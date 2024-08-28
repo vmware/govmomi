@@ -268,7 +268,6 @@ but appear via `govc $cmd -h`:
  - [namespace.info](#namespaceinfo)
  - [namespace.logs.download](#namespacelogsdownload)
  - [namespace.ls](#namespacels)
- - [namespace.registervm](#namespaceregistervm)
  - [namespace.rm](#namespacerm)
  - [namespace.service.activate](#namespaceserviceactivate)
  - [namespace.service.create](#namespaceservicecreate)
@@ -1241,7 +1240,7 @@ Create datastore on HOST.
 
 Examples:
   govc datastore.create -type nfs -name nfsDatastore -remote-host 10.143.2.232 -remote-path /share cluster1
-  govc datastore.create -type vmfs -name vmfsDatastore -disk=mpx.vmhba0:C0:T0:L0 cluster1
+  govc datastore.create -type vmfs -name vmfsDatastore -disk=mpx.vmhba0:C0:T0:L0 -size 20G cluster1
   govc datastore.create -type local -name localDatastore -path /var/datastore host1
 
 Options:
@@ -1254,6 +1253,7 @@ Options:
   -path=                 Local directory path for the datastore (local only)
   -remote-host=          Remote hostname of the NAS datastore
   -remote-path=          Remote path of the NFS mount point
+  -size=0B               Size of new disk
   -type=                 Datastore type (NFS|NFS41|CIFS|VMFS|local)
   -username=             Username to use when connecting (CIFS only)
   -version=<nil>         VMFS major version
@@ -4482,20 +4482,6 @@ Examples:
   govc namespace.ls
 
 Options:
-```
-
-## namespace.registervm
-
-```
-Usage: govc namespace.registervm [OPTIONS] NAME
-
-Register an existing virtual machine as VM Service managed VM.
-
-Examples:
-  govc namespace.registervm -vm my-vm my-namespace
-
-Options:
-  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## namespace.rm
