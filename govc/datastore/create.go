@@ -28,8 +28,14 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+)
+
+const (
+	sectorSize  = 512  // Sector size in bytes
+	startSector = 2048 // Start sector (typically fixed)
 )
 
 type create struct {
@@ -50,6 +56,7 @@ type create struct {
 	// Options for VMFS
 	DiskCanonicalName string
 	Version           *int32
+	Size              units.ByteSize
 
 	// Options for local
 	Path string
@@ -144,6 +151,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	// Options for VMFS
 	f.StringVar(&cmd.DiskCanonicalName, "disk", "", "Canonical name of disk (VMFS only)")
 	f.Var(flags.NewOptionalInt32(&cmd.Version), "version", "VMFS major version")
+	f.Var(&cmd.Size, "size", "Size of new disk. Default is to use entire disk")
 
 	// Options for Local
 	f.StringVar(&cmd.Path, "path", "", "Local directory path for the datastore (local only)")
@@ -165,7 +173,8 @@ func (cmd *create) Description() string {
 
 Examples:
   govc datastore.create -type nfs -name nfsDatastore -remote-host 10.143.2.232 -remote-path /share cluster1
-  govc datastore.create -type vmfs -name vmfsDatastore -disk=mpx.vmhba0:C0:T0:L0 cluster1
+  govc datastore.create -type vmfs -name vmfsDatastore -disk=mpx.vmhba0:C0:T0:L0 cluster1 # use entire disk
+  govc datastore.create -type vmfs -name vmfsDatastore -disk=mpx.vmhba0:C0:T0:L0 -size 20G cluster1 # use 20G of disk
   govc datastore.create -type local -name localDatastore -path /var/datastore host1`
 }
 
@@ -289,6 +298,12 @@ func (cmd *create) CreateVmfsDatastore(ctx context.Context, hosts []*object.Host
 
 		spec := *option.Spec.(*types.VmfsDatastoreCreateSpec)
 		spec.Vmfs.VolumeName = cmd.Name
+		if cmd.Size > 0 {
+			endSector := CalculateSectors(int64(cmd.Size))
+			// set values for Sectors
+			spec.Partition.Partition[0].StartSector = startSector
+			spec.Partition.Partition[0].EndSector = endSector
+		}
 		if cmd.Version != nil {
 			spec.Vmfs.MajorVersion = *cmd.Version
 		}
@@ -299,6 +314,14 @@ func (cmd *create) CreateVmfsDatastore(ctx context.Context, hosts []*object.Host
 	}
 
 	return nil
+}
+
+// CalculateSectors calculates the start and end sectors based on the given size.
+func CalculateSectors(sizeInBytes int64) (endSector int64) {
+	totalSectors := sizeInBytes / sectorSize
+	endSector = startSector + totalSectors - 1
+
+	return endSector
 }
 
 func (cmd *create) CreateLocalDatastore(ctx context.Context, hosts []*object.HostSystem) error {
