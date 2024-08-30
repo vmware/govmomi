@@ -594,6 +594,12 @@ func (vm *VirtualMachine) configure(ctx *Context, spec *types.VirtualMachineConf
 		}
 	}
 
+	if spec.Crypto != nil {
+		if err := vm.updateCrypto(ctx, spec.Crypto); err != nil {
+			return err
+		}
+	}
+
 	return vm.configureDevices(ctx, spec)
 }
 
@@ -1601,6 +1607,157 @@ func (vm *VirtualMachine) genVmdkPath(p object.DatastorePath) (string, types.Bas
 	}
 }
 
+// Encrypt requires powered off VM with no snapshots.
+// Decrypt requires powered off VM.
+// Deep recrypt requires powered off VM with no snapshots.
+// Shallow recrypt works with VMs in any power state and even if snapshots are
+// present as long as it is a single chain and not a tree.
+func (vm *VirtualMachine) updateCrypto(
+	ctx *Context,
+	spec types.BaseCryptoSpec) types.BaseMethodFault {
+
+	const configKeyId = "config.keyId"
+
+	assertEncrypted := func() types.BaseMethodFault {
+		if vm.Config.KeyId == nil {
+			return newInvalidStateFault("vm is not encrypted")
+		}
+		return nil
+	}
+
+	assertPoweredOff := func() types.BaseMethodFault {
+		if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOff {
+			return &types.InvalidPowerState{
+				ExistingState:  vm.Runtime.PowerState,
+				RequestedState: types.VirtualMachinePowerStatePoweredOff,
+			}
+		}
+		return nil
+	}
+
+	assertNoSnapshots := func(allowSingleChain bool) types.BaseMethodFault {
+		hasSnapshots := vm.Snapshot != nil && vm.Snapshot.CurrentSnapshot != nil
+		if !hasSnapshots {
+			return nil
+		}
+		if !allowSingleChain {
+			return newInvalidStateFault("vm has snapshots")
+		}
+		type node = types.VirtualMachineSnapshotTree
+		var isTreeFn func(nodes []node) types.BaseMethodFault
+		isTreeFn = func(nodes []node) types.BaseMethodFault {
+			switch len(nodes) {
+			case 0:
+				return nil
+			case 1:
+				return isTreeFn(nodes[0].ChildSnapshotList)
+			default:
+				return newInvalidStateFault("vm has snapshot tree")
+			}
+		}
+		return isTreeFn(vm.Snapshot.RootSnapshotList)
+	}
+
+	doRecrypt := func(newKeyID types.CryptoKeyId) types.BaseMethodFault {
+		if err := assertEncrypted(); err != nil {
+			return err
+		}
+		var providerID *types.KeyProviderId
+		if pid := vm.Config.KeyId.ProviderId; pid != nil {
+			providerID = &types.KeyProviderId{
+				Id: pid.Id,
+			}
+		}
+		if pid := newKeyID.ProviderId; pid != nil {
+			providerID = &types.KeyProviderId{
+				Id: pid.Id,
+			}
+		}
+		ctx.Map.Update(vm, []types.PropertyChange{
+			{
+				Name: configKeyId,
+				Op:   types.PropertyChangeOpAssign,
+				Val: &types.CryptoKeyId{
+					KeyId:      newKeyID.KeyId,
+					ProviderId: providerID,
+				},
+			},
+		})
+		return nil
+	}
+
+	switch tspec := spec.(type) {
+	case *types.CryptoSpecDecrypt:
+		if err := assertPoweredOff(); err != nil {
+			return err
+		}
+		if err := assertNoSnapshots(false); err != nil {
+			return err
+		}
+		if err := assertEncrypted(); err != nil {
+			return err
+		}
+		ctx.Map.Update(vm, []types.PropertyChange{
+			{
+				Name: configKeyId,
+				Op:   types.PropertyChangeOpRemove,
+				Val:  nil,
+			},
+		})
+
+	case *types.CryptoSpecDeepRecrypt:
+		if err := assertPoweredOff(); err != nil {
+			return err
+		}
+		if err := assertNoSnapshots(false); err != nil {
+			return err
+		}
+		return doRecrypt(tspec.NewKeyId)
+
+	case *types.CryptoSpecShallowRecrypt:
+		if err := assertNoSnapshots(true); err != nil {
+			return err
+		}
+		return doRecrypt(tspec.NewKeyId)
+
+	case *types.CryptoSpecEncrypt:
+		if err := assertPoweredOff(); err != nil {
+			return err
+		}
+		if err := assertNoSnapshots(false); err != nil {
+			return err
+		}
+		if vm.Config.KeyId != nil {
+			return newInvalidStateFault("vm is already encrypted")
+		}
+
+		var providerID *types.KeyProviderId
+		if pid := tspec.CryptoKeyId.ProviderId; pid != nil {
+			providerID = &types.KeyProviderId{
+				Id: pid.Id,
+			}
+		}
+
+		ctx.Map.Update(vm, []types.PropertyChange{
+			{
+				Name: configKeyId,
+				Op:   types.PropertyChangeOpAssign,
+				Val: &types.CryptoKeyId{
+					KeyId:      tspec.CryptoKeyId.KeyId,
+					ProviderId: providerID,
+				},
+			},
+		})
+
+	case *types.CryptoSpecNoOp,
+		*types.CryptoSpecRegister:
+
+		// No-op
+	}
+
+	return nil
+}
+
 func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	var changes []types.PropertyChange
 	field := mo.Field{Path: "config.hardware.device"}
@@ -1920,22 +2077,6 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 	body := &methods.UpgradeVM_TaskBody{}
 
 	task := CreateTask(vm, "upgradeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-
-		newInvalidStateFault := func(format string, args ...any) *types.InvalidState {
-			msg := fmt.Sprintf(format, args...)
-			return &types.InvalidState{
-				VimFault: types.VimFault{
-					MethodFault: types.MethodFault{
-						FaultCause: &types.LocalizedMethodFault{
-							Fault: &types.SystemErrorFault{
-								Reason: msg,
-							},
-							LocalizedMessage: msg,
-						},
-					},
-				},
-			}
-		}
 
 		// InvalidPowerState
 		//
