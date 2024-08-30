@@ -308,6 +308,27 @@ func TestClient(t *testing.T) {
 		}
 	}
 
+	// Test BackingDiskPath field
+	var queryFilterBackingDiskPathTest cnstypes.CnsQueryFilter
+	var volumeIDListBackingDiskPathTest []cnstypes.CnsVolumeId
+	volumeIDListBackingDiskPathTest = append(volumeIDListBackingDiskPathTest, cnstypes.CnsVolumeId{Id: volumeId})
+	queryFilterBackingDiskPathTest.VolumeIds = volumeIDListBackingDiskPathTest
+	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilterBackingDiskPathTest))
+	queryResultBackingDiskPathTest, err := cnsClient.QueryVolume(ctx, queryFilterBackingDiskPathTest)
+	if err != nil {
+		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	t.Logf("Successfully Queried Volumes. queryResultBackingDiskPathTest: %+v", pretty.Sprint(queryResultBackingDiskPathTest))
+	t.Log("Checking backingDiskPath retrieved")
+	for _, vol := range queryResultBackingDiskPathTest.Volumes {
+		backingDiskPath := vol.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskPath
+		if backingDiskPath == "" {
+			t.Errorf("Failed to get BackingDiskPath")
+			t.FailNow()
+		}
+	}
+
 	// Test QuerySnapshots API on 7.0 U3 or above
 	var snapshotQueryFilter cnstypes.CnsSnapshotQueryFilter
 	var querySnapshotsTaskResult *cnstypes.CnsSnapshotQueryResult
