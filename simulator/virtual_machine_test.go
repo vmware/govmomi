@@ -25,6 +25,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
@@ -2650,4 +2652,594 @@ func TestUpgradeVm(t *testing.T) {
 		})
 
 	}, model)
+}
+
+func TestEncryptDecryptVM(t *testing.T) {
+
+	newTaskErrWithInvalidState := func(msg string) error {
+		return task.Error{
+			LocalizedMethodFault: &types.LocalizedMethodFault{
+				Fault:            newInvalidStateFault(msg),
+				LocalizedMessage: "*types.InvalidState",
+			},
+		}
+	}
+
+	newTaskErrWithInvalidPowerState := func(cur, req types.VirtualMachinePowerState) error {
+		return task.Error{
+			LocalizedMethodFault: &types.LocalizedMethodFault{
+				Fault: &types.InvalidPowerState{
+					ExistingState:  cur,
+					RequestedState: req,
+				},
+				LocalizedMessage: "*types.InvalidPowerState",
+			},
+		}
+	}
+
+	testCases := []struct {
+		name                string
+		initStateFn         func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error
+		configSpec          types.VirtualMachineConfigSpec
+		expectedCryptoKeyId *types.CryptoKeyId
+		expectedErr         error
+	}{
+		{
+			name: "encrypt",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecEncrypt{
+					CryptoKeyId: types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					},
+				},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "123",
+				ProviderId: &types.KeyProviderId{
+					Id: "abc",
+				},
+			},
+		},
+		{
+			name: "encrypt w already encrypted",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecEncrypt{
+					CryptoKeyId: types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm is already encrypted"),
+		},
+		{
+			name: "encrypt w powered on",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				tsk, err := object.NewVirtualMachine(c, vmRef).PowerOn(ctx)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecEncrypt{
+					CryptoKeyId: types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidPowerState(
+				types.VirtualMachinePowerStatePoweredOn,
+				types.VirtualMachinePowerStatePoweredOff,
+			),
+		},
+		{
+			name: "encrypt w snapshots",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				tsk, err := object.NewVirtualMachine(c, vmRef).CreateSnapshot(
+					ctx, "root", "", false, false)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecEncrypt{
+					CryptoKeyId: types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm has snapshots"),
+		},
+		{
+			name: "decrypt",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDecrypt{},
+			},
+			expectedCryptoKeyId: nil,
+		},
+		{
+			name: "decrypt w not encrypted",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDecrypt{},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm is not encrypted"),
+		},
+		{
+			name: "decrypt w powered on",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				tsk, err := object.NewVirtualMachine(c, vmRef).PowerOn(ctx)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDecrypt{},
+			},
+			expectedErr: newTaskErrWithInvalidPowerState(
+				types.VirtualMachinePowerStatePoweredOn,
+				types.VirtualMachinePowerStatePoweredOff,
+			),
+		},
+		{
+			name: "decrypt w snapshots",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				tsk, err := object.NewVirtualMachine(c, vmRef).CreateSnapshot(
+					ctx, "root", "", false, false)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDecrypt{},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm has snapshots"),
+		},
+		{
+			name: "deep recrypt",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDeepRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "456",
+				ProviderId: &types.KeyProviderId{
+					Id: "def",
+				},
+			},
+		},
+		{
+			name: "deep recrypt w same provider id",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDeepRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+					},
+				},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "456",
+				ProviderId: &types.KeyProviderId{
+					Id: "abc",
+				},
+			},
+		},
+		{
+			name: "deep recrypt w not encrypted",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDeepRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm is not encrypted"),
+		},
+		{
+			name: "deep recrypt w powered on",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				tsk, err := object.NewVirtualMachine(c, vmRef).PowerOn(ctx)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDeepRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidPowerState(
+				types.VirtualMachinePowerStatePoweredOn,
+				types.VirtualMachinePowerStatePoweredOff,
+			),
+		},
+		{
+			name: "deep recrypt w snapshots",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				tsk, err := object.NewVirtualMachine(c, vmRef).CreateSnapshot(
+					ctx, "root", "", false, false)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDeepRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm has snapshots"),
+		},
+		{
+			name: "shallow recrypt",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecShallowRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "456",
+				ProviderId: &types.KeyProviderId{
+					Id: "def",
+				},
+			},
+		},
+		{
+			name: "shallow recrypt w same provider id",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecShallowRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+					},
+				},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "456",
+				ProviderId: &types.KeyProviderId{
+					Id: "abc",
+				},
+			},
+		},
+		{
+			name: "shallow recrypt w not encrypted",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecShallowRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm is not encrypted"),
+		},
+		{
+			name: "shallow recrypt w single snapshot chain",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				tsk, err := object.NewVirtualMachine(c, vmRef).CreateSnapshot(
+					ctx, "root", "", false, false)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecShallowRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "456",
+				ProviderId: &types.KeyProviderId{
+					Id: "def",
+				},
+			},
+		},
+		{
+			name: "shallow recrypt w snapshot tree",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				vm := object.NewVirtualMachine(c, vmRef)
+				tsk, err := vm.CreateSnapshot(ctx, "root", "", false, false)
+				if err != nil {
+					return err
+				}
+				if err := tsk.Wait(ctx); err != nil {
+					return err
+				}
+				for i := 0; i < 2; i++ {
+					tsk, err := vm.CreateSnapshot(
+						ctx,
+						fmt.Sprintf("snap-%d", i),
+						"",
+						false,
+						false)
+					if err != nil {
+						return err
+					}
+					if err := tsk.Wait(ctx); err != nil {
+						return err
+					}
+					tsk, err = vm.RevertToSnapshot(ctx, "root", true)
+					if err != nil {
+						return err
+					}
+					if err := tsk.Wait(ctx); err != nil {
+						return err
+					}
+				}
+				tsk, err = object.NewVirtualMachine(c, vmRef).PowerOn(ctx)
+				if err != nil {
+					return err
+				}
+				return tsk.Wait(ctx)
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecShallowRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedErr: newTaskErrWithInvalidState("vm has snapshot tree"),
+		},
+		{
+			name: "noop",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecNoOp{},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "123",
+				ProviderId: &types.KeyProviderId{
+					Id: "abc",
+				},
+			},
+		},
+		{
+			name: "register",
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				return nil
+			},
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecRegister{
+					CryptoKeyId: types.CryptoKeyId{
+						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "def",
+						},
+					},
+				},
+			},
+			expectedCryptoKeyId: &types.CryptoKeyId{
+				KeyId: "123",
+				ProviderId: &types.KeyProviderId{
+					Id: "abc",
+				},
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+		t.Run(tc.name, func(t *testing.T) {
+
+			model := VPX()
+			model.Autostart = false
+			model.Cluster = 1
+			model.ClusterHost = 1
+			model.Host = 1
+
+			Test(func(ctx context.Context, c *vim25.Client) {
+
+				ref := Map.Any("VirtualMachine").Reference()
+				vm := object.NewVirtualMachine(c, ref)
+
+				if tc.initStateFn != nil {
+					if err := tc.initStateFn(SpoofContext(), c, ref); err != nil {
+						t.Fatalf("initStateFn failed: %v", err)
+					}
+				}
+
+				tsk, err := vm.Reconfigure(context.TODO(), tc.configSpec)
+				assert.NoError(t, err)
+
+				if a, e := tsk.Wait(context.TODO()), tc.expectedErr; e != nil {
+					assert.Equal(t, e, a)
+				} else {
+					if !assert.NoError(t, a) {
+						return
+					}
+					var moVM mo.VirtualMachine
+					if err := vm.Properties(ctx, ref, []string{"config.keyId"}, &moVM); err != nil {
+						t.Fatalf("fetching properties failed: %v", err)
+					}
+					if tc.expectedCryptoKeyId != nil {
+						assert.Equal(t, tc.expectedCryptoKeyId, moVM.Config.KeyId)
+					} else {
+						assert.Nil(t, moVM.Config)
+					}
+				}
+			}, model)
+		})
+	}
 }
