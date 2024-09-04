@@ -33,6 +33,7 @@ type create struct {
 	*flags.DatastoreFlag
 	*flags.OutputFlag
 	*flags.VirtualMachineFlag
+	*flags.StorageProfileFlag
 
 	controller string
 	Name       string
@@ -58,6 +59,8 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag.Register(ctx, f)
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
+	cmd.StorageProfileFlag, ctx = flags.NewStorageProfileFlag(ctx)
+	cmd.StorageProfileFlag.Register(ctx, f)
 
 	err := (&cmd.Bytes).Set("10G")
 	if err != nil {
@@ -81,6 +84,9 @@ func (cmd *create) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StorageProfileFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -108,6 +114,11 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	ds, err := cmd.Datastore()
+	if err != nil {
+		return err
+	}
+
+	profile, err := cmd.StorageProfileSpec(ctx)
 	if err != nil {
 		return err
 	}
@@ -154,5 +165,5 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	_, _ = cmd.Log("Creating disk\n")
 	disk.CapacityInKB = int64(cmd.Bytes) / 1024
-	return vm.AddDevice(ctx, disk)
+	return vm.AddDeviceWithProfile(ctx, profile, disk)
 }

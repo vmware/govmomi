@@ -695,6 +695,13 @@ load test_helper
 
   run govc vm.disk.change -vm "$vm" -disk.name "$disk" -size 1M
   assert_failure # cannot shrink disk
+
+  name=$(new_id)
+  run govc vm.disk.create -vm "$vm" -name "$vm/$name" -profile enoent
+  assert_failure # profile does not exist
+
+  run govc vm.disk.create -vm "$vm" -name "$vm/$name" -profile "vSAN Default Storage Policy"
+  assert_success
 }
 
 @test "vm.disk.attach" {
