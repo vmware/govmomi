@@ -130,6 +130,15 @@ load test_helper
 
     ns=$(govc namespace.info -json test-namespace-2 | jq)
     assert_equal "2" $(echo $ns | jq -r '."vm_service_spec"."content_libraries"' | jq length)
+
+    run govc namespace.create -cluster DC0_C0 -storage MyStoragePolicy test-namespace-2
+    assert_failure # storage policy does not exist
+
+    run govc storage.policy.create -category my_cat -tag my_tag MyStoragePolicy
+    assert_success
+
+    run govc namespace.create -cluster DC0_C0 -storage MyStoragePolicy test-namespace-2
+    assert_success
 }
 
 @test "namespace.update" {

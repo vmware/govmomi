@@ -88,7 +88,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	rc, err := cmd.RestClient()
+	rc, err := cmd.namespaceFlag.RestClient()
 	if err != nil {
 		return err
 	}
