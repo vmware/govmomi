@@ -471,7 +471,10 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 	}
 
 	if match {
-		rr.Objects = append(rr.Objects, content)
+		// Copy while content.Obj is locked, as it won't be when final results are encoded.
+		var dst types.ObjectContent
+		deepCopy(&content, &dst)
+		rr.Objects = append(rr.Objects, dst)
 	}
 
 	rr.collected[ref] = true
@@ -905,7 +908,9 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 		ctx.Map.AddHandler(pc) // Listen for create, update, delete of managed objects
 		apply()                // Collect current state
 		set.Version = "-"      // Next request with Version set will wait via loop below
-		pc.pending = pageUpdateSet(body.Res.Returnval, maxObject)
+		if body.Res != nil {
+			pc.pending = pageUpdateSet(body.Res.Returnval, maxObject)
+		}
 		return body
 	}
 
