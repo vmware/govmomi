@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,6 +34,7 @@ type disk struct {
 	*flags.DatastoreFlag
 	*flags.ResourcePoolFlag
 	*flags.StoragePodFlag
+	*flags.StorageProfileFlag
 
 	size units.ByteSize
 	keep *bool
@@ -50,6 +51,9 @@ func (cmd *disk) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.StoragePodFlag, ctx = flags.NewStoragePodFlag(ctx)
 	cmd.StoragePodFlag.Register(ctx, f)
 
+	cmd.StorageProfileFlag, ctx = flags.NewStorageProfileFlag(ctx)
+	cmd.StorageProfileFlag.Register(ctx, f)
+
 	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
 	cmd.ResourcePoolFlag.Register(ctx, f)
 
@@ -63,6 +67,9 @@ func (cmd *disk) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.StoragePodFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StorageProfileFlag.Process(ctx); err != nil {
 		return err
 	}
 	return cmd.ResourcePoolFlag.Process(ctx)
@@ -108,12 +115,18 @@ func (cmd *disk) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
+	profile, err := cmd.StorageProfileSpec(ctx)
+	if err != nil {
+		return err
+	}
+
 	m := vslm.NewObjectManager(c)
 
 	spec := types.VslmCreateSpec{
 		Name:              name,
 		CapacityInMB:      int64(cmd.size) / units.MB,
 		KeepAfterDeleteVm: cmd.keep,
+		Profile:           profile,
 		BackingSpec: &types.VslmCreateSpecDiskFileBackingSpec{
 			VslmCreateSpecBackingSpec: types.VslmCreateSpecBackingSpec{
 				Datastore: ds.Reference(),
