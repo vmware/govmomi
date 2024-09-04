@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ import (
 type attach struct {
 	*flags.DatastoreFlag
 	*flags.VirtualMachineFlag
+	*flags.StorageProfileFlag
 
 	persist    bool
 	link       bool
@@ -48,6 +49,8 @@ func (cmd *attach) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag.Register(ctx, f)
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
+	cmd.StorageProfileFlag, ctx = flags.NewStorageProfileFlag(ctx)
+	cmd.StorageProfileFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.persist, "persist", true, "Persist attached disk")
 	f.BoolVar(&cmd.link, "link", true, "Link specified disk")
@@ -62,6 +65,9 @@ func (cmd *attach) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StorageProfileFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -129,5 +135,10 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		backing.DiskMode = cmd.mode
 	}
 
-	return vm.AddDevice(ctx, disk)
+	profile, err := cmd.StorageProfileSpec(ctx)
+	if err != nil {
+		return err
+	}
+
+	return vm.AddDeviceWithProfile(ctx, profile, disk)
 }
