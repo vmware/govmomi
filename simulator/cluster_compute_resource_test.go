@@ -19,6 +19,7 @@ package simulator
 import (
 	"context"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -28,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -141,5 +143,66 @@ func TestClusterVC(t *testing.T) {
 				t.Error(err)
 			}
 		}
+	}
+}
+
+func TestPlaceVmReconfigure(t *testing.T) {
+	tests := []struct {
+		name          string
+		configSpec    *types.VirtualMachineConfigSpec
+		placementType types.PlacementSpecPlacementType
+		expectedErr   string
+	}{
+		{
+			"unsupported placement type",
+			nil,
+			types.PlacementSpecPlacementTypeRelocate,
+			"NotSupported",
+		},
+		{
+			"create",
+			nil,
+			types.PlacementSpecPlacementTypeCreate,
+			"",
+		},
+		{
+			"reconfigure with nil config spec",
+			nil,
+			types.PlacementSpecPlacementTypeReconfigure,
+			"InvalidArgument",
+		},
+		{
+			"reconfigure with an empty config spec",
+			&types.VirtualMachineConfigSpec{},
+			types.PlacementSpecPlacementTypeReconfigure,
+			"",
+		},
+	}
+
+	for _, test := range tests {
+		test := test // assign to local var since loop var is reused
+		Test(func(ctx context.Context, c *vim25.Client) {
+			// Test env setup.
+			finder := find.NewFinder(c, true)
+			datacenter, err := finder.DefaultDatacenter(ctx)
+			if err != nil {
+				t.Fatalf("failed to get default datacenter: %v", err)
+			}
+			finder.SetDatacenter(datacenter)
+			vmMoRef := Map.Any("VirtualMachine").(*VirtualMachine).Reference()
+			clusterMoRef := Map.Any("ClusterComputeResource").(*ClusterComputeResource).Reference()
+			clusterObj := object.NewClusterComputeResource(c, clusterMoRef)
+
+			// PlaceVm.
+			placementSpec := types.PlacementSpec{
+				Vm:            &vmMoRef,
+				ConfigSpec:    test.configSpec,
+				PlacementType: string(test.placementType),
+			}
+			_, err = clusterObj.PlaceVm(ctx, placementSpec)
+			if err != nil && !strings.Contains(err.Error(), test.expectedErr) {
+				t.Fatalf("expected error %q, got %v", test.expectedErr, err)
+			}
+		})
 	}
 }
