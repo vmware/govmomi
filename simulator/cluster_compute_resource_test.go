@@ -156,7 +156,7 @@ func TestPlaceVmReconfigure(t *testing.T) {
 		{
 			"unsupported placement type",
 			nil,
-			types.PlacementSpecPlacementTypeRelocate,
+			types.PlacementSpecPlacementType("unsupported"),
 			"NotSupported",
 		},
 		{
@@ -205,4 +205,164 @@ func TestPlaceVmReconfigure(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestPlaceVmRelocate(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		// Test env setup.
+		finder := find.NewFinder(c, true)
+		datacenter, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatalf("failed to get default datacenter: %v", err)
+		}
+		finder.SetDatacenter(datacenter)
+
+		vmMoRef := Map.Any("VirtualMachine").(*VirtualMachine).Reference()
+		hostMoRef := Map.Any("HostSystem").(*HostSystem).Reference()
+		dsMoRef := Map.Any("Datastore").(*Datastore).Reference()
+
+		tests := []struct {
+			name         string
+			relocateSpec *types.VirtualMachineRelocateSpec
+			vmMoRef      *types.ManagedObjectReference
+			expectedErr  string
+		}{
+			{
+				"relocate without a spec",
+				nil,
+				&vmMoRef,
+				"",
+			},
+			{
+				"relocate with an empty spec",
+				&types.VirtualMachineRelocateSpec{},
+				&vmMoRef,
+				"",
+			},
+			{
+				"relocate without a vm in spec",
+				&types.VirtualMachineRelocateSpec{
+					Host: &hostMoRef,
+				},
+				nil,
+				"InvalidArgument",
+			},
+			{
+				"relocate with a non-existing vm in spec",
+				&types.VirtualMachineRelocateSpec{
+					Host: &hostMoRef,
+				},
+				&types.ManagedObjectReference{
+					Type:  "VirtualMachine",
+					Value: "fake-vm-999",
+				},
+				"InvalidArgument",
+			},
+			{
+				"relocate with a diskId in spec.dick that does not exist in the vm",
+				&types.VirtualMachineRelocateSpec{
+					Host: &hostMoRef,
+					Disk: []types.VirtualMachineRelocateSpecDiskLocator{
+						{
+							DiskId:    1,
+							Datastore: dsMoRef,
+						},
+					},
+				},
+				&vmMoRef,
+				"InvalidArgument",
+			},
+			{
+				"relocate with a non-existing datastore in spec.disk",
+				&types.VirtualMachineRelocateSpec{
+					Host: &hostMoRef,
+					Disk: []types.VirtualMachineRelocateSpecDiskLocator{
+						{
+							DiskId: 204, // The default diskId in simulator.
+							Datastore: types.ManagedObjectReference{
+								Type:  "Datastore",
+								Value: "fake-datastore-999",
+							},
+						},
+					},
+				},
+				&vmMoRef,
+				"InvalidArgument",
+			},
+			{
+				"relocate with a valid spec.disk",
+				&types.VirtualMachineRelocateSpec{
+					Host: &hostMoRef,
+					Disk: []types.VirtualMachineRelocateSpecDiskLocator{
+						{
+							DiskId:    204, // The default diskId in simulator.
+							Datastore: dsMoRef,
+						},
+					},
+				},
+				&vmMoRef,
+				"",
+			},
+			{
+				"relocate with a valid host in spec",
+				&types.VirtualMachineRelocateSpec{
+					Host: &hostMoRef,
+				},
+				&vmMoRef,
+				"",
+			},
+			{
+				"relocate with a non-existing host in spec",
+				&types.VirtualMachineRelocateSpec{
+					Host: &types.ManagedObjectReference{
+						Type:  "HostSystem",
+						Value: "fake-host-999",
+					},
+				},
+				&vmMoRef,
+				"ManagedObjectNotFound",
+			},
+			{
+				"relocate with a non-existing datastore in spec",
+				&types.VirtualMachineRelocateSpec{
+					Datastore: &types.ManagedObjectReference{
+						Type:  "Datastore",
+						Value: "fake-datastore-999",
+					},
+				},
+				&vmMoRef,
+				"ManagedObjectNotFound",
+			},
+			{
+				"relocate with a non-existing resource pool in spec",
+				&types.VirtualMachineRelocateSpec{
+					Pool: &types.ManagedObjectReference{
+						Type:  "ResourcePool",
+						Value: "fake-resource-pool-999",
+					},
+				},
+				&vmMoRef,
+				"ManagedObjectNotFound",
+			},
+		}
+
+		for _, test := range tests {
+			test := test // assign to local var since loop var is reused
+			// PlaceVm.
+			placementSpec := types.PlacementSpec{
+				Vm:            test.vmMoRef,
+				RelocateSpec:  test.relocateSpec,
+				PlacementType: string(types.PlacementSpecPlacementTypeRelocate),
+			}
+
+			clusterMoRef := Map.Any("ClusterComputeResource").(*ClusterComputeResource).Reference()
+			clusterObj := object.NewClusterComputeResource(c, clusterMoRef)
+			_, err = clusterObj.PlaceVm(ctx, placementSpec)
+			if err == nil && test.expectedErr != "" {
+				t.Fatalf("expected error %q, got nil", test.expectedErr)
+			} else if err != nil && !strings.Contains(err.Error(), test.expectedErr) {
+				t.Fatalf("expected error %q, got %v", test.expectedErr, err)
+			}
+		}
+	})
 }
