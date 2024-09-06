@@ -440,14 +440,36 @@ func (c *ClusterComputeResource) PlaceVm(ctx *Context, req *types.PlaceVm) soap.
 		datastores = c.Datastore
 	}
 
-	spec := &types.VirtualMachineRelocateSpec{
-		Datastore: &datastores[rand.Intn(len(c.Datastore))],
-		Host:      &hosts[rand.Intn(len(c.Host))],
-		Pool:      c.ResourcePool,
-	}
-
 	switch types.PlacementSpecPlacementType(req.PlacementSpec.PlacementType) {
 	case types.PlacementSpecPlacementTypeClone, types.PlacementSpecPlacementTypeCreate:
+		spec := &types.VirtualMachineRelocateSpec{
+			Datastore: &datastores[rand.Intn(len(c.Datastore))],
+			Host:      &hosts[rand.Intn(len(c.Host))],
+			Pool:      c.ResourcePool,
+		}
+		res.Action = append(res.Action, &types.PlacementAction{
+			Vm:           req.PlacementSpec.Vm,
+			TargetHost:   spec.Host,
+			RelocateSpec: spec,
+		})
+	case types.PlacementSpecPlacementTypeReconfigure:
+		// Validate input.
+		if req.PlacementSpec.ConfigSpec == nil {
+			invalidArg := &types.InvalidArgument{
+				InvalidProperty: "PlacementSpec.configSpec",
+			}
+			body.Fault_ = Fault("", invalidArg)
+			return body
+		}
+
+		// Update PlacementResult.
+		vmObj := ctx.Map.Get(*req.PlacementSpec.Vm).(*VirtualMachine)
+		spec := &types.VirtualMachineRelocateSpec{
+			Datastore:    &vmObj.Datastore[0],
+			Host:         vmObj.Runtime.Host,
+			Pool:         vmObj.ResourcePool,
+			DiskMoveType: string(types.VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndAllowSharing),
+		}
 		res.Action = append(res.Action, &types.PlacementAction{
 			Vm:           req.PlacementSpec.Vm,
 			TargetHost:   spec.Host,
