@@ -122,7 +122,9 @@ but appear via `govc $cmd -h`:
  - [device.serial.connect](#deviceserialconnect)
  - [device.serial.disconnect](#deviceserialdisconnect)
  - [device.usb.add](#deviceusbadd)
+ - [disk.attach](#diskattach)
  - [disk.create](#diskcreate)
+ - [disk.detach](#diskdetach)
  - [disk.ls](#diskls)
  - [disk.register](#diskregister)
  - [disk.rm](#diskrm)
@@ -2010,6 +2012,24 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
+## disk.attach
+
+```
+Usage: govc disk.attach [OPTIONS] ID
+
+Attach disk ID on VM.
+
+See also: govc vm.disk.attach
+
+Examples:
+  govc disk.attach -vm $vm ID
+  govc disk.attach -vm $vm -ds $ds ID
+
+Options:
+  -ds=                   Datastore [GOVC_DATASTORE]
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
 ## disk.create
 
 ```
@@ -2025,7 +2045,24 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -keep=<nil>            Keep disk after VM is deleted
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+  -profile=[]            Storage profile name or ID
   -size=10.0GB           Size of new disk
+```
+
+## disk.detach
+
+```
+Usage: govc disk.detach [OPTIONS] ID
+
+Detach disk ID from VM.
+
+See also: govc device.remove
+
+Examples:
+  govc disk.detach -vm $vm ID
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## disk.ls
@@ -3604,7 +3641,7 @@ Options:
   -m=false               Preserve MAC-addresses on network adapters
   -ovf=false             Clone as OVF (default is VM Template)
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
-  -profile=              Storage profile
+  -profile=[]            Storage profile name or ID
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -3669,7 +3706,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
   -options=              Options spec file path for VM deployment
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
-  -profile=              Storage profile
+  -profile=[]            Storage profile name or ID
 ```
 
 ## library.evict
@@ -4436,7 +4473,7 @@ Examples:
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -library=[]            Content library IDs to associate with the vSphere Namespace.
-  -storage=[]            Storage profile IDs to associate with the vSphere Namespace.
+  -storage=[]            Storage profile name or ID
   -vmclass=[]            Virtual machine class IDs to associate with the vSphere Namespace.
 ```
 
@@ -4611,7 +4648,7 @@ Examples:
 
 Options:
   -library=[]            Content library IDs to associate with the vSphere Namespace.
-  -storage=[]            Storage profile IDs to associate with the vSphere Namespace.
+  -storage=[]            Storage profile name or ID
   -vmclass=[]            Virtual machine class IDs to associate with the vSphere Namespace.
 ```
 
@@ -6451,7 +6488,7 @@ Options:
   -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -on=true               Power on VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
-  -profile=              Storage profile name or ID
+  -profile=[]            Storage profile name or ID
   -version=              ESXi hardware version [2|3|4|5.0|5.1|5.5|6.0|6.5|6.7|6.7.2|7.0|7.0.1|7.0.2|8.0|8.0.1|8.0.2]
 ```
 
@@ -6695,6 +6732,7 @@ Options:
   -link=true             Link specified disk
   -mode=                 Disk mode (persistent|nonpersistent|undoable|independent_persistent|independent_nonpersistent|append)
   -persist=true          Persist attached disk
+  -profile=[]            Storage profile name or ID
   -sharing=              Sharing (sharingNone|sharingMultiWriter)
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -6743,6 +6781,7 @@ Options:
   -eager=false           Eagerly scrub new disk
   -mode=persistent       Disk mode (persistent|nonpersistent|undoable|independent_persistent|independent_nonpersistent|append)
   -name=                 Name for new disk
+  -profile=[]            Storage profile name or ID
   -sharing=              Sharing (sharingNone|sharingMultiWriter)
   -size=10.0GB           Size of new disk
   -thick=false           Thick provision new disk

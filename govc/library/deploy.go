@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,10 +35,10 @@ type deploy struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.FolderFlag
+	*flags.StorageProfileFlag
 	*importx.OptionsFlag
 
-	profile string
-	config  string
+	config string
 }
 
 func init() {
@@ -58,10 +58,11 @@ func (cmd *deploy) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
 	cmd.FolderFlag.Register(ctx, f)
 
+	cmd.StorageProfileFlag, ctx = flags.NewStorageProfileFlag(ctx)
+	cmd.StorageProfileFlag.Register(ctx, f)
+
 	cmd.OptionsFlag = new(importx.OptionsFlag)
 	cmd.OptionsFlag.Register(ctx, f)
-
-	f.StringVar(&cmd.profile, "profile", "", "Storage profile")
 
 	if cli.ShowUnreleased() {
 		f.StringVar(&cmd.config, "config", "", "VM config spec")
@@ -79,6 +80,9 @@ func (cmd *deploy) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.FolderFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StorageProfileFlag.Process(ctx); err != nil {
 		return err
 	}
 	return cmd.OptionsFlag.Process(ctx)
@@ -114,13 +118,13 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
-	cmd.KeepAlive(vc)
+	cmd.FolderFlag.KeepAlive(vc)
 
 	c, err := cmd.DatastoreFlag.RestClient()
 	if err != nil {
 		return err
 	}
-	cmd.KeepAlive(c)
+	cmd.FolderFlag.KeepAlive(c)
 
 	m := vcenter.NewManager(c)
 
@@ -194,6 +198,11 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	var ref *types.ManagedObjectReference
 
+	profile, err := cmd.StorageProfile(ctx)
+	if err != nil {
+		return err
+	}
+
 	switch item.Type {
 	case library.ItemTypeOVF:
 		deploy := vcenter.Deploy{
@@ -217,7 +226,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 				},
 				NetworkMappings:     networks,
 				StorageProvisioning: cmd.Options.DiskProvisioning,
-				StorageProfileID:    cmd.profile,
+				StorageProfileID:    profile,
 			},
 			Target: vcenter.Target{
 				ResourcePoolID: rp.Reference().Value,
@@ -241,11 +250,11 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		storage := &vcenter.DiskStorage{
 			Datastore: dsID,
 			StoragePolicy: &vcenter.StoragePolicy{
-				Policy: cmd.profile,
+				Policy: profile,
 				Type:   "USE_SOURCE_POLICY",
 			},
 		}
-		if cmd.profile != "" {
+		if profile != "" {
 			storage.StoragePolicy.Type = "USE_SPECIFIED_POLICY"
 		}
 

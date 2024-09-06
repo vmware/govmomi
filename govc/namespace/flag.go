@@ -25,24 +25,23 @@ import (
 )
 
 type namespaceFlag struct {
-	*flags.ClientFlag
+	*flags.StorageProfileFlag
 
 	library flags.StringList
 	vmclass flags.StringList
-	storage flags.StringList
+	storage []string
 }
 
 func (ns *namespaceFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	ns.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	ns.ClientFlag.Register(ctx, f)
+	ns.StorageProfileFlag, ctx = flags.NewStorageProfileFlag(ctx, "storage")
+	ns.StorageProfileFlag.Register(ctx, f)
 
 	f.Var(&ns.library, "library", "Content library IDs to associate with the vSphere Namespace.")
 	f.Var(&ns.vmclass, "vmclass", "Virtual machine class IDs to associate with the vSphere Namespace.")
-	f.Var(&ns.storage, "storage", "Storage profile IDs to associate with the vSphere Namespace.")
 }
 
 func (ns *namespaceFlag) Process(ctx context.Context) error {
-	if err := ns.ClientFlag.Process(ctx); err != nil {
+	if err := ns.StorageProfileFlag.Process(ctx); err != nil {
 		return err
 	}
 
@@ -58,23 +57,9 @@ func (ns *namespaceFlag) Process(ctx context.Context) error {
 		}
 	}
 
-	pc, err := ns.PbmClient()
-	if err != nil {
-		return err
-	}
+	ns.storage, err = ns.StorageProfileList(ctx)
 
-	m, err := pc.ProfileMap(ctx)
-	if err != nil {
-		return err
-	}
-
-	for i, name := range ns.storage {
-		if n, ok := m.Name[name]; ok {
-			ns.storage[i] = n.GetPbmProfile().ProfileId.UniqueId
-		}
-	}
-
-	return nil
+	return err
 }
 
 func (ns *namespaceFlag) storageSpec() []namespace.StorageSpec {

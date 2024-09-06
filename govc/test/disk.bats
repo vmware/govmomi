@@ -26,11 +26,26 @@ load test_helper
 
   govc disk.ls -json "$id" | jq .
 
+  vm=DC0_H0_VM0
+
+  run govc disk.attach -vm $vm "$id"
+  assert_success
+
+  run govc disk.detach -vm $vm "$id"
+  assert_success
+
   run govc disk.rm "$id"
   assert_success
 
   run govc disk.rm "$id"
   assert_failure
+
+  name=$(new_id)
+  run govc disk.create -profile enoent "$name"
+  assert_failure # profile does not exist
+
+  run govc disk.create -profile "vSAN Default Storage Policy" "$name"
+  assert_success
 }
 
 @test "disk.create -datastore-cluster" {

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,11 +33,11 @@ type clone struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.VirtualMachineFlag
+	*flags.StorageProfileFlag
 
-	profile string
-	ovf     bool
-	extra   bool
-	mac     bool
+	ovf   bool
+	extra bool
+	mac   bool
 }
 
 func init() {
@@ -63,10 +63,12 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
+	cmd.StorageProfileFlag, ctx = flags.NewStorageProfileFlag(ctx)
+	cmd.StorageProfileFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.ovf, "ovf", false, "Clone as OVF (default is VM Template)")
 	f.BoolVar(&cmd.extra, "e", false, "Include extra configuration")
 	f.BoolVar(&cmd.mac, "m", false, "Preserve MAC-addresses on network adapters")
-	f.StringVar(&cmd.profile, "profile", "", "Storage profile")
 }
 
 func (cmd *clone) Process(ctx context.Context) error {
@@ -83,6 +85,9 @@ func (cmd *clone) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.FolderFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StorageProfileFlag.Process(ctx); err != nil {
 		return err
 	}
 	return cmd.VirtualMachineFlag.Process(ctx)
@@ -176,14 +181,19 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		return nil
 	}
 
+	profile, err := cmd.StorageProfile(ctx)
+	if err != nil {
+		return err
+	}
+
 	storage := &vcenter.DiskStorage{
 		Datastore: dsID,
 		StoragePolicy: &vcenter.StoragePolicy{
-			Policy: cmd.profile,
+			Policy: profile,
 			Type:   "USE_SOURCE_POLICY",
 		},
 	}
-	if cmd.profile != "" {
+	if profile != "" {
 		storage.StoragePolicy.Type = "USE_SPECIFIED_POLICY"
 	}
 
