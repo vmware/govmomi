@@ -50,6 +50,13 @@ type Library struct {
 	Publication           *Publication     `json:"publish_info,omitempty"`
 	SecurityPolicyID      string           `json:"security_policy_id,omitempty"`
 	UnsetSecurityPolicyID bool             `json:"unset_security_policy_id,omitempty"`
+	ServerGUID            string           `json:"server_guid,omitempty"`
+	StateInfo             *StateInfo       `json:"state_info,omitempty"`
+}
+
+// StateInfo provides the state info of a content library.
+type StateInfo struct {
+	State string `json:"state"`
 }
 
 // Subscription info

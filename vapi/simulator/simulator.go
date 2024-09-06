@@ -919,6 +919,7 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 
 			id := uuid.New().String()
 			spec.Library.ID = id
+			spec.Library.ServerGUID = uuid.New().String()
 			spec.Library.CreationTime = types.NewTime(time.Now())
 			spec.Library.LastModifiedTime = types.NewTime(time.Now())
 			spec.Library.UnsetSecurityPolicyID = spec.Library.SecurityPolicyID == ""
@@ -952,6 +953,8 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 					s.Library[id].Item = p.Item
 				}
 			}
+
+			spec.Library.StateInfo = &library.StateInfo{State: "ACTIVE"}
 
 			OK(w, id)
 		}
