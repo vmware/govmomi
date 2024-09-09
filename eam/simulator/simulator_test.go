@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/eam"
 	"github.com/vmware/govmomi/eam/object"
 	"github.com/vmware/govmomi/eam/types"
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
 	vimobject "github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/session"
@@ -348,53 +349,6 @@ func TestSimulator(t *testing.T) {
 func TestNotAuthenticated(t *testing.T) {
 	vcsim.Test(func(ctx context.Context, vimClient *vim25.Client) {
 
-		isNotAuthenticatedFault := func(fault vim.AnyType) bool {
-			switch fault.(type) {
-			case vim.NotAuthenticated, *vim.NotAuthenticated:
-				return true
-			default:
-				return false
-			}
-		}
-
-		isEamInvalidLoginFault := func(fault vim.AnyType) bool {
-			switch fault.(type) {
-			case types.EamInvalidLogin, *types.EamInvalidLogin:
-				return true
-			default:
-				return false
-			}
-		}
-
-		validateFault := func(
-			err error,
-			faultType string,
-			faultIsTypeFn func(vim.AnyType) bool) error {
-
-			if err == nil {
-				return fmt.Errorf("%s expected", faultType)
-			}
-
-			validateVimFault := func(vimFault vim.AnyType) error {
-				if !faultIsTypeFn(vimFault) {
-					return fmt.Errorf(
-						"err is not %[1]s: %[2]T %[2]v", faultType, vimFault)
-				}
-				return nil
-			}
-
-			if soap.IsSoapFault(err) {
-				return validateVimFault(soap.ToSoapFault(err).VimFault())
-			}
-
-			if soap.IsVimFault(err) {
-				return validateVimFault(soap.ToVimFault(err))
-			}
-
-			return fmt.Errorf(
-				"err is not a Soap or Vim fault: %[1]T %[1]v", err)
-		}
-
 		t.Run("TerminateSession", func(t *testing.T) {
 			// Terminate the session.
 			sessionManager := session.NewManager(vimClient)
@@ -415,11 +369,7 @@ func TestNotAuthenticated(t *testing.T) {
 				// error.
 				_, err := finder.DefaultDatacenter(ctx)
 
-				if err := validateFault(
-					err,
-					"NotAuthenticated",
-					isNotAuthenticatedFault); err != nil {
-
+				if !fault.Is(err, &vim.NotAuthenticated{}) {
 					t.Fatal(err)
 				}
 			})
@@ -436,12 +386,8 @@ func TestNotAuthenticated(t *testing.T) {
 				// Try to list the agencies, but receive an EamInvalidLogin error.
 				_, err := mgr.Agencies(ctx)
 
-				if err := validateFault(
-					err,
-					"EamInvalidLogin",
-					isEamInvalidLoginFault); err != nil {
-
-					t.Fatal(err)
+				if !fault.Is(err, &types.EamInvalidLogin{}) {
+					t.Fatalf("err=%[1]T %+[1]v", err)
 				}
 			})
 		})

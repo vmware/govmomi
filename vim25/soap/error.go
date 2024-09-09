@@ -62,6 +62,26 @@ func (s soapFaultError) MarshalJSON() ([]byte, error) {
 	return json.Marshal(out)
 }
 
+func (s soapFaultError) Fault() types.BaseMethodFault {
+	if s.fault != nil {
+		fault := s.fault.Detail.Fault
+		if fault == nil {
+			return nil
+		}
+		if f, ok := fault.(types.BaseMethodFault); ok {
+			return f
+		}
+		if val := reflect.ValueOf(fault); val.Kind() != reflect.Pointer {
+			ptrVal := reflect.New(val.Type())
+			ptrVal.Elem().Set(val)
+			if f, ok := ptrVal.Interface().(types.BaseMethodFault); ok {
+				return f
+			}
+		}
+	}
+	return nil
+}
+
 type vimFaultError struct {
 	fault types.BaseMethodFault
 }
