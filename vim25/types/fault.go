@@ -41,3 +41,15 @@ func IsAlreadyExists(err error) bool {
 
 	return false
 }
+
+// HasLocalizedMethodFault is any type that has a LocalizedMethodFault.
+type HasLocalizedMethodFault interface {
+
+	// GetLocalizedMethodFault returns the LocalizedMethodFault instance.
+	GetLocalizedMethodFault() *LocalizedMethodFault
+}
+
+// GetLocalizedMethodFault returns this LocalizedMethodFault.
+func (f *LocalizedMethodFault) GetLocalizedMethodFault() *LocalizedMethodFault {
+	return f
+}
