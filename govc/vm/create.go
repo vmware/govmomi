@@ -61,6 +61,8 @@ type create struct {
 	on         bool
 	force      bool
 	controller string
+	eager      bool
+	thick      bool
 	annotation string
 	firmware   string
 	version    string
@@ -129,6 +131,8 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.on, "on", true, "Power on VM")
 	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
 	f.StringVar(&cmd.controller, "disk.controller", "scsi", "Disk controller type")
+	f.BoolVar(&cmd.eager, "disk.eager", false, "Eagerly scrub new disk")
+	f.BoolVar(&cmd.thick, "disk.thick", false, "Thick provision new disk")
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
 	f.StringVar(&cmd.firmware, "firmware", FirmwareTypes[0], FirmwareUsage)
 	if cli.ShowUnreleased() {
@@ -550,13 +554,17 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 			return nil, err
 		}
 
+		backing := &types.VirtualDiskFlatVer2BackingInfo{
+			DiskMode:        string(types.VirtualDiskModePersistent),
+			ThinProvisioned: types.NewBool(!cmd.thick),
+		}
+		if cmd.thick {
+			backing.EagerlyScrub = &cmd.eager
+		}
 		disk := &types.VirtualDisk{
 			VirtualDevice: types.VirtualDevice{
-				Key: devices.NewKey(),
-				Backing: &types.VirtualDiskFlatVer2BackingInfo{
-					DiskMode:        string(types.VirtualDiskModePersistent),
-					ThinProvisioned: types.NewBool(true),
-				},
+				Key:     devices.NewKey(),
+				Backing: backing,
 			},
 			CapacityInKB: cmd.diskByteSize / 1024,
 		}
