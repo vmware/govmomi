@@ -19,11 +19,11 @@ package object
 import (
 	"context"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -119,10 +119,8 @@ func (m HostCertificateManager) InstallServerCertificate(ctx context.Context, ce
 	}
 
 	err = m.Client().RoundTrip(ctx, &body, &body)
-	if err != nil && soap.IsSoapFault(err) {
-		if _, ok := soap.ToSoapFault(err).VimFault().(types.MethodNotFound); ok {
-			return nil
-		}
+	if err != nil && fault.Is(err, &types.MethodNotFound{}) {
+		return nil
 	}
 	return err
 }

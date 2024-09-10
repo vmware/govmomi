@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,10 +22,10 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -63,17 +63,6 @@ Examples:
   govc option.set logger.Vsan verbose`
 }
 
-func isInvalidName(err error) bool {
-	if soap.IsSoapFault(err) {
-		soapFault := soap.ToSoapFault(err)
-		if _, ok := soapFault.VimFault().(types.InvalidName); ok {
-			return ok
-		}
-	}
-
-	return false
-}
-
 func (cmd *Set) Update(ctx context.Context, f *flag.FlagSet, m *object.OptionManager) error {
 	if f.NArg() != 2 {
 		return flag.ErrHelp
@@ -84,7 +73,7 @@ func (cmd *Set) Update(ctx context.Context, f *flag.FlagSet, m *object.OptionMan
 
 	opts, err := m.Query(ctx, name)
 	if err != nil {
-		if isInvalidName(err) {
+		if fault.Is(err, &types.InvalidName{}) {
 			// If the option doesn't exist, creating one can only have a string Value.
 			// The Key prefix is limited in this case too, it seems to the config.* namespace.
 			return m.Update(ctx, []types.BaseOptionValue{&types.OptionValue{

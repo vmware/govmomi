@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
@@ -75,14 +76,7 @@ func (cmd *ls) Usage() string {
 }
 
 func isInvalid(err error) bool {
-	if f, ok := err.(types.HasFault); ok {
-		switch f.Fault().(type) {
-		case *types.InvalidArgument:
-			return true
-		}
-	}
-
-	return false
+	return fault.Is(err, &types.InvalidArgument{})
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {

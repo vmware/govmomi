@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -181,11 +182,8 @@ func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) 
 	err := pc.RetrieveOne(ctx, sm.Reference(), []string{"currentSession"}, &mgr)
 	if err != nil {
 		// It's OK if we can't retrieve properties because we're not authenticated
-		if f, ok := err.(types.HasFault); ok {
-			switch f.Fault().(type) {
-			case *types.NotAuthenticated:
-				return nil, nil
-			}
+		if fault.Is(err, &types.NotAuthenticated{}) {
+			return nil, nil
 		}
 
 		return nil, err

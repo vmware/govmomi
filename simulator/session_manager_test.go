@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,25 +24,15 @@ import (
 	"testing"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
-
-func isNotAuthenticated(err error) bool {
-	if soap.IsSoapFault(err) {
-		switch soap.ToSoapFault(err).VimFault().(type) {
-		case types.NotAuthenticated:
-			return true
-		}
-	}
-	return false
-}
 
 func TestSessionManagerAuth(t *testing.T) {
 	ctx := context.Background()
@@ -100,7 +90,7 @@ func TestSessionManagerAuth(t *testing.T) {
 	}
 
 	_, err = methods.GetCurrentTime(ctx, c)
-	if !isNotAuthenticated(err) {
+	if !fault.Is(err, &types.NotAuthenticated{}) {
 		t.Error("expected NotAuthenticated")
 	}
 
