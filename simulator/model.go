@@ -237,6 +237,7 @@ var kinds = map[string]reflect.Type{
 	"ClusterComputeResource":             reflect.TypeOf((*ClusterComputeResource)(nil)).Elem(),
 	"CustomFieldsManager":                reflect.TypeOf((*CustomFieldsManager)(nil)).Elem(),
 	"CustomizationSpecManager":           reflect.TypeOf((*CustomizationSpecManager)(nil)).Elem(),
+	"CryptoManagerKmip":                  reflect.TypeOf((*CryptoManagerKmip)(nil)).Elem(),
 	"Datacenter":                         reflect.TypeOf((*Datacenter)(nil)).Elem(),
 	"Datastore":                          reflect.TypeOf((*Datastore)(nil)).Elem(),
 	"DatastoreNamespaceManager":          reflect.TypeOf((*DatastoreNamespaceManager)(nil)).Elem(),

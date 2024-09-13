@@ -535,6 +535,11 @@ func (r *Registry) FileManager() *FileManager {
 	return r.Get(r.content().FileManager.Reference()).(*FileManager)
 }
 
+// CryptoManager returns the CryptoManagerKmip singleton
+func (r *Registry) CryptoManager() *CryptoManagerKmip {
+	return r.Get(r.content().CryptoManager.Reference()).(*CryptoManagerKmip)
+}
+
 type VirtualDiskManagerInterface interface {
 	mo.Reference
 	MO() mo.VirtualDiskManager
