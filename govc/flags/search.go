@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,10 +23,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -205,11 +205,8 @@ func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (ob
 	for _, iu := range []*bool{nil, types.NewBool(true)} {
 		ref, err = flag.searchIndex(c).FindByUuid(ctx, dc, flag.byUUID, isVM, iu)
 		if err != nil {
-			if soap.IsSoapFault(err) {
-				fault := soap.ToSoapFault(err).VimFault()
-				if _, ok := fault.(types.InvalidArgument); ok {
-					continue
-				}
+			if fault.Is(err, &types.InvalidArgument{}) {
+				continue
 			}
 			return nil, err
 		}

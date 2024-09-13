@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -107,14 +107,7 @@ func (cmd *power) Process(ctx context.Context) error {
 }
 
 func isToolsUnavailable(err error) bool {
-	if soap.IsSoapFault(err) {
-		soapFault := soap.ToSoapFault(err)
-		if _, ok := soapFault.VimFault().(types.ToolsUnavailable); ok {
-			return ok
-		}
-	}
-
-	return false
+	return fault.Is(err, &types.ToolsUnavailable{})
 }
 
 // this is annoying, but the likely use cases for Datacenter.PowerOnVM outside of this command would

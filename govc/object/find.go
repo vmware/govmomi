@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/internal"
@@ -33,7 +34,6 @@ import (
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -388,11 +388,8 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 		if cmd.long || !cmd.ref {
 			e, err := finder.Element(ctx, o)
 			if err != nil {
-				if soap.IsSoapFault(err) {
-					_, ok := soap.ToSoapFault(err).VimFault().(types.ManagedObjectNotFound)
-					if ok {
-						continue // object was deleted after v.Find() returned
-					}
+				if fault.Is(err, &types.ManagedObjectNotFound{}) {
+					continue // object was deleted after v.Find() returned
 				}
 				return err
 			}

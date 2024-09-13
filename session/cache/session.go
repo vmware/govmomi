@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
@@ -227,12 +228,9 @@ func soapSessionValid(ctx context.Context, client *vim25.Client) (bool, error) {
 	m := session.NewManager(client)
 	u, err := m.UserSession(ctx)
 	if err != nil {
-		if soap.IsSoapFault(err) {
-			fault := soap.ToSoapFault(err).VimFault()
+		if fault.Is(err, &types.ManagedObjectNotFound{}) {
 			// If the PropertyCollector is not found, the saved session for this URL is not valid
-			if _, ok := fault.(types.ManagedObjectNotFound); ok {
-				return false, nil
-			}
+			return false, nil
 		}
 
 		return false, err

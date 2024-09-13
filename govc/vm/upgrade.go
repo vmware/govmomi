@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,9 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -34,15 +34,6 @@ type upgrade struct {
 
 func init() {
 	cli.Register("vm.upgrade", &upgrade{})
-}
-
-func isAlreadyUpgraded(err error) bool {
-	if fault, ok := err.(task.Error); ok {
-		_, ok = fault.Fault().(*types.AlreadyUpgraded)
-		return ok
-	}
-
-	return false
 }
 
 func (cmd *upgrade) Register(ctx context.Context, f *flag.FlagSet) {
@@ -85,7 +76,7 @@ func (cmd *upgrade) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	err = task.Wait(ctx)
 	if err != nil {
-		if isAlreadyUpgraded(err) {
+		if fault.Is(err, &types.AlreadyUpgraded{}) {
 			fmt.Println(err.Error())
 		} else {
 			return err

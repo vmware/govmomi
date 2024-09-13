@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,9 +25,9 @@ import (
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/event"
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/property"
-	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -254,11 +254,6 @@ func TestRace(t *testing.T) {
 	}
 }
 
-func isManagedObjectNotFound(err error) bool {
-	_, ok := err.(task.Error).Fault().(*types.ManagedObjectNotFound)
-	return ok
-}
-
 // Race VirtualMachine.Destroy vs Folder.Destroy; the latter removes the VM parent and the former should not panic in that case
 func TestRaceDestroy(t *testing.T) {
 	ctx := context.Background()
@@ -305,7 +300,7 @@ func TestRaceDestroy(t *testing.T) {
 			}
 			err = task.Wait(ctx)
 			if err != nil {
-				if isManagedObjectNotFound(err) {
+				if fault.Is(err, &types.ManagedObjectNotFound{}) {
 					notFound = true
 				} else {
 					t.Error(err)
