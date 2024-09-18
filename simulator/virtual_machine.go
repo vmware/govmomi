@@ -1662,23 +1662,32 @@ func (vm *VirtualMachine) updateCrypto(
 		if err := assertEncrypted(); err != nil {
 			return err
 		}
+
 		var providerID *types.KeyProviderId
-		if pid := vm.Config.KeyId.ProviderId; pid != nil {
-			providerID = &types.KeyProviderId{
-				Id: pid.Id,
-			}
-		}
 		if pid := newKeyID.ProviderId; pid != nil {
 			providerID = &types.KeyProviderId{
 				Id: pid.Id,
 			}
 		}
+
+		keyID := newKeyID.KeyId
+		if providerID == nil {
+			if p, k := getDefaultProvider(ctx, vm, true); p != "" && k != "" {
+				providerID = &types.KeyProviderId{
+					Id: p,
+				}
+				keyID = k
+			}
+		} else if keyID == "" {
+			keyID = generateKeyForProvider(ctx, providerID.Id)
+		}
+
 		ctx.Map.Update(vm, []types.PropertyChange{
 			{
 				Name: configKeyId,
 				Op:   types.PropertyChangeOpAssign,
 				Val: &types.CryptoKeyId{
-					KeyId:      newKeyID.KeyId,
+					KeyId:      keyID,
 					ProviderId: providerID,
 				},
 			},
@@ -1738,12 +1747,24 @@ func (vm *VirtualMachine) updateCrypto(
 			}
 		}
 
+		keyID := tspec.CryptoKeyId.KeyId
+		if providerID == nil {
+			if p, k := getDefaultProvider(ctx, vm, true); p != "" && k != "" {
+				providerID = &types.KeyProviderId{
+					Id: p,
+				}
+				keyID = k
+			}
+		} else if keyID == "" {
+			keyID = generateKeyForProvider(ctx, providerID.Id)
+		}
+
 		ctx.Map.Update(vm, []types.PropertyChange{
 			{
 				Name: configKeyId,
 				Op:   types.PropertyChangeOpAssign,
 				Val: &types.CryptoKeyId{
-					KeyId:      tspec.CryptoKeyId.KeyId,
+					KeyId:      keyID,
 					ProviderId: providerID,
 				},
 			},

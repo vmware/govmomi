@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -400,6 +400,32 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		})
 	} else {
 		vm.Runtime.Host = c.req.Host
+	}
+
+	if cryptoSpec, ok := c.req.Config.Crypto.(*types.CryptoSpecEncrypt); ok {
+		if cryptoSpec.CryptoKeyId.KeyId == "" {
+			if cryptoSpec.CryptoKeyId.ProviderId == nil {
+				providerID, keyID := getDefaultProvider(c.ctx, vm, true)
+				if providerID == "" {
+					return nil, &types.InvalidVmConfig{Property: "configSpec.crypto"}
+				}
+				vm.Config.KeyId = &types.CryptoKeyId{
+					KeyId: keyID,
+					ProviderId: &types.KeyProviderId{
+						Id: providerID,
+					},
+				}
+			} else {
+				providerID := cryptoSpec.CryptoKeyId.ProviderId.Id
+				keyID := generateKeyForProvider(c.ctx, providerID)
+				vm.Config.KeyId = &types.CryptoKeyId{
+					KeyId: keyID,
+					ProviderId: &types.KeyProviderId{
+						Id: providerID,
+					},
+				}
+			}
+		}
 	}
 
 	vm.Guest = &types.GuestInfo{
