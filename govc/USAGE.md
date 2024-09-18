@@ -218,6 +218,11 @@ but appear via `govc $cmd -h`:
  - [import.ovf](#importovf)
  - [import.spec](#importspec)
  - [import.vmdk](#importvmdk)
+ - [kms.add](#kmsadd)
+ - [kms.default](#kmsdefault)
+ - [kms.ls](#kmsls)
+ - [kms.rm](#kmsrm)
+ - [kms.trust](#kmstrust)
  - [library.checkin](#librarycheckin)
  - [library.checkout](#librarycheckout)
  - [library.clone](#libraryclone)
@@ -3580,6 +3585,93 @@ Options:
   -folder=               Inventory folder [GOVC_FOLDER]
   -force=false           Overwrite existing disk
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+```
+
+## kms.add
+
+```
+Usage: govc kms.add [OPTIONS] NAME
+
+Add KMS cluster.
+
+Server name and address are required, port defaults to 5696.
+
+Examples:
+  govc kms.add -n my-server -a kms.example.com my-kp
+
+Options:
+  -a=                    Server address
+  -n=                    Server name
+  -p=5696                Server port
+```
+
+## kms.default
+
+```
+Usage: govc kms.default [OPTIONS] NAME
+
+Set default KMS cluster.
+
+Examples:
+  govc kms.default my-kp
+  govc kms.default - # clear default
+  govc kms.default -e /dc/host/cluster my-kp
+  govc kms.default -e /dc/host/cluster my-kp - # clear default
+
+Options:
+  -e=                    Set entity default KMS cluster (cluster or host folder)
+```
+
+## kms.ls
+
+```
+Usage: govc kms.ls [OPTIONS] NAME
+
+Display KMS info.
+
+Examples:
+  govc kms.ls
+  govc kms.ls -json
+  govc kms.ls - # default provider
+  govc kms.ls ProviderName
+  govc kms.ls -json ProviderName
+
+Options:
+```
+
+## kms.rm
+
+```
+Usage: govc kms.rm [OPTIONS] NAME
+
+Remove KMS server or cluster.
+
+Examples:
+  govc kms.rm my-kp
+  govc kms.rm -s my-server my-kp
+
+Options:
+  -s=                    Server name
+```
+
+## kms.trust
+
+```
+Usage: govc kms.trust [OPTIONS] NAME
+
+Establish trust between KMS and vCenter.
+
+Examples:
+  # "Make vCenter Trust KMS"
+  govc kms.trust -server-cert "$(govc about.cert -show)" my-kp
+
+  # "Make KMS Trust vCenter" -> "KMS certificate and private key"
+  govc kms.trust -client-cert "$(cat crt.pem) -client-key "$(cat key.pem) my-kp
+
+  # "Download the vCenter certificate and upload it to the KMS"
+  govc about.cert -show > vcenter-cert.pem
+
+Options:
 ```
 
 ## library.checkin

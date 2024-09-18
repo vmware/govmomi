@@ -72,6 +72,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/host/vnic"
 	_ "github.com/vmware/govmomi/govc/host/vswitch"
 	_ "github.com/vmware/govmomi/govc/importx"
+	_ "github.com/vmware/govmomi/govc/kms"
 	_ "github.com/vmware/govmomi/govc/library"
 	_ "github.com/vmware/govmomi/govc/library/policy"
 	_ "github.com/vmware/govmomi/govc/library/session"
