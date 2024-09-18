@@ -25,9 +25,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/crypto"
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
@@ -2681,6 +2684,7 @@ func TestEncryptDecryptVM(t *testing.T) {
 		name                string
 		initStateFn         func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error
 		configSpec          types.VirtualMachineConfigSpec
+		isGeneratedKey      bool
 		expectedCryptoKeyId *types.CryptoKeyId
 		expectedErr         error
 	}{
@@ -2701,6 +2705,49 @@ func TestEncryptDecryptVM(t *testing.T) {
 				ProviderId: &types.KeyProviderId{
 					Id: "abc",
 				},
+			},
+		},
+		{
+			name: "encrypt w default key provider",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecEncrypt{},
+			},
+			isGeneratedKey: true,
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+					m := ctx.Map.CryptoManager()
+					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
+						ClusterId: types.KeyProviderId{
+							Id: "key-provider",
+						},
+						UseAsDefault: true,
+					})
+				})
+				return nil
+			},
+		},
+		{
+			name: "encrypt w generated key",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecEncrypt{
+					CryptoKeyId: types.CryptoKeyId{
+						ProviderId: &types.KeyProviderId{
+							Id: "key-provider",
+						},
+					},
+				},
+			},
+			isGeneratedKey: true,
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+					m := ctx.Map.CryptoManager()
+					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
+						ClusterId: types.KeyProviderId{
+							Id: "key-provider",
+						},
+					})
+				})
+				return nil
 			},
 		},
 		{
@@ -2878,6 +2925,65 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 		},
 		{
+			name: "deep recrypt w default key provider",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDeepRecrypt{},
+			},
+			isGeneratedKey: true,
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+					m := ctx.Map.CryptoManager()
+					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
+						ClusterId: types.KeyProviderId{
+							Id: "key-provider",
+						},
+						UseAsDefault: true,
+					})
+				})
+				return nil
+			},
+		},
+		{
+			name: "deep recrypt w generated key",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecDeepRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						ProviderId: &types.KeyProviderId{
+							Id: "key-provider",
+						},
+					},
+				},
+			},
+			isGeneratedKey: true,
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "key",
+						ProviderId: &types.KeyProviderId{
+							Id: "key-provider",
+						},
+					}
+				})
+				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+					m := ctx.Map.CryptoManager()
+					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
+						ClusterId: types.KeyProviderId{
+							Id: "key-provider",
+						},
+					})
+				})
+				return nil
+			},
+		},
+		{
 			name: "deep recrypt w same provider id",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
 				Map.WithLock(ctx, vmRef, func() {
@@ -2894,6 +3000,9 @@ func TestEncryptDecryptVM(t *testing.T) {
 				Crypto: &types.CryptoSpecDeepRecrypt{
 					NewKeyId: types.CryptoKeyId{
 						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
 					},
 				},
 			},
@@ -3011,6 +3120,65 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 		},
 		{
+			name: "shallow recrypt w default key provider",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecShallowRecrypt{},
+			},
+			isGeneratedKey: true,
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "123",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
+					}
+				})
+				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+					m := ctx.Map.CryptoManager()
+					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
+						ClusterId: types.KeyProviderId{
+							Id: "key-provider",
+						},
+						UseAsDefault: true,
+					})
+				})
+				return nil
+			},
+		},
+		{
+			name: "shallow recrypt w generated key",
+			configSpec: types.VirtualMachineConfigSpec{
+				Crypto: &types.CryptoSpecShallowRecrypt{
+					NewKeyId: types.CryptoKeyId{
+						ProviderId: &types.KeyProviderId{
+							Id: "key-provider",
+						},
+					},
+				},
+			},
+			isGeneratedKey: true,
+			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
+				Map.WithLock(ctx, vmRef, func() {
+					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+						KeyId: "key",
+						ProviderId: &types.KeyProviderId{
+							Id: "key-provider",
+						},
+					}
+				})
+				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+					m := ctx.Map.CryptoManager()
+					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
+						ClusterId: types.KeyProviderId{
+							Id: "key-provider",
+						},
+					})
+				})
+				return nil
+			},
+		},
+		{
 			name: "shallow recrypt w same provider id",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
 				Map.WithLock(ctx, vmRef, func() {
@@ -3027,6 +3195,9 @@ func TestEncryptDecryptVM(t *testing.T) {
 				Crypto: &types.CryptoSpecShallowRecrypt{
 					NewKeyId: types.CryptoKeyId{
 						KeyId: "456",
+						ProviderId: &types.KeyProviderId{
+							Id: "abc",
+						},
 					},
 				},
 			},
@@ -3210,7 +3381,6 @@ func TestEncryptDecryptVM(t *testing.T) {
 			model.Host = 1
 
 			Test(func(ctx context.Context, c *vim25.Client) {
-
 				ref := Map.Any("VirtualMachine").Reference()
 				vm := object.NewVirtualMachine(c, ref)
 
@@ -3233,7 +3403,10 @@ func TestEncryptDecryptVM(t *testing.T) {
 					if err := vm.Properties(ctx, ref, []string{"config.keyId"}, &moVM); err != nil {
 						t.Fatalf("fetching properties failed: %v", err)
 					}
-					if tc.expectedCryptoKeyId != nil {
+					if tc.isGeneratedKey {
+						assert.NotEmpty(t, moVM.Config.KeyId.KeyId)
+						assert.Equal(t, "key-provider", moVM.Config.KeyId.ProviderId.Id)
+					} else if tc.expectedCryptoKeyId != nil {
 						assert.Equal(t, tc.expectedCryptoKeyId, moVM.Config.KeyId)
 					} else {
 						assert.Nil(t, moVM.Config)
@@ -3242,4 +3415,216 @@ func TestEncryptDecryptVM(t *testing.T) {
 			}, model)
 		})
 	}
+}
+
+func TestCreateVmWithDefaultKeyProvider(t *testing.T) {
+
+	t.Run("when default key provider exists", func(t *testing.T) {
+		Test(func(ctx context.Context, c *vim25.Client) {
+			providerID := uuid.NewString()
+			m := crypto.NewManagerKmip(c)
+			assert.NoError(t, m.RegisterKmipCluster(
+				ctx,
+				providerID,
+				types.KmipClusterInfoKmsManagementTypeUnknown))
+			assert.NoError(t, m.SetDefaultKmsClusterId(ctx, providerID, nil))
+
+			finder := find.NewFinder(c, false)
+
+			dc, err := finder.DefaultDatacenter(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, dc)
+			finder.SetDatacenter(dc)
+
+			ds, err := finder.DefaultDatastore(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, ds)
+
+			folders, err := dc.Folders(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, folders)
+			assert.NotNil(t, folders.VmFolder)
+
+			hosts, err := finder.HostSystemList(ctx, "*/*")
+			assert.NoError(t, err)
+			assert.NotEmpty(t, hosts)
+
+			host := hosts[rand.Intn(len(hosts))]
+			pool, err := host.ResourcePool(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, pool)
+
+			tsk, err := folders.VmFolder.CreateVM(
+				ctx,
+				types.VirtualMachineConfigSpec{
+					Name: "test",
+					Files: &types.VirtualMachineFileInfo{
+						VmPathName: fmt.Sprintf("[%s] test/test.vmx", ds.Name()),
+					},
+					GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+					Crypto:  &types.CryptoSpecEncrypt{},
+				},
+				pool,
+				host)
+			assert.NoError(t, err)
+			assert.NotNil(t, tsk)
+
+			tskInfo, err := tsk.WaitForResult(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, tskInfo)
+			assert.Nil(t, tskInfo.Error)
+			assert.NotNil(t, tskInfo.Result)
+
+			vmRef, ok := tskInfo.Result.(types.ManagedObjectReference)
+			assert.True(t, ok)
+
+			vm := object.NewVirtualMachine(c, vmRef)
+
+			var moVM mo.VirtualMachine
+			assert.NoError(t, vm.Properties(ctx, vmRef, []string{"config.keyId"}, &moVM))
+
+			assert.NotNil(t, moVM.Config)
+			assert.NotNil(t, moVM.Config.KeyId)
+			assert.NotNil(t, moVM.Config.KeyId.ProviderId)
+			assert.Equal(t, providerID, moVM.Config.KeyId.ProviderId.Id)
+			assert.NotEmpty(t, moVM.Config.KeyId.KeyId)
+		})
+	})
+
+	t.Run("when default key provider does not exist", func(t *testing.T) {
+		Test(func(ctx context.Context, c *vim25.Client) {
+			providerID := uuid.NewString()
+			m := crypto.NewManagerKmip(c)
+			assert.NoError(t, m.RegisterKmipCluster(
+				ctx,
+				providerID,
+				types.KmipClusterInfoKmsManagementTypeUnknown))
+
+			finder := find.NewFinder(c, false)
+
+			dc, err := finder.DefaultDatacenter(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, dc)
+			finder.SetDatacenter(dc)
+
+			ds, err := finder.DefaultDatastore(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, ds)
+
+			folders, err := dc.Folders(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, folders)
+			assert.NotNil(t, folders.VmFolder)
+
+			hosts, err := finder.HostSystemList(ctx, "*/*")
+			assert.NoError(t, err)
+			assert.NotEmpty(t, hosts)
+
+			host := hosts[rand.Intn(len(hosts))]
+			pool, err := host.ResourcePool(ctx)
+			assert.NoError(t, err)
+			assert.NotNil(t, pool)
+
+			tsk, err := folders.VmFolder.CreateVM(
+				ctx,
+				types.VirtualMachineConfigSpec{
+					Name: "test",
+					Files: &types.VirtualMachineFileInfo{
+						VmPathName: fmt.Sprintf("[%s] test/test.vmx", ds.Name()),
+					},
+					GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+					Crypto:  &types.CryptoSpecEncrypt{},
+				},
+				pool,
+				host)
+			assert.NoError(t, err)
+			assert.NotNil(t, tsk)
+
+			_, err = tsk.WaitForResult(ctx)
+			assert.Error(t, err)
+
+			var flt *types.InvalidVmConfig
+			_, ok := fault.As(err, &flt)
+			assert.True(t, ok)
+			assert.NotNil(t, flt)
+			assert.Equal(t, "configSpec.crypto", flt.Property)
+		})
+	})
+}
+
+func TestCreateVmWithGeneratedKey(t *testing.T) {
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		providerID := uuid.NewString()
+		m := crypto.NewManagerKmip(c)
+		assert.NoError(t, m.RegisterKmipCluster(
+			ctx,
+			providerID,
+			types.KmipClusterInfoKmsManagementTypeUnknown))
+		finder := find.NewFinder(c, false)
+
+		dc, err := finder.DefaultDatacenter(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, dc)
+		finder.SetDatacenter(dc)
+
+		ds, err := finder.DefaultDatastore(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, ds)
+
+		folders, err := dc.Folders(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, folders)
+		assert.NotNil(t, folders.VmFolder)
+
+		hosts, err := finder.HostSystemList(ctx, "*/*")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, hosts)
+
+		host := hosts[rand.Intn(len(hosts))]
+		pool, err := host.ResourcePool(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, pool)
+
+		tsk, err := folders.VmFolder.CreateVM(
+			ctx,
+			types.VirtualMachineConfigSpec{
+				Name: "test",
+				Files: &types.VirtualMachineFileInfo{
+					VmPathName: fmt.Sprintf("[%s] test/test.vmx", ds.Name()),
+				},
+				GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+				Crypto: &types.CryptoSpecEncrypt{
+					CryptoKeyId: types.CryptoKeyId{
+						ProviderId: &types.KeyProviderId{
+							Id: providerID,
+						},
+					},
+				},
+			},
+			pool,
+			host)
+		assert.NoError(t, err)
+		assert.NotNil(t, tsk)
+
+		tskInfo, err := tsk.WaitForResult(ctx)
+		assert.NoError(t, err)
+		assert.NotNil(t, tskInfo)
+		assert.Nil(t, tskInfo.Error)
+		assert.NotNil(t, tskInfo.Result)
+
+		vmRef, ok := tskInfo.Result.(types.ManagedObjectReference)
+		assert.True(t, ok)
+
+		vm := object.NewVirtualMachine(c, vmRef)
+
+		var moVM mo.VirtualMachine
+		assert.NoError(t, vm.Properties(ctx, vmRef, []string{"config.keyId"}, &moVM))
+
+		assert.NotNil(t, moVM.Config)
+		assert.NotNil(t, moVM.Config.KeyId)
+		assert.NotNil(t, moVM.Config.KeyId.ProviderId)
+		assert.Equal(t, providerID, moVM.Config.KeyId.ProviderId.Id)
+		assert.NotEmpty(t, moVM.Config.KeyId.KeyId)
+	})
 }

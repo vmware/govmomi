@@ -509,3 +509,79 @@ func (m *CryptoManagerKmip) ListKeys(
 
 	return &body
 }
+
+func getDefaultProvider(
+	ctx *Context,
+	vm *VirtualMachine,
+	generateKey bool) (string, string) {
+
+	m := ctx.Map.CryptoManager()
+	if m == nil {
+		return "", ""
+	}
+
+	var (
+		providerID string
+		keyID      string
+	)
+
+	ctx.WithLock(m, func() {
+		// Lookup the default provider ID via the VM's parent entities:
+		// host, host folder, cluster.
+		if host := vm.Runtime.Host; host != nil {
+			for i := range m.KmipServers {
+				kmipCluster := m.KmipServers[i]
+				for j := range kmipCluster.UseAsEntityDefault {
+					parent := host
+					for providerID == "" && parent != nil {
+						if kmipCluster.UseAsEntityDefault[j] == *parent {
+							providerID = kmipCluster.ClusterId.Id
+							break
+						} else {
+							// TODO (akutz): Support looking up the
+							//               default entity via the host
+							//               folder and cluster.
+							parent = nil
+						}
+					}
+					if providerID != "" {
+						break
+					}
+				}
+				if providerID != "" {
+					break
+				}
+			}
+		}
+
+		// If the default provider ID has not been discovered, see if
+		// any of the providers are the global default.
+		if providerID == "" {
+			for i := range m.KmipServers {
+				if providerID == "" && m.KmipServers[i].UseAsDefault {
+					providerID = m.KmipServers[i].ClusterId.Id
+					break
+				}
+			}
+		}
+	})
+
+	if providerID != "" && generateKey {
+		keyID = generateKeyForProvider(ctx, providerID)
+	}
+
+	return providerID, keyID
+}
+
+func generateKeyForProvider(ctx *Context, providerID string) string {
+	m := ctx.Map.CryptoManager()
+	if m == nil {
+		return ""
+	}
+	var keyID string
+	ctx.WithLock(m, func() {
+		keyID = uuid.NewString()
+		m.keyIDToProviderID[keyID] = providerID
+	})
+	return keyID
+}
