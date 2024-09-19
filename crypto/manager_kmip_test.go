@@ -230,14 +230,11 @@ func TestCryptoManagerKmip(t *testing.T) {
 				},
 			}
 
-			err = m.RegisterKmipServer(ctx, serverSpec)
-			assert.EqualError(t, err, "ServerFaultCode: Invalid cluster ID")
-			assert.True(t, fault.Is(err, &types.RuntimeFault{}))
-
-			assert.NoError(t, m.RegisterKmipCluster(
+			err = m.RegisterKmipCluster(
 				ctx,
 				providerID,
-				types.KmipClusterInfoKmsManagementTypeUnknown))
+				types.KmipClusterInfoKmsManagementTypeVCenter)
+			assert.True(t, fault.Is(err, &types.InvalidArgument{}))
 
 			assert.NoError(t, m.RegisterKmipServer(ctx, serverSpec))
 

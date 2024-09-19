@@ -257,15 +257,28 @@ func (m *CryptoManagerKmip) SetDefaultKmsCluster(
 	return &body
 }
 
+// real vCenter only allows TrustAuthority, but we allow more to simplify test setup
+var validClusterTypes = []string{
+	string(types.KmipClusterInfoKmsManagementTypeTrustAuthority),
+	string(types.KmipClusterInfoKmsManagementTypeUnknown),
+	string(types.KmipClusterInfoKmsManagementTypeNativeProvider),
+}
+
 func (m *CryptoManagerKmip) RegisterKmsCluster(
 	ctx *Context, req *types.RegisterKmsCluster) soap.HasFault {
 
 	var body methods.RegisterKmsClusterBody
 
-	for i := range m.KmipServers {
-		if req.ClusterId.Id == m.KmipServers[i].ClusterId.Id {
-			body.Fault_ = Fault("Already registered", &types.RuntimeFault{})
+	if slices.Contains(validClusterTypes, req.ManagementType) {
+		for i := range m.KmipServers {
+			if req.ClusterId.Id == m.KmipServers[i].ClusterId.Id {
+				body.Fault_ = Fault("Already registered", &types.RuntimeFault{})
+			}
 		}
+	} else {
+		body.Fault_ = Fault("", &types.InvalidArgument{
+			InvalidProperty: "managementType",
+		})
 	}
 	if body.Fault_ == nil {
 		body.Res = &types.RegisterKmsClusterResponse{}
@@ -312,6 +325,11 @@ func (m *CryptoManagerKmip) RegisterKmipServer(
 		body              methods.RegisterKmipServerBody
 	)
 
+	if req.Server.Info.Name == "" {
+		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "server.info.name"})
+		return &body
+	}
+
 	for i := range m.KmipServers {
 		c := &m.KmipServers[i]
 
@@ -333,11 +351,20 @@ func (m *CryptoManagerKmip) RegisterKmipServer(
 		}
 	}
 
-	if !validClusterID {
-		body.Fault_ = Fault("Invalid cluster ID", &types.RuntimeFault{})
-	} else if alreadyRegistered {
+	if alreadyRegistered {
 		body.Fault_ = Fault("Already registered", &types.RuntimeFault{})
 	} else {
+		if !validClusterID {
+			m.KmipServers = append(m.KmipServers,
+				types.KmipClusterInfo{
+					ClusterId: types.KeyProviderId{
+						Id: req.Server.ClusterId.Id,
+					},
+					ManagementType: string(types.KmipClusterInfoKmsManagementTypeVCenter),
+					Servers:        []types.KmipServerInfo{req.Server.Info},
+				})
+		}
+
 		body.Res = &types.RegisterKmipServerResponse{}
 	}
 
