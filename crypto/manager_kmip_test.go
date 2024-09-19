@@ -44,7 +44,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 
 			providerID := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -53,7 +53,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.NoError(t, err)
 			assert.True(t, isValid)
 
-			err = m.RegisterKmipCluster(
+			err = m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown)
@@ -73,7 +73,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.EqualError(t, err, "invalid cluster ID")
 			assert.Nil(t, status)
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -96,7 +96,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.EqualError(t, err, "ServerFaultCode: Invalid cluster ID")
 			assert.True(t, fault.Is(err, &types.RuntimeFault{}))
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -124,7 +124,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.NoError(t, err)
 			assert.False(t, ok)
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -144,15 +144,15 @@ func TestCryptoManagerKmip(t *testing.T) {
 			provider2ID := uuid.NewString()
 			provider3ID := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider1ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider2ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider3ID,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -230,7 +230,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 				},
 			}
 
-			err = m.RegisterKmipCluster(
+			err = m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeVCenter)
@@ -260,7 +260,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.EqualError(t, err, "invalid cluster ID")
 			assert.Nil(t, status)
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -305,15 +305,15 @@ func TestCryptoManagerKmip(t *testing.T) {
 			provider2serverName3 := uuid.NewString()
 			provider3serverName1 := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider1ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider2ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider3ID,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -451,7 +451,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			providerID := uuid.NewString()
 			serverName := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -521,7 +521,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.EqualError(t, err, "ServerFaultCode: Invalid cluster ID")
 			assert.True(t, fault.Is(err, &types.RuntimeFault{}))
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -559,7 +559,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			providerID := uuid.NewString()
 			serverName := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -605,15 +605,15 @@ func TestCryptoManagerKmip(t *testing.T) {
 			provider2serverName3 := uuid.NewString()
 			provider3serverName1 := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider1ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider2ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider3ID,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -720,15 +720,15 @@ func TestCryptoManagerKmip(t *testing.T) {
 			provider2ID := uuid.NewString()
 			provider3ID := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider1ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider2ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider3ID,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -755,15 +755,15 @@ func TestCryptoManagerKmip(t *testing.T) {
 			provider2ID := uuid.NewString()
 			provider3ID := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider1ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider2ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider3ID,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -800,15 +800,15 @@ func TestCryptoManagerKmip(t *testing.T) {
 			provider2ID := uuid.NewString()
 			provider3ID := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider1ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider2ID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				provider3ID,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -848,7 +848,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			providerID1 := uuid.NewString()
 			providerID2 := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID1,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -866,7 +866,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.True(t, fault.Is(err, &types.RuntimeFault{}))
 			assert.Empty(t, keyID)
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID2,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -896,15 +896,15 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Len(t, keys, 0)
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID1,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID2,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID3,
 				types.KmipClusterInfoKmsManagementTypeNativeProvider))
@@ -976,7 +976,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 
 			providerID := uuid.NewString()
 
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
