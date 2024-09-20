@@ -19,73 +19,71 @@ package kms
 import (
 	"context"
 	"flag"
+	"fmt"
 
-	"github.com/vmware/govmomi/crypto"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	vapicrypto "github.com/vmware/govmomi/vapi/crypto"
+	"github.com/vmware/govmomi/vapi/crypto"
 )
 
-type rm struct {
+type export struct {
 	*flags.ClientFlag
 
-	server string
+	spec crypto.KmsProviderExportSpec
+	file string
 }
 
 func init() {
-	cli.Register("kms.rm", &rm{})
+	cli.Register("kms.export", &export{})
 }
 
-func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *export) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.server, "s", "", "Server name")
+	f.StringVar(&cmd.file, "f", "", "File name")
+	f.StringVar(&cmd.spec.Password, "p", "", "Password")
 }
 
-func (cmd *rm) Usage() string {
+func (cmd *export) Usage() string {
 	return "NAME"
 }
 
-func (cmd *rm) Description() string {
-	return `Remove KMS server or cluster.
+func (cmd *export) Description() string {
+	return `Export KMS cluster for backup.
 
 Examples:
-  govc kms.rm my-kp
-  govc kms.rm -s my-server my-kp`
+  govc kms.export my-kp
+  govc kms.export -f my-backup.p12 my-kp`
 }
 
-func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
+func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
 	id := f.Arg(0)
 	if id == "" {
 		return flag.ErrHelp
 	}
 
-	c, err := cmd.Client()
+	rc, err := cmd.RestClient()
 	if err != nil {
 		return err
 	}
 
-	m, err := crypto.GetManagerKmip(c)
+	m := crypto.NewManager(rc)
+
+	cmd.spec.Provider = id
+	export, err := m.KmsProviderExport(ctx, cmd.spec)
 	if err != nil {
 		return err
 	}
 
-	native, err := m.IsNativeProvider(ctx, id)
+	if export.Type != "LOCATION" {
+		return fmt.Errorf("unsupported export type: %s", export.Type)
+	}
+
+	req, err := m.KmsProviderExportRequest(ctx, export.Location)
 	if err != nil {
 		return err
 	}
-	if native {
-		rc, err := cmd.RestClient()
-		if err != nil {
-			return err
-		}
-		return vapicrypto.NewManager(rc).KmsProviderDelete(ctx, id)
-	}
 
-	if cmd.server != "" {
-		return m.RemoveKmipServer(ctx, id, cmd.server)
-	}
-
-	return m.UnregisterKmsCluster(ctx, id)
+	return rc.DownloadAttachment(ctx, req, cmd.file)
 }

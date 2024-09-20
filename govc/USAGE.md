@@ -220,6 +220,7 @@ but appear via `govc $cmd -h`:
  - [import.vmdk](#importvmdk)
  - [kms.add](#kmsadd)
  - [kms.default](#kmsdefault)
+ - [kms.export](#kmsexport)
  - [kms.ls](#kmsls)
  - [kms.rm](#kmsrm)
  - [kms.trust](#kmstrust)
@@ -3597,12 +3598,15 @@ Add KMS cluster.
 Server name and address are required, port defaults to 5696.
 
 Examples:
+  govc kms.add -N knp
   govc kms.add -n my-server -a kms.example.com my-kp
 
 Options:
+  -N=false               Add native key provider
   -a=                    Server address
   -n=                    Server name
   -p=5696                Server port
+  -tpm=true              Use only with TPM protected ESXi hosts (native only)
 ```
 
 ## kms.default
@@ -3620,6 +3624,22 @@ Examples:
 
 Options:
   -e=                    Set entity default KMS cluster (cluster or host folder)
+```
+
+## kms.export
+
+```
+Usage: govc kms.export [OPTIONS] NAME
+
+Export KMS cluster for backup.
+
+Examples:
+  govc kms.export my-kp
+  govc kms.export -f my-backup.p12 my-kp
+
+Options:
+  -f=                    File name
+  -p=                    Password
 ```
 
 ## kms.ls
