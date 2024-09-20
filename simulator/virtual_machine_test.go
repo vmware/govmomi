@@ -3423,7 +3423,7 @@ func TestCreateVmWithDefaultKeyProvider(t *testing.T) {
 		Test(func(ctx context.Context, c *vim25.Client) {
 			providerID := uuid.NewString()
 			m := crypto.NewManagerKmip(c)
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -3495,7 +3495,7 @@ func TestCreateVmWithDefaultKeyProvider(t *testing.T) {
 		Test(func(ctx context.Context, c *vim25.Client) {
 			providerID := uuid.NewString()
 			m := crypto.NewManagerKmip(c)
-			assert.NoError(t, m.RegisterKmipCluster(
+			assert.NoError(t, m.RegisterKmsCluster(
 				ctx,
 				providerID,
 				types.KmipClusterInfoKmsManagementTypeUnknown))
@@ -3557,7 +3557,7 @@ func TestCreateVmWithGeneratedKey(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
 		providerID := uuid.NewString()
 		m := crypto.NewManagerKmip(c)
-		assert.NoError(t, m.RegisterKmipCluster(
+		assert.NoError(t, m.RegisterKmsCluster(
 			ctx,
 			providerID,
 			types.KmipClusterInfoKmsManagementTypeUnknown))

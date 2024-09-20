@@ -229,7 +229,7 @@ func (m ManagerKmip) SetDefaultKmsClusterId(
 	return nil
 }
 
-func (m ManagerKmip) RegisterKmipCluster(
+func (m ManagerKmip) RegisterKmsCluster(
 	ctx context.Context,
 	providerID string,
 	managementType types.KmipClusterInfoKmsManagementType) error {
