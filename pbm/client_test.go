@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package pbm
+package pbm_test
 
 import (
 	"context"
@@ -23,10 +23,17 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/fault"
+	"github.com/vmware/govmomi/pbm"
+	pbmsim "github.com/vmware/govmomi/pbm/simulator"
 	"github.com/vmware/govmomi/pbm/types"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
@@ -52,7 +59,7 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	pc, err := NewClient(ctx, c.Client)
+	pc, err := pbm.NewClient(ctx, c.Client)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,27 +171,27 @@ func TestClient(t *testing.T) {
 
 	// user spec for the profile.
 	// VSAN profile with 2 capability instances - hostFailuresToTolerate = 2, stripeWidth = 1
-	pbmCreateSpecForVSAN := CapabilityProfileCreateSpec{
+	pbmCreateSpecForVSAN := pbm.CapabilityProfileCreateSpec{
 		Name:        "Kubernetes-VSAN-TestPolicy",
 		Description: "VSAN Test policy create",
 		Category:    string(types.PbmProfileCategoryEnumREQUIREMENT),
-		CapabilityList: []Capability{
-			Capability{
+		CapabilityList: []pbm.Capability{
+			{
 				ID:        "hostFailuresToTolerate",
 				Namespace: "VSAN",
-				PropertyList: []Property{
-					Property{
+				PropertyList: []pbm.Property{
+					{
 						ID:       "hostFailuresToTolerate",
 						Value:    "2",
 						DataType: "int",
 					},
 				},
 			},
-			Capability{
+			{
 				ID:        "stripeWidth",
 				Namespace: "VSAN",
-				PropertyList: []Property{
-					Property{
+				PropertyList: []pbm.Property{
+					{
 						ID:       "stripeWidth",
 						Value:    "1",
 						DataType: "int",
@@ -195,7 +202,7 @@ func TestClient(t *testing.T) {
 	}
 
 	// Create PBM capability spec for the above defined user spec.
-	createSpecVSAN, err := CreateCapabilityProfileSpec(pbmCreateSpecForVSAN)
+	createSpecVSAN, err := pbm.CreateCapabilityProfileSpec(pbmCreateSpecForVSAN)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,37 +236,37 @@ func TestClient(t *testing.T) {
 
 	// user spec for the profile.
 	// VSAN profile with 2 capability instances - stripeWidth = 1 and an SIOC profile.
-	pbmCreateSpecVSANandSIOC := CapabilityProfileCreateSpec{
+	pbmCreateSpecVSANandSIOC := pbm.CapabilityProfileCreateSpec{
 		Name:        "Kubernetes-VSAN-SIOC-TestPolicy",
 		Description: "VSAN-SIOC-Test policy create",
 		Category:    string(types.PbmProfileCategoryEnumREQUIREMENT),
-		CapabilityList: []Capability{
-			Capability{
+		CapabilityList: []pbm.Capability{
+			{
 				ID:        "stripeWidth",
 				Namespace: "VSAN",
-				PropertyList: []Property{
-					Property{
+				PropertyList: []pbm.Property{
+					{
 						ID:       "stripeWidth",
 						Value:    "1",
 						DataType: "int",
 					},
 				},
 			},
-			Capability{
+			{
 				ID:        "spm@DATASTOREIOCONTROL",
 				Namespace: "spm",
-				PropertyList: []Property{
-					Property{
+				PropertyList: []pbm.Property{
+					{
 						ID:       "limit",
 						Value:    "200",
 						DataType: "int",
 					},
-					Property{
+					{
 						ID:       "reservation",
 						Value:    "1000",
 						DataType: "int",
 					},
-					Property{
+					{
 						ID:       "shares",
 						Value:    "2000",
 						DataType: "int",
@@ -270,7 +277,7 @@ func TestClient(t *testing.T) {
 	}
 
 	// Create PBM capability spec for the above defined user spec.
-	createSpecVSANandSIOC, err := CreateCapabilityProfileSpec(pbmCreateSpecVSANandSIOC)
+	createSpecVSANandSIOC, err := pbm.CreateCapabilityProfileSpec(pbmCreateSpecVSANandSIOC)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -312,4 +319,30 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("Profile: %+v successfully deleted", []types.PbmProfileId{*vsanProfileID, *vsansiocProfileID})
+}
+
+func TestSupportsEncryption(t *testing.T) {
+	t.Run("valid profile id", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, c *vim25.Client) {
+			pbmc, err := pbm.NewClient(ctx, c)
+			assert.NoError(t, err)
+			assert.NotNil(t, pbmc)
+
+			ok, err := pbmc.SupportsEncryption(ctx, pbmsim.DefaultEncryptionProfileID)
+			assert.NoError(t, err)
+			assert.True(t, ok)
+		})
+	})
+	t.Run("invalid profile id", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, c *vim25.Client) {
+			pbmc, err := pbm.NewClient(ctx, c)
+			assert.NoError(t, err)
+			assert.NotNil(t, pbmc)
+
+			ok, err := pbmc.SupportsEncryption(ctx, "invalid")
+			assert.EqualError(t, err, "ServerFaultCode: Invalid profile ID")
+			assert.True(t, fault.Is(err, &vim.RuntimeFault{}))
+			assert.False(t, ok)
+		})
+	})
 }

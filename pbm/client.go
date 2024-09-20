@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -312,4 +312,36 @@ func (c *Client) QueryAssociatedProfiles(ctx context.Context, entities []types.P
 	}
 
 	return res.Returnval, nil
+}
+
+func (c *Client) QueryIOFiltersFromProfileId(
+	ctx context.Context, profileID string) ([]types.PbmProfileToIofilterMap, error) {
+
+	req := types.PbmQueryIOFiltersFromProfileId{
+		This:       c.ServiceContent.ProfileManager,
+		ProfileIds: []types.PbmProfileId{{UniqueId: profileID}},
+	}
+	res, err := methods.PbmQueryIOFiltersFromProfileId(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Returnval, nil
+}
+
+func (c *Client) SupportsEncryption(
+	ctx context.Context, profileID string) (bool, error) {
+
+	list, err := c.QueryIOFiltersFromProfileId(ctx, profileID)
+	if err != nil {
+		return false, err
+	}
+	for i := range list {
+		for j := range list[i].Iofilters {
+			f := list[i].Iofilters[j]
+			if f.FilterType == string(types.PbmIofilterInfoFilterTypeENCRYPTION) {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }
