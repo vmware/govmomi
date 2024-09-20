@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,8 +23,61 @@ import (
 	vim "github.com/vmware/govmomi/vim25/types"
 )
 
-// profiles is a captured from vCenter 6.7's default set of PBM profiles.
-var profiles = []types.BasePbmProfile{
+const DefaultEncryptionProfileID = "4d5f673c-536f-11e6-beb8-9e71128cae77"
+
+var defaultEncryptionProfile = &types.PbmCapabilityProfile{
+	PbmProfile: types.PbmProfile{
+		ProfileId: types.PbmProfileId{
+			UniqueId: DefaultEncryptionProfileID,
+		},
+		Name:            "VM Encryption Policy",
+		Description:     "Sample storage policy for VMware's VM and virtual disk encryption",
+		CreationTime:    time.Now(),
+		CreatedBy:       "Temporary user handle",
+		LastUpdatedTime: time.Now(),
+		LastUpdatedBy:   "Temporary user handle",
+	},
+	ProfileCategory: "REQUIREMENT",
+	ResourceType: types.PbmProfileResourceType{
+		ResourceType: "STORAGE",
+	},
+	Constraints: &types.PbmCapabilitySubProfileConstraints{
+		PbmCapabilityConstraints: types.PbmCapabilityConstraints{},
+		SubProfiles: []types.PbmCapabilitySubProfile{
+			{
+				Name: "sp-1",
+				Capability: []types.PbmCapabilityInstance{
+					{
+						Id: types.PbmCapabilityMetadataUniqueId{
+							Namespace: "com.vmware.storageprofile.dataservice",
+							Id:        "ad5a249d-cbc2-43af-9366-694d7664fa52",
+						},
+						Constraint: []types.PbmCapabilityConstraintInstance{
+							{
+								PropertyInstance: []types.PbmCapabilityPropertyInstance{
+									{
+										Id:       "ad5a249d-cbc2-43af-9366-694d7664fa52",
+										Operator: "",
+										Value:    "ad5a249d-cbc2-43af-9366-694d7664fa52",
+									},
+								},
+							},
+						},
+					},
+				},
+				ForceProvision: vim.NewBool(false),
+			},
+		},
+	},
+	GenerationId:             0,
+	IsDefault:                false,
+	SystemCreatedProfileType: "",
+	LineOfService:            "",
+}
+
+// vcenter67DefaultProfiles is a captured from vCenter 6.7's default set of PBM
+// profiles.
+var vcenter67DefaultProfiles = []types.BasePbmProfile{
 	&types.PbmCapabilityProfile{
 		PbmProfile: types.PbmProfile{
 			ProfileId: types.PbmProfileId{
@@ -164,55 +217,7 @@ var profiles = []types.BasePbmProfile{
 		SystemCreatedProfileType: "VVolDefaultProfile",
 		LineOfService:            "",
 	},
-	&types.PbmCapabilityProfile{
-		PbmProfile: types.PbmProfile{
-			ProfileId: types.PbmProfileId{
-				UniqueId: "4d5f673c-536f-11e6-beb8-9e71128cae77",
-			},
-			Name:            "VM Encryption Policy",
-			Description:     "Sample storage policy for VMware's VM and virtual disk encryption",
-			CreationTime:    time.Now(),
-			CreatedBy:       "Temporary user handle",
-			LastUpdatedTime: time.Now(),
-			LastUpdatedBy:   "Temporary user handle",
-		},
-		ProfileCategory: "REQUIREMENT",
-		ResourceType: types.PbmProfileResourceType{
-			ResourceType: "STORAGE",
-		},
-		Constraints: &types.PbmCapabilitySubProfileConstraints{
-			PbmCapabilityConstraints: types.PbmCapabilityConstraints{},
-			SubProfiles: []types.PbmCapabilitySubProfile{
-				{
-					Name: "sp-1",
-					Capability: []types.PbmCapabilityInstance{
-						{
-							Id: types.PbmCapabilityMetadataUniqueId{
-								Namespace: "com.vmware.storageprofile.dataservice",
-								Id:        "ad5a249d-cbc2-43af-9366-694d7664fa52",
-							},
-							Constraint: []types.PbmCapabilityConstraintInstance{
-								{
-									PropertyInstance: []types.PbmCapabilityPropertyInstance{
-										{
-											Id:       "ad5a249d-cbc2-43af-9366-694d7664fa52",
-											Operator: "",
-											Value:    "ad5a249d-cbc2-43af-9366-694d7664fa52",
-										},
-									},
-								},
-							},
-						},
-					},
-					ForceProvision: vim.NewBool(false),
-				},
-			},
-		},
-		GenerationId:             0,
-		IsDefault:                false,
-		SystemCreatedProfileType: "",
-		LineOfService:            "",
-	},
+	defaultEncryptionProfile,
 	&types.PbmCapabilityProfile{
 		PbmProfile: types.PbmProfile{
 			ProfileId: types.PbmProfileId{
