@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -271,6 +273,36 @@ func (c *Client) DownloadFile(ctx context.Context, file string, u *url.URL, para
 	p := *param
 	p.Headers = c.authHeaders(p.Headers)
 	return c.Client.DownloadFile(ctx, file, u, &p)
+}
+
+// DownloadAttachment writes the response to given filename, defaulting to Content-Disposition filename in the response.
+// A filename of "-" writes the response to stdout.
+func (c *Client) DownloadAttachment(ctx context.Context, req *http.Request, filename string) error {
+	return c.Client.Do(ctx, req, func(res *http.Response) error {
+		if filename == "" {
+			d := res.Header.Get("Content-Disposition")
+			_, params, err := mime.ParseMediaType(d)
+			if err == nil {
+				filename = params["filename"]
+			}
+		}
+
+		var w io.Writer
+
+		if filename == "-" {
+			w = os.Stdout
+		} else {
+			f, err := os.Create(filename)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+			w = f
+		}
+
+		_, err := io.Copy(w, res.Body)
+		return err
+	})
 }
 
 // Upload wraps soap.Client.Upload, adding the REST authentication header
