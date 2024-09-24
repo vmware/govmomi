@@ -1,17 +1,17 @@
 /*
-   Copyright (c) 2022 VMware, Inc. All Rights Reserved.
+Copyright (c) 2022-2024 VMware, Inc. All Rights Reserved.
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
 http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
 
 package types
@@ -75,9 +75,10 @@ func init() {
 type PlaceVmsXClusterResultPlacementFaults struct {
 	DynamicData
 
-	ResourcePool ManagedObjectReference `xml:"resourcePool"`
-	VmName       string                 `xml:"vmName"`
-	Faults       []LocalizedMethodFault `xml:"faults,omitempty"`
+	ResourcePool ManagedObjectReference  `xml:"resourcePool"`
+	VmName       string                  `xml:"vmName"`
+	Faults       []LocalizedMethodFault  `xml:"faults,omitempty"`
+	Vm           *ManagedObjectReference `xml:"vm,omitempty"`
 }
 
 func init() {
@@ -87,18 +88,48 @@ func init() {
 type PlaceVmsXClusterResultPlacementInfo struct {
 	DynamicData
 
-	VmName         string                `xml:"vmName"`
-	Recommendation ClusterRecommendation `xml:"recommendation"`
+	VmName         string                  `xml:"vmName"`
+	Recommendation ClusterRecommendation   `xml:"recommendation"`
+	Vm             *ManagedObjectReference `xml:"vm,omitempty"`
 }
 
 func init() {
 	t["PlaceVmsXClusterResultPlacementInfo"] = reflect.TypeOf((*PlaceVmsXClusterResultPlacementInfo)(nil)).Elem()
 }
 
+// Defines the type of placement
+type PlaceVmsXClusterSpecPlacementType string
+
+const (
+	// Create a new VM to be powered On
+	PlaceVmsXClusterSpecPlacementTypeCreateAndPowerOn = PlaceVmsXClusterSpecPlacementType("createAndPowerOn")
+	// Reconfigure a VM
+	PlaceVmsXClusterSpecPlacementTypeReconfigure = PlaceVmsXClusterSpecPlacementType("reconfigure")
+	// Relocate a VM
+	PlaceVmsXClusterSpecPlacementTypeRelocate = PlaceVmsXClusterSpecPlacementType("relocate")
+)
+
+func (e PlaceVmsXClusterSpecPlacementType) Values() []PlaceVmsXClusterSpecPlacementType {
+	return []PlaceVmsXClusterSpecPlacementType{
+		PlaceVmsXClusterSpecPlacementTypeCreateAndPowerOn,
+		PlaceVmsXClusterSpecPlacementTypeReconfigure,
+		PlaceVmsXClusterSpecPlacementTypeRelocate,
+	}
+}
+
+func (e PlaceVmsXClusterSpecPlacementType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["PlaceVmsXClusterSpecPlacementType"] = reflect.TypeOf((*PlaceVmsXClusterSpecPlacementType)(nil)).Elem()
+}
+
 type PlaceVmsXClusterSpec struct {
 	DynamicData
 
 	ResourcePools           []ManagedObjectReference              `xml:"resourcePools,omitempty"`
+	PlacementType           string                                `xml:"placementType,omitempty"`
 	VmPlacementSpecs        []PlaceVmsXClusterSpecVmPlacementSpec `xml:"vmPlacementSpecs,omitempty"`
 	HostRecommRequired      *bool                                 `xml:"hostRecommRequired"`
 	DatastoreRecommRequired *bool                                 `xml:"datastoreRecommRequired"`
@@ -111,7 +142,9 @@ func init() {
 type PlaceVmsXClusterSpecVmPlacementSpec struct {
 	DynamicData
 
-	ConfigSpec VirtualMachineConfigSpec `xml:"configSpec"`
+	Vm           *ManagedObjectReference     `xml:"vm,omitempty"`
+	ConfigSpec   VirtualMachineConfigSpec    `xml:"configSpec"`
+	RelocateSpec *VirtualMachineRelocateSpec `xml:"relocateSpec,omitempty"`
 }
 
 func init() {
@@ -119,3 +152,25 @@ func init() {
 }
 
 const RecommendationReasonCodeXClusterPlacement = RecommendationReasonCode("xClusterPlacement")
+
+type ClusterReconfigurePlacementAction struct {
+	ClusterAction
+	TargetHost *ManagedObjectReference   `xml:"targetHost,omitempty"`
+	Pool       ManagedObjectReference    `xml:"pool"`
+	ConfigSpec *VirtualMachineConfigSpec `xml:"configSpec,omitempty"`
+}
+
+func init() {
+	t["ClusterReconfigurePlacementAction"] = reflect.TypeOf((*ClusterReconfigurePlacementAction)(nil)).Elem()
+}
+
+type ClusterRelocatePlacementAction struct {
+	ClusterAction
+	TargetHost   *ManagedObjectReference     `xml:"targetHost,omitempty"`
+	Pool         ManagedObjectReference      `xml:"pool"`
+	RelocateSpec *VirtualMachineRelocateSpec `xml:"relocateSpec,omitempty"`
+}
+
+func init() {
+	t["ClusterRelocatePlacementAction"] = reflect.TypeOf((*ClusterRelocatePlacementAction)(nil)).Elem()
+}
