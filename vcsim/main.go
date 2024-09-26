@@ -49,6 +49,7 @@ import (
 	_ "github.com/vmware/govmomi/vapi/appliance/simulator"
 	_ "github.com/vmware/govmomi/vapi/cis/tasks/simulator"
 	_ "github.com/vmware/govmomi/vapi/cluster/simulator"
+	_ "github.com/vmware/govmomi/vapi/crypto/simulator"
 	_ "github.com/vmware/govmomi/vapi/esx/settings/simulator"
 	_ "github.com/vmware/govmomi/vapi/namespace/simulator"
 	_ "github.com/vmware/govmomi/vapi/simulator"
