@@ -89,13 +89,13 @@ func networkSummary(n *mo.Network) types.BaseNetworkSummary {
 
 func folderPutChild(ctx *Context, f *mo.Folder, o mo.Entity) {
 	ctx.WithLock(f, func() {
-		// Need to update ChildEntity before Map.Put for ContainerView updates to work properly
-		f.ChildEntity = append(f.ChildEntity, ctx.Map.reference(o))
-		ctx.Map.PutEntity(f, o)
-
-		folderUpdate(ctx, f, o, ctx.Map.AddReference)
-
 		ctx.WithLock(o, func() {
+			// Need to update ChildEntity before Map.Put for ContainerView updates to work properly
+			f.ChildEntity = append(f.ChildEntity, ctx.Map.reference(o))
+			ctx.Map.PutEntity(f, o)
+
+			folderUpdate(ctx, f, o, ctx.Map.AddReference)
+
 			switch e := o.(type) {
 			case *mo.Network:
 				e.Summary = networkSummary(e)
@@ -110,7 +110,10 @@ func folderPutChild(ctx *Context, f *mo.Folder, o mo.Entity) {
 
 func folderRemoveChild(ctx *Context, f *mo.Folder, o mo.Reference) {
 	ctx.Map.Remove(ctx, o.Reference())
+	folderRemoveReference(ctx, f, o)
+}
 
+func folderRemoveReference(ctx *Context, f *mo.Folder, o mo.Reference) {
 	ctx.WithLock(f, func() {
 		RemoveReference(&f.ChildEntity, o.Reference())
 
@@ -596,7 +599,7 @@ func (f *Folder) MoveIntoFolderTask(ctx *Context, c *types.MoveIntoFolder_Task) 
 				return nil, &types.NotSupported{}
 			}
 
-			folderRemoveChild(ctx, &parent.Folder, ref)
+			folderRemoveReference(ctx, &parent.Folder, ref)
 			folderPutChild(ctx, &f.Folder, obj)
 		}
 

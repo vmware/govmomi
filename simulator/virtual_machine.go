@@ -2509,8 +2509,12 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 
 		if ref := req.Spec.Folder; ref != nil {
 			folder := ctx.Map.Get(*ref).(*Folder)
-			folder.MoveIntoFolderTask(ctx, &types.MoveIntoFolder_Task{
-				List: []types.ManagedObjectReference{vm.Self},
+			ctx.WithLock(folder, func() {
+				res := folder.MoveIntoFolderTask(ctx, &types.MoveIntoFolder_Task{
+					List: []types.ManagedObjectReference{vm.Self},
+				}).(*methods.MoveIntoFolder_TaskBody).Res
+				// Wait for task to complete while we hold the Folder lock
+				ctx.Map.Get(res.Returnval).(*Task).Wait()
 			})
 		}
 

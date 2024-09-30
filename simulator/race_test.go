@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -327,4 +329,61 @@ func TestRaceDestroy(t *testing.T) {
 	if !notFound {
 		t.Error("expected ManagedObjectNotFound")
 	}
+}
+
+func TestRaceVmRelocate(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c)
+
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		finder.SetDatacenter(dc)
+
+		vm, err := finder.VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		vmFolder := folders.VmFolder
+
+		var failed atomic.Int32
+		var wg sync.WaitGroup
+
+		for i := 0; i < 10; i++ {
+			spec := types.VirtualMachineRelocateSpec{
+				Folder: types.NewReference(vmFolder.Reference()),
+			}
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				task, err := vm.Relocate(ctx, spec, types.VirtualMachineMovePriorityDefaultPriority)
+				if err != nil {
+					panic(err)
+				}
+				if err = task.Wait(ctx); err != nil {
+					failed.Add(1)
+				}
+			}()
+
+			vmFolder, err = vmFolder.CreateFolder(ctx, "child")
+			if err != nil {
+				t.Fatal("Failed to create folder", err)
+			}
+		}
+
+		wg.Wait()
+
+		if n := failed.Load(); n != 0 {
+			t.Errorf("%d relocate calls failed", n)
+		}
+	})
 }
