@@ -135,20 +135,31 @@ func ParseURL(s string) (*url.URL, error) {
 	return u, nil
 }
 
+// Go's ForceAttemptHTTP2 default is true, we disable by default.
+// This undocumented env var can be used to enable.
+var http2 = os.Getenv("GOVMOMI_HTTP2") == "true"
+
 func NewClient(u *url.URL, insecure bool) *Client {
 	var t *http.Transport
 
 	if d, ok := http.DefaultTransport.(*http.Transport); ok {
-		t = d.Clone()
+		// Inherit the same defaults explicitly set in http.DefaultTransport,
+		// unless otherwise noted.
+		t = &http.Transport{
+			Proxy:                 d.Proxy,
+			DialContext:           d.DialContext,
+			ForceAttemptHTTP2:     http2, // false by default in govmomi
+			MaxIdleConns:          d.MaxIdleConns,
+			IdleConnTimeout:       d.IdleConnTimeout,
+			TLSHandshakeTimeout:   d.TLSHandshakeTimeout,
+			ExpectContinueTimeout: d.ExpectContinueTimeout,
+		}
 	} else {
 		t = new(http.Transport)
 	}
 
-	if insecure {
-		if t.TLSClientConfig == nil {
-			t.TLSClientConfig = new(tls.Config)
-		}
-		t.TLSClientConfig.InsecureSkipVerify = insecure
+	t.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: insecure,
 	}
 
 	c := newClientWithTransport(u, insecure, t)
