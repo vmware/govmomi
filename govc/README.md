@@ -34,9 +34,7 @@ Github using:
 go install github.com/vmware/govmomi/govc@latest
 ```
 
-**Note:** `govmomi` and its binaries use [Go
-modules](https://golang.org/ref/mod), i.e. explicitly setting `GOPATH` is not
-required anymore. To inject build variables (see details
+**Note:** To inject build variables (see details
 [below](#install-via-goreleaser)) used by `govc version [-l]`, `GOFLAGS` can be
 defined and are honored by `go get`.
 
@@ -250,40 +248,6 @@ Test connection using `curl`:
 curl --verbose -k -X POST https://x.x.x.x/sdk
 ```
 
-### MSYS2 (Windows)
-
-Inventory path arguments with a leading '/' are subject
-to [Posix path conversion](http://www.mingw.org/wiki/Posix_path_conversion).
-
-### NotAuthenticated
-
-When connecting to a non-TLS endpoint, Go's http.Client will not send Secure
-cookies, resulting in a `NotAuthenticated` error. For example, running `govc`
-directly against the vCenter vpxd endpoint at `http://127.0.0.1:8085`. Set the
-environment variable `GOVMOMI_INSECURE_COOKIES=true` to workaround this:
-
-```bash
-GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
-```
-
-## Examples
-
-Several examples are embedded in the govc command [help](USAGE.md)
-
-* [Upload ssh public key to a VM](examples/lib/ssh.sh)
-
-* [Create a CoreOS VM](https://github.com/vmware/govmomi/blob/main/toolbox/toolbox-test.sh)
-
-* [Create a Debian VM](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
-
-* [Create a Windows VM](https://github.com/dougm/govc-windows-box/blob/master/provision-esx.sh)
-
-* [Create an ESX VM](../scripts/vcsa/create-esxi-vm.sh)
-
-* [Create a vCenter VM](../scripts/vcsa/create-vcsa-vm.sh)
-
-* [Create a Cluster](../scripts/vcsa/create-cluster.sh)
-
 ## Status
 
 Changes to the CLI are subject to [semantic versioning](http://semver.org).
@@ -297,22 +261,6 @@ script, for example:
 ```bash
 govc version -require 0.24
 ```
-
-## Projects using `govc`
-
-* [Emacs govc package](./emacs)
-
-* [Kubernetes vSphere Cloud Provider](https://github.com/kubernetes/cloud-provider-vsphere)
-
-* [VMware VIC Engine](https://github.com/vmware/vic)
-
-* [vSphere Docker Volume Service](https://github.com/vmware/docker-volume-vsphere)
-
-* [golang/build](https://github.com/golang/build)
-
-## Related projects
-
-* [rvc](https://github.com/vmware/rvc)
 
 ## License
 
