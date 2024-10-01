@@ -23,7 +23,7 @@ on:
         type: string
         default: 'v0.99.0'
       dryrun:
-        description: 'Verify release workflow without pushing any changes (catches most but not all errors)'
+        description: 'Dry Run (verify workflow without pushing a release)'
         type: boolean
         required: false
         default: true
@@ -102,9 +102,9 @@ jobs:
 
           # check whether the new tag is also the latest
           if [[ $LATEST == $TAG ]]; then
-            echo "islatest::true >> $GITHUB_OUTPUT"
+            echo "islatest=true >> $GITHUB_OUTPUT"
           else
-            echo "islatest::false >> $GITHUB_OUTPUT"
+            echo "islatest=false >> $GITHUB_OUTPUT"
           fi
 
       - name: Push changes and tag to release branch
