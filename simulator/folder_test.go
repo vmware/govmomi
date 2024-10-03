@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package simulator
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/vmware/govmomi"
@@ -610,7 +611,7 @@ func TestFolderCreateDVS(t *testing.T) {
 	}
 }
 
-func TestPlaceVmsXCluster(t *testing.T) {
+func TestPlaceVmsXClusterCreateAndPowerOn(t *testing.T) {
 	vpx := VPX()
 	vpx.Cluster = 3
 
@@ -642,6 +643,227 @@ func TestPlaceVmsXCluster(t *testing.T) {
 
 		if len(res.PlacementInfos) != len(spec.VmPlacementSpecs) {
 			t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(spec.VmPlacementSpecs))
+		}
+	}, vpx)
+}
+
+func TestPlaceVmsXClusterRelocate(t *testing.T) {
+	vpx := VPX()
+	vpx.Cluster = 3
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, true)
+		datacenter, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatalf("failed to get default datacenter: %v", err)
+		}
+		finder.SetDatacenter(datacenter)
+
+		pools, err := finder.ResourcePoolList(ctx, "/DC0/host/DC0_C*/*")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var poolMoRefs []types.ManagedObjectReference
+		for _, pool := range pools {
+			poolMoRefs = append(poolMoRefs, pool.Reference())
+		}
+
+		vmMoRef := Map.Any("VirtualMachine").(*VirtualMachine).Reference()
+
+		cfgSpec := types.VirtualMachineConfigSpec{}
+
+		tests := []struct {
+			name         string
+			poolMoRefs   []types.ManagedObjectReference
+			configSpec   types.VirtualMachineConfigSpec
+			relocateSpec *types.VirtualMachineRelocateSpec
+			vmMoRef      *types.ManagedObjectReference
+			expectedErr  string
+		}{
+			{
+				"relocate without any resource pools",
+				nil,
+				cfgSpec,
+				&types.VirtualMachineRelocateSpec{},
+				&vmMoRef,
+				"InvalidArgument",
+			},
+			{
+				"relocate without a relocate spec",
+				poolMoRefs,
+				cfgSpec,
+				nil,
+				&vmMoRef,
+				"InvalidArgument",
+			},
+			{
+				"relocate without a vm in the placement spec",
+				poolMoRefs,
+				cfgSpec,
+				&types.VirtualMachineRelocateSpec{},
+				nil,
+				"InvalidArgument",
+			},
+			{
+				"relocate with a non-existing vm in the placement spec",
+				poolMoRefs,
+				cfgSpec,
+				&types.VirtualMachineRelocateSpec{},
+				&types.ManagedObjectReference{
+					Type:  "VirtualMachine",
+					Value: "fake-vm-999",
+				},
+				"InvalidArgument",
+			},
+			{
+				"relocate with an empty relocate spec",
+				poolMoRefs,
+				cfgSpec,
+				&types.VirtualMachineRelocateSpec{},
+				&vmMoRef,
+				"",
+			},
+		}
+
+		for testNo, test := range tests {
+			test := test // assign to local var since loop var is reused
+
+			placeVmsXClusterSpec := types.PlaceVmsXClusterSpec{
+				ResourcePools: test.poolMoRefs,
+				PlacementType: string(types.PlaceVmsXClusterSpecPlacementTypeRelocate),
+			}
+
+			placeVmsXClusterSpec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
+				ConfigSpec:   test.configSpec,
+				Vm:           test.vmMoRef,
+				RelocateSpec: test.relocateSpec,
+			}}
+
+			folder := object.NewRootFolder(c)
+			res, err := folder.PlaceVmsXCluster(ctx, placeVmsXClusterSpec)
+
+			if err == nil && test.expectedErr != "" {
+				t.Fatalf("Test %v: expected error %q, received nil", testNo, test.expectedErr)
+			} else if err != nil &&
+				(test.expectedErr == "" || !strings.Contains(err.Error(), test.expectedErr)) {
+				t.Fatalf("Test %v: expected error %q, received %v", testNo, test.expectedErr, err)
+			}
+
+			if err == nil {
+				if len(res.PlacementInfos) != len(placeVmsXClusterSpec.VmPlacementSpecs) {
+					t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(placeVmsXClusterSpec.VmPlacementSpecs))
+				}
+			}
+		}
+	}, vpx)
+}
+
+func TestPlaceVmsXClusterReconfigure(t *testing.T) {
+	vpx := VPX()
+	// All hosts are cluster hosts
+	vpx.Host = 0
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, true)
+		datacenter, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatalf("failed to get default datacenter: %v", err)
+		}
+		finder.SetDatacenter(datacenter)
+
+		vm := Map.Any("VirtualMachine").(*VirtualMachine)
+		host := Map.Get(vm.Runtime.Host.Reference()).(*HostSystem)
+		cluster := Map.Get(*host.Parent).(*ClusterComputeResource)
+		pool := Map.Get(*cluster.ResourcePool).(*ResourcePool)
+
+		var poolMoRefs []types.ManagedObjectReference
+		poolMoRefs = append(poolMoRefs, pool.Reference())
+
+		cfgSpec := types.VirtualMachineConfigSpec{}
+
+		tests := []struct {
+			name         string
+			poolMoRefs   []types.ManagedObjectReference
+			configSpec   types.VirtualMachineConfigSpec
+			relocateSpec *types.VirtualMachineRelocateSpec
+			vmMoRef      *types.ManagedObjectReference
+			expectedErr  string
+		}{
+			{
+				"reconfigure without any resource pools",
+				nil,
+				cfgSpec,
+				nil,
+				&vm.Self,
+				"InvalidArgument",
+			},
+			{
+				"reconfigure with a relocate spec",
+				poolMoRefs,
+				cfgSpec,
+				&types.VirtualMachineRelocateSpec{},
+				&vm.Self,
+				"InvalidArgument",
+			},
+			{
+				"reconfigure without a vm in the placement spec",
+				poolMoRefs,
+				cfgSpec,
+				nil,
+				nil,
+				"InvalidArgument",
+			},
+			{
+				"reconfigure with a non-existing vm in the placement spec",
+				poolMoRefs,
+				cfgSpec,
+				nil,
+				&types.ManagedObjectReference{
+					Type:  "VirtualMachine",
+					Value: "fake-vm-999",
+				},
+				"InvalidArgument",
+			},
+			{
+				"reconfigure with an empty config spec",
+				poolMoRefs,
+				cfgSpec,
+				nil,
+				&vm.Self,
+				"",
+			},
+		}
+
+		for testNo, test := range tests {
+			test := test // assign to local var since loop var is reused
+
+			placeVmsXClusterSpec := types.PlaceVmsXClusterSpec{
+				ResourcePools: test.poolMoRefs,
+				PlacementType: string(types.PlaceVmsXClusterSpecPlacementTypeReconfigure),
+			}
+
+			placeVmsXClusterSpec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
+				ConfigSpec:   test.configSpec,
+				Vm:           test.vmMoRef,
+				RelocateSpec: test.relocateSpec,
+			}}
+
+			folder := object.NewRootFolder(c)
+			res, err := folder.PlaceVmsXCluster(ctx, placeVmsXClusterSpec)
+
+			if err == nil && test.expectedErr != "" {
+				t.Fatalf("Test %v: expected error %q, received nil", testNo, test.expectedErr)
+			} else if err != nil &&
+				(test.expectedErr == "" || !strings.Contains(err.Error(), test.expectedErr)) {
+				t.Fatalf("Test %v: expected error %q, received %v", testNo, test.expectedErr, err)
+			}
+
+			if err == nil {
+				if len(res.PlacementInfos) != len(placeVmsXClusterSpec.VmPlacementSpecs) {
+					t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(placeVmsXClusterSpec.VmPlacementSpecs))
+				}
+			}
 		}
 	}, vpx)
 }

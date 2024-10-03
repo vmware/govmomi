@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -259,7 +259,7 @@ func TestPlaceVmRelocate(t *testing.T) {
 				"InvalidArgument",
 			},
 			{
-				"relocate with a diskId in spec.dick that does not exist in the vm",
+				"relocate with a diskId in spec.disk that does not exist in the vm",
 				&types.VirtualMachineRelocateSpec{
 					Host: &hostMoRef,
 					Disk: []types.VirtualMachineRelocateSpecDiskLocator{
