@@ -25,6 +25,12 @@ load test_helper
 
     run govc storage.policy.info "vSAN Default Storage Policy"
     assert_success
+
+    run env GOVC_SHOW_UNRELEASED=true govc storage.policy.info -json -i "VM Encryption Policy"
+    assert_success
+
+    kind="$(jq -r .policies[].filterMap[].iofilters[].filterType <<<"$output")"
+    assert_equal "ENCRYPTION" "$kind"
 }
 
 @test "storage.policy.create" {
