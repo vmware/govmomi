@@ -38,6 +38,7 @@ type info struct {
 
 	compliance bool
 	storage    bool
+	iofilters  bool
 }
 
 func init() {
@@ -53,6 +54,10 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.storage, "s", false, "Check Storage Compatibility")
 	f.BoolVar(&cmd.compliance, "c", false, "Check VM Compliance")
+
+	if cli.ShowUnreleased() {
+		f.BoolVar(&cmd.iofilters, "i", false, "Query IO Filters")
+	}
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -79,9 +84,10 @@ Examples:
 }
 
 type Policy struct {
-	Profile              types.BasePbmProfile `json:"profile"`
-	CompliantVM          []string             `json:"compliantVM"`
-	CompatibleDatastores []string             `json:"compatibleDatastores"`
+	Profile              types.BasePbmProfile            `json:"profile"`
+	CompliantVM          []string                        `json:"compliantVM"`
+	CompatibleDatastores []string                        `json:"compatibleDatastores"`
+	FilterMap            []types.PbmProfileToIofilterMap `json:"filterMap,omitempty"`
 }
 
 type infoResult struct {
@@ -187,6 +193,13 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 			for _, hub := range res.CompatibleDatastores() {
 				policy.CompatibleDatastores = append(policy.CompatibleDatastores, ds.Name[hub.HubId])
+			}
+		}
+
+		if cmd.iofilters {
+			policy.FilterMap, err = c.QueryIOFiltersFromProfileId(ctx, p.ProfileId.UniqueId)
+			if err != nil {
+				return err
 			}
 		}
 
