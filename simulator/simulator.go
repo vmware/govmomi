@@ -315,16 +315,29 @@ type response struct {
 }
 
 func (r *response) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	val := reflect.ValueOf(r.Body).Elem().FieldByName("Res")
+	body := reflect.ValueOf(r.Body).Elem()
+	val := body.FieldByName("Res")
 	if !val.IsValid() {
 		return fmt.Errorf("%T: invalid response type (missing 'Res' field)", r.Body)
 	}
 	if val.IsNil() {
 		return fmt.Errorf("%T: invalid response (nil 'Res' field)", r.Body)
 	}
+
+	// Default response namespace
+	ns := "urn:" + r.Namespace
+	// Override namespace from struct tag if defined
+	field, _ := body.Type().FieldByName("Res")
+	if tag := field.Tag.Get("xml"); tag != "" {
+		tags := strings.Split(tag, " ")
+		if len(tags) > 0 && strings.HasPrefix(tags[0], "urn") {
+			ns = tags[0]
+		}
+	}
+
 	res := xml.StartElement{
 		Name: xml.Name{
-			Space: "urn:" + r.Namespace,
+			Space: ns,
 			Local: val.Elem().Type().Name(),
 		},
 	}
