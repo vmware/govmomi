@@ -24,8 +24,8 @@ import (
 )
 
 type PbmQueryIOFiltersFromProfileIdBody struct {
-	Req    *types.PbmQueryIOFiltersFromProfileId         `xml:"urn:pbm PbmQueryIOFiltersFromProfileId,omitempty"`
-	Res    *types.PbmQueryIOFiltersFromProfileIdResponse `xml:"urn:pbm PbmQueryIOFiltersFromProfileIdResponse,omitempty"`
+	Req    *types.PbmQueryIOFiltersFromProfileId         `xml:"urn:internalpbm PbmQueryIOFiltersFromProfileId,omitempty"`
+	Res    *types.PbmQueryIOFiltersFromProfileIdResponse `xml:"urn:internalpbm PbmQueryIOFiltersFromProfileIdResponse,omitempty"`
 	Fault_ *soap.Fault                                   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
 
