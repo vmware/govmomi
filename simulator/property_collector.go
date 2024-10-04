@@ -518,7 +518,7 @@ func (rr *retrieveResult) selectSet(ctx *Context, obj reflect.Value, s []types.B
 	return nil
 }
 
-func (pc *PropertyCollector) collect(ctx *Context, r *types.RetrievePropertiesEx) (*types.RetrieveResult, types.BaseMethodFault) {
+func collect(ctx *Context, r *types.RetrievePropertiesEx) (*types.RetrieveResult, types.BaseMethodFault) {
 	var refs []types.ManagedObjectReference
 
 	rr := &retrieveResult{
@@ -573,6 +573,8 @@ func (pc *PropertyCollector) CreateFilter(ctx *Context, c *types.CreateFilter) s
 	body.Res = &types.CreateFilterResponse{
 		Returnval: filter.Self,
 	}
+
+	ctx.Map.AddHandler(filter)
 
 	return body
 }
@@ -666,7 +668,7 @@ func (pc *PropertyCollector) ContinueRetrievePropertiesEx(ctx *Context, r *types
 func (pc *PropertyCollector) RetrievePropertiesEx(ctx *Context, r *types.RetrievePropertiesEx) soap.HasFault {
 	body := &methods.RetrievePropertiesExBody{}
 
-	res, fault := pc.collect(ctx, r)
+	res, fault := collect(ctx, r)
 
 	if fault != nil {
 		switch fault.(type) {
@@ -782,10 +784,7 @@ func (pc *PropertyCollector) apply(ctx *Context, update *types.UpdateSet) types.
 	for _, ref := range pc.Filter {
 		filter := ctx.Session.Get(ref).(*PropertyFilter)
 
-		r := &types.RetrievePropertiesEx{}
-		r.SpecSet = append(r.SpecSet, filter.Spec)
-
-		res, fault := pc.collect(ctx, r)
+		res, fault := filter.collect(ctx)
 		if fault != nil {
 			return fault
 		}
@@ -951,6 +950,7 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 
 			for _, f := range pc.Filter {
 				filter := ctx.Session.Get(f).(*PropertyFilter)
+				filter.update(ctx)
 				fu := types.PropertyFilterUpdate{Filter: f}
 
 				for _, update := range updates {

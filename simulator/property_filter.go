@@ -31,7 +31,28 @@ type PropertyFilter struct {
 
 	pc   *PropertyCollector
 	refs map[types.ManagedObjectReference]struct{}
+	sync bool
 }
+
+func (f *PropertyFilter) UpdateObject(o mo.Reference, changes []types.PropertyChange) {
+	// A PropertyFilter's traversal spec is "applied" on the initial call to WaitForUpdates,
+	// with matching objects tracked in the `refs` field.
+	// New and deleted objects matching the filter are accounted for within PropertyCollector.
+	// But when an object used for the traversal itself is updated (e.g. ListView),
+	// we need to update the tracked `refs` on the next call to WaitForUpdates.
+	ref := o.Reference()
+
+	for _, set := range f.Spec.ObjectSet {
+		if set.Obj == ref && len(set.SelectSet) != 0 {
+			f.sync = true
+			break
+		}
+	}
+}
+
+func (_ *PropertyFilter) PutObject(_ mo.Reference) {}
+
+func (_ *PropertyFilter) RemoveObject(_ *Context, _ types.ManagedObjectReference) {}
 
 func (f *PropertyFilter) DestroyPropertyFilter(ctx *Context, c *types.DestroyPropertyFilter) soap.HasFault {
 	body := &methods.DestroyPropertyFilterBody{}
@@ -43,6 +64,21 @@ func (f *PropertyFilter) DestroyPropertyFilter(ctx *Context, c *types.DestroyPro
 	body.Res = &types.DestroyPropertyFilterResponse{}
 
 	return body
+}
+
+func (f *PropertyFilter) collect(ctx *Context) (*types.RetrieveResult, types.BaseMethodFault) {
+	req := &types.RetrievePropertiesEx{
+		SpecSet: []types.PropertyFilterSpec{f.Spec},
+	}
+	return collect(ctx, req)
+}
+
+func (f *PropertyFilter) update(ctx *Context) {
+	if f.sync {
+		f.sync = false
+		clear(f.refs)
+		_, _ = f.collect(ctx)
+	}
 }
 
 // matches returns true if the change matches one of the filter Spec.PropSet
