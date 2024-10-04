@@ -34,9 +34,7 @@ go install github.com/vmware/govmomi/vcsim@latest
 $GOPATH/bin/vcsim -h
 ```
 
-**Note:** `govmomi` and its binaries use [Go
-modules](https://golang.org/ref/mod), i.e. explicitly setting `GOPATH` is not
-required anymore. To inject build variables (see details
+**Note:** To inject build variables (see details
 [below](#install-via-goreleaser)) used by `vcsim version`, `GOFLAGS` can be
 defined and are honored by `go get`.
 
@@ -422,30 +420,6 @@ directly, rather than the vcsim binary.
 ## Feature Details
 
 For more details on vcsim features, see the project [wiki](https://github.com/vmware/govmomi/wiki/vcsim-features).
-
-## Projects using vcsim
-
-* [VMware VIC Engine](https://github.com/vmware/vic)
-
-* [Kubernetes](https://github.com/kubernetes/kubernetes/tree/master/pkg/cloudprovider/providers/vsphere)
-
-* [Ansible](https://github.com/ansible/vcenter-test-container)
-
-* [Telegraf](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/vsphere)
-
-## Blog posts
-
-* [Beginning vCenter Server simulation with vcsim](https://opensourceforu.com/2017/10/vcenter-server-simulation-govcsim/) by Abhijeet Kasurde
-
-* [vCenter & ESXi API based simulator](https://www.virtuallyghetto.com/2017/04/govcsim-neat-incubation-project-vcenter-server-esxi-api-based-simulator.html) by William Lam
-
-* [vCenter Simulator Docker Container](https://www.brianbunke.com/blog/2018/12/31/vcenter-simulator-ci/) by Brian Bunke
-
-* [Using govc with vcsim in Kubernetes](https://www.mgasch.com/2021/05/vcsim-k8s/) by Michael Gasch
-
-## Related projects
-
-* [LocalStack](https://github.com/localstack/localstack/blob/master/README.md#why-localstack)
 
 ## License
 

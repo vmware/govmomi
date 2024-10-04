@@ -1,5 +1,11 @@
 # Contributing to `govmomi`
 
+tl;dr
+
+- Sign your commits, unless you've signed the CLA
+- Include a component `prefix:` in your commit message, if applicable
+- Squash fixup commits and force push to your branch
+
 ## Getting started
 
 First, fork the repository on GitHub to your personal account.
@@ -27,6 +33,7 @@ This is a rough outline of what a contributor's workflow looks like:
 - Create an issue describing the feature/fix
 - Create a topic branch from where you want to base your work.
 - Make commits of logical units.
+- [Sign](#sign-off-your-work) your commits.
 - Make sure your commit messages are in the proper format (see below).
 - Push your changes to a topic branch in your fork of the repository.
 - Submit a pull request to `vmware/govmomi`.
@@ -38,12 +45,30 @@ and **supported prefixes**, e.g. `govc: <message>`.
 > my!](https://www.mgasch.com/2021/05/git-basics/) for more details on how to
 > successfully contribute to an open source project.
 
+### Sign-off Your Work
+
+Use the [Developer Certificate of Origin](https://developercertificate.org/) (DCO) on all Pull Requests.
+By adding this line to their commit messages, contributors *sign-off* that they adhere to the requirements of the DCO.
+
+Git provides the `-s` command-line option to append the required line
+automatically to the commit message:
+
+```bash
+git commit -s -m 'This is my commit message'
+```
+
+For an existing commit, you can also use this option with `--amend`:
+
+```bash
+git commit -s --amend
+```
+
 ### Example 1 - Fix a Bug in `govmomi`
 
 ```bash
 git checkout -b issue-<number> main
 git add <files>
-git commit -m "fix: ..." -m "Closes: #<issue-number>"
+git commit -s -m "fix: ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
 ```
 
@@ -52,7 +77,7 @@ git push $USER issue-<number>
 ```bash
 git checkout -b issue-<number> main
 git add <files>
-git commit -m "Add API ..." -m "Closes: #<issue-number>"
+git commit -s -m "Add API ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
 ```
 
@@ -61,10 +86,10 @@ git push $USER issue-<number>
 ```bash
 git checkout -b issue-<number> main
 git add <files>
-git commit -m "govc: Add feature ..." -m "Closes: #<issue-number>"
+git commit -s -m "govc: Add feature ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
 ```
-**Note**:  
+**Note**:
 To register the new `govc` command package, add a blank `_` import to `govmomi/govc/main.go`.
 
 ### Example 4 - Fix a Bug in `vcsim`
@@ -72,7 +97,7 @@ To register the new `govc` command package, add a blank `_` import to `govmomi/g
 ```bash
 git checkout -b issue-<number> main
 git add <files>
-git commit -m "vcsim: Fix ..." -m "Closes: #<issue-number>"
+git commit -s -m "vcsim: Fix ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
 ```
 
@@ -80,7 +105,7 @@ git push $USER issue-<number>
 
 Breaking changes, e.g. to the `govmomi` APIs, are highlighted in the `CHANGELOG`
 and release notes when the keyword `BREAKING:` is used in the commit message
-body. 
+body.
 
 The text after `BREAKING:` is used in the corresponding highlighted section.
 Thus these details should be stated at the body of the commit message.
@@ -89,7 +114,7 @@ Multi-line strings are supported.
 ```bash
 git checkout -b issue-<number> main
 git add <files>
-cat << EOF | git commit -F -
+cat << EOF | git commit -s -F -
 Add ctx to funcXYZ
 
 This commit introduces context.Context to function XYZ
@@ -127,7 +152,7 @@ directly instead.
 git add .
 
 # create a fixup commit which will be merged into your (original) <commit>
-git commit --fixup <commit>
+git commit -s --fixup <commit>
 git push $USER issue-<number>
 ```
 
@@ -162,7 +187,7 @@ e.g. `Closes: #<number>`.
 The [`CHANGELOG.md`](./CHANGELOG.md) and release page uses **commit message
 prefixes** for grouping and highlighting. A commit message that
 starts with `[prefix:] ` will place this commit under the respective
-section in the `CHANGELOG`. 
+section in the `CHANGELOG`.
 
 The following example creates a commit referencing the `issue: 1234` and puts
 the commit message in the `govc` `CHANGELOG` section:
@@ -186,7 +211,7 @@ is recommended to break up your commits using distinct prefixes.
 
 ### Running CI Checks and Tests
 You can run both `make check` and `make test` from the top level of the
-repository. 
+repository.
 
 While `make check` will catch formatting and import errors, it will not apply
 any fixes. The developer is expected to do that.
