@@ -822,8 +822,6 @@ func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 	obj := Map.Put(new(Folder))
 	folderPutChild(SpoofContext(), &obj.(*Folder).Folder, new(Folder))
 
-	pc := &PropertyCollector{}
-
 	req := types.RetrievePropertiesEx{
 		SpecSet: []types.PropertyFilterSpec{
 			{
@@ -853,7 +851,7 @@ func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 		},
 	}
 
-	_, err := pc.collect(SpoofContext(), &req)
+	_, err := collect(SpoofContext(), &req)
 	if err == nil {
 		t.Fatal("expected error")
 	}

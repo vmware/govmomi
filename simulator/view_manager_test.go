@@ -222,5 +222,14 @@ func TestListViewModify(t *testing.T) {
 		if len(refs) != 1 {
 			t.Errorf("unresolved refs=%s", refs)
 		}
+
+		refs, err = list.Remove(ctx, add)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if len(refs) != 0 {
+			t.Errorf("unresolved refs=%s", refs)
+		}
 	})
 }
