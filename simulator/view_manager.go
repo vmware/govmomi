@@ -275,9 +275,6 @@ func (v *ListView) ModifyListView(ctx *Context, req *types.ModifyListView) soap.
 
 	for _, ref := range req.Remove {
 		RemoveReference(&v.View, ref)
-		if ctx.Map.Get(ref) == nil {
-			body.Res.Returnval = append(body.Res.Returnval, ref)
-		}
 	}
 
 	if len(req.Remove) != 0 || len(req.Add) != 0 {
