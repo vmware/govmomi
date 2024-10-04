@@ -22,6 +22,7 @@ import (
 	"log"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
@@ -29,6 +30,7 @@ import (
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -246,4 +248,182 @@ func ExampleListView_tasks() {
 		return werr
 	})
 	// Output: success=4
+}
+
+// viewOfVM returns a spec to traverse a ListView of ContainerView, for tracking VM updates.
+func viewOfVM(ref types.ManagedObjectReference, pathSet []string) types.CreateFilter {
+	return types.CreateFilter{
+		Spec: types.PropertyFilterSpec{
+			ObjectSet: []types.ObjectSpec{{
+				Obj:  ref,
+				Skip: types.NewBool(true),
+				SelectSet: []types.BaseSelectionSpec{
+					// ListView --> ContainerView
+					&types.TraversalSpec{
+						Type: "ListView",
+						Path: "view",
+						SelectSet: []types.BaseSelectionSpec{
+							&types.SelectionSpec{
+								Name: "visitViews",
+							},
+						},
+					},
+					// ContainerView --> VM
+					&types.TraversalSpec{
+						SelectionSpec: types.SelectionSpec{
+							Name: "visitViews",
+						},
+						Type: "ContainerView",
+						Path: "view",
+					},
+				},
+			}},
+			PropSet: []types.PropertySpec{{
+				Type:    "VirtualMachine",
+				PathSet: pathSet,
+			}},
+		},
+	}
+}
+
+// Example of using WaitForUpdates with a ListView of ContainerView.
+// Each container root is a Cluster view of VirtualMachines.
+// Modifying the ListView changes which VirtualMachine updates are returned by WaitForUpdates.
+func ExampleListView_ofContainerView() {
+	model := simulator.VPX()
+	model.Cluster = 3
+
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		m := view.NewManager(c)
+
+		kind := []string{"ClusterComputeResource"}
+		root, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, kind, true)
+		if err != nil {
+			return err
+		}
+
+		clusters, err := root.Find(ctx, kind, property.Match{})
+		if err != nil {
+			return err
+		}
+
+		list, err := m.CreateListView(ctx, nil)
+		if err != nil {
+			return err
+		}
+
+		kind = []string{"VirtualMachine"}
+		views := make(map[types.ManagedObjectReference]*view.ContainerView)
+
+		for _, cluster := range clusters {
+			cv, err := m.CreateContainerView(ctx, cluster, kind, true)
+			if err != nil {
+				return err
+			}
+
+			_, err = list.Add(ctx, []types.ManagedObjectReference{cv.Reference()})
+
+			views[cluster] = cv
+		}
+
+		pc := property.DefaultCollector(c)
+
+		pathSet := []string{"config.extraConfig"}
+		pf, err := pc.CreateFilter(ctx, viewOfVM(list.Reference(), pathSet))
+		if err != nil {
+			return err
+		}
+		defer pf.Destroy(ctx)
+
+		// MaxWaitSeconds value of 0 causes WaitForUpdatesEx to do one update calculation and return any results.
+		req := types.WaitForUpdatesEx{
+			This: pc.Reference(),
+			Options: &types.WaitOptions{
+				MaxWaitSeconds: types.NewInt32(0),
+			},
+		}
+
+		updates := func() ([]types.ObjectUpdate, error) {
+			res, err := methods.WaitForUpdatesEx(ctx, c.Client, &req)
+			if err != nil {
+				return nil, err
+			}
+
+			set := res.Returnval
+
+			if set == nil {
+				return nil, nil
+			}
+
+			req.Version = set.Version
+
+			if len(set.FilterSet) == 0 {
+				return nil, nil
+			}
+
+			return set.FilterSet[0].ObjectSet, nil
+		}
+
+		set, err := updates()
+		if err != nil {
+			return err
+		}
+
+		all := make([]types.ManagedObjectReference, len(set))
+		for i := range set {
+			all[i] = set[i].Obj
+		}
+
+		fmt.Printf("Initial updates=%d\n", len(all))
+
+		reconfig := func() {
+			spec := types.VirtualMachineConfigSpec{
+				ExtraConfig: []types.BaseOptionValue{
+					&types.OptionValue{Key: "time", Value: time.Now().String()},
+				},
+			}
+			// Change state of all VMs in all Clusters
+			for _, ref := range all {
+				task, err := object.NewVirtualMachine(c, ref).Reconfigure(ctx, spec)
+				if err != nil {
+					panic(err)
+				}
+				if err = task.Wait(ctx); err != nil {
+					panic(err)
+				}
+			}
+
+			set, err := updates()
+			if err != nil {
+				panic(err)
+			}
+
+			fmt.Printf("Reconfig updates=%d\n", len(set))
+		}
+
+		reconfig()
+
+		cluster := views[clusters[0]].Reference()
+		_, err = list.Remove(ctx, []types.ManagedObjectReference{cluster})
+		if err != nil {
+			return err
+		}
+
+		reconfig()
+
+		_, err = list.Add(ctx, []types.ManagedObjectReference{cluster})
+		if err != nil {
+			return err
+		}
+
+		reconfig()
+
+		return nil
+	}, model)
+
+	// Output:
+	// Initial updates=6
+	// Reconfig updates=6
+	// Reconfig updates=4
+	// Reconfig updates=6
 }
