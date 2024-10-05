@@ -277,7 +277,11 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	}
 
 	if spec.ManagedBy != nil {
+		if spec.ManagedBy.ExtensionKey == "" {
+			spec.ManagedBy = nil
+		}
 		vm.Config.ManagedBy = spec.ManagedBy
+		vm.Summary.Config.ManagedBy = spec.ManagedBy
 	}
 
 	if spec.BootOptions != nil {
