@@ -6477,6 +6477,7 @@ Options:
   -iommu-enabled=<nil>           Enable IOMMU
   -latency=                      Latency sensitivity (low|normal|medium|high|custom)
   -m=0                           Size in MB of memory
+  -managed-by=                   Set or clear managed by VC Extension
   -mem.limit=<nil>               Memory limit in MB
   -mem.reservation=<nil>         Memory reservation in MB
   -mem.shares=                   Memory shares level or number
