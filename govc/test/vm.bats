@@ -197,6 +197,21 @@ load test_helper
   run govc object.collect -s "vm/$id" config.uuid
   assert_success "$uuid"
 
+  run govc vm.change -vm $id -managed-by com.vmware.govmomi.simulator
+  assert_success
+
+  run govc vm.info -json $id
+  assert_success
+
+  run govc object.collect -s "vm/$id" config.managedBy.extensionKey
+  assert_success com.vmware.govmomi.simulator
+
+  run govc vm.change -vm $id -managed-by -
+  assert_success
+
+  run govc object.collect -s "vm/$id" config.managedBy
+  assert_success ""
+
   nid=$(new_id)
   run govc vm.change -name $nid -vm $id
   assert_success
