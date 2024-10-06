@@ -79,7 +79,7 @@ func (m *TaskManager) PutObject(obj mo.Reference) {
 	// - TaskHistoryCollector instances, if Filter matches
 	// - $MO.RecentTask
 	m.Lock()
-	ctx.Map.Update(m, recentTask(m.RecentTask, task.Self))
+	ctx.Update(m, recentTask(m.RecentTask, task.Self))
 
 	pushHistory(m.history.page, task)
 
@@ -88,7 +88,7 @@ func (m *TaskManager) PutObject(obj mo.Reference) {
 		ctx.WithLock(c, func() {
 			if c.taskMatches(ctx, &task.Info) {
 				pushHistory(c.page, task)
-				ctx.Map.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
+				ctx.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
 		})
 	}
@@ -96,7 +96,7 @@ func (m *TaskManager) PutObject(obj mo.Reference) {
 
 	entity := ctx.Map.Get(*task.Info.Entity)
 	if e, ok := entity.(mo.Entity); ok {
-		ctx.Map.Update(entity, recentTask(e.Entity().RecentTask, task.Self))
+		ctx.Update(entity, recentTask(e.Entity().RecentTask, task.Self))
 	}
 }
 
@@ -109,7 +109,7 @@ func taskStateChanged(pc []types.PropertyChange) bool {
 	return false
 }
 
-func (m *TaskManager) UpdateObject(obj mo.Reference, pc []types.PropertyChange) {
+func (m *TaskManager) UpdateObject(ctx *Context, obj mo.Reference, pc []types.PropertyChange) {
 	task, ok := obj.(*mo.Task)
 	if !ok {
 		return
@@ -125,10 +125,9 @@ func (m *TaskManager) UpdateObject(obj mo.Reference, pc []types.PropertyChange) 
 	m.Lock()
 	for _, hc := range m.history.collectors {
 		c := hc.(*TaskHistoryCollector)
-		ctx := SpoofContext()
 		ctx.WithLock(c, func() {
 			if c.hasTask(ctx, &task.Info) {
-				ctx.Map.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
+				ctx.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
 		})
 	}

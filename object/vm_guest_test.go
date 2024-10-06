@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,8 +37,21 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 			return err
 		}
 
-		obj := simulator.Map.Get(vm.Reference()).(*simulator.VirtualMachine)
-		obj.Guest.IpAddress = "fe80::250:56ff:fe97:2458"
+		reconfig := func(ip string) error {
+			task, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+				ExtraConfig: []types.BaseOptionValue{
+					&types.OptionValue{Key: "SET.guest.ipAddress", Value: ip},
+				},
+			})
+			if err != nil {
+				return err
+			}
+			return task.Wait(ctx)
+		}
+
+		if err := reconfig("fe80::250:56ff:fe97:2458"); err != nil {
+			return err
+		}
 
 		ip, err := vm.WaitForIP(ctx)
 		if err != nil {
@@ -49,7 +62,7 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 			t.Errorf("expected v6 ip, but %q is v4", ip)
 		}
 
-		delay := time.Second
+		delay := time.Second / 2
 		var wg sync.WaitGroup
 
 		wg.Add(1)
@@ -57,12 +70,9 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 			defer wg.Done()
 			t.Logf("delaying map update for %v", delay)
 			time.Sleep(delay)
-
-			simulator.Map.WithLock(simulator.SpoofContext(), obj.Reference(), func() {
-				simulator.Map.Update(obj, []types.PropertyChange{
-					{Name: "guest.ipAddress", Val: "10.0.0.1"},
-				})
-			})
+			if err := reconfig("10.0.0.1"); err != nil {
+				t.Logf("reconfig error: %s", err)
+			}
 		}()
 
 		ip, err = vm.WaitForIP(ctx, true)

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -413,6 +413,10 @@ func (c *Context) WithLock(obj mo.Reference, f func()) {
 	// Basic mutex locking will work even if obj doesn't belong to Map, but
 	// if obj implements sync.Locker, that custom locking will not be used.
 	c.Map.WithLock(c, obj, f)
+}
+
+func (c *Context) Update(obj mo.Reference, changes []types.PropertyChange) {
+	c.Map.Update(c, obj, changes)
 }
 
 // postEvent wraps EventManager.PostEvent for internal use, with a lock on the EventManager.

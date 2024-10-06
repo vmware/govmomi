@@ -161,7 +161,7 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 		ctx.WithLock(c, func() {
 			if c.eventMatches(ctx, req.EventToPost) {
 				pushHistory(c.page, req.EventToPost)
-				ctx.Map.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
+				ctx.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
 		})
 	}

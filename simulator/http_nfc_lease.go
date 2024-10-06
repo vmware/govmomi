@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -108,7 +108,7 @@ func ServeNFC(w http.ResponseWriter, r *http.Request) {
 
 func (l *HttpNfcLease) error(ctx *Context, err *types.LocalizedMethodFault) {
 	ctx.WithLock(l, func() {
-		ctx.Map.Update(l, []types.PropertyChange{
+		ctx.Update(l, []types.PropertyChange{
 			{Name: "state", Val: types.HttpNfcLeaseStateError},
 			{Name: "error", Val: err},
 		})
@@ -124,7 +124,7 @@ func (l *HttpNfcLease) ready(ctx *Context, entity types.ManagedObjectReference, 
 	}
 
 	ctx.WithLock(l, func() {
-		ctx.Map.Update(l, []types.PropertyChange{
+		ctx.Update(l, []types.PropertyChange{
 			{Name: "state", Val: types.HttpNfcLeaseStateReady},
 			{Name: "info", Val: info},
 		})

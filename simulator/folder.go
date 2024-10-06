@@ -301,7 +301,7 @@ func (f *Folder) CreateDatacenter(ctx *Context, c *types.CreateDatacenter) soap.
 	if folderHasChildType(&f.Folder, "Datacenter") && folderHasChildType(&f.Folder, "Folder") {
 		dc := NewDatacenter(ctx, &f.Folder)
 
-		ctx.Map.Update(dc, []types.PropertyChange{
+		ctx.Update(dc, []types.PropertyChange{
 			{Name: "name", Val: c.Name},
 		})
 
@@ -490,7 +490,7 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 
 	vm.RefreshStorageInfo(c.ctx, nil)
 
-	c.ctx.Map.Update(vm, []types.PropertyChange{
+	c.ctx.Update(vm, []types.PropertyChange{
 		{Name: "name", Val: c.req.Config.Name},
 	})
 

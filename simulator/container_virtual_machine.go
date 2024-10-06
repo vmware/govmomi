@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2023-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2023-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -193,7 +193,7 @@ func (svm *simVM) start(ctx *Context) error {
 		if err != nil {
 			log.Printf("%s %s: %s", svm.vm.Name, "start", err)
 		} else {
-			ctx.Map.Update(svm.vm, toolsRunning)
+			ctx.Update(svm.vm, toolsRunning)
 		}
 
 		return err
@@ -287,7 +287,7 @@ func (svm *simVM) start(ctx *Context) error {
 		return err
 	}
 
-	ctx.Map.Update(svm.vm, toolsRunning)
+	ctx.Update(svm.vm, toolsRunning)
 
 	svm.vm.logPrintf("%s: %s", args, svm.c.id)
 
@@ -345,7 +345,7 @@ func (svm *simVM) stop(ctx *Context) error {
 		return err
 	}
 
-	ctx.Map.Update(svm.vm, toolsNotRunning)
+	ctx.Update(svm.vm, toolsNotRunning)
 
 	return nil
 }
@@ -363,7 +363,7 @@ func (svm *simVM) pause(ctx *Context) error {
 		return err
 	}
 
-	ctx.Map.Update(svm.vm, toolsNotRunning)
+	ctx.Update(svm.vm, toolsNotRunning)
 
 	return nil
 }
@@ -381,7 +381,7 @@ func (svm *simVM) restart(ctx *Context) error {
 		return err
 	}
 
-	ctx.Map.Update(svm.vm, toolsRunning)
+	ctx.Update(svm.vm, toolsRunning)
 
 	return nil
 }

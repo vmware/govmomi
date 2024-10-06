@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -139,7 +139,7 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.Rem
 
 			ctx.Map.Get(req.This).(*VirtualMachineSnapshot).removeSnapshotFiles(ctx)
 
-			ctx.Map.Update(vm, changes)
+			ctx.Update(vm, changes)
 		})
 
 		ctx.Map.Remove(ctx, req.This)
@@ -160,7 +160,7 @@ func (v *VirtualMachineSnapshot) RevertToSnapshotTask(ctx *Context, req *types.R
 
 		ctx.WithLock(vm, func() {
 			vm.DataSets = copyDataSetsForVmClone(v.DataSets)
-			ctx.Map.Update(vm, []types.PropertyChange{
+			ctx.Update(vm, []types.PropertyChange{
 				{Name: "snapshot.currentSnapshot", Val: v.Self},
 			})
 		})

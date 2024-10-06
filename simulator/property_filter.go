@@ -34,7 +34,7 @@ type PropertyFilter struct {
 	sync bool
 }
 
-func (f *PropertyFilter) UpdateObject(o mo.Reference, changes []types.PropertyChange) {
+func (f *PropertyFilter) UpdateObject(ctx *Context, o mo.Reference, changes []types.PropertyChange) {
 	// A PropertyFilter's traversal spec is "applied" on the initial call to WaitForUpdates,
 	// with matching objects tracked in the `refs` field.
 	// New and deleted objects matching the filter are accounted for within PropertyCollector.
@@ -44,7 +44,7 @@ func (f *PropertyFilter) UpdateObject(o mo.Reference, changes []types.PropertyCh
 
 	for _, set := range f.Spec.ObjectSet {
 		if set.Obj == ref && len(set.SelectSet) != 0 {
-			f.sync = true
+			ctx.WithLock(f, func() { f.sync = true })
 			break
 		}
 	}
@@ -74,11 +74,13 @@ func (f *PropertyFilter) collect(ctx *Context) (*types.RetrieveResult, types.Bas
 }
 
 func (f *PropertyFilter) update(ctx *Context) {
-	if f.sync {
-		f.sync = false
-		clear(f.refs)
-		_, _ = f.collect(ctx)
-	}
+	ctx.WithLock(f, func() {
+		if f.sync {
+			f.sync = false
+			clear(f.refs)
+			_, _ = f.collect(ctx)
+		}
+	})
 }
 
 // matches returns true if the change matches one of the filter Spec.PropSet

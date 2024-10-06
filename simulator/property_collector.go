@@ -597,8 +597,7 @@ func (pc *PropertyCollector) DestroyPropertyCollector(ctx *Context, c *types.Des
 	body := &methods.DestroyPropertyCollectorBody{}
 
 	for _, ref := range pc.Filter {
-		filter := ctx.Session.Get(ref).(*PropertyFilter)
-		filter.DestroyPropertyFilter(ctx, &types.DestroyPropertyFilter{This: ref})
+		ctx.Session.Remove(ctx, ref)
 	}
 
 	ctx.Session.Remove(ctx, c.This)
@@ -764,7 +763,7 @@ func (pc *PropertyCollector) PutObject(o mo.Reference) {
 	})
 }
 
-func (pc *PropertyCollector) UpdateObject(o mo.Reference, changes []types.PropertyChange) {
+func (pc *PropertyCollector) UpdateObject(_ *Context, o mo.Reference, changes []types.PropertyChange) {
 	pc.update(types.ObjectUpdate{
 		Obj:       o.Reference(),
 		Kind:      types.ObjectUpdateKindModify,
@@ -782,7 +781,10 @@ func (pc *PropertyCollector) RemoveObject(_ *Context, ref types.ManagedObjectRef
 
 func (pc *PropertyCollector) apply(ctx *Context, update *types.UpdateSet) types.BaseMethodFault {
 	for _, ref := range pc.Filter {
-		filter := ctx.Session.Get(ref).(*PropertyFilter)
+		filter, ok := ctx.Session.Get(ref).(*PropertyFilter)
+		if !ok {
+			continue
+		}
 
 		res, fault := filter.collect(ctx)
 		if fault != nil {
