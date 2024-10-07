@@ -212,13 +212,18 @@ func (v *ContainerView) find(root mo.Reference, ref types.ManagedObjectReference
 func (v *ContainerView) PutObject(obj mo.Reference) {
 	ref := obj.Reference()
 
-	if v.include(ref) && v.find(v.root, ref, types.NewBool(false)) {
-		SpoofContext().Update(v, []types.PropertyChange{{Name: "view", Val: append(v.View, ref)}})
-	}
+	ctx := SpoofContext()
+	ctx.WithLock(v, func() {
+		if v.include(ref) && v.find(v.root, ref, types.NewBool(false)) {
+			ctx.Update(v, []types.PropertyChange{{Name: "view", Val: append(v.View, ref)}})
+		}
+	})
 }
 
 func (v *ContainerView) RemoveObject(ctx *Context, obj types.ManagedObjectReference) {
-	ctx.Map.RemoveReference(ctx, v, &v.View, obj)
+	ctx.WithLock(v, func() {
+		ctx.Map.RemoveReference(ctx, v, &v.View, obj)
+	})
 }
 
 func (*ContainerView) UpdateObject(*Context, mo.Reference, []types.PropertyChange) {}
