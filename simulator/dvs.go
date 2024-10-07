@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -166,7 +166,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 
 				parent := ctx.Map.Get(*host.HostSystem.Parent)
 				computeNetworks := append(hostParent(&host.HostSystem).Network, pg.Reference())
-				ctx.Map.Update(parent, []types.PropertyChange{
+				ctx.Update(parent, []types.PropertyChange{
 					{Name: "network", Val: computeNetworks},
 				})
 			}
@@ -176,7 +176,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 			})
 		}
 
-		ctx.Map.Update(s, []types.PropertyChange{
+		ctx.Update(s, []types.PropertyChange{
 			{Name: "portgroup", Val: portgroups},
 			{Name: "summary.portgroupName", Val: portgroupNames},
 		})
@@ -212,7 +212,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				}
 
 				hostNetworks := append(host.Network, s.Portgroup...)
-				ctx.Map.Update(host, []types.PropertyChange{
+				ctx.Update(host, []types.PropertyChange{
 					{Name: "network", Val: hostNetworks},
 				})
 				members = append(members, member.Host)
@@ -224,14 +224,14 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 					pgs = append(pgs, ref)
 
 					pgHosts := append(pg.Host, member.Host)
-					ctx.Map.Update(pg, []types.PropertyChange{
+					ctx.Update(pg, []types.PropertyChange{
 						{Name: "host", Val: pgHosts},
 					})
 
 					cr := hostParent(&host.HostSystem)
 					if FindReference(cr.Network, ref) == nil {
 						computeNetworks := append(cr.Network, ref)
-						ctx.Map.Update(parent, []types.PropertyChange{
+						ctx.Update(parent, []types.PropertyChange{
 							{Name: "network", Val: computeNetworks},
 						})
 					}
@@ -263,7 +263,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 			}
 		}
 
-		ctx.Map.Update(s, []types.PropertyChange{
+		ctx.Update(s, []types.PropertyChange{
 			{Name: "summary.hostMember", Val: members},
 		})
 

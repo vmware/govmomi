@@ -214,7 +214,7 @@ func (t *Task) SetTaskState(ctx *Context, req *types.SetTaskState) soap.HasFault
 		}
 	}
 
-	ctx.Map.Update(t, changes)
+	ctx.Update(t, changes)
 
 	body.Res = new(types.SetTaskStateResponse)
 	return body
@@ -228,7 +228,7 @@ func (t *Task) SetTaskDescription(ctx *Context, req *types.SetTaskDescription) s
 		return body
 	}
 
-	ctx.Map.Update(t, []types.PropertyChange{{Name: "info.description", Val: req.Description}})
+	ctx.Update(t, []types.PropertyChange{{Name: "info.description", Val: req.Description}})
 
 	body.Res = new(types.SetTaskDescriptionResponse)
 	return body
@@ -242,7 +242,7 @@ func (t *Task) UpdateProgress(ctx *Context, req *types.UpdateProgress) soap.HasF
 		return body
 	}
 
-	ctx.Map.Update(t, []types.PropertyChange{{Name: "info.progress", Val: req.PercentDone}})
+	ctx.Update(t, []types.PropertyChange{{Name: "info.progress", Val: req.PercentDone}})
 
 	body.Res = new(types.UpdateProgressResponse)
 	return body
@@ -266,7 +266,7 @@ func (t *Task) CancelTask(ctx *Context, req *types.CancelTask) soap.HasFault {
 		}},
 	}
 
-	ctx.Map.Update(t, changes)
+	ctx.Update(t, changes)
 
 	body.Res = new(types.CancelTaskResponse)
 	return body

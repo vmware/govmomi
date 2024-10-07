@@ -61,7 +61,7 @@ var Map = NewRegistry()
 type RegisterObject interface {
 	mo.Reference
 	PutObject(mo.Reference)
-	UpdateObject(mo.Reference, []types.PropertyChange)
+	UpdateObject(*Context, mo.Reference, []types.PropertyChange)
 	RemoveObject(*Context, types.ManagedObjectReference)
 }
 
@@ -305,7 +305,7 @@ func (r *Registry) Remove(ctx *Context, item types.ManagedObjectReference) {
 // such as any PropertyCollector instances with in-progress WaitForUpdates calls.
 // The changes are also applied to the given object via mo.ApplyPropertyChange,
 // so there is no need to set object fields directly.
-func (r *Registry) Update(obj mo.Reference, changes []types.PropertyChange) {
+func (r *Registry) Update(ctx *Context, obj mo.Reference, changes []types.PropertyChange) {
 	for i := range changes {
 		if changes[i].Op == "" {
 			changes[i].Op = types.PropertyChangeOpAssign
@@ -321,13 +321,13 @@ func (r *Registry) Update(obj mo.Reference, changes []types.PropertyChange) {
 	mo.ApplyPropertyChange(val, changes)
 
 	r.applyHandlers(func(o RegisterObject) {
-		o.UpdateObject(val, changes)
+		o.UpdateObject(ctx, val, changes)
 	})
 }
 
 func (r *Registry) AtomicUpdate(ctx *Context, obj mo.Reference, changes []types.PropertyChange) {
 	r.WithLock(ctx, obj, func() {
-		r.Update(obj, changes)
+		ctx.Update(obj, changes)
 	})
 }
 
