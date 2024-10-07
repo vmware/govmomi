@@ -161,6 +161,7 @@ func (imp *Importer) Import(ctx context.Context, fpath string, opts Options) (*t
 
 	info, err := lease.Wait(ctx, spec.FileItem)
 	if err != nil {
+		_ = lease.Abort(ctx, nil)
 		return nil, err
 	}
 
@@ -169,6 +170,11 @@ func (imp *Importer) Import(ctx context.Context, fpath string, opts Options) (*t
 
 	for _, i := range info.Items {
 		if err := imp.Upload(ctx, lease, i); err != nil {
+			_ = lease.Abort(ctx, &types.LocalizedMethodFault{
+				Fault: &types.FileFault{
+					File: i.Path,
+				},
+			})
 			return nil, err
 		}
 	}
