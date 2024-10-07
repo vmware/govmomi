@@ -65,7 +65,7 @@ It is licensed under the Apache License, Version 2.0
 
 The available commands are listed below. A detailed description of each
 command can be displayed with "govc <COMMAND> -h". The description of all
-commands can be also found at https://via.vmw.com/GJ98hk .
+commands can be also found at https://github.com/vmware/govmomi/blob/main/govc/USAGE.md.
 
 Examples:
   show usage of a command:       govc <COMMAND> -h
