@@ -786,11 +786,11 @@ func addPlacementFault(body *methods.PlaceVmsXClusterBody, vmName string, vmRef 
 	body.Res.Returnval.Faults = append(body.Res.Returnval.Faults, faults)
 }
 
-func generateInitialPlacementAction(ctx *Context, inputConfigSpec *types.VirtualMachineConfigSpec, pool *ResourcePool,
-	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) *types.ClusterClusterInitialPlacementAction {
-	var configSpec *types.VirtualMachineConfigSpec
+func generateRelocatePlacementAction(ctx *Context, inputRelocateSpec *types.VirtualMachineRelocateSpec, pool *ResourcePool,
+	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) *types.ClusterClusterRelocatePlacementAction {
+	var relocateSpec *types.VirtualMachineRelocateSpec
 
-	placementAction := types.ClusterClusterInitialPlacementAction{
+	placementAction := types.ClusterClusterRelocatePlacementAction{
 		Pool: pool.Self,
 	}
 
@@ -800,49 +800,18 @@ func generateInitialPlacementAction(ctx *Context, inputConfigSpec *types.Virtual
 	}
 
 	if datastoreRequired {
-		configSpec = inputConfigSpec
+		relocateSpec = inputRelocateSpec
 
-		// TODO: This is just an initial implementation aimed at returning some data but it is not
-		// necessarily fully consistent, like we should ensure the host, if also required, has the
-		// datastore mounted.
 		ds := ctx.Map.Get(cluster.Datastore[rand.Intn(len(cluster.Datastore))]).(*Datastore)
 
-		if configSpec.Files == nil {
-			configSpec.Files = new(types.VirtualMachineFileInfo)
-		}
-		configSpec.Files.VmPathName = fmt.Sprintf("[%[1]s] %[2]s/%[2]s.vmx", ds.Name, inputConfigSpec.Name)
+		relocateSpec.Datastore = types.NewReference(ds.Reference())
 
-		for _, change := range configSpec.DeviceChange {
-			dspec := change.GetVirtualDeviceConfigSpec()
-
-			if dspec.FileOperation != types.VirtualDeviceConfigSpecFileOperationCreate {
-				continue
-			}
-
-			switch dspec.Operation {
-			case types.VirtualDeviceConfigSpecOperationAdd:
-				device := dspec.Device
-				d := device.GetVirtualDevice()
-
-				switch device.(type) {
-				case *types.VirtualDisk:
-					switch b := d.Backing.(type) {
-					case types.BaseVirtualDeviceFileBackingInfo:
-						info := b.GetVirtualDeviceFileBackingInfo()
-						info.Datastore = types.NewReference(ds.Reference())
-
-						var dsPath object.DatastorePath
-						if dsPath.FromString(info.FileName) {
-							dsPath.Datastore = ds.Name
-							info.FileName = dsPath.String()
-						}
-					}
-				}
-			}
+		for _, diskLocator := range relocateSpec.Disk {
+			diskLocator.Datastore = ds.Reference()
 		}
 	}
 
-	placementAction.ConfigSpec = configSpec
+	placementAction.RelocateSpec = relocateSpec
 	return &placementAction
 }
 
@@ -895,7 +864,7 @@ func generateRecommendationForRelocate(ctx *Context, req *types.PlaceVmsXCluster
 			Target:     &cluster.Self,
 		}
 
-		placementAction := generateInitialPlacementAction(ctx, &spec.ConfigSpec, pool, cluster, hostRequired, datastoreRequired)
+		placementAction := generateRelocatePlacementAction(ctx, spec.RelocateSpec, pool, cluster, hostRequired, datastoreRequired)
 
 		reco.Action = append(reco.Action, placementAction)
 
@@ -908,6 +877,31 @@ func generateRecommendationForRelocate(ctx *Context, req *types.PlaceVmsXCluster
 		)
 	}
 	return body
+}
+
+func generateReconfigurePlacementAction(ctx *Context, inputConfigSpec *types.VirtualMachineConfigSpec, pool *ResourcePool,
+	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) *types.ClusterClusterReconfigurePlacementAction {
+	var configSpec *types.VirtualMachineConfigSpec
+
+	placementAction := types.ClusterClusterReconfigurePlacementAction{
+		Pool: pool.Self,
+	}
+
+	if hostRequired {
+		randomHost := cluster.Host[rand.Intn(len(cluster.Host))]
+		placementAction.TargetHost = &randomHost
+	}
+
+	if datastoreRequired {
+		configSpec = inputConfigSpec
+
+		ds := ctx.Map.Get(cluster.Datastore[rand.Intn(len(cluster.Datastore))]).(*Datastore)
+
+		fillConfigSpecWithDatastore(ctx, inputConfigSpec, configSpec, ds)
+	}
+
+	placementAction.ConfigSpec = configSpec
+	return &placementAction
 }
 
 func generateRecommendationForReconfigure(ctx *Context, req *types.PlaceVmsXCluster) *methods.PlaceVmsXClusterBody {
@@ -969,7 +963,7 @@ func generateRecommendationForReconfigure(ctx *Context, req *types.PlaceVmsXClus
 			Target:     &cluster.Self,
 		}
 
-		placementAction := generateInitialPlacementAction(ctx, &spec.ConfigSpec, pool, cluster, hostRequired, datastoreRequired)
+		placementAction := generateReconfigurePlacementAction(ctx, &spec.ConfigSpec, pool, cluster, hostRequired, datastoreRequired)
 
 		reco.Action = append(reco.Action, placementAction)
 
@@ -982,6 +976,70 @@ func generateRecommendationForReconfigure(ctx *Context, req *types.PlaceVmsXClus
 		)
 	}
 	return body
+}
+
+func fillConfigSpecWithDatastore(ctx *Context, inputConfigSpec, configSpec *types.VirtualMachineConfigSpec, ds *Datastore) {
+	if configSpec.Files == nil {
+		configSpec.Files = new(types.VirtualMachineFileInfo)
+	}
+	configSpec.Files.VmPathName = fmt.Sprintf("[%[1]s] %[2]s/%[2]s.vmx", ds.Name, inputConfigSpec.Name)
+
+	for _, change := range configSpec.DeviceChange {
+		dspec := change.GetVirtualDeviceConfigSpec()
+
+		if dspec.FileOperation != types.VirtualDeviceConfigSpecFileOperationCreate {
+			continue
+		}
+
+		switch dspec.Operation {
+		case types.VirtualDeviceConfigSpecOperationAdd:
+			device := dspec.Device
+			d := device.GetVirtualDevice()
+
+			switch device.(type) {
+			case *types.VirtualDisk:
+				switch b := d.Backing.(type) {
+				case types.BaseVirtualDeviceFileBackingInfo:
+					info := b.GetVirtualDeviceFileBackingInfo()
+					info.Datastore = types.NewReference(ds.Reference())
+
+					var dsPath object.DatastorePath
+					if dsPath.FromString(info.FileName) {
+						dsPath.Datastore = ds.Name
+						info.FileName = dsPath.String()
+					}
+				}
+			}
+		}
+	}
+}
+
+func generateInitialPlacementAction(ctx *Context, inputConfigSpec *types.VirtualMachineConfigSpec, pool *ResourcePool,
+	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) *types.ClusterClusterInitialPlacementAction {
+	var configSpec *types.VirtualMachineConfigSpec
+
+	placementAction := types.ClusterClusterInitialPlacementAction{
+		Pool: pool.Self,
+	}
+
+	if hostRequired {
+		randomHost := cluster.Host[rand.Intn(len(cluster.Host))]
+		placementAction.TargetHost = &randomHost
+	}
+
+	if datastoreRequired {
+		configSpec = inputConfigSpec
+
+		// TODO: This is just an initial implementation aimed at returning some data but it is not
+		// necessarily fully consistent, like we should ensure the host, if also required, has the
+		// datastore mounted.
+		ds := ctx.Map.Get(cluster.Datastore[rand.Intn(len(cluster.Datastore))]).(*Datastore)
+
+		fillConfigSpecWithDatastore(ctx, inputConfigSpec, configSpec, ds)
+	}
+
+	placementAction.ConfigSpec = configSpec
+	return &placementAction
 }
 
 func generateRecommendationForCreateAndPowerOn(ctx *Context, req *types.PlaceVmsXCluster) *methods.PlaceVmsXClusterBody {
