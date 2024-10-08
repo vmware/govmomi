@@ -92,7 +92,10 @@ func (c *Manager) CreateTag(ctx context.Context, tag *Tag) (string, error) {
 	}
 	url := c.Resource(internal.TagPath)
 	var res string
-	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err := c.Do(ctx, url.Request(http.MethodPost, spec), &res); err != nil {
+		return "", err
+	}
+	return res, nil
 }
 
 // UpdateTag can update one or both of the tag Description and Name fields.
@@ -133,8 +136,10 @@ func (c *Manager) GetTag(ctx context.Context, id string) (*Tag, error) {
 
 	url := c.Resource(internal.TagPath).WithID(id)
 	var res Tag
-	return &res, c.Do(ctx, url.Request(http.MethodGet), &res)
-
+	if err := c.Do(ctx, url.Request(http.MethodGet), &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 // GetTagForCategory fetches the tag information for the given identifier in the given category.
@@ -165,7 +170,10 @@ func (c *Manager) GetTagForCategory(ctx context.Context, id, category string) (*
 func (c *Manager) ListTags(ctx context.Context) ([]string, error) {
 	url := c.Resource(internal.TagPath)
 	var res []string
-	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
+	if err := c.Do(ctx, url.Request(http.MethodGet), &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // GetTags fetches an array of tag information in the system.
@@ -203,7 +211,10 @@ func (c *Manager) ListTagsForCategory(ctx context.Context, id string) ([]string,
 	}{id}
 	url := c.Resource(internal.TagPath).WithID(id).WithAction("list-tags-for-category")
 	var res []string
-	return res, c.Do(ctx, url.Request(http.MethodPost, body), &res)
+	if err := c.Do(ctx, url.Request(http.MethodPost, body), &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // The id parameter can be a Category ID or Category Name.

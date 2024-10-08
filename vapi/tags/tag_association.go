@@ -103,7 +103,7 @@ func (c *Manager) AttachTagToMultipleObjects(ctx context.Context, tagID string, 
 // not successfully attached to the managed object reference it might leave the
 // managed object reference in a partially tagged state and needs to be resolved
 // by the caller. In this case BatchErrors is returned and can be used to
-// analyse failure reasons on each failed tag.
+// analyze failure reasons on each failed tag.
 //
 // Specified tagIDs must use URN-notation instead of display names or a generic
 // error will be returned and no tagging operation will be performed. If the
@@ -156,7 +156,7 @@ func (c *Manager) AttachMultipleTagsToObject(ctx context.Context, tagIDs []strin
 // not successfully detached from the managed object reference it might leave
 // the managed object reference in a partially tagged state and needs to be
 // resolved by the caller. In this case BatchErrors is returned and can be used
-// to analyse failure reasons on each failed tag.
+// to analyze failure reasons on each failed tag.
 //
 // Specified tagIDs must use URN-notation instead of display names or a generic
 // error will be returned and no tagging operation will be performed. If the
@@ -207,7 +207,10 @@ func (c *Manager) ListAttachedTags(ctx context.Context, ref mo.Reference) ([]str
 	spec := internal.NewAssociation(ref)
 	url := c.Resource(internal.AssociationPath).WithAction("list-attached-tags")
 	var res []string
-	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err := c.Do(ctx, url.Request(http.MethodPost, spec), &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // GetAttachedTags fetches the array of tags attached to the given object.
@@ -291,7 +294,10 @@ func (c *Manager) ListAttachedObjectsOnTags(ctx context.Context, tagID []string)
 
 	url := c.Resource(internal.AssociationPath).WithAction("list-attached-objects-on-tags")
 	var res []AttachedObjects
-	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err := c.Do(ctx, url.Request(http.MethodPost, spec), &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // GetAttachedObjectsOnTags combines ListAttachedObjectsOnTags and populates each Tag field.
@@ -362,7 +368,10 @@ func (c *Manager) ListAttachedTagsOnObjects(ctx context.Context, objectID []mo.R
 
 	url := c.Resource(internal.AssociationPath).WithAction("list-attached-tags-on-objects")
 	var res []AttachedTags
-	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err := c.Do(ctx, url.Request(http.MethodPost, spec), &res); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // GetAttachedTagsOnObjects calls ListAttachedTagsOnObjects and populates each Tags field.
