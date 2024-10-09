@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -545,6 +545,8 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 	if d.Key == 0 {
 		d.Key = l.newRandomKey()
 	}
+
+	c.GetVirtualController().Device = append(c.GetVirtualController().Device, d.Key)
 }
 
 // newRandomKey returns a random negative device key.
