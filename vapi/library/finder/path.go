@@ -196,6 +196,7 @@ func (f *PathFinder) ResolveLibraryItemStorage(ctx context.Context, storage []li
 			if err != nil {
 				return err
 			}
+			uri.OmitHost = false            // `ds://` required for ConvertNamespacePathToUuidPath()
 			uri.Path = path.Clean(uri.Path) // required for ConvertNamespacePathToUuidPath()
 			uri.RawQuery = ""
 			u, err := f.convertPath(ctx, b, uri.String())
