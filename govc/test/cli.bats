@@ -34,6 +34,9 @@ load test_helper
   version=$(govc about -json -c -vim-version "" | jq -r .client.version)
   assert_equal uE53DA "$version" # vcsim's service version
 
+  version=$(env GOVC_VIM_VERSION=- govc about -json -c | jq -r .client.version)
+  assert_equal uE53DA "$version" # vcsim's service version
+
   version=$(govc about -json -c -vim-version 6.8.2 | jq -r .client.version)
   assert_equal 6.8.2 "$version" # client specified version
 
