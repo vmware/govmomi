@@ -381,7 +381,7 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 		return nil, err
 	}
 
-	if flag.vimVersion == "" {
+	if flag.vimVersion == "" || flag.vimVersion == "-" {
 		err = c.UseServiceVersion()
 		if err != nil {
 			return nil, err
