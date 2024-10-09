@@ -168,7 +168,7 @@ func (imp *Importer) Import(ctx context.Context, fpath string, opts Options) (*t
 	defer u.Done()
 
 	for _, i := range info.Items {
-		if err := imp.Upload(ctx, lease, i); err != nil {
+		if err := imp.Upload(ctx, lease, i, filepath.Dir(fpath)); err != nil {
 			return nil, err
 		}
 	}
@@ -281,10 +281,10 @@ func ValidateChecksum(ctx context.Context, lease *nfc.Lease, sum *library.Checks
 	return errors.New(msg)
 }
 
-func (imp *Importer) Upload(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) error {
+func (imp *Importer) Upload(ctx context.Context, lease *nfc.Lease, item nfc.FileItem, srcDir string) error {
 	file := item.Path
 
-	f, size, err := imp.Archive.Open(file)
+	f, size, err := imp.Archive.Open(filepath.Join(srcDir, file))
 	if err != nil {
 		return err
 	}
