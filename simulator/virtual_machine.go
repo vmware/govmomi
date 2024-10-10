@@ -1279,10 +1279,24 @@ func (vm *VirtualMachine) configureDevice(
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
 
+	key := d.Key
 	if d.Key <= 0 {
 		// Keys can't be negative; Key 0 is reserved
 		d.Key = devices.NewKey()
 		d.Key *= -1
+	}
+
+	// Update device controller's key reference
+	if key != d.Key {
+		if device := devices.FindByKey(d.ControllerKey); device != nil {
+			c := device.(types.BaseVirtualController).GetVirtualController()
+			for i := range c.Device {
+				if c.Device[i] == key {
+					c.Device[i] = d.Key
+					break
+				}
+			}
+		}
 	}
 
 	// Choose a unique key

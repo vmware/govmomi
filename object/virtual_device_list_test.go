@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -743,6 +743,12 @@ func TestAssignController(t *testing.T) {
 	// so that it will not collide with existing device keys
 	if disk.Key >= 0 {
 		t.Errorf("device key %d should be negative", disk.Key)
+	}
+
+	// AssignController should add the disk to the controller's device list.
+	cd := scsi.(*types.VirtualLsiLogicController).Device[0]
+	if cd != disk.Key {
+		t.Errorf("expected controller device key: %d, got: %d\n", disk.Key, cd)
 	}
 }
 
