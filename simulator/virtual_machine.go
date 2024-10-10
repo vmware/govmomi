@@ -1289,11 +1289,13 @@ func (vm *VirtualMachine) configureDevice(
 	// Update device controller's key reference
 	if key != d.Key {
 		if device := devices.FindByKey(d.ControllerKey); device != nil {
-			c := device.(types.BaseVirtualController).GetVirtualController()
-			for i := range c.Device {
-				if c.Device[i] == key {
-					c.Device[i] = d.Key
-					break
+			if c, ok := device.(types.BaseVirtualController); ok {
+				c := c.GetVirtualController()
+				for i := range c.Device {
+					if c.Device[i] == key {
+						c.Device[i] = d.Key
+						break
+					}
 				}
 			}
 		}
