@@ -153,7 +153,7 @@ func init() {
 
 const RecommendationReasonCodeXClusterPlacement = RecommendationReasonCode("xClusterPlacement")
 
-type ClusterReconfigurePlacementAction struct {
+type ClusterClusterReconfigurePlacementAction struct {
 	ClusterAction
 	TargetHost *ManagedObjectReference   `xml:"targetHost,omitempty"`
 	Pool       ManagedObjectReference    `xml:"pool"`
@@ -161,10 +161,10 @@ type ClusterReconfigurePlacementAction struct {
 }
 
 func init() {
-	t["ClusterReconfigurePlacementAction"] = reflect.TypeOf((*ClusterReconfigurePlacementAction)(nil)).Elem()
+	t["ClusterClusterReconfigurePlacementAction"] = reflect.TypeOf((*ClusterClusterReconfigurePlacementAction)(nil)).Elem()
 }
 
-type ClusterRelocatePlacementAction struct {
+type ClusterClusterRelocatePlacementAction struct {
 	ClusterAction
 	TargetHost   *ManagedObjectReference     `xml:"targetHost,omitempty"`
 	Pool         ManagedObjectReference      `xml:"pool"`
@@ -172,5 +172,5 @@ type ClusterRelocatePlacementAction struct {
 }
 
 func init() {
-	t["ClusterRelocatePlacementAction"] = reflect.TypeOf((*ClusterRelocatePlacementAction)(nil)).Elem()
+	t["ClusterClusterRelocatePlacementAction"] = reflect.TypeOf((*ClusterClusterRelocatePlacementAction)(nil)).Elem()
 }
