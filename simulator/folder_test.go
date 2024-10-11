@@ -729,9 +729,13 @@ func TestPlaceVmsXClusterRelocate(t *testing.T) {
 		for testNo, test := range tests {
 			test := test // assign to local var since loop var is reused
 
+			truebool := true
+
 			placeVmsXClusterSpec := types.PlaceVmsXClusterSpec{
-				ResourcePools: test.poolMoRefs,
-				PlacementType: string(types.PlaceVmsXClusterSpecPlacementTypeRelocate),
+				ResourcePools:           test.poolMoRefs,
+				PlacementType:           string(types.PlaceVmsXClusterSpecPlacementTypeRelocate),
+				HostRecommRequired:      &truebool,
+				DatastoreRecommRequired: &truebool,
 			}
 
 			placeVmsXClusterSpec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
@@ -752,7 +756,19 @@ func TestPlaceVmsXClusterRelocate(t *testing.T) {
 
 			if err == nil {
 				if len(res.PlacementInfos) != len(placeVmsXClusterSpec.VmPlacementSpecs) {
-					t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(placeVmsXClusterSpec.VmPlacementSpecs))
+					t.Errorf("Test %v: %d PlacementInfos vs %d VmPlacementSpecs", testNo, len(res.PlacementInfos), len(placeVmsXClusterSpec.VmPlacementSpecs))
+				}
+
+				for _, pinfo := range res.PlacementInfos {
+					for _, action := range pinfo.Recommendation.Action {
+						if relocateAction, ok := action.(*types.ClusterClusterRelocatePlacementAction); ok {
+							if relocateAction.TargetHost == nil {
+								t.Errorf("Test %v: received nil host recommendation", testNo)
+							}
+						} else {
+							t.Errorf("Test %v: received wrong action type in recommendation", testNo)
+						}
+					}
 				}
 			}
 		}
@@ -839,8 +855,10 @@ func TestPlaceVmsXClusterReconfigure(t *testing.T) {
 			test := test // assign to local var since loop var is reused
 
 			placeVmsXClusterSpec := types.PlaceVmsXClusterSpec{
-				ResourcePools: test.poolMoRefs,
-				PlacementType: string(types.PlaceVmsXClusterSpecPlacementTypeReconfigure),
+				ResourcePools:           test.poolMoRefs,
+				PlacementType:           string(types.PlaceVmsXClusterSpecPlacementTypeReconfigure),
+				HostRecommRequired:      types.NewBool(true),
+				DatastoreRecommRequired: types.NewBool(true),
 			}
 
 			placeVmsXClusterSpec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
@@ -862,6 +880,18 @@ func TestPlaceVmsXClusterReconfigure(t *testing.T) {
 			if err == nil {
 				if len(res.PlacementInfos) != len(placeVmsXClusterSpec.VmPlacementSpecs) {
 					t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(placeVmsXClusterSpec.VmPlacementSpecs))
+				}
+
+				for _, pinfo := range res.PlacementInfos {
+					for _, action := range pinfo.Recommendation.Action {
+						if reconfigureAction, ok := action.(*types.ClusterClusterReconfigurePlacementAction); ok {
+							if reconfigureAction.TargetHost == nil {
+								t.Errorf("Test %v: received nil host recommendation", testNo)
+							}
+						} else {
+							t.Errorf("Test %v: received wrong action type in recommendation", testNo)
+						}
+					}
 				}
 			}
 		}
