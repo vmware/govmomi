@@ -255,6 +255,8 @@ func In(err any, onFaultFn OnFaultFn) {
 			}
 			In(uErr, onFaultFn)
 		}
+	case error:
+		// No-op
 	default:
 		panic("fault: err must implement error, types.BaseMethodFault, or " +
 			"types.HasLocalizedMethodFault")
