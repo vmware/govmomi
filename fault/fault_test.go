@@ -414,6 +414,12 @@ func TestIn(t *testing.T) {
 			expectedPanic:    unsupported,
 		},
 		{
+			name:             "err is unsupported but still an err",
+			err:              errors.New("error"),
+			callback:         &testHarness{},
+			expectedNumCalls: 0,
+		},
+		{
 			name:             "error is task.Error",
 			err:              task.Error{},
 			callback:         &testHarness{},
