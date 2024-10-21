@@ -59,7 +59,8 @@ type collect struct {
 }
 
 func init() {
-	cli.Register("object.collect", &collect{})
+	cli.Register("collect", &collect{})
+	cli.Alias("collect", "object.collect")
 }
 
 func (cmd *collect) Register(ctx context.Context, f *flag.FlagSet) {
@@ -101,18 +102,18 @@ The '-type' flag value can be a managed entity type or one of the following alia
 
 %s
 Examples:
-  govc object.collect - content
-  govc object.collect -s HostSystem:ha-host hardware.systemInfo.uuid
-  govc object.collect -s /ha-datacenter/vm/foo overallStatus
-  govc object.collect -s /ha-datacenter/vm/foo -guest.guestOperationsReady true # property filter
-  govc object.collect -type m / name runtime.powerState # collect properties for multiple objects
-  govc object.collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
-  govc object.collect -json -s $(govc object.collect -s - content.perfManager) description.counterType | jq .
-  govc object.collect -R create-filter-request.xml # replay filter
-  govc object.collect -R create-filter-request.xml -O # convert filter to Go code
-  govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
-  govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
-  govc object.collect -json -s $vm config | \ # use -json + jq to search array elements
+  govc collect - content
+  govc collect -s HostSystem:ha-host hardware.systemInfo.uuid
+  govc collect -s /ha-datacenter/vm/foo overallStatus
+  govc collect -s /ha-datacenter/vm/foo -guest.guestOperationsReady true # property filter
+  govc collect -type m / name runtime.powerState # collect properties for multiple objects
+  govc collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
+  govc collect -json -s $(govc collect -s - content.perfManager) description.counterType | jq .
+  govc collect -R create-filter-request.xml # replay filter
+  govc collect -R create-filter-request.xml -O # convert filter to Go code
+  govc collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
+  govc collect -dump -o "network/VM Network" # output Managed Object structure as Go code
+  govc collect -json -s $vm config | \ # use -json + jq to search array elements
     jq -r 'select(.hardware.device[].macAddress == "00:50:56:99:c4:27") | .name'`, atable)
 }
 

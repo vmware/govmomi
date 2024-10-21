@@ -145,7 +145,7 @@ ROOT can be an inventory path or ManagedObjectReference.
 ROOT defaults to '.', an alias for the root folder or DC if set.
 
 Optional KEY VAL pairs can be used to filter results against object instance properties.
-Use the govc 'object.collect' command to view possible object property keys.
+Use the govc 'collect' command to view possible object property keys.
 
 The '-type' flag value can be a managed entity type or one of the following aliases:
 

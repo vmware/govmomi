@@ -76,6 +76,7 @@ but appear via `govc $cmd -h`:
  - [cluster.usage](#clusterusage)
  - [cluster.vlcm.enable](#clustervlcmenable)
  - [cluster.vlcm.info](#clustervlcminfo)
+ - [collect](#collect)
  - [datacenter.create](#datacentercreate)
  - [datacenter.info](#datacenterinfo)
  - [datastore.cluster.change](#datastoreclusterchange)
@@ -290,7 +291,6 @@ but appear via `govc $cmd -h`:
  - [namespace.vmclass.ls](#namespacevmclassls)
  - [namespace.vmclass.rm](#namespacevmclassrm)
  - [namespace.vmclass.update](#namespacevmclassupdate)
- - [object.collect](#objectcollect)
  - [object.destroy](#objectdestroy)
  - [object.method](#objectmethod)
  - [object.mv](#objectmv)
@@ -1165,6 +1165,67 @@ Options:
   -cluster-id=           The identifier of the cluster.
 ```
 
+## collect
+
+```
+Usage: govc collect [OPTIONS] [MOID] [PROPERTY]...
+
+Collect managed object properties.
+
+MOID can be an inventory path or ManagedObjectReference.
+MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance' or the root folder if a '-type' flag is given.
+
+If a '-type' flag is given, properties are collected using a ContainerView object where MOID is the root of the view.
+
+By default only the current property value(s) are collected.  To wait for updates, use the '-n' flag or
+specify a property filter.  A property filter can be specified by prefixing the property name with a '-',
+followed by the value to match.
+
+The '-R' flag sets the Filter using the given XML encoded request, which can be captured by 'vcsim -trace' for example.
+It can be useful for replaying property filters created by other clients and converting filters to Go code via '-O -dump'.
+
+The '-type' flag value can be a managed entity type or one of the following aliases:
+
+  a    VirtualApp
+  c    ClusterComputeResource
+  d    Datacenter
+  f    Folder
+  g    DistributedVirtualPortgroup
+  h    HostSystem
+  m    VirtualMachine
+  n    Network
+  o    OpaqueNetwork
+  p    ResourcePool
+  r    ComputeResource
+  s    Datastore
+  w    DistributedVirtualSwitch
+
+Examples:
+  govc collect - content
+  govc collect -s HostSystem:ha-host hardware.systemInfo.uuid
+  govc collect -s /ha-datacenter/vm/foo overallStatus
+  govc collect -s /ha-datacenter/vm/foo -guest.guestOperationsReady true # property filter
+  govc collect -type m / name runtime.powerState # collect properties for multiple objects
+  govc collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
+  govc collect -json -s $(govc collect -s - content.perfManager) description.counterType | jq .
+  govc collect -R create-filter-request.xml # replay filter
+  govc collect -R create-filter-request.xml -O # convert filter to Go code
+  govc collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
+  govc collect -dump -o "network/VM Network" # output Managed Object structure as Go code
+  govc collect -json -s $vm config | \ # use -json + jq to search array elements
+    jq -r 'select(.hardware.device[].macAddress == "00:50:56:99:c4:27") | .name'
+
+Options:
+  -O=false               Output the CreateFilter request itself
+  -R=                    Raw XML encoded CreateFilter request
+  -d=,                   Delimiter for array values
+  -n=0                   Wait for N property updates
+  -o=false               Output the structure of a single Managed Object
+  -s=false               Output property value only
+  -type=[]               Resource type.  If specified, MOID is used for a container view root
+  -wait=0s               Max wait time for updates
+```
+
 ## datacenter.create
 
 ```
@@ -1383,9 +1444,9 @@ Examples:
   govc datastore.info
   govc datastore.info vsanDatastore
   # info on Datastores shared between cluster hosts:
-  govc object.collect -s -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
+  govc collect -s -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
   # info on Datastores shared between VM hosts:
-  govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc object.collect -s % summary.runtime.host | xargs govc datastore.info -H
+  govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc collect -s % summary.runtime.host | xargs govc datastore.info -H
 
 Options:
   -H=false               Display info for Datastores shared between hosts
@@ -2518,7 +2579,7 @@ ROOT can be an inventory path or ManagedObjectReference.
 ROOT defaults to '.', an alias for the root folder or DC if set.
 
 Optional KEY VAL pairs can be used to filter results against object instance properties.
-Use the govc 'object.collect' command to view possible object property keys.
+Use the govc 'collect' command to view possible object property keys.
 
 The '-type' flag value can be a managed entity type or one of the following aliases:
 
@@ -4837,67 +4898,6 @@ Examples:
 Options:
   -cpus=0                The number of CPUs.
   -memory=0              The amount of memory (in MB).
-```
-
-## object.collect
-
-```
-Usage: govc object.collect [OPTIONS] [MOID] [PROPERTY]...
-
-Collect managed object properties.
-
-MOID can be an inventory path or ManagedObjectReference.
-MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance' or the root folder if a '-type' flag is given.
-
-If a '-type' flag is given, properties are collected using a ContainerView object where MOID is the root of the view.
-
-By default only the current property value(s) are collected.  To wait for updates, use the '-n' flag or
-specify a property filter.  A property filter can be specified by prefixing the property name with a '-',
-followed by the value to match.
-
-The '-R' flag sets the Filter using the given XML encoded request, which can be captured by 'vcsim -trace' for example.
-It can be useful for replaying property filters created by other clients and converting filters to Go code via '-O -dump'.
-
-The '-type' flag value can be a managed entity type or one of the following aliases:
-
-  a    VirtualApp
-  c    ClusterComputeResource
-  d    Datacenter
-  f    Folder
-  g    DistributedVirtualPortgroup
-  h    HostSystem
-  m    VirtualMachine
-  n    Network
-  o    OpaqueNetwork
-  p    ResourcePool
-  r    ComputeResource
-  s    Datastore
-  w    DistributedVirtualSwitch
-
-Examples:
-  govc object.collect - content
-  govc object.collect -s HostSystem:ha-host hardware.systemInfo.uuid
-  govc object.collect -s /ha-datacenter/vm/foo overallStatus
-  govc object.collect -s /ha-datacenter/vm/foo -guest.guestOperationsReady true # property filter
-  govc object.collect -type m / name runtime.powerState # collect properties for multiple objects
-  govc object.collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
-  govc object.collect -json -s $(govc object.collect -s - content.perfManager) description.counterType | jq .
-  govc object.collect -R create-filter-request.xml # replay filter
-  govc object.collect -R create-filter-request.xml -O # convert filter to Go code
-  govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
-  govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
-  govc object.collect -json -s $vm config | \ # use -json + jq to search array elements
-    jq -r 'select(.hardware.device[].macAddress == "00:50:56:99:c4:27") | .name'
-
-Options:
-  -O=false               Output the CreateFilter request itself
-  -R=                    Raw XML encoded CreateFilter request
-  -d=,                   Delimiter for array values
-  -n=0                   Wait for N property updates
-  -o=false               Output the structure of a single Managed Object
-  -s=false               Output property value only
-  -type=[]               Resource type.  If specified, MOID is used for a container view root
-  -wait=0s               Max wait time for updates
 ```
 
 ## object.destroy
