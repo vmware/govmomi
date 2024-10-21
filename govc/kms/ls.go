@@ -189,7 +189,11 @@ func (r *clusterResult) Write(w io.Writer) error {
 		name := info.ClusterId.Id
 		kind := kmsType(info.ManagementType)
 		status := r.status(info.ClusterId)
-		fmt.Fprintf(tw, "%s\t%s\t%s\n", name, kind, status)
+		use := ""
+		if info.UseAsDefault {
+			use = "default"
+		}
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", name, kind, status, use)
 	}
 
 	return tw.Flush()
