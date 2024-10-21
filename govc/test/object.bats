@@ -76,256 +76,256 @@ load test_helper
   [ "$result" -eq "0" ]
 }
 
-@test "object.collect" {
+@test "collect" {
   vcsim_env
 
-  run govc object.collect
+  run govc collect
   assert_success
 
-  run govc object.collect -json
+  run govc collect -json
   assert_success
 
-  run govc object.collect -
+  run govc collect -
   assert_success
 
-  run govc object.collect -json -
+  run govc collect -json -
   assert_success
 
-  run govc object.collect - content
+  run govc collect - content
   assert_success
 
-  run govc object.collect -json - content
+  run govc collect -json - content
   assert_success
 
-  root=$(govc object.collect - content | grep content.rootFolder | awk '{print $3}')
+  root=$(govc collect - content | grep content.rootFolder | awk '{print $3}')
 
-  dc=$(govc object.collect "$root" childEntity | awk '{print $3}' | cut -d, -f1)
+  dc=$(govc collect "$root" childEntity | awk '{print $3}' | cut -d, -f1)
 
-  hostFolder=$(govc object.collect "$dc" hostFolder | awk '{print $3}')
+  hostFolder=$(govc collect "$dc" hostFolder | awk '{print $3}')
 
-  cr=$(govc object.collect "$hostFolder" childEntity | awk '{print $3}' | cut -d, -f1)
+  cr=$(govc collect "$hostFolder" childEntity | awk '{print $3}' | cut -d, -f1)
 
-  host=$(govc object.collect "$cr" host | awk '{print $3}' | cut -d, -f1)
+  host=$(govc collect "$cr" host | awk '{print $3}' | cut -d, -f1)
 
-  run govc object.collect "$host"
+  run govc collect "$host"
   assert_success
 
-  run govc object.collect "$host" hardware
+  run govc collect "$host" hardware
   assert_success
 
-  run govc object.collect "$host" hardware.systemInfo
+  run govc collect "$host" hardware.systemInfo
   assert_success
 
-  uuid=$(govc object.collect "$host" hardware.systemInfo.uuid | awk '{print $3}')
-  uuid_s=$(govc object.collect -s "$host" hardware.systemInfo.uuid)
+  uuid=$(govc collect "$host" hardware.systemInfo.uuid | awk '{print $3}')
+  uuid_s=$(govc collect -s "$host" hardware.systemInfo.uuid)
   assert_equal "$uuid" "$uuid_s"
 
-  run govc object.collect "$(govc ls host | head -n1)"
+  run govc collect "$(govc ls host | head -n1)"
   assert_success
 
   # test against slice of interface
-  setting=$(govc object.collect -s - content.setting)
-  result=$(govc object.collect -s "$setting" setting)
+  setting=$(govc collect -s - content.setting)
+  result=$(govc collect -s "$setting" setting)
   assert_equal "..." "$result"
 
   # test against an interface field
-  run govc object.collect 'network/VM Network' summary
+  run govc collect 'network/VM Network' summary
   assert_success
 
-  run govc object.collect -dump -o 'network/VM Network'
+  run govc collect -dump -o 'network/VM Network'
   assert_success
   gofmt <<<"$output"
 
-  run govc object.collect -json -o 'network/VM Network'
+  run govc collect -json -o 'network/VM Network'
   assert_success
   jq . <<<"$output"
 }
 
-@test "object.collect vcsim" {
+@test "collect vcsim" {
   vcsim_env -app 1 -pool 1
 
   # test that {Cluster}ComputeResource and HostSystem network fields have the expected refs
   for obj in DC0_C0 DC0_C0/DC0_C0_H0 DC0_H0 DC0_H0/DC0_H0; do
-    run govc object.collect /DC0/host/$obj network
+    run govc collect /DC0/host/$obj network
     assert_success
     echo "obj=$obj"
     assert_matches "DistributedVirtualPortgroup:"
     assert_matches "Network:"
   done
 
-  run govc object.collect -s -type ClusterComputeResource / configStatus
+  run govc collect -s -type ClusterComputeResource / configStatus
   assert_success green
 
-  run govc object.collect -s -type ClusterComputeResource / effectiveRole # []int32 -> ArrayOfInt
+  run govc collect -s -type ClusterComputeResource / effectiveRole # []int32 -> ArrayOfInt
   assert_number
 
-  run govc object.collect -s -type ComputeResource / configStatus
+  run govc collect -s -type ComputeResource / configStatus
   assert_success "$(printf "green\ngreen")"
 
-  run govc object.collect -s -type ComputeResource / effectiveRole
+  run govc collect -s -type ComputeResource / effectiveRole
   assert_number
 
-  run govc object.collect -s -type Datacenter / effectiveRole
+  run govc collect -s -type Datacenter / effectiveRole
   assert_number
 
-  run govc object.collect -s -type Datastore / effectiveRole
+  run govc collect -s -type Datastore / effectiveRole
   assert_number
 
-  run govc object.collect -s -type DistributedVirtualPortgroup / config.key
+  run govc collect -s -type DistributedVirtualPortgroup / config.key
   assert_matches dvportgroup-
 
-  run govc object.collect -s -type DistributedVirtualPortgroup / config.name
+  run govc collect -s -type DistributedVirtualPortgroup / config.name
   assert_matches DC0_DVPG0
   assert_matches DVS0-DVUplinks-
 
-  run govc object.collect -s -type DistributedVirtualPortgroup / effectiveRole
+  run govc collect -s -type DistributedVirtualPortgroup / effectiveRole
   assert_number
 
-  run govc object.collect -s -type DistributedVirtualSwitch / effectiveRole
+  run govc collect -s -type DistributedVirtualSwitch / effectiveRole
   assert_number
 
-  run govc object.collect -s -type DistributedVirtualSwitch / summary.name
+  run govc collect -s -type DistributedVirtualSwitch / summary.name
   assert_success DVS0
 
-  run govc object.collect -s -type DistributedVirtualSwitch / summary.productInfo.name
+  run govc collect -s -type DistributedVirtualSwitch / summary.productInfo.name
   assert_success DVS
 
-  run govc object.collect -s -type DistributedVirtualSwitch / summary.productInfo.vendor
+  run govc collect -s -type DistributedVirtualSwitch / summary.productInfo.vendor
   assert_success "VMware, Inc."
 
-  run govc object.collect -s -type DistributedVirtualSwitch / summary.productInfo.version
+  run govc collect -s -type DistributedVirtualSwitch / summary.productInfo.version
   assert_success 6.5.0
 
-  run govc object.collect -s -type DistributedVirtualSwitch / summary.uuid
+  run govc collect -s -type DistributedVirtualSwitch / summary.uuid
   assert_matches "-"
 
-  run govc object.collect -s -type Folder / effectiveRole
+  run govc collect -s -type Folder / effectiveRole
   assert_number
 
-  run govc object.collect -json -type HostSystem / config.storageDevice.scsiLun
+  run govc collect -json -type HostSystem / config.storageDevice.scsiLun
   assert_matches /vmfs/devices
 
-  run govc object.collect -json -type HostSystem / config.storageDevice.scsiTopology
+  run govc collect -json -type HostSystem / config.storageDevice.scsiTopology
   assert_matches host.ScsiTopology
 
-  run govc object.collect -s -type HostSystem / effectiveRole
+  run govc collect -s -type HostSystem / effectiveRole
   assert_number
 
-  run govc object.collect -s -type Network / effectiveRole
+  run govc collect -s -type Network / effectiveRole
   assert_number
 
-  run govc object.collect -s -type ResourcePool / resourcePool
+  run govc collect -s -type ResourcePool / resourcePool
   # DC0_C0/Resources has 1 child ResourcePool and 1 child VirtualApp
   assert_matches "ResourcePool:"
   assert_matches "VirtualApp:"
 
-  run govc object.collect -s -type VirtualApp / effectiveRole
+  run govc collect -s -type VirtualApp / effectiveRole
   assert_number
 
-  run govc object.collect -s -type VirtualApp / name
+  run govc collect -s -type VirtualApp / name
   assert_success DC0_C0_APP0
 
-  run govc object.collect -s -type VirtualApp / owner
+  run govc collect -s -type VirtualApp / owner
   assert_matches ":"
 
-  run govc object.collect -s -type VirtualApp / parent
+  run govc collect -s -type VirtualApp / parent
   assert_matches ":"
 
-  run govc object.collect -s -type VirtualApp / resourcePool
+  run govc collect -s -type VirtualApp / resourcePool
   assert_success "" # no VirtualApp children
 
-  run govc object.collect -s -type VirtualApp / summary.config.cpuAllocation.limit
+  run govc collect -s -type VirtualApp / summary.config.cpuAllocation.limit
   assert_number
 
-  run govc object.collect -s -type VirtualApp / summary.config.cpuAllocation.reservation
+  run govc collect -s -type VirtualApp / summary.config.cpuAllocation.reservation
   assert_number
 
-  run govc object.collect -s -type VirtualApp / summary.config.memoryAllocation.limit
+  run govc collect -s -type VirtualApp / summary.config.memoryAllocation.limit
   assert_number
 
-  run govc object.collect -s -type VirtualApp / summary.config.memoryAllocation.reservation
+  run govc collect -s -type VirtualApp / summary.config.memoryAllocation.reservation
   assert_number
 
-  run govc object.collect -s -type VirtualApp / vm
+  run govc collect -s -type VirtualApp / vm
   assert_matches "VirtualMachine:"
 
-  run govc object.collect -s -type VirtualMachine / config.tools.toolsVersion
+  run govc collect -s -type VirtualMachine / config.tools.toolsVersion
   assert_number
 
-  run govc object.collect -s -type VirtualMachine / effectiveRole
+  run govc collect -s -type VirtualMachine / effectiveRole
   assert_number
 
-  run govc object.collect -s -type VirtualMachine / summary.guest.toolsStatus
+  run govc collect -s -type VirtualMachine / summary.guest.toolsStatus
   assert_matches toolsNotInstalled
 
-  run govc object.collect -s -type VirtualMachine / config.npivPortWorldWideName # []int64 -> ArrayOfLong
+  run govc collect -s -type VirtualMachine / config.npivPortWorldWideName # []int64 -> ArrayOfLong
   assert_success
 
-  run govc object.collect -s -type VirtualMachine / config.vmxConfigChecksum # []uint8 -> ArrayOfByte
+  run govc collect -s -type VirtualMachine / config.vmxConfigChecksum # []uint8 -> ArrayOfByte
   assert_success
 
-  run govc object.collect -s /DC0/vm/DC0_H0_VM0 config.hardware.numCoresPerSocket
+  run govc collect -s /DC0/vm/DC0_H0_VM0 config.hardware.numCoresPerSocket
   assert_success 1
 
-  run govc object.collect -s -type ClusterComputeResource / summary.effectiveCpu
+  run govc collect -s -type ClusterComputeResource / summary.effectiveCpu
   assert_number
 
-  run govc object.collect -s -type ClusterComputeResource / summary.effectiveMemory
+  run govc collect -s -type ClusterComputeResource / summary.effectiveMemory
   assert_number
 
-  run govc object.collect -s -type ClusterComputeResource / summary.numCpuCores
+  run govc collect -s -type ClusterComputeResource / summary.numCpuCores
   assert_number
 
-  run govc object.collect -s -type ClusterComputeResource / summary.numCpuThreads
+  run govc collect -s -type ClusterComputeResource / summary.numCpuThreads
   assert_number
 
-  run govc object.collect -s -type ClusterComputeResource / summary.numEffectiveHosts
+  run govc collect -s -type ClusterComputeResource / summary.numEffectiveHosts
   assert_number
 
-  run govc object.collect -s -type ClusterComputeResource / summary.numHosts
+  run govc collect -s -type ClusterComputeResource / summary.numHosts
   assert_number
 
-  run govc object.collect -s -type ClusterComputeResource / summary.totalCpu
+  run govc collect -s -type ClusterComputeResource / summary.totalCpu
   assert_number
 
-  run govc object.collect -s -type ClusterComputeResource / summary.totalMemory
+  run govc collect -s -type ClusterComputeResource / summary.totalMemory
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.effectiveCpu
+  run govc collect -s -type ComputeResource / summary.effectiveCpu
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.effectiveMemory
+  run govc collect -s -type ComputeResource / summary.effectiveMemory
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.numCpuCores
+  run govc collect -s -type ComputeResource / summary.numCpuCores
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.numCpuThreads
+  run govc collect -s -type ComputeResource / summary.numCpuThreads
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.numEffectiveHosts
+  run govc collect -s -type ComputeResource / summary.numEffectiveHosts
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.numHosts
+  run govc collect -s -type ComputeResource / summary.numHosts
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.totalCpu
+  run govc collect -s -type ComputeResource / summary.totalCpu
   assert_number
 
-  run govc object.collect -s -type ComputeResource / summary.totalMemory
+  run govc collect -s -type ComputeResource / summary.totalMemory
   assert_number
 
-  run govc object.collect -s -type Network / summary.accessible
+  run govc collect -s -type Network / summary.accessible
   assert_success "$(printf "true\ntrue\ntrue")"
 
-  run govc object.collect -s -type Network / summary.ipPoolName
+  run govc collect -s -type Network / summary.ipPoolName
   assert_success ""
 
   # check that uuid and instanceUuid are set under both config and summary.config
   for prop in config summary.config ; do
-    uuids=$(govc object.collect -s -type m / "$prop.uuid" | sort)
+    uuids=$(govc collect -s -type m / "$prop.uuid" | sort)
     [ -n "$uuids" ]
-    iuuids=$(govc object.collect -s -type m / "$prop.instanceUuid" | sort)
+    iuuids=$(govc collect -s -type m / "$prop.instanceUuid" | sort)
     [ -n "$iuuids" ]
 
     [ "$uuids" != "$iuuids" ]
@@ -334,81 +334,81 @@ load test_helper
   govc vm.create -g ubuntu64Guest my-ubuntu
   assert_success
 
-  govc object.collect -type m / -guest.guestFamily linuxGuest
+  govc collect -type m / -guest.guestFamily linuxGuest
   assert_success
 }
 
-@test "object.collect bytes" {
+@test "collect bytes" {
   vcsim_env
 
   host=$(govc find / -type h | head -1)
 
   # ArrayOfByte with PEM encoded cert
-  govc object.collect -s "$host" config.certificate | \
+  govc collect -s "$host" config.certificate | \
     base64 -d | openssl x509 -text
 
   # []byte field with PEM encoded cert
-  govc object.collect -s -json "$host" config | jq -r .certificate | \
+  govc collect -s -json "$host" config | jq -r .certificate | \
     base64 -d | openssl x509 -text
 
   # ArrayOfByte with DER encoded cert
-  govc object.collect -s CustomizationSpecManager:CustomizationSpecManager encryptionKey | \
+  govc collect -s CustomizationSpecManager:CustomizationSpecManager encryptionKey | \
     base64 -d | openssl x509 -inform DER -text
 
   # []byte field with DER encoded cert
-  govc object.collect -o -json CustomizationSpecManager:CustomizationSpecManager | jq -r .encryptionKey | \
+  govc collect -o -json CustomizationSpecManager:CustomizationSpecManager | jq -r .encryptionKey | \
     base64 -d | openssl x509 -inform DER -text
 }
 
-@test "object.collect view" {
+@test "collect view" {
   vcsim_env -dc 2 -folder 1
 
-  run govc object.collect -type m
+  run govc collect -type m
   assert_success
 
-  run govc object.collect -type m / -name '*C0*'
+  run govc collect -type m / -name '*C0*'
   assert_success
 
-  run govc object.collect -type m / -name
+  run govc collect -type m / -name
   assert_success
 
-  run govc object.collect -type m / name runtime.powerState
+  run govc collect -type m / name runtime.powerState
   assert_success
 
-  run govc object.collect -type m -type h /F0 name
+  run govc collect -type m -type h /F0 name
   assert_success
 
-  run govc object.collect -type n / name
+  run govc collect -type n / name
   assert_success
 
-  run govc object.collect -type enoent / name
+  run govc collect -type enoent / name
   assert_failure
 
-  govc object.collect -wait 5m -s -type m ./vm -name foo &
+  govc collect -wait 5m -s -type m ./vm -name foo &
   pid=$!
   run govc vm.create -on=false foo
   assert_success
 
-  wait $pid # wait for object.collect to exit
+  wait $pid # wait for collect to exit
 
-  run govc object.collect -s -type m ./vm -name foo
+  run govc collect -s -type m ./vm -name foo
   assert_success
 
-  govc object.collect -wait 5m -s -type d / -name dcx &
+  govc collect -wait 5m -s -type d / -name dcx &
   pid=$!
   run govc datacenter.create dcx
   assert_success
 
-  wait $pid # wait for object.collect to exit
+  wait $pid # wait for collect to exit
 
-  run govc object.collect -s -type d / -name dcx
+  run govc collect -s -type d / -name dcx
   assert_success
 }
 
-@test "object.collect raw" {
+@test "collect raw" {
   vcsim_env
 
-  govc object.collect -R - <<EOF | grep serverClock
+  govc collect -R - <<EOF | grep serverClock
 <?xml version="1.0" encoding="UTF-8"?>
 <Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
  <Body>
@@ -429,11 +429,11 @@ load test_helper
 </Envelope>
 EOF
 
-  govc object.collect -O | grep types.CreateFilter
-  govc object.collect -O -json | jq .
+  govc collect -O | grep types.CreateFilter
+  govc collect -O -json | jq .
 }
 
-@test "object.collect index" {
+@test "collect index" {
   vcsim_env
 
   export GOVC_VM=/DC0/vm/DC0_H0_VM0
@@ -441,55 +441,55 @@ EOF
   # NOTE: '-o' flag uses RetrievePropertiesEx() and mo.ObjectContentToType()
   # By default, WaitForUpdatesEx() is used with raw types.ObjectContent
 
-  run govc object.collect -o $GOVC_VM 'config.hardware[4000]'
+  run govc collect -o $GOVC_VM 'config.hardware[4000]'
   assert_failure
 
-  run govc object.collect -o $GOVC_VM 'config.hardware.device[4000'
+  run govc collect -o $GOVC_VM 'config.hardware.device[4000'
   assert_failure
 
-  run govc object.collect -o $GOVC_VM 'config.hardware.device["4000"]'
+  run govc collect -o $GOVC_VM 'config.hardware.device["4000"]'
   assert_failure # Key is int, not string
 
-  run govc object.collect -o -json $GOVC_VM 'config.hardware.device[4000]'
+  run govc collect -o -json $GOVC_VM 'config.hardware.device[4000]'
   assert_success
 
   run jq -r .config.hardware.device[].deviceInfo.label <<<"$output"
   assert_success ethernet-0
 
-  run govc object.collect -o $GOVC_VM 'config.hardware.device[4000].enoent'
+  run govc collect -o $GOVC_VM 'config.hardware.device[4000].enoent'
   assert_failure # InvalidProperty
 
-  run govc object.collect -o -json $GOVC_VM 'config.hardware.device[4000].deviceInfo.label'
+  run govc collect -o -json $GOVC_VM 'config.hardware.device[4000].deviceInfo.label'
   assert_success
 
-  run govc object.collect -s $GOVC_VM 'config.hardware.device[4000].deviceInfo.label'
+  run govc collect -s $GOVC_VM 'config.hardware.device[4000].deviceInfo.label'
   assert_success ethernet-0
 
-  run govc object.collect -o $GOVC_VM 'config.extraConfig[guestinfo.a]'
+  run govc collect -o $GOVC_VM 'config.extraConfig[guestinfo.a]'
   assert_failure # string Key requires quotes
 
-  run govc object.collect -o $GOVC_VM 'config["guestinfo.a"]'
+  run govc collect -o $GOVC_VM 'config["guestinfo.a"]'
   assert_failure
 
-  run govc object.collect -o $GOVC_VM 'config.extraConfig["guestinfo.a"]'
+  run govc collect -o $GOVC_VM 'config.extraConfig["guestinfo.a"]'
   assert_success # Key does not exist, not an error
 
   run govc vm.change -e "guestinfo.a=1" -e "guestinfo.b=2"
   assert_success
 
-  run govc object.collect -json $GOVC_VM 'config.extraConfig["guestinfo.b"]'
+  run govc collect -json $GOVC_VM 'config.extraConfig["guestinfo.b"]'
   assert_success
 
   run jq -r .[].val.value <<<"$output"
   assert_success 2
 
-  run govc object.collect -o -json $GOVC_VM 'config.extraConfig["guestinfo.b"]'
+  run govc collect -o -json $GOVC_VM 'config.extraConfig["guestinfo.b"]'
   assert_success
 
   run jq -r .config.extraConfig[].value <<<"$output"
   assert_success 2
 
-  run govc object.collect -s $GOVC_VM 'config.extraConfig["guestinfo.b"].value'
+  run govc collect -s $GOVC_VM 'config.extraConfig["guestinfo.b"].value'
   assert_success 2
 }
 
@@ -672,19 +672,19 @@ EOF
   run govc object.method -enable=false -name Destroy_Task enoent
   assert_failure
 
-  run govc object.collect -s "$vm" disabledMethod
+  run govc collect -s "$vm" disabledMethod
   ! assert_matches "Destroy_Task" "$output"
 
   run govc object.method -enable=false -name Destroy_Task "$vm"
   assert_success
 
-  run govc object.collect -s "$vm" disabledMethod
+  run govc collect -s "$vm" disabledMethod
   assert_matches "Destroy_Task" "$output"
 
   run govc object.method -enable -name Destroy_Task "$vm"
   assert_success
 
-  run govc object.collect -s "$vm" disabledMethod
+  run govc collect -s "$vm" disabledMethod
   ! assert_matches "Destroy_Task" "$output"
 }
 

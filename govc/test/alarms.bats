@@ -16,7 +16,7 @@ load test_helper
   run govc alarms $vm
   assert_success
 
-  run govc object.collect -s $vm triggeredAlarmState
+  run govc collect -s $vm triggeredAlarmState
   assert_success "" # empty
 
   run env GOVC_SHOW_UNRELEASED=true govc event.post -s info -i vcsim.vm.success $vm
@@ -42,7 +42,7 @@ load test_helper
   run jq -r .[].event.eventTypeId <<<"$alarms"
   assert_success "vcsim.vm.failure"
 
-  run govc object.collect -json -s $vm triggeredAlarmState
+  run govc collect -json -s $vm triggeredAlarmState
   assert_success
   state="$output"
   run jq -r .[].overallStatus <<<"$state"
@@ -53,7 +53,7 @@ load test_helper
   run govc alarms -ack
   assert_success
 
-  run govc object.collect -json -s $vm triggeredAlarmState
+  run govc collect -json -s $vm triggeredAlarmState
   assert_success
   state="$output"
   run jq -r .[].overallStatus <<<"$state"
@@ -64,10 +64,10 @@ load test_helper
   run env GOVC_SHOW_UNRELEASED=true govc event.post -s info -i vcsim.vm.success $vm
   assert_success
 
-  run govc object.collect -s $vm triggeredAlarmState
+  run govc collect -s $vm triggeredAlarmState
   assert_success "" # empty
 
-  run govc object.collect -s / triggeredAlarmState
+  run govc collect -s / triggeredAlarmState
   assert_success "" # empty
 }
 
@@ -88,7 +88,7 @@ load test_helper
 @test "alarm -esx" {
   vcsim_env -esx
 
-  run govc object.collect -s - content.alarmManager
+  run govc collect -s - content.alarmManager
   assert_success "" # empty, no AlarmManager
 
   run govc alarm.info

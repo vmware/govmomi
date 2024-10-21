@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -81,9 +81,9 @@ Examples:
   govc datastore.info
   govc datastore.info vsanDatastore
   # info on Datastores shared between cluster hosts:
-  govc object.collect -s -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
+  govc collect -s -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
   # info on Datastores shared between VM hosts:
-  govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc object.collect -s % summary.runtime.host | xargs govc datastore.info -H`
+  govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc collect -s % summary.runtime.host | xargs govc datastore.info -H`
 }
 
 func intersect(common []types.ManagedObjectReference, refs []types.ManagedObjectReference) []types.ManagedObjectReference {
