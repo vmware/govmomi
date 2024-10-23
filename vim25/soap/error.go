@@ -121,11 +121,11 @@ func IsCertificateUntrusted(err error) bool {
 	// golang 1.20 introduce a new type to wrap 509 errors. So instead of
 	// casting the type, now we check the error chain contains the
 	// x509 error or not.
-	if errors.Is(err, &x509.UnknownAuthorityError{}) {
+	if errors.As(err, &x509.UnknownAuthorityError{}) {
 		return true
 	}
 
-	if errors.Is(err, &x509.HostnameError{}) {
+	if errors.As(err, &x509.HostnameError{}) {
 		return true
 	}
 
