@@ -26,12 +26,18 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type VirtualDiskCryptoKey struct {
+	KeyID      string
+	ProviderID string
+}
+
 type VirtualDiskInfo struct {
 	CapacityInBytes int64
 	DeviceKey       int32
 	FileName        string
 	Size            int64
 	UniqueSize      int64
+	CryptoKey       VirtualDiskCryptoKey
 }
 
 // GetVirtualDiskInfoByUUID returns information about a virtual disk identified
@@ -87,8 +93,9 @@ func GetVirtualDiskInfoByUUID(
 	// Find the disk by UUID by inspecting all of the disk backing types that
 	// can have an associated UUID.
 	var (
-		disk     *types.VirtualDisk
-		fileName string
+		disk      *types.VirtualDisk
+		fileName  string
+		cryptoKey *types.CryptoKeyId
 	)
 	for i := range mo.Config.Hardware.Device {
 		switch tvd := mo.Config.Hardware.Device[i].(type) {
@@ -98,11 +105,13 @@ func GetVirtualDiskInfoByUUID(
 				if tb.Uuid == diskUUID {
 					disk = tvd
 					fileName = tb.FileName
+					cryptoKey = tb.KeyId
 				}
 			case *types.VirtualDiskSeSparseBackingInfo:
 				if tb.Uuid == diskUUID {
 					disk = tvd
 					fileName = tb.FileName
+					cryptoKey = tb.KeyId
 				}
 			case *types.VirtualDiskRawDiskMappingVer1BackingInfo:
 				if tb.Uuid == diskUUID {
@@ -113,6 +122,7 @@ func GetVirtualDiskInfoByUUID(
 				if tb.Uuid == diskUUID {
 					disk = tvd
 					fileName = tb.FileName
+					cryptoKey = tb.KeyId
 				}
 			case *types.VirtualDiskRawDiskVer2BackingInfo:
 				if tb.Uuid == diskUUID {
@@ -154,11 +164,20 @@ func GetVirtualDiskInfoByUUID(
 		}
 	}
 
-	return VirtualDiskInfo{
+	di := VirtualDiskInfo{
 		CapacityInBytes: disk.CapacityInBytes,
 		DeviceKey:       disk.Key,
 		FileName:        fileName,
 		Size:            size,
 		UniqueSize:      uniqueSize,
-	}, nil
+	}
+
+	if ck := cryptoKey; ck != nil {
+		di.CryptoKey.KeyID = ck.KeyId
+		if pid := ck.ProviderId; pid != nil {
+			di.CryptoKey.ProviderID = pid.Id
+		}
+	}
+
+	return di, nil
 }

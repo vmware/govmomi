@@ -79,6 +79,20 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 			}
 		}
 
+		getEncryptedDiskInfo := func(pid, kid string) vmdk.VirtualDiskInfo {
+			return vmdk.VirtualDiskInfo{
+				CapacityInBytes: tenGiBInBytes,
+				DeviceKey:       deviceKey,
+				FileName:        fileName,
+				Size:            (1 * 1024 * 1024 * 1024) + 950,
+				UniqueSize:      (5 * 1024 * 1024) + 100,
+				CryptoKey: vmdk.VirtualDiskCryptoKey{
+					KeyID:      kid,
+					ProviderID: pid,
+				},
+			}
+		}
+
 		getLayoutEx := func() *types.VirtualMachineFileLayoutEx {
 			return &types.VirtualMachineFileLayoutEx{
 				Disk: []types.VirtualMachineFileLayoutExDiskLayout{
@@ -151,6 +165,32 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 				diskInfo: getDiskInfo(),
 			},
 			{
+				name: "one encrypted disk w VirtualDiskFlatVer2BackingInfo",
+				mo: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						Hardware: types.VirtualHardware{
+							Device: []types.BaseVirtualDevice{
+								getDisk(&types.VirtualDiskFlatVer2BackingInfo{
+									VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+										FileName: fileName,
+									},
+									Uuid: diskUUID,
+									KeyId: &types.CryptoKeyId{
+										KeyId: "my-key-id",
+										ProviderId: &types.KeyProviderId{
+											Id: "my-provider-id",
+										},
+									},
+								}),
+							},
+						},
+					},
+					LayoutEx: getLayoutEx(),
+				},
+				diskUUID: diskUUID,
+				diskInfo: getEncryptedDiskInfo("my-provider-id", "my-key-id"),
+			},
+			{
 				name: "one disk w VirtualDiskSeSparseBackingInfo",
 				mo: mo.VirtualMachine{
 					Config: &types.VirtualMachineConfigInfo{
@@ -169,6 +209,32 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 				},
 				diskUUID: diskUUID,
 				diskInfo: getDiskInfo(),
+			},
+			{
+				name: "one encrypted disk w VirtualDiskSeSparseBackingInfo",
+				mo: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						Hardware: types.VirtualHardware{
+							Device: []types.BaseVirtualDevice{
+								getDisk(&types.VirtualDiskSeSparseBackingInfo{
+									VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+										FileName: fileName,
+									},
+									Uuid: diskUUID,
+									KeyId: &types.CryptoKeyId{
+										KeyId: "my-key-id",
+										ProviderId: &types.KeyProviderId{
+											Id: "my-provider-id",
+										},
+									},
+								}),
+							},
+						},
+					},
+					LayoutEx: getLayoutEx(),
+				},
+				diskUUID: diskUUID,
+				diskInfo: getEncryptedDiskInfo("my-provider-id", "my-key-id"),
 			},
 			{
 				name: "one disk w VirtualDiskRawDiskMappingVer1BackingInfo",
@@ -209,6 +275,32 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 				},
 				diskUUID: diskUUID,
 				diskInfo: getDiskInfo(),
+			},
+			{
+				name: "one encrypted disk w VirtualDiskSparseVer2BackingInfo",
+				mo: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						Hardware: types.VirtualHardware{
+							Device: []types.BaseVirtualDevice{
+								getDisk(&types.VirtualDiskSparseVer2BackingInfo{
+									VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+										FileName: fileName,
+									},
+									Uuid: diskUUID,
+									KeyId: &types.CryptoKeyId{
+										KeyId: "my-key-id",
+										ProviderId: &types.KeyProviderId{
+											Id: "my-provider-id",
+										},
+									},
+								}),
+							},
+						},
+					},
+					LayoutEx: getLayoutEx(),
+				},
+				diskUUID: diskUUID,
+				diskInfo: getEncryptedDiskInfo("my-provider-id", "my-key-id"),
 			},
 			{
 				name: "one disk w VirtualDiskRawDiskVer2BackingInfo",
@@ -311,8 +403,9 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 		for i := range testCases {
 			tc := testCases[i]
 			t.Run(tc.name, func(t *testing.T) {
+				var ctx context.Context
 				dii, err := vmdk.GetVirtualDiskInfoByUUID(
-					nil, nil, tc.mo, false, tc.diskUUID)
+					ctx, nil, tc.mo, false, tc.diskUUID)
 
 				if tc.err != "" {
 					assert.EqualError(t, err, tc.err)
