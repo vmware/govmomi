@@ -987,7 +987,7 @@ func TestCryptoManagerKmip(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotEmpty(t, keyID)
 
-			ok, err := m.IsValidKey(ctx, keyID)
+			ok, err := m.IsValidKey(ctx, providerID, keyID)
 			assert.NoError(t, err)
 			assert.True(t, ok)
 		})

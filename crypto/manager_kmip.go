@@ -26,6 +26,13 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+const (
+	CheckKeyAvailable   = int32(0x01)
+	CheckKeyUsedByVms   = int32(0x02)
+	CheckKeyUsedByHosts = int32(0x04)
+	CheckKeyUsedByOther = int32(0x08)
+)
+
 type ManagerKmip struct {
 	object.Common
 }
@@ -313,6 +320,24 @@ func (m ManagerKmip) RemoveKmipServer(
 	return nil
 }
 
+func (m ManagerKmip) QueryCryptoKeyStatus(
+	ctx context.Context,
+	ids []types.CryptoKeyId,
+	check int32) ([]types.CryptoManagerKmipCryptoKeyStatus, error) {
+
+	req := types.QueryCryptoKeyStatus{
+		This:           m.Reference(),
+		KeyIds:         ids,
+		CheckKeyBitMap: check,
+	}
+
+	res, err := methods.QueryCryptoKeyStatus(ctx, m.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Returnval, nil
+}
+
 func (m ManagerKmip) ListKeys(
 	ctx context.Context,
 	limit *int32) ([]types.CryptoKeyId, error) {
@@ -328,17 +353,33 @@ func (m ManagerKmip) ListKeys(
 	return res.Returnval, nil
 }
 
+const keyStateNotActiveOrEnabled = string(types.CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateNotActiveOrEnabled)
+
+// IsValidKey returns true if QueryCryptoKeyStatus results indicate the key is available or unavailable reason is `KeyStateNotActiveOrEnabled`.
+// This method is only valid for standard providers and will always return false for native providers.
 func (m ManagerKmip) IsValidKey(
 	ctx context.Context,
+	providerID,
 	keyID string) (bool, error) {
 
-	keys, err := m.ListKeys(ctx, nil)
+	id := []types.CryptoKeyId{{
+		KeyId: keyID,
+		ProviderId: &types.KeyProviderId{
+			Id: providerID,
+		}},
+	}
+
+	res, err := m.QueryCryptoKeyStatus(ctx, id, CheckKeyAvailable)
 	if err != nil {
 		return false, err
 	}
 
-	for i := range keys {
-		if keys[i].KeyId == keyID {
+	for _, status := range res {
+		if status.KeyAvailable != nil && *status.KeyAvailable {
+			return true, nil
+		}
+
+		if status.Reason == keyStateNotActiveOrEnabled {
 			return true, nil
 		}
 	}
@@ -411,6 +452,21 @@ func (m ManagerKmip) GenerateKey(
 		return "", err
 	}
 	return res.Returnval.KeyId.KeyId, nil
+}
+
+func (m ManagerKmip) RemoveKeys(
+	ctx context.Context,
+	ids []types.CryptoKeyId,
+	force bool) error {
+
+	req := types.RemoveKeys{
+		This:  m.Reference(),
+		Keys:  ids,
+		Force: force,
+	}
+
+	_, err := methods.RemoveKeys(ctx, m.Client(), &req)
+	return err
 }
 
 type generateKeyError struct {
