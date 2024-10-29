@@ -353,17 +353,33 @@ func (m ManagerKmip) ListKeys(
 	return res.Returnval, nil
 }
 
+const keyStateNotActiveOrEnabled = string(types.CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateNotActiveOrEnabled)
+
+// IsValidKey returns true if QueryCryptoKeyStatus results indicate the key is available or unavailable reason is `KeyStateNotActiveOrEnabled`.
+// This method is only valid for standard providers and will always return false for native providers.
 func (m ManagerKmip) IsValidKey(
 	ctx context.Context,
+	providerID,
 	keyID string) (bool, error) {
 
-	keys, err := m.ListKeys(ctx, nil)
+	id := []types.CryptoKeyId{{
+		KeyId: keyID,
+		ProviderId: &types.KeyProviderId{
+			Id: providerID,
+		}},
+	}
+
+	res, err := m.QueryCryptoKeyStatus(ctx, id, CheckKeyAvailable)
 	if err != nil {
 		return false, err
 	}
 
-	for i := range keys {
-		if keys[i].KeyId == keyID {
+	for _, status := range res {
+		if status.KeyAvailable != nil && *status.KeyAvailable {
+			return true, nil
+		}
+
+		if status.Reason == keyStateNotActiveOrEnabled {
 			return true, nil
 		}
 	}
