@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/vmware/govmomi/crypto"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -535,6 +536,60 @@ func (m *CryptoManagerKmip) ListKeys(
 	}
 
 	return &body
+}
+
+func (m *CryptoManagerKmip) QueryCryptoKeyStatus(
+	ctx *Context, req *types.QueryCryptoKeyStatus) soap.HasFault {
+
+	status := make([]types.CryptoManagerKmipCryptoKeyStatus, len(req.KeyIds))
+
+	servers := make(map[string]types.KmipClusterInfo, len(m.KmipServers))
+	for _, p := range m.KmipServers {
+		servers[p.KeyId] = p
+	}
+
+	for i, id := range req.KeyIds {
+		s := types.CryptoManagerKmipCryptoKeyStatus{KeyId: id}
+
+		if req.CheckKeyBitMap&crypto.CheckKeyAvailable != 0 {
+			s.KeyAvailable = types.NewBool(false)
+			s.Reason = string(types.CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateMissingInKMS)
+
+			providerID := ""
+			if id.ProviderId != nil {
+				providerID = id.ProviderId.Id
+			}
+			cluster := servers[providerID]
+			if pid, ok := m.keyIDToProviderID[id.KeyId]; ok {
+				if cluster.ManagementType == string(types.KmipClusterInfoKmsManagementTypeNativeProvider) {
+					s.Reason = string(types.CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateManagedByNKP)
+				} else if pid == providerID {
+					*s.KeyAvailable = true
+					s.Reason = ""
+				}
+			}
+		}
+
+		if req.CheckKeyBitMap&crypto.CheckKeyUsedByVms != 0 {
+			for _, obj := range ctx.Map.All("VirtualMachine") {
+				ctx.WithLock(obj, func() {
+					if key := obj.(*VirtualMachine).Config.KeyId; key != nil {
+						if *key == id {
+							status[i].EncryptedVMs = append(status[i].EncryptedVMs, obj.Reference())
+						}
+					}
+				})
+			}
+		}
+
+		status[i] = s
+	}
+
+	return &methods.QueryCryptoKeyStatusBody{
+		Res: &types.QueryCryptoKeyStatusResponse{
+			Returnval: status,
+		},
+	}
 }
 
 func getDefaultProvider(

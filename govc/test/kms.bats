@@ -80,3 +80,48 @@ load test_helper
   run govc kms.rm nkp
   assert_success
 }
+
+@test "kms.key" {
+  vcsim_env
+
+  run govc kms.add -N nkp
+  assert_success
+
+  host=$(govc env -x GOVC_URL_HOST)
+
+  run govc kms.add -n my-server -a "$host" skp
+  assert_success
+
+  export GOVC_SHOW_UNRELEASED=true
+
+  run govc kms.key.create nkp
+  assert_failure # Cannot generate keys with native key provider
+
+  run govc kms.key.create skp
+  assert_success
+  skey="$output"
+
+  run govc kms.key.info -p skp "$skey"
+  assert_success
+
+  run govc kms.key.info -json "$skey"
+  assert_success
+
+  run jq .status[].keyAvailable <<<"$output"
+  assert_success "false" # provider not specified
+
+  run govc kms.key.info -json -p skp "$skey"
+  assert_success
+
+  run jq .status[].keyAvailable <<<"$output"
+  assert_success "true"
+
+  run govc kms.key.info -p nkp "$skey"
+  assert_success
+
+  run govc kms.key.info -json -p nkp "$skey"
+  assert_success
+
+  run jq .status[].keyAvailable <<<"$output"
+  assert_success "false" # wrong provider for key
+}
