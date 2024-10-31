@@ -402,6 +402,10 @@ func (l VirtualDeviceList) FindSATAController(name string) (types.BaseVirtualCon
 func (l VirtualDeviceList) CreateSATAController() (types.BaseVirtualDevice, error) {
 	sata := &types.VirtualAHCIController{}
 	sata.BusNumber = l.newSATABusNumber()
+	if sata.BusNumber == -1 {
+		return nil, errors.New("no bus numbers available")
+	}
+
 	sata.Key = l.NewKey()
 
 	return sata, nil

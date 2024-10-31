@@ -768,6 +768,24 @@ func TestCreateSCSIController(t *testing.T) {
 	}
 }
 
+func TestCreateSATAController(t *testing.T) {
+	l := VirtualDeviceList{}
+	for _, i := range sataBusNumbers {
+		c, err := l.CreateSATAController()
+		if err != nil {
+			t.Error(err)
+		}
+		if j := c.(types.BaseVirtualController).GetVirtualController().BusNumber; j != int32(i) {
+			t.Errorf("expected bus number: %d, got: %d", i, j)
+		}
+		l = append(l, c)
+	}
+
+	if _, err := l.CreateSATAController(); err == nil {
+		t.Error("should fail")
+	}
+}
+
 func TestCreateEthernetCard(t *testing.T) {
 	_, err := EthernetCardTypes().CreateEthernetCard("enoent", nil)
 	if err == nil {
