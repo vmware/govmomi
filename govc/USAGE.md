@@ -2600,6 +2600,7 @@ The '-type' flag value can be a managed entity type or one of the following alia
 Examples:
   govc find
   govc find -l / # include object type in output
+  govc find -l -I / # include MOID in output
   govc find /dc1 -type c
   govc find vm -name my-vm-*
   govc find . -type n
@@ -2611,6 +2612,7 @@ Examples:
   govc find . -type h -hardware.cpuInfo.numCpuCores 16
 
 Options:
+  -I=false               Print the managed object ID
   -i=false               Print the managed object reference
   -l=false               Long listing format
   -maxdepth=-1           Max depth
@@ -4388,6 +4390,7 @@ Examples:
   govc ls -t Datastore host/ClusterA/* | grep -v local | xargs -n1 basename | sort | uniq
 
 Options:
+  -I=false               Print the managed object ID
   -L=false               Follow managed object references
   -i=false               Print the managed object reference
   -l=false               Long listing format

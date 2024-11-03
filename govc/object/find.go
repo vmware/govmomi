@@ -41,6 +41,7 @@ type find struct {
 	*flags.DatacenterFlag
 
 	ref      bool
+	id       bool
 	long     bool
 	parent   bool
 	kind     kinds
@@ -128,6 +129,7 @@ func (cmd *find) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.name, "name", "*", "Resource name")
 	f.IntVar(&cmd.maxdepth, "maxdepth", -1, "Max depth")
 	f.BoolVar(&cmd.ref, "i", false, "Print the managed object reference")
+	f.BoolVar(&cmd.id, "I", false, "Print the managed object ID")
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.parent, "p", false, "Find parent objects")
 }
@@ -153,6 +155,7 @@ The '-type' flag value can be a managed entity type or one of the following alia
 Examples:
   govc find
   govc find -l / # include object type in output
+  govc find -l -I / # include MOID in output
   govc find /dc1 -type c
   govc find vm -name my-vm-*
   govc find . -type n
@@ -214,6 +217,13 @@ func (cmd *find) writeResult(paths []string) error {
 	return cmd.WriteResult(findResult(paths))
 }
 
+func (cmd *find) mo(o types.ManagedObjectReference) string {
+	if cmd.id {
+		return o.Value
+	}
+	return o.String()
+}
+
 func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
@@ -223,6 +233,10 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	finder, err := cmd.Finder()
 	if err != nil {
 		return err
+	}
+
+	if cmd.id {
+		cmd.ref = true
 	}
 
 	root := client.ServiceContent.RootFolder
@@ -316,7 +330,7 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	printPath := func(o types.ManagedObjectReference, p string) {
 		if cmd.ref && !cmd.long {
-			paths = append(paths, o.String())
+			paths = append(paths, cmd.mo(o))
 			return
 		}
 
@@ -324,7 +338,7 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 		if cmd.long {
 			id := strings.TrimPrefix(o.Type, "Vmware")
 			if cmd.ref {
-				id = o.String()
+				id = cmd.mo(o)
 			}
 
 			path = id + "\t" + path

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,6 +36,7 @@ type ls struct {
 	Long  bool
 	Type  string
 	ToRef bool
+	ToID  bool
 	DeRef bool
 }
 
@@ -49,6 +50,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.Long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.ToRef, "i", false, "Print the managed object reference")
+	f.BoolVar(&cmd.ToID, "I", false, "Print the managed object ID")
 	f.BoolVar(&cmd.DeRef, "L", false, "Follow managed object references")
 	f.StringVar(&cmd.Type, "t", "", "Object type")
 }
@@ -145,8 +147,13 @@ func (l listResult) Write(w io.Writer) error {
 	var err error
 
 	for _, e := range l.Elements {
-		if l.ToRef {
-			fmt.Fprint(w, e.Object.Reference().String())
+		if l.ToRef || l.ToID {
+			ref := e.Object.Reference()
+			id := ref.String()
+			if l.ToID {
+				id = ref.Value
+			}
+			fmt.Fprint(w, id)
 			if l.Long {
 				fmt.Fprintf(w, " %s", e.Path)
 			}
