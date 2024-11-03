@@ -41,11 +41,13 @@ var refValueMap = map[string]string{
 	"EnvironmentBrowser":             "envbrowser",
 	"HostSystem":                     "host",
 	"ResourcePool":                   "resgroup",
+	"VirtualApp":                     "resgroup-v",
 	"VirtualMachine":                 "vm",
 	"VirtualMachineSnapshot":         "snapshot",
 	"VmwareDistributedVirtualSwitch": "dvs",
 	"DistributedVirtualSwitch":       "dvs",
 	"ClusterComputeResource":         "domain-c",
+	"ComputeResource":                "domain-s",
 	"Folder":                         "group",
 	"StoragePod":                     "group-p",
 }

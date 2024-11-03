@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -104,4 +104,49 @@ func TestFindNetwork(t *testing.T) {
 			}
 		}
 	}, model)
+}
+
+func TestFindByID(t *testing.T) {
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		find := find.NewFinder(c)
+
+		vms, err := find.VirtualMachineList(ctx, "*")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, vm := range vms {
+			ref := vm.Reference()
+			byRef, err := find.VirtualMachine(ctx, ref.String())
+			if err != nil {
+				t.Fatal(err)
+			}
+			if byRef.InventoryPath != vm.InventoryPath {
+				t.Errorf("InventoryPath=%q", byRef.InventoryPath)
+			}
+			if byRef.Reference() != ref {
+				t.Error(byRef.Reference())
+			}
+			_, err = find.VirtualMachine(ctx, ref.String()+"invalid")
+			if err == nil {
+				t.Error("expected error")
+			}
+
+			byID, err := find.VirtualMachine(ctx, ref.Value)
+			if err != nil {
+				t.Error(err)
+			}
+			if byID.InventoryPath != vm.InventoryPath {
+				t.Errorf("InventoryPath=%q", byID.InventoryPath)
+			}
+			if byID.Reference() != ref {
+				t.Error(byID.Reference())
+			}
+			_, err = find.VirtualMachine(ctx, ref.Value+"invalid")
+			if err == nil {
+				t.Error("expected error")
+			}
+
+		}
+	})
 }

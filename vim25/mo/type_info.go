@@ -337,6 +337,16 @@ func IsManagedObjectType(kind string) bool {
 	return ok
 }
 
+// Value returns a new mo instance of the given ref Type.
+func Value(ref types.ManagedObjectReference) (Reference, bool) {
+	if rt, ok := t[ref.Type]; ok {
+		val := reflect.New(rt)
+		val.Interface().(Entity).Entity().Self = ref
+		return val.Elem().Interface().(Reference), true
+	}
+	return nil, false
+}
+
 // Field of a ManagedObject in string form.
 type Field struct {
 	Path string

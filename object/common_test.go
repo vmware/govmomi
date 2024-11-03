@@ -18,11 +18,13 @@ package object_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestCommonName(t *testing.T) {
@@ -62,4 +64,30 @@ func TestObjectName(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestReferenceFromString(t *testing.T) {
+	tests := []struct {
+		in  string
+		out *types.ManagedObjectReference
+	}{
+		{"no:no", nil},
+		{"Datacenter:yes", &types.ManagedObjectReference{Type: "Datacenter", Value: "yes"}},
+		{"datacenter-yes", &types.ManagedObjectReference{Type: "Datacenter", Value: "datacenter-yes"}},
+		{"VirtualMachine:vm-2", &types.ManagedObjectReference{Type: "VirtualMachine", Value: "vm-2"}},
+		{"vm-2", &types.ManagedObjectReference{Type: "VirtualMachine", Value: "vm-2"}},
+		{"domain-s2", &types.ManagedObjectReference{Type: "ComputeResource", Value: "domain-s2"}},
+		{"domain-c2", &types.ManagedObjectReference{Type: "ClusterComputeResource", Value: "domain-c2"}},
+		{"group-d1", &types.ManagedObjectReference{Type: "Folder", Value: "group-d1"}},
+		{"group-p2", &types.ManagedObjectReference{Type: "StoragePod", Value: "group-p2"}},
+		{"resgroup-42", &types.ManagedObjectReference{Type: "ResourcePool", Value: "resgroup-42"}},
+		{"resgroup-v32", &types.ManagedObjectReference{Type: "VirtualApp", Value: "resgroup-v32"}},
+	}
+
+	for _, test := range tests {
+		ref := object.ReferenceFromString(test.in)
+		if !reflect.DeepEqual(test.out, ref) {
+			t.Errorf("%s: expected %v, got %v", test.in, test.out, ref)
+		}
+	}
 }

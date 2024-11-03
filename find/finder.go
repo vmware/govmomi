@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,6 +22,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/object"
@@ -115,6 +116,19 @@ func (f *Finder) findRoot(ctx context.Context, root *list.Element, parts []strin
 
 func (f *Finder) find(ctx context.Context, arg string, s *spec) ([]list.Element, error) {
 	isPath := strings.Contains(arg, "/")
+
+	if !isPath {
+		if ref := object.ReferenceFromString(arg); ref != nil {
+			p, err := InventoryPath(ctx, f.client, *ref)
+			if err == nil {
+				if t, ok := mo.Value(*ref); ok {
+					return []list.Element{{Object: t, Path: p}}, nil
+				}
+			} else if !fault.Is(err, &types.ManagedObjectNotFound{}) {
+				return nil, err
+			} // else fall through to name based lookup
+		}
+	}
 
 	root := list.Element{
 		Object: object.NewRootFolder(f.client),
@@ -821,11 +835,6 @@ func (f *Finder) Network(ctx context.Context, path string) (object.NetworkRefere
 }
 
 func (f *Finder) networkByID(ctx context.Context, path string) (object.NetworkReference, error) {
-	if ref := object.ReferenceFromString(path); ref != nil {
-		// This is a MOID
-		return object.NewReference(f.client, *ref).(object.NetworkReference), nil
-	}
-
 	kind := []string{"DistributedVirtualPortgroup"}
 
 	m := view.NewManager(f.client)

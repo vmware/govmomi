@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,9 @@ otherwise "find" mode is used.
 
 The exception is to use a "..." wildcard with a path to find all objects recursively underneath any root object.
 For example: VirtualMachineList("/DC1/...")
+
+Finder methods can also convert a managed object reference (aka MOID) to an object instance.
+For example: VirtualMachine("VirtualMachine:vm-123") or VirtualMachine("vm-123")
 
 See also: https://github.com/vmware/govmomi/blob/main/govc/README.md#usage
 */
