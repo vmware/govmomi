@@ -208,7 +208,7 @@ func (f *Folder) CreateFolder(ctx *Context, c *types.CreateFolder) soap.HasFault
 		if obj := ctx.Map.FindByName(name, f.ChildEntity); obj != nil {
 			r.Fault_ = Fault("", &types.DuplicateName{
 				Name:   name,
-				Object: f.Self,
+				Object: obj.Reference(),
 			})
 
 			return r
@@ -250,7 +250,7 @@ func (f *Folder) CreateStoragePod(ctx *Context, c *types.CreateStoragePod) soap.
 		if obj := ctx.Map.FindByName(c.Name, f.ChildEntity); obj != nil {
 			r.Fault_ = Fault("", &types.DuplicateName{
 				Name:   c.Name,
-				Object: f.Self,
+				Object: obj.Reference(),
 			})
 
 			return r

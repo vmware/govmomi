@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
@@ -73,7 +74,7 @@ func TestFolderESX(t *testing.T) {
 
 	_, err = f.CreateDatacenter(ctx, "foo")
 	if err == nil {
-		t.Error("expected error")
+		t.Fatal("expected error")
 	}
 
 	finder := find.NewFinder(c.Client, false)
@@ -119,6 +120,20 @@ func TestFolderVC(t *testing.T) {
 		t.Error(err)
 	}
 
+	_, err = f.CreateFolder(ctx, "foo")
+	if err == nil {
+		t.Error("expected error")
+	}
+
+	var dup *types.DuplicateName
+	_, ok := fault.As(err, &dup)
+	if !ok {
+		t.Fatal("expected DuplicateName type")
+	}
+	if dup.Object != ff.Reference() {
+		t.Fatal("Duplicate object not matched")
+	}
+
 	dc, err := f.CreateDatacenter(ctx, "bar")
 	if err != nil {
 		t.Error(err)
@@ -151,9 +166,21 @@ func TestFolderVC(t *testing.T) {
 		t.Error("expected error")
 	}
 
-	_, err = folders.DatastoreFolder.CreateStoragePod(ctx, "pod")
+	pod, err := folders.DatastoreFolder.CreateStoragePod(ctx, "pod")
 	if err != nil {
 		t.Error(err)
+	}
+
+	_, err = folders.DatastoreFolder.CreateStoragePod(ctx, "pod")
+	if err == nil {
+		t.Error("expected error")
+	}
+	_, ok = fault.As(err, &dup)
+	if !ok {
+		t.Fatal("expected DuplicateName type")
+	}
+	if dup.Object != pod.Reference() {
+		t.Fatal("Duplicate object not matched")
 	}
 
 	tests := []struct {
