@@ -31,6 +31,7 @@ import (
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -105,9 +106,8 @@ func validateNginxContainer(t *testing.T, vm *object.VirtualMachine, expected st
 // 3. Confirm docker container present that matches expectations
 func TestCreateVMWithContainerBacking(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
-		if _, err := exec.LookPath("docker"); err != nil {
-			fmt.Println("0 diff")
-			t.Skip("docker client binary not on PATH")
+		if !test.HasDocker() {
+			t.Skip("requires docker on linux")
 			return
 		}
 
@@ -177,7 +177,6 @@ func TestCreateVMWithContainerBacking(t *testing.T) {
 		task, _ = vm.Destroy(ctx)
 		_ = task.Wait(ctx)
 	})
-	// Output: 0 diff
 }
 
 // 1. Create VM without ExtraConfig args for container backing
@@ -186,9 +185,8 @@ func TestCreateVMWithContainerBacking(t *testing.T) {
 // 4. Confirm docker container present that matches expectations
 func TestUpdateVMAddContainerBacking(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
-		if _, err := exec.LookPath("docker"); err != nil {
-			fmt.Println("0 diff")
-			t.Skip("docker client binary not on PATH")
+		if !test.HasDocker() {
+			t.Skip("requires docker on linux")
 			return
 		}
 
@@ -255,5 +253,4 @@ func TestUpdateVMAddContainerBacking(t *testing.T) {
 		task, _ = vm.Destroy(ctx)
 		_ = task.Wait(ctx)
 	})
-	// Output: 0 diff
 }
