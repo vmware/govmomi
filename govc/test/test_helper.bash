@@ -44,6 +44,10 @@ require_docker() {
   if ! docker version ; then
     skip "docker client not installed"
   fi
+
+  if [ "$(uname)" != "Linux" ] ; then
+     skip "docker tests require linux"
+  fi
 }
 
 docker_name() {

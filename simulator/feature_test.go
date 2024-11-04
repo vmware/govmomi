@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -88,7 +89,7 @@ func Example_setVirtualMachineProperties() {
 // Tie a docker container to the lifecycle of a vcsim VM
 func Example_runContainer() {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		if _, err := exec.LookPath("docker"); err != nil {
+		if !test.HasDocker() {
 			fmt.Println("0 diff")
 			return
 		}

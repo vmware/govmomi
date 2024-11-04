@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -161,6 +162,10 @@ func TestPerHostOptionManager(t *testing.T) {
 }
 
 func TestHostContainerBacking(t *testing.T) {
+	if !test.HasDocker() {
+		t.Skip("requires docker on linux")
+	}
+
 	m := ESX()
 
 	defer m.Remove()
@@ -188,6 +193,10 @@ func TestHostContainerBacking(t *testing.T) {
 }
 
 func TestMultipleSimHost(t *testing.T) {
+	if !test.HasDocker() {
+		t.Skip("requires docker on linux")
+	}
+
 	m := ESX()
 
 	defer m.Remove()

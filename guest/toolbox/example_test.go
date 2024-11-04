@@ -18,18 +18,24 @@ package toolbox_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/guest/toolbox"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 func ExampleClient_Run() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		if !test.HasDocker() {
+			fmt.Println("Linux")
+			return nil
+		}
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
 		if err != nil {
 			return err
