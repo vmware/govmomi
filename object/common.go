@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
@@ -136,13 +137,58 @@ func (c Common) SetCustomValue(ctx context.Context, key string, value string) er
 	return err
 }
 
+var refTypeMap = map[string]string{
+	"datacenter":  "Datacenter",
+	"datastore":   "Datastore",
+	"domain":      "ComputeResource",
+	"dvportgroup": "DistributedVirtualPortgroup",
+	"dvs":         "DistributedVirtualSwitch",
+	"group":       "Folder",
+	"host":        "HostSystem",
+	"network":     "Network",
+	"resgroup":    "ResourcePool",
+	"vm":          "VirtualMachine",
+}
+
+// sub types
+var prefixTypeMap = map[string]struct{ prefix, kind string }{
+	"domain":   {"c", "ClusterComputeResource"}, // extends ComputeResource
+	"group":    {"p", "StoragePod"},             // extends Folder
+	"resgroup": {"v", "VirtualApp"},             // extends ResourcePool
+}
+
+// ReferenceFromString converts a string to ManagedObjectReference.
+// First checks for ManagedObjectReference (MOR), in the format of:
+// "$Type:$ID", e.g. "Datacenter:datacenter-3"
+// Next checks for Managed Object ID (MOID), where type is derived from the ID.
+// For example, "datacenter-3" is converted to a MOR "Datacenter:datacenter-3"
+// Returns nil if string is not in either format.
 func ReferenceFromString(s string) *types.ManagedObjectReference {
 	var ref types.ManagedObjectReference
-	if !ref.FromString(s) {
-		return nil
-	}
-	if mo.IsManagedObjectType(ref.Type) {
+	if ref.FromString(s) && mo.IsManagedObjectType(ref.Type) {
 		return &ref
 	}
+
+	id := strings.SplitN(s, "-", 2)
+	if len(id) != 2 {
+		return nil
+	}
+
+	if kind, ok := refTypeMap[id[0]]; ok {
+		if p, ok := prefixTypeMap[id[0]]; ok {
+			if strings.HasPrefix(id[1], p.prefix) {
+				return &types.ManagedObjectReference{
+					Type:  p.kind,
+					Value: s,
+				}
+			}
+		}
+
+		return &types.ManagedObjectReference{
+			Type:  kind,
+			Value: s,
+		}
+	}
+
 	return nil
 }

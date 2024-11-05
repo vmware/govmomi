@@ -493,6 +493,42 @@ EOF
   assert_success 2
 }
 
+@test "collect by id" {
+  vcsim_env -standalone-host 0 -pod 1 -app 1
+
+  run govc find -i /
+  assert_success
+
+  for ref in "${lines[@]}" ; do
+    run govc collect "$ref" name
+    assert_success
+  done
+
+  run govc find -I /
+  assert_success
+
+  for id in "${lines[@]}" ; do
+    run govc collect "$id" name
+    assert_success
+  done
+
+  run govc find -I -type m /
+  assert_success
+
+  for id in "${lines[@]}" ; do
+    run govc vm.info "$id"
+    assert_success
+  done
+
+  run govc find -I -type h /
+  assert_success
+
+  for id in "${lines[@]}" ; do
+    run govc host.info "$id"
+    assert_success
+  done
+}
+
 @test "object.find" {
   vcsim_env -ds 2
 

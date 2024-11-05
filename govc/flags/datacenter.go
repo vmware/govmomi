@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -197,16 +197,6 @@ func (flag *DatacenterFlag) ManagedObjects(ctx context.Context, args []string) (
 	}
 
 	for _, arg := range args {
-		if ref := object.ReferenceFromString(arg); ref != nil {
-			// e.g. output from object.collect
-			refs = append(refs, *ref)
-			continue
-		}
-
-		if !strings.Contains(arg, "/") {
-			return nil, fmt.Errorf("%q must be qualified with a path", arg)
-		}
-
 		elements, err := finder.ManagedObjectList(ctx, arg)
 		if err != nil {
 			return nil, err
@@ -214,6 +204,10 @@ func (flag *DatacenterFlag) ManagedObjects(ctx context.Context, args []string) (
 
 		if len(elements) == 0 {
 			return nil, fmt.Errorf("object '%s' not found", arg)
+		}
+
+		if len(elements) > 1 && !strings.Contains(arg, "/") {
+			return nil, fmt.Errorf("%q must be qualified with a path", arg)
 		}
 
 		for _, e := range elements {
