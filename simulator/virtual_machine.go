@@ -238,6 +238,8 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		{spec.Files.SnapshotDirectory, &vm.Config.Files.SnapshotDirectory},
 		{spec.Files.SuspendDirectory, &vm.Config.Files.SuspendDirectory},
 		{spec.Files.LogDirectory, &vm.Config.Files.LogDirectory},
+		{spec.FtEncryptionMode, &vm.Config.FtEncryptionMode},
+		{spec.MigrateEncryption, &vm.Config.MigrateEncryption},
 	}
 
 	for _, f := range apply {
