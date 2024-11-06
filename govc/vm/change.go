@@ -103,7 +103,11 @@ func (cmd *change) setLatency() error {
 	return fmt.Errorf("latency must be one of: %s", strings.Join(latencyLevels, "|"))
 }
 
-var hwUpgradePolicies = types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicy("").Strings()
+var (
+	hwUpgradePolicies      = types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicy("").Strings()
+	ftEncryptionModes      = types.VirtualMachineConfigSpecEncryptedFtModes("").Strings()
+	migrateEncryptionModes = types.VirtualMachineConfigSpecEncryptedVMotionModes("").Strings()
+)
 
 // setHwUpgradePolicy validates hwUpgradePolicy if set
 func (cmd *change) setHwUpgradePolicy() error {
@@ -176,6 +180,9 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.Flags.VvtdEnabled), "iommu-enabled", "Enable IOMMU")
 
 	f.StringVar(&cmd.hwUpgradePolicy, "scheduled-hw-upgrade-policy", "", fmt.Sprintf("Schedule hardware upgrade policy (%s)", strings.Join(hwUpgradePolicies, "|")))
+
+	f.StringVar(&cmd.FtEncryptionMode, "ft-encryption-mode", "", fmt.Sprintf("Encrypted fault tolerance mode (%s)", strings.Join(ftEncryptionModes, "|")))
+	f.StringVar(&cmd.MigrateEncryption, "migrate-encryption", "", fmt.Sprintf("Encrypted vMotion mode (%s)", strings.Join(migrateEncryptionModes, "|")))
 }
 
 func (cmd *change) Description() string {

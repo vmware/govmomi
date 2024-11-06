@@ -6476,6 +6476,7 @@ Options:
   -cpu.shares=                   CPU shares level or number
   -e=[]                          ExtraConfig. <key>=<value>
   -f=[]                          ExtraConfig. <key>=<absolute path to file>
+  -ft-encryption-mode=           Encrypted fault tolerance mode (ftEncryptionDisabled|ftEncryptionOpportunistic|ftEncryptionRequired)
   -g=                            Guest OS
   -iommu-enabled=<nil>           Enable IOMMU
   -latency=                      Latency sensitivity (low|normal|medium|high|custom)
@@ -6486,6 +6487,7 @@ Options:
   -mem.shares=                   Memory shares level or number
   -memory-hot-add-enabled=<nil>  Enable memory hot add
   -memory-pin=<nil>              Reserve all guest memory
+  -migrate-encryption=           Encrypted vMotion mode (disabled|opportunistic|required)
   -name=                         Display name
   -nested-hv-enabled=<nil>       Enable nested hardware-assisted virtualization
   -scheduled-hw-upgrade-policy=  Schedule hardware upgrade policy (never|onSoftPowerOff|always)

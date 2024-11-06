@@ -212,6 +212,15 @@ load test_helper
   run govc object.collect -s "vm/$id" config.managedBy
   assert_success ""
 
+  run govc vm.change -vm $id -migrate-encryption required -ft-encryption-mode ftEncryptionRequired
+  assert_success
+
+  run govc collect -s "vm/$id" config.migrateEncryption
+  assert_success "required"
+
+  run govc collect -s "vm/$id" config.FtEncryptionMode
+  assert_success "ftEncryptionRequired"
+
   nid=$(new_id)
   run govc vm.change -name $nid -vm $id
   assert_success
