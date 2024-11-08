@@ -94,13 +94,21 @@ install: ## Install govc and vcsim
 ## Generate
 ## --------------------------------------
 
-.PHONY: mod
-mod: ## Runs go mod tidy to validate modules
-	go mod tidy -v
+GO_MOD_FILES := $(filter-out ./hack/tools/go.mod,$(shell find . -name go.mod))
+GO_MOD_OP := tidy
 
-.PHONY: mod-get
-mod-get: ## Downloads and caches the modules
-	go mod download
+.PHONY: $(GO_MOD_FILES)
+$(GO_MOD_FILES):
+	go -C $(@D) mod $(GO_MOD_OP)
+
+.PHONY: mod
+mod: $(GO_MOD_FILES)
+mod: ## Validates the modules
+
+.PHONY: modules-download
+mod-download: GO_MOD_OP=download
+mod-download: $(GO_MOD_FILES)
+mod-download: ## Downloads and caches the modules
 
 .PHONY: doc
 doc: install
