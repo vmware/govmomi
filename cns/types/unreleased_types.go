@@ -28,9 +28,41 @@ type CnsBlockCreateSpec struct {
 
 	// Crypto specifies the encryption settings for the volume to be created.
 	// Works with block volumes only.
-	CryptoSpec *types.CryptoSpec `xml:"cryptoSpec,omitempty"`
+	CryptoSpec types.BaseCryptoSpec `xml:"cryptoSpec,omitempty,typeattr"`
 }
 
 func init() {
 	types.Add("CnsBlockCreateSpec", reflect.TypeOf((*CnsBlockCreateSpec)(nil)).Elem())
+}
+
+type CnsUpdateVolumeCryptoRequestType struct {
+	This        types.ManagedObjectReference `xml:"_this"`
+	UpdateSpecs []CnsVolumeCryptoUpdateSpec  `xml:"updateSpecs,omitempty"`
+}
+
+func init() {
+	types.Add("CnsUpdateVolumeCryptoRequestType", reflect.TypeOf((*CnsUpdateVolumeCryptoRequestType)(nil)).Elem())
+}
+
+type CnsUpdateVolumeCrypto CnsUpdateVolumeCryptoRequestType
+
+func init() {
+	types.Add("CnsUpdateVolumeCrypto", reflect.TypeOf((*CnsUpdateVolumeCrypto)(nil)).Elem())
+}
+
+type CnsUpdateVolumeCryptoResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+// CnsVolumeCryptoUpdateSpec is the specification for volume crypto update operation.
+type CnsVolumeCryptoUpdateSpec struct {
+	types.DynamicData
+
+	VolumeId    CnsVolumeId                           `xml:"volumeId"`
+	Profile     []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
+	DisksCrypto *types.DiskCryptoSpec                 `xml:"disksCrypto,omitempty"`
+}
+
+func init() {
+	types.Add("CnsVolumeCryptoUpdateSpec", reflect.TypeOf((*CnsVolumeCryptoUpdateSpec)(nil)).Elem())
 }
