@@ -18,7 +18,8 @@ builds:
     env:
       - CGO_ENABLED=0
       - PKGPATH=github.com/vmware/govmomi/govc/flags
-    main: ./govc/main.go
+    dir: ./govc
+    main: .
     binary: govc
     ldflags:
       - "-X {{.Env.PKGPATH}}.BuildVersion={{.Version}} -X {{.Env.PKGPATH}}.BuildCommit={{.ShortCommit}} -X {{.Env.PKGPATH}}.BuildDate={{.Date}}"
@@ -28,7 +29,8 @@ builds:
     goarch: *goarch-defs
     env:
       - CGO_ENABLED=0
-    main: ./vcsim/main.go
+    dir: ./vcsim
+    main: .
     binary: vcsim
     ldflags:
       - "-X main.buildVersion={{.Version}} -X main.buildCommit={{.ShortCommit}} -X main.buildDate={{.Date}}"

@@ -30,16 +30,28 @@ toolchain](https://golang.org/dl/). You can then install the latest `vcsim` from
 Github using:
 
 ```bash
-go install github.com/vmware/govmomi/vcsim@latest
-$GOPATH/bin/vcsim -h
+cd $(mktemp -d) && git clone github.com/vmware/govmomi . && go -C vcsim install
 ```
 
 **Note:** To inject build variables (see details
-[below](#install-via-goreleaser)) used by `vcsim version`, `GOFLAGS` can be
+[below](#install-via-goreleaser)) used by `govc version [-l]`, `GOFLAGS` can be
 defined and are honored by `go get`.
 
 ⚠️ Make sure `$GOPATH/bin` is in your `PATH` to use the version installed from
 source.
+
+If you've made local modifications to the repository, you can install with the
+following command from inside the `./vcsim` package:
+
+```bash
+go install .
+```
+
+You can also use the following command from the root of the project:
+
+```bash
+go -C vcsim install
+```
 
 #### Install via `goreleaser`
 

@@ -31,7 +31,7 @@ toolchain](https://golang.org/dl/). You can then install the latest `govc` from
 Github using:
 
 ```bash
-go install github.com/vmware/govmomi/govc@latest
+cd $(mktemp -d) && git clone github.com/vmware/govmomi . && go -C govc install
 ```
 
 **Note:** To inject build variables (see details
@@ -41,11 +41,17 @@ defined and are honored by `go get`.
 ⚠️ Make sure `$GOPATH/bin` is in your `PATH` to use the version installed from
 source.
 
-If you've made local modifications to the repository at
-`$GOPATH/src/github.com/vmware/govmomi`, you can install using:
+If you've made local modifications to the repository, you can install with the
+following command from inside the `./govc` package:
 
 ```bash
-go install github.com/vmware/govmomi/govc
+go install .
+```
+
+You can also use the following command from the root of the project:
+
+```bash
+go -C govc install
 ```
 
 #### Install via `goreleaser`
