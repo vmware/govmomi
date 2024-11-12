@@ -92,7 +92,11 @@ func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference,
 	for _, p := range f.Spec.PropSet {
 		if p.Type != ref.Type {
 			if kind == nil {
-				kind = getManagedObject(ctx.Map.Get(ref)).Type()
+				obj := ctx.Map.Get(ref)
+				if obj == nil { // object may have since been deleted
+					continue
+				}
+				kind = getManagedObject(obj).Type()
 			}
 			// e.g. ManagedEntity, ComputeResource
 			field, ok := kind.FieldByName(p.Type)
