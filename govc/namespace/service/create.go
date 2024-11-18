@@ -44,10 +44,9 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
-	flag.StringVar(&cmd.specType, "spec-type", "vsphere", "Type of Spec: only vsphere is supported right now")
-	flag.BoolVar(&cmd.trustedProvider, "trusted", false, "Define if this is a trusted provider")
-	flag.BoolVar(&cmd.acceptEULA, "accept-eula", false, "Auto accept EULA")
-
+	f.StringVar(&cmd.specType, "spec-type", "vsphere", "Type of Spec: only vsphere is supported right now")
+	f.BoolVar(&cmd.trustedProvider, "trusted", false, "Define if this is a trusted provider")
+	f.BoolVar(&cmd.acceptEULA, "accept-eula", false, "Auto accept EULA")
 }
 
 func (cmd *create) Description() string {

@@ -4750,6 +4750,9 @@ Examples:
   govc namespace.service.create manifest.yaml
 
 Options:
+  -accept-eula=false     Auto accept EULA
+  -spec-type=vsphere     Type of Spec: only vsphere is supported right now
+  -trusted=false         Define if this is a trusted provider
 ```
 
 ## namespace.service.deactivate
