@@ -17,7 +17,7 @@ builds:
       - s390x
     env:
       - CGO_ENABLED=0
-      - PKGPATH=github.com/vmware/govmomi/govc/flags
+      - PKGPATH=github.com/vmware/govmomi/cli/flags
     dir: ./govc
     main: .
     binary: govc
