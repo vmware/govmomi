@@ -36,7 +36,8 @@ func (b ByteSlice) MarshalXML(e *xml.Encoder, field xml.StartElement) error {
 		Name: field.Name,
 	}
 	for i := range b {
-		if err := e.EncodeElement(b[i], start); err != nil {
+		// Using int8() here to output a signed byte (issue #3615)
+		if err := e.EncodeElement(int8(b[i]), start); err != nil {
 			return err
 		}
 	}
