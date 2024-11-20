@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ type Executor struct {
 	mme  *internal.ReflectManagedMethodExecuter
 	dtm  *internal.InternalDynamicTypeManager
 	info map[string]*CommandInfo
+
+	Trace func(*internal.ExecuteSoapRequest, *internal.ExecuteSoapResponse)
 }
 
 func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
@@ -88,32 +90,42 @@ func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
 	return e, nil
 }
 
-func (e *Executor) CommandInfo(c *Command) (*CommandInfoMethod, error) {
+func (e *Executor) CommandInfo(ns string) (*CommandInfo, error) {
+	info, ok := e.info[ns]
+	if ok {
+		return info, nil
+	}
+
+	req := internal.ExecuteSoapRequest{
+		Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
+		Method: "vim.CLIInfo.FetchCLIInfo",
+		Argument: []internal.ReflectManagedMethodExecuterSoapArgument{
+			NewCommand(nil).Argument("typeName", "vim.EsxCLI."+ns),
+		},
+	}
+
+	info = new(CommandInfo)
+	if err := e.Execute(&req, info); err != nil {
+		return nil, err
+	}
+
+	e.info[ns] = info
+
+	return info, nil
+}
+
+func (e *Executor) CommandInfoMethod(c *Command) (*CommandInfoMethod, error) {
 	ns := c.Namespace()
-	var info *CommandInfo
-	var ok bool
 
-	if info, ok = e.info[ns]; !ok {
-		req := internal.ExecuteSoapRequest{
-			Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
-			Method: "vim.CLIInfo.FetchCLIInfo",
-			Argument: []internal.ReflectManagedMethodExecuterSoapArgument{
-				c.Argument("typeName", "vim.EsxCLI."+ns),
-			},
-		}
-
-		info = new(CommandInfo)
-		if err := e.Execute(&req, info); err != nil {
-			return nil, err
-		}
-
-		e.info[ns] = info
+	info, err := e.CommandInfo(ns)
+	if err != nil {
+		return nil, err
 	}
 
 	name := c.Name()
 	for _, method := range info.Method {
 		if method.Name == name {
-			return method, nil
+			return &method, nil
 		}
 	}
 
@@ -123,7 +135,7 @@ func (e *Executor) CommandInfo(c *Command) (*CommandInfoMethod, error) {
 func (e *Executor) NewRequest(args []string) (*internal.ExecuteSoapRequest, *CommandInfoMethod, error) {
 	c := NewCommand(args)
 
-	info, err := e.CommandInfo(c)
+	info, err := e.CommandInfoMethod(c)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -150,6 +162,10 @@ func (e *Executor) Execute(req *internal.ExecuteSoapRequest, res interface{}) er
 	x, err := internal.ExecuteSoap(ctx, e.c, req)
 	if err != nil {
 		return err
+	}
+
+	if e.Trace != nil {
+		e.Trace(req, x)
 	}
 
 	if x.Returnval != nil {

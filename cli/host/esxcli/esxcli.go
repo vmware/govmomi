@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,18 +22,24 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
+	"os/exec"
 	"sort"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/dougm/pretty"
+
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
+	"github.com/vmware/govmomi/internal"
 )
 
 type esxcli struct {
 	*flags.HostSystemFlag
 
 	hints bool
+	trace bool
 }
 
 func init() {
@@ -49,6 +55,9 @@ func (cmd *esxcli) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.hints, "hints", true, "Use command info hints when formatting output")
+	if cli.ShowUnreleased() {
+		f.BoolVar(&cmd.trace, "T", false, "Write esxcli nested SOAP traffic to stderr")
+	}
 }
 
 func (cmd *esxcli) Description() string {
@@ -71,6 +80,38 @@ func (cmd *esxcli) Process(ctx context.Context) error {
 	return nil
 }
 
+func fmtXML(s string) {
+	cmd := exec.Command("xmlstarlet", "fo")
+	cmd.Stdout = os.Stderr
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = strings.NewReader(s)
+	if err := cmd.Run(); err != nil {
+		panic(err) // yes xmlstarlet is required (your eyes will thank you)
+	}
+}
+
+func (cmd *esxcli) Trace(req *internal.ExecuteSoapRequest, res *internal.ExecuteSoapResponse) {
+	x := res.Returnval
+
+	if req.Moid == "ha-dynamic-type-manager-local-cli-cliinfo" {
+		if x.Fault == nil {
+			return // TODO: option to trace this
+		}
+	}
+
+	pretty.Fprintf(os.Stderr, "%# v\n", req)
+
+	if x.Fault == nil {
+		fmtXML(res.Returnval.Response)
+	} else {
+		fmt.Fprintln(os.Stderr, "Message=", x.Fault.FaultMsg)
+		if x.Fault.FaultDetail != "" {
+			fmt.Fprint(os.Stderr, "Detail=")
+			fmtXML(x.Fault.FaultDetail)
+		}
+	}
+}
+
 func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
@@ -89,6 +130,9 @@ func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 	e, err := NewExecutor(c, host)
 	if err != nil {
 		return err
+	}
+	if cmd.trace {
+		e.Trace = cmd.Trace
 	}
 
 	res, err := e.Run(f.Args())
@@ -115,6 +159,10 @@ func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 type result struct {
 	*Response
 	cmd *esxcli
+}
+
+func (r *result) Dump() interface{} {
+	return r.Response
 }
 
 func (r *result) Write(w io.Writer) error {

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@ limitations under the License.
 package esxcli
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -101,5 +103,60 @@ func TestNetworkVmPortList(t *testing.T) {
 
 	if !reflect.DeepEqual(r.Values, expect) {
 		t.Errorf("%s != %s", r.Values, expect)
+	}
+}
+
+func TestMarshalResponse(t *testing.T) {
+	t.Error("TODO: make a useful test")
+	values := []Values{
+		{
+			"IPAddress":    {"192.168.247.149"},
+			"MACAddress":   {"00:0c:29:12:b2:cf"},
+			"PortID":       {"33554438"},
+			"Portgroup":    {"VM Network"},
+			"TeamUplink":   {"vmnic0"},
+			"UplinkPortID": {"33554434"},
+			"vSwitch":      {"vSwitch0"},
+			"DVPortID":     {""},
+			"Tags":         {"one", "two"},
+		},
+	}
+
+	{
+		res := &Response{
+			Values: values,
+		}
+
+		var out bytes.Buffer
+
+		fmt.Fprint(&out, xml.Header)
+		e := xml.NewEncoder(&out)
+		e.Indent("", "  ")
+		err := e.Encode(res)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = e.Flush()
+
+		fmt.Println(out.String())
+	}
+
+	{
+		res := &Response{
+			String: "time",
+		}
+
+		var out bytes.Buffer
+
+		fmt.Fprint(&out, xml.Header)
+		e := xml.NewEncoder(&out)
+		e.Indent("", "  ")
+		err := e.Encode(res)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_ = e.Flush()
+
+		fmt.Println(out.String())
 	}
 }

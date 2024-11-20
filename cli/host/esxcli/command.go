@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ type CommandInfoMethod struct {
 
 type CommandInfo struct {
 	CommandInfoItem
-	Method []*CommandInfoMethod `xml:"method" json:"method"`
+	Method []CommandInfoMethod `xml:"method" json:"method"`
 }
 
 func NewCommand(args []string) *Command {
