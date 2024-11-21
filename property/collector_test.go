@@ -18,6 +18,7 @@ package property_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -105,6 +106,64 @@ func TestWaitForUpdatesEx(t *testing.T) {
 				}
 			case error:
 				t.Fatalf("error while waiting for updates: %s", tResult)
+			}
+		}
+	}, model)
+}
+
+func TestWaitForUpdatesExEmptyUpdateSet(t *testing.T) {
+	model := simulator.VPX()
+	model.Datacenter = 1
+	model.Cluster = 0
+	model.Pool = 0
+	model.Machine = 0
+	model.Autostart = false
+
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		// Set up the finder and get a VM.
+		finder := find.NewFinder(c, true)
+		datacenter, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatalf("default datacenter not found: %s", err.Error())
+		}
+		finder.SetDatacenter(datacenter)
+		vmList, err := finder.VirtualMachineList(ctx, "*")
+		if len(vmList) != 0 {
+			t.Fatalf("vmList != 0")
+		}
+
+		pc, err := property.DefaultCollector(c).Create(ctx)
+		if err != nil {
+			t.Fatalf("failed to create new property collector: %s", err.Error())
+		}
+
+		// Start a goroutine to wait for updates on any VMs.
+		// Since there are no VMs in the filter set, we expect to
+		// receive an empty update set.
+		chanResult := make(chan error)
+		cancelCtx, cancel := context.WithCancel(ctx)
+		go func() {
+			defer close(chanResult)
+			_ = pc.WaitForUpdatesEx(
+				cancelCtx,
+				&property.WaitOptions{},
+				func(updates []types.ObjectUpdate) bool {
+					var err error
+					if len(updates) > 0 {
+						err = fmt.Errorf("unexpected update")
+					}
+					chanResult <- err
+					cancel()
+					return true
+				})
+		}()
+
+		select {
+		case <-ctx.Done():
+			t.Fatalf("timed out while waiting for updates")
+		case err := <-chanResult:
+			if err != nil {
+				t.Fatalf("error while waiting for updates: %s", err.Error())
 			}
 		}
 	}, model)
