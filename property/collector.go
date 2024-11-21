@@ -264,9 +264,12 @@ func (p *Collector) RetrieveOne(ctx context.Context, obj types.ManagedObjectRefe
 
 // WaitForUpdatesEx waits for any of the specified properties of the specified
 // managed object to change. It calls the specified function for every update it
-// receives. If this function returns false, it continues waiting for
+// receives an update - including the empty filter set, which can occur if no
+// objects are eligible for updates.
+//
+// If this function returns false, it continues waiting for
 // subsequent updates. If this function returns true, it stops waiting and
-// returns.
+// returns upon receiving the first non-empty filter set.
 //
 // If the Context is canceled, a call to CancelWaitForUpdates() is made and its
 // error value is returned.
@@ -311,6 +314,12 @@ func (p *Collector) WaitForUpdatesEx(
 		opts.Truncated = false
 		if set.Truncated != nil {
 			opts.Truncated = *set.Truncated
+		}
+
+		if len(set.FilterSet) == 0 {
+			// Trigger callbacks in case callers need to be notified
+			// of the empty filter set.
+			_ = onUpdatesFn(make([]types.ObjectUpdate, 0))
 		}
 
 		for _, fs := range set.FilterSet {
