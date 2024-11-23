@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package esxcli
+package esx
 
 import (
 	"bytes"
@@ -107,7 +107,6 @@ func TestNetworkVmPortList(t *testing.T) {
 }
 
 func TestMarshalResponse(t *testing.T) {
-	t.Error("TODO: make a useful test")
 	values := []Values{
 		{
 			"IPAddress":    {"192.168.247.149"},
@@ -138,7 +137,7 @@ func TestMarshalResponse(t *testing.T) {
 		}
 		_ = e.Flush()
 
-		fmt.Println(out.String())
+		t.Log(out.String())
 	}
 
 	{
@@ -157,6 +156,6 @@ func TestMarshalResponse(t *testing.T) {
 		}
 		_ = e.Flush()
 
-		fmt.Println(out.String())
+		t.Log(out.String())
 	}
 }

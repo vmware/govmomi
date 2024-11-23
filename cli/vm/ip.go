@@ -24,8 +24,8 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/cli"
+	"github.com/vmware/govmomi/cli/esx"
 	"github.com/vmware/govmomi/cli/flags"
-	"github.com/vmware/govmomi/cli/host/esxcli"
 	"github.com/vmware/govmomi/object"
 )
 
@@ -123,7 +123,7 @@ func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	if cmd.esx {
 		get = func(vm *object.VirtualMachine, deadline context.Context) (string, error) {
-			guest := esxcli.NewGuestInfo(c)
+			guest := esx.NewGuestInfo(c)
 
 			ticker := time.NewTicker(time.Millisecond * 500)
 			defer ticker.Stop()
@@ -131,7 +131,7 @@ func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 			for {
 				select {
 				case <-ticker.C:
-					ip, err := guest.IpAddress(vm)
+					ip, err := guest.IpAddress(ctx, vm)
 					if err != nil {
 						return "", err
 					}

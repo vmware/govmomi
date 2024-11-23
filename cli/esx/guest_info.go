@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,13 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package esxcli
+package esx
 
 import (
 	"context"
 	"strings"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -44,20 +43,18 @@ func NewGuestInfo(c *vim25.Client) *GuestInfo {
 	}
 }
 
-func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, error) {
+func (g *GuestInfo) hostInfo(ctx context.Context, ref *types.ManagedObjectReference) (*hostInfo, error) {
 	// cache exectuor and uuid -> worldid map
 	if h, ok := g.hosts[ref.Value]; ok {
 		return h, nil
 	}
 
-	host := object.NewHostSystem(g.c, *ref)
-
-	e, err := NewExecutor(g.c, host)
+	e, err := NewExecutor(ctx, g.c, ref)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := e.Run([]string{"vm", "process", "list"})
+	res, err := e.Run(ctx, []string{"vm", "process", "list"})
 	if err != nil {
 		return nil, err
 	}
@@ -82,8 +79,7 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 // ESX hosts must be configured with the /Net/GuestIPHack enabled.
 // For example:
 // $ govc host.esxcli -- system settings advanced set -o /Net/GuestIPHack -i 1
-func (g *GuestInfo) IpAddress(vm *object.VirtualMachine) (string, error) {
-	ctx := context.TODO()
+func (g *GuestInfo) IpAddress(ctx context.Context, vm mo.Reference) (string, error) {
 	const any = "0.0.0.0"
 	var mvm mo.VirtualMachine
 
@@ -93,7 +89,7 @@ func (g *GuestInfo) IpAddress(vm *object.VirtualMachine) (string, error) {
 		return "", err
 	}
 
-	h, err := g.hostInfo(mvm.Runtime.Host)
+	h, err := g.hostInfo(ctx, mvm.Runtime.Host)
 	if err != nil {
 		return "", err
 	}
@@ -102,7 +98,7 @@ func (g *GuestInfo) IpAddress(vm *object.VirtualMachine) (string, error) {
 	uuid := strings.Replace(mvm.Config.Uuid, "-", "", -1)
 
 	if wid, ok := h.wids[uuid]; ok {
-		res, err := h.Run([]string{"network", "vm", "port", "list", "--world-id", wid})
+		res, err := h.Run(ctx, []string{"network", "vm", "port", "list", "--world-id", wid})
 		if err != nil {
 			return "", err
 		}

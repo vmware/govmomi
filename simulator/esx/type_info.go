@@ -18,6 +18,7 @@ package esx
 
 import "github.com/vmware/govmomi/internal"
 
+// TypeInfo generated via `govc host.esxcli.model -dump`
 var TypeInfo = internal.DynamicTypeMgrAllTypeInfo{
 	ManagedTypeInfo: []internal.DynamicTypeMgrManagedTypeInfo{
 		{

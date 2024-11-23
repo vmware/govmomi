@@ -23,8 +23,8 @@ import (
 	"os"
 
 	"github.com/vmware/govmomi/cli"
+	"github.com/vmware/govmomi/cli/esx"
 	"github.com/vmware/govmomi/cli/flags"
-	"github.com/vmware/govmomi/cli/host/esxcli"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -96,7 +96,12 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if cmd.check {
-		esxfw, err := esxcli.GetFirewallInfo(host)
+		x, err := esx.NewExecutor(ctx, host.Client(), host)
+		if err != nil {
+			return err
+		}
+
+		esxfw, err := x.GetFirewallInfo(ctx)
 		if err != nil {
 			return err
 		}

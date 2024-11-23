@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package esxcli
+package esx
 
-import "github.com/vmware/govmomi/object"
+import "context"
 
 type FirewallInfo struct {
 	Loaded        bool   `json:"loaded"`
@@ -27,13 +27,8 @@ type FirewallInfo struct {
 // GetFirewallInfo via 'esxcli network firewall get'
 // The HostFirewallSystem type does not expose this data.
 // This helper can be useful in particular to determine if the firewall is enabled or disabled.
-func GetFirewallInfo(s *object.HostSystem) (*FirewallInfo, error) {
-	x, err := NewExecutor(s.Client(), s)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := x.Run([]string{"network", "firewall", "get"})
+func (x *Executor) GetFirewallInfo(ctx context.Context) (*FirewallInfo, error) {
+	res, err := x.Run(ctx, []string{"network", "firewall", "get"})
 	if err != nil {
 		return nil, err
 	}

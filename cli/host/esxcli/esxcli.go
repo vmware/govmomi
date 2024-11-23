@@ -31,6 +31,7 @@ import (
 	"github.com/dougm/pretty"
 
 	"github.com/vmware/govmomi/cli"
+	"github.com/vmware/govmomi/cli/esx"
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/internal"
 )
@@ -127,7 +128,7 @@ func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	e, err := NewExecutor(c, host)
+	e, err := esx.NewExecutor(ctx, c, host)
 	if err != nil {
 		return err
 	}
@@ -135,10 +136,10 @@ func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 		e.Trace = cmd.Trace
 	}
 
-	res, err := e.Run(f.Args())
+	res, err := e.Run(ctx, f.Args())
 	if err != nil {
-		if f, ok := err.(*Fault); ok {
-			return errors.New(f.messageDetail())
+		if f, ok := err.(*esx.Fault); ok {
+			return errors.New(f.MessageDetail())
 		}
 		return err
 	}
@@ -157,7 +158,7 @@ func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 type result struct {
-	*Response
+	*esx.Response
 	cmd *esxcli
 }
 
@@ -181,7 +182,7 @@ func (r *result) Write(w io.Writer) error {
 	return nil
 }
 
-func (cmd *esxcli) formatSimple(w io.Writer, res *Response) {
+func (cmd *esxcli) formatSimple(w io.Writer, res *esx.Response) {
 	var keys []string
 	for key := range res.Values[0] {
 		keys = append(keys, key)
@@ -203,7 +204,7 @@ func (cmd *esxcli) formatSimple(w io.Writer, res *Response) {
 	_ = tw.Flush()
 }
 
-func (cmd *esxcli) formatTable(w io.Writer, res *Response) {
+func (cmd *esxcli) formatTable(w io.Writer, res *esx.Response) {
 	fields := res.Info.Hints.Fields()
 	if len(fields) == 0 {
 		cmd.formatSimple(w, res)

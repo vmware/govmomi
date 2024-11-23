@@ -26,6 +26,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/cli"
+	"github.com/vmware/govmomi/cli/esx"
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/internal"
 )
@@ -52,7 +53,7 @@ func (cmd *model) Description() string {
 Examples:
   govc host.esxcli.model # prints type model supported by vcsim
   govc host.esxcli.model network.vm network.ip.connection # specific namespaces
-  govc host.esxcli.model -dump # generate simulator/esx/cli.go
+  govc host.esxcli.model -dump # generate simulator/esx/type_info.go
   govc host.esxcli.model -c # prints commands supported by vcsim
   govc host.esxcli.model -c network.vm`
 }
@@ -83,7 +84,7 @@ var namespaces = []string{
 }
 
 type modelInfo struct {
-	CommandInfo []CommandInfo
+	CommandInfo []esx.CommandInfo
 	TypeInfo    internal.DynamicTypeMgrAllTypeInfo
 	Instances   []internal.DynamicTypeMgrMoInstance
 }
@@ -149,18 +150,18 @@ func (r modelInfo) Write(w io.Writer) error {
 	return nil
 }
 
-func (cmd *model) typeInfo(ctx context.Context, e *Executor, args []string) (internal.DynamicTypeMgrAllTypeInfo, error) {
+func (cmd *model) typeInfo(ctx context.Context, e *esx.Executor, args []string) (internal.DynamicTypeMgrAllTypeInfo, error) {
 	var info internal.DynamicTypeMgrAllTypeInfo
 
 	for _, ns := range args {
 		req := internal.DynamicTypeMgrQueryTypeInfoRequest{
-			This: e.dtm.Reference(),
+			This: e.DynamicTypeManager(),
 			FilterSpec: &internal.DynamicTypeMgrTypeFilterSpec{
 				TypeSubstr: ns,
 			},
 		}
 
-		res, err := internal.DynamicTypeMgrQueryTypeInfo(ctx, e.c, &req)
+		res, err := internal.DynamicTypeMgrQueryTypeInfo(ctx, e.Client(), &req)
 		if err != nil {
 			return info, err
 		}
@@ -173,11 +174,11 @@ func (cmd *model) typeInfo(ctx context.Context, e *Executor, args []string) (int
 	return info, nil
 }
 
-func (cmd *model) commandInfo(ctx context.Context, e *Executor, args []string) ([]CommandInfo, error) {
-	var info []CommandInfo
+func (cmd *model) commandInfo(ctx context.Context, e *esx.Executor, args []string) ([]esx.CommandInfo, error) {
+	var info []esx.CommandInfo
 
 	for _, ns := range args {
-		c, err := e.CommandInfo(ns)
+		c, err := e.CommandInfo(ctx, ns)
 		if err != nil {
 			return nil, err
 		}
@@ -188,14 +189,14 @@ func (cmd *model) commandInfo(ctx context.Context, e *Executor, args []string) (
 	return info, nil
 }
 
-func (cmd *model) instanceInfo(ctx context.Context, e *Executor, args []string) ([]internal.DynamicTypeMgrMoInstance, error) {
+func (cmd *model) instanceInfo(ctx context.Context, e *esx.Executor, args []string) ([]internal.DynamicTypeMgrMoInstance, error) {
 	var info []internal.DynamicTypeMgrMoInstance
 
 	req := internal.DynamicTypeMgrQueryMoInstancesRequest{
-		This: e.dtm.Reference(),
+		This: e.DynamicTypeManager(),
 	}
 
-	res, err := internal.DynamicTypeMgrQueryMoInstances(ctx, e.c, &req)
+	res, err := internal.DynamicTypeMgrQueryMoInstances(ctx, e.Client(), &req)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +233,7 @@ func (cmd *model) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	e, err := NewExecutor(c, host)
+	e, err := esx.NewExecutor(ctx, c, host)
 	if err != nil {
 		return err
 	}

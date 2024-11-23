@@ -24,7 +24,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vmware/govmomi/cli/host/esxcli"
+	esxcli "github.com/vmware/govmomi/cli/esx"
 	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/mo"
