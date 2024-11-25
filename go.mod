@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/rasky/go-xdr v0.0.0-20170124162913-1a41d1a06c93
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/vmware/vmw-guestinfo v0.0.0-20220317130741-510905f0efa3
 	github.com/xlab/treeprint v1.2.0
 	golang.org/x/text v0.18.0
