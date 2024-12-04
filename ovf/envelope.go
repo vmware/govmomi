@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,32 +20,46 @@ import (
 	"fmt"
 )
 
+// Envelope is defined according to
+// https://www.dmtf.org/sites/default/files/standards/documents/DSP0243_2.1.1.pdf.
+//
+// Section 9 describes the parent/child relationships.
+//
+// A VirtualSystem may have zero or more VirtualHardware sections.
 type Envelope struct {
 	References []File `xml:"References>File"`
 
 	// Package level meta-data
-	Annotation         *AnnotationSection         `xml:"AnnotationSection"`
-	Product            *ProductSection            `xml:"ProductSection"`
-	Network            *NetworkSection            `xml:"NetworkSection"`
-	Disk               *DiskSection               `xml:"DiskSection"`
-	OperatingSystem    *OperatingSystemSection    `xml:"OperatingSystemSection"`
-	Eula               *EulaSection               `xml:"EulaSection"`
-	VirtualHardware    *VirtualHardwareSection    `xml:"VirtualHardwareSection"`
-	ResourceAllocation *ResourceAllocationSection `xml:"ResourceAllocationSection"`
-	DeploymentOption   *DeploymentOptionSection   `xml:"DeploymentOptionSection"`
+	Disk             *DiskSection             `xml:"DiskSection,omitempty"`
+	Network          *NetworkSection          `xml:"NetworkSection,omitempty"`
+	DeploymentOption *DeploymentOptionSection `xml:"DeploymentOptionSection,omitempty"`
 
 	// Content: A VirtualSystem or a VirtualSystemCollection
-	VirtualSystem *VirtualSystem `xml:"VirtualSystem"`
+	VirtualSystem           *VirtualSystem           `xml:"VirtualSystem,omitempty"`
+	VirtualSystemCollection *VirtualSystemCollection `xml:"VirtualSystemCollection,omitempty"`
 }
 
 type VirtualSystem struct {
 	Content
 
-	Annotation      []AnnotationSection      `xml:"AnnotationSection"`
-	Product         []ProductSection         `xml:"ProductSection"`
-	OperatingSystem []OperatingSystemSection `xml:"OperatingSystemSection"`
-	Eula            []EulaSection            `xml:"EulaSection"`
-	VirtualHardware []VirtualHardwareSection `xml:"VirtualHardwareSection"`
+	Annotation      *AnnotationSection       `xml:"AnnotationSection,omitempty"`
+	Product         []ProductSection         `xml:"ProductSection,omitempty"`
+	Eula            []EulaSection            `xml:"EulaSection,omitempty"`
+	OperatingSystem *OperatingSystemSection  `xml:"OperatingSystemSection,omitempty"`
+	VirtualHardware []VirtualHardwareSection `xml:"VirtualHardwareSection,omitempty"`
+}
+
+type VirtualSystemCollection struct {
+	Content
+
+	// Collection level meta-data
+	ResourceAllocation *ResourceAllocationSection `xml:"ResourceAllocationSection,omitempty"`
+	Annotation         *AnnotationSection         `xml:"AnnotationSection,omitempty"`
+	Product            []ProductSection           `xml:"ProductSection,omitempty"`
+	Eula               []EulaSection              `xml:"EulaSection,omitempty"`
+
+	// Content: One or more VirtualSystems
+	VirtualSystem []VirtualSystem `xml:"VirtualSystem,omitempty"`
 }
 
 type File struct {

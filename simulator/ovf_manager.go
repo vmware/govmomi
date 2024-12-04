@@ -185,8 +185,8 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 		}
 	}
 
-	if os := env.VirtualSystem.OperatingSystem; len(os) != 0 {
-		if id := os[0].OSType; id != nil {
+	if os := env.VirtualSystem.OperatingSystem; os != nil {
+		if id := os.OSType; id != nil {
 			spec.ConfigSpec.GuestId = *id
 		}
 	}

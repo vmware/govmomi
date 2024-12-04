@@ -114,9 +114,7 @@ func Spec(fpath string, a Archive, hidden, verbose bool) (*Options, error) {
 	}
 
 	if e.VirtualSystem != nil && e.VirtualSystem.Annotation != nil {
-		for _, a := range e.VirtualSystem.Annotation {
-			o.Annotation += a.Annotation
-		}
+		o.Annotation = e.VirtualSystem.Annotation.Annotation
 	}
 
 	if e.Network != nil {

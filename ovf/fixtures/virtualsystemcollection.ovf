@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+Example 3 from https://www.dmtf.org/sites/default/files/standards/documents/DSP0243_2.1.1.pdf
+-->
+<Envelope
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/2"
+    xmlns="http://schemas.dmtf.org/ovf/envelope/2"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:epasd="http://schemas.dmtf.org/wbem/wscim/1/cim2608 schema/2/CIM_EthernetPortAllocationSettingData"
+    xmlns:sasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_StorageAllocationSettingData">
+    <!-- References to all external files -->
+    <References>
+        <File ovf:id="file1" ovf:href="vmdisk1.vmdk" ovf:size="2000000000" />
+    </References>
+    <!-- Describes meta-information for all virtual disks in the package -->
+    <DiskSection>
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:capacity="4294967296"
+            ovf:format="http://www.examplecompany.com/interfaces/specifications/vmdk.html#sparse" />
+    </DiskSection>
+    <!-- Describes all networks used in the package -->
+    <NetworkSection>
+        <Info>List of logical networks used in the package</Info>
+        <Network ovf:name="VS Network">
+            <Description>The network that the VSs connect to</Description>
+            <!-- Network port profile for storage traffic -->
+
+            <NetworkPortProfileURI>http://www.dmtf.org/networkportprofiles/networkportprofile1.xml</NetworkPortProfileURI>
+            <!-- Network port profile for networking traffic -->
+
+            <NetworkPortProfileURI>http://www.dmtf.org/networkportprofiles/networkportprofile2.xml</NetworkPortProfileURI>
+        </Network>
+    </NetworkSection>
+    <VirtualSystemCollection ovf:id="vsc1">
+        <Info>Collection of 2 VSs</Info>
+        <VirtualSystem ovf:id="storage server">
+            <Info>Describes a virtual system</Info>
+            <Name>Virtual Appliance One</Name>
+            <ProductSection>
+                <Info>Describes product information for the appliance</Info>
+                <Product>The Great Appliance</Product>
+                <Vendor>Some Great Corporation</Vendor>
+                <Version>13.00</Version>
+                <FullVersion>13.00-b5</FullVersion>
+                <ProductUrl>http://www.somegreatcorporation.com/greatappliance</ProductUrl>
+                <VendorUrl>http://www.somegreatcorporation.com/</VendorUrl>
+                <Property ovf:key="adminemail" ovf:type="string">
+                    <Description>Email address of administrator</Description>
+                </Property>
+                <Property ovf:key="app_ip" ovf:type="string" ovf:defaultValue="192.168.0.10">
+                    <Description>The IP address of this appliance</Description>
+                </Property>
+            </ProductSection>
+            <AnnotationSection ovf:required="false">
+                <Info>A random annotation on this service. It can be ignored</Info>
+                <Annotation>Contact customer support if you have any problems</Annotation>
+            </AnnotationSection>
+            <EulaSection>
+                <Info>License information for the appliance</Info>
+                <License>Insert your favorite license here</License>
+            </EulaSection>
+            <VirtualHardwareSection>
+                <Info>Memory = 4 GB, CPU = 1 GHz, Disk = 100 GB, 1 Ethernet nic</Info>
+                <Item>
+                    <rasd:AllocationUnits>Hertz*10^9</rasd:AllocationUnits>
+                    <rasd:Description>Virtual CPU</rasd:Description>
+                    <rasd:ElementName>1 GHz virtual CPU</rasd:ElementName>
+                    <rasd:InstanceID>1</rasd:InstanceID>
+                    <rasd:Reservation>1</rasd:Reservation>
+                    <rasd:ResourceType>3</rasd:ResourceType>
+                    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:AllocationUnits>byte*2^30</rasd:AllocationUnits>
+                    <rasd:Description>Memory</rasd:Description>
+                    <rasd:ElementName>1 GByte of memory</rasd:ElementName>
+                    <rasd:InstanceID>2</rasd:InstanceID>
+                    <rasd:ResourceType>4</rasd:ResourceType>
+                    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                </Item>
+                <EthernetPortItem>
+                    <epasd:Address>00-16-8B-DB-00-5E</epasd:Address>
+                    <epasd:Connection>VS Network</epasd:Connection>
+                    <epasd:Description>Virtual NIC</epasd:Description>
+
+                    <epasd:ElementName>Ethernet Port</epasd:ElementName>
+
+                    <epasd:InstanceID>3</epasd:InstanceID>
+
+                    <epasd:NetworkPortProfileID>
+                        http://www.dmtf.org/networkportprofiles/networkportprofile1.xml</epasd:NetworkPortProfileID>
+                    <epasd:NetworkPortProfileIDType>2</epasd:NetworkPortProfileIDType>
+                    <epasd:ResourceType>10</epasd:ResourceType>
+                    <epasd:VirtualQuantityUnits>1</epasd:VirtualQuantityUnits>
+                </EthernetPortItem>
+                <StorageItem>
+                    <sasd:AllocationUnits>byte*2^30</sasd:AllocationUnits>
+                    <sasd:Description>Virtual Disk</sasd:Description>
+                    <sasd:ElementName>100 GByte Virtual Disk</sasd:ElementName>
+                    <sasd:InstanceID>4</sasd:InstanceID>
+                    <sasd:Reservation>100</sasd:Reservation>
+                    <sasd:ResourceType>31</sasd:ResourceType>
+                    <sasd:VirtualQuantity>1</sasd:VirtualQuantity>
+                </StorageItem>
+            </VirtualHardwareSection>
+            <OperatingSystemSection ovf:id="58" ovf:required="false">
+                <Info>Guest Operating System</Info>
+                <Description>OS</Description>
+            </OperatingSystemSection>
+        </VirtualSystem>
+        <VirtualSystem ovf:id="web-server">
+            <Info>Describes a virtual system</Info>
+            <Name>Virtual Appliance Two</Name>
+            <ProductSection>
+                <Info>Describes product information for the appliance</Info>
+                <Product>The Great Appliance</Product>
+                <Vendor>Some Great Corporation</Vendor>
+                <Version>13.00</Version>
+                <FullVersion>13.00-b5</FullVersion>
+                <ProductUrl>http://www.somegreatcorporation.com/greatappliance</ProductUrl>
+                <VendorUrl>http://www.somegreatcorporation.com/</VendorUrl>
+                <Property ovf:key="adminemail" ovf:type="string">
+                    <Description>Email address of administrator</Description>
+                </Property>
+                <Property ovf:key="app_ip" ovf:type="string" ovf:defaultValue="192.168.0.10">
+                    <Description>The IP address of this appliance</Description>
+                </Property>
+            </ProductSection>
+            <AnnotationSection ovf:required="false">
+                <Info>A random annotation on this service. It can be ignored</Info>
+                <Annotation>Contact customer support if you have any problems</Annotation>
+            </AnnotationSection>
+            <EulaSection>
+                <Info>License information for the appliance</Info>
+                <License>Insert your favorite license here</License>
+            </EulaSection>
+            <VirtualHardwareSection>
+                <Info>Memory = 4 GB, CPU = 1 GHz, Disk = 100 GB, 1 Ethernet nic</Info>
+                <Item>
+                    <rasd:AllocationUnits>Hertz*10^9</rasd:AllocationUnits>
+                    <rasd:Description>Virtual CPU</rasd:Description>
+                    <rasd:ElementName>1 GHz virtual CPU</rasd:ElementName>
+                    <rasd:InstanceID>1</rasd:InstanceID>
+                    <rasd:Reservation>1</rasd:Reservation>
+                    <rasd:ResourceType>3</rasd:ResourceType>
+                    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:AllocationUnits>byte*2^30</rasd:AllocationUnits>
+                    <rasd:Description>Memory</rasd:Description>
+                    <rasd:ElementName>1 GByte of memory</rasd:ElementName>
+                    <rasd:InstanceID>2</rasd:InstanceID>
+                    <rasd:ResourceType>4</rasd:ResourceType>
+                    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                </Item>
+                <EthernetPortItem>
+                    <epasd:Address>00-16-8B-DB-00-5F</epasd:Address>
+                    <epasd:Connection>VS Network</epasd:Connection>
+                    <epasd:Description>Virtual NIC</epasd:Description>
+
+                    <epasd:ElementName>Ethernet Port</epasd:ElementName>
+                    <!-- Virtual NIC for networking traffic -->
+                    <epasd:InstanceID>3</epasd:InstanceID>
+
+                    <epasd:NetworkPortProfileID>
+                        http://www.dmtf.org/networkportprofiles/networkportprofile2.xml</epasd:NetworkPortProfileID>
+                    <epasd:NetworkPortProfileIDType>2</epasd:NetworkPortProfileIDType>
+                    <epasd:ResourceType>10</epasd:ResourceType>
+                    <epasd:VirtualQuantityUnits>1</epasd:VirtualQuantityUnits>
+                </EthernetPortItem>
+                <StorageItem>
+                    <sasd:AllocationUnits>byte*2^30</sasd:AllocationUnits>
+                    <sasd:Description>Virtual Disk</sasd:Description>
+                    <sasd:ElementName>100 GByte Virtual Disk</sasd:ElementName>
+                    <sasd:InstanceID>4</sasd:InstanceID>
+                    <sasd:Reservation>100</sasd:Reservation>
+                    <sasd:ResourceType>31</sasd:ResourceType>
+                    <sasd:VirtualQuantity>1</sasd:VirtualQuantity>
+                </StorageItem>
+            </VirtualHardwareSection>
+            <OperatingSystemSection ovf:id="58" ovf:required="false">
+                <Info>Guest Operating System</Info>
+                <Description>OS</Description>
+            </OperatingSystemSection>
+        </VirtualSystem>
+    </VirtualSystemCollection>
+</Envelope>

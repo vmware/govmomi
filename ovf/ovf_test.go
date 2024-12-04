@@ -22,6 +22,8 @@ import (
 	"os"
 	"testing"
 	"text/tabwriter"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func testEnvelope(t *testing.T, fn string) *Envelope {
@@ -94,4 +96,14 @@ func TestDeploymentOptions(t *testing.T) {
 	}
 	tw.Flush()
 	t.Log(b.String())
+}
+
+func TestVirtualSystemCollection(t *testing.T) {
+	e := testEnvelope(t, "fixtures/virtualsystemcollection.ovf")
+
+	assert.Nil(t, e.VirtualSystem)
+	assert.NotNil(t, e.VirtualSystemCollection)
+	assert.Len(t, e.VirtualSystemCollection.VirtualSystem, 2)
+	assert.Equal(t, e.VirtualSystemCollection.VirtualSystem[0].ID, "storage server")
+	assert.Equal(t, e.VirtualSystemCollection.VirtualSystem[1].ID, "web-server")
 }
