@@ -78,6 +78,7 @@ type Registry struct {
 	Namespace string
 	Path      string
 	Handler   func(*Context, *Method) (mo.Reference, types.BaseMethodFault)
+	Cookie    func(*Context) string
 
 	tagManager tagManager
 }

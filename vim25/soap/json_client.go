@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2023-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2023-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -71,8 +71,10 @@ func (c *Client) invoke(ctx context.Context, this types.ManagedObjectReference, 
 		return err
 	}
 
-	if len(c.cookie) != 0 {
-		req.Header.Add(sessionHeader, c.cookie)
+	if c.Cookie != nil {
+		if cookie := c.Cookie(); cookie != nil {
+			req.Header.Add(sessionHeader, cookie.Value)
+		}
 	}
 
 	result, err := getSOAPResultPtr(res)
@@ -156,8 +158,10 @@ func isError(statusCode int) bool {
 // session header.
 func (c *Client) checkForSessionHeader(resp *http.Response) {
 	sessionKey := resp.Header.Get(sessionHeader)
-	if len(sessionKey) > 0 {
-		c.cookie = sessionKey
+	if sessionKey != "" {
+		c.Cookie = func() *HeaderElement {
+			return &HeaderElement{Value: sessionKey}
+		}
 	}
 }
 
