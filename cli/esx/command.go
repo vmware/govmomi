@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package esxcli
+package esx
 
 import (
 	"flag"
 	"fmt"
 	"strings"
 
-	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/internal"
 )
 
@@ -57,7 +56,7 @@ type CommandInfoMethod struct {
 
 type CommandInfo struct {
 	CommandInfoItem
-	Method []*CommandInfoMethod `xml:"method" json:"method"`
+	Method []CommandInfoMethod `xml:"method" json:"method"`
 }
 
 func NewCommand(args []string) *Command {
@@ -91,11 +90,22 @@ func (c *Command) Moid() string {
 	return "ha-cli-handler-" + strings.Join(c.name[:len(c.name)-1], "-")
 }
 
+type stringList []string
+
+func (l *stringList) String() string {
+	return fmt.Sprint(*l)
+}
+
+func (l *stringList) Set(value string) error {
+	*l = append(*l, value)
+	return nil
+}
+
 // Parse generates a flag.FlagSet based on the given []CommandInfoParam and
 // returns arguments for use with methods.ExecuteSoap
 func (c *Command) Parse(params []CommandInfoParam) ([]internal.ReflectManagedMethodExecuterSoapArgument, error) {
 	fs := flag.NewFlagSet(strings.Join(c.name, " "), flag.ExitOnError)
-	vals := make([]flags.StringList, len(params))
+	vals := make([]stringList, len(params))
 
 	for i, p := range params {
 		v := &vals[i]

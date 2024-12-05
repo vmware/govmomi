@@ -41,7 +41,9 @@ var (
 type HostSystem struct {
 	mo.HostSystem
 
-	sh *simHost
+	sh  *simHost
+	mme *ManagedMethodExecuter
+	dtm *DynamicTypeManager
 
 	types.QueryTpmAttestationReportResponse
 }

@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"net"
@@ -2350,6 +2351,10 @@ func (vm *VirtualMachine) cloneDevice() []types.BaseVirtualDevice {
 	dst := types.ArrayOfVirtualDevice{}
 	deepCopy(src, &dst)
 	return dst.VirtualDevice
+}
+
+func (vm *VirtualMachine) worldID() int {
+	return int(binary.BigEndian.Uint32(vm.uid[0:4]))
 }
 
 func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {

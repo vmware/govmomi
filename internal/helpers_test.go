@@ -1,9 +1,12 @@
 /*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-    http://www.apache.org/licenses/LICENSE-2.0
+
+http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -148,4 +151,23 @@ func TestRewriteURLForHostGateway(t *testing.T) {
 	require.Equal(t, "/hgw/host-123/baz", result.Path)
 	values := url.Values{"query_param": []string{"1"}}
 	require.Equal(t, values, result.Query())
+}
+
+func TestSoapArgument(t *testing.T) {
+	arg := internal.ReflectManagedMethodExecuterSoapArgument{
+		Name: "vibname",
+		Val:  "<vibname>crx</vibname>",
+	}
+
+	val := arg.Value()
+	if len(val) != 1 || val[0] != "crx" {
+		t.Errorf("val=%s", val)
+	}
+}
+
+func TestEsxcliName(t *testing.T) {
+	name := internal.EsxcliName("vim.EsxCLI.software.vib.get")
+	if name != "VimEsxCLISoftwareVibGet" {
+		t.Errorf("name=%s", name)
+	}
 }

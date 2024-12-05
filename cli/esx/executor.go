@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package esxcli
+package esx
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/vmware/govmomi/internal"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
@@ -35,7 +36,7 @@ func (f Fault) Error() string {
 	return f.Message
 }
 
-func (f Fault) messageDetail() string {
+func (f Fault) MessageDetail() string {
 	if f.Detail != "" {
 		return fmt.Sprintf("%s %s", f.Message, f.Detail)
 	}
@@ -45,14 +46,15 @@ func (f Fault) messageDetail() string {
 
 type Executor struct {
 	c    *vim25.Client
-	host *object.HostSystem
+	host mo.Reference
 	mme  *internal.ReflectManagedMethodExecuter
 	dtm  *internal.InternalDynamicTypeManager
 	info map[string]*CommandInfo
+
+	Trace func(*internal.ExecuteSoapRequest, *internal.ExecuteSoapResponse)
 }
 
-func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
-	ctx := context.TODO()
+func NewExecutor(ctx context.Context, c *vim25.Client, host mo.Reference) (*Executor, error) {
 	e := &Executor{
 		c:    c,
 		host: host,
@@ -88,42 +90,60 @@ func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
 	return e, nil
 }
 
-func (e *Executor) CommandInfo(c *Command) (*CommandInfoMethod, error) {
+func (e *Executor) Client() *vim25.Client {
+	return e.c
+}
+
+func (e *Executor) DynamicTypeManager() types.ManagedObjectReference {
+	return e.dtm.ManagedObjectReference
+}
+
+func (e *Executor) CommandInfo(ctx context.Context, ns string) (*CommandInfo, error) {
+	info, ok := e.info[ns]
+	if ok {
+		return info, nil
+	}
+
+	req := internal.ExecuteSoapRequest{
+		Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
+		Method: "vim.CLIInfo.FetchCLIInfo",
+		Argument: []internal.ReflectManagedMethodExecuterSoapArgument{
+			NewCommand(nil).Argument("typeName", "vim.EsxCLI."+ns),
+		},
+	}
+
+	info = new(CommandInfo)
+	if err := e.Execute(ctx, &req, info); err != nil {
+		return nil, err
+	}
+
+	e.info[ns] = info
+
+	return info, nil
+}
+
+func (e *Executor) CommandInfoMethod(ctx context.Context, c *Command) (*CommandInfoMethod, error) {
 	ns := c.Namespace()
-	var info *CommandInfo
-	var ok bool
 
-	if info, ok = e.info[ns]; !ok {
-		req := internal.ExecuteSoapRequest{
-			Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
-			Method: "vim.CLIInfo.FetchCLIInfo",
-			Argument: []internal.ReflectManagedMethodExecuterSoapArgument{
-				c.Argument("typeName", "vim.EsxCLI."+ns),
-			},
-		}
-
-		info = new(CommandInfo)
-		if err := e.Execute(&req, info); err != nil {
-			return nil, err
-		}
-
-		e.info[ns] = info
+	info, err := e.CommandInfo(ctx, ns)
+	if err != nil {
+		return nil, err
 	}
 
 	name := c.Name()
 	for _, method := range info.Method {
 		if method.Name == name {
-			return method, nil
+			return &method, nil
 		}
 	}
 
 	return nil, fmt.Errorf("method '%s' not found in name space '%s'", name, c.Namespace())
 }
 
-func (e *Executor) NewRequest(args []string) (*internal.ExecuteSoapRequest, *CommandInfoMethod, error) {
+func (e *Executor) NewRequest(ctx context.Context, args []string) (*internal.ExecuteSoapRequest, *CommandInfoMethod, error) {
 	c := NewCommand(args)
 
-	info, err := e.CommandInfo(c)
+	info, err := e.CommandInfoMethod(ctx, c)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -142,14 +162,17 @@ func (e *Executor) NewRequest(args []string) (*internal.ExecuteSoapRequest, *Com
 	return &sreq, info, nil
 }
 
-func (e *Executor) Execute(req *internal.ExecuteSoapRequest, res interface{}) error {
-	ctx := context.TODO()
+func (e *Executor) Execute(ctx context.Context, req *internal.ExecuteSoapRequest, res interface{}) error {
 	req.This = e.mme.ManagedObjectReference
 	req.Version = "urn:vim25/5.0"
 
 	x, err := internal.ExecuteSoap(ctx, e.c, req)
 	if err != nil {
 		return err
+	}
+
+	if e.Trace != nil {
+		e.Trace(req, x)
 	}
 
 	if x.Returnval != nil {
@@ -168,8 +191,8 @@ func (e *Executor) Execute(req *internal.ExecuteSoapRequest, res interface{}) er
 	return nil
 }
 
-func (e *Executor) Run(args []string) (*Response, error) {
-	req, info, err := e.NewRequest(args)
+func (e *Executor) Run(ctx context.Context, args []string) (*Response, error) {
+	req, info, err := e.NewRequest(ctx, args)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +201,7 @@ func (e *Executor) Run(args []string) (*Response, error) {
 		Info: info,
 	}
 
-	if err := e.Execute(req, res); err != nil {
+	if err := e.Execute(ctx, req, res); err != nil {
 		return nil, err
 	}
 

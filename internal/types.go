@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,9 +22,23 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type VimEsxCLICLIFault struct {
+	types.MethodFault
+
+	ErrMsg []string `xml:"errMsg"`
+}
+
+func init() {
+	types.Add("VimEsxCLICLIFault", reflect.TypeOf((*VimEsxCLICLIFault)(nil)).Elem())
+}
+
 type DynamicTypeMgrQueryMoInstancesRequest struct {
 	This       types.ManagedObjectReference `xml:"_this"`
 	FilterSpec BaseDynamicTypeMgrFilterSpec `xml:"filterSpec,omitempty,typeattr"`
+}
+
+func init() {
+	types.Add("DynamicTypeMgrQueryMoInstances", reflect.TypeOf((*DynamicTypeMgrQueryMoInstancesRequest)(nil)).Elem())
 }
 
 type DynamicTypeMgrQueryMoInstancesResponse struct {
@@ -45,7 +59,7 @@ func init() {
 	types.Add("DynamicTypeEnumTypeInfo", reflect.TypeOf((*DynamicTypeEnumTypeInfo)(nil)).Elem())
 }
 
-type DynamicTypeMgrAllTypeInfoRequest struct {
+type DynamicTypeMgrAllTypeInfo struct {
 	types.DynamicData
 
 	ManagedTypeInfo []DynamicTypeMgrManagedTypeInfo `xml:"managedTypeInfo,omitempty"`
@@ -54,7 +68,7 @@ type DynamicTypeMgrAllTypeInfoRequest struct {
 }
 
 func init() {
-	types.Add("DynamicTypeMgrAllTypeInfo", reflect.TypeOf((*DynamicTypeMgrAllTypeInfoRequest)(nil)).Elem())
+	types.Add("DynamicTypeMgrAllTypeInfo", reflect.TypeOf((*DynamicTypeMgrAllTypeInfo)(nil)).Elem())
 }
 
 type DynamicTypeMgrAnnotation struct {
@@ -182,8 +196,12 @@ type DynamicTypeMgrQueryTypeInfoRequest struct {
 	FilterSpec BaseDynamicTypeMgrFilterSpec `xml:"filterSpec,omitempty,typeattr"`
 }
 
+func init() {
+	types.Add("DynamicTypeMgrQueryTypeInfo", reflect.TypeOf((*DynamicTypeMgrQueryTypeInfoRequest)(nil)).Elem())
+}
+
 type DynamicTypeMgrQueryTypeInfoResponse struct {
-	Returnval DynamicTypeMgrAllTypeInfoRequest `xml:"urn:vim25 returnval"`
+	Returnval DynamicTypeMgrAllTypeInfo `xml:"urn:vim25 returnval"`
 }
 
 func init() {
@@ -237,6 +255,10 @@ type RetrieveDynamicTypeManagerResponse struct {
 	Returnval *InternalDynamicTypeManager `xml:"urn:vim25 returnval"`
 }
 
+func init() {
+	types.Add("RetrieveDynamicTypeManager", reflect.TypeOf((*RetrieveDynamicTypeManagerRequest)(nil)).Elem())
+}
+
 type RetrieveManagedMethodExecuterRequest struct {
 	This types.ManagedObjectReference `xml:"_this"`
 }
@@ -267,4 +289,8 @@ type ExecuteSoapRequest struct {
 
 type ExecuteSoapResponse struct {
 	Returnval *ReflectManagedMethodExecuterSoapResult `xml:"urn:vim25 returnval"`
+}
+
+func init() {
+	types.Add("ExecuteSoap", reflect.TypeOf((*ExecuteSoapRequest)(nil)).Elem())
 }
