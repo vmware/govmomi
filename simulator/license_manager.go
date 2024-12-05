@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,19 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-// Copyright 2017 VMware, Inc. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 
 package simulator
 
@@ -67,12 +54,19 @@ func (m *LicenseManager) init(r *Registry) {
 	m.Licenses = []types.LicenseManagerLicenseInfo{EvalLicense}
 
 	if r.IsVPX() {
-		am := Map.Put(&LicenseAssignmentManager{}).Reference()
-		m.LicenseAssignmentManager = &am
+		if m.LicenseAssignmentManager == nil {
+			m.LicenseAssignmentManager = &types.ManagedObjectReference{
+				Type:  "LicenseAssignmentManager",
+				Value: "LicenseAssignmentManager",
+			}
+		}
+		r.Put(&LicenseAssignmentManager{
+			mo.LicenseAssignmentManager{Self: *m.LicenseAssignmentManager},
+		})
 	}
 }
 
-func (m *LicenseManager) AddLicense(req *types.AddLicense) soap.HasFault {
+func (m *LicenseManager) AddLicense(ctx *Context, req *types.AddLicense) soap.HasFault {
 	body := &methods.AddLicenseBody{
 		Res: &types.AddLicenseResponse{},
 	}
@@ -94,7 +88,7 @@ func (m *LicenseManager) AddLicense(req *types.AddLicense) soap.HasFault {
 	return body
 }
 
-func (m *LicenseManager) RemoveLicense(req *types.RemoveLicense) soap.HasFault {
+func (m *LicenseManager) RemoveLicense(ctx *Context, req *types.RemoveLicense) soap.HasFault {
 	body := &methods.RemoveLicenseBody{
 		Res: &types.RemoveLicenseResponse{},
 	}
@@ -108,7 +102,7 @@ func (m *LicenseManager) RemoveLicense(req *types.RemoveLicense) soap.HasFault {
 	return body
 }
 
-func (m *LicenseManager) UpdateLicenseLabel(req *types.UpdateLicenseLabel) soap.HasFault {
+func (m *LicenseManager) UpdateLicenseLabel(ctx *Context, req *types.UpdateLicenseLabel) soap.HasFault {
 	body := &methods.UpdateLicenseLabelBody{}
 
 	for i := range m.Licenses {
@@ -149,20 +143,20 @@ type LicenseAssignmentManager struct {
 	mo.LicenseAssignmentManager
 }
 
-func (m *LicenseAssignmentManager) QueryAssignedLicenses(req *types.QueryAssignedLicenses) soap.HasFault {
+func (m *LicenseAssignmentManager) QueryAssignedLicenses(ctx *Context, req *types.QueryAssignedLicenses) soap.HasFault {
 	body := &methods.QueryAssignedLicensesBody{
 		Res: &types.QueryAssignedLicensesResponse{},
 	}
 
 	// EntityId can be a HostSystem or the vCenter InstanceUuid
 	if req.EntityId != "" {
-		if req.EntityId != Map.content().About.InstanceUuid {
+		if req.EntityId != ctx.Map.content().About.InstanceUuid {
 			id := types.ManagedObjectReference{
 				Type:  "HostSystem",
 				Value: req.EntityId,
 			}
 
-			if Map.Get(id) == nil {
+			if ctx.Map.Get(id) == nil {
 				return body
 			}
 		}
@@ -172,6 +166,16 @@ func (m *LicenseAssignmentManager) QueryAssignedLicenses(req *types.QueryAssigne
 		{
 			EntityId:        req.EntityId,
 			AssignedLicense: EvalLicense,
+		},
+	}
+
+	return body
+}
+
+func (m *LicenseAssignmentManager) UpdateAssignedLicense(ctx *Context, req *types.UpdateAssignedLicense) soap.HasFault {
+	body := &methods.UpdateAssignedLicenseBody{
+		Res: &types.UpdateAssignedLicenseResponse{
+			Returnval: licenseInfo(req.LicenseKey, nil),
 		},
 	}
 
