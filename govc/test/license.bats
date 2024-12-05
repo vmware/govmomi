@@ -38,8 +38,18 @@ get_nlabel() {
   assert_equal "License is not valid for this product" "$(get_key 00000-00000-00000-00000-00002 <<<${output} | get_property diagnostic)"
 }
 
+@test "license.assign" {
+  vcsim_env
+
+  run govc license.assign -cluster DC0_C0 00000-00000-00000-00000-00000
+  assert_success
+
+  run govc license.assigned.ls
+  assert_success
+}
+
 @test "license.remove" {
-  esx_env
+  vcsim_env
 
   verify_evaluation
 

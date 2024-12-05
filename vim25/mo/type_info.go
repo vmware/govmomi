@@ -341,8 +341,10 @@ func IsManagedObjectType(kind string) bool {
 func Value(ref types.ManagedObjectReference) (Reference, bool) {
 	if rt, ok := t[ref.Type]; ok {
 		val := reflect.New(rt)
-		val.Interface().(Entity).Entity().Self = ref
-		return val.Elem().Interface().(Reference), true
+		if e, ok := val.Interface().(Entity); ok {
+			e.Entity().Self = ref
+			return val.Elem().Interface().(Reference), true
+		}
 	}
 	return nil, false
 }

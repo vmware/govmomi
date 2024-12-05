@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
+Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -290,10 +290,15 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		for _, p := range content[0].PropSet {
 			if c, ok := p.Val.(types.ServiceContent); ok {
+				var path []string
 				for _, ref := range mo.References(c) {
 					all := types.NewBool(true)
 					switch ref.Type {
-					case "LicenseManager", "ServiceManager":
+					case "LicenseManager":
+						// avoid saving "licenses" property as it includes the keys
+						path = []string{"licenseAssignmentManager"}
+						all = nil
+					case "ServiceManager":
 						all = nil
 					}
 					req.SpecSet = append(req.SpecSet, types.PropertyFilterSpec{
@@ -303,7 +308,7 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 						PropSet: []types.PropertySpec{{
 							Type:    ref.Type,
 							All:     all,
-							PathSet: nil,
+							PathSet: path,
 						}},
 					})
 				}
