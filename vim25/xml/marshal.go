@@ -497,11 +497,6 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		start.Name.Local = name
 	}
 
-	// Add type attribute if necessary
-	if finfo != nil && finfo.flags&fTypeAttr != 0 {
-		start.Attr = append(start.Attr, Attr{xmlSchemaInstance, typeToString(typ)})
-	}
-
 	// Attributes
 	for i := range tinfo.fields {
 		finfo := &tinfo.fields[i]
@@ -522,6 +517,11 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		if err := p.marshalAttr(&start, name, fv); err != nil {
 			return err
 		}
+	}
+
+	// Add type attribute if necessary
+	if finfo != nil && finfo.flags&fTypeAttr != 0 {
+		start.Attr = append(start.Attr, Attr{xmlSchemaInstance, typeToString(typ)})
 	}
 
 	if err := p.writeStart(&start); err != nil {
