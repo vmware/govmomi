@@ -125,6 +125,7 @@ type Property struct {
 	UserConfigurable *bool   `xml:"userConfigurable,attr"`
 	Default          *string `xml:"value,attr"`
 	Password         *bool   `xml:"password,attr"`
+	Configuration    *string `xml:"configuration,attr"`
 
 	Label       *string `xml:"Label"`
 	Description *string `xml:"Description"`
@@ -207,9 +208,11 @@ type VirtualSystemSettingData struct {
 type ResourceAllocationSettingData struct {
 	CIMResourceAllocationSettingData
 
-	Required      *bool   `xml:"required,attr"`
-	Configuration *string `xml:"configuration,attr"`
-	Bound         *string `xml:"bound,attr"`
+	Required       *bool           `xml:"required,attr"`
+	Configuration  *string         `xml:"configuration,attr"`
+	Bound          *string         `xml:"bound,attr"`
+	Config         []Config        `xml:"Config"`
+	CoresPerSocket *CoresPerSocket `xml:"CoresPerSocket"`
 }
 
 type StorageAllocationSettingData struct {
@@ -238,4 +241,9 @@ type DeploymentOptionConfiguration struct {
 
 	Label       string `xml:"Label"`
 	Description string `xml:"Description"`
+}
+
+type CoresPerSocket struct {
+	Required *bool `xml:"required,attr"`
+	Value    int32 `xml:",chardata"`
 }

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -106,4 +106,28 @@ func TestVirtualSystemCollection(t *testing.T) {
 	assert.Len(t, e.VirtualSystemCollection.VirtualSystem, 2)
 	assert.Equal(t, e.VirtualSystemCollection.VirtualSystem[0].ID, "storage server")
 	assert.Equal(t, e.VirtualSystemCollection.VirtualSystem[1].ID, "web-server")
+}
+
+func TestMultipleDeploymentConfigs(t *testing.T) {
+	e := testEnvelope(t, "fixtures/haproxy-vsphere.ovf")
+
+	assert.NotNil(t, e.VirtualSystem)
+	assert.Nil(t, e.VirtualSystemCollection)
+	assert.NotNil(t, e.DeploymentOption)
+	assert.Len(t, e.DeploymentOption.Configuration, 2)
+
+	assert.NotNil(t, e.DeploymentOption.Configuration[0].Default)
+	assert.True(t, *e.DeploymentOption.Configuration[0].Default)
+	assert.Equal(t, "default", e.DeploymentOption.Configuration[0].ID)
+
+	assert.Nil(t, e.DeploymentOption.Configuration[1].Default)
+	assert.Equal(t, "frontend", e.DeploymentOption.Configuration[1].ID)
+
+	assert.Len(t, e.VirtualSystem.VirtualHardware, 1)
+	assert.Len(t, e.VirtualSystem.VirtualHardware[0].Item, 23)
+	assert.Len(t, e.VirtualSystem.VirtualHardware[0].Item[2].Config, 1)
+	assert.NotNil(t, e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Required)
+	assert.False(t, *e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Required)
+	assert.Equal(t, "slotInfo.pciSlotNumber", e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Key)
+	assert.Equal(t, "128", e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Value)
 }
