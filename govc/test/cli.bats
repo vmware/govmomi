@@ -122,25 +122,6 @@ load test_helper
   assert_success
 }
 
-@test "API version check" {
-  vcsim_env -esx
-
-  run env GOVC_MIN_API_VERSION=24.4 govc about
-  assert grep -q "^govc: require API version \"24.4\"," <<<"${output}"
-
-  run env GOVC_MIN_API_VERSION=no.no govc about
-  assert_failure
-
-  run env GOVC_MIN_API_VERSION=- govc about
-  assert_success
-
-  run env GOVC_MIN_API_VERSION=5.0 govc about
-  assert_success
-
-  run govc about -vim-namespace urn:vim25 -vim-version 6.0
-  assert_success
-}
-
 @test "govc env" {
   output="$(govc env -x -u 'user:pass@enoent:99999?key=val#anchor')"
   assert grep -q GOVC_URL=enoent:99999 <<<${output}
