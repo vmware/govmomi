@@ -21,6 +21,51 @@ import (
 )
 
 /*
+Source:
+  - https://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_ResourceAllocationSettingData.xsd
+  - https://schemas.dmtf.org/wbem/cim-html/2/CIM_ResourceAllocationSettingData.html
+*/
+type CIMResourceType uint16
+
+// Please note, the iota pattern is not used to ensure these constants remain
+// affixed to an explicit value.
+const (
+	Other              CIMResourceType = 1
+	ComputerSystem     CIMResourceType = 2
+	Processor          CIMResourceType = 3
+	Memory             CIMResourceType = 4
+	IdeController      CIMResourceType = 5
+	ParallelScsiHba    CIMResourceType = 6
+	FcHba              CIMResourceType = 7
+	IScsiHba           CIMResourceType = 8
+	IbHba              CIMResourceType = 9
+	EthernetAdapter    CIMResourceType = 10
+	OtherNetwork       CIMResourceType = 11
+	IoSlot             CIMResourceType = 12
+	IoDevice           CIMResourceType = 13
+	FloppyDrive        CIMResourceType = 14
+	CdDrive            CIMResourceType = 15
+	DvdDrive           CIMResourceType = 16
+	DiskDrive          CIMResourceType = 17
+	TapeDrive          CIMResourceType = 18
+	StorageExtent      CIMResourceType = 19
+	OtherStorage       CIMResourceType = 20
+	SerialPort         CIMResourceType = 21
+	ParallelPort       CIMResourceType = 22
+	UsbController      CIMResourceType = 23
+	Graphics           CIMResourceType = 24
+	Ieee1394           CIMResourceType = 25
+	PartitionableUnit  CIMResourceType = 26
+	BasePartitionable  CIMResourceType = 27
+	PowerSupply        CIMResourceType = 28
+	CoolingDevice      CIMResourceType = 29
+	EthernetSwitchPort CIMResourceType = 30
+	LogicalDisk        CIMResourceType = 31
+	StorageVolume      CIMResourceType = 32
+	EthernetConnection CIMResourceType = 33
+)
+
+/*
 Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_VirtualSystemSettingData.xsd
 */
 
@@ -57,9 +102,9 @@ type CIMResourceAllocationSettingData struct {
 	ElementName string `xml:"ElementName"`
 	InstanceID  string `xml:"InstanceID"`
 
-	ResourceType      *uint16 `xml:"ResourceType"`
-	OtherResourceType *string `xml:"OtherResourceType"`
-	ResourceSubType   *string `xml:"ResourceSubType"`
+	ResourceType      *CIMResourceType `xml:"ResourceType"`
+	OtherResourceType *string          `xml:"OtherResourceType"`
+	ResourceSubType   *string          `xml:"ResourceSubType"`
 
 	AddressOnParent       *string  `xml:"AddressOnParent"`
 	Address               *string  `xml:"Address"`
@@ -88,9 +133,9 @@ type CIMStorageAllocationSettingData struct {
 	ElementName string `xml:"ElementName"`
 	InstanceID  string `xml:"InstanceID"`
 
-	ResourceType      *uint16 `xml:"ResourceType"`
-	OtherResourceType *string `xml:"OtherResourceType"`
-	ResourceSubType   *string `xml:"ResourceSubType"`
+	ResourceType      *CIMResourceType `xml:"ResourceType"`
+	OtherResourceType *string          `xml:"OtherResourceType"`
+	ResourceSubType   *string          `xml:"ResourceSubType"`
 
 	Access                       *uint16         `xml:"Access"`
 	Address                      *string         `xml:"Address"`

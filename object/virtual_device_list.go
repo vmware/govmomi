@@ -573,15 +573,20 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, ds types.Ma
 		name += ".vmdk"
 	}
 
+	bi := types.VirtualDeviceFileBackingInfo{
+		FileName: name,
+	}
+
+	if ds.Value != "" {
+		bi.Datastore = &ds
+	}
+
 	device := &types.VirtualDisk{
 		VirtualDevice: types.VirtualDevice{
 			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: types.NewBool(true),
-				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName:  name,
-					Datastore: &ds,
-				},
+				DiskMode:                     string(types.VirtualDiskModePersistent),
+				ThinProvisioned:              types.NewBool(true),
+				VirtualDeviceFileBackingInfo: bi,
 			},
 		},
 	}
