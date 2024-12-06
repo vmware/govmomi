@@ -53,8 +53,6 @@ const (
 	envVimVersion    = "GOVC_VIM_VERSION"
 	envTLSCaCerts    = "GOVC_TLS_CA_CERTS"
 	envTLSKnownHosts = "GOVC_TLS_KNOWN_HOSTS"
-
-	defaultMinVimVersion = "5.5"
 )
 
 const cDescr = "ESX or vCenter URL"
@@ -69,7 +67,6 @@ type ClientFlag struct {
 	cert          string
 	key           string
 	persist       bool
-	minAPIVersion string
 	vimNamespace  string
 	vimVersion    string
 	tlsCaCerts    string
@@ -165,15 +162,6 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 
 			usage := fmt.Sprintf("Persist session to disk [%s]", envPersist)
 			f.BoolVar(&flag.persist, "persist-session", persist, usage)
-		}
-
-		{
-			env := os.Getenv(envMinAPIVersion)
-			if env == "" {
-				env = defaultMinVimVersion
-			}
-
-			flag.minAPIVersion = env
 		}
 
 		{
@@ -310,45 +298,6 @@ func (flag *ClientFlag) SetRootCAs(c *soap.Client) error {
 	return nil
 }
 
-func isDevelopmentVersion(apiVersion string) bool {
-	// Skip version check for development builds which can be in the form of "r4A70F" or "6.5.x"
-	return strings.Count(apiVersion, ".") == 0 || strings.HasSuffix(apiVersion, ".x")
-}
-
-// apiVersionValid returns whether or not the API version supported by the
-// server the client is connected to is not recent enough.
-func apiVersionValid(c *vim25.Client, minVersionString string) error {
-	if minVersionString == "-" {
-		// Disable version check
-		return nil
-	}
-
-	apiVersion := c.ServiceContent.About.ApiVersion
-	if isDevelopmentVersion(apiVersion) {
-		return nil
-	}
-
-	realVersion, err := ParseVersion(apiVersion)
-	if err != nil {
-		return fmt.Errorf("error parsing API version %q: %s", apiVersion, err)
-	}
-
-	minVersion, err := ParseVersion(minVersionString)
-	if err != nil {
-		return fmt.Errorf("error parsing %s=%q: %s", envMinAPIVersion, minVersionString, err)
-	}
-
-	if !minVersion.Lte(realVersion) {
-		err = fmt.Errorf("require API version %q, connected to API version %q (set %s to override)",
-			minVersionString,
-			c.ServiceContent.About.ApiVersion,
-			envMinAPIVersion)
-		return err
-	}
-
-	return nil
-}
-
 func (flag *ClientFlag) RoundTripper(c *soap.Client) soap.RoundTripper {
 	// Retry twice when a temporary I/O error occurs.
 	// This means a maximum of 3 attempts.
@@ -371,12 +320,6 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 
 	c := new(vim25.Client)
 	err := flag.Session.Login(context.Background(), c, flag.ConfigureTLS)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check that the endpoint has the right API version
-	err = apiVersionValid(c, flag.minAPIVersion)
 	if err != nil {
 		return nil, err
 	}
