@@ -346,3 +346,28 @@ func TestSupportsEncryption(t *testing.T) {
 		})
 	})
 }
+
+func TestClientCookie(t *testing.T) {
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		pbmc, err := pbm.NewClient(ctx, c)
+		assert.NoError(t, err)
+		assert.NotNil(t, pbmc)
+
+		// Using default / expected Header.Cookie.XMLName = vcSessionCookie
+		ok, err := pbmc.SupportsEncryption(ctx, pbmsim.DefaultEncryptionProfileID)
+		assert.NoError(t, err)
+		assert.True(t, ok)
+
+		// Using invalid Header.Cookie.XMLName = myCookie
+		myCookie := c.SessionCookie()
+		myCookie.XMLName.Local = "myCookie"
+
+		pbmc.Client.Cookie = func() *soap.HeaderElement {
+			return myCookie
+		}
+
+		ok, err = pbmc.SupportsEncryption(ctx, pbmsim.DefaultEncryptionProfileID)
+		assert.EqualError(t, err, "ServerFaultCode: NotAuthenticated")
+		assert.False(t, ok)
+	})
+}

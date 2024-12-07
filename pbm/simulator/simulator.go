@@ -56,6 +56,7 @@ func New() *simulator.Registry {
 	r := simulator.NewRegistry()
 	r.Namespace = pbm.Namespace
 	r.Path = pbm.Path
+	r.Cookie = simulator.SOAPCookie
 
 	r.Put(&ServiceInstance{
 		ManagedObjectReference: pbm.ServiceInstance,

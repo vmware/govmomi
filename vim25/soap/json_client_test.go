@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2023-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2023-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -206,7 +206,9 @@ func TestFullRequestCycle(t *testing.T) {
 	c := NewClient(addr, true)
 	c.Namespace = "urn:vim25"
 	c.Version = "8.0.0.1"
-	c.cookie = "(original)"
+	c.Cookie = func() *HeaderElement {
+		return &HeaderElement{Value: "(original)"}
+	}
 	c.UseJSON(true)
 
 	c.Transport = &mockHTTP{
