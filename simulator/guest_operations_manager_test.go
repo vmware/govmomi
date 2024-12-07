@@ -19,6 +19,7 @@ package simulator
 import (
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -26,6 +27,14 @@ import (
 )
 
 func TestFileInfo(t *testing.T) {
+	switch runtime.GOOS {
+	case "linux", "darwin":
+	default:
+		// listFiles() returns a `find` command to run inside a linux docker container.
+		// The `find` command also works on darwin, skip otherwise.
+		t.Skipf("GOOS=%s", runtime.GOOS)
+	}
+
 	pwd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)

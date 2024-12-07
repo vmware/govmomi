@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"runtime"
 	"strconv"
 	"testing"
 	"time"
@@ -33,7 +34,17 @@ import (
 	"github.com/vmware/govmomi/toolbox/vix"
 )
 
+func checkGOOS(t *testing.T) {
+	switch runtime.GOOS {
+	case "linux", "darwin":
+	default:
+		t.Skipf("GOOS=%s", runtime.GOOS)
+	}
+}
+
 func TestProcessFunction(t *testing.T) {
+	checkGOOS(t)
+
 	m := NewManager()
 	var pids []int64
 
@@ -72,16 +83,21 @@ func TestProcessFunction(t *testing.T) {
 }
 
 func TestProcessCommand(t *testing.T) {
+	checkGOOS(t)
+
 	m := NewManager()
 	var pids []int64
 
 	for i := 0; i <= 2; i++ {
 		r := &vix.StartProgramRequest{
-			ProgramPath: "/bin/bash",
+			ProgramPath: shell,
 			Arguments:   fmt.Sprintf(`-c "exit %d"`, i),
 		}
 
-		pid, _ := m.Start(r, New())
+		pid, err := m.Start(r, New())
+		if err != nil {
+			t.Fatal(err)
+		}
 		pids = append(pids, pid)
 	}
 
@@ -115,6 +131,8 @@ func TestProcessCommand(t *testing.T) {
 }
 
 func TestProcessKill(t *testing.T) {
+	checkGOOS(t)
+
 	m := NewManager()
 	var pids []int64
 
@@ -139,7 +157,7 @@ func TestProcessKill(t *testing.T) {
 		},
 		{
 			&vix.StartProgramRequest{
-				ProgramPath: "/bin/bash",
+				ProgramPath: shell,
 				Arguments:   fmt.Sprintf(`-c "while true; do sleep 1; done"`),
 			},
 			New(),
@@ -186,6 +204,8 @@ func TestProcessKill(t *testing.T) {
 }
 
 func TestProcessRemove(t *testing.T) {
+	checkGOOS(t)
+
 	m := NewManager()
 
 	m.expire = time.Millisecond
@@ -234,6 +254,8 @@ func TestProcessError(t *testing.T) {
 }
 
 func TestProcessIO(t *testing.T) {
+	checkGOOS(t)
+
 	m := NewManager()
 
 	r := &vix.StartProgramRequest{
@@ -278,6 +300,8 @@ func (c *testRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 }
 
 func TestProcessRoundTripper(t *testing.T) {
+	checkGOOS(t)
+
 	echo := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_ = r.Write(w)
 	}))
