@@ -257,6 +257,7 @@ var kinds = map[string]reflect.Type{
 	"HostSystem":                         reflect.TypeOf((*HostSystem)(nil)).Elem(),
 	"IpPoolManager":                      reflect.TypeOf((*IpPoolManager)(nil)).Elem(),
 	"LicenseManager":                     reflect.TypeOf((*LicenseManager)(nil)).Elem(),
+	"LicenseAssignmentManager":           reflect.TypeOf((*LicenseAssignmentManager)(nil)).Elem(),
 	"OptionManager":                      reflect.TypeOf((*OptionManager)(nil)).Elem(),
 	"OvfManager":                         reflect.TypeOf((*OvfManager)(nil)).Elem(),
 	"PerformanceManager":                 reflect.TypeOf((*PerformanceManager)(nil)).Elem(),

@@ -5000,6 +5000,7 @@ Options:
   -d=                    Save objects in directory
   -f=false               Remove existing object directory
   -folder=               Inventory folder [GOVC_FOLDER]
+  -l=false               Include license properties
   -r=true                Include children of the container view root
   -type=[]               Resource types to save.  Defaults to all types
   -v=false               Verbose output
