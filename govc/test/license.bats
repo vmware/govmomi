@@ -66,11 +66,18 @@ get_nlabel() {
   assert_success
 
   # Expect the test instance to run in evaluation mode
-  assert_equal "Evaluation Mode" "$(get_key 00000-00000-00000-00000-00000 <<<$output | jq -r ".name")"
+  mode="$(get_key 00000-00000-00000-00000-00000 <<<"$output" | jq -r ".name")"
+  assert_equal "Evaluation Mode" "$mode"
+
+  name=$(jq -r '.[].properties[] | select(.key == "ProductName") | .value' <<<"$output")
+  assert_equal "$(govc about -json | jq -r .about.licenseProductName)" "$name"
+
+  name=$(jq -r '.[].properties[] | select(.key == "ProductVersion") | .value' <<<"$output")
+  assert_equal "$(govc about -json | jq -r .about.licenseProductVersion)" "$name"
 }
 
 @test "license.decode" {
-  esx_env
+  vcsim_env
 
   verify_evaluation
 
