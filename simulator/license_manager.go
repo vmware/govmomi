@@ -51,7 +51,23 @@ type LicenseManager struct {
 }
 
 func (m *LicenseManager) init(r *Registry) {
-	m.Licenses = []types.LicenseManagerLicenseInfo{EvalLicense}
+	if len(m.Licenses) == 0 {
+		about := r.content().About
+		product := []types.KeyAnyValue{
+			{
+				Key:   "ProductName",
+				Value: about.LicenseProductName,
+			},
+			{
+				Key:   "ProductVersion",
+				Value: about.LicenseProductVersion,
+			},
+		}
+
+		EvalLicense.Properties = append(EvalLicense.Properties, product...)
+
+		m.Licenses = []types.LicenseManagerLicenseInfo{EvalLicense}
+	}
 
 	if r.IsVPX() {
 		if m.LicenseAssignmentManager == nil {
@@ -60,9 +76,9 @@ func (m *LicenseManager) init(r *Registry) {
 				Value: "LicenseAssignmentManager",
 			}
 		}
-		r.Put(&LicenseAssignmentManager{
-			mo.LicenseAssignmentManager{Self: *m.LicenseAssignmentManager},
-		})
+		lam := new(LicenseAssignmentManager)
+		lam.Self = *m.LicenseAssignmentManager
+		r.Put(lam)
 	}
 }
 
@@ -141,6 +157,8 @@ func (m *LicenseManager) UpdateLicenseLabel(ctx *Context, req *types.UpdateLicen
 
 type LicenseAssignmentManager struct {
 	mo.LicenseAssignmentManager
+
+	types.QueryAssignedLicensesResponse
 }
 
 func (m *LicenseAssignmentManager) QueryAssignedLicenses(ctx *Context, req *types.QueryAssignedLicenses) soap.HasFault {
@@ -148,25 +166,67 @@ func (m *LicenseAssignmentManager) QueryAssignedLicenses(ctx *Context, req *type
 		Res: &types.QueryAssignedLicensesResponse{},
 	}
 
-	// EntityId can be a HostSystem or the vCenter InstanceUuid
-	if req.EntityId != "" {
-		if req.EntityId != ctx.Map.content().About.InstanceUuid {
+	if len(m.QueryAssignedLicensesResponse.Returnval) != 0 {
+		// Using Returnval from govc object.save -l
+		if req.EntityId == "" {
+			body.Res = &m.QueryAssignedLicensesResponse
+		} else {
+			for _, r := range m.QueryAssignedLicensesResponse.Returnval {
+				if r.EntityId == req.EntityId {
+					body.Res.Returnval = append(body.Res.Returnval, r)
+				}
+			}
+		}
+		return body
+	}
+
+	c := ctx.Map.content()
+
+	if req.EntityId == "" {
+		var add func(child types.ManagedObjectReference)
+
+		add = func(child types.ManagedObjectReference) {
+			if child.Type == "HostSystem" || child.Type == "ClusterComputeResource" {
+				la := types.LicenseAssignmentManagerLicenseAssignment{
+					EntityId:          child.Value,
+					Scope:             c.About.InstanceUuid,
+					EntityDisplayName: ctx.Map.Get(child).(mo.Entity).Entity().Name,
+					AssignedLicense:   EvalLicense,
+				}
+				body.Res.Returnval = append(body.Res.Returnval, la)
+			}
+			walk(ctx.Map.Get(child), add)
+		}
+
+		walk(ctx.Map.Get(c.RootFolder), add)
+
+		la := types.LicenseAssignmentManagerLicenseAssignment{
+			EntityId:          c.About.InstanceUuid,
+			EntityDisplayName: ctx.svc.Listen.Hostname(),
+			AssignedLicense:   EvalLicense,
+		}
+		body.Res.Returnval = append(body.Res.Returnval, la)
+	} else {
+		name := ctx.svc.Listen.Hostname()
+		// EntityId can be a HostSystem or the vCenter InstanceUuid
+		if req.EntityId != c.About.InstanceUuid {
 			id := types.ManagedObjectReference{
 				Type:  "HostSystem",
 				Value: req.EntityId,
 			}
-
-			if ctx.Map.Get(id) == nil {
+			e := ctx.Map.Get(id)
+			if e == nil {
 				return body
 			}
+			name = e.(mo.Entity).Entity().Name
 		}
-	}
 
-	body.Res.Returnval = []types.LicenseAssignmentManagerLicenseAssignment{
-		{
-			EntityId:        req.EntityId,
-			AssignedLicense: EvalLicense,
-		},
+		body.Res.Returnval = []types.LicenseAssignmentManagerLicenseAssignment{{
+			EntityId:          req.EntityId,
+			Scope:             c.About.InstanceUuid,
+			EntityDisplayName: name,
+			AssignedLicense:   EvalLicense,
+		}}
 	}
 
 	return body
