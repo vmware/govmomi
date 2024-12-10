@@ -34,6 +34,10 @@ func EnumValuesAsStrings[T ~string](enumValues []T) []string {
 	return stringValues
 }
 
+func New[T any](t T) *T {
+	return &t
+}
+
 func NewBool(v bool) *bool {
 	return &v
 }
