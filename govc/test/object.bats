@@ -734,6 +734,20 @@ EOF
   n=$(ls "$dir"/*.xml | wc -l)
   rm -rf "$dir"
   assert_equal 10 "$n"
+
+  run govc object.save -v -d "$dir"
+  assert_success
+
+  n=$(ls "$dir"/*License*.xml | wc -l)
+  rm -rf "$dir"
+  assert_equal 1 "$n" # LicenseManager
+
+  run govc object.save -l -v -d "$dir"
+  assert_success
+
+  n=$(ls "$dir"/*License*.xml | wc -l)
+  rm -rf "$dir"
+  assert_equal 2 "$n" # LicenseManager + LicenseAssignmentManager
 }
 
 @test "tree" {
