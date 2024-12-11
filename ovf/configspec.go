@@ -69,13 +69,16 @@ const (
 	ResourceSubTypeVTPM                   = "vmware.vtpm"
 )
 
+var errUnsupportedResourceSubtype = errors.New("unsupported resource subtype")
+
 // ErrUnsupportedItem is returned by Envelope.ToConfigSpec when there is an
 // invalid item configuration.
 type ErrUnsupportedItem struct {
 	Name             string
 	Index            int
 	InstanceID       string
-	DeviceType       CIMResourceType
+	ResourceType     CIMResourceType
+	ResourceSubType  string
 	LocalizedMessage string
 }
 
@@ -83,8 +86,11 @@ func (e ErrUnsupportedItem) Error() string {
 	msg := fmt.Sprintf(
 		"unsupported item name=%q, index=%d, instanceID=%q",
 		e.Name, e.Index, e.InstanceID)
-	if e.DeviceType > 0 {
-		msg = fmt.Sprintf("%s, type=%d", msg, e.DeviceType)
+	if e.ResourceType > 0 {
+		msg = fmt.Sprintf("%s, resourceType=%d", msg, e.ResourceType)
+	}
+	if e.ResourceSubType != "" {
+		msg = fmt.Sprintf("%s, resourceSubType=%s", msg, e.ResourceSubType)
 	}
 	if e.LocalizedMessage != "" {
 		msg = fmt.Sprintf("%s, msg=%q", msg, e.LocalizedMessage)
@@ -92,10 +98,72 @@ func (e ErrUnsupportedItem) Error() string {
 	return msg
 }
 
+// AsErrUnsupportedItem returns any possible wrapped ErrUnsupportedItem error
+// from the provided error.
+func AsErrUnsupportedItem(in error) (ErrUnsupportedItem, bool) {
+	var out ErrUnsupportedItem
+	if errors.As(in, &out) {
+		return out, true
+	}
+	return ErrUnsupportedItem{}, false
+}
+
+func errUnsupportedItem(
+	index int,
+	item itemElement,
+	inner error,
+	args ...any) error {
+
+	err := ErrUnsupportedItem{
+		Name:            item.ElementName,
+		InstanceID:      item.InstanceID,
+		Index:           index,
+		ResourceSubType: item.resourceSubType,
+	}
+
+	if item.ResourceType != nil {
+		err.ResourceType = *item.ResourceType
+	}
+
+	if len(args) == 1 {
+		err.LocalizedMessage = args[0].(string)
+	} else if len(args) > 1 {
+		err.LocalizedMessage = fmt.Sprintf(args[0].(string), args[1:]...)
+	}
+
+	if inner != nil {
+		return fmt.Errorf("%w, %w", err, inner)
+	}
+
+	return err
+}
+
+type itemElement struct {
+	ResourceAllocationSettingData
+
+	resourceSubType string
+}
+
 type configSpec = types.VirtualMachineConfigSpec
 
-// ToConfigSpec transforms the envelope into a ConfigSpec that may be used to
-// create a new virtual machine.
+// ToConfigSpecOptions influence the behavior of the ToConfigSpecWithOptions
+// function.
+type ToConfigSpecOptions struct {
+
+	// Strict indicates that an error should be returned on Item elements in
+	// a VirtualHardware section that have an unknown ResourceType, i.e. a value
+	// that falls outside the range of the enum CIMResourceType.
+	Strict bool
+}
+
+// ToConfigSpec calls ToConfigSpecWithOptions with an empty ToConfigSpecOptions
+// object.
+func (e Envelope) ToConfigSpec() (types.VirtualMachineConfigSpec, error) {
+	return e.ToConfigSpecWithOptions(ToConfigSpecOptions{})
+}
+
+// ToConfigSpecWithOptions transforms the envelope into a ConfigSpec that may be
+// used to create a new virtual machine.
 // Please note, at this time:
 //   - Only a single VirtualSystem is supported. The VirtualSystemCollection
 //     section is ignored.
@@ -104,7 +172,8 @@ type configSpec = types.VirtualMachineConfigSpec
 //     part of a non-default configuration are ignored.
 //   - Disks must specify zero or one HostResource elements.
 //   - Many, many more constraints...
-func (e Envelope) ToConfigSpec() (types.VirtualMachineConfigSpec, error) {
+func (e Envelope) ToConfigSpecWithOptions(
+	opts ToConfigSpecOptions) (types.VirtualMachineConfigSpec, error) {
 
 	vs := e.VirtualSystem
 	if vs == nil {
@@ -133,7 +202,7 @@ func (e Envelope) ToConfigSpec() (types.VirtualMachineConfigSpec, error) {
 	}
 
 	// Parse the hardware.
-	if err := e.toHardware(&dst, defaultConfigName, vs); err != nil {
+	if err := e.toHardware(&dst, defaultConfigName, vs, opts); err != nil {
 		return configSpec{}, err
 	}
 
@@ -148,7 +217,8 @@ func (e Envelope) ToConfigSpec() (types.VirtualMachineConfigSpec, error) {
 func (e Envelope) toHardware(
 	dst *configSpec,
 	configName string,
-	vs *VirtualSystem) error {
+	vs *VirtualSystem,
+	opts ToConfigSpecOptions) error {
 
 	var hw VirtualHardwareSection
 	if len(vs.VirtualHardware) == 0 {
@@ -173,7 +243,9 @@ func (e Envelope) toHardware(
 	)
 
 	for index := range hw.Item {
-		item := hw.Item[index]
+		item := itemElement{
+			ResourceAllocationSettingData: hw.Item[index],
+		}
 
 		if c := item.Configuration; c != nil {
 			if *c != configName {
@@ -182,10 +254,13 @@ func (e Envelope) toHardware(
 			}
 		}
 
-		rt := item.ResourceType
-		if rt == nil {
-			return e.errUnsupportedItem(
-				index, item, nil, "nil ResourceType")
+		if item.ResourceType == nil {
+			return errUnsupportedItem(index, item, nil, "nil ResourceType")
+		}
+
+		// Get the resource sub type, if any.
+		if rst := item.ResourceSubType; rst != nil {
+			item.resourceSubType = strings.ToLower(*rst)
 		}
 
 		var (
@@ -193,13 +268,17 @@ func (e Envelope) toHardware(
 			err error
 		)
 
-		switch *rt {
-		case Other:
+		switch *item.ResourceType {
+
+		case Other: // 1
 			d, err = e.toOther(item, devices, resources)
 
-		case Processor:
+		case ComputerSystem: // 2
+			// TODO(akutz)
+
+		case Processor: // 3
 			if item.VirtualQuantity == nil {
-				return e.errUnsupportedItem(
+				return errUnsupportedItem(
 					index, item, nil, "nil VirtualQuantity")
 			}
 			dst.NumCPUs = int32(*item.VirtualQuantity)
@@ -207,23 +286,41 @@ func (e Envelope) toHardware(
 				dst.NumCoresPerSocket = cps.Value
 			}
 
-		case Memory:
+		case Memory: // 4
 			if item.VirtualQuantity == nil {
-				return e.errUnsupportedItem(
+				return errUnsupportedItem(
 					index, item, nil, "nil VirtualQuantity")
 			}
 			dst.MemoryMB = int64(*item.VirtualQuantity)
 
-		case IdeController:
+		case IdeController: // 5
 			d, err = e.toIDEController(item, devices, resources)
 
-		case ParallelScsiHba:
+		case ParallelScsiHba: // 6
 			d, err = e.toSCSIController(item, devices, resources)
 
-		case EthernetAdapter:
+		case FcHba: // 7
+			// TODO(akutz)
+
+		case IScsiHba: // 8
+			// TODO(akutz)
+
+		case IbHba: // 9
+			// TODO(akutz)
+
+		case EthernetAdapter: // 10
 			d, err = e.toNetworkInterface(item, devices, resources)
 
-		case FloppyDrive:
+		case OtherNetwork: // 11
+			// TODO(akutz)
+
+		case IoSlot: // 12
+			// TODO(akutz)
+
+		case IoDevice: // 13
+			// TODO(akutz)
+
+		case FloppyDrive: // 14
 			if devices.PickController((*types.VirtualSIOController)(nil)) == nil {
 				c := &types.VirtualSIOController{}
 				c.Key = devices.NewKey()
@@ -231,37 +328,83 @@ func (e Envelope) toHardware(
 			}
 			d, err = e.toFloppyDrive(item, devices, resources)
 
-		case CdDrive, DvdDrive:
+		case CdDrive, DvdDrive: // 15, 16
 			d, err = e.toCDOrDVDDrive(item, devices, resources)
 
-		case DiskDrive:
+		case DiskDrive: // 17
 			d, err = e.toVirtualDisk(item, devices, resources)
 
-		case OtherStorage:
+		case TapeDrive: // 18
+			// TODO(akutz)
+
+		case StorageExtent: // 19
+			// TODO(akutz)
+
+		case OtherStorage: // 20
 			d, err = e.toOtherStorage(item, devices, resources)
 
-		case UsbController:
+		case SerialPort: // 21
+			// TODO(akutz)
+
+		case ParallelPort: // 22
+			// TODO(akutz)
+
+		case UsbController: // 23
 			d, err = e.toUSB(item, devices, resources)
 
-		case Graphics:
+		case Graphics: // 24
 			d, err = e.toVideoCard(item, devices, resources)
 
+		case Ieee1394: // 25
+			// TODO(akutz)
+
+		case PartitionableUnit: // 26
+			// TODO(akutz)
+
+		case BasePartitionable: // 27
+			// TODO(akutz)
+
+		case PowerSupply: // 28
+			// TODO(akutz)
+
+		case CoolingDevice: // 29
+			// TODO(akutz)
+
+		case EthernetSwitchPort: // 30
+			// TODO(akutz)
+
+		case LogicalDisk: // 31
+			// TODO(akutz)
+
+		case StorageVolume: // 32
+			// TODO(akutz)
+
+		case EthernetConnection: // 33
+			// TODO(akutz)
+
 		default:
-			return e.errUnsupportedItem(
-				index, item, nil, "unsupported resource type")
+			if opts.Strict {
+				return errUnsupportedItem(
+					index, item, nil, "unsupported resource type")
+			}
 		}
 
 		if err != nil {
-			return e.errUnsupportedItem(index, item, err)
+			if err == errUnsupportedResourceSubtype {
+				if !opts.Strict {
+					continue
+				}
+			}
+			return errUnsupportedItem(index, item, err)
 		}
 
 		if d != nil {
 			setConnectable(d, item)
 			if err := e.setUnitNumber(item, d); err != nil {
-				return e.errUnsupportedItem(index, item, err)
+				return errUnsupportedItem(index, item, err)
 			}
 			if err := e.setPCISlotNumber(item, d); err != nil {
-				return e.errUnsupportedItem(index, item, err)
+				return errUnsupportedItem(index, item, err)
 			}
 			devices = append(devices, d)
 		}
@@ -273,37 +416,8 @@ func (e Envelope) toHardware(
 	return nil
 }
 
-func (e Envelope) errUnsupportedItem(
-	index int,
-	item ResourceAllocationSettingData,
-	inner error,
-	args ...any) error {
-
-	err := ErrUnsupportedItem{
-		Name:       item.ElementName,
-		InstanceID: item.InstanceID,
-		Index:      index,
-	}
-
-	if item.ResourceType != nil {
-		err.DeviceType = *item.ResourceType
-	}
-
-	if len(args) == 1 {
-		err.LocalizedMessage = args[0].(string)
-	} else if len(args) > 1 {
-		err.LocalizedMessage = fmt.Sprintf(args[0].(string), args[1:]...)
-	}
-
-	if inner != nil {
-		return fmt.Errorf("%w, inner=%w", err, inner)
-	}
-
-	return err
-}
-
 func (e Envelope) setUnitNumber(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	d types.BaseVirtualDevice) error {
 
 	if item.AddressOnParent == nil || *item.AddressOnParent == "" {
@@ -320,7 +434,7 @@ func (e Envelope) setUnitNumber(
 }
 
 func (e Envelope) setBusNumber(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	d types.BaseVirtualDevice) error {
 
 	if item.Address == nil || *item.Address == "" {
@@ -343,7 +457,7 @@ func (e Envelope) setBusNumber(
 }
 
 func (e Envelope) setPCISlotNumber(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	d types.BaseVirtualDevice) error {
 
 	var pciSlotNumber int32 = -1
@@ -388,7 +502,7 @@ func (e Envelope) ovfDisk(diskID string) *VirtualDiskDesc {
 }
 
 func (e Envelope) toVirtualDisk(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -408,8 +522,6 @@ func (e Envelope) toVirtualDisk(
 	}
 
 	d := devices.CreateDisk(c, types.ManagedObjectReference{}, "")
-
-	devices.AssignController(d, c)
 
 	d.VirtualDevice.DeviceInfo = &types.Description{
 		Label: item.ElementName,
@@ -465,7 +577,7 @@ func (e Envelope) toVirtualDisk(
 }
 
 func (e Envelope) toCDOrDVDDrive(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -478,7 +590,7 @@ func (e Envelope) toCDOrDVDDrive(
 		return nil, nil // Parent is unsupported
 	}
 
-	c, ok := r.(*types.VirtualIDEController)
+	c, ok := r.(types.BaseVirtualController)
 	if !ok {
 		return nil, fmt.Errorf("expectedType=%s, actualType=%T",
 			"*types.VirtualIDEController", r)
@@ -493,11 +605,11 @@ func (e Envelope) toCDOrDVDDrive(
 }
 
 func (e Envelope) toSCSIController(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
-	d, err := devices.CreateSCSIController(item.toResourceSubType())
+	d, err := devices.CreateSCSIController(item.resourceSubType)
 	if err != nil {
 		return nil, err
 	}
@@ -510,7 +622,7 @@ func (e Envelope) toSCSIController(
 }
 
 func (e Envelope) toIDEController(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -526,22 +638,21 @@ func (e Envelope) toIDEController(
 }
 
 func (e Envelope) toOtherStorage(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
-	rst := item.toResourceSubType()
-	switch rst {
+	switch item.resourceSubType {
 	case ResourceSubTypeSATAAHCI, ResourceSubTypeSATAAHCIAlter:
 		return e.toSATAController(item, devices, resources)
 	case ResourceSubTypeNVMEController:
 		return e.toNVMEController(item, devices, resources)
 	}
-	return nil, fmt.Errorf("unknown subtype %q", rst)
+	return nil, errUnsupportedResourceSubtype
 }
 
 func (e Envelope) toSATAController(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -557,7 +668,7 @@ func (e Envelope) toSATAController(
 }
 
 func (e Envelope) toNVMEController(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -573,7 +684,7 @@ func (e Envelope) toNVMEController(
 }
 
 func (e Envelope) toUSB(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -585,8 +696,7 @@ func (e Envelope) toUSB(
 		},
 	}
 
-	rst := item.toResourceSubType()
-	switch rst {
+	switch item.resourceSubType {
 	case ResourceSubTypeUSBEHCI:
 		c := &types.VirtualUSBController{VirtualController: vc}
 		for i := range item.Config {
@@ -610,7 +720,7 @@ func (e Envelope) toUSB(
 		}
 		d = c
 	default:
-		return nil, fmt.Errorf("invalid subtype %q", rst)
+		return nil, errUnsupportedResourceSubtype
 	}
 
 	if err := e.setBusNumber(item, d); err != nil {
@@ -622,11 +732,11 @@ func (e Envelope) toUSB(
 }
 
 func (e Envelope) toNetworkInterface(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	_ map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
-	d, err := devices.CreateEthernetCard(item.toResourceSubType(), nil)
+	d, err := devices.CreateEthernetCard(item.resourceSubType, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -647,7 +757,7 @@ func (e Envelope) toNetworkInterface(
 }
 
 func (e Envelope) toFloppyDrive(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -661,7 +771,7 @@ func (e Envelope) toFloppyDrive(
 }
 
 func (e Envelope) toVideoCard(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	_ map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -705,19 +815,19 @@ func (e Envelope) toVideoCard(
 }
 
 func (e Envelope) toOther(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
-	switch item.toResourceSubType() {
+	switch item.resourceSubType {
 	case ResourceSubTypeVMCI:
 		return e.toVMCI(item, devices, resources)
 	}
-	return nil, nil
+	return nil, errUnsupportedResourceSubtype
 }
 
 func (e Envelope) toVMCI(
-	item ResourceAllocationSettingData,
+	item itemElement,
 	devices object.VirtualDeviceList,
 	_ map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
@@ -736,16 +846,6 @@ func (e Envelope) toVMCI(
 	}
 
 	return d, nil
-}
-
-func (r *ResourceAllocationSettingData) toResourceSubType() string {
-	rst := "unknown"
-	if r != nil {
-		if r.ResourceSubType != nil {
-			rst = strings.ToLower(*r.ResourceSubType)
-		}
-	}
-	return rst
 }
 
 func (e Envelope) toConfig(
@@ -876,9 +976,7 @@ func initBootOptions(dst *configSpec) {
 	}
 }
 
-func setConnectable(
-	dst types.BaseVirtualDevice,
-	src ResourceAllocationSettingData) {
+func setConnectable(dst types.BaseVirtualDevice, src itemElement) {
 
 	d := dst.GetVirtualDevice()
 	for i := range src.Config {
