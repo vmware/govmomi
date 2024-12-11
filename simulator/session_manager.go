@@ -329,12 +329,29 @@ type Context struct {
 	Map     *Registry
 }
 
+func SOAPCookie(ctx *Context) string {
+	if cookie := ctx.Header.Cookie; cookie != nil {
+		return cookie.Value
+	}
+	return ""
+}
+
+func HTTPCookie(ctx *Context) string {
+	if cookie, err := ctx.req.Cookie(soap.SessionCookieName); err == nil {
+		return cookie.Value
+	}
+	return ""
+}
+
 // mapSession maps an HTTP cookie to a Session.
 func (c *Context) mapSession() {
-	if cookie, err := c.req.Cookie(soap.SessionCookieName); err == nil {
-		if val, ok := c.svc.sm.getSession(cookie.Value); ok {
-			c.SetSession(val, false)
-		}
+	cookie := c.Map.Cookie
+	if cookie == nil {
+		cookie = HTTPCookie
+	}
+
+	if val, ok := c.svc.sm.getSession(cookie(c)); ok {
+		c.SetSession(val, false)
 	}
 }
 
