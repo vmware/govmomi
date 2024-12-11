@@ -109,7 +109,7 @@ func TestVirtualSystemCollection(t *testing.T) {
 }
 
 func TestMultipleDeploymentConfigs(t *testing.T) {
-	e := testEnvelope(t, "fixtures/haproxy-vsphere.ovf")
+	e := testEnvelope(t, "fixtures/configspec.ovf")
 
 	assert.NotNil(t, e.VirtualSystem)
 	assert.Nil(t, e.VirtualSystemCollection)
@@ -124,7 +124,7 @@ func TestMultipleDeploymentConfigs(t *testing.T) {
 	assert.Equal(t, "frontend", e.DeploymentOption.Configuration[1].ID)
 
 	assert.Len(t, e.VirtualSystem.VirtualHardware, 1)
-	assert.Len(t, e.VirtualSystem.VirtualHardware[0].Item, 23)
+	assert.Len(t, e.VirtualSystem.VirtualHardware[0].Item, 24)
 	assert.Len(t, e.VirtualSystem.VirtualHardware[0].Item[2].Config, 1)
 	assert.NotNil(t, e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Required)
 	assert.False(t, *e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Required)

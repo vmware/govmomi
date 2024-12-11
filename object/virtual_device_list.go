@@ -661,7 +661,7 @@ func (l VirtualDeviceList) FindCdrom(name string) (*types.VirtualCdrom, error) {
 }
 
 // CreateCdrom creates a new VirtualCdrom device which can be added to a VM.
-func (l VirtualDeviceList) CreateCdrom(c *types.VirtualIDEController) (*types.VirtualCdrom, error) {
+func (l VirtualDeviceList) CreateCdrom(c types.BaseVirtualController) (*types.VirtualCdrom, error) {
 	device := &types.VirtualCdrom{}
 
 	l.AssignController(device, c)

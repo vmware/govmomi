@@ -258,6 +258,14 @@
         <rasd:ResourceSubType>vmware.usb.xhci</rasd:ResourceSubType>
         <vmw:Config ovf:required="false" vmw:key="autoConnectDevices" vmw:value="true"/>
       </Item>
+      <Item ovf:required="false">
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:ElementName>serial0</rasd:ElementName>
+        <rasd:InstanceID>24</rasd:InstanceID>
+        <rasd:ResourceSubType>vmware.serialport.device</rasd:ResourceSubType>
+        <rasd:ResourceType>21</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:key="yieldOnPoll" vmw:value="false" />
+      </Item>
 
       <vmw:Config ovf:required="false" vmw:key="cpuHotAddEnabled" vmw:value="false"/>
       <vmw:Config ovf:required="false" vmw:key="cpuHotRemoveEnabled" vmw:value="false"/>
