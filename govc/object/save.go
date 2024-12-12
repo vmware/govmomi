@@ -212,6 +212,9 @@ func (cmd *save) save(content []types.ObjectContent) error {
 				if fault.Is(err, &types.HostNotConnected{}) {
 					continue
 				}
+				if fault.Is(err, &types.NotSupported{}) {
+					continue
+				}
 				return err
 			}
 			dir := filepath.Join(cmd.dir, ref)
