@@ -75,8 +75,13 @@ func TestLicenseManagerVPX(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(la) != 1 {
-			t.Fatal("no licenses")
+		expect := 1
+		if name == "" {
+			count := m.Count()
+			expect = count.Host + count.ClusterHost + count.Cluster + 1 // (1 == vCenter)
+		}
+		if len(la) != expect {
+			t.Fatalf("%d licenses", len(la))
 		}
 
 		if !reflect.DeepEqual(la[0].AssignedLicense, EvalLicense) {
