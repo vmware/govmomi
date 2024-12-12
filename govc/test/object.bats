@@ -750,6 +750,16 @@ EOF
   assert_equal 2 "$n" # LicenseManager + LicenseAssignmentManager
 }
 
+@test "object.save esx" {
+  vcsim_env -esx
+
+  dir="$BATS_TMPDIR/$(new_id)"
+  run govc object.save -v -d "$dir"
+  assert_success
+
+  rm -rf "$dir"
+}
+
 @test "tree" {
   vcsim_start -dc 2 -folder 1 -pod 1 -nsx 1 -pool 2
 
