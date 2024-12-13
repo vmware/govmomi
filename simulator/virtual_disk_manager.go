@@ -278,7 +278,7 @@ func (m *VirtualDiskManager) QueryVirtualDiskUuid(ctx *Context, req *types.Query
 	}
 
 	body.Res = &types.QueryVirtualDiskUuidResponse{
-		Returnval: virtualDiskUUID(req.Datacenter, file),
+		Returnval: virtualDiskUUID(req.Datacenter, req.Name),
 	}
 
 	return body
