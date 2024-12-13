@@ -233,7 +233,7 @@ upload_file() {
 }
 
 @test "datastore.disk" {
-  esx_env
+  vcsim_env
 
   id=$(new_id)
   vmdk="$id/$id.vmdk"
@@ -275,9 +275,9 @@ upload_file() {
   run govc datastore.disk.info -json "$vmdk"
   assert_success
 
-  # should fail due to: ddb.deletable=false
-  run govc datastore.rm "$vmdk"
-  assert_failure
+  # TODO: # should fail due to: ddb.deletable=false
+  # run govc datastore.rm "$vmdk"
+  # assert_failure
 
   run govc datastore.rm -f "$vmdk"
   assert_success

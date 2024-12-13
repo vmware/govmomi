@@ -121,3 +121,28 @@ func ExecuteSoap(ctx context.Context, r soap.RoundTripper, req *ExecuteSoapReque
 
 	return resBody.Res, nil
 }
+
+type QueryVirtualDiskInfoTaskBody struct {
+	Req         *QueryVirtualDiskInfoTaskRequest   `xml:"urn:internalvim25 QueryVirtualDiskInfo_Task,omitempty"`
+	Res         *QueryVirtualDiskInfo_TaskResponse `xml:"urn:vim25 QueryVirtualDiskInfo_TaskResponse,omitempty"`
+	InternalRes *QueryVirtualDiskInfo_TaskResponse `xml:"urn:internalvim25 QueryVirtualDiskInfo_TaskResponse,omitempty"`
+	Fault_      *soap.Fault                        `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *QueryVirtualDiskInfoTaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func QueryVirtualDiskInfoTask(ctx context.Context, r soap.RoundTripper, req *QueryVirtualDiskInfoTaskRequest) (*QueryVirtualDiskInfo_TaskResponse, error) {
+	var reqBody, resBody QueryVirtualDiskInfoTaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	if resBody.Res != nil {
+		return resBody.Res, nil
+	}
+
+	return resBody.InternalRes, nil
+}
