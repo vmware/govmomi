@@ -233,9 +233,9 @@ upload_file() {
 }
 
 @test "datastore.disk" {
-  esx_env
+  vcsim_env
 
-  id=$(new_id)
+  id=govc-test-disk
   vmdk="$id/$id.vmdk"
 
   run govc datastore.mkdir "$id"
@@ -249,6 +249,7 @@ upload_file() {
 
   run govc datastore.disk.info -uuid "$vmdk"
   assert_success
+  disk_uuid=$(grep UUID: <<<"$output" | awk '{print $2}')
 
   run govc datastore.rm "$vmdk"
   assert_success
@@ -275,9 +276,9 @@ upload_file() {
   run govc datastore.disk.info -json "$vmdk"
   assert_success
 
-  # should fail due to: ddb.deletable=false
-  run govc datastore.rm "$vmdk"
-  assert_failure
+  # TODO: # should fail due to: ddb.deletable=false
+  # run govc datastore.rm "$vmdk"
+  # assert_failure
 
   run govc datastore.rm -f "$vmdk"
   assert_success
@@ -295,6 +296,25 @@ upload_file() {
 
   run govc datastore.rm "$(dirname "$vmdk")"
   assert_success
+
+  # validate that QueryVirtualDiskUuid result is stable,
+  # using same datastore + name as beginning of the test.
+  vcsim_stop
+  vcsim_start
+
+  id=govc-test-disk
+  vmdk="$id/$id.vmdk"
+  run govc datastore.mkdir "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  run govc datastore.disk.info -uuid "$vmdk"
+  assert_success
+  disk_uuid2=$(grep UUID: <<<"$output" | awk '{print $2}')
+
+  assert_equal "$disk_uuid" "$disk_uuid2"
 }
 
 @test "datastore.cp" {

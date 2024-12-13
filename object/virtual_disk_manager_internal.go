@@ -18,66 +18,16 @@ package object
 
 import (
 	"context"
-	"reflect"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func init() {
-	types.Add("ArrayOfVirtualDiskInfo", reflect.TypeOf((*arrayOfVirtualDiskInfo)(nil)).Elem())
-
-	types.Add("VirtualDiskInfo", reflect.TypeOf((*VirtualDiskInfo)(nil)).Elem())
-}
-
-type arrayOfVirtualDiskInfo struct {
-	VirtualDiskInfo []VirtualDiskInfo `xml:"VirtualDiskInfo,omitempty"`
-}
-
-type queryVirtualDiskInfoTaskRequest struct {
-	This           types.ManagedObjectReference  `xml:"_this"`
-	Name           string                        `xml:"name"`
-	Datacenter     *types.ManagedObjectReference `xml:"datacenter,omitempty"`
-	IncludeParents bool                          `xml:"includeParents"`
-}
-
-type queryVirtualDiskInfoTaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
-}
-
-type queryVirtualDiskInfoTaskBody struct {
-	Req         *queryVirtualDiskInfoTaskRequest  `xml:"urn:internalvim25 QueryVirtualDiskInfo_Task,omitempty"`
-	Res         *queryVirtualDiskInfoTaskResponse `xml:"urn:vim25 QueryVirtualDiskInfo_TaskResponse,omitempty"`
-	InternalRes *queryVirtualDiskInfoTaskResponse `xml:"urn:internalvim25 QueryVirtualDiskInfo_TaskResponse,omitempty"`
-	Err         *soap.Fault                       `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
-}
-
-func (b *queryVirtualDiskInfoTaskBody) Fault() *soap.Fault { return b.Err }
-
-func queryVirtualDiskInfoTask(ctx context.Context, r soap.RoundTripper, req *queryVirtualDiskInfoTaskRequest) (*queryVirtualDiskInfoTaskResponse, error) {
-	var reqBody, resBody queryVirtualDiskInfoTaskBody
-
-	reqBody.Req = req
-
-	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
-		return nil, err
-	}
-
-	if resBody.Res != nil {
-		return resBody.Res, nil
-	}
-
-	return resBody.InternalRes, nil
-}
-
-type VirtualDiskInfo struct {
-	Name     string `xml:"unit>name"`
-	DiskType string `xml:"diskType"`
-	Parent   string `xml:"parent,omitempty"`
-}
+type VirtualDiskInfo = internal.VirtualDiskInfo
 
 func (m VirtualDiskManager) QueryVirtualDiskInfo(ctx context.Context, name string, dc *Datacenter, includeParents bool) ([]VirtualDiskInfo, error) {
-	req := queryVirtualDiskInfoTaskRequest{
+	req := internal.QueryVirtualDiskInfoTaskRequest{
 		This:           m.Reference(),
 		Name:           name,
 		IncludeParents: includeParents,
@@ -88,7 +38,7 @@ func (m VirtualDiskManager) QueryVirtualDiskInfo(ctx context.Context, name strin
 		req.Datacenter = &ref
 	}
 
-	res, err := queryVirtualDiskInfoTask(ctx, m.Client(), &req)
+	res, err := internal.QueryVirtualDiskInfoTask(ctx, m.Client(), &req)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +48,7 @@ func (m VirtualDiskManager) QueryVirtualDiskInfo(ctx context.Context, name strin
 		return nil, err
 	}
 
-	return info.Result.(arrayOfVirtualDiskInfo).VirtualDiskInfo, nil
+	return info.Result.(internal.ArrayOfVirtualDiskInfo).VirtualDiskInfo, nil
 }
 
 type createChildDiskTaskRequest struct {

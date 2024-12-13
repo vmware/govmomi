@@ -24,6 +24,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -277,7 +278,7 @@ func (m *VirtualDiskManager) QueryVirtualDiskUuid(ctx *Context, req *types.Query
 	}
 
 	body.Res = &types.QueryVirtualDiskUuidResponse{
-		Returnval: virtualDiskUUID(req.Datacenter, file),
+		Returnval: virtualDiskUUID(req.Datacenter, req.Name),
 	}
 
 	return body
@@ -288,4 +289,31 @@ func (m *VirtualDiskManager) SetVirtualDiskUuid(_ *Context, req *types.SetVirtua
 	// TODO: validate uuid format and persist
 	body.Res = new(types.SetVirtualDiskUuidResponse)
 	return body
+}
+
+func (m *VirtualDiskManager) QueryVirtualDiskInfoTask(ctx *Context, req *internal.QueryVirtualDiskInfoTaskRequest) soap.HasFault {
+	task := CreateTask(m, "queryVirtualDiskInfo", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		var res []internal.VirtualDiskInfo
+
+		fm := ctx.Map.FileManager()
+
+		_, fault := fm.resolve(req.Datacenter, req.Name)
+		if fault != nil {
+			return nil, fault
+		}
+
+		res = append(res, internal.VirtualDiskInfo{Name: req.Name, DiskType: "thin"})
+
+		if req.IncludeParents {
+			// TODO
+		}
+
+		return res, nil
+	})
+
+	return &internal.QueryVirtualDiskInfoTaskBody{
+		Res: &internal.QueryVirtualDiskInfo_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
 }

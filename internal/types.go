@@ -293,4 +293,31 @@ type ExecuteSoapResponse struct {
 
 func init() {
 	types.Add("ExecuteSoap", reflect.TypeOf((*ExecuteSoapRequest)(nil)).Elem())
+
+	types.Add("ArrayOfVirtualDiskInfo", reflect.TypeOf((*ArrayOfVirtualDiskInfo)(nil)).Elem())
+
+	types.Add("VirtualDiskInfo", reflect.TypeOf((*VirtualDiskInfo)(nil)).Elem())
+
+	types.Add("QueryVirtualDiskInfo_Task", reflect.TypeOf((*QueryVirtualDiskInfoTaskRequest)(nil)).Elem())
+}
+
+type VirtualDiskInfo struct {
+	Name     string `xml:"unit>name"`
+	DiskType string `xml:"diskType"`
+	Parent   string `xml:"parent,omitempty"`
+}
+
+type ArrayOfVirtualDiskInfo struct {
+	VirtualDiskInfo []VirtualDiskInfo `xml:"VirtualDiskInfo,omitempty"`
+}
+
+type QueryVirtualDiskInfoTaskRequest struct {
+	This           types.ManagedObjectReference  `xml:"_this"`
+	Name           string                        `xml:"name"`
+	Datacenter     *types.ManagedObjectReference `xml:"datacenter,omitempty"`
+	IncludeParents bool                          `xml:"includeParents"`
+}
+
+type QueryVirtualDiskInfo_TaskResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
 }
