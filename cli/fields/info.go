@@ -134,7 +134,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	if cmd.name != "" {
 		fkey, cerr := m.FindKey(ctx, cmd.name)
 		if cerr != nil {
-			return err
+			return cerr
 		}
 		matches = func(key int32) bool {
 			return key == fkey

@@ -35,7 +35,10 @@ load test_helper
   run govc fields.info vm/$vm_id
   assert_success
 
-  run govc fields.info -n $val vm/$vm_id
+  run govc fields.info -n "invalid" vm/$vm_id
+  assert_failure
+
+  run govc fields.info -n $field vm/$vm_id
   assert_success
 
   info=$(govc vm.info -json $vm_id | jq .virtualMachines[0].customValue[0])
