@@ -41,7 +41,7 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 	ctx context.Context,
 	sourceName string, sourceDatacenter *Datacenter,
 	destName string, destDatacenter *Datacenter,
-	destSpec *types.VirtualDiskSpec, force bool) (*Task, error) {
+	destSpec types.BaseVirtualDiskSpec, force bool) (*Task, error) {
 
 	req := types.CopyVirtualDisk_Task{
 		This:       m.Reference(),
