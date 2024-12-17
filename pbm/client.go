@@ -49,7 +49,7 @@ type Client struct {
 
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc := c.Client.NewServiceClient(Path, Namespace)
-	sc.Cookie = sc.SessionCookie // vcSessionCookie soap.Header
+	sc.Cookie = c.SessionCookie // vcSessionCookie soap.Header, value must be from vim25.Client
 
 	req := types.PbmRetrieveServiceContent{
 		This: ServiceInstance,
