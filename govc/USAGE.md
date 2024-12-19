@@ -1458,6 +1458,7 @@ Options:
 Usage: govc datastore.ls [OPTIONS] [FILE]...
 
 Options:
+  -H=true                Display human friendly name
   -R=false               List subdirectories recursively
   -a=false               Do not ignore entries starting with .
   -ds=                   Datastore [GOVC_DATASTORE]
