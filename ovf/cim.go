@@ -70,28 +70,28 @@ Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_VirtualSystem
 */
 
 type CIMVirtualSystemSettingData struct {
-	ElementName string `xml:"ElementName"`
-	InstanceID  string `xml:"InstanceID"`
+	ElementName string `xml:"ElementName" json:"elementName"`
+	InstanceID  string `xml:"InstanceID" json:"instanceID"`
 
-	AutomaticRecoveryAction              *uint8   `xml:"AutomaticRecoveryAction"`
-	AutomaticShutdownAction              *uint8   `xml:"AutomaticShutdownAction"`
-	AutomaticStartupAction               *uint8   `xml:"AutomaticStartupAction"`
-	AutomaticStartupActionDelay          *string  `xml:"AutomaticStartupActionDelay>Interval"`
-	AutomaticStartupActionSequenceNumber *uint16  `xml:"AutomaticStartupActionSequenceNumber"`
-	Caption                              *string  `xml:"Caption"`
-	ConfigurationDataRoot                *string  `xml:"ConfigurationDataRoot"`
-	ConfigurationFile                    *string  `xml:"ConfigurationFile"`
-	ConfigurationID                      *string  `xml:"ConfigurationID"`
-	CreationTime                         *string  `xml:"CreationTime"`
-	Description                          *string  `xml:"Description"`
-	LogDataRoot                          *string  `xml:"LogDataRoot"`
-	Notes                                []string `xml:"Notes"`
-	RecoveryFile                         *string  `xml:"RecoveryFile"`
-	SnapshotDataRoot                     *string  `xml:"SnapshotDataRoot"`
-	SuspendDataRoot                      *string  `xml:"SuspendDataRoot"`
-	SwapFileDataRoot                     *string  `xml:"SwapFileDataRoot"`
-	VirtualSystemIdentifier              *string  `xml:"VirtualSystemIdentifier"`
-	VirtualSystemType                    *string  `xml:"VirtualSystemType"`
+	AutomaticRecoveryAction              *uint8   `xml:"AutomaticRecoveryAction" json:"automaticRecoveryAction,omitempty"`
+	AutomaticShutdownAction              *uint8   `xml:"AutomaticShutdownAction" json:"automaticShutdownAction,omitempty"`
+	AutomaticStartupAction               *uint8   `xml:"AutomaticStartupAction" json:"automaticStartupAction,omitempty"`
+	AutomaticStartupActionDelay          *string  `xml:"AutomaticStartupActionDelay>Interval" json:"automaticStartupActionDelay,omitempty"`
+	AutomaticStartupActionSequenceNumber *uint16  `xml:"AutomaticStartupActionSequenceNumber" json:"automaticStartupActionSequenceNumber,omitempty"`
+	Caption                              *string  `xml:"Caption" json:"caption,omitempty"`
+	ConfigurationDataRoot                *string  `xml:"ConfigurationDataRoot" json:"configurationDataRoot,omitempty"`
+	ConfigurationFile                    *string  `xml:"ConfigurationFile" json:"configurationFile,omitempty"`
+	ConfigurationID                      *string  `xml:"ConfigurationID" json:"configurationID,omitempty"`
+	CreationTime                         *string  `xml:"CreationTime" json:"creationTime,omitempty"`
+	Description                          *string  `xml:"Description" json:"description,omitempty"`
+	LogDataRoot                          *string  `xml:"LogDataRoot" json:"logDataRoot,omitempty"`
+	Notes                                []string `xml:"Notes" json:"notes,omitempty"`
+	RecoveryFile                         *string  `xml:"RecoveryFile" json:"recoveryFile,omitempty"`
+	SnapshotDataRoot                     *string  `xml:"SnapshotDataRoot" json:"snapshotDataRoot,omitempty"`
+	SuspendDataRoot                      *string  `xml:"SuspendDataRoot" json:"suspendDataRoot,omitempty"`
+	SwapFileDataRoot                     *string  `xml:"SwapFileDataRoot" json:"swapFileDataRoot,omitempty"`
+	VirtualSystemIdentifier              *string  `xml:"VirtualSystemIdentifier" json:"virtualSystemIdentifier,omitempty"`
+	VirtualSystemType                    *string  `xml:"VirtualSystemType" json:"virtualSystemType,omitempty"`
 }
 
 /*
@@ -99,75 +99,75 @@ Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_ResourceAlloc
 */
 
 type CIMResourceAllocationSettingData struct {
-	ElementName string `xml:"ElementName"`
-	InstanceID  string `xml:"InstanceID"`
+	ElementName string `xml:"ElementName" json:"elementName,omitempty"`
+	InstanceID  string `xml:"InstanceID" json:"instanceID,omitempty"`
 
-	ResourceType      *CIMResourceType `xml:"ResourceType"`
-	OtherResourceType *string          `xml:"OtherResourceType"`
-	ResourceSubType   *string          `xml:"ResourceSubType"`
+	ResourceType      *CIMResourceType `xml:"ResourceType" json:"resourceType,omitempty"`
+	OtherResourceType *string          `xml:"OtherResourceType" json:"otherResourceType,omitempty"`
+	ResourceSubType   *string          `xml:"ResourceSubType" json:"resourceSubType,omitempty"`
 
-	AddressOnParent       *string  `xml:"AddressOnParent"`
-	Address               *string  `xml:"Address"`
-	AllocationUnits       *string  `xml:"AllocationUnits"`
-	AutomaticAllocation   *bool    `xml:"AutomaticAllocation"`
-	AutomaticDeallocation *bool    `xml:"AutomaticDeallocation"`
-	Caption               *string  `xml:"Caption"`
-	Connection            []string `xml:"Connection"`
-	ConsumerVisibility    *uint16  `xml:"ConsumerVisibility"`
-	Description           *string  `xml:"Description"`
-	HostResource          []string `xml:"HostResource"`
-	Limit                 *uint64  `xml:"Limit"`
-	MappingBehavior       *uint    `xml:"MappingBehavior"`
-	Parent                *string  `xml:"Parent"`
-	PoolID                *string  `xml:"PoolID"`
-	Reservation           *uint64  `xml:"Reservation"`
-	VirtualQuantity       *uint    `xml:"VirtualQuantity"`
-	VirtualQuantityUnits  *string  `xml:"VirtualQuantityUnits"`
-	Weight                *uint    `xml:"Weight"`
+	AddressOnParent       *string  `xml:"AddressOnParent" json:"addressOnParent,omitempty"`
+	Address               *string  `xml:"Address" json:"address,omitempty"`
+	AllocationUnits       *string  `xml:"AllocationUnits" json:"allocationUnits,omitempty"`
+	AutomaticAllocation   *bool    `xml:"AutomaticAllocation" json:"automaticAllocation,omitempty"`
+	AutomaticDeallocation *bool    `xml:"AutomaticDeallocation" json:"automaticDeallocation,omitempty"`
+	Caption               *string  `xml:"Caption" json:"caption,omitempty"`
+	Connection            []string `xml:"Connection" json:"connection,omitempty"`
+	ConsumerVisibility    *uint16  `xml:"ConsumerVisibility" json:"consumerVisibility,omitempty"`
+	Description           *string  `xml:"Description" json:"description,omitempty"`
+	HostResource          []string `xml:"HostResource" json:"hostResource,omitempty"`
+	Limit                 *uint64  `xml:"Limit" json:"limit,omitempty"`
+	MappingBehavior       *uint    `xml:"MappingBehavior" json:"mappingBehavior,omitempty"`
+	Parent                *string  `xml:"Parent" json:"parent,omitempty"`
+	PoolID                *string  `xml:"PoolID" json:"poolID,omitempty"`
+	Reservation           *uint64  `xml:"Reservation" json:"reservation,omitempty"`
+	VirtualQuantity       *uint    `xml:"VirtualQuantity" json:"virtualQuantity,omitempty"`
+	VirtualQuantityUnits  *string  `xml:"VirtualQuantityUnits" json:"virtualQuantityUnits,omitempty"`
+	Weight                *uint    `xml:"Weight" json:"weight,omitempty"`
 }
 
 /*
 Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_StorageAllocationSettingData.xsd
 */
 type CIMStorageAllocationSettingData struct {
-	ElementName string `xml:"ElementName"`
-	InstanceID  string `xml:"InstanceID"`
+	ElementName string `xml:"ElementName" json:"elementName"`
+	InstanceID  string `xml:"InstanceID" json:"instanceID"`
 
-	ResourceType      *CIMResourceType `xml:"ResourceType"`
-	OtherResourceType *string          `xml:"OtherResourceType"`
-	ResourceSubType   *string          `xml:"ResourceSubType"`
+	ResourceType      *CIMResourceType `xml:"ResourceType" json:"resourceType,omitempty"`
+	OtherResourceType *string          `xml:"OtherResourceType" json:"otherResourceType,omitempty"`
+	ResourceSubType   *string          `xml:"ResourceSubType" json:"resourceSubType,omitempty"`
 
-	Access                       *uint16         `xml:"Access"`
-	Address                      *string         `xml:"Address"`
-	AddressOnParent              *string         `xml:"AddressOnParent"`
-	AllocationUnits              *string         `xml:"AllocationUnits"`
-	AutomaticAllocation          *bool           `xml:"AutomaticAllocation"`
-	AutomaticDeallocation        *bool           `xml:"AutomaticDeallocation"`
-	Caption                      *string         `xml:"Caption"`
-	ChangeableType               *uint16         `xml:"ChangeableType"`
-	ComponentSetting             []types.AnyType `xml:"ComponentSetting"`
-	ConfigurationName            *string         `xml:"ConfigurationName"`
-	Connection                   []string        `xml:"Connection"`
-	ConsumerVisibility           *uint16         `xml:"ConsumerVisibility"`
-	Description                  *string         `xml:"Description"`
-	Generation                   *uint64         `xml:"Generation"`
-	HostExtentName               *string         `xml:"HostExtentName"`
-	HostExtentNameFormat         *uint16         `xml:"HostExtentNameFormat"`
-	HostExtentNameNamespace      *uint16         `xml:"HostExtentNameNamespace"`
-	HostExtentStartingAddress    *uint64         `xml:"HostExtentStartingAddress"`
-	HostResource                 []string        `xml:"HostResource"`
-	HostResourceBlockSize        *uint64         `xml:"HostResourceBlockSize"`
-	Limit                        *uint64         `xml:"Limit"`
-	MappingBehavior              *uint           `xml:"MappingBehavior"`
-	OtherHostExtentNameFormat    *string         `xml:"OtherHostExtentNameFormat"`
-	OtherHostExtentNameNamespace *string         `xml:"OtherHostExtentNameNamespace"`
-	Parent                       *string         `xml:"Parent"`
-	PoolID                       *string         `xml:"PoolID"`
-	Reservation                  *uint64         `xml:"Reservation"`
-	SoID                         *string         `xml:"SoID"`
-	SoOrgID                      *string         `xml:"SoOrgID"`
-	VirtualQuantity              *uint           `xml:"VirtualQuantity"`
-	VirtualQuantityUnits         *string         `xml:"VirtualQuantityUnits"`
-	VirtualResourceBlockSize     *uint64         `xml:"VirtualResourceBlockSize"`
-	Weight                       *uint           `xml:"Weight"`
+	Access                       *uint16         `xml:"Access" json:"access,omitempty"`
+	Address                      *string         `xml:"Address" json:"address,omitempty"`
+	AddressOnParent              *string         `xml:"AddressOnParent" json:"addressOnParent,omitempty"`
+	AllocationUnits              *string         `xml:"AllocationUnits" json:"allocationUnits,omitempty"`
+	AutomaticAllocation          *bool           `xml:"AutomaticAllocation" json:"automaticAllocation,omitempty"`
+	AutomaticDeallocation        *bool           `xml:"AutomaticDeallocation" json:"automaticDeallocation,omitempty"`
+	Caption                      *string         `xml:"Caption" json:"caption,omitempty"`
+	ChangeableType               *uint16         `xml:"ChangeableType" json:"changeableType,omitempty"`
+	ComponentSetting             []types.AnyType `xml:"ComponentSetting" json:"componentSetting,omitempty"`
+	ConfigurationName            *string         `xml:"ConfigurationName" json:"configurationName,omitempty"`
+	Connection                   []string        `xml:"Connection" json:"connection,omitempty"`
+	ConsumerVisibility           *uint16         `xml:"ConsumerVisibility" json:"consumerVisibility,omitempty"`
+	Description                  *string         `xml:"Description" json:"description,omitempty"`
+	Generation                   *uint64         `xml:"Generation" json:"generation,omitempty"`
+	HostExtentName               *string         `xml:"HostExtentName" json:"hostExtentName,omitempty"`
+	HostExtentNameFormat         *uint16         `xml:"HostExtentNameFormat" json:"hostExtentNameFormat,omitempty"`
+	HostExtentNameNamespace      *uint16         `xml:"HostExtentNameNamespace" json:"hostExtentNameNamespace,omitempty"`
+	HostExtentStartingAddress    *uint64         `xml:"HostExtentStartingAddress" json:"hostExtentStartingAddress,omitempty"`
+	HostResource                 []string        `xml:"HostResource" json:"hostResource,omitempty"`
+	HostResourceBlockSize        *uint64         `xml:"HostResourceBlockSize" json:"hostResourceBlockSize,omitempty"`
+	Limit                        *uint64         `xml:"Limit" json:"limit,omitempty"`
+	MappingBehavior              *uint           `xml:"MappingBehavior" json:"mappingBehavior,omitempty"`
+	OtherHostExtentNameFormat    *string         `xml:"OtherHostExtentNameFormat" json:"otherHostExtentNameFormat,omitempty"`
+	OtherHostExtentNameNamespace *string         `xml:"OtherHostExtentNameNamespace" json:"otherHostExtentNameNamespace,omitempty"`
+	Parent                       *string         `xml:"Parent" json:"parent,omitempty"`
+	PoolID                       *string         `xml:"PoolID" json:"poolID,omitempty"`
+	Reservation                  *uint64         `xml:"Reservation" json:"reservation,omitempty"`
+	SoID                         *string         `xml:"SoID" json:"soID,omitempty"`
+	SoOrgID                      *string         `xml:"SoOrgID" json:"soOrgID,omitempty"`
+	VirtualQuantity              *uint           `xml:"VirtualQuantity" json:"virtualQuantity,omitempty"`
+	VirtualQuantityUnits         *string         `xml:"VirtualQuantityUnits" json:"virtualQuantityUnits,omitempty"`
+	VirtualResourceBlockSize     *uint64         `xml:"VirtualResourceBlockSize" json:"virtualResourceBlockSize,omitempty"`
+	Weight                       *uint           `xml:"Weight" json:"weight,omitempty"`
 }
