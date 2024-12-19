@@ -18,12 +18,18 @@ package ovf
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
+	"path"
+	"strconv"
 	"testing"
 	"text/tabwriter"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 func testEnvelope(t *testing.T, fn string) *Envelope {
@@ -130,4 +136,72 @@ func TestMultipleDeploymentConfigs(t *testing.T) {
 	assert.False(t, *e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Required)
 	assert.Equal(t, "slotInfo.pciSlotNumber", e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Key)
 	assert.Equal(t, "128", e.VirtualSystem.VirtualHardware[0].Item[2].Config[0].Value)
+}
+
+func TestJSONEncoder(t *testing.T) {
+	t.Parallel()
+
+	testCases := []string{
+		"fixtures/ttylinux.ovf",
+		"fixtures/configspec.ovf",
+		"fixtures/photon5.ovf",
+		"fixtures/ubuntu24.10.ovf",
+		"fixtures/virtualsystemcollection.ovf",
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+
+		t.Run(path.Base(tc), func(t *testing.T) {
+
+			t.Parallel()
+
+			// Unmarshal the OVF envelope from XML.
+			decodedFromXML := testEnvelope(t, tc)
+
+			// Marshal the OVF envelope to JSON.
+			data, err := json.MarshalIndent(decodedFromXML, "", "  ")
+
+			if assert.NoError(t, err) {
+
+				if ok, _ := strconv.ParseBool(os.Getenv("DEBUG")); ok {
+					t.Log(string(data))
+				}
+
+				// Unmarshal the OVF envelop from JSON.
+				var decodedFromJSON Envelope
+				if assert.NoError(t, json.Unmarshal(data, &decodedFromJSON)) {
+
+					// Assert the OVF envelopes unmarshaled from XML and from
+					// JSON are equal.
+					if assert.True(
+						t,
+						cmp.Equal(*decodedFromXML, decodedFromJSON),
+						cmp.Diff(*decodedFromXML, decodedFromJSON)) {
+
+						// Take the OVF envelope that was unmarshaled from
+						// JSON and marshal it *back* to XML.
+						data, err := xml.Marshal(decodedFromJSON)
+						if assert.NoError(t, err) {
+
+							// Take the OVF envelope that was unmarshaled from
+							// JSON, then back to XML, and unmarshal it from XML.
+							var decodedFromXMLFromJSON Envelope
+							if assert.NoError(
+								t,
+								xml.Unmarshal(data, &decodedFromXMLFromJSON)) {
+
+								// Assert this envelope is equal to the
+								// original.
+								assert.True(
+									t,
+									cmp.Equal(*decodedFromXML, decodedFromXMLFromJSON),
+									cmp.Diff(*decodedFromXML, decodedFromXMLFromJSON))
+							}
+						}
+					}
+				}
+			}
+		})
+	}
 }

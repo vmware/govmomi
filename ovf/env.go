@@ -44,28 +44,28 @@ const (
 )
 
 type Env struct {
-	XMLName xml.Name `xml:"http://schemas.dmtf.org/ovf/environment/1 Environment"`
-	ID      string   `xml:"id,attr"`
-	EsxID   string   `xml:"http://www.vmware.com/schema/ovfenv esxId,attr"`
+	XMLName xml.Name `xml:"http://schemas.dmtf.org/ovf/environment/1 Environment" json:"xmlName"`
+	ID      string   `xml:"id,attr" json:"id"`
+	EsxID   string   `xml:"http://www.vmware.com/schema/ovfenv esxId,attr" json:"esxID"`
 
-	Platform *PlatformSection `xml:"PlatformSection"`
-	Property *PropertySection `xml:"PropertySection"`
+	Platform *PlatformSection `xml:"PlatformSection" json:"platformSection,omitempty"`
+	Property *PropertySection `xml:"PropertySection" json:"propertySection,omitempty"`
 }
 
 type PlatformSection struct {
-	Kind    string `xml:"Kind"`
-	Version string `xml:"Version"`
-	Vendor  string `xml:"Vendor"`
-	Locale  string `xml:"Locale"`
+	Kind    string `xml:"Kind" json:"kind,omitempty"`
+	Version string `xml:"Version" json:"version,omitempty"`
+	Vendor  string `xml:"Vendor" json:"vendor,omitempty"`
+	Locale  string `xml:"Locale" json:"locale,omitempty"`
 }
 
 type PropertySection struct {
-	Properties []EnvProperty `xml:"Property"`
+	Properties []EnvProperty `xml:"Property" json:"property,omitempty"`
 }
 
 type EnvProperty struct {
-	Key   string `xml:"key,attr"`
-	Value string `xml:"value,attr"`
+	Key   string `xml:"key,attr" json:"key"`
+	Value string `xml:"value,attr" json:"value,omitempty"`
 }
 
 // Marshal marshals Env to xml by using xml.Marshal.

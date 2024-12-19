@@ -27,81 +27,81 @@ import (
 //
 // A VirtualSystem may have zero or more VirtualHardware sections.
 type Envelope struct {
-	References []File `xml:"References>File"`
+	References []File `xml:"References>File" json:"references,omitempty"`
 
 	// Package level meta-data
-	Disk             *DiskSection             `xml:"DiskSection,omitempty"`
-	Network          *NetworkSection          `xml:"NetworkSection,omitempty"`
-	DeploymentOption *DeploymentOptionSection `xml:"DeploymentOptionSection,omitempty"`
+	Disk             *DiskSection             `xml:"DiskSection,omitempty" json:"diskSection,omitempty"`
+	Network          *NetworkSection          `xml:"NetworkSection,omitempty" json:"networkSection,omitempty"`
+	DeploymentOption *DeploymentOptionSection `xml:"DeploymentOptionSection,omitempty" json:"deploymentOptionSection,omitempty"`
 
 	// Content: A VirtualSystem or a VirtualSystemCollection
-	VirtualSystem           *VirtualSystem           `xml:"VirtualSystem,omitempty"`
-	VirtualSystemCollection *VirtualSystemCollection `xml:"VirtualSystemCollection,omitempty"`
+	VirtualSystem           *VirtualSystem           `xml:"VirtualSystem,omitempty" json:"virtualSystem,omitempty"`
+	VirtualSystemCollection *VirtualSystemCollection `xml:"VirtualSystemCollection,omitempty" json:"virtualSystemCollection,omitempty"`
 }
 
 type VirtualSystem struct {
 	Content
 
-	Annotation      *AnnotationSection       `xml:"AnnotationSection,omitempty"`
-	Product         []ProductSection         `xml:"ProductSection,omitempty"`
-	Eula            []EulaSection            `xml:"EulaSection,omitempty"`
-	OperatingSystem *OperatingSystemSection  `xml:"OperatingSystemSection,omitempty"`
-	VirtualHardware []VirtualHardwareSection `xml:"VirtualHardwareSection,omitempty"`
+	Annotation      *AnnotationSection       `xml:"AnnotationSection,omitempty" json:"annotationSection,omitempty"`
+	Product         []ProductSection         `xml:"ProductSection,omitempty" json:"productSection,omitempty"`
+	Eula            []EulaSection            `xml:"EulaSection,omitempty" json:"eulaSection,omitempty"`
+	OperatingSystem *OperatingSystemSection  `xml:"OperatingSystemSection,omitempty" json:"operatingSystemSection,omitempty"`
+	VirtualHardware []VirtualHardwareSection `xml:"VirtualHardwareSection,omitempty" json:"virtualHardwareSection,omitempty"`
 }
 
 type VirtualSystemCollection struct {
 	Content
 
 	// Collection level meta-data
-	ResourceAllocation *ResourceAllocationSection `xml:"ResourceAllocationSection,omitempty"`
-	Annotation         *AnnotationSection         `xml:"AnnotationSection,omitempty"`
-	Product            []ProductSection           `xml:"ProductSection,omitempty"`
-	Eula               []EulaSection              `xml:"EulaSection,omitempty"`
+	ResourceAllocation *ResourceAllocationSection `xml:"ResourceAllocationSection,omitempty" json:"resourceAllocationSection,omitempty"`
+	Annotation         *AnnotationSection         `xml:"AnnotationSection,omitempty" json:"annotationSection,omitempty"`
+	Product            []ProductSection           `xml:"ProductSection,omitempty" json:"productSection,omitempty"`
+	Eula               []EulaSection              `xml:"EulaSection,omitempty" json:"eulaSection,omitempty"`
 
 	// Content: One or more VirtualSystems
-	VirtualSystem []VirtualSystem `xml:"VirtualSystem,omitempty"`
+	VirtualSystem []VirtualSystem `xml:"VirtualSystem,omitempty" json:"virtualSystem,omitempty"`
 }
 
 type File struct {
-	ID          string  `xml:"id,attr"`
-	Href        string  `xml:"href,attr"`
-	Size        uint    `xml:"size,attr"`
-	Compression *string `xml:"compression,attr"`
-	ChunkSize   *int    `xml:"chunkSize,attr"`
+	ID          string  `xml:"id,attr" json:"id,omitempty"`
+	Href        string  `xml:"href,attr" json:"href,omitempty"`
+	Size        uint    `xml:"size,attr" json:"size,omitempty"`
+	Compression *string `xml:"compression,attr" json:"compression,omitempty"`
+	ChunkSize   *int    `xml:"chunkSize,attr" json:"chunkSize,omitempty"`
 }
 
 type Content struct {
-	ID   string  `xml:"id,attr"`
-	Info string  `xml:"Info"`
-	Name *string `xml:"Name"`
+	ID   string  `xml:"id,attr" json:"id,omitempty"`
+	Info string  `xml:"Info" json:"info,omitempty"`
+	Name *string `xml:"Name" json:"name,omitempty"`
 }
 
 type Section struct {
-	Required *bool  `xml:"required,attr"`
-	Info     string `xml:"Info"`
-	Category string `xml:"Category"`
+	Required *bool  `xml:"required,attr" json:"required,omitempty"`
+	Info     string `xml:"Info" json:"info,omitempty"`
+	Category string `xml:"Category" json:"category,omitempty"`
 }
 
 type AnnotationSection struct {
 	Section
 
-	Annotation string `xml:"Annotation"`
+	Annotation string `xml:"Annotation" json:"annotation,omitempty"`
 }
 
 type ProductSection struct {
 	Section
 
-	Class    *string `xml:"class,attr"`
-	Instance *string `xml:"instance,attr"`
+	Class    *string `xml:"class,attr" json:"class,omitempty"`
+	Instance *string `xml:"instance,attr" json:"instance,omitempty"`
 
-	Product     string     `xml:"Product"`
-	Vendor      string     `xml:"Vendor"`
-	Version     string     `xml:"Version"`
-	FullVersion string     `xml:"FullVersion"`
-	ProductURL  string     `xml:"ProductUrl"`
-	VendorURL   string     `xml:"VendorUrl"`
-	AppURL      string     `xml:"AppUrl"`
-	Property    []Property `xml:"Property"`
+	Product     string     `xml:"Product" json:"product,omitempty"`
+	Vendor      string     `xml:"Vendor" json:"vendor,omitempty"`
+	Version     string     `xml:"Version" json:"version,omitempty"`
+	FullVersion string     `xml:"FullVersion" json:"fullVersion,omitempty"`
+	ProductURL  string     `xml:"ProductUrl" json:"productUrl,omitempty"`
+	VendorURL   string     `xml:"VendorUrl" json:"vendorUrl,omitempty"`
+	AppURL      string     `xml:"AppUrl" json:"appUrl,omitempty"`
+	Property    []Property `xml:"Property" json:"property,omitempty"`
 }
 
 func (p ProductSection) Key(prop Property) string {
@@ -119,86 +119,86 @@ func (p ProductSection) Key(prop Property) string {
 }
 
 type Property struct {
-	Key              string  `xml:"key,attr"`
-	Type             string  `xml:"type,attr"`
-	Qualifiers       *string `xml:"qualifiers,attr"`
-	UserConfigurable *bool   `xml:"userConfigurable,attr"`
-	Default          *string `xml:"value,attr"`
-	Password         *bool   `xml:"password,attr"`
-	Configuration    *string `xml:"configuration,attr"`
+	Key              string  `xml:"key,attr" json:"key,omitempty"`
+	Type             string  `xml:"type,attr" json:"type,omitempty"`
+	Qualifiers       *string `xml:"qualifiers,attr" json:"qualifiers,omitempty"`
+	UserConfigurable *bool   `xml:"userConfigurable,attr" json:"userConfigurable,omitempty"`
+	Default          *string `xml:"value,attr" json:"default,omitempty"`
+	Password         *bool   `xml:"password,attr" json:"password,omitempty"`
+	Configuration    *string `xml:"configuration,attr" json:"configuration,omitempty"`
 
-	Label       *string `xml:"Label"`
-	Description *string `xml:"Description"`
+	Label       *string `xml:"Label" json:"label,omitempty"`
+	Description *string `xml:"Description" json:"description,omitempty"`
 
-	Values []PropertyConfigurationValue `xml:"Value"`
+	Values []PropertyConfigurationValue `xml:"Value" json:"value,omitempty"`
 }
 
 type PropertyConfigurationValue struct {
-	Value         string  `xml:"value,attr"`
-	Configuration *string `xml:"configuration,attr"`
+	Value         string  `xml:"value,attr" json:"value,omitempty"`
+	Configuration *string `xml:"configuration,attr" json:"configuration,omitempty"`
 }
 
 type NetworkSection struct {
 	Section
 
-	Networks []Network `xml:"Network"`
+	Networks []Network `xml:"Network" json:"network,omitempty"`
 }
 
 type Network struct {
-	Name string `xml:"name,attr"`
+	Name string `xml:"name,attr" json:"name,omitempty"`
 
-	Description string `xml:"Description"`
+	Description string `xml:"Description" json:"description,omitempty"`
 }
 
 type DiskSection struct {
 	Section
 
-	Disks []VirtualDiskDesc `xml:"Disk"`
+	Disks []VirtualDiskDesc `xml:"Disk" json:"disk,omitempty"`
 }
 
 type VirtualDiskDesc struct {
-	DiskID                  string  `xml:"diskId,attr"`
-	FileRef                 *string `xml:"fileRef,attr"`
-	Capacity                string  `xml:"capacity,attr"`
-	CapacityAllocationUnits *string `xml:"capacityAllocationUnits,attr"`
-	Format                  *string `xml:"format,attr"`
-	PopulatedSize           *int    `xml:"populatedSize,attr"`
-	ParentRef               *string `xml:"parentRef,attr"`
+	DiskID                  string  `xml:"diskId,attr" json:"diskId,omitempty"`
+	FileRef                 *string `xml:"fileRef,attr" json:"fileRef,omitempty"`
+	Capacity                string  `xml:"capacity,attr" json:"capacity,omitempty"`
+	CapacityAllocationUnits *string `xml:"capacityAllocationUnits,attr" json:"capacityAllocationUnits,omitempty"`
+	Format                  *string `xml:"format,attr" json:"format,omitempty"`
+	PopulatedSize           *int    `xml:"populatedSize,attr" json:"populatedSize,omitempty"`
+	ParentRef               *string `xml:"parentRef,attr" json:"parentRef,omitempty"`
 }
 
 type OperatingSystemSection struct {
 	Section
 
-	ID      int16   `xml:"id,attr"`
-	Version *string `xml:"version,attr"`
-	OSType  *string `xml:"osType,attr"`
+	ID      int16   `xml:"id,attr" json:"id"`
+	Version *string `xml:"version,attr" json:"version,omitempty"`
+	OSType  *string `xml:"osType,attr" json:"osType,omitempty"`
 
-	Description *string `xml:"Description"`
+	Description *string `xml:"Description" json:"description,omitempty"`
 }
 
 type EulaSection struct {
 	Section
 
-	License string `xml:"License"`
+	License string `xml:"License" json:"license,omitempty"`
 }
 
 type Config struct {
-	Required *bool  `xml:"required,attr"`
-	Key      string `xml:"key,attr"`
-	Value    string `xml:"value,attr"`
+	Required *bool  `xml:"required,attr" json:"required,omitempty"`
+	Key      string `xml:"key,attr" json:"key,omitempty"`
+	Value    string `xml:"value,attr" json:"value,omitempty"`
 }
 
 type VirtualHardwareSection struct {
 	Section
 
-	ID        *string `xml:"id,attr"`
-	Transport *string `xml:"transport,attr"`
+	ID        *string `xml:"id,attr" json:"id"`
+	Transport *string `xml:"transport,attr" json:"transport,omitempty"`
 
-	System      *VirtualSystemSettingData       `xml:"System"`
-	Item        []ResourceAllocationSettingData `xml:"Item"`
-	StorageItem []StorageAllocationSettingData  `xml:"StorageItem"`
-	Config      []Config                        `xml:"Config"`
-	ExtraConfig []Config                        `xml:"ExtraConfig"`
+	System      *VirtualSystemSettingData       `xml:"System" json:"system,omitempty"`
+	Item        []ResourceAllocationSettingData `xml:"Item" json:"item,omitempty"`
+	StorageItem []StorageAllocationSettingData  `xml:"StorageItem" json:"storageItem,omitempty"`
+	Config      []Config                        `xml:"Config" json:"config,omitempty"`
+	ExtraConfig []Config                        `xml:"ExtraConfig" json:"extraConfig,omitempty"`
 }
 
 type VirtualSystemSettingData struct {
@@ -208,42 +208,42 @@ type VirtualSystemSettingData struct {
 type ResourceAllocationSettingData struct {
 	CIMResourceAllocationSettingData
 
-	Required       *bool           `xml:"required,attr"`
-	Configuration  *string         `xml:"configuration,attr"`
-	Bound          *string         `xml:"bound,attr"`
-	Config         []Config        `xml:"Config"`
-	CoresPerSocket *CoresPerSocket `xml:"CoresPerSocket"`
+	Required       *bool           `xml:"required,attr" json:"required,omitempty"`
+	Configuration  *string         `xml:"configuration,attr" json:"configuration,omitempty"`
+	Bound          *string         `xml:"bound,attr" json:"bound,omitempty"`
+	Config         []Config        `xml:"Config" json:"config,omitempty"`
+	CoresPerSocket *CoresPerSocket `xml:"CoresPerSocket" json:"coresPerSocket,omitempty"`
 }
 
 type StorageAllocationSettingData struct {
 	CIMStorageAllocationSettingData
 
-	Required      *bool   `xml:"required,attr"`
-	Configuration *string `xml:"configuration,attr"`
-	Bound         *string `xml:"bound,attr"`
+	Required      *bool   `xml:"required,attr" json:"required,omitempty"`
+	Configuration *string `xml:"configuration,attr" json:"configuration,omitempty"`
+	Bound         *string `xml:"bound,attr" json:"bound,omitempty"`
 }
 
 type ResourceAllocationSection struct {
 	Section
 
-	Item []ResourceAllocationSettingData `xml:"Item"`
+	Item []ResourceAllocationSettingData `xml:"Item" json:"item,omitempty"`
 }
 
 type DeploymentOptionSection struct {
 	Section
 
-	Configuration []DeploymentOptionConfiguration `xml:"Configuration"`
+	Configuration []DeploymentOptionConfiguration `xml:"Configuration" json:"configuration,omitempty"`
 }
 
 type DeploymentOptionConfiguration struct {
-	ID      string `xml:"id,attr"`
-	Default *bool  `xml:"default,attr"`
+	ID      string `xml:"id,attr" json:"id"`
+	Default *bool  `xml:"default,attr" json:"default,omitempty"`
 
-	Label       string `xml:"Label"`
-	Description string `xml:"Description"`
+	Label       string `xml:"Label" json:"label,omitempty"`
+	Description string `xml:"Description" json:"description,omitempty"`
 }
 
 type CoresPerSocket struct {
-	Required *bool `xml:"required,attr"`
-	Value    int32 `xml:",chardata"`
+	Required *bool `xml:"required,attr" json:"required,omitempty"`
+	Value    int32 `xml:",chardata" json:"value,omitempty"`
 }
