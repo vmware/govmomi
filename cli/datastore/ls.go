@@ -42,6 +42,7 @@ type ls struct {
 	slash   bool
 	all     bool
 	recurse bool
+	human   bool
 }
 
 func init() {
@@ -55,6 +56,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
 
+	f.BoolVar(&cmd.human, "H", true, "Display human friendly name") // vSAN top-level dirs are ID by default
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.slash, "p", false, "Append / indicator to directories")
 	f.BoolVar(&cmd.all, "a", false, "Do not ignore entries starting with .")
@@ -206,8 +208,15 @@ func (o *listOutput) add(r types.HostDatastoreBrowserSearchResults) {
 	res.File = nil
 
 	for _, f := range r.File {
-		if f.GetFileInfo().Path[0] == '.' && !o.cmd.all {
+		info := f.GetFileInfo()
+		if info.Path[0] == '.' && !o.cmd.all {
 			continue
+		}
+
+		if o.cmd.human {
+			if info.FriendlyName != "" {
+				info.Path = info.FriendlyName
+			}
 		}
 
 		if o.cmd.slash {
