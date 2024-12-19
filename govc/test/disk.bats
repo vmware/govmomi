@@ -204,13 +204,24 @@ load test_helper
 
   run govc disk.ls
   assert_success
+  [ ${#lines[@]} -eq 2 ]
 
   path=$(govc disk.ls -json "$id" | jq -r .objects[].config.backing.filePath)
   run govc datastore.rm "$path"
   assert_success
 
+  # file backing was removed without using disk.rm, results in NotFound fault
+  run govc disk.ls "$id"
+  assert_failure
+
   run govc disk.ls
-  assert_failure # file backing was removed without using disk.rm, results in NotFound fault
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
+
+  run govc disk.ls -a
+  assert_success
+  [ ${#lines[@]} -eq 2 ]
+  assert_matches "not found"
 
   run govc disk.ls -R
   assert_success
