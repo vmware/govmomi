@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/cli"
@@ -41,6 +42,7 @@ type ls struct {
 	long bool
 	id   bool
 	disk bool
+	back bool
 }
 
 func init() {
@@ -60,6 +62,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.id, "i", false, "List volume ID only")
 	f.BoolVar(&cmd.disk, "L", false, "List volume disk or file backing ID only")
+	f.BoolVar(&cmd.back, "b", false, "List file backing path")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -84,12 +87,22 @@ Examples:
   govc volume.ls -l
   govc volume.ls -ds vsanDatastore
   govc volume.ls df86393b-5ae0-4fca-87d0-b692dbc67d45
+  govc volume.ls -json $id | jq -r .volume[].backingObjectDetails.backingDiskPath
+  govc volume.ls -b $id # verify backingDiskPath exists
   govc disk.ls -l $(govc volume.ls -L pvc-9744a4ff-07f4-43c4-b8ed-48ea7a528734)`
 }
 
 type lsWriter struct {
-	Volume []types.CnsVolume `json:"volume"`
+	Volume []types.CnsVolume                    `json:"volume"`
+	Info   []types.BaseCnsVolumeOperationResult `json:"info,omitempty"`
 	cmd    *ls
+}
+
+func (r *lsWriter) Dump() any {
+	if len(r.Info) != 0 {
+		return r.Info
+	}
+	return r.Volume
 }
 
 func (r *lsWriter) Write(w io.Writer) error {
@@ -123,6 +136,9 @@ func (r *lsWriter) Write(w io.Writer) error {
 
 	for _, volume := range r.Volume {
 		fmt.Printf("%s\t%s", volume.VolumeId.Id, volume.Name)
+		if r.cmd.back {
+			fmt.Printf("\t%s", r.backing(volume.VolumeId))
+		}
 		if r.cmd.long {
 			capacity := volume.BackingObjectDetails.GetCnsBackingObjectDetails().CapacityInMb
 			c := volume.Metadata.ContainerCluster
@@ -132,6 +148,34 @@ func (r *lsWriter) Write(w io.Writer) error {
 	}
 
 	return tw.Flush()
+}
+
+func (r *lsWriter) backing(id types.CnsVolumeId) string {
+	for _, info := range r.Info {
+		res, ok := info.(*types.CnsQueryVolumeInfoResult)
+		if !ok {
+			continue
+		}
+
+		switch vol := res.VolumeInfo.(type) {
+		case *types.CnsBlockVolumeInfo:
+			if vol.VStorageObject.Config.Id.Id == id.Id {
+				switch backing := vol.VStorageObject.Config.BaseConfigInfo.Backing.(type) {
+				case *vim.BaseConfigInfoDiskFileBackingInfo:
+					return backing.FilePath
+				}
+			}
+		}
+
+		if fault := res.Fault; fault != nil {
+			if f, ok := fault.Fault.(types.CnsFault); ok {
+				if strings.Contains(f.Reason, id.Id) {
+					return f.Reason
+				}
+			}
+		}
+	}
+	return "???"
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -154,6 +198,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	var volumes []types.CnsVolume
+	var info []types.BaseCnsVolumeOperationResult
 
 	for {
 		res, err := c.QueryVolume(ctx, cmd.CnsQueryFilter)
@@ -170,5 +215,26 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.Cursor = &res.Cursor
 	}
 
-	return cmd.WriteResult(&lsWriter{volumes, cmd})
+	if cmd.back {
+		ids := make([]types.CnsVolumeId, len(volumes))
+		for i := range volumes {
+			ids[i] = volumes[i].VolumeId
+		}
+
+		task, err := c.QueryVolumeInfo(ctx, ids)
+		if err != nil {
+			return err
+		}
+
+		res, err := task.WaitForResult(ctx, nil)
+		if err != nil {
+			return err
+		}
+
+		if batch, ok := res.Result.(types.CnsVolumeOperationBatchResult); ok {
+			info = batch.VolumeResults
+		}
+	}
+
+	return cmd.WriteResult(&lsWriter{volumes, info, cmd})
 }

@@ -7398,10 +7398,13 @@ Examples:
   govc volume.ls -l
   govc volume.ls -ds vsanDatastore
   govc volume.ls df86393b-5ae0-4fca-87d0-b692dbc67d45
+  govc volume.ls -json $id | jq -r .volume[].backingObjectDetails.backingDiskPath
+  govc volume.ls -b $id # verify backingDiskPath exists
   govc disk.ls -l $(govc volume.ls -L pvc-9744a4ff-07f4-43c4-b8ed-48ea7a528734)
 
 Options:
   -L=false               List volume disk or file backing ID only
+  -b=false               List file backing path
   -ds=                   Datastore [GOVC_DATASTORE]
   -i=false               List volume ID only
   -l=false               Long listing format
