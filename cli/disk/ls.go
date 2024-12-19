@@ -35,6 +35,7 @@ import (
 
 type ls struct {
 	*flags.DatastoreFlag
+	all      bool
 	long     bool
 	path     bool
 	r        bool
@@ -51,6 +52,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
 
+	f.BoolVar(&cmd.all, "a", false, "List IDs with missing file backing")
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.path, "L", false, "Print disk backing path instead of disk name")
 	f.BoolVar(&cmd.r, "R", false, "Reconcile the datastore inventory info")
@@ -167,7 +169,18 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			if filterNotFound && fault.Is(err, &types.NotFound{}) {
 				// The case when an FCD is deleted by something other than DeleteVStorageObject_Task, such as VM destroy
-				return fmt.Errorf("%s not found: use 'disk.ls -R' to reconcile datastore inventory", id)
+				if cmd.all {
+					obj := VStorageObject{VStorageObject: types.VStorageObject{
+						Config: types.VStorageObjectConfigInfo{
+							BaseConfigInfo: types.BaseConfigInfo{
+								Id:   types.ID{Id: id},
+								Name: "not found: use 'disk.ls -R' to reconcile datastore inventory",
+							},
+						},
+					}}
+					res.Objects = append(res.Objects, obj)
+				}
+				continue
 			}
 			return fmt.Errorf("retrieve %q: %s", id, err)
 		}

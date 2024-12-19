@@ -2150,6 +2150,7 @@ Options:
   -L=false               Print disk backing path instead of disk name
   -R=false               Reconcile the datastore inventory info
   -T=false               List attached tags
+  -a=false               List IDs with missing file backing
   -c=                    Query tag category
   -ds=                   Datastore [GOVC_DATASTORE]
   -l=false               Long listing format
