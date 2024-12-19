@@ -28,7 +28,7 @@ type CnsBlockCreateSpec struct {
 
 	// Crypto specifies the encryption settings for the volume to be created.
 	// Works with block volumes only.
-	CryptoSpec types.BaseCryptoSpec `xml:"cryptoSpec,omitempty,typeattr"`
+	CryptoSpec types.BaseCryptoSpec `xml:"cryptoSpec,omitempty,typeattr" json:"cryptoSpec"`
 }
 
 func init() {
@@ -36,8 +36,8 @@ func init() {
 }
 
 type CnsUpdateVolumeCryptoRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	UpdateSpecs []CnsVolumeCryptoUpdateSpec  `xml:"updateSpecs,omitempty"`
+	This        types.ManagedObjectReference `xml:"_this" json:"-"`
+	UpdateSpecs []CnsVolumeCryptoUpdateSpec  `xml:"updateSpecs,omitempty" json:"updateSpecs"`
 }
 
 func init() {
@@ -51,16 +51,16 @@ func init() {
 }
 
 type CnsUpdateVolumeCryptoResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 // CnsVolumeCryptoUpdateSpec is the specification for volume crypto update operation.
 type CnsVolumeCryptoUpdateSpec struct {
 	types.DynamicData
 
-	VolumeId    CnsVolumeId                           `xml:"volumeId"`
-	Profile     []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
-	DisksCrypto *types.DiskCryptoSpec                 `xml:"disksCrypto,omitempty"`
+	VolumeId    CnsVolumeId                           `xml:"volumeId" json:"volumeId"`
+	Profile     []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile"`
+	DisksCrypto *types.DiskCryptoSpec                 `xml:"disksCrypto,omitempty" json:"disksCrypto"`
 }
 
 func init() {
