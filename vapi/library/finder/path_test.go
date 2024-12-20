@@ -19,8 +19,9 @@ package finder_test
 import (
 	"context"
 	"fmt"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
@@ -35,60 +36,131 @@ import (
 )
 
 func TestResolveLibraryItemStorage(t *testing.T) {
-	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
-		rc := rest.NewClient(vc)
 
-		ds, err := find.NewFinder(vc).Datastore(ctx, "*")
-		if err != nil {
-			t.Fatal(err)
-		}
+	testCases := []struct {
+		name                             string
+		nilDatacenter                    bool
+		topLevelDirectoryCreateSupported *bool
+	}{
+		{
+			name:                             "Nil datacenter and nil topLevelCreate",
+			nilDatacenter:                    true,
+			topLevelDirectoryCreateSupported: nil,
+		},
+		{
+			name:                             "Nil datacenter and false topLevelCreate",
+			nilDatacenter:                    true,
+			topLevelDirectoryCreateSupported: types.New(false),
+		},
+		{
+			name:                             "Nil datacenter and true topLevelCreate",
+			nilDatacenter:                    true,
+			topLevelDirectoryCreateSupported: types.New(true),
+		},
+		{
+			name:                             "Non-nil datacenter and nil topLevelCreate",
+			nilDatacenter:                    false,
+			topLevelDirectoryCreateSupported: nil,
+		},
+		{
+			name:                             "Non-Nil datacenter and false topLevelCreate",
+			nilDatacenter:                    false,
+			topLevelDirectoryCreateSupported: types.New(false),
+		},
+		{
+			name:                             "Non-Nil datacenter and true topLevelCreate",
+			nilDatacenter:                    false,
+			topLevelDirectoryCreateSupported: types.New(true),
+		},
+	}
 
-		var props mo.Datastore
-		err = ds.Properties(ctx, ds.Reference(), []string{"name", "summary"}, &props)
-		if err != nil {
-			t.Fatal(err)
-		}
+	for i := range testCases {
+		tc := testCases[i]
 
-		fsTypes := []string{
-			string(types.HostFileSystemVolumeFileSystemTypeOTHER),
-			string(types.HostFileSystemVolumeFileSystemTypeVsan),
-		}
+		t.Run(tc.name, func(t *testing.T) {
 
-		for _, fs := range fsTypes {
-			// client uses DatastoreNamespaceManager only when datastore fs is vsan/vvol
-			simulator.Map.Get(ds.Reference()).(*simulator.Datastore).Summary.Type = fs
+			simulator.Test(func(ctx context.Context, vc *vim25.Client) {
 
-			u := props.Summary.Url
+				vf := find.NewFinder(vc)
+				rc := rest.NewClient(vc)
+				lf := finder.NewPathFinder(library.NewManager(rc), vc)
 
-			storage := []library.Storage{
-				{
-					StorageBacking: library.StorageBacking{DatastoreID: ds.Reference().Value, Type: "DATASTORE"},
-					StorageURIs: []string{
-						fmt.Sprintf("%s/contentlib-${lib_id}/${item_id}/${file_name}_${file_id}.iso", u),
-						fmt.Sprintf("%s/contentlib-${lib_id}/${item_id}/${file_name}_${file_id}.iso?serverId=${server_id}", u),
+				dc, err := vf.Datacenter(ctx, "*")
+				if !assert.NoError(t, err) || !assert.NotNil(t, dc) {
+					t.FailNow()
+				}
+
+				ds, err := vf.Datastore(ctx, "*")
+				if !assert.NoError(t, err) || !assert.NotNil(t, ds) {
+					t.FailNow()
+				}
+
+				var (
+					dsName string
+					dsURL  string
+					moDS   mo.Datastore
+				)
+				if !assert.NoError(
+					t,
+					ds.Properties(
+						ctx,
+						ds.Reference(),
+						[]string{"name", "summary"},
+						&moDS)) {
+					t.FailNow()
+				}
+
+				dsName = moDS.Name
+				dsURL = moDS.Summary.Url
+
+				storage := []library.Storage{
+					{
+						StorageBacking: library.StorageBacking{
+							DatastoreID: ds.Reference().Value,
+							Type:        "DATASTORE",
+						},
+						StorageURIs: []string{
+							fmt.Sprintf("%s/contentlib-${lib_id}/${item_id}/${file_1_name}_${file_1_id}.iso", dsURL),
+							fmt.Sprintf("%s/contentlib-${lib_id}/${item_id}/${file_2_name}_${file_2_id}.iso?serverId=${server_id}", dsURL),
+						},
 					},
-				},
-			}
+				}
 
-			f := finder.NewPathFinder(library.NewManager(rc), vc)
+				var fsType string
+				if v := tc.topLevelDirectoryCreateSupported; v != nil && *v {
+					fsType = string(types.HostFileSystemVolumeFileSystemTypeOTHER)
+				} else {
+					fsType = string(types.HostFileSystemVolumeFileSystemTypeVsan)
+				}
 
-			err = f.ResolveLibraryItemStorage(ctx, storage)
-			if err != nil {
-				t.Fatal(err)
-			}
+				simulator.Map.WithLock(
+					simulator.SpoofContext(),
+					ds.Reference(),
+					func() {
+						ds := simulator.Map.Get(ds.Reference()).(*simulator.Datastore)
+						ds.Summary.Type = fsType
+						ds.Capability.TopLevelDirectoryCreateSupported = tc.topLevelDirectoryCreateSupported
+					})
 
-			var path object.DatastorePath
-			for _, s := range storage {
-				for _, u := range s.StorageURIs {
-					path.FromString(u)
-					if path.Datastore != props.Name {
-						t.Errorf("failed to parse %s", u)
-					}
-					if strings.Contains(u, "?") {
-						t.Errorf("includes query: %s", u)
+				if !assert.NoError(
+					t,
+					lf.ResolveLibraryItemStorage(ctx, dc, storage)) {
+
+					t.FailNow()
+				}
+
+				assert.Len(t, storage, 1)
+				assert.Len(t, storage[0].StorageURIs, 2)
+
+				for _, s := range storage {
+					for _, u := range s.StorageURIs {
+						var path object.DatastorePath
+						path.FromString(u)
+						assert.Equal(t, path.Datastore, dsName)
+						assert.NotContains(t, u, "?")
 					}
 				}
-			}
-		}
-	})
+			})
+		})
+	}
 }

@@ -18,12 +18,12 @@ package finder
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"path"
 	"strings"
 
-	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vapi/library"
@@ -135,79 +135,126 @@ func (f *PathFinder) datastoreName(ctx context.Context, id string) (string, erro
 	return name, nil
 }
 
-func (f *PathFinder) convertPath(ctx context.Context, b *mo.Datastore, path string) (string, error) {
-	if !internal.IsDatastoreVSAN(*b) {
+func (f *PathFinder) convertPath(
+	ctx context.Context,
+	dc *object.Datacenter,
+	ds mo.Datastore,
+	path string) (string, error) {
+
+	if v := ds.Capability.TopLevelDirectoryCreateSupported; v != nil && *v {
 		return path, nil
 	}
 
-	var dc *object.Datacenter
-
-	entities, err := mo.Ancestors(ctx, f.c, f.c.ServiceContent.PropertyCollector, b.Self)
-	if err != nil {
-		return "", err
+	if dc == nil {
+		entities, err := mo.Ancestors(
+			ctx,
+			f.c,
+			f.c.ServiceContent.PropertyCollector,
+			ds.Self)
+		if err != nil {
+			return "", fmt.Errorf("failed to find ancestors: %w", err)
+		}
+		for _, entity := range entities {
+			if entity.Self.Type == "Datacenter" {
+				dc = object.NewDatacenter(f.c, entity.Self)
+				break
+			}
+		}
 	}
 
-	for _, entity := range entities {
-		if entity.Self.Type == "Datacenter" {
-			dc = object.NewDatacenter(f.c, entity.Self)
-			break
-		}
+	if dc == nil {
+		return "", errors.New("failed to find datacenter")
 	}
 
 	m := object.NewDatastoreNamespaceManager(f.c)
 	return m.ConvertNamespacePathToUuidPath(ctx, dc, path)
 }
 
-// ResolveLibraryItemStorage transforms StorageURIs Datastore url (uuid) to Datastore name.
-func (f *PathFinder) ResolveLibraryItemStorage(ctx context.Context, storage []library.Storage) error {
+// ResolveLibraryItemStorage transforms the StorageURIs field in the provided
+// storage items from a datastore URL, ex.
+// "ds:///vmfs/volumes/DATASTORE_UUID/contentlib-LIB_UUID/ITEM_UUID/file.vmdk",
+// to the format that includes the datastore name, ex.
+// "[DATASTORE_NAME] contentlib-LIB_UUID/ITEM_UUID/file.vmdk".
+//
+// If a storage item resides on a datastore that does not support the creation
+// of top-level directories, then this means the datastore is vSAN and the
+// storage item path needs to be further converted. If this occurs, then the
+// datacenter to which the datastore belongs is required. If the datacenter
+// parameter is non-nil, it is used, otherwise the datacenter for each datastore
+// is resolved as needed. It is much more efficient to send in the datacenter if
+// it is known ahead of time that the content library is stored on a vSAN
+// datastore.
+func (f *PathFinder) ResolveLibraryItemStorage(
+	ctx context.Context,
+	datacenter *object.Datacenter,
+	storage []library.Storage) error {
+
 	// TODO:
 	// - reuse PathFinder.cache
-	// - the transform here isn't Content Library specific, but is currently the only known use case
-	backing := map[string]*mo.Datastore{}
-	var ids []types.ManagedObjectReference
+	// - the transform here isn't Content Library specific, but is currently
+	//   the only known use case
+	var (
+		ids          []types.ManagedObjectReference
+		datastoreMap = map[string]mo.Datastore{}
+	)
 
-	// don't think we can have more than 1 Datastore backing currently, future proof anyhow
+	// Currently ContentLibrary only supports a single storage backing, but this
+	// future proofs things.
 	for _, item := range storage {
 		id := item.StorageBacking.DatastoreID
-		if _, ok := backing[id]; ok {
+		if _, ok := datastoreMap[id]; ok {
 			continue
 		}
-		backing[id] = nil
-		ids = append(ids, types.ManagedObjectReference{Type: "Datastore", Value: id})
+		datastoreMap[id] = mo.Datastore{}
+		ids = append(
+			ids,
+			types.ManagedObjectReference{Type: "Datastore", Value: id})
 	}
 
-	var ds []mo.Datastore
-	pc := property.DefaultCollector(f.c)
-	props := []string{"name", "summary.url", "summary.type"}
-	if err := pc.Retrieve(ctx, ids, props, &ds); err != nil {
+	var (
+		datastores []mo.Datastore
+		pc         = property.DefaultCollector(f.c)
+		props      = []string{
+			"name",
+			"summary.url",
+			"capability.topLevelDirectoryCreateSupported",
+		}
+	)
+
+	if err := pc.Retrieve(ctx, ids, props, &datastores); err != nil {
 		return err
 	}
 
-	for i := range ds {
-		backing[ds[i].Self.Value] = &ds[i]
+	for i := range datastores {
+		datastoreMap[datastores[i].Self.Value] = datastores[i]
 	}
 
 	for _, item := range storage {
-		b := backing[item.StorageBacking.DatastoreID]
-		dsurl := b.Summary.Url
+		ds := datastoreMap[item.StorageBacking.DatastoreID]
+		dsURL := ds.Summary.Url
 
 		for i := range item.StorageURIs {
-			uri, err := url.Parse(item.StorageURIs[i])
+			szURI := item.StorageURIs[i]
+			uri, err := url.Parse(szURI)
 			if err != nil {
-				return err
+				return fmt.Errorf(
+					"failed to parse storage URI %q: %w", szURI, err)
 			}
+
 			uri.OmitHost = false            // `ds://` required for ConvertNamespacePathToUuidPath()
 			uri.Path = path.Clean(uri.Path) // required for ConvertNamespacePathToUuidPath()
 			uri.RawQuery = ""
-			u, err := f.convertPath(ctx, b, uri.String())
+
+			uriPath := uri.String()
+			u, err := f.convertPath(ctx, datacenter, ds, uriPath)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to convert path %q: %w", uriPath, err)
 			}
-			u = strings.TrimPrefix(u, dsurl)
+			u = strings.TrimPrefix(u, dsURL)
 			u = strings.TrimPrefix(u, "/")
 
 			item.StorageURIs[i] = (&object.DatastorePath{
-				Datastore: b.Name,
+				Datastore: ds.Name,
 				Path:      u,
 			}).String()
 		}
