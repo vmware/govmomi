@@ -40,36 +40,55 @@ func TestResolveLibraryItemStorage(t *testing.T) {
 	testCases := []struct {
 		name                             string
 		nilDatacenter                    bool
+		datastoreMap                     map[string]mo.Datastore
 		topLevelDirectoryCreateSupported *bool
 	}{
 		{
 			name:                             "Nil datacenter and nil topLevelCreate",
 			nilDatacenter:                    true,
+			datastoreMap:                     nil,
 			topLevelDirectoryCreateSupported: nil,
 		},
 		{
 			name:                             "Nil datacenter and false topLevelCreate",
 			nilDatacenter:                    true,
+			datastoreMap:                     nil,
 			topLevelDirectoryCreateSupported: types.New(false),
 		},
 		{
 			name:                             "Nil datacenter and true topLevelCreate",
 			nilDatacenter:                    true,
+			datastoreMap:                     nil,
 			topLevelDirectoryCreateSupported: types.New(true),
 		},
 		{
 			name:                             "Non-nil datacenter and nil topLevelCreate",
 			nilDatacenter:                    false,
+			datastoreMap:                     nil,
 			topLevelDirectoryCreateSupported: nil,
 		},
 		{
 			name:                             "Non-Nil datacenter and false topLevelCreate",
 			nilDatacenter:                    false,
+			datastoreMap:                     nil,
 			topLevelDirectoryCreateSupported: types.New(false),
 		},
 		{
 			name:                             "Non-Nil datacenter and true topLevelCreate",
 			nilDatacenter:                    false,
+			datastoreMap:                     nil,
+			topLevelDirectoryCreateSupported: types.New(true),
+		},
+		{
+			name:                             "Nil datastoreMap",
+			nilDatacenter:                    true,
+			datastoreMap:                     nil,
+			topLevelDirectoryCreateSupported: nil,
+		},
+		{
+			name:                             "Non-Nil datastoreMap and true topLevelCreate",
+			nilDatacenter:                    true,
+			datastoreMap:                     map[string]mo.Datastore{},
 			topLevelDirectoryCreateSupported: types.New(true),
 		},
 	}
@@ -105,7 +124,7 @@ func TestResolveLibraryItemStorage(t *testing.T) {
 					ds.Properties(
 						ctx,
 						ds.Reference(),
-						[]string{"name", "summary"},
+						[]string{"name", "summary.url"},
 						&moDS)) {
 					t.FailNow()
 				}
@@ -142,15 +161,35 @@ func TestResolveLibraryItemStorage(t *testing.T) {
 						ds.Capability.TopLevelDirectoryCreateSupported = tc.topLevelDirectoryCreateSupported
 					})
 
+				nilDSM := tc.datastoreMap == nil
+
 				if !assert.NoError(
 					t,
-					lf.ResolveLibraryItemStorage(ctx, dc, storage)) {
+					lf.ResolveLibraryItemStorage(
+						ctx,
+						dc,
+						tc.datastoreMap,
+						storage)) {
 
 					t.FailNow()
 				}
 
 				assert.Len(t, storage, 1)
 				assert.Len(t, storage[0].StorageURIs, 2)
+
+				if nilDSM {
+					assert.Nil(t, tc.datastoreMap)
+				} else if assert.NotNil(t, tc.datastoreMap) {
+					if assert.Len(t, tc.datastoreMap, 1) {
+						dsv := ds.Reference().Value
+						if assert.Contains(t, tc.datastoreMap, dsv) {
+							ds := tc.datastoreMap[dsv]
+							assert.Equal(t, ds.Name, dsName)
+							assert.Equal(t, ds.Summary.Url, dsURL)
+							assert.Equal(t, ds.Capability.TopLevelDirectoryCreateSupported, tc.topLevelDirectoryCreateSupported)
+						}
+					}
+				}
 
 				for _, s := range storage {
 					for _, u := range s.StorageURIs {
