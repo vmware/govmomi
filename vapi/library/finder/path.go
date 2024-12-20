@@ -176,6 +176,11 @@ func (f *PathFinder) convertPath(
 // to the format that includes the datastore name, ex.
 // "[DATASTORE_NAME] contentlib-LIB_UUID/ITEM_UUID/file.vmdk".
 //
+// If datastoreMap is provided, then it will be updated with the datastores
+// involved in the resolver. The properties name, summary.url, and
+// capability.topLevelDirectoryCreateSupported will be available after the
+// resolver completes.
+//
 // If a storage item resides on a datastore that does not support the creation
 // of top-level directories, then this means the datastore is vSAN and the
 // storage item path needs to be further converted. If this occurs, then the
@@ -187,16 +192,18 @@ func (f *PathFinder) convertPath(
 func (f *PathFinder) ResolveLibraryItemStorage(
 	ctx context.Context,
 	datacenter *object.Datacenter,
+	datastoreMap map[string]mo.Datastore,
 	storage []library.Storage) error {
 
 	// TODO:
 	// - reuse PathFinder.cache
 	// - the transform here isn't Content Library specific, but is currently
 	//   the only known use case
-	var (
-		ids          []types.ManagedObjectReference
+	var ids []types.ManagedObjectReference
+
+	if datastoreMap == nil {
 		datastoreMap = map[string]mo.Datastore{}
-	)
+	}
 
 	// Currently ContentLibrary only supports a single storage backing, but this
 	// future proofs things.

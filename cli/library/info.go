@@ -277,7 +277,7 @@ func (r infoResultsWriter) writeFile(
 		}
 		if r.cmd.Stor {
 			label = "Resolved URI"
-			err = r.cmd.pathFinder.ResolveLibraryItemStorage(r.ctx, nil, s)
+			err = r.cmd.pathFinder.ResolveLibraryItemStorage(r.ctx, nil, nil, s)
 			if err != nil {
 				return err
 			}
