@@ -343,6 +343,8 @@ type AviConfigCreateSpec struct {
 //
 // See https://developer.vmware.com/apis/vsphere-automation/latest/vcenter/data-structures/NamespaceManagement/LoadBalancers/HAProxyConfigCreateSpec/
 // Since 7.0u1:-
+// Deprecated: HA Proxy is being deprecated in vSphere 9.0. Use
+// Avi with vSphere networking, or NSX-T networking, instead.
 type HAProxyConfigCreateSpec struct {
 	CertificateAuthorityChain string                `json:"certificate_authority_chain"`
 	Password                  string                `json:"password"`
@@ -367,8 +369,10 @@ type LoadBalancerProvider struct {
 
 var (
 	UndefinedLoadBalancerProvider = LoadBalancerProvider{""}
-	HAProxyLoadBalancerProvider   = LoadBalancerProvider{"HA_PROXY"}
-	AviLoadBalancerProvider       = LoadBalancerProvider{"AVI"}
+	// Deprecated: HA Proxy is being deprecated in vSphere 9.0. Use
+	// Avi vSphere networking, or NSX-T networking, instead.
+	HAProxyLoadBalancerProvider = LoadBalancerProvider{"HA_PROXY"}
+	AviLoadBalancerProvider     = LoadBalancerProvider{"AVI"}
 )
 
 func (v LoadBalancerProvider) String() string {
