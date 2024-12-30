@@ -223,7 +223,7 @@ load test_helper
   run govc library.import -pull -c fake -a MD5 -n invalid-md5 my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
   assert_failure # invalid checksum
 
-  sum=$(md5sum "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" | awk '{print $1}')
+  sum=$(md5sum "$GOVC_IMAGES/$TTYLINUX_NAME.ova" | awk '{print $1}')
   run govc library.import -pull -c "$sum" -a MD5 -n ttylinux-unpacked my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
   assert_success
 
@@ -668,7 +668,14 @@ EOF
   run govc library.sync subscribed-content/ttylinux-latest
   assert_success
 
-  # assert cached is false after item sync
+  # assert cached is false after item sync for ondemand library sans -f=true (force)
+  cached=$(govc library.info subscribed-content/ttylinux-latest | grep Cached: | awk '{print $2}')
+  assert_equal "false" "$cached"
+
+  run govc library.sync -f=true subscribed-content/ttylinux-latest
+  assert_success
+
+  # assert cached is true after item sync with -f=true (force)
   cached=$(govc library.info subscribed-content/ttylinux-latest | grep Cached: | awk '{print $2}')
   assert_equal "true" "$cached"
 
