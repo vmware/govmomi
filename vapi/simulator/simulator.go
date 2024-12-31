@@ -66,6 +66,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 	vim "github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
+	"github.com/vmware/govmomi/vmdk"
 )
 
 type item struct {
@@ -1232,6 +1233,42 @@ func createFile(dstPath string) error {
 	return f.Close()
 }
 
+// TODO: considering using object.DatastoreFileManager.Copy here instead
+func openFile(dstPath string, flag int, perm os.FileMode) (*os.File, error) {
+	backing := simulator.VirtualDiskBackingFileName(dstPath)
+	if backing == dstPath {
+		// dstPath is not a .vmdk file
+		return os.OpenFile(dstPath, flag, perm)
+	}
+
+	// Generate the descriptor file using dstPath
+	extent := vmdk.Extent{Info: filepath.Base(backing)}
+	desc := vmdk.NewDescriptor(extent)
+
+	f, err := os.OpenFile(dstPath, flag, perm)
+	if err != nil {
+		return nil, err
+	}
+
+	if err = desc.Write(f); err != nil {
+		_ = f.Close()
+		return nil, err
+	}
+
+	if err = f.Close(); err != nil {
+		return nil, err
+	}
+
+	// Create ${name}-flat.vmdk to store contents
+	return os.OpenFile(backing, flag, perm)
+}
+
+func sourceFile(srcPath string) (*os.File, error) {
+	// Open ${name}-flat.vmdk if src is a .vmdk
+	srcPath = simulator.VirtualDiskBackingFileName(srcPath)
+	return os.Open(srcPath)
+}
+
 func copyFile(dstPath, srcPath string) error {
 	srcStat, err := os.Stat(srcPath)
 	if err != nil {
@@ -1242,13 +1279,13 @@ func copyFile(dstPath, srcPath string) error {
 		return fmt.Errorf("%q is not a regular file", srcPath)
 	}
 
-	src, err := os.Open(srcPath)
+	src, err := sourceFile(srcPath)
 	if err != nil {
 		return fmt.Errorf("failed to open %q: %w", srcPath, err)
 	}
 	defer src.Close()
 
-	dst, err := os.OpenFile(dstPath, createOrCopyFlags, createOrCopyMode)
+	dst, err := openFile(dstPath, createOrCopyFlags, createOrCopyMode)
 	if err != nil {
 		return fmt.Errorf("failed to create %q: %w", dstPath, err)
 	}
@@ -2266,7 +2303,7 @@ func (s *handler) libraryItemFileCreate(
 
 		dstFilePath := path.Join(dstItemPath, fileName)
 
-		dst, err := os.OpenFile(dstFilePath, createOrCopyFlags, createOrCopyMode)
+		dst, err := openFile(dstFilePath, createOrCopyFlags, createOrCopyMode)
 		if err != nil {
 			return library.File{}, err
 		}
