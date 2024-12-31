@@ -398,6 +398,16 @@ EOF
   run govc library.import published-content "$GOVC_IMAGES/ttylinux-latest.ova"
   assert_success
 
+  run govc library.info -L published-content/ttylinux-latest/*.vmdk
+  assert_success
+  vmdk="$output"
+
+  run govc datastore.ls "$vmdk"
+  assert_success
+
+  run govc datastore.ls "${vmdk/.vmdk/-flat.vmdk}"
+  assert_success
+
   run govc library.create -sub "$url" my-content
   assert_success
 
@@ -405,6 +415,16 @@ EOF
   assert_success
   assert_matches "Subscription:"
   assert_matches "$url"
+
+  run govc library.info -L my-content/ttylinux-latest/*.vmdk
+  assert_success
+  vmdk="$output"
+
+  run govc datastore.ls "$vmdk"
+  assert_success
+
+  run govc datastore.ls "${vmdk/.vmdk/-flat.vmdk}"
+  assert_success
 
   run govc library.import my-content "$GOVC_IMAGES/$TTYLINUX_NAME.iso"
   assert_failure # cannot add items to subscribed libraries
