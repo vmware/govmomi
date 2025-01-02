@@ -1427,6 +1427,9 @@ If DEST name is "-", source is written to stdout.
 Examples:
   govc datastore.download vm-name/vmware.log ./local.log
   govc datastore.download vm-name/vmware.log - | grep -i error
+  govc datastore.download -json vm-name/vm-name.vmdk - | jq .ddb
+  ovf=$(govc library.info -l -L vmservice/photon-5.0/*.ovf)
+  govc datastore.download -json "$ovf" - | jq -r .diskSection.disk[].capacity
 
 Options:
   -ds=                   Datastore [GOVC_DATASTORE]
