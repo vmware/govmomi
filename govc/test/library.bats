@@ -63,6 +63,7 @@ load test_helper
 
 @test "library.import" {
   vcsim_env
+  unset GOVC_HOST # else datastore.download tries via ESX
 
   run govc library.create my-content
   assert_success
@@ -133,6 +134,29 @@ load test_helper
   assert_success
   assert_matches "$TTYLINUX_NAME.ovf"
   assert_matches "$TTYLINUX_NAME-disk1.vmdk"
+
+  run govc library.info -l -L "/my-content/$TTYLINUX_NAME/*.ovf"
+  assert_success
+  ovf="$output"
+
+  # validate ovf.Envelope as json
+  run govc datastore.download -json "$ovf" -
+  assert_success
+
+  run jq -r .virtualSystem.operatingSystemSection.osType <<<"$output"
+  assert_success "otherLinuxGuest"
+
+  run govc library.info -L "/my-content/$TTYLINUX_NAME/*.vmdk"
+  assert_success
+  vmdk="$output"
+
+  # validate vmdk.Descriptor as json
+  run govc datastore.download -json "$vmdk" -
+  assert_success
+
+  base=$(basename "$vmdk")
+  run jq -r .extent[].info <<<"$output"
+  assert_success "${base/.vmdk/-flat.vmdk}"
 
   run govc library.import /my-content "$GOVC_IMAGES/$TTYLINUX_NAME.iso"
   assert_failure # already_exists

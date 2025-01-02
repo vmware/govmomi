@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package vmdk
 
@@ -27,13 +15,13 @@ import (
 )
 
 type Descriptor struct {
-	Encoding  string
-	Version   int
-	CID       DiskContentID
-	ParentCID DiskContentID
-	Type      string
-	Extent    []Extent
-	DDB       map[string]string
+	Encoding  string            `json:"encoding"`
+	Version   int               `json:"version"`
+	CID       DiskContentID     `json:"cid"`
+	ParentCID DiskContentID     `json:"parentCID"`
+	Type      string            `json:"type"`
+	Extent    []Extent          `json:"extent"`
+	DDB       map[string]string `json:"ddb"`
 }
 
 type DiskContentID uint32
@@ -43,10 +31,10 @@ func (cid DiskContentID) String() string {
 }
 
 type Extent struct {
-	Type       string
-	Permission string
-	Size       uint64
-	Info       string
+	Type       string `json:"type"`
+	Permission string `json:"permission"`
+	Size       uint64 `json:"size"`
+	Info       string `json:"info"`
 }
 
 func NewDescriptor(extent ...Extent) *Descriptor {
@@ -91,8 +79,8 @@ func ParseDescriptor(r io.Reader) (*Descriptor, error) {
 
 		key, val := strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
 		val = strings.Trim(val, `"`)
-		if strings.HasPrefix(key, "ddb") {
-			d.DDB[key] = val
+		if k := strings.TrimPrefix(key, "ddb."); k != key {
+			d.DDB[k] = val
 			continue
 		}
 
@@ -161,7 +149,7 @@ createType="{{ .Type }}"
 
 # The Disk Data Base
 #DDB{{ range $key, $val := .DDB }}
-{{ $key }} = "{{ $val }}"{{end}}
+ddb.{{ $key }} = "{{ $val }}"{{end}}
 `
 
 func (d *Descriptor) Write(w io.Writer) error {
