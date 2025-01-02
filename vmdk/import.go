@@ -263,7 +263,7 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 		EntityName:       disk.ImportName,
 	}
 
-	spec, err := m.CreateImportSpec(ctx, descriptor, pool, datastore, params)
+	spec, err := m.CreateImportSpec(ctx, descriptor, pool, datastore, &params)
 	if err != nil {
 		return err
 	}

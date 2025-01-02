@@ -52,7 +52,7 @@ func (m *Manager) CreateDescriptor(ctx context.Context, obj mo.Reference, cdp ty
 }
 
 // CreateImportSpec wraps methods.CreateImportSpec
-func (m *Manager) CreateImportSpec(ctx context.Context, ovfDescriptor string, resourcePool mo.Reference, datastore mo.Reference, cisp types.OvfCreateImportSpecParams) (*types.OvfCreateImportSpecResult, error) {
+func (m *Manager) CreateImportSpec(ctx context.Context, ovfDescriptor string, resourcePool mo.Reference, datastore mo.Reference, cisp types.BaseOvfCreateImportSpecParams) (*types.OvfCreateImportSpecResult, error) {
 	req := types.CreateImportSpec{
 		This:          m.Reference(),
 		OvfDescriptor: ovfDescriptor,
