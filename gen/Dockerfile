@@ -1,5 +1,5 @@
 ## The version of Go from which this image is based.
-ARG GO_VERSION=1.20.6
+ARG GO_VERSION=1.23.2
 
 ## Docker image used as base of this image.
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION}
