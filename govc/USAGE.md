@@ -3558,7 +3558,7 @@ Usage: govc host.vnic.service [OPTIONS] SERVICE DEVICE
 
 Enable or disable service on a virtual nic device.
 
-Where SERVICE is one of: vmotion|faultToleranceLogging|vSphereReplication|vSphereReplicationNFC|management|vsan|vSphereProvisioning|vsanWitness|vSphereBackupNFC|ptp|nvmeTcp|nvmeRdma
+Where SERVICE is one of: vmotion|faultToleranceLogging|vSphereReplication|vSphereReplicationNFC|management|vsan|vSphereProvisioning|vsanWitness|vSphereBackupNFC|ptp|nvmeTcp|nvmeRdma|vsanExternal
 Where DEVICE is one of: vmk0|vmk1|...
 
 Examples:

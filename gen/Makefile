@@ -10,6 +10,16 @@ SHELL := /usr/bin/env bash
 # Print the help/usage when make is executed without any other arguments
 .DEFAULT_GOAL := help
 
+# CRI_BIN is the path to the container runtime binary.
+ifeq (,$(strip $(GITHUB_RUN_ID)))
+# Prefer podman locally.
+CRI_BIN := $(shell command -v podman 2>/dev/null || command -v docker 2>/dev/null)
+else
+# Prefer docker in GitHub actions.
+CRI_BIN := $(shell command -v docker 2>/dev/null || command -v podman 2>/dev/null)
+endif
+export CRI_BIN
+
 
 ## --------------------------------------
 ## Help
@@ -30,7 +40,7 @@ IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
 
 .PHONY: image-build
 image-build: ## Build the image for generating types
-	docker build -t $(IMAGE) .
+	$(CRI_BIN) build -t $(IMAGE) .
 
 
 ## --------------------------------------
@@ -49,7 +59,7 @@ ABS_PATH_PARENT_DIR := $(abspath $(dir $(shell pwd)))
 generate-types: image-build
 generate-types: ## Generate the types
 	@cp -f Gemfile.lock .Gemfile.lock.tmp
-	docker run -it --rm \
+	$(CRI_BIN) run -it --rm \
 	  -v $(ABS_PATH_PARENT_DIR):/govmomi \
 	  -v $(ABS_PATH_PARENT_DIR)/gen/.Gemfile.lock.tmp:/govmomi/gen/Gemfile.lock \
 	  $(IMAGE) \

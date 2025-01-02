@@ -2614,7 +2614,7 @@ func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *libra
 	}
 
 	m := ovf.NewManager(c)
-	spec, err := m.CreateImportSpec(ctx, string(desc), pool, ds, cisp)
+	spec, err := m.CreateImportSpec(ctx, string(desc), pool, ds, &cisp)
 	if err != nil {
 		return nil, err
 	}

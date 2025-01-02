@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package types
 
@@ -46,6 +34,8 @@ type AddIssueResponse struct {
 	Returnval BaseIssue `xml:"returnval,typeattr" json:"returnval"`
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Scope specifies on which compute resources to deploy a solution's agents.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -65,6 +55,8 @@ func init() {
 	types.Add("eam:AgencyComputeResourceScope", reflect.TypeOf((*AgencyComputeResourceScope)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // This is the configuration of an <code>Agency</code>.
 //
 // It determines on
@@ -296,6 +288,8 @@ type AgencyQueryRuntimeResponse struct {
 	Returnval BaseEamObjectRuntimeInfo `xml:"returnval,typeattr" json:"returnval"`
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Scope specifies which where to deploy agents.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -307,6 +301,8 @@ func init() {
 	types.Add("eam:AgencyScope", reflect.TypeOf((*AgencyScope)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM System VMs APIs.
+//
 // Represents the mapping of a VM folder to a datacenter.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -330,6 +326,8 @@ func init() {
 	types.Add("eam:AgencyVMFolder", reflect.TypeOf((*AgencyVMFolder)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM System VMs APIs.
+//
 // Represents the mapping of a VM resource pool to a compute resource.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -387,6 +385,8 @@ func init() {
 type Agency_EnableResponse struct {
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Specifies an SSL policy that trusts any SSL certificate.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -399,6 +399,8 @@ func init() {
 	types.AddMinAPIVersionForType("eam:AgentAnyCertificate", "8.2")
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // A description of what should be put on a host.
 //
 // By setting the
@@ -576,6 +578,8 @@ func init() {
 	types.Add("eam:AgentIssue", reflect.TypeOf((*AgentIssue)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // The <code>OvfEnvironment</code> is used to assign OVF environment
 // properties in the `AgentConfigInfo`.
 //
@@ -595,6 +599,8 @@ func init() {
 	types.Add("eam:AgentOvfEnvironmentInfo", reflect.TypeOf((*AgentOvfEnvironmentInfo)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // One OVF property.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -611,6 +617,8 @@ func init() {
 	types.Add("eam:AgentOvfEnvironmentInfoOvfProperty", reflect.TypeOf((*AgentOvfEnvironmentInfoOvfProperty)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Specifies an SSL policy that trusts one specific pinned PEM encoded
 // SSL certificate.
 //
@@ -664,6 +672,8 @@ type AgentQueryRuntimeResponse struct {
 	Returnval AgentRuntimeInfo `xml:"returnval" json:"returnval"`
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Extends <code>RuntimeInfo</code> with information regarding the deployment
 // of an agent on a specific host.
 //
@@ -729,6 +739,8 @@ func init() {
 	types.Add("eam:AgentRuntimeInfo", reflect.TypeOf((*AgentRuntimeInfo)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Specifies an SSL trust policy.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -741,6 +753,8 @@ func init() {
 	types.AddMinAPIVersionForType("eam:AgentSslTrust", "8.2")
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Specifies the storage policies configured on Agent VMs.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -772,6 +786,8 @@ func init() {
 	types.Add("eam:AgentVibMatchingRule", reflect.TypeOf((*AgentVibMatchingRule)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Represents an active hook of the VM lifecycle which EAM is waiting on to
 // be processed by the client.
 //
@@ -800,6 +816,8 @@ func init() {
 	types.Add("eam:AgentVmHook", reflect.TypeOf((*AgentVmHook)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Specifies vSAN specific storage policy configured on Agent VMs.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -1049,6 +1067,8 @@ func init() {
 	types.Add("eam:CannotAccessAgentOVF", reflect.TypeOf((*CannotAccessAgentOVF)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // An agent VIB module is expected to be deployed on a host, but the VIM module
 // cannot be deployed because the vSphere ESX Agent Manager is unable to access the VIB
 // package for the agent.
@@ -1324,6 +1344,14 @@ func init() {
 	types.Add("eam:ClusterAgentOvfInvalidProperty", reflect.TypeOf((*ClusterAgentOvfInvalidProperty)(nil)).Elem())
 }
 
+type ClusterAgentTransitionFailed struct {
+	ClusterAgentAgentIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentTransitionFailed", reflect.TypeOf((*ClusterAgentTransitionFailed)(nil)).Elem())
+}
+
 type ClusterAgentVmHookFailed struct {
 	ClusterAgentVmIssue
 }
@@ -1554,6 +1582,8 @@ func init() {
 	types.Add("eam:EamAppFaultFault", reflect.TypeOf((*EamAppFaultFault)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // The common base type for all vSphere ESX Agent Manager exceptions.
 //
 // # TODO migrate to EamRuntimeFault
@@ -1573,6 +1603,8 @@ func init() {
 	types.Add("eam:EamFaultFault", reflect.TypeOf((*EamFaultFault)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // IO error
 // NOTE: Since this type is a first of system-type errors we do not introduce a
 // common base type for them.
@@ -1629,6 +1661,8 @@ func init() {
 	types.Add("eam:EamInvalidStateFault", reflect.TypeOf((*EamInvalidStateFault)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Indicates for an invalid or unknown Vib package structure and/or format.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -1646,6 +1680,8 @@ func init() {
 	types.Add("eam:EamInvalidVibPackageFault", reflect.TypeOf((*EamInvalidVibPackageFault)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // The <code>RuntimeInfo</code> represents the runtime information of the vSphere ESX Agent
 // Manager managed
 // objects `Agency` and `Agent`.
@@ -1737,6 +1773,8 @@ func init() {
 	types.Add("eam:EamSystemFaultFault", reflect.TypeOf((*EamSystemFaultFault)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. No longer in use since vSphee 6.5.
+//
 // Extensible issue class used by solutions to add custom issues to agents.
 //
 // When resolved, the issue is removed from the agent and an event is generated.
@@ -1918,6 +1956,8 @@ func init() {
 	types.Add("eam:HostPoweredOff", reflect.TypeOf((*HostPoweredOff)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Live VIB operation failed.
 //
 // An immediate reboot is required to clear live VIB
@@ -1935,6 +1975,8 @@ func init() {
 	types.Add("eam:ImmediateHostRebootRequired", reflect.TypeOf((*ImmediateHostRebootRequired)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // An agent virtual machine is expected to be deployed on a host, but the agent could not be
 // deployed because it was incompatible with the host.
 //
@@ -2005,6 +2047,8 @@ func init() {
 	types.Add("eam:InsufficientSpace", reflect.TypeOf((*InsufficientSpace)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Cannot remove the Baseline associated with an Agency from VUM.
 //
 // This is an active remediable issue. To remediate, vSphere ESX Agent Manager
@@ -2021,6 +2065,8 @@ func init() {
 	types.Add("eam:IntegrityAgencyCannotDeleteSoftware", reflect.TypeOf((*IntegrityAgencyCannotDeleteSoftware)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // The software defined by an Agency cannot be staged in VUM.
 //
 // The staging
@@ -2040,6 +2086,8 @@ func init() {
 	types.Add("eam:IntegrityAgencyCannotStageSoftware", reflect.TypeOf((*IntegrityAgencyCannotStageSoftware)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Base class for all issues which occurred during EAM communication with
 // vSphere Update Manager (VUM).
 //
@@ -2052,6 +2100,8 @@ func init() {
 	types.Add("eam:IntegrityAgencyVUMIssue", reflect.TypeOf((*IntegrityAgencyVUMIssue)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // VUM service is not available - its registered SOAP endpoint cannot be
 // accessed or it is malfunctioning.
 //
@@ -2067,6 +2117,8 @@ func init() {
 	types.Add("eam:IntegrityAgencyVUMUnavailable", reflect.TypeOf((*IntegrityAgencyVUMUnavailable)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // An <code>InvalidAgencyScope</code> fault is thrown when the scope in an
 // `AgencyConfigInfo` is invalid.
 //
@@ -2092,6 +2144,8 @@ func init() {
 	types.Add("eam:InvalidAgencyScopeFault", reflect.TypeOf((*InvalidAgencyScopeFault)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // An <code>InvalidAgentConfiguration</code> fault is thrown when the agent
 // configuration of an agency configuration is empty or invalid.
 //
@@ -2449,6 +2503,8 @@ func init() {
 	types.Add("eam:NoCustomAgentVmNetwork", reflect.TypeOf((*NoCustomAgentVmNetwork)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. No longer in use since vCLS 2.0.
+//
 // An agent virtual machine is expected to be deployed on a host, but the
 // agent cannot be deployed because the agent VM datastore could not be
 // discovered, as per defined selection policy, on the host.
@@ -2465,6 +2521,8 @@ func init() {
 	types.Add("eam:NoDiscoverableAgentVmDatastore", reflect.TypeOf((*NoDiscoverableAgentVmDatastore)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. No longer in use since vCLS 2.0.
+//
 // An agent virtual machine is expected to be deployed on a host, but the
 // agent cannot be deployed because the agent VM network could not be
 // discovered, as per defined selection policy, on the host.
@@ -2581,6 +2639,8 @@ func init() {
 	types.Add("eam:OvfInvalidProperty", reflect.TypeOf((*OvfInvalidProperty)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // EAM was unable to set its required compute resource configuration in PM.
 //
 // EAM configuration needs to be updated or PM needs to be repaired manually to
@@ -2604,6 +2664,8 @@ func init() {
 	types.Add("eam:PersonalityAgencyCannotConfigureSolutions", reflect.TypeOf((*PersonalityAgencyCannotConfigureSolutions)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // The offline depot could not be uploaded in Personality Manager.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -2618,6 +2680,8 @@ func init() {
 	types.Add("eam:PersonalityAgencyCannotUploadDepot", reflect.TypeOf((*PersonalityAgencyCannotUploadDepot)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Base class for all offline depot (VIB) issues while communicating with
 // Personality Manager.
 //
@@ -2633,6 +2697,8 @@ func init() {
 	types.Add("eam:PersonalityAgencyDepotIssue", reflect.TypeOf((*PersonalityAgencyDepotIssue)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // The offline depot was not available for download during communicating with
 // Personality Manager.
 //
@@ -2645,6 +2711,8 @@ func init() {
 	types.Add("eam:PersonalityAgencyInaccessibleDepot", reflect.TypeOf((*PersonalityAgencyInaccessibleDepot)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // The offline depot has missing or invalid metadata to be usable by
 // Personality Manager.
 //
@@ -2657,6 +2725,8 @@ func init() {
 	types.Add("eam:PersonalityAgencyInvalidDepot", reflect.TypeOf((*PersonalityAgencyInvalidDepot)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Base class for all issues which occurred during EAM communication with
 // Personality Manager.
 //
@@ -2669,6 +2739,8 @@ func init() {
 	types.Add("eam:PersonalityAgencyPMIssue", reflect.TypeOf((*PersonalityAgencyPMIssue)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // PM service is not available - its endpoint cannot be accessed or it is
 // malfunctioning.
 //
@@ -2684,6 +2756,8 @@ func init() {
 	types.Add("eam:PersonalityAgencyPMUnavailable", reflect.TypeOf((*PersonalityAgencyPMUnavailable)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // The agent workflow is blocked until its' required solutions are re-mediated
 // externally in Personality Manager.
 //
@@ -2699,6 +2773,8 @@ func init() {
 	types.Add("eam:PersonalityAgentAwaitingPMRemediation", reflect.TypeOf((*PersonalityAgentAwaitingPMRemediation)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // The agent workflow is blocked by a failed agency operation with
 // Personality Manager.
 //
@@ -2714,6 +2790,8 @@ func init() {
 	types.Add("eam:PersonalityAgentBlockedByAgencyOperation", reflect.TypeOf((*PersonalityAgentBlockedByAgencyOperation)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Base class for all issues which occurred during EAM communication with
 // Personality Manager.
 //
@@ -2990,9 +3068,10 @@ type SolutionsClusterBoundSolutionConfig struct {
 	// `SolutionsVmPlacementPolicy_enum` If omitted - no VM placement
 	// policies are configured.
 	VmPlacementPolicies []string `xml:"vmPlacementPolicies,omitempty" json:"vmPlacementPolicies,omitempty"`
-	// Networks to be configured on the VMs.
+	// Networks defined in the OVF to be configured on the VMs.
 	//
-	// If omitted - no VM networks are
+	// Mutually
+	// exclusive with `SolutionsClusterBoundSolutionConfig.devices`. If omitted - no VM networks are
 	// configured.
 	VmNetworks []SolutionsVMNetworkMapping `xml:"vmNetworks,omitempty" json:"vmNetworks,omitempty"`
 	// Datastores to be configured as a storage of the VMs.
@@ -3000,10 +3079,44 @@ type SolutionsClusterBoundSolutionConfig struct {
 	// The first
 	// available datastore in the cluster is used. The collection cannot
 	// contain duplicate elements.
+	// If omitted - the system automatically selects the datastore. The
+	// selection takes into account the other properties of the desired state
+	// specification (the provided VM storage policies and VM devices) and the
+	// runtime state of the datastores in the cluster. It is required DRS to
+	// be enabled on the cluster.
 	//
 	// Refers instances of `Datastore`.
-	Datastores []types.ManagedObjectReference  `xml:"datastores,omitempty" json:"datastores,omitempty"`
-	Devices    *types.VirtualMachineConfigSpec `xml:"devices,omitempty" json:"devices,omitempty"`
+	Datastores []types.ManagedObjectReference `xml:"datastores,omitempty" json:"datastores,omitempty"`
+	// Devices of the VMs not defined in the OVF descriptor.
+	//
+	// Mutually
+	// exclusive with `SolutionsClusterBoundSolutionConfig.vmNetworks`.
+	//
+	// If `SolutionsClusterBoundSolutionConfig.datastores` is not set, the devices of the VMs not defined
+	// in the OVF descriptor should be provided to `SolutionsClusterBoundSolutionConfig.devices` and not as
+	// part of a VM lifecycle hook (VM reconfiguration). Otherwise, the
+	// compatibility of the devices with the selected host and datastore where
+	// the VM is deployed needs to be ensured by the client.
+	//
+	// 1\. For VM initial placement the devices are added to the VM
+	// configuration. 2. For VM reconfiguration it is checked if a relocation
+	// is needed based on the provided `SolutionsClusterBoundSolutionConfig.devices` and the rest of the
+	// desired specification change. If relocation is not needed then only VM
+	// reconfiguration is executed. Otherwise (e.g. a network device not
+	// present on the host where the VM is located) the VM is first relocated
+	// and then VM reconfiguration is executed. For the reconfiguration it is
+	// checked what devices need to be added, removed, and edited on the
+	// existing VMs.
+	//
+	// The supported property of vim.vm.ConfigSpec is
+	// vim.vm.ConfigSpec.deviceChange. The property
+	// vim.vm.device.VirtualDeviceSpec.operation is ignored. Device keys/Ids
+	// needs to be negative integers.
+	//
+	// NOTE: Devices are added only during VM initial placement. VM
+	// reconfiguration with the provided devices is currently not supported.
+	// If omitted - no additional devices will be added to the VMs.
+	Devices *types.VirtualMachineConfigSpec `xml:"devices,omitempty" json:"devices,omitempty"`
 }
 
 func init() {
@@ -3496,7 +3609,8 @@ type SolutionsValidateSpec struct {
 	types.DynamicData
 
 	// Desired state to be validated.
-	DesiredState []SolutionsSolutionConfig `xml:"desiredState" json:"desiredState"`
+	DesiredState   []SolutionsSolutionConfig `xml:"desiredState" json:"desiredState"`
+	TransitionSpec *SolutionsTransitionSpec  `xml:"transitionSpec,omitempty" json:"transitionSpec,omitempty"`
 }
 
 func init() {
@@ -3538,6 +3652,14 @@ type SolutionsVmResourceSpec struct {
 
 func init() {
 	types.Add("eam:SolutionsVmResourceSpec", reflect.TypeOf((*SolutionsVmResourceSpec)(nil)).Elem())
+}
+
+type TransitionFailed struct {
+	AgentIssue
+}
+
+func init() {
+	types.Add("eam:TransitionFailed", reflect.TypeOf((*TransitionFailed)(nil)).Elem())
 }
 
 type Uninstall UninstallRequestType
@@ -3625,6 +3747,8 @@ func init() {
 type UpdateResponse struct {
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module requires the host to be in maintenance mode, but the vSphere ESX Agent Manager
 // is unable toput the host in maintenance mode.
 //
@@ -3645,6 +3769,8 @@ func init() {
 	types.Add("eam:VibCannotPutHostInMaintenanceMode", reflect.TypeOf((*VibCannotPutHostInMaintenanceMode)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // ESXi host is in Maintenance Mode.
 //
 // This prevents powering on and
@@ -3664,6 +3790,8 @@ func init() {
 	types.Add("eam:VibCannotPutHostOutOfMaintenanceMode", reflect.TypeOf((*VibCannotPutHostOutOfMaintenanceMode)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module is expected to be installed on a host, but the dependencies,
 // describred within the module, were not satisfied by the host.
 //
@@ -3679,6 +3807,8 @@ func init() {
 	types.Add("eam:VibDependenciesNotMetByHost", reflect.TypeOf((*VibDependenciesNotMetByHost)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module is expected to be installed on a host, but it failed to install
 // since the VIB package is in an invalid format.
 //
@@ -3697,6 +3827,8 @@ func init() {
 	types.Add("eam:VibInvalidFormat", reflect.TypeOf((*VibInvalidFormat)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // Base class for all issues related to the VIB modules that belong to an agent.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -3708,6 +3840,8 @@ func init() {
 	types.Add("eam:VibIssue", reflect.TypeOf((*VibIssue)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module is expected to be installed/removed on a host, but it has not
 // been installed/removed.
 //
@@ -3728,6 +3862,8 @@ func init() {
 	types.Add("eam:VibNotInstalled", reflect.TypeOf((*VibNotInstalled)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module is expected to be installed on a host, but the system
 // requirements, describred within the module, were not satisfied by the host.
 //
@@ -3743,6 +3879,8 @@ func init() {
 	types.Add("eam:VibRequirementsNotMetByHost", reflect.TypeOf((*VibRequirementsNotMetByHost)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module has been uploaded to the host, but will not be fully installed
 // until the host has been put in maintenance mode.
 //
@@ -3758,6 +3896,8 @@ func init() {
 	types.Add("eam:VibRequiresHostInMaintenanceMode", reflect.TypeOf((*VibRequiresHostInMaintenanceMode)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module has been uploaded to the host, but will not be activated
 // until the host is rebooted.
 //
@@ -3773,6 +3913,8 @@ func init() {
 	types.Add("eam:VibRequiresHostReboot", reflect.TypeOf((*VibRequiresHostReboot)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module failed to install, but failed to do so because automatic installation
 // by vSphere ESX Agent Manager is not allowed on the host.
 //
@@ -3792,6 +3934,8 @@ func init() {
 	types.Add("eam:VibRequiresManualInstallation", reflect.TypeOf((*VibRequiresManualInstallation)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A VIB module failed to uninstall, but failed to do so because automatic uninstallation
 // by vSphere ESX Agent Manager is not allowed on the host.
 //
@@ -3811,6 +3955,8 @@ func init() {
 	types.Add("eam:VibRequiresManualUninstallation", reflect.TypeOf((*VibRequiresManualUninstallation)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // A data entity providing information about a VIB.
 //
 // This abstraction contains only those of the VIB attributes which convey

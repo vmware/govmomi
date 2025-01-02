@@ -126,7 +126,7 @@ func (imp *Importer) Import(ctx context.Context, fpath string, opts Options) (*t
 	}
 
 	m := ovf.NewManager(imp.Client)
-	spec, err := m.CreateImportSpec(ctx, string(o), imp.ResourcePool, imp.Datastore, cisp)
+	spec, err := m.CreateImportSpec(ctx, string(o), imp.ResourcePool, imp.Datastore, &cisp)
 	if err != nil {
 		return nil, err
 	}

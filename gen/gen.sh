@@ -1,18 +1,8 @@
 #!/bin/bash
 
-# Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: Apache-2.0
 
 set -e
 
@@ -72,7 +62,7 @@ ensure_rb_vmodl
 #
 # The VIM API version used by the vim25 client.
 #
-VIM_VERSION="${VIM_VERSION:-8.0.3.0}"
+VIM_VERSION="${VIM_VERSION:-9.0.0.0}"
 
 #
 # Update the vim25 client's VIM version.
@@ -81,9 +71,9 @@ update_vim_version "${VIM_VERSION}"
 
 
 #
-# All types derive from vSphere 8.0U3, vcenter-all build 23710986.
+# All types derive from vSphere 9.0.0.0.rc1, vcenter-all build 24472083.
 #
-export COPYRIGHT_DATE_RANGE="2014-2024"
+export COPYRIGHT_DATE_RANGE="2014-2025"
 
 #
 # FORCE_BASE_INTERFACE_FOR_TYPES defines the types that we want to
@@ -92,20 +82,20 @@ export COPYRIGHT_DATE_RANGE="2014-2024"
 #
 export FORCE_BASE_INTERFACE_FOR_TYPES="AgencyConfigInfo"
 
-# ./sdk/ contains the contents of wsdl.zip from vimbase build 23652695.
+# ./sdk/ contains the contents of wsdl.zip from vimbase build 24471874.
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v3.0.0
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 generate "../sms" "sms"
 
 # ./sdk/ contains the files eam-messagetypes.xsd and eam-types.xsd from
-# eam-wsdl.zip, from eam-vcenter build 24075398.
+# eam-wsdl.zip, from eam-vcenter build 24472222.
 #
 # Please note the EAM files are also available at the following, public URL --
 # http://bit.ly/eam-sdk, therefore the WSDL resource for EAM are in fact
 # public. A specific build was obtained in order to match the same build as
 # used for the file from above, wsdl.zip.
-COPYRIGHT_DATE_RANGE="2021-2024" generate "../eam" "eam"
+COPYRIGHT_DATE_RANGE="2021-2025" generate "../eam" "eam"
 
 # originally generated, then manually pruned as there are several vim25 types
 # that are duplicated.

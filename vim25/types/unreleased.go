@@ -97,34 +97,6 @@ func init() {
 	t["PlaceVmsXClusterResultPlacementInfo"] = reflect.TypeOf((*PlaceVmsXClusterResultPlacementInfo)(nil)).Elem()
 }
 
-// Defines the type of placement
-type PlaceVmsXClusterSpecPlacementType string
-
-const (
-	// Create a new VM to be powered On
-	PlaceVmsXClusterSpecPlacementTypeCreateAndPowerOn = PlaceVmsXClusterSpecPlacementType("createAndPowerOn")
-	// Reconfigure a VM
-	PlaceVmsXClusterSpecPlacementTypeReconfigure = PlaceVmsXClusterSpecPlacementType("reconfigure")
-	// Relocate a VM
-	PlaceVmsXClusterSpecPlacementTypeRelocate = PlaceVmsXClusterSpecPlacementType("relocate")
-)
-
-func (e PlaceVmsXClusterSpecPlacementType) Values() []PlaceVmsXClusterSpecPlacementType {
-	return []PlaceVmsXClusterSpecPlacementType{
-		PlaceVmsXClusterSpecPlacementTypeCreateAndPowerOn,
-		PlaceVmsXClusterSpecPlacementTypeReconfigure,
-		PlaceVmsXClusterSpecPlacementTypeRelocate,
-	}
-}
-
-func (e PlaceVmsXClusterSpecPlacementType) Strings() []string {
-	return EnumValuesAsStrings(e.Values())
-}
-
-func init() {
-	t["PlaceVmsXClusterSpecPlacementType"] = reflect.TypeOf((*PlaceVmsXClusterSpecPlacementType)(nil)).Elem()
-}
-
 type PlaceVmsXClusterSpec struct {
 	DynamicData
 
