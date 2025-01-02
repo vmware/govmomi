@@ -55,8 +55,9 @@ ENV PATH="/root/.rbenv/shims:${PATH}" \
 RUN apt-get install -y rbenv && \
     rbenv install 2.7.6 && \
     rbenv rehash && \
-    rbenv global 2.7.6 && \
-    gem install bundler
+    rbenv global 2.7.6
+
+RUN gem install bundler -v 2.4.22
 
 
 ## --------------------------------------
@@ -71,6 +72,11 @@ WORKDIR /govmomi/gen
 ## --------------------------------------
 
 COPY Gemfile Gemfile.lock .
-RUN go install golang.org/x/tools/cmd/goimports@latest && \
-    bundle update --bundler && \
-    bundle install
+RUN bundle update --bundler && bundle install
+
+
+## --------------------------------------
+## Install goimports to forma gen'd files
+## --------------------------------------
+
+RUN go install golang.org/x/tools/cmd/goimports@latest
