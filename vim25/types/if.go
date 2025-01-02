@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package types
 
@@ -422,6 +410,18 @@ func init() {
 	t["BaseCpuIncompatible"] = reflect.TypeOf((*CpuIncompatible)(nil)).Elem()
 }
 
+func (b *CryptoManagerKmipCryptoKeyStatusKeyInfo) GetCryptoManagerKmipCryptoKeyStatusKeyInfo() *CryptoManagerKmipCryptoKeyStatusKeyInfo {
+	return b
+}
+
+type BaseCryptoManagerKmipCryptoKeyStatusKeyInfo interface {
+	GetCryptoManagerKmipCryptoKeyStatusKeyInfo() *CryptoManagerKmipCryptoKeyStatusKeyInfo
+}
+
+func init() {
+	t["BaseCryptoManagerKmipCryptoKeyStatusKeyInfo"] = reflect.TypeOf((*CryptoManagerKmipCryptoKeyStatusKeyInfo)(nil)).Elem()
+}
+
 func (b *CryptoSpec) GetCryptoSpec() *CryptoSpec { return b }
 
 type BaseCryptoSpec interface {
@@ -762,6 +762,54 @@ func init() {
 	t["BaseDeviceNotSupported"] = reflect.TypeOf((*DeviceNotSupported)(nil)).Elem()
 }
 
+func (b *DirectPathProfileManagerCapacityQuerySpec) GetDirectPathProfileManagerCapacityQuerySpec() *DirectPathProfileManagerCapacityQuerySpec {
+	return b
+}
+
+type BaseDirectPathProfileManagerCapacityQuerySpec interface {
+	GetDirectPathProfileManagerCapacityQuerySpec() *DirectPathProfileManagerCapacityQuerySpec
+}
+
+func init() {
+	t["BaseDirectPathProfileManagerCapacityQuerySpec"] = reflect.TypeOf((*DirectPathProfileManagerCapacityQuerySpec)(nil)).Elem()
+}
+
+func (b *DirectPathProfileManagerCapacityResult) GetDirectPathProfileManagerCapacityResult() *DirectPathProfileManagerCapacityResult {
+	return b
+}
+
+type BaseDirectPathProfileManagerCapacityResult interface {
+	GetDirectPathProfileManagerCapacityResult() *DirectPathProfileManagerCapacityResult
+}
+
+func init() {
+	t["BaseDirectPathProfileManagerCapacityResult"] = reflect.TypeOf((*DirectPathProfileManagerCapacityResult)(nil)).Elem()
+}
+
+func (b *DirectPathProfileManagerDirectPathConfig) GetDirectPathProfileManagerDirectPathConfig() *DirectPathProfileManagerDirectPathConfig {
+	return b
+}
+
+type BaseDirectPathProfileManagerDirectPathConfig interface {
+	GetDirectPathProfileManagerDirectPathConfig() *DirectPathProfileManagerDirectPathConfig
+}
+
+func init() {
+	t["BaseDirectPathProfileManagerDirectPathConfig"] = reflect.TypeOf((*DirectPathProfileManagerDirectPathConfig)(nil)).Elem()
+}
+
+func (b *DirectPathProfileManagerTargetEntity) GetDirectPathProfileManagerTargetEntity() *DirectPathProfileManagerTargetEntity {
+	return b
+}
+
+type BaseDirectPathProfileManagerTargetEntity interface {
+	GetDirectPathProfileManagerTargetEntity() *DirectPathProfileManagerTargetEntity
+}
+
+func init() {
+	t["BaseDirectPathProfileManagerTargetEntity"] = reflect.TypeOf((*DirectPathProfileManagerTargetEntity)(nil)).Elem()
+}
+
 func (b *DiskNotSupported) GetDiskNotSupported() *DiskNotSupported { return b }
 
 type BaseDiskNotSupported interface {
@@ -976,6 +1024,18 @@ type BaseEventArgument interface {
 
 func init() {
 	t["BaseEventArgument"] = reflect.TypeOf((*EventArgument)(nil)).Elem()
+}
+
+func (b *EventManagerEventViewSpec) GetEventManagerEventViewSpec() *EventManagerEventViewSpec {
+	return b
+}
+
+type BaseEventManagerEventViewSpec interface {
+	GetEventManagerEventViewSpec() *EventManagerEventViewSpec
+}
+
+func init() {
+	t["BaseEventManagerEventViewSpec"] = reflect.TypeOf((*EventManagerEventViewSpec)(nil)).Elem()
 }
 
 func (b *ExitStandbyModeFailedEvent) GetExitStandbyModeFailedEvent() *ExitStandbyModeFailedEvent {
@@ -1202,6 +1262,16 @@ type BaseGuestRegistryValueFault interface {
 
 func init() {
 	t["BaseGuestRegistryValueFault"] = reflect.TypeOf((*GuestRegistryValueFault)(nil)).Elem()
+}
+
+func (b *HbrReplicationTargetSpec) GetHbrReplicationTargetSpec() *HbrReplicationTargetSpec { return b }
+
+type BaseHbrReplicationTargetSpec interface {
+	GetHbrReplicationTargetSpec() *HbrReplicationTargetSpec
+}
+
+func init() {
+	t["BaseHbrReplicationTargetSpec"] = reflect.TypeOf((*HbrReplicationTargetSpec)(nil)).Elem()
 }
 
 func (b *HostAccountSpec) GetHostAccountSpec() *HostAccountSpec { return b }
@@ -1842,6 +1912,26 @@ func init() {
 	t["BaseIscsiFault"] = reflect.TypeOf((*IscsiFault)(nil)).Elem()
 }
 
+func (b *KmipClusterInfoKeyInfo) GetKmipClusterInfoKeyInfo() *KmipClusterInfoKeyInfo { return b }
+
+type BaseKmipClusterInfoKeyInfo interface {
+	GetKmipClusterInfoKeyInfo() *KmipClusterInfoKeyInfo
+}
+
+func init() {
+	t["BaseKmipClusterInfoKeyInfo"] = reflect.TypeOf((*KmipClusterInfoKeyInfo)(nil)).Elem()
+}
+
+func (b *KmipServerSpecKeySpec) GetKmipServerSpecKeySpec() *KmipServerSpecKeySpec { return b }
+
+type BaseKmipServerSpecKeySpec interface {
+	GetKmipServerSpecKeySpec() *KmipServerSpecKeySpec
+}
+
+func init() {
+	t["BaseKmipServerSpecKeySpec"] = reflect.TypeOf((*KmipServerSpecKeySpec)(nil)).Elem()
+}
+
 func (b *LicenseEvent) GetLicenseEvent() *LicenseEvent { return b }
 
 type BaseLicenseEvent interface {
@@ -2114,6 +2204,18 @@ type BaseOvfConsumerCallbackFault interface {
 
 func init() {
 	t["BaseOvfConsumerCallbackFault"] = reflect.TypeOf((*OvfConsumerCallbackFault)(nil)).Elem()
+}
+
+func (b *OvfCreateImportSpecParams) GetOvfCreateImportSpecParams() *OvfCreateImportSpecParams {
+	return b
+}
+
+type BaseOvfCreateImportSpecParams interface {
+	GetOvfCreateImportSpecParams() *OvfCreateImportSpecParams
+}
+
+func init() {
+	t["BaseOvfCreateImportSpecParams"] = reflect.TypeOf((*OvfCreateImportSpecParams)(nil)).Elem()
 }
 
 func (b *OvfElement) GetOvfElement() *OvfElement { return b }
@@ -2650,6 +2752,16 @@ type BaseTaskInProgress interface {
 
 func init() {
 	t["BaseTaskInProgress"] = reflect.TypeOf((*TaskInProgress)(nil)).Elem()
+}
+
+func (b *TaskManagerTaskViewSpec) GetTaskManagerTaskViewSpec() *TaskManagerTaskViewSpec { return b }
+
+type BaseTaskManagerTaskViewSpec interface {
+	GetTaskManagerTaskViewSpec() *TaskManagerTaskViewSpec
+}
+
+func init() {
+	t["BaseTaskManagerTaskViewSpec"] = reflect.TypeOf((*TaskManagerTaskViewSpec)(nil)).Elem()
 }
 
 func (b *TaskReason) GetTaskReason() *TaskReason { return b }

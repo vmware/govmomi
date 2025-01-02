@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package types
 
@@ -22,6 +10,8 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM System VMs APIs.
+//
 // Defines if the deployed VMs needs to run on different hosts.
 type AgencyVMPlacementPolicyVMAntiAffinity string
 
@@ -52,6 +42,8 @@ func init() {
 	types.Add("eam:AgencyVMPlacementPolicyVMAntiAffinity", reflect.TypeOf((*AgencyVMPlacementPolicyVMAntiAffinity)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM System VMs APIs.
+//
 // Defines if the deployed VM is affinied to run on the same host it is
 // deployed on.
 type AgencyVMPlacementPolicyVMDataAffinity string
@@ -106,6 +98,8 @@ func init() {
 	types.Add("eam:AgentConfigInfoAuthenticationScheme", reflect.TypeOf((*AgentConfigInfoAuthenticationScheme)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // Defines the type of disk provisioning for the target Agent VMs.
 type AgentConfigInfoOvfDiskProvisioning string
 
@@ -165,6 +159,8 @@ func init() {
 	types.Add("eam:AgentVmHookVmState", reflect.TypeOf((*AgentVmHookVmState)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // The <code>GoalState</code> enumeration defines the goal of the entity.
 type EamObjectRuntimeInfoGoalState string
 
@@ -210,6 +206,8 @@ func init() {
 	types.Add("eam:EamObjectRuntimeInfoGoalState", reflect.TypeOf((*EamObjectRuntimeInfoGoalState)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
+//
 // <code>Status</code> defines a health value that denotes how well the entity
 // conforms to the goal state.
 type EamObjectRuntimeInfoStatus string
@@ -244,6 +242,8 @@ func init() {
 	types.Add("eam:EamObjectRuntimeInfoStatus", reflect.TypeOf((*EamObjectRuntimeInfoStatus)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM Image APIs.
+//
 // <code>MaintenanceModePolicy</code> defines how ESX Agent Manager is going
 // to put into maintenance mode hosts which are part of a cluster not managed
 type EsxAgentManagerMaintenanceModePolicy string
@@ -301,6 +301,34 @@ func (e HooksHookType) Strings() []string {
 
 func init() {
 	types.Add("eam:HooksHookType", reflect.TypeOf((*HooksHookType)(nil)).Elem())
+}
+
+type ManagedObjectTypes string
+
+const (
+	ManagedObjectTypesAgency          = ManagedObjectTypes("Agency")
+	ManagedObjectTypesAgent           = ManagedObjectTypes("Agent")
+	ManagedObjectTypesEamObject       = ManagedObjectTypes("EamObject")
+	ManagedObjectTypesEsxAgentManager = ManagedObjectTypes("EsxAgentManager")
+	ManagedObjectTypesEamTask         = ManagedObjectTypes("EamTask")
+)
+
+func (e ManagedObjectTypes) Values() []ManagedObjectTypes {
+	return []ManagedObjectTypes{
+		ManagedObjectTypesAgency,
+		ManagedObjectTypesAgent,
+		ManagedObjectTypesEamObject,
+		ManagedObjectTypesEsxAgentManager,
+		ManagedObjectTypesEamTask,
+	}
+}
+
+func (e ManagedObjectTypes) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("eam:ManagedObjectTypes", reflect.TypeOf((*ManagedObjectTypes)(nil)).Elem())
 }
 
 // Reasons solution is not valid for application.

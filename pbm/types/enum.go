@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package types
 
@@ -21,6 +9,40 @@ import (
 
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+type ManagedObjectTypes string
+
+const (
+	ManagedObjectTypesPbmServiceInstance           = ManagedObjectTypes("PbmServiceInstance")
+	ManagedObjectTypesPbmSessionManager            = ManagedObjectTypes("PbmSessionManager")
+	ManagedObjectTypesPbmCapabilityMetadataManager = ManagedObjectTypes("PbmCapabilityMetadataManager")
+	ManagedObjectTypesPbmComplianceManager         = ManagedObjectTypes("PbmComplianceManager")
+	ManagedObjectTypesPbmPlacementSolver           = ManagedObjectTypes("PbmPlacementSolver")
+	ManagedObjectTypesPbmProfileProfileManager     = ManagedObjectTypes("PbmProfileProfileManager")
+	ManagedObjectTypesPbmProvider                  = ManagedObjectTypes("PbmProvider")
+	ManagedObjectTypesPbmReplicationManager        = ManagedObjectTypes("PbmReplicationManager")
+)
+
+func (e ManagedObjectTypes) Values() []ManagedObjectTypes {
+	return []ManagedObjectTypes{
+		ManagedObjectTypesPbmServiceInstance,
+		ManagedObjectTypesPbmSessionManager,
+		ManagedObjectTypesPbmCapabilityMetadataManager,
+		ManagedObjectTypesPbmComplianceManager,
+		ManagedObjectTypesPbmPlacementSolver,
+		ManagedObjectTypesPbmProfileProfileManager,
+		ManagedObjectTypesPbmProvider,
+		ManagedObjectTypesPbmReplicationManager,
+	}
+}
+
+func (e ManagedObjectTypes) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("pbm:ManagedObjectTypes", reflect.TypeOf((*ManagedObjectTypes)(nil)).Elem())
+}
 
 type PbmAssociateAndApplyPolicyStatusPolicyStatus string
 
@@ -193,6 +215,31 @@ func (e PbmCapabilityOperator) Strings() []string {
 
 func init() {
 	types.Add("pbm:PbmCapabilityOperator", reflect.TypeOf((*PbmCapabilityOperator)(nil)).Elem())
+}
+
+// Capability category type constants.
+type PbmCapabilitySchemaCapabilityCategory string
+
+const (
+	// Common and identical in all sub-profiles.
+	PbmCapabilitySchemaCapabilityCategoryCommon = PbmCapabilitySchemaCapabilityCategory("common")
+	// Part of a single sub-profile.
+	PbmCapabilitySchemaCapabilityCategoryDatastoreSpecific = PbmCapabilitySchemaCapabilityCategory("datastoreSpecific")
+)
+
+func (e PbmCapabilitySchemaCapabilityCategory) Values() []PbmCapabilitySchemaCapabilityCategory {
+	return []PbmCapabilitySchemaCapabilityCategory{
+		PbmCapabilitySchemaCapabilityCategoryCommon,
+		PbmCapabilitySchemaCapabilityCategoryDatastoreSpecific,
+	}
+}
+
+func (e PbmCapabilitySchemaCapabilityCategory) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("pbm:PbmCapabilitySchemaCapabilityCategory", reflect.TypeOf((*PbmCapabilitySchemaCapabilityCategory)(nil)).Elem())
 }
 
 // The `PbmCapabilityTimeUnitType_enum` enumeration type

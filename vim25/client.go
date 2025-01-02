@@ -28,7 +28,7 @@ import (
 
 const (
 	Namespace = "vim25"
-	Version   = "8.0.3.0"
+	Version   = "9.0.0.0"
 	Path      = "/sdk"
 )
 
