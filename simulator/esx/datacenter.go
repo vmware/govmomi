@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package esx
 
@@ -50,9 +38,7 @@ var Datacenter = mo.Datacenter{
 	HostFolder:      types.ManagedObjectReference{Type: "Folder", Value: "ha-folder-host"},
 	DatastoreFolder: types.ManagedObjectReference{Type: "Folder", Value: "ha-folder-datastore"},
 	NetworkFolder:   types.ManagedObjectReference{Type: "Folder", Value: "ha-folder-network"},
-	Datastore: []types.ManagedObjectReference{
-		{Type: "Datastore", Value: "57089c25-85e3ccd4-17b6-000c29d0beb3"},
-	},
+	Datastore:       nil,
 	Network: []types.ManagedObjectReference{
 		{Type: "Network", Value: "HaNetwork-VM Network"},
 	},
