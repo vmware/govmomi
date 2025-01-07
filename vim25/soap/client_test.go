@@ -229,3 +229,29 @@ func TestParseURL(t *testing.T) {
 		})
 	}
 }
+
+func TestSessionCookie(t *testing.T) {
+	u := &url.URL{
+		Scheme: "http",
+		Host:   "localhost:1080",
+		Path:   "sdk", // see comment in Client.SessionCookie
+	}
+
+	c := NewClient(u, true)
+
+	cookie := &http.Cookie{
+		Name:     SessionCookieName,
+		Value:    "ANY",
+		Path:     "/",
+		Domain:   "localhost",
+		HttpOnly: true,
+		Secure:   false,
+	}
+
+	c.Jar.SetCookies(u, []*http.Cookie{cookie})
+
+	val := c.SessionCookie()
+	if val == nil {
+		t.Fatal("no session cookie")
+	}
+}
