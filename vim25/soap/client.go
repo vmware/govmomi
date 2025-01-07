@@ -214,14 +214,29 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 	return c.newServiceClientWithTransport(path, namespace, c.t)
 }
 
-// SessionCookie returns a SessionCookie with value of the vmware_soap_session http.Cookie.
-func (c *Client) SessionCookie() *HeaderElement {
-	for _, cookie := range c.Jar.Cookies(c.URL()) {
+func sessionCookie(jar http.CookieJar, u *url.URL) *HeaderElement {
+	for _, cookie := range jar.Cookies(u) {
 		if cookie.Name == SessionCookieName {
 			return &HeaderElement{Value: cookie.Value}
 		}
 	}
 	return nil
+}
+
+// SessionCookie returns a SessionCookie with value of the vmware_soap_session http.Cookie.
+func (c *Client) SessionCookie() *HeaderElement {
+	u := c.URL()
+
+	if cookie := sessionCookie(c.Jar, u); cookie != nil {
+		return cookie
+	}
+
+	// Default "/sdk" Path would match above,
+	// but saw a case of Path == "sdk", where above returns nil.
+	// The jar entry Path is normally "/", so fallback to that.
+	u.Path = "/"
+
+	return sessionCookie(c.Jar, u)
 }
 
 func (c *Client) newServiceClientWithTransport(path string, namespace string, t *http.Transport) *Client {
