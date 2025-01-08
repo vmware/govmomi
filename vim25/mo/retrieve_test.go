@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package mo
 
@@ -225,6 +213,10 @@ func TestDatastoreInfoURL(t *testing.T) {
 					Name: "info.url",
 					Val:  "ds:///vmfs/volumes/666d7a79-cb0d28b2-57c8-0645602e1b58/",
 				},
+				{
+					Name: "info.name",
+					Val:  "foo",
+				},
 			},
 			MissingSet: nil,
 		},
@@ -240,5 +232,9 @@ func TestDatastoreInfoURL(t *testing.T) {
 
 	if info.Url != content[0].PropSet[0].Val.(string) {
 		t.Errorf("info.url=%s", info.Url)
+	}
+
+	if info.Name != content[0].PropSet[1].Val.(string) {
+		t.Errorf("info.name=%s", info.Name)
 	}
 }
