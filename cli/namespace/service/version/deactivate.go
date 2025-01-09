@@ -2,7 +2,7 @@
 // The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
-package service
+package version
 
 import (
 	"context"
@@ -18,7 +18,7 @@ type deactivate struct {
 }
 
 func init() {
-	cli.Register("namespace.service.deactivate", &deactivate{})
+	cli.Register("namespace.service.version.deactivate", &deactivate{})
 }
 
 func (cmd *deactivate) Register(ctx context.Context, f *flag.FlagSet) {
@@ -27,20 +27,23 @@ func (cmd *deactivate) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *deactivate) Description() string {
-	return `Deactivates a vSphere Supervisor Service (and all its versions).
+	return `Deactivates a vSphere Supervisor Service version.
 
 Examples:
-  govc namespace.service.deactivate my-supervisor-service other-supervisor-service`
+  govc namespace.service.version.deactivate my-supervisor-service 1.0.0`
 }
 
 func (cmd *deactivate) Usage() string {
-	return "NAME..."
+	return "NAME VERSION"
 }
 
 func (cmd *deactivate) Run(ctx context.Context, f *flag.FlagSet) error {
-
-	services := f.Args()
-	if len(services) < 1 {
+	service := f.Arg(0)
+	if len(service) == 0 {
+		return flag.ErrHelp
+	}
+	version := f.Arg(1)
+	if len(version) == 0 {
 		return flag.ErrHelp
 	}
 
@@ -50,11 +53,5 @@ func (cmd *deactivate) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	m := namespace.NewManager(c)
-	for _, svc := range services {
-		if err := m.DeactivateSupervisorServices(ctx, svc); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return m.DeactivateSupervisorServiceVersion(ctx, service, version)
 }

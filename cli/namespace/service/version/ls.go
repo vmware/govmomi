@@ -2,7 +2,7 @@
 // The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
-package service
+package version
 
 import (
 	"context"
@@ -26,7 +26,7 @@ type ls struct {
 }
 
 func init() {
-	cli.Register("namespace.service.ls", &ls{})
+	cli.Register("namespace.service.version.ls", &ls{})
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
@@ -46,27 +46,33 @@ func (cmd *ls) Process(ctx context.Context) error {
 }
 
 func (cmd *ls) Description() string {
-	return `List all registered vSphere Supervisor Services.
+	return `List all registered versions for a given vSphere Supervisor Service.
 
 Examples:
-  govc namespace.service.ls
-  govc namespace.service.ls -l
-  govc namespace.service.ls -json | jq .`
+  govc namespace.service.version.ls my-service
+  govc namespace.service.version.ls -l my-service
+  govc namespace.service.version.ls -json my-service | jq .`
+}
+
+func (cmd *ls) Usage() string {
+	return "NAME"
 }
 
 type lsWriter struct {
-	cmd     *ls
-	Service []namespace.SupervisorServiceSummary `json:"service"`
+	cmd      *ls
+	service  string
+	Versions []namespace.SupervisorServiceVersionSummary `json:"versions"`
 }
 
 func (r *lsWriter) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
-
-	for _, svc := range r.Service {
-		fmt.Fprintf(tw, "%s", svc.ID)
+	fmt.Fprintf(tw, "%s:\n", r.service)
+	for _, svc := range r.Versions {
+		fmt.Fprintf(tw, "%s", svc.Version)
 		if r.cmd.long {
-			fmt.Fprintf(tw, "\t%s", svc.State)
 			fmt.Fprintf(tw, "\t%s", svc.Name)
+			fmt.Fprintf(tw, "\t%s", svc.State)
+			fmt.Fprintf(tw, "\t%s", svc.Description)
 		}
 		fmt.Fprintf(tw, "\n")
 	}
@@ -74,24 +80,28 @@ func (r *lsWriter) Write(w io.Writer) error {
 }
 
 func (r *lsWriter) MarshalJSON() ([]byte, error) {
-	return json.Marshal(r.Service)
+	return json.Marshal(r.Versions)
 }
 
 func (r *lsWriter) Dump() interface{} {
-	return r.Service
+	return r.Versions
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
+	service := f.Arg(0)
+	if len(service) == 0 {
+		return flag.ErrHelp
+	}
 	c, err := cmd.RestClient()
 	if err != nil {
 		return err
 	}
 
 	m := namespace.NewManager(c)
-	supervisorservices, err := m.ListSupervisorServices(ctx)
+	versions, err := m.ListSupervisorServiceVersions(ctx, service)
 	if err != nil {
 		return err
 	}
 
-	return cmd.WriteResult(&lsWriter{cmd, supervisorservices})
+	return cmd.WriteResult(&lsWriter{cmd, service, versions})
 }
