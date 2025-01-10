@@ -2210,7 +2210,7 @@ Usage: govc disk.snapshot.ls [OPTIONS] ID
 List snapshots for disk ID on DS.
 
 Examples:
-  govc snapshot.disk.ls -l 9b06a8b-d047-4d3c-b15b-43ea9608b1a6
+  govc disk.snapshot.ls -l 9b06a8b-d047-4d3c-b15b-43ea9608b1a6
 
 Options:
   -ds=                   Datastore [GOVC_DATASTORE]

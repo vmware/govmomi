@@ -3,9 +3,12 @@
 load test_helper
 
 @test "disk.ls" {
-  vcsim_env
+  vcsim_start -ds 2
 
   run govc disk.ls
+  assert_success
+
+  run govc disk.ls -ds LocalDS_0
   assert_success
 
   run govc disk.ls enoent
@@ -19,7 +22,7 @@ load test_helper
 
   run govc disk.create -size 10M "$name"
   assert_success
-  id="${lines[1]}"
+  id="$output"
 
   run govc disk.ls "$id"
   assert_success
@@ -124,14 +127,14 @@ load test_helper
 
   run govc disk.create -size 10M "$name"
   assert_success
-  id="${lines[1]}"
+  id="$output"
 
   run govc disk.snapshot.ls "$id"
   assert_success
 
   run govc disk.snapshot.create "$id"
   assert_success
-  sid="${lines[1]}"
+  sid="$output"
 
   govc disk.snapshot.ls "$id" | grep "$sid"
 
@@ -160,7 +163,7 @@ load test_helper
 
   run govc disk.create -size 10M "$name"
   assert_success
-  id="${lines[1]}"
+  id="$output"
 
   run govc disk.ls "$id"
   assert_success
@@ -197,7 +200,7 @@ load test_helper
 
   run govc disk.create -size 10M "$name"
   assert_success
-  id="${lines[1]}"
+  id="$output"
 
   run govc disk.create -size 10M "$(new_id)"
   assert_success
@@ -225,4 +228,66 @@ load test_helper
 
   run govc disk.ls -R
   assert_success
+}
+
+@test "disk global catalog" {
+  vcsim_start -ds 3
+
+  run govc disk.create -ds LocalDS_0 -size 10M disk-0
+  assert_success
+  id0="$output"
+
+  run govc disk.create -ds LocalDS_1 -size 10M disk-1
+  assert_success
+  id1="$output"
+
+  run govc disk.snapshot.create "$id0" snapshot-0
+  assert_success
+  sid0="$output"
+
+  run govc disk.snapshot.ls "$id0"
+  assert_success
+  assert_matches "$sid0"
+  assert_matches "snapshot-0"
+
+  run govc disk.snapshot.rm "$id0" "$sid0"
+  assert_success
+  sid0="$output"
+
+  run govc disk.ls
+  assert_success
+  [ ${#lines[@]} -eq 2 ]
+
+  run govc disk.ls -ds LocalDS_0
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
+
+  run govc disk.ls -ds LocalDS_1
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
+
+  run govc disk.ls -ds LocalDS_2
+  assert_success
+  [ ${#lines[@]} -eq 0 ]
+
+  vm=DC0_H0_VM0
+
+  run govc disk.attach -vm $vm "$id0"
+  assert_success
+
+  run govc disk.detach -vm $vm "$id0"
+  assert_success
+
+  run govc disk.rm -ds LocalDS_1 "$id0"
+  assert_failure
+
+  run govc disk.rm -ds LocalDS_0 "$id0"
+  assert_success
+
+  run govc disk.rm "$id1"
+  assert_success
+
+  run govc disk.ls
+  assert_success
+  [ ${#lines[@]} -eq 0 ]
 }

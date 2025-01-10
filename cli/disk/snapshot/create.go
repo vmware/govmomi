@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package snapshot
 
@@ -22,9 +10,8 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi/cli"
+	"github.com/vmware/govmomi/cli/disk"
 	"github.com/vmware/govmomi/cli/flags"
-	"github.com/vmware/govmomi/vim25/types"
-	"github.com/vmware/govmomi/vslm"
 )
 
 type create struct {
@@ -52,28 +39,20 @@ Examples:
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	ds, err := cmd.Datastore()
+	m, err := disk.NewManagerFromFlag(ctx, cmd.DatastoreFlag)
 	if err != nil {
 		return err
 	}
 
-	m := vslm.NewObjectManager(ds.Client())
 	id := f.Arg(0)
+	desc := f.Arg(1)
 
-	task, err := m.CreateSnapshot(ctx, ds, id, f.Arg(1))
+	res, err := m.CreateSnapshot(ctx, id, desc)
 	if err != nil {
 		return err
 	}
 
-	logger := cmd.ProgressLogger(fmt.Sprintf("Snapshot %s...", id))
-
-	res, err := task.WaitForResult(ctx, logger)
-	logger.Wait()
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(res.Result.(types.ID).Id)
+	fmt.Println(res.Id)
 
 	return nil
 }

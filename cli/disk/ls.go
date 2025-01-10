@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package disk
 
@@ -30,7 +18,6 @@ import (
 	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/types"
-	"github.com/vmware/govmomi/vslm"
 )
 
 type ls struct {
@@ -123,23 +110,13 @@ func (r *lsResult) Dump() interface{} {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	c, err := cmd.Client()
+	m, err := NewManagerFromFlag(ctx, cmd.DatastoreFlag)
 	if err != nil {
 		return err
 	}
 
-	ds, err := cmd.Datastore()
-	if err != nil {
-		return err
-	}
-
-	m := vslm.NewObjectManager(c)
 	if cmd.r {
-		task, err := m.ReconcileDatastoreInventory(ctx, ds)
-		if err != nil {
-			return err
-		}
-		if err = task.Wait(ctx); err != nil {
+		if err = m.ReconcileDatastoreInventory(ctx); err != nil {
 			return err
 		}
 	}
@@ -151,7 +128,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		filterNotFound = true
 		var oids []types.ID
 		if cmd.category == "" {
-			oids, err = m.List(ctx, ds)
+			oids, err = m.List(ctx)
 		} else {
 			oids, err = m.ListAttachedObjects(ctx, cmd.category, cmd.tag)
 		}
@@ -165,7 +142,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	for _, id := range ids {
-		o, err := m.Retrieve(ctx, ds, id)
+		o, err := m.Retrieve(ctx, id)
 		if err != nil {
 			if filterNotFound && fault.Is(err, &types.NotFound{}) {
 				// The case when an FCD is deleted by something other than DeleteVStorageObject_Task, such as VM destroy

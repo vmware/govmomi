@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package disk
 
@@ -23,7 +11,6 @@ import (
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/vim25/types"
-	"github.com/vmware/govmomi/vslm"
 )
 
 type tags struct {
@@ -75,7 +62,11 @@ func (cmd *tags) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	m := vslm.NewObjectManager(c)
+	m, err := NewManager(ctx, c, nil)
+	if err != nil {
+		return err
+	}
+
 	cmd.TagName = f.Arg(0)
 	method := m.DetachTag
 	if cmd.attach {
