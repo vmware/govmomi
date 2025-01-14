@@ -1,7 +1,3 @@
-# set the following variables only if they've not been set
-export GOVC_DATASTORE=${GOVC_DATASTORE-datastore1}
-export GOVC_NETWORK=${GOVC_NETWORK-"VM Network"}
-
 export GOVC_INSECURE=true
 export GOVC_PERSIST_SESSION=false
 unset GOVC_URL
@@ -142,6 +138,8 @@ esx_env() {
   fi
 
   export GOVC_URL=$GOVC_TEST_URL
+  export GOVC_DATASTORE=${GOVC_DATASTORE-datastore1}
+  export GOVC_NETWORK=${GOVC_NETWORK-"VM Network"}
 }
 
 vcsim_env_todo() {

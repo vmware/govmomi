@@ -95,8 +95,8 @@ load test_helper
 }
 
 @test "vm.create" {
-  unset GOVC_DATASTORE
   vcsim_start
+  export GOVC_NETWORK=/DC0/network/DC0_DVPG0
 
   run govc cluster.create empty-cluster
   assert_success

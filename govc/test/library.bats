@@ -468,6 +468,7 @@ EOF
   ds1=LocalDS_1
   ds2=LocalDS_2
   pool=DC0_C0/Resources
+  export GOVC_NETWORK=/DC0/network/DC0_DVPG0
 
   # Create a published library with OVA items
   govc library.create -ds $ds0 -pub ttylinux-pub-ovf
