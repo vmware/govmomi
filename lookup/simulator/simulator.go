@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -52,12 +40,10 @@ func New() *simulator.Registry {
 	r.Put(&ServiceInstance{
 		ManagedObjectReference: lookup.ServiceInstance,
 		Content:                content,
-		register: func() {
-			r.Put(&ServiceRegistration{
-				ManagedObjectReference: *content.ServiceRegistration,
-				Info:                   registrationInfo(),
-			})
-		},
+	})
+
+	r.Put(&ServiceRegistration{
+		ManagedObjectReference: *content.ServiceRegistration,
 	})
 
 	return r
@@ -67,15 +53,11 @@ type ServiceInstance struct {
 	vim.ManagedObjectReference
 
 	Content types.LookupServiceContent
-
-	instance sync.Once
-	register func()
 }
 
-func (s *ServiceInstance) RetrieveServiceContent(_ *types.RetrieveServiceContent) soap.HasFault {
-	// defer register to this point to ensure we can include vcsim's cert in ServiceEndpoints.SslTrust
-	// TODO: we should be able to register within New(), but this is the only place that currently depends on vcsim's cert.
-	s.instance.Do(s.register)
+func (s *ServiceInstance) RetrieveServiceContent(ctx *simulator.Context, _ *types.RetrieveServiceContent) soap.HasFault {
+	// Initialize prior to List() being called (see ExampleServiceRegistration)
+	ctx.Map.Get(*content.ServiceRegistration).(*ServiceRegistration).info(ctx)
 
 	return &methods.RetrieveServiceContentBody{
 		Res: &types.RetrieveServiceContentResponse{
@@ -88,6 +70,8 @@ type ServiceRegistration struct {
 	vim.ManagedObjectReference
 
 	Info []types.LookupServiceRegistrationInfo
+
+	register sync.Once
 }
 
 func (s *ServiceRegistration) GetSiteId(_ *types.GetSiteId) soap.HasFault {
@@ -130,7 +114,16 @@ func matchEndpointType(filter, info *types.LookupServiceRegistrationEndpointType
 	return true
 }
 
-func (s *ServiceRegistration) List(req *types.List) soap.HasFault {
+// defer register to this point to ensure we can include vcsim's cert in ServiceEndpoints.SslTrust
+// TODO: we should be able to register within New(), but this is the only place that currently depends on vcsim's cert
+func (s *ServiceRegistration) info(ctx *simulator.Context) []types.LookupServiceRegistrationInfo {
+	s.register.Do(func() {
+		s.Info = registrationInfo(ctx)
+	})
+	return s.Info
+}
+
+func (s *ServiceRegistration) List(ctx *simulator.Context, req *types.List) soap.HasFault {
 	body := new(methods.ListBody)
 	filter := req.FilterCriteria
 
@@ -143,7 +136,7 @@ func (s *ServiceRegistration) List(req *types.List) soap.HasFault {
 	}
 	body.Res = new(types.ListResponse)
 
-	for _, info := range s.Info {
+	for _, info := range s.info(ctx) {
 		if filter.SiteId != "" {
 			if filter.SiteId != info.SiteId {
 				continue
