@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2022-2023 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -24,6 +12,7 @@ import (
 	"github.com/vmware/govmomi/ssoadmin"
 	"github.com/vmware/govmomi/ssoadmin/methods"
 	"github.com/vmware/govmomi/ssoadmin/types"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
 )
@@ -111,6 +100,10 @@ type SessionManager struct {
 	vim.ManagedObjectReference
 }
 
+type ConfigurationManagementService struct {
+	vim.ManagedObjectReference
+}
+
 type IdentitySourceManagementService struct {
 	vim.ManagedObjectReference
 }
@@ -159,6 +152,10 @@ func New(vc *simulator.Registry, u *url.URL) *simulator.Registry {
 
 	r.Put(&SessionManager{
 		ManagedObjectReference: content.SessionManager,
+	})
+
+	r.Put(&ConfigurationManagementService{
+		ManagedObjectReference: content.ConfigurationManagementService,
 	})
 
 	r.Put(&IdentitySourceManagementService{
@@ -243,6 +240,22 @@ func (s *SessionManager) Login(ctx *simulator.Context, req *types.Login) soap.Ha
 func (s *SessionManager) Logout(ctx *simulator.Context, req *types.Logout) soap.HasFault {
 	return &methods.LogoutBody{
 		Res: new(types.LogoutResponse),
+	}
+}
+
+func (*ConfigurationManagementService) GetTrustedCertificates(ctx *simulator.Context, _ *types.GetTrustedCertificates) soap.HasFault {
+	m := ctx.For(vim25.Path).Map.SessionManager()
+
+	var res []string
+
+	if m.TLSCert != nil {
+		res = append(res, m.TLSCert())
+	}
+
+	return &methods.GetTrustedCertificatesBody{
+		Res: &types.GetTrustedCertificatesResponse{
+			Returnval: res,
+		},
 	}
 }
 

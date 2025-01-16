@@ -140,7 +140,12 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 
 	if session == nil {
 		switch method.Name {
-		case "RetrieveServiceContent", "PbmRetrieveServiceContent", "Fetch", "List", "Login", "LoginByToken", "LoginExtensionByCertificate", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
+		case
+			"Login", "LoginByToken", "LoginExtensionByCertificate", "CloneSession", // SessionManager
+			"RetrieveServiceContent", "RetrieveInternalContent", "PbmRetrieveServiceContent", // ServiceContent
+			"Fetch", "RetrieveProperties", "RetrievePropertiesEx", // PropertyCollector
+			"List",                   // lookup service
+			"GetTrustedCertificates": // ssoadmin
 			// ok for now, TODO: authz
 		default:
 			fault := &types.NotAuthenticated{
