@@ -1,23 +1,12 @@
-/*
-Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package ssoadmin_test
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 
@@ -57,6 +46,22 @@ func TestClient(t *testing.T) {
 			verifyClient(t, ctx, c)
 		}, model)
 	})
+	t.Run("System.Anonymous methods", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, client *vim25.Client) {
+			c, err := ssoadmin.NewClient(ctx, client)
+			require.NoError(t, err)
+
+			c.Jar = nil // session cookie will not be sent
+
+			_, err = c.FindUser(ctx, "testuser")
+			require.Error(t, err) // NotAuthenticated
+
+			certs, err := c.GetTrustedCertificates(ctx)
+			require.NoError(t, err)
+			fmt.Println(certs[0])
+			require.NotEmpty(t, certs)
+		})
+	})
 }
 
 func verifyClient(t *testing.T, ctx context.Context, c *ssoadmin.Client) {
@@ -66,5 +71,4 @@ func verifyClient(t *testing.T, ctx context.Context, c *ssoadmin.Client) {
 	user, err := c.FindUser(ctx, "testuser")
 	require.NoError(t, err)
 	require.Equal(t, &types.AdminUser{Id: types.PrincipalId{Name: "testuser", Domain: "vsphere.local"}, Kind: "person"}, user)
-
 }
