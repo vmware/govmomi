@@ -139,7 +139,7 @@ func (m *Manager) Retrieve(ctx context.Context, id string) (*types.VStorageObjec
 	return m.GlobalObjectManager.Retrieve(ctx, types.ID{Id: id})
 }
 
-func (m *Manager) List(ctx context.Context) ([]types.ID, error) {
+func (m *Manager) List(ctx context.Context, qs ...vslmtypes.VslmVsoVStorageObjectQuerySpec) ([]types.ID, error) {
 	if m.Datastore != nil {
 		return m.ObjectManager.List(ctx, m.Datastore)
 	}
@@ -153,7 +153,7 @@ func (m *Manager) List(ctx context.Context) ([]types.ID, error) {
 		QueryField:    string(vslmtypes.VslmVsoVStorageObjectQuerySpecQueryFieldEnumId),
 		QueryOperator: string(vslmtypes.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan),
 	}
-	var query []vslmtypes.VslmVsoVStorageObjectQuerySpec
+	query := qs
 	var ids []types.ID
 
 	for {
@@ -164,13 +164,13 @@ func (m *Manager) List(ctx context.Context) ([]types.ID, error) {
 
 		ids = append(ids, res.Id...)
 
-		if res.AllRecordsReturned {
+		if res.AllRecordsReturned || len(ids) == 0 {
 			break
 		}
 
 		spec.QueryValue = []string{ids[len(ids)-1].Id}
 
-		query = []vslmtypes.VslmVsoVStorageObjectQuerySpec{spec}
+		query = append(qs, spec)
 	}
 
 	return ids, nil

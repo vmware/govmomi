@@ -127,6 +127,8 @@ but appear via `govc $cmd -h`:
  - [disk.create](#diskcreate)
  - [disk.detach](#diskdetach)
  - [disk.ls](#diskls)
+ - [disk.metadata.ls](#diskmetadatals)
+ - [disk.metadata.update](#diskmetadataupdate)
  - [disk.register](#diskregister)
  - [disk.rm](#diskrm)
  - [disk.snapshot.create](#disksnapshotcreate)
@@ -2149,11 +2151,39 @@ Usage: govc disk.ls [OPTIONS] [ID]...
 
 List disk IDs on DS.
 
+The '-q' flag can be used to match disk fields.
+Each query must be in the form of:
+  FIELD.OP=VAL
+
+Where FIELD can be one of:
+  id
+  name
+  capacity
+  createTime
+  backingObjectId
+  datastoreMoId
+  metadataKey
+  metadataValue
+
+And OP can be one of:
+  eq    equals
+  ne    notEquals
+  lt    lessThan
+  le    lessThanOrEqual
+  gt    greaterThan
+  ge    greaterThanOrEqual
+  ct    contains
+  sw    startsWith
+  ew    endsWith
+
 Examples:
   govc disk.ls
   govc disk.ls -l -T
   govc disk.ls -l e9b06a8b-d047-4d3c-b15b-43ea9608b1a6
   govc disk.ls -c k8s-region -t us-west-2
+  govc disk.ls -q capacity.ge=100 # capacity in MB
+  govc disk.ls -q name.sw=my-disk
+  govc disk.ls -q metadataKey.eq=cns.k8s.pvc.namespace -q metadataValue.eq=dev
 
 Options:
   -L=false               Print disk backing path instead of disk name
@@ -2163,7 +2193,39 @@ Options:
   -c=                    Query tag category
   -ds=                   Datastore [GOVC_DATASTORE]
   -l=false               Long listing format
+  -q=[]                  Query spec
   -t=                    Query tag name
+```
+
+## disk.metadata.ls
+
+```
+Usage: govc disk.metadata.ls [OPTIONS] ID
+
+List metadata for disk ID.
+
+Examples:
+  govc disk.metadata.ls 9b06a8b-d047-4d3c-b15b-43ea9608b1a6
+
+Options:
+  -K=                    Get value for key only
+  -p=                    Key filter prefix
+  -s=                    Snapshot ID
+```
+
+## disk.metadata.update
+
+```
+Usage: govc disk.metadata.update [OPTIONS] ID
+
+Update metadata for disk ID.
+
+Examples:
+  govc disk.metadata.update $id foo=bar biz=baz
+  govc disk.metadata.update -d foo -d biz $id
+
+Options:
+  -d=[]                  Delete keys
 ```
 
 ## disk.register

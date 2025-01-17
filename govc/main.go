@@ -47,6 +47,7 @@ import (
 	_ "github.com/vmware/govmomi/cli/device/serial"
 	_ "github.com/vmware/govmomi/cli/device/usb"
 	_ "github.com/vmware/govmomi/cli/disk"
+	_ "github.com/vmware/govmomi/cli/disk/metadata"
 	_ "github.com/vmware/govmomi/cli/disk/snapshot"
 	_ "github.com/vmware/govmomi/cli/dvs"
 	_ "github.com/vmware/govmomi/cli/dvs/portgroup"
