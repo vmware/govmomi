@@ -5,6 +5,13 @@
 package simulator
 
 import (
+	"cmp"
+	"fmt"
+	"slices"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
 	vimx "github.com/vmware/govmomi/vim25/methods"
@@ -75,34 +82,206 @@ type VStorageObjectManager struct {
 	vim.ManagedObjectReference
 }
 
-func (m *VStorageObjectManager) VslmListVStorageObjectForSpec(ctx *simulator.Context, req *types.VslmListVStorageObjectForSpec) soap.HasFault {
-	res := new(types.VslmVsoVStorageObjectQueryResult)
+func matchesTime(q types.VslmVsoVStorageObjectQuerySpec, val time.Time) (bool, error) {
+	src, err := time.Parse(time.RFC3339Nano, q.QueryValue[0])
+	if err != nil {
+		return false, err
+	}
 
-	vctx := ctx.For(vim25.Path)
-	vsom := vctx.Map.VStorageObjectManager()
+	switch types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnum(q.QueryOperator) {
+	case types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEquals:
+		return src == val, nil
+	case types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThan:
+		return val.Before(src), nil
+	case types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan:
+		return val.After(src), nil
+	default:
+		return false, fmt.Errorf("invalid queryOperator %s for time", q.QueryOperator)
+	}
+}
 
-	res.AllRecordsReturned = true // TODO: req.MaxResult
+var longOps = map[types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnum]func(int64, int64) bool{
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEquals:             func(a, b int64) bool { return a == b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumNotEquals:          func(a, b int64) bool { return a != b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThan:           func(a, b int64) bool { return a < b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan:        func(a, b int64) bool { return a > b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThanOrEqual:    func(a, b int64) bool { return a < b || a == b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThanOrEqual: func(a, b int64) bool { return a > b || a == b },
+}
 
-	for _, objs := range vsom.Catalog() {
-		// TODO: filter req.Query
-		for id, obj := range objs {
-			res.Id = append(res.Id, id)
+func matchesLong(q types.VslmVsoVStorageObjectQuerySpec, field int64) (bool, error) {
+	num, err := strconv.ParseInt(q.QueryValue[0], 10, 64)
+	if err != nil {
+		return false, err
+	}
 
-			vso := types.VslmVsoVStorageObjectResult{
-				Id:           id,
-				Name:         obj.Config.Name,
-				CapacityInMB: obj.Config.CapacityInMB,
-				CreateTime:   &obj.Config.CreateTime,
-			}
-			res.QueryResults = append(res.QueryResults, vso)
+	op, ok := longOps[types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnum(q.QueryOperator)]
+	if !ok {
+		return false, fmt.Errorf("invalid QueryOperator: %s", q.QueryOperator)
+	}
+
+	return op(field, int64(num)), nil
+}
+
+var stringOps = map[types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnum]func(string, string) bool{
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEquals:             func(a, b string) bool { return a == b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumNotEquals:          func(a, b string) bool { return a != b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThan:           func(a, b string) bool { return a < b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan:        func(a, b string) bool { return a > b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThanOrEqual:    func(a, b string) bool { return a < b || a == b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThanOrEqual: func(a, b string) bool { return a > b || a == b },
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumContains:           strings.Contains,
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumStartsWith:         strings.HasPrefix,
+	types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEndsWith:           strings.HasSuffix,
+}
+
+func matches(obj *simulator.VStorageObject, q types.VslmVsoVStorageObjectQuerySpec) (bool, error) {
+	var field []string
+
+	switch types.VslmVsoVStorageObjectQuerySpecQueryFieldEnum(q.QueryField) {
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumCapacity:
+		return matchesLong(q, obj.Config.CapacityInMB)
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumCreateTime:
+		return matchesTime(q, obj.Config.CreateTime)
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumBackingObjectId:
+		return false, fmt.Errorf("Query field %s is not supported", q.QueryField) // Same as real VC currently
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumDatastoreMoId:
+		return true, nil // Already filtered datastores
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumId:
+		field = append(field, obj.Config.Id.Id)
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumName:
+		field = append(field, obj.Config.Name)
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataKey:
+		field = make([]string, len(obj.Metadata))
+		for i := range obj.Metadata {
+			field[i] = obj.Metadata[i].Key
+		}
+	case types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataValue:
+		field = make([]string, len(obj.Metadata))
+		for i := range obj.Metadata {
+			field[i] = obj.Metadata[i].Value
+		}
+	default:
+		return false, fmt.Errorf("invalid QueryField: %s", q.QueryField)
+	}
+
+	op, ok := stringOps[types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnum(q.QueryOperator)]
+	if !ok {
+		return false, fmt.Errorf("invalid QueryOperator: %s", q.QueryOperator)
+	}
+
+	for _, f := range field {
+		if op(f, q.QueryValue[0]) {
+			return true, nil
 		}
 	}
 
-	return &methods.VslmListVStorageObjectForSpecBody{
-		Res: &types.VslmListVStorageObjectForSpecResponse{
-			Returnval: res,
+	return false, nil
+}
+
+var (
+	invalidValues = &vim.InvalidArgument{InvalidProperty: "values"}
+
+	invalidQuery = &vim.SystemError{
+		RuntimeFault: vim.RuntimeFault{
+			MethodFault: vim.MethodFault{
+				FaultCause: &vim.LocalizedMethodFault{
+					Fault: &types.VslmFault{
+						Msg: "Unexpected exception",
+					},
+				},
+			},
 		},
+		Reason: "Undeclared fault",
 	}
+)
+
+func matchesSpec(obj *simulator.VStorageObject, query []types.VslmVsoVStorageObjectQuerySpec) (bool, *soap.Fault) {
+	for _, q := range query {
+		if len(q.QueryValue) != 1 { // Only 1 value is currently supported by vCenter
+			return false, simulator.Fault("", invalidValues)
+		}
+		match, err := matches(obj, q)
+		if err != nil {
+			return false, simulator.Fault(err.Error(), invalidQuery)
+		}
+		if !match {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+func (m *VStorageObjectManager) VslmListVStorageObjectForSpec(ctx *simulator.Context, req *types.VslmListVStorageObjectForSpec) soap.HasFault {
+	body := new(methods.VslmListVStorageObjectForSpecBody)
+	vctx := ctx.For(vim25.Path)
+	vsom := vctx.Map.VStorageObjectManager()
+
+	datastores := map[vim.ManagedObjectReference]bool{}
+	for _, q := range req.Query {
+		if q.QueryField == string(types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumDatastoreMoId) {
+			for _, id := range q.QueryValue {
+				datastores[vim.ManagedObjectReference{
+					Type:  "Datastore",
+					Value: "datastore-" + id,
+				}] = true
+			}
+		}
+	}
+
+	var catalog []vim.VStorageObject
+
+	for ds, objs := range vsom.Catalog() {
+		if len(datastores) != 0 && !datastores[ds] {
+			continue
+		}
+
+		for _, obj := range objs {
+			matches, err := matchesSpec(obj, req.Query)
+			if err != nil {
+				body.Fault_ = err
+				return body
+			}
+			if !matches {
+				continue
+			}
+
+			catalog = append(catalog, obj.VStorageObject)
+		}
+	}
+
+	// Sort as real VC does, required to support pagination
+	slices.SortFunc(catalog, func(a, b vim.VStorageObject) int {
+		return cmp.Compare(a.Config.Id.Id, b.Config.Id.Id)
+	})
+
+	res := &types.VslmVsoVStorageObjectQueryResult{
+		AllRecordsReturned: true,
+	}
+
+	for _, obj := range catalog {
+		res.Id = append(res.Id, obj.Config.Id)
+
+		vso := types.VslmVsoVStorageObjectResult{
+			Id:           obj.Config.Id,
+			Name:         obj.Config.Name,
+			CapacityInMB: obj.Config.CapacityInMB,
+			CreateTime:   &obj.Config.CreateTime,
+		}
+
+		res.QueryResults = append(res.QueryResults, vso)
+
+		if len(res.QueryResults) >= int(req.MaxResult) {
+			res.AllRecordsReturned = false
+			break
+		}
+	}
+
+	body.Res = &types.VslmListVStorageObjectForSpecResponse{
+		Returnval: res,
+	}
+
+	return body
 }
 
 func (m *VStorageObjectManager) VslmRetrieveVStorageObject(ctx *simulator.Context, req *types.VslmRetrieveVStorageObject) soap.HasFault {
@@ -429,6 +608,84 @@ func (m *VStorageObjectManager) VslmAttachDiskTask(ctx *simulator.Context, req *
 	return body
 }
 
+func (m *VStorageObjectManager) VslmUpdateVStorageObjectMetadataTask(ctx *simulator.Context, req *types.VslmUpdateVStorageObjectMetadata_Task) soap.HasFault {
+	body := new(methods.VslmUpdateVStorageObjectMetadata_TaskBody)
+
+	vctx := ctx.For(vim25.Path)
+	vsom := vctx.Map.VStorageObjectManager()
+
+	val := vsom.VCenterUpdateVStorageObjectMetadataExTask(vctx, &vim.VCenterUpdateVStorageObjectMetadataEx_Task{
+		This:       vsom.Self,
+		Id:         req.Id,
+		Metadata:   req.Metadata,
+		DeleteKeys: req.DeleteKeys,
+		Datastore:  m.ds(vsom, req.Id),
+	})
+
+	if val.Fault() != nil {
+		body.Fault_ = val.Fault()
+	} else {
+		ref := val.(*vimx.VCenterUpdateVStorageObjectMetadataEx_TaskBody).Res.Returnval
+
+		body.Res = &types.VslmUpdateVStorageObjectMetadata_TaskResponse{
+			Returnval: newVslmTask(ctx, ref),
+		}
+	}
+
+	return body
+}
+
+func (m *VStorageObjectManager) VslmRetrieveVStorageObjectMetadata(ctx *simulator.Context, req *types.VslmRetrieveVStorageObjectMetadata) soap.HasFault {
+	body := new(methods.VslmRetrieveVStorageObjectMetadataBody)
+
+	vctx := ctx.For(vim25.Path)
+	vsom := vctx.Map.VStorageObjectManager()
+
+	obj := m.object(vsom, req.Id)
+	if obj == nil {
+		body.Fault_ = simulator.Fault("", &vim.InvalidArgument{InvalidProperty: "VolumeId"})
+	} else {
+		body.Res = new(types.VslmRetrieveVStorageObjectMetadataResponse)
+
+		for _, kv := range obj.Metadata {
+			if req.Prefix == "" || strings.HasPrefix(kv.Key, req.Prefix) {
+				body.Res.Returnval = append(body.Res.Returnval, kv)
+			}
+		}
+	}
+
+	return body
+}
+
+func (m *VStorageObjectManager) VslmRetrieveVStorageObjectMetadataValue(ctx *simulator.Context, req *types.VslmRetrieveVStorageObjectMetadataValue) soap.HasFault {
+	body := new(methods.VslmRetrieveVStorageObjectMetadataValueBody)
+
+	vctx := ctx.For(vim25.Path)
+	vsom := vctx.Map.VStorageObjectManager()
+
+	obj := m.object(vsom, req.Id)
+	if obj == nil {
+		body.Fault_ = simulator.Fault("", &vim.InvalidArgument{InvalidProperty: "VolumeId"})
+	} else {
+		val, ok := func() (string, bool) {
+			for _, data := range obj.Metadata {
+				if data.Key == req.Key {
+					return data.Value, true
+				}
+			}
+			return "", false
+		}()
+
+		if ok {
+			body.Res = &types.VslmRetrieveVStorageObjectMetadataValueResponse{Returnval: val}
+		} else {
+			body.Fault_ = simulator.Fault("", &vim.KeyNotFound{Key: req.Key})
+		}
+	}
+
+	return body
+}
+
 // VslmTask methods are just a proxy to vim25 Task methods
 type VslmTask struct {
 	vim.ManagedObjectReference
@@ -506,4 +763,15 @@ func (*VStorageObjectManager) ds(vsom *simulator.VcenterVStorageObjectManager, r
 
 	// vsom calls will fault as they would when ID is NotFound
 	return vim.ManagedObjectReference{Type: "Datastore"}
+}
+
+func (*VStorageObjectManager) object(vsom *simulator.VcenterVStorageObjectManager, reqID vim.ID) *simulator.VStorageObject {
+	for _, objs := range vsom.Catalog() {
+		for id, obj := range objs {
+			if id == reqID {
+				return obj
+			}
+		}
+	}
+	return nil
 }

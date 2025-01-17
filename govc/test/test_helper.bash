@@ -241,6 +241,10 @@ assert_output() {
   assert_equal "$expected" "$output"
 }
 
+assert_output_lines() {
+  assert_equal "$1" ${#lines[@]}
+}
+
 assert_matches() {
   local pattern="${1}"
   local actual="${2}"

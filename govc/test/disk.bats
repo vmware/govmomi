@@ -193,6 +193,52 @@ load test_helper
   govc disk.ls -T | grep -v US-WEST
 }
 
+@test "disk.metadata" {
+  vcsim_env
+
+  run govc disk.create -size 10M my-disk
+  assert_success
+  id="$output"
+
+  run govc disk.metadata.ls "$id"
+  assert_success ""
+
+  run govc disk.metadata.ls -json "$id"
+  assert_success null
+
+  run govc disk.metadata.update "$id" foo=bar biz=baz
+  assert_success
+
+  run govc disk.metadata.ls "$id"
+  assert_success
+  assert_output_lines 2
+
+  run govc disk.metadata.ls -json "$id"
+  assert_success
+
+  run govc disk.metadata.ls -K foo "$id"
+  assert_success
+  assert_output_lines 1
+
+  run govc disk.metadata.update "$id" foo2=bar2 biz2=baz2
+  assert_success
+
+  run govc disk.metadata.ls "$id"
+  assert_success
+  assert_output_lines 4
+
+  run govc disk.metadata.ls -p foo "$id"
+  assert_success
+  assert_output_lines 2
+
+  run govc disk.metadata.update -d foo2 -d biz2 "$id"
+  assert_success
+
+  run govc disk.metadata.ls "$id"
+  assert_success
+  assert_output_lines 2
+}
+
 @test "disk.reconcile" {
   vcsim_env
 
@@ -290,4 +336,47 @@ load test_helper
   run govc disk.ls
   assert_success
   [ ${#lines[@]} -eq 0 ]
+}
+
+@test "disk query" {
+  vcsim_start -ds 3
+
+  name=0
+  size=10
+
+  for ds in $(govc find / -type s) ; do
+    for prefix in alpha beta ; do
+      run govc disk.create -ds "$ds" -size ${size}M $prefix-disk-$name
+      assert_success
+      id="$output"
+
+      run govc disk.metadata.update "$id" \
+          namespace=ns-$prefix \
+          name=vol-$prefix-$name
+      assert_success
+    done
+
+    name=$((name + 1))
+    size=$((size + 10))
+  done
+
+  run govc disk.ls
+  assert_success
+  assert_output_lines 6
+
+  run govc disk.ls -q capacity.eq=10
+  assert_success
+  assert_output_lines 2
+
+  run govc disk.ls -q capacity.gt=10
+  assert_success
+  assert_output_lines 4
+
+  run govc disk.ls -q capacity.ge=10 -q name.sw=alpha-
+  assert_success
+  assert_output_lines 3
+
+  run govc disk.ls -q metadataKey.eq=namespace -q metadataValue.eq=ns-alpha
+  assert_success
+  assert_output_lines 3
 }
