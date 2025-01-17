@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-	http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package service
 
@@ -30,10 +18,7 @@ import (
 
 type create struct {
 	*flags.ClientFlag
-
-	specType        string
-	trustedProvider bool
-	acceptEULA      bool
+	*ServiceVersionFlag
 }
 
 func init() {
@@ -44,13 +29,14 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.specType, "spec-type", "vsphere", "Type of Spec: only vsphere is supported right now")
-	f.BoolVar(&cmd.trustedProvider, "trusted", false, "Define if this is a trusted provider")
-	f.BoolVar(&cmd.acceptEULA, "accept-eula", false, "Auto accept EULA")
+	cmd.ServiceVersionFlag = &ServiceVersionFlag{}
+	cmd.ServiceVersionFlag.Register(ctx, f)
 }
 
 func (cmd *create) Description() string {
-	return `Creates a vSphere Namespace Supervisor Service.
+	return `Registers a vSphere Supervisor Service version on vCenter for a new service.
+A service version can be registered once on vCenter and then be installed on multiple vSphere Supervisors managed by this vCenter.
+A vSphere Supervisor Service contains a list of service versions; this call will create a service and its first version.
 
 Examples:
   govc namespace.service.create manifest.yaml`
@@ -60,30 +46,41 @@ func (cmd *create) Usage() string {
 	return "MANIFEST"
 }
 
+func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.ServiceVersionFlag.Process(ctx); err != nil {
+		return err
+	}
+	return cmd.ClientFlag.Process(ctx)
+}
+
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	manifest := f.Args()
-	if len(manifest) != 1 {
+	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 
-	if cmd.specType != "vsphere" {
-		return fmt.Errorf("only vsphere specs are accepted right now")
-	}
+	manifestFile := f.Arg(0)
 
-	manifestFile, err := os.ReadFile(manifest[0])
+	manifest, err := os.ReadFile(manifestFile)
 	if err != nil {
 		return fmt.Errorf("failed to read manifest file: %s", err)
 	}
+	content := base64.StdEncoding.EncodeToString(manifest)
 
-	content := base64.StdEncoding.EncodeToString(manifestFile)
-	service := namespace.SupervisorService{
-		VsphereService: namespace.SupervisorServicesVSphereSpec{
+	service := namespace.SupervisorService{}
+	if cmd.ServiceVersionFlag.SpecType == "carvel" {
+		service.CarvelService = &namespace.SupervisorServicesCarvelSpec{
+			VersionSpec: namespace.CarvelVersionCreateSpec{
+				Content: content,
+			},
+		}
+	} else {
+		service.VsphereService = &namespace.SupervisorServicesVSphereSpec{
 			VersionSpec: namespace.SupervisorServicesVSphereVersionCreateSpec{
 				Content:         content,
-				AcceptEula:      cmd.acceptEULA,
-				TrustedProvider: cmd.trustedProvider,
+				AcceptEula:      cmd.ServiceVersionFlag.AcceptEULA,
+				TrustedProvider: cmd.ServiceVersionFlag.TrustedProvider,
 			},
-		},
+		}
 	}
 
 	c, err := cmd.RestClient()
@@ -93,5 +90,4 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	m := namespace.NewManager(c)
 	return m.CreateSupervisorService(ctx, &service)
-
 }

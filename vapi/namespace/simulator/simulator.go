@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2020-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -48,7 +36,7 @@ func init() {
 	})
 }
 
-// Handler implements the Cluster Modules API simulator
+// Handler implements the Namespace Management Modules API simulator
 type Handler struct {
 	URL *url.URL
 }
@@ -72,6 +60,8 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 
 		s.HandleFunc(internal.SupervisorServicesPath, h.listServices)
 		s.HandleFunc(internal.SupervisorServicesPath+"/", h.getService)
+		s.HandleFunc(internal.SupervisorServicesPath+"/{id}"+internal.SupervisorServicesVersionsPath, h.versionsForService)
+		s.HandleFunc(internal.SupervisorServicesPath+"/{id}"+internal.SupervisorServicesVersionsPath+"/{version}", h.getServiceVersion)
 
 		s.HandleFunc(internal.VmClassesPath, h.vmClasses)
 		s.HandleFunc(internal.VmClassesPath+"/", h.vmClasses)
@@ -209,22 +199,61 @@ func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-var supervisorServices []namespace.SupervisorServiceSummary = []namespace.SupervisorServiceSummary{
-	{
+// Some fake services, service 1 has 2 versions, service 2 has 1 version
+// Summary for services
+var supervisorServicesMap = map[string]namespace.SupervisorServiceSummary{
+	"service1": {
 		ID:    "service1",
 		Name:  "mock-service-1",
 		State: "ACTIVATED",
 	},
-	{
+	"service2": {
 		ID:    "service2",
 		Name:  "mock-service-2",
-		State: "DE-ACTIVATED",
+		State: "DEACTIVATED",
+	},
+}
+
+// Summary for service versions
+var supervisorServiceVersionsMap = map[string][]namespace.SupervisorServiceVersionSummary{
+	"service1": {
+		{
+			SupervisorServiceInfo: namespace.SupervisorServiceInfo{
+				Name:        "mock-service-1 v1 display name",
+				State:       "ACTIVATED",
+				Description: "This is service 1 version 1.0.0",
+			},
+			Version: "1.0.0",
+		},
+		{
+			SupervisorServiceInfo: namespace.SupervisorServiceInfo{
+				Name:        "mock-service-1 v2 display name",
+				State:       "DEACTIVATED",
+				Description: "This is service 1 version 2.0.0",
+			},
+			Version: "2.0.0",
+		}},
+	"service2": {
+		{
+			SupervisorServiceInfo: namespace.SupervisorServiceInfo{
+				Name:        "mock-service-2 v1 display name",
+				State:       "ACTIVATED",
+				Description: "This is service 2 version 1.1.0",
+			},
+			Version: "1.1.0",
+		},
 	},
 }
 
 func (h *Handler) listServices(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
+		supervisorServices := make([]namespace.SupervisorServiceSummary, len(supervisorServicesMap))
+		i := 0
+		for _, service := range supervisorServicesMap {
+			supervisorServices[i] = service
+			i++
+		}
 		vapi.StatusOK(w, supervisorServices)
 	}
 }
@@ -233,18 +262,58 @@ func (h *Handler) getService(w http.ResponseWriter, r *http.Request) {
 	id := path.Base(r.URL.Path)
 	switch r.Method {
 	case http.MethodGet:
-		for _, svc := range supervisorServices {
-			if svc.ID == id {
-				svcInfo := namespace.SupervisorServiceInfo{
-					Name:        svc.Name,
-					State:       svc.State,
-					Description: fmt.Sprintf("Description of %s", svc.ID),
-				}
-				vapi.StatusOK(w, svcInfo)
-				return
-			}
+		if result, contains := supervisorServicesMap[id]; contains {
+			vapi.StatusOK(w, result)
+		} else {
+			vapi.ApiErrorNotFound(w)
 		}
-		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+}
+
+// versionsForService returns the list of versions for a particular service
+func (h *Handler) versionsForService(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("In versionsForService: %v\n", r.URL.Path)
+	id := r.PathValue("id")
+	switch r.Method {
+	case http.MethodGet:
+		if result, contains := supervisorServiceVersionsMap[id]; contains {
+			vapi.StatusOK(w, result)
+		} else {
+			vapi.ApiErrorNotFound(w)
+		}
+		return
+	}
+}
+
+// getServiceVersion returns info on a particular service version
+func (h *Handler) getServiceVersion(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	version := r.PathValue("version")
+
+	switch r.Method {
+	case http.MethodGet:
+		if versions, contains := supervisorServiceVersionsMap[id]; contains {
+			for _, v := range versions {
+				if v.Version == version {
+					info := namespace.SupervisorServiceVersionInfo{
+						SupervisorServiceInfo: namespace.SupervisorServiceInfo{
+							Description: v.Description,
+							State:       v.State,
+							Name:        v.Name,
+						},
+						ContentType: "CARVEL_APPS_YAML", // return Carvel by default
+						Content:     "abc",              // in reality this is base 64 encoded of content
+					}
+					vapi.StatusOK(w, info)
+					return
+				}
+			}
+			vapi.ApiErrorNotFound(w)
+		} else {
+			vapi.ApiErrorNotFound(w)
+		}
+		return
 	}
 }
 

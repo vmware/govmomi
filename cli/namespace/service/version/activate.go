@@ -2,7 +2,7 @@
 // The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
-package service
+package version
 
 import (
 	"context"
@@ -18,7 +18,7 @@ type activate struct {
 }
 
 func init() {
-	cli.Register("namespace.service.activate", &activate{})
+	cli.Register("namespace.service.version.activate", &activate{})
 }
 
 func (cmd *activate) Register(ctx context.Context, f *flag.FlagSet) {
@@ -27,19 +27,23 @@ func (cmd *activate) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *activate) Description() string {
-	return `Activates a vSphere Supervisor Service (and all its versions).
+	return `Activates a vSphere Supervisor Service version.
 
 Examples:
-  govc namespace.service.activate my-supervisor-service other-supervisor-service`
+  govc namespace.service.version.activate my-supervisor-service 1.0.0`
 }
 
 func (cmd *activate) Usage() string {
-	return "NAME..."
+	return "NAME VERSION"
 }
 
 func (cmd *activate) Run(ctx context.Context, f *flag.FlagSet) error {
-	services := f.Args()
-	if len(services) < 1 {
+	service := f.Arg(0)
+	if len(service) == 0 {
+		return flag.ErrHelp
+	}
+	version := f.Arg(1)
+	if len(version) == 0 {
 		return flag.ErrHelp
 	}
 
@@ -49,11 +53,5 @@ func (cmd *activate) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	m := namespace.NewManager(c)
-	for _, svc := range services {
-		if err := m.ActivateSupervisorServices(ctx, svc); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return m.ActivateSupervisorServiceVersion(ctx, service, version)
 }

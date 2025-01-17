@@ -2,7 +2,7 @@
 // The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
-package service
+package version
 
 import (
 	"context"
@@ -24,7 +24,7 @@ type info struct {
 }
 
 func init() {
-	cli.Register("namespace.service.info", &info{})
+	cli.Register("namespace.service.version.info", &info{})
 }
 
 func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
@@ -43,16 +43,16 @@ func (cmd *info) Process(ctx context.Context) error {
 }
 
 func (cmd *info) Description() string {
-	return `Gets information of a specific vSphere Supervisor Service.
+	return `Gets information of a specific vSphere Supervisor Service version.
 
 Examples:
-  govc namespace.service.info my-supervisor-service
-  govc namespace.service.info -json my-supervisor-service | jq .`
+  govc namespace.service.version.info my-supervisor-service 2.0.0
+  govc namespace.service.version.info -json my-supervisor-service 2.0.0 | jq .`
 }
 
 type infoWriter struct {
 	cmd     *info
-	Service namespace.SupervisorServiceInfo `json:"service"`
+	Service namespace.SupervisorServiceVersionInfo `json:"service"`
 }
 
 func (r *infoWriter) Write(w io.Writer) error {
@@ -61,6 +61,7 @@ func (r *infoWriter) Write(w io.Writer) error {
 	fmt.Fprintf(tw, "%s", r.Service.Name)
 	fmt.Fprintf(tw, "\t%s", r.Service.State)
 	fmt.Fprintf(tw, "\t%s", r.Service.Description)
+
 	fmt.Fprintf(tw, "\n")
 
 	return tw.Flush()
@@ -75,12 +76,16 @@ func (r *infoWriter) Dump() interface{} {
 }
 
 func (cmd *info) Usage() string {
-	return "NAME"
+	return "NAME VERSION"
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	service := f.Args()
-	if len(service) != 1 {
+	service := f.Arg(0)
+	if len(service) == 0 {
+		return flag.ErrHelp
+	}
+	version := f.Arg(1)
+	if len(version) == 0 {
 		return flag.ErrHelp
 	}
 
@@ -90,10 +95,10 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	m := namespace.NewManager(c)
-	supervisorservice, err := m.GetSupervisorService(ctx, service[0])
+	serviceVersion, err := m.GetSupervisorServiceVersion(ctx, service, version)
 	if err != nil {
 		return err
 	}
 
-	return cmd.WriteResult(&infoWriter{cmd, supervisorservice})
+	return cmd.WriteResult(&infoWriter{cmd, serviceVersion})
 }

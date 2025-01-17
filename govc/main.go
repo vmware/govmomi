@@ -87,6 +87,7 @@ import (
 	_ "github.com/vmware/govmomi/cli/namespace"
 	_ "github.com/vmware/govmomi/cli/namespace/cluster"
 	_ "github.com/vmware/govmomi/cli/namespace/service"
+	_ "github.com/vmware/govmomi/cli/namespace/service/version"
 	_ "github.com/vmware/govmomi/cli/namespace/vmclass"
 	_ "github.com/vmware/govmomi/cli/object"
 	_ "github.com/vmware/govmomi/cli/option"

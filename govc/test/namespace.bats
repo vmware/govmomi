@@ -99,6 +99,16 @@ load test_helper
     assert_success
     assert_matches ACTIVATED
     assert_matches mock-service-1
+    assert_matches mock-service-2
+    assert_matches DEACTIVATED
+}
+
+@test "namespace.service.info notfound" {
+    vcsim_env
+
+    run govc namespace.service.info non-existing-service
+    assert_failure
+    assert_matches "404 Not Found"
 }
 
 @test "namespace.service.info" {
@@ -108,10 +118,40 @@ load test_helper
     assert_success
     assert_matches mock-service-1
     assert_matches ACTIVATED
-    assert_matches "Description of service1"
 
     run govc namespace.service.info -json service2
-    assert_matches DE-ACTIVATED
+    assert_matches DEACTIVATED
+}
+
+@test "namespace.service.version.ls" {
+    vcsim_env
+
+    versions=$(govc namespace.service.version.ls -json service1)
+    assert_equal "2" $(echo $versions | jq '. |  length')
+
+    run govc namespace.service.version.ls service1
+    assert_success
+    assert_matches "1.0.0"
+    assert_matches "2.0.0"
+}
+
+@test "namespace.service.version.info notfound" {
+    vcsim_env
+
+    run govc namespace.service.version.info service2 9.9.9
+    assert_failure
+    assert_matches "404 Not Found"
+}
+
+@test "namespace.service.version.info" {
+    vcsim_env
+
+    v=$(govc namespace.service.version.info -json service2 1.1.0 | jq)
+
+    assert_equal "ACTIVATED" $(echo $v |  jq -r .state)
+    assert_equal "This is service 2 version 1.1.0" "$(echo $v |  jq -r .description)"
+    assert_equal "CARVEL_APPS_YAML" $(echo $v |  jq -r .content_type)
+    assert_equal "abc" $(echo $v | jq -r .content)
 }
 
 @test "namespace.create" {
@@ -335,3 +375,5 @@ load test_helper
   run govc namespace.registervm -vm $vm test-namespace-1
   assert_success
 }
+
+

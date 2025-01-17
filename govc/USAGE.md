@@ -285,6 +285,12 @@ but appear via `govc $cmd -h`:
  - [namespace.service.info](#namespaceserviceinfo)
  - [namespace.service.ls](#namespaceservicels)
  - [namespace.service.rm](#namespaceservicerm)
+ - [namespace.service.version.activate](#namespaceserviceversionactivate)
+ - [namespace.service.version.create](#namespaceserviceversioncreate)
+ - [namespace.service.version.deactivate](#namespaceserviceversiondeactivate)
+ - [namespace.service.version.info](#namespaceserviceversioninfo)
+ - [namespace.service.version.ls](#namespaceserviceversionls)
+ - [namespace.service.version.rm](#namespaceserviceversionrm)
  - [namespace.update](#namespaceupdate)
  - [namespace.vmclass.create](#namespacevmclasscreate)
  - [namespace.vmclass.info](#namespacevmclassinfo)
@@ -4736,7 +4742,7 @@ Options:
 ```
 Usage: govc namespace.service.activate [OPTIONS] NAME...
 
-Activates a vSphere Namespace Supervisor Service.
+Activates a vSphere Supervisor Service (and all its versions).
 
 Examples:
   govc namespace.service.activate my-supervisor-service other-supervisor-service
@@ -4749,15 +4755,17 @@ Options:
 ```
 Usage: govc namespace.service.create [OPTIONS] MANIFEST
 
-Creates a vSphere Namespace Supervisor Service.
+Registers a vSphere Supervisor Service version on vCenter for a new service.
+A service version can be registered once on vCenter and then be installed on multiple vSphere Supervisors managed by this vCenter.
+A vSphere Supervisor Service contains a list of service versions; this call will create a service and its first version.
 
 Examples:
   govc namespace.service.create manifest.yaml
 
 Options:
-  -accept-eula=false     Auto accept EULA
-  -spec-type=vsphere     Type of Spec: only vsphere is supported right now
-  -trusted=false         Define if this is a trusted provider
+  -accept-eula=false     Auto accept EULA (only required for vSphere spec type)
+  -spec-type=carvel      Type of Spec: vsphere (deprecated) or carvel
+  -trusted=false         Define if this is a trusted provider (only applicable for vSphere spec type)
 ```
 
 ## namespace.service.deactivate
@@ -4765,7 +4773,7 @@ Options:
 ```
 Usage: govc namespace.service.deactivate [OPTIONS] NAME...
 
-Deactivates a vSphere Namespace Supervisor Service.
+Deactivates a vSphere Supervisor Service (and all its versions).
 
 Examples:
   govc namespace.service.deactivate my-supervisor-service other-supervisor-service
@@ -4778,7 +4786,7 @@ Options:
 ```
 Usage: govc namespace.service.info [OPTIONS] NAME
 
-Gets information of a specific supervisor service.
+Gets information of a specific vSphere Supervisor Service.
 
 Examples:
   govc namespace.service.info my-supervisor-service
@@ -4792,7 +4800,7 @@ Options:
 ```
 Usage: govc namespace.service.ls [OPTIONS]
 
-List namepace registered supervisor services.
+List all registered vSphere Supervisor Services.
 
 Examples:
   govc namespace.service.ls
@@ -4808,10 +4816,97 @@ Options:
 ```
 Usage: govc namespace.service.rm [OPTIONS] NAME...
 
-Removes a vSphere Namespace Supervisor Service.
+Removes a vSphere Supervisor Service.
+Note that a service must be deactivated and all versions must be removed before being deleted.
 
 Examples:
   govc namespace.service.rm my-supervisor-service other-supervisor-service
+
+Options:
+```
+
+## namespace.service.version.activate
+
+```
+Usage: govc namespace.service.version.activate [OPTIONS] NAME VERSION
+
+Activates a vSphere Supervisor Service version.
+
+Examples:
+  govc namespace.service.version.activate my-supervisor-service 1.0.0
+
+Options:
+```
+
+## namespace.service.version.create
+
+```
+Usage: govc namespace.service.version.create [OPTIONS] SERVICE MANIFEST
+
+Registers a new version for a registered vSphere Supervisor Service.
+
+Examples:
+  govc namespace.service.create my-service manifest-2.0.0.yaml
+
+Options:
+  -accept-eula=false     Auto accept EULA (only required for vSphere spec type)
+  -spec-type=carvel      Type of Spec: vsphere (deprecated) or carvel
+  -trusted=false         Define if this is a trusted provider (only applicable for vSphere spec type)
+```
+
+## namespace.service.version.deactivate
+
+```
+Usage: govc namespace.service.version.deactivate [OPTIONS] NAME VERSION
+
+Deactivates a vSphere Supervisor Service version.
+
+Examples:
+  govc namespace.service.version.deactivate my-supervisor-service 1.0.0
+
+Options:
+```
+
+## namespace.service.version.info
+
+```
+Usage: govc namespace.service.version.info [OPTIONS] NAME VERSION
+
+Gets information of a specific vSphere Supervisor Service version.
+
+Examples:
+  govc namespace.service.version.info my-supervisor-service 2.0.0
+  govc namespace.service.version.info -json my-supervisor-service 2.0.0 | jq .
+
+Options:
+```
+
+## namespace.service.version.ls
+
+```
+Usage: govc namespace.service.version.ls [OPTIONS] NAME
+
+List all registered versions for a given vSphere Supervisor Service.
+
+Examples:
+  govc namespace.service.version.ls my-service
+  govc namespace.service.version.ls -l my-service
+  govc namespace.service.version.ls -json my-service | jq .
+
+Options:
+  -l=false               Long listing format
+```
+
+## namespace.service.version.rm
+
+```
+Usage: govc namespace.service.version.rm [OPTIONS] NAME VERSION
+
+Removes a vSphere Supervisor Service version.
+Note that a service version must be deactivated before being deleted.
+
+Examples:
+  govc namespace.service.version.rm my-supervisor-service 1.0.0
 
 Options:
 ```
