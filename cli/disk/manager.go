@@ -144,36 +144,12 @@ func (m *Manager) List(ctx context.Context, qs ...vslmtypes.VslmVsoVStorageObjec
 		return m.ObjectManager.List(ctx, m.Datastore)
 	}
 
-	// TODO: move this logic to vslm.GlobalObjectManager
-	// Need to better understand the QuerySpec + implement in vcsim.
-	// For now we just want the complete list of IDs (govc disk.ls)
-	maxResults := int32(100)
-
-	spec := vslmtypes.VslmVsoVStorageObjectQuerySpec{
-		QueryField:    string(vslmtypes.VslmVsoVStorageObjectQuerySpecQueryFieldEnumId),
-		QueryOperator: string(vslmtypes.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan),
-	}
-	query := qs
-	var ids []types.ID
-
-	for {
-		res, err := m.GlobalObjectManager.ListObjectsForSpec(ctx, query, maxResults)
-		if err != nil {
-			return nil, err
-		}
-
-		ids = append(ids, res.Id...)
-
-		if res.AllRecordsReturned || len(ids) == 0 {
-			break
-		}
-
-		spec.QueryValue = []string{ids[len(ids)-1].Id}
-
-		query = append(qs, spec)
+	res, err := m.GlobalObjectManager.List(ctx, qs...)
+	if err != nil {
+		return nil, err
 	}
 
-	return ids, nil
+	return res.Id, nil
 }
 
 func (m *Manager) RegisterDisk(ctx context.Context, path, name string) (*types.VStorageObject, error) {
