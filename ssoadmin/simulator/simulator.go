@@ -5,7 +5,11 @@
 package simulator
 
 import (
+	"encoding/base64"
+	"encoding/pem"
+	"log"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/vmware/govmomi/simulator"
@@ -248,7 +252,25 @@ func (*ConfigurationManagementService) GetTrustedCertificates(ctx *simulator.Con
 
 	var res []string
 
-	if m.TLSCert != nil {
+	// TODO: consider adding a vcsim -tlscacerts flag
+	cacerts := os.Getenv("VCSIM_CACERTS")
+	if cacerts != "" {
+		pemCerts, err := os.ReadFile(cacerts)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for len(pemCerts) > 0 {
+			var block *pem.Block
+			block, pemCerts = pem.Decode(pemCerts)
+			if block == nil {
+				break
+			}
+			if block.Type != "CERTIFICATE" || len(block.Headers) != 0 {
+				continue
+			}
+			res = append(res, base64.StdEncoding.EncodeToString(block.Bytes))
+		}
+	} else if m.TLSCert != nil {
 		res = append(res, m.TLSCert())
 	}
 
