@@ -294,6 +294,7 @@ type CnsContainerCluster struct {
 	VSphereUser         string `xml:"vSphereUser" json:"vSphereUser"`
 	ClusterFlavor       string `xml:"clusterFlavor,omitempty" json:"clusterFlavor"`
 	ClusterDistribution string `xml:"clusterDistribution,omitempty" json:"clusterDistribution"`
+	Delete              bool   `xml:"delete,omitempty" json:"delete"`
 }
 
 func init() {
