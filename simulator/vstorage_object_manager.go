@@ -24,6 +24,7 @@ import (
 type VStorageObject struct {
 	types.VStorageObject
 	types.VStorageObjectSnapshotInfo
+	Metadata []types.KeyValue
 }
 
 type VcenterVStorageObjectManager struct {
@@ -462,4 +463,56 @@ func (m *VcenterVStorageObjectManager) ListTagsAttachedToVStorageObject(ctx *Con
 	}
 
 	return body
+}
+
+func (m *VcenterVStorageObjectManager) VCenterUpdateVStorageObjectMetadataExTask(ctx *Context, req *types.VCenterUpdateVStorageObjectMetadataEx_Task) soap.HasFault {
+	task := CreateTask(m, "updateVStorageObjectMetadataEx", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		obj := m.object(req.Datastore, req.Id)
+		if obj == nil {
+			return nil, new(types.InvalidArgument)
+		}
+
+		var metadata []types.KeyValue
+
+		remove := func(key string) bool {
+			for _, dk := range req.DeleteKeys {
+				if key == dk {
+					return true
+				}
+			}
+			return false
+		}
+
+		for _, kv := range obj.Metadata {
+			if !remove(kv.Key) {
+				metadata = append(metadata, kv)
+			}
+		}
+
+		update := func(kv types.KeyValue) bool {
+			for i := range obj.Metadata {
+				if obj.Metadata[i].Key == kv.Key {
+					obj.Metadata[i] = kv
+					return true
+				}
+			}
+			return false
+		}
+
+		for _, kv := range req.Metadata {
+			if !update(kv) {
+				metadata = append(metadata, kv)
+			}
+		}
+
+		obj.Metadata = metadata
+
+		return nil, nil
+	})
+
+	return &methods.VCenterUpdateVStorageObjectMetadataEx_TaskBody{
+		Res: &types.VCenterUpdateVStorageObjectMetadataEx_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
 }

@@ -5,6 +5,7 @@
 package disk
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"fmt"
@@ -18,6 +19,7 @@ import (
 	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/types"
+	vslm "github.com/vmware/govmomi/vslm/types"
 )
 
 type ls struct {
@@ -29,6 +31,7 @@ type ls struct {
 	category string
 	tag      string
 	tags     bool
+	query    flags.StringList
 }
 
 func init() {
@@ -46,6 +49,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.category, "c", "", "Query tag category")
 	f.StringVar(&cmd.tag, "t", "", "Query tag name")
 	f.BoolVar(&cmd.tags, "T", false, "List attached tags")
+	f.Var(&cmd.query, "q", "Query spec")
 }
 
 func (cmd *ls) Usage() string {
@@ -53,13 +57,29 @@ func (cmd *ls) Usage() string {
 }
 
 func (cmd *ls) Description() string {
-	return `List disk IDs on DS.
+	var fields vslm.VslmVsoVStorageObjectQuerySpecQueryFieldEnum
 
+	return fmt.Sprintf(`List disk IDs on DS.
+
+The '-q' flag can be used to match disk fields.
+Each query must be in the form of:
+  FIELD.OP=VAL
+
+Where FIELD can be one of:
+  %s
+
+And OP can be one of:
+%s
 Examples:
   govc disk.ls
   govc disk.ls -l -T
   govc disk.ls -l e9b06a8b-d047-4d3c-b15b-43ea9608b1a6
-  govc disk.ls -c k8s-region -t us-west-2`
+  govc disk.ls -c k8s-region -t us-west-2
+  govc disk.ls -q capacity.ge=100 # capacity in MB
+  govc disk.ls -q name.sw=my-disk
+  govc disk.ls -q metadataKey.eq=cns.k8s.pvc.namespace -q metadataValue.eq=dev`,
+		strings.Join(fields.Strings(), "\n  "),
+		aliasHelp())
 }
 
 type VStorageObject struct {
@@ -78,6 +98,70 @@ func (o *VStorageObject) tags() string {
 type lsResult struct {
 	cmd     *ls
 	Objects []VStorageObject `json:"objects"`
+}
+
+var alias = []struct {
+	name string
+	kind vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnum
+}{
+	{"eq", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEquals},
+	{"ne", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumNotEquals},
+	{"lt", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThan},
+	{"le", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThanOrEqual},
+	{"gt", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan},
+	{"ge", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThanOrEqual},
+	{"ct", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumContains},
+	{"sw", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumStartsWith},
+	{"ew", vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEndsWith},
+}
+
+func opAlias(value string) string {
+	if len(value) != 2 {
+		return value
+	}
+
+	for _, a := range alias {
+		if a.name == value {
+			return string(a.kind)
+		}
+	}
+
+	return value
+}
+
+func aliasHelp() string {
+	var help bytes.Buffer
+
+	for _, a := range alias {
+		fmt.Fprintf(&help, "  %s    %s\n", a.name, a.kind)
+	}
+
+	return help.String()
+}
+
+func (cmd *ls) querySpec() ([]vslm.VslmVsoVStorageObjectQuerySpec, error) {
+	q := make([]vslm.VslmVsoVStorageObjectQuerySpec, len(cmd.query))
+
+	for i, s := range cmd.query {
+		val := strings.SplitN(s, "=", 2)
+		if len(val) != 2 {
+			return nil, fmt.Errorf("invalid query: %s", s)
+		}
+
+		op := string(vslm.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEquals)
+		field := strings.SplitN(val[0], ".", 2)
+		if len(field) == 2 {
+			op = field[1]
+		}
+
+		q[i] = vslm.VslmVsoVStorageObjectQuerySpec{
+			QueryField:    field[0],
+			QueryOperator: opAlias(op),
+			QueryValue:    []string{val[1]},
+		}
+	}
+
+	return q, nil
 }
 
 func (r *lsResult) Write(w io.Writer) error {
@@ -124,11 +208,16 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	filterNotFound := false
 	ids := f.Args()
+	q, err := cmd.querySpec()
+	if err != nil {
+		return err
+	}
+
 	if len(ids) == 0 {
 		filterNotFound = true
 		var oids []types.ID
 		if cmd.category == "" {
-			oids, err = m.List(ctx)
+			oids, err = m.List(ctx, q...)
 		} else {
 			oids, err = m.ListAttachedObjects(ctx, cmd.category, cmd.tag)
 		}

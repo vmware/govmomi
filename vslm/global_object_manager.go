@@ -302,6 +302,41 @@ func (this *GlobalObjectManager) ListObjectsForSpec(ctx context.Context, query [
 	return res.Returnval, nil
 }
 
+var DefaultMaxResults = 100
+
+// List wraps ListObjectsForSpec, using maxResult = DefaultMaxResults
+// and looping until AllRecordsReturned == true or error is returned.
+func (this *GlobalObjectManager) List(ctx context.Context, qs ...types.VslmVsoVStorageObjectQuerySpec) (*types.VslmVsoVStorageObjectQueryResult, error) {
+	var res types.VslmVsoVStorageObjectQueryResult
+
+	query := qs
+
+	for {
+		page, err := this.ListObjectsForSpec(ctx, query, int32(DefaultMaxResults))
+		if err != nil {
+			return nil, err
+		}
+
+		res.Id = append(res.Id, page.Id...)
+		res.QueryResults = append(res.QueryResults, page.QueryResults...)
+		res.AllRecordsReturned = page.AllRecordsReturned
+
+		if page.AllRecordsReturned || len(page.Id) == 0 {
+			break
+		}
+
+		spec := types.VslmVsoVStorageObjectQuerySpec{
+			QueryField:    string(types.VslmVsoVStorageObjectQuerySpecQueryFieldEnumId),
+			QueryOperator: string(types.VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan),
+			QueryValue:    []string{page.Id[len(page.Id)-1].Id},
+		}
+
+		query = append(qs, spec)
+	}
+
+	return &res, nil
+}
+
 func (this *GlobalObjectManager) Clone(ctx context.Context, id vim.ID, spec vim.VslmCloneSpec) (*Task, error) {
 	req := types.VslmCloneVStorageObject_Task{
 		This: this.Reference(),
