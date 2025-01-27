@@ -238,3 +238,39 @@ func TestDatastoreInfoURL(t *testing.T) {
 		t.Errorf("info.name=%s", info.Name)
 	}
 }
+
+func TestIgnoreMissingProperty(t *testing.T) {
+	// subset of RetrievePropertiesEx response, see ignoreMissingProperty()
+	content := []types.ObjectContent{{
+		Obj: types.ManagedObjectReference{Type: "ResourcePool", Value: "ha-root-pool"},
+		PropSet: []types.DynamicProperty{{
+			Name: "config",
+			Val: types.ResourceConfigSpec{
+				CpuAllocation: types.ResourceAllocationInfo{
+					Reservation: types.NewInt64(5585),
+					Limit:       types.NewInt64(5585),
+				},
+				MemoryAllocation: types.ResourceAllocationInfo{
+					Reservation: types.NewInt64(13652),
+					Limit:       types.NewInt64(13652),
+				},
+			},
+		}},
+		MissingSet: []types.MissingProperty{
+			{
+				Path: "resourceConfigSpecDetailed",
+				Fault: types.LocalizedMethodFault{
+					Fault: &types.SystemError{
+						Reason: "unexpected error reading property",
+					},
+				},
+			},
+		},
+	}}
+
+	var pool ResourcePool
+
+	if err := LoadObjectContent(content, &pool); err != nil {
+		t.Fatal(err)
+	}
+}
