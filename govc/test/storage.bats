@@ -51,7 +51,13 @@ load test_helper
   run govc storage.policy.info MyZonalPolicy
   assert_success
 
-  run govc storage.policy.create -category my_cat -tag my_tag -z MyCombinedPolicy
+  run govc storage.policy.create -e MyEncryptionPolicy
+  assert_success
+
+  run govc storage.policy.info MyEncryptionPolicy
+  assert_success
+
+  run govc storage.policy.create -category my_cat -tag my_tag -z -e MyCombinedPolicy
   assert_success
 
   run govc storage.policy.info MyCombinedPolicy
