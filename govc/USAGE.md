@@ -5930,6 +5930,7 @@ Examples:
 Options:
   -category=             Category
   -d=                    Description
+  -e=false               Enable encryption
   -tag=                  Tag
   -z=false               Enable Zonal topology for multi-zone Supervisor
 ```
