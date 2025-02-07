@@ -159,6 +159,11 @@ but appear via `govc $cmd -h`:
  - [firewall.ruleset.find](#firewallrulesetfind)
  - [folder.create](#foldercreate)
  - [folder.info](#folderinfo)
+ - [gpu.host.info](#gpuhostinfo)
+ - [gpu.host.profile.ls](#gpuhostprofilels)
+ - [gpu.vm.add](#gpuvmadd)
+ - [gpu.vm.info](#gpuvminfo)
+ - [gpu.vm.remove](#gpuvmremove)
  - [guest.chmod](#guestchmod)
  - [guest.chown](#guestchown)
  - [guest.df](#guestdf)
@@ -2741,6 +2746,84 @@ Options:
 Usage: govc folder.info [OPTIONS] [PATH]...
 
 Options:
+```
+
+## gpu.host.info
+
+```
+Usage: govc gpu.host.info [OPTIONS]
+
+Display GPU information for a host.
+
+Examples:
+  govc gpu.host.info -host hostname
+  govc gpu.host.info -host hostname -json | jq .
+  govc gpu.host.info -host hostname -json | jq -r '.devices[] | select(.deviceName | contains("NVIDIA"))'
+  govc find / -type h | xargs -n1 govc gpu.host.info -host # all hosts
+
+Options:
+  -host=                 Host system [GOVC_HOST]
+```
+
+## gpu.host.profile.ls
+
+```
+Usage: govc gpu.host.profile.ls [OPTIONS]
+
+List available vGPU profiles on host.
+
+Examples:
+  govc gpu.host.profile.ls -host hostname
+  govc gpu.host.profile.ls -host hostname -json | jq -r '.profiles[]'
+  govc gpu.host.profile.ls -host hostname -json | jq -r '.profiles[] | select(contains("nvidia_a40"))'
+
+Options:
+  -host=                 Host system [GOVC_HOST]
+```
+
+## gpu.vm.add
+
+```
+Usage: govc gpu.vm.add [OPTIONS]
+
+Add vGPU to VM.
+
+Examples:
+  govc gpu.vm.add -vm $vm -profile nvidia_a40-1b
+
+Options:
+  -profile=              vGPU profile
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## gpu.vm.info
+
+```
+Usage: govc gpu.vm.info [OPTIONS]
+
+Display GPU information for a VM.
+
+Examples:
+  govc gpu.vm.info -vm $vm
+  govc gpu.vm.info -vm $vm -json | jq -r '.gpus[].summary'
+  govc gpu.vm.info -vm $vm -json | jq -r '.gpus[] | select(.summary | contains("nvidia_a40"))'
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## gpu.vm.remove
+
+```
+Usage: govc gpu.vm.remove [OPTIONS]
+
+Remove all vGPUs from VM.
+
+Examples:
+  govc gpu.vm.remove -vm $vm
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## guest.chmod
