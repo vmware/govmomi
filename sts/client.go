@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package sts
 
@@ -30,6 +18,7 @@ import (
 	"github.com/vmware/govmomi/sts/internal"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
+	vim25types "github.com/vmware/govmomi/vim25/types"
 )
 
 const (
@@ -84,6 +73,8 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 
 // RoundTrip dispatches to the RoundTripper field.
 func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	// Drop any operationID header, not used by STS
+	ctx = context.WithValue(ctx, vim25types.ID{}, "")
 	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
@@ -191,7 +182,7 @@ func (c *Client) Issue(ctx context.Context, req TokenRequest) (*Signer, error) {
 
 	header := soap.Header{
 		Security: s,
-		Action:   rst.Action(),
+		Action:   fmt.Sprintf(`"%s"`, rst.Action()),
 	}
 
 	res, err := internal.Issue(c.WithHeader(ctx, header), c, &rst)
