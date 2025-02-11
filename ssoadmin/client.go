@@ -99,7 +99,7 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 			This: ServiceInstance,
 		}
 
-		res, err := methods.SsoAdminServiceInstance(ctx, sc, &req)
+		res, err := methods.SsoAdminServiceInstance(ctx, admin, &req)
 		if err != nil {
 			return nil, err
 		}
@@ -114,7 +114,7 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 			},
 		}
 
-		res, err := methods.SsoGroupcheckServiceInstance(ctx, sc, &req)
+		res, err := methods.SsoGroupcheckServiceInstance(ctx, admin, &req)
 		if err != nil {
 			return nil, err
 		}
@@ -127,6 +127,8 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 
 // RoundTrip dispatches to the RoundTripper field.
 func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	// Drop any operationID header, not used by ssoadmin
+	ctx = context.WithValue(ctx, vim.ID{}, "")
 	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 

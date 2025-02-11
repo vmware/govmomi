@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package lookup
 
@@ -73,21 +61,26 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 
 	sc := c.Client.NewServiceClient(path.String(), Namespace)
 	sc.Version = Version
+	client := &Client{Client: sc, RoundTripper: sc}
 
 	req := types.RetrieveServiceContent{
 		This: ServiceInstance,
 	}
 
-	res, err := methods.RetrieveServiceContent(ctx, sc, &req)
+	res, err := methods.RetrieveServiceContent(ctx, client, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Client{sc, sc, res.Returnval}, nil
+	client.ServiceContent = res.Returnval
+
+	return client, nil
 }
 
 // RoundTrip dispatches to the RoundTripper field.
 func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	// Drop any operationID header, not used by lookup service
+	ctx = context.WithValue(ctx, vim.ID{}, "")
 	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
