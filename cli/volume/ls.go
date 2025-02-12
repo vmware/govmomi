@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2020-2023 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package volume
 
@@ -35,6 +23,7 @@ import (
 type ls struct {
 	*flags.ClientFlag
 	*flags.DatastoreFlag
+	*flags.StorageProfileFlag
 	*flags.OutputFlag
 
 	types.CnsQueryFilter
@@ -43,6 +32,21 @@ type ls struct {
 	id   bool
 	disk bool
 	back bool
+}
+
+type keyValue []vim.KeyValue
+
+func (e *keyValue) String() string {
+	return fmt.Sprintf("%v", *e)
+}
+
+func (e *keyValue) Set(v string) error {
+	r := strings.SplitN(v, "=", 2)
+	if len(r) < 2 {
+		return fmt.Errorf("failed to parse: %s", v)
+	}
+	*e = append(*e, vim.KeyValue{Key: r[0], Value: r[1]})
+	return nil
 }
 
 func init() {
@@ -56,6 +60,9 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
 
+	cmd.StorageProfileFlag, ctx = flags.NewStorageProfileFlag(ctx)
+	cmd.StorageProfileFlag.Register(ctx, f)
+
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
 
@@ -63,6 +70,11 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.id, "i", false, "List volume ID only")
 	f.BoolVar(&cmd.disk, "L", false, "List volume disk or file backing ID only")
 	f.BoolVar(&cmd.back, "b", false, "List file backing path")
+
+	f.Var((*flags.StringList)(&cmd.Names), "n", "List volumes with names")
+	f.Var((*keyValue)(&cmd.Labels), "label", "List volumes with labels")
+	f.StringVar(&cmd.HealthStatus, "H", "", "List volumes with health status")
+	f.Var((*flags.StringList)(&cmd.ContainerClusterIds), "c", "List volumes in clusters")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -70,6 +82,9 @@ func (cmd *ls) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StorageProfileFlag.Process(ctx); err != nil {
 		return err
 	}
 	return cmd.OutputFlag.Process(ctx)
@@ -123,6 +138,8 @@ func (r *lsWriter) Write(w io.Writer) error {
 				id = backing.BackingFileId
 			case *types.CnsVsanFileShareBackingDetails:
 				id = backing.Name
+			case *types.CnsBackingObjectDetails:
+				id = volume.VolumeId.Id
 			default:
 				log.Printf("%s unknown backing type: %T", volume.VolumeId.Id, backing)
 			}
@@ -135,16 +152,16 @@ func (r *lsWriter) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(r.cmd.Out, 2, 0, 2, ' ', 0)
 
 	for _, volume := range r.Volume {
-		fmt.Printf("%s\t%s", volume.VolumeId.Id, volume.Name)
+		fmt.Fprintf(tw, "%s\t%s", volume.VolumeId.Id, volume.Name)
 		if r.cmd.back {
-			fmt.Printf("\t%s", r.backing(volume.VolumeId))
+			fmt.Fprintf(tw, "\t%s", r.backing(volume.VolumeId))
 		}
 		if r.cmd.long {
 			capacity := volume.BackingObjectDetails.GetCnsBackingObjectDetails().CapacityInMb
 			c := volume.Metadata.ContainerCluster
-			fmt.Printf("\t%s\t%s\t%s", units.ByteSize(capacity*1024*1024), c.ClusterType, c.ClusterId)
+			fmt.Fprintf(tw, "\t%s\t%s\t%s", units.ByteSize(capacity*1024*1024), c.ClusterType, c.ClusterId)
 		}
-		fmt.Println()
+		fmt.Fprintln(tw)
 	}
 
 	return tw.Flush()
@@ -186,6 +203,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	if ds != nil {
 		cmd.Datastores = []vim.ManagedObjectReference{ds.Reference()}
+	}
+
+	cmd.StoragePolicyId, err = cmd.StorageProfile(ctx)
+	if err != nil {
+		return err
 	}
 
 	c, err := cmd.CnsClient()

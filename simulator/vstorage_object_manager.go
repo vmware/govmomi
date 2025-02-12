@@ -199,7 +199,7 @@ func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, 
 	if !ok {
 		objects = make(map[types.ID]*VStorageObject)
 		m.objects[ds.Self] = objects
-		_ = os.Mkdir(filepath.Join(ds.Info.GetDatastoreInfo().Url, dir), 0750)
+		_ = os.MkdirAll(filepath.Join(ds.Info.GetDatastoreInfo().Url, dir), 0750)
 	}
 
 	id := uuid.New().String()
