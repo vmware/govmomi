@@ -5,7 +5,7 @@ go 1.21 // required for slices/maps package and built-in clear function
 require (
 	github.com/a8m/tree v0.0.0-20230208161321-36ae24ddad15
 	github.com/dougm/pretty v0.0.0-20160325215624-add1dbc86daf
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/rasky/go-xdr v0.0.0-20170124162913-1a41d1a06c93
 	github.com/stretchr/testify v1.10.0
