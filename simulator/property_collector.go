@@ -531,10 +531,10 @@ func collect(ctx *Context, r *types.RetrievePropertiesEx) (*types.RetrieveResult
 	// Select object references
 	for _, spec := range r.SpecSet {
 		for _, o := range spec.ObjectSet {
-			var rval reflect.Value
-			ok := false
-			ctx.WithLock(o.Obj, func() { rval, ok = getObject(ctx, o.Obj) })
+			unlock := ctx.Map.AcquireLock(ctx, o.Obj)
+			rval, ok := getObject(ctx, o.Obj)
 			if !ok {
+				unlock()
 				if isFalse(spec.ReportMissingObjectsInResults) {
 					return nil, &types.ManagedObjectNotFound{Obj: o.Obj}
 				}
@@ -542,10 +542,12 @@ func collect(ctx *Context, r *types.RetrievePropertiesEx) (*types.RetrieveResult
 			}
 
 			if o.SelectSet == nil || isFalse(o.Skip) {
-				refs = append(refs, o.Obj)
+				rr.collect(ctx, o.Obj)
 			}
 
-			if err := rr.selectSet(ctx, rval, o.SelectSet, &refs); err != nil {
+			err := rr.selectSet(ctx, rval, o.SelectSet, &refs)
+			unlock()
+			if err != nil {
 				return nil, err
 			}
 		}
