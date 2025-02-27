@@ -19,6 +19,7 @@ package session
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"flag"
 	"fmt"
@@ -33,6 +34,7 @@ import (
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/sts"
+	"github.com/vmware/govmomi/vapi/authentication"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -45,6 +47,7 @@ type login struct {
 
 	clone  bool
 	issue  bool
+	jwt    string
 	renew  bool
 	long   bool
 	vapi   bool
@@ -69,6 +72,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.clone, "clone", false, "Acquire clone ticket")
 	f.BoolVar(&cmd.issue, "issue", false, "Issue SAML token")
+	f.StringVar(&cmd.jwt, "jwt", "", "Exchange SAML token for JWT audience")
 	f.BoolVar(&cmd.renew, "renew", false, "Renew SAML token")
 	f.BoolVar(&cmd.vapi, "r", false, "REST login")
 	f.DurationVar(&cmd.life, "lifetime", time.Minute*10, "SAML token lifetime")
@@ -103,6 +107,7 @@ The session.login command can be used to:
 - Login using a vCenter Extension certificate
 - Issue a SAML token
 - Renew a SAML token
+- Exchange a SAML token for a JSON Web Token (JWT)
 - Login using a SAML token
 - Impersonate a user
 - Avoid passing credentials to other govc commands
@@ -124,6 +129,7 @@ Examples:
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"
   token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")
+  govc session.login -jwt vmware-tes:vc:nsxd-v2:nsx -token "$token"
   # HTTP requests
   govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .
   govc session.login -r -X POST /rest/vcenter/cluster/modules <<<'{"spec": {"cluster": "domain-c9"}}'`
@@ -208,6 +214,22 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 	}
 
 	return s.Token, nil
+}
+
+func (cmd *login) exchangeTokenJWT(ctx context.Context, c *rest.Client) (string, error) {
+	spec := authentication.TokenIssueSpec{
+		Audience:           cmd.jwt,
+		GrantType:          "urn:ietf:params:oauth:grant-type:token-exchange",
+		RequestedTokenType: "urn:ietf:params:oauth:token-type:id_token",
+		SubjectToken:       base64.StdEncoding.EncodeToString([]byte(cmd.token)),
+		SubjectTokenType:   "urn:ietf:params:oauth:token-type:saml2",
+	}
+
+	info, err := authentication.NewManager(c).Issue(ctx, spec)
+	if err != nil {
+		return "", err
+	}
+	return info.AccessToken, nil
 }
 
 func (cmd *login) loginByToken(ctx context.Context, c *vim25.Client) error {
@@ -340,6 +362,8 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 	case cmd.issue:
 		cmd.Session.LoginSOAP = nologinSOAP
 		cmd.Session.LoginREST = nologinREST
+	case cmd.jwt != "":
+		cmd.Session.LoginSOAP = nologinSOAP
 	}
 
 	c, err := cmd.Client()
@@ -348,6 +372,14 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	r := &ticketResult{cmd: cmd}
+
+	var rc *rest.Client
+	if cmd.vapi || cmd.jwt != "" {
+		rc, err = cmd.RestClient()
+		if err != nil {
+			return err
+		}
+	}
 
 	switch {
 	case cmd.clone:
@@ -362,14 +394,8 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		return cmd.WriteResult(r)
-	}
-
-	var rc *rest.Client
-	if cmd.vapi {
-		rc, err = cmd.RestClient()
-		if err != nil {
-			return err
-		}
+	case cmd.jwt != "":
+		r.Token, err = cmd.exchangeTokenJWT(ctx, rc)
 	}
 
 	if f.NArg() == 1 {
