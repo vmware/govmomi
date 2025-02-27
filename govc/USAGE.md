@@ -7647,11 +7647,16 @@ Examples:
   govc disk.ls -l $(govc volume.ls -L pvc-9744a4ff-07f4-43c4-b8ed-48ea7a528734)
 
 Options:
+  -H=                    List volumes with health status
   -L=false               List volume disk or file backing ID only
   -b=false               List file backing path
+  -c=[]                  List volumes in clusters
   -ds=                   Datastore [GOVC_DATASTORE]
   -i=false               List volume ID only
   -l=false               Long listing format
+  -label=[]              List volumes with labels
+  -n=[]                  List volumes with names
+  -profile=[]            Storage profile name or ID
 ```
 
 ## volume.rm

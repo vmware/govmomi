@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -27,12 +15,12 @@ import (
 	cnstypes "github.com/vmware/govmomi/cns/types"
 	"github.com/vmware/govmomi/simulator"
 	vim25types "github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vslm"
 )
 
 const (
-	testLabel              = "testLabel"
-	testValue              = "testValue"
-	simulatorBackingDiskID = "fake-volume-Handle"
+	testLabel = "testLabel"
+	testValue = "testValue"
 )
 
 func TestSimulator(t *testing.T) {
@@ -74,6 +62,25 @@ func TestSimulator(t *testing.T) {
 
 	// Create volume for static provisioning
 	var capacityInMb int64 = 1024
+
+	task, err := vslm.NewObjectManager(c.Client).CreateDisk(ctx, vim25types.VslmCreateSpec{
+		Name:         "vcsim-test",
+		CapacityInMB: capacityInMb,
+		BackingSpec: &vim25types.VslmCreateSpecDiskFileBackingSpec{
+			VslmCreateSpecBackingSpec: vim25types.VslmCreateSpecBackingSpec{
+				Datastore: datastore.Reference(),
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := task.WaitForResult(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	createSpecListForStaticProvision := []cnstypes.CnsVolumeCreateSpec{
 		{
 			Name:       "test",
@@ -85,7 +92,7 @@ func TestSimulator(t *testing.T) {
 				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
 					CapacityInMb: capacityInMb,
 				},
-				BackingDiskId: simulatorBackingDiskID,
+				BackingDiskId: res.Result.(vim25types.VStorageObject).Config.Id.Id,
 			},
 			Profile: []vim25types.BaseVirtualMachineProfileSpec{
 				&vim25types.VirtualMachineDefinedProfileSpec{
@@ -153,8 +160,10 @@ func TestSimulator(t *testing.T) {
 			Datastores: []vim25types.ManagedObjectReference{
 				datastore.Self,
 			},
-			BackingObjectDetails: &cnstypes.CnsBackingObjectDetails{
-				CapacityInMb: capacityInMb,
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: capacityInMb,
+				},
 			},
 			Profile: []vim25types.BaseVirtualMachineProfileSpec{
 				&vim25types.VirtualMachineDefinedProfileSpec{
