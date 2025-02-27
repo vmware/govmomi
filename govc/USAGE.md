@@ -5471,6 +5471,7 @@ The session.login command can be used to:
 - Login using a vCenter Extension certificate
 - Issue a SAML token
 - Renew a SAML token
+- Exchange a SAML token for a JSON Web Token (JWT)
 - Login using a SAML token
 - Impersonate a user
 - Avoid passing credentials to other govc commands
@@ -5492,6 +5493,7 @@ Examples:
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"
   token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")
+  govc session.login -jwt vmware-tes:vc:nsxd-v2:nsx -token "$token"
   # HTTP requests
   govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .
   govc session.login -r -X POST /rest/vcenter/cluster/modules <<<'{"spec": {"cluster": "domain-c9"}}'
@@ -5503,6 +5505,7 @@ Options:
   -cookie=               Set HTTP cookie for an existing session
   -extension=            Extension name
   -issue=false           Issue SAML token
+  -jwt=                  Exchange SAML token for JWT audience
   -l=false               Output session cookie
   -lifetime=10m0s        SAML token lifetime
   -r=false               REST login
