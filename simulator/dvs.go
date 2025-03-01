@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -44,10 +32,10 @@ func (s *DistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
 	}
 }
 
-func (s *DistributedVirtualSwitch) event() types.DvsEvent {
+func (s *DistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
 	return types.DvsEvent{
 		Event: types.Event{
-			Datacenter: datacenterEventArgument(s),
+			Datacenter: datacenterEventArgument(ctx, s),
 			Dvs:        s.eventArgument(),
 		},
 	}
@@ -165,7 +153,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 				ctx.Map.AppendReference(ctx, host, &host.Network, pg.Reference())
 
 				parent := ctx.Map.Get(*host.HostSystem.Parent)
-				computeNetworks := append(hostParent(&host.HostSystem).Network, pg.Reference())
+				computeNetworks := append(hostParent(ctx, &host.HostSystem).Network, pg.Reference())
 				ctx.Update(parent, []types.PropertyChange{
 					{Name: "network", Val: computeNetworks},
 				})
@@ -228,7 +216,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 						{Name: "host", Val: pgHosts},
 					})
 
-					cr := hostParent(&host.HostSystem)
+					cr := hostParent(ctx, &host.HostSystem)
 					if FindReference(cr.Network, ref) == nil {
 						computeNetworks := append(cr.Network, ref)
 						ctx.Update(parent, []types.PropertyChange{
@@ -238,7 +226,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				}
 
 				ctx.postEvent(&types.DvsHostJoinedEvent{
-					DvsEvent:   s.event(),
+					DvsEvent:   s.event(ctx),
 					HostJoined: *host.eventArgument(),
 				})
 			case types.ConfigSpecOperationRemove:
@@ -255,7 +243,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				RemoveReference(&members, member.Host)
 
 				ctx.postEvent(&types.DvsHostLeftEvent{
-					DvsEvent: s.event(),
+					DvsEvent: s.event(ctx),
 					HostLeft: *host.eventArgument(),
 				})
 			case types.ConfigSpecOperationEdit:
@@ -268,7 +256,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 		})
 
 		ctx.postEvent(&types.DvsReconfiguredEvent{
-			DvsEvent:   s.event(),
+			DvsEvent:   s.event(ctx),
 			ConfigSpec: spec,
 		})
 
@@ -282,10 +270,10 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 	}
 }
 
-func (s *DistributedVirtualSwitch) FetchDVPorts(req *types.FetchDVPorts) soap.HasFault {
+func (s *DistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
 	body := &methods.FetchDVPortsBody{}
 	body.Res = &types.FetchDVPortsResponse{
-		Returnval: s.dvPortgroups(req.Criteria),
+		Returnval: s.dvPortgroups(ctx, req.Criteria),
 	}
 	return body
 }
@@ -296,7 +284,7 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 		// and past that, remove refs from each host.Network, etc
 		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
 		folderRemoveChild(ctx, &f.Folder, s.Reference())
-		ctx.postEvent(&types.DvsDestroyedEvent{DvsEvent: s.event()})
+		ctx.postEvent(&types.DvsDestroyedEvent{DvsEvent: s.event(ctx)})
 		return nil, nil
 	})
 
@@ -307,14 +295,14 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 	}
 }
 
-func (s *DistributedVirtualSwitch) dvPortgroups(criteria *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
+func (s *DistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
 	res := s.FetchDVPortsResponse.Returnval
 	if len(res) != 0 {
 		return res
 	}
 
 	for _, ref := range s.Portgroup {
-		pg := Map.Get(ref).(*DistributedVirtualPortgroup)
+		pg := ctx.Map.Get(ref).(*DistributedVirtualPortgroup)
 
 		for _, key := range pg.PortKeys {
 			res = append(res, types.DistributedVirtualPort{

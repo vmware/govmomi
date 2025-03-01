@@ -193,7 +193,7 @@ func main() {
 			Registry *simulator.Registry `json:"registry"`
 			Model    *simulator.Model    `json:"model"`
 		}{
-			simulator.Map,
+			model.Service.Context.Map,
 			&count,
 		}
 	}))

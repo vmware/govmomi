@@ -336,7 +336,7 @@ func (m *VStorageObjectManager) VslmRegisterDisk(ctx *simulator.Context, req *ty
 	vctx := ctx.For(vim25.Path)
 	vsom := vctx.Map.VStorageObjectManager()
 
-	val := vsom.RegisterDisk(ctx, &vim.RegisterDisk{
+	val := vsom.RegisterDisk(vctx, &vim.RegisterDisk{
 		This: vsom.Self,
 		Path: req.Path,
 		Name: req.Name,

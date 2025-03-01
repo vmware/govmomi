@@ -27,7 +27,7 @@ func TestDatastoreFindInventoryPath(t *testing.T) {
 	model.Datastore = 2
 
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		refs := simulator.Map.All("Datastore")
+		refs := simulator.Map(ctx).All("Datastore")
 
 		for _, obj := range refs {
 			ds := object.NewDatastore(c, obj.Reference())

@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -29,9 +17,9 @@ type HostLocalAccountManager struct {
 	mo.HostLocalAccountManager
 }
 
-func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFault {
+func (h *HostLocalAccountManager) CreateUser(ctx *Context, req *types.CreateUser) soap.HasFault {
 	spec := req.User.GetHostAccountSpec()
-	userDirectory := Map.UserDirectory()
+	userDirectory := ctx.Map.UserDirectory()
 
 	found := userDirectory.search(true, false, compareFunc(spec.Id, true))
 	if len(found) > 0 {
@@ -47,8 +35,8 @@ func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFaul
 	}
 }
 
-func (h *HostLocalAccountManager) RemoveUser(req *types.RemoveUser) soap.HasFault {
-	userDirectory := Map.UserDirectory()
+func (h *HostLocalAccountManager) RemoveUser(ctx *Context, req *types.RemoveUser) soap.HasFault {
+	userDirectory := ctx.Map.UserDirectory()
 
 	found := userDirectory.search(true, false, compareFunc(req.UserName, true))
 

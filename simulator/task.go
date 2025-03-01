@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -22,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -64,9 +53,6 @@ func CreateTask(e mo.Reference, name string, run func(*Task) (types.AnyType, typ
 		Execute: run,
 	}
 
-	task.Self = Map.newReference(task)
-	task.Info.Key = task.Self.Value
-	task.Info.Task = task.Self
 	task.Info.Name = ucFirst(name)
 	task.Info.DescriptionId = fmt.Sprintf("%s.%s", ref.Type, id)
 	task.Info.Entity = &ref
@@ -74,8 +60,6 @@ func CreateTask(e mo.Reference, name string, run func(*Task) (types.AnyType, typ
 	task.Info.Reason = &types.TaskReasonUser{UserName: "vcsim"} // TODO: Context.Session.User
 	task.Info.QueueTime = time.Now()
 	task.Info.State = types.TaskInfoStateQueued
-
-	Map.Put(task)
 
 	return task
 }
@@ -96,12 +80,19 @@ func (tr *taskReference) Reference() types.ManagedObjectReference {
 }
 
 func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
-	t.ctx = ctx
-	// alias the global Map to reduce data races in tests that reset the
-	// global Map variable.
-	vimMap := Map
+	if ctx.Map.Path != vim25.Path {
+		// All Tasks live in the vim25 namespace
+		ctx = ctx.For(vim25.Path)
+	}
 
-	vimMap.AtomicUpdate(t.ctx, t, []types.PropertyChange{
+	t.ctx = ctx
+
+	t.Self = ctx.Map.newReference(t)
+	t.Info.Key = t.Self.Value
+	t.Info.Task = t.Self
+	ctx.Map.Put(t)
+
+	ctx.Map.AtomicUpdate(t.ctx, t, []types.PropertyChange{
 		{Name: "info.startTime", Val: time.Now()},
 		{Name: "info.state", Val: types.TaskInfoStateRunning},
 	})
@@ -120,12 +111,12 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 	}
 	var unlock func()
 	if handoff {
-		unlock = vimMap.AcquireLock(ctx, tr)
+		unlock = ctx.Map.AcquireLock(ctx, tr)
 	}
 	go func() {
 		TaskDelay.delay(t.Info.Name)
 		if !handoff {
-			unlock = vimMap.AcquireLock(ctx, tr)
+			unlock = ctx.Map.AcquireLock(ctx, tr)
 		}
 		res, err := t.Execute(t)
 		unlock()
@@ -140,7 +131,7 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 			}
 		}
 
-		vimMap.AtomicUpdate(t.ctx, t, []types.PropertyChange{
+		ctx.Map.AtomicUpdate(t.ctx, t, []types.PropertyChange{
 			{Name: "info.completeTime", Val: time.Now()},
 			{Name: "info.state", Val: state},
 			{Name: "info.result", Val: res},
@@ -168,7 +159,7 @@ func (t *Task) Wait() {
 
 	isRunning := func() bool {
 		var running bool
-		Map.WithLock(isolatedLockingContext, t, func() {
+		t.ctx.Map.WithLock(isolatedLockingContext, t, func() {
 			switch t.Info.State {
 			case types.TaskInfoStateSuccess, types.TaskInfoStateError:
 				running = false

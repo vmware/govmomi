@@ -418,11 +418,14 @@ EOF
   [[ "$url" == *"https://127.0.0.1:"* ]]
   vcsim_stop
 
-  vcsim_start -dc 0 -l 0.0.0.0:0
-  url=$(govc option.ls vcsim.server.url)
-  [[ "$url" != *"https://127.0.0.1:"* ]]
-  [[ "$url" != *"https://[::]:"* ]]
-  vcsim_stop
+  # Symantec WSS Agent may block this :shrug:
+  if [ -z "$(pidof wssa-ui_netext)" ] ; then
+    vcsim_start -dc 0 -l 0.0.0.0:0
+    url=$(govc option.ls vcsim.server.url)
+    [[ "$url" != *"https://127.0.0.1:"* ]]
+    [[ "$url" != *"https://[::]:"* ]]
+    vcsim_stop
+  fi
 }
 
 @test "vcsim vapi auth" {

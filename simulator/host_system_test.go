@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -31,7 +19,7 @@ import (
 )
 
 func TestDefaultESX(t *testing.T) {
-	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(NewContext(), esx.ServiceContent, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -73,7 +61,7 @@ func TestDefaultESX(t *testing.T) {
 
 func TestDefaultVPX(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
-		for _, e := range Map.All("HostSystem") {
+		for _, e := range Map(ctx).All("HostSystem") {
 			host := e.(*HostSystem)
 			// issue #3221
 			if host.Config.Host != host.Self {
@@ -97,9 +85,9 @@ func TestMaintenanceMode(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	c := m.Service.client
+	c := m.Service.client()
 
-	hs := Map.Get(esx.HostSystem.Reference()).(*HostSystem)
+	hs := m.Map().Get(esx.HostSystem.Reference()).(*HostSystem)
 	host := object.NewHostSystem(c, hs.Self)
 
 	task, err := host.EnterMaintenanceMode(ctx, 1, false, nil)
@@ -141,7 +129,7 @@ func TestNewHostSystem(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hs := NewHostSystem(esx.HostSystem)
+	hs := NewHostSystem(m.Service.Context, esx.HostSystem)
 
 	assert.Equal(t, &hs.Runtime, hs.Summary.Runtime, "expected pointer to runtime in summary")
 	assert.False(t, esx.AdvancedOptions[0] == hs.Config.Option[0], "expected each host to have it's own advanced options")
@@ -161,15 +149,15 @@ func TestDestroyHostSystem(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	c := m.Service.client
+	c := m.Service.client()
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
-	hs := Map.Get(*vm.Runtime.Host).(*HostSystem)
+	vm := m.Map().Any("VirtualMachine").(*VirtualMachine)
+	hs := m.Map().Get(*vm.Runtime.Host).(*HostSystem)
 	host := object.NewHostSystem(c, hs.Self)
 
 	vms := []*VirtualMachine{}
 	for _, vmref := range hs.Vm {
-		vms = append(vms, Map.Get(vmref).(*VirtualMachine))
+		vms = append(vms, m.Map().Get(vmref).(*VirtualMachine))
 	}
 
 	task, err := host.Destroy(ctx)
@@ -183,7 +171,7 @@ func TestDestroyHostSystem(t *testing.T) {
 	}
 
 	for _, vmref := range hs.Vm {
-		vm := Map.Get(vmref).(*VirtualMachine)
+		vm := m.Map().Get(vmref).(*VirtualMachine)
 		vmo := object.NewVirtualMachine(c, vm.Self)
 
 		task, err := vmo.PowerOff(ctx)
@@ -217,7 +205,7 @@ func TestDestroyHostSystem(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hs2 := Map.Get(esx.HostSystem.Reference())
+	hs2 := m.Map().Get(esx.HostSystem.Reference())
 	if hs2 != nil {
 		t.Fatal("host should have been destroyed")
 	}
@@ -237,9 +225,9 @@ func TestDisconnect(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	c := m.Service.client
+	c := m.Service.client()
 
-	hs := Map.Get(esx.HostSystem.Reference()).(*HostSystem)
+	hs := m.Map().Get(esx.HostSystem.Reference()).(*HostSystem)
 	host := object.NewHostSystem(c, hs.Self)
 
 	task, err := host.Disconnect(ctx)

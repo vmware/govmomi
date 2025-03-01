@@ -1,24 +1,11 @@
-/*
-Copyright (c) 2023-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
 import (
 	"archive/tar"
-	"context"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -296,12 +283,10 @@ func (svm *simVM) start(ctx *Context) error {
 	}
 
 	callback := func(details *containerDetails, c *container) error {
-		spoofctx := SpoofContext()
-
 		if c.id == "" && svm.vm != nil {
 			// If the container cannot be found then destroy this VM unless the VM is no longer configured for container backing (svm.vm == nil)
-			taskRef := svm.vm.DestroyTask(spoofctx, &types.Destroy_Task{This: svm.vm.Self}).(*methods.Destroy_TaskBody).Res.Returnval
-			task, ok := spoofctx.Map.Get(taskRef).(*Task)
+			taskRef := svm.vm.DestroyTask(ctx, &types.Destroy_Task{This: svm.vm.Self}).(*methods.Destroy_TaskBody).Res.Returnval
+			task, ok := ctx.Map.Get(taskRef).(*Task)
 			if !ok {
 				panic(fmt.Sprintf("couldn't retrieve task for moref %+q while deleting VM %s", taskRef, svm.vm.Name))
 			}
@@ -320,7 +305,7 @@ func (svm *simVM) start(ctx *Context) error {
 	}
 
 	// Start watching the container resource.
-	err = svm.c.watchContainer(context.Background(), callback)
+	err = svm.c.watchContainer(ctx, callback)
 	if _, ok := err.(uninitializedContainer); ok {
 		// the container has been deleted before we could watch, despite successful launch so clean up.
 		callback(nil, svm.c)

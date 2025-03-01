@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -78,7 +66,7 @@ func TestContainerViewVPX(t *testing.T) {
 		t.Fatal("expected error")
 	}
 
-	vapp := object.NewVirtualApp(c.Client, Map.Any("VirtualApp").Reference())
+	vapp := object.NewVirtualApp(c.Client, m.Map().Any("VirtualApp").Reference())
 
 	count := m.Count()
 

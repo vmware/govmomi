@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -38,28 +26,29 @@ func TestRename(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	dc := Map.Any("Datacenter").(*Datacenter)
-	vmFolder := Map.Get(dc.VmFolder).(*Folder)
+	ctx := m.Service.Context
+	dc := ctx.Map.Any("Datacenter").(*Datacenter)
+	vmFolder := ctx.Map.Get(dc.VmFolder).(*Folder)
 
-	f1 := Map.Get(vmFolder.ChildEntity[0]).(*Folder) // "F1"
+	f1 := ctx.Map.Get(vmFolder.ChildEntity[0]).(*Folder) // "F1"
 
-	id := vmFolder.CreateFolder(SpoofContext(), &types.CreateFolder{
+	id := vmFolder.CreateFolder(ctx, &types.CreateFolder{
 		This: vmFolder.Reference(),
 		Name: "F2",
 	}).(*methods.CreateFolderBody).Res.Returnval
 
-	f2 := Map.Get(id).(*Folder) // "F2"
+	f2 := ctx.Map.Get(id).(*Folder) // "F2"
 
 	states := []types.TaskInfoState{types.TaskInfoStateError, types.TaskInfoStateSuccess}
 	name := f1.Name
 
 	for _, expect := range states {
-		id = f2.RenameTask(SpoofContext(), &types.Rename_Task{
+		id = f2.RenameTask(ctx, &types.Rename_Task{
 			This:    f2.Reference(),
 			NewName: name,
 		}).(*methods.Rename_TaskBody).Res.Returnval
 
-		task := Map.Get(id).(*Task)
+		task := ctx.Map.Get(id).(*Task)
 		task.Wait()
 
 		if task.Info.State != expect {

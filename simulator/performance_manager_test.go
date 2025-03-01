@@ -1,18 +1,7 @@
-/*
-Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package simulator
 
 import (
@@ -94,8 +83,6 @@ func TestMetricsDuplicates(t *testing.T) {
 }
 
 func TestQueryProviderSummary(t *testing.T) {
-	ctx := context.Background()
-
 	m := VPX()
 
 	err := m.Create()
@@ -105,11 +92,12 @@ func TestQueryProviderSummary(t *testing.T) {
 
 	defer m.Remove()
 
-	c := m.Service.client
+	c := m.Service.client()
 
 	p := performance.NewManager(c)
+	ctx := m.Service.Context
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := ctx.Map.Any("VirtualMachine").(*VirtualMachine)
 	if info, err := p.ProviderSummary(ctx, vm.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -118,7 +106,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	host := Map.Any("HostSystem").(*HostSystem)
+	host := ctx.Map.Any("HostSystem").(*HostSystem)
 	if info, err := p.ProviderSummary(ctx, host.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -127,7 +115,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	pool := Map.Any("ResourcePool").(*ResourcePool)
+	pool := ctx.Map.Any("ResourcePool").(*ResourcePool)
 	if info, err := p.ProviderSummary(ctx, pool.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -136,7 +124,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	cluster := Map.Any("ClusterComputeResource").(*ClusterComputeResource)
+	cluster := ctx.Map.Any("ClusterComputeResource").(*ClusterComputeResource)
 	if info, err := p.ProviderSummary(ctx, cluster.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -145,7 +133,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	datastore := Map.Any("Datastore").(*Datastore)
+	datastore := ctx.Map.Any("Datastore").(*Datastore)
 	if info, err := p.ProviderSummary(ctx, datastore.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -164,8 +152,6 @@ func TestQueryProviderSummary(t *testing.T) {
 }
 
 func TestQueryAvailablePerfMetric(t *testing.T) {
-	ctx := context.Background()
-
 	m := VPX()
 
 	err := m.Create()
@@ -175,10 +161,11 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 
 	defer m.Remove()
 
-	c := m.Service.client
+	c := m.Service.client()
 	p := performance.NewManager(c)
+	ctx := m.Service.Context
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := ctx.Map.Any("VirtualMachine").(*VirtualMachine)
 	if info, err := p.AvailableMetric(ctx, vm.Reference(), 20); err != nil {
 		t.Fatal(err)
 	} else {
@@ -187,7 +174,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	host := Map.Any("HostSystem").(*HostSystem)
+	host := ctx.Map.Any("HostSystem").(*HostSystem)
 	if info, err := p.AvailableMetric(ctx, host.Reference(), 20); err != nil {
 		t.Fatal(err)
 	} else {
@@ -207,7 +194,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	pool := Map.Any("ResourcePool").(*ResourcePool)
+	pool := ctx.Map.Any("ResourcePool").(*ResourcePool)
 	if info, err := p.AvailableMetric(ctx, pool.Reference(), 20); err != nil {
 		t.Fatal(err)
 	} else {
@@ -216,7 +203,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	cluster := Map.Any("ClusterComputeResource").(*ClusterComputeResource)
+	cluster := ctx.Map.Any("ClusterComputeResource").(*ClusterComputeResource)
 	if info, err := p.AvailableMetric(ctx, cluster.Reference(), 300); err != nil {
 		t.Fatal(err)
 	} else {
@@ -233,7 +220,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	ds := Map.Any("Datastore").(*Datastore)
+	ds := ctx.Map.Any("Datastore").(*Datastore)
 	if info, err := p.AvailableMetric(ctx, ds.Reference(), 300); err != nil {
 		t.Fatal(err)
 	} else {
@@ -250,7 +237,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	dc := Map.Any("Datacenter").(*Datacenter)
+	dc := ctx.Map.Any("Datacenter").(*Datacenter)
 	if info, err := p.AvailableMetric(ctx, dc.Reference(), 300); err != nil {
 		t.Fatal(err)
 	} else {
@@ -270,7 +257,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 }
 
 func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32, maxSample int32) error {
-	c := m.Service.client
+	c := m.Service.client()
 
 	p := performance.NewManager(c)
 
@@ -308,7 +295,7 @@ func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32, m
 }
 
 func testPerfQueryCSV(ctx context.Context, m *Model, e mo.Entity, interval int32, maxSample int32) error {
-	c := m.Service.client
+	c := m.Service.client()
 
 	p := performance.NewManager(c)
 
@@ -355,8 +342,6 @@ func testPerfQueryCSV(ctx context.Context, m *Model, e mo.Entity, interval int32
 }
 
 func TestQueryPerf(t *testing.T) {
-	ctx := context.Background()
-
 	m := VPX()
 
 	err := m.Create()
@@ -366,43 +351,45 @@ func TestQueryPerf(t *testing.T) {
 
 	defer m.Remove()
 
+	ctx := m.Service.Context
+
 	for _, maxSample := range []int32{4, 0} {
-		if err := testPerfQuery(ctx, m, Map.Any("VirtualMachine"), 20, maxSample); err != nil {
+		if err := testPerfQuery(ctx, m, ctx.Map.Any("VirtualMachine"), 20, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQuery(ctx, m, Map.Any("HostSystem"), 20, maxSample); err != nil {
+		if err := testPerfQuery(ctx, m, ctx.Map.Any("HostSystem"), 20, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQuery(ctx, m, Map.Any("ClusterComputeResource"), 300, maxSample); err != nil {
+		if err := testPerfQuery(ctx, m, ctx.Map.Any("ClusterComputeResource"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQuery(ctx, m, Map.Any("Datastore"), 300, maxSample); err != nil {
+		if err := testPerfQuery(ctx, m, ctx.Map.Any("Datastore"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQuery(ctx, m, Map.Any("Datacenter"), 300, maxSample); err != nil {
+		if err := testPerfQuery(ctx, m, ctx.Map.Any("Datacenter"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQuery(ctx, m, Map.Any("ResourcePool"), 300, maxSample); err != nil {
+		if err := testPerfQuery(ctx, m, ctx.Map.Any("ResourcePool"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
 
 		//csv format
-		if err := testPerfQueryCSV(ctx, m, Map.Any("VirtualMachine"), 20, maxSample); err != nil {
+		if err := testPerfQueryCSV(ctx, m, ctx.Map.Any("VirtualMachine"), 20, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQueryCSV(ctx, m, Map.Any("HostSystem"), 20, maxSample); err != nil {
+		if err := testPerfQueryCSV(ctx, m, ctx.Map.Any("HostSystem"), 20, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQueryCSV(ctx, m, Map.Any("ClusterComputeResource"), 300, maxSample); err != nil {
+		if err := testPerfQueryCSV(ctx, m, ctx.Map.Any("ClusterComputeResource"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQueryCSV(ctx, m, Map.Any("Datastore"), 300, maxSample); err != nil {
+		if err := testPerfQueryCSV(ctx, m, ctx.Map.Any("Datastore"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQueryCSV(ctx, m, Map.Any("Datacenter"), 300, maxSample); err != nil {
+		if err := testPerfQueryCSV(ctx, m, ctx.Map.Any("Datacenter"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
-		if err := testPerfQueryCSV(ctx, m, Map.Any("ResourcePool"), 300, maxSample); err != nil {
+		if err := testPerfQueryCSV(ctx, m, ctx.Map.Any("ResourcePool"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
 	}

@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -187,15 +175,14 @@ func (s *searchDatastore) Run(task *Task) (types.AnyType, types.BaseMethodFault)
 		return nil, fault
 	}
 
-	ref := Map.FindByName(p.Datastore, s.Datastore)
+	ref := task.ctx.Map.FindByName(p.Datastore, s.Datastore)
 	if ref == nil {
 		return nil, &types.InvalidDatastore{Name: p.Datastore}
 	}
 
 	ds := ref.(*Datastore)
 
-	isolatedLockContext := &Context{} // we don't need/want to share the task lock
-	Map.WithLock(isolatedLockContext, task, func() {
+	task.ctx.WithLock(task, func() {
 		task.Info.Entity = &ds.Self // TODO: CreateTask() should require mo.Entity, rather than mo.Reference
 		task.Info.EntityName = ds.Name
 	})

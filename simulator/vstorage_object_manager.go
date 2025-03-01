@@ -98,7 +98,7 @@ func (m *VcenterVStorageObjectManager) statDatastoreBacking(ctx *Context, ref ty
 
 	for _, obj := range objs {
 		backing := obj.Config.Backing.(*types.BaseConfigInfoDiskFileBackingInfo)
-		file, _ := fm.resolve(&dc.Self, backing.FilePath)
+		file, _ := fm.resolve(ctx, &dc.Self, backing.FilePath)
 		_, res[obj.Config.Id] = os.Stat(file)
 	}
 
@@ -176,7 +176,7 @@ func (m *VcenterVStorageObjectManager) RegisterDisk(ctx *Context, req *types.Reg
 		},
 	}
 
-	obj, fault := m.createObject(creq, true)
+	obj, fault := m.createObject(ctx, creq, true)
 	if fault != nil {
 		body.Fault_ = Fault("", fault)
 		return body
@@ -189,11 +189,11 @@ func (m *VcenterVStorageObjectManager) RegisterDisk(ctx *Context, req *types.Reg
 	return body
 }
 
-func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, register bool) (*types.VStorageObject, types.BaseMethodFault) {
+func (m *VcenterVStorageObjectManager) createObject(ctx *Context, req *types.CreateDisk_Task, register bool) (*types.VStorageObject, types.BaseMethodFault) {
 	dir := "fcd"
 	ref := req.Spec.BackingSpec.GetVslmCreateSpecBackingSpec().Datastore
-	ds := Map.Get(ref).(*Datastore)
-	dc := Map.getEntityDatacenter(ds)
+	ds := ctx.Map.Get(ref).(*Datastore)
+	dc := ctx.Map.getEntityDatacenter(ds)
 
 	objects, ok := m.objects[ds.Self]
 	if !ok {
@@ -233,7 +233,7 @@ func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, 
 	}
 
 	if !register {
-		err := vdmCreateVirtualDisk(types.VirtualDeviceConfigSpecFileOperationCreate, &types.CreateVirtualDisk_Task{
+		err := vdmCreateVirtualDisk(ctx, types.VirtualDeviceConfigSpecFileOperationCreate, &types.CreateVirtualDisk_Task{
 			Datacenter: &dc.Self,
 			Name:       path.String(),
 		})
@@ -263,7 +263,7 @@ func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, 
 
 func (m *VcenterVStorageObjectManager) CreateDiskTask(ctx *Context, req *types.CreateDisk_Task) soap.HasFault {
 	task := CreateTask(m, "createDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		return m.createObject(req, false)
+		return m.createObject(ctx, req, false)
 	})
 
 	return &methods.CreateDisk_TaskBody{

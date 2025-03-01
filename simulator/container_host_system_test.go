@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2023-2023 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -38,9 +26,11 @@ func TestHostOptionManager(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hs := NewHostSystem(esx.HostSystem)
+	ctx := m.Service.Context
 
-	advOpts, ok := Map.Get(hs.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	hs := NewHostSystem(ctx, esx.HostSystem)
+
+	advOpts, ok := m.Map().Get(hs.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
 	require.True(t, ok, "Expected to inflate OptionManager from reference")
 
 	option := &types.OptionValue{
@@ -70,7 +60,7 @@ func TestHostOptionManager(t *testing.T) {
 	require.Equal(t, 1, len(queryRes.Returnval), "Expected query of updated option to succeed")
 	require.Equal(t, option2.Value, queryRes.Returnval[0].GetOptionValue().Value, "Expected updated value")
 
-	hs.configure(SpoofContext(), types.HostConnectSpec{}, true)
+	hs.configure(ctx, types.HostConnectSpec{}, true)
 	assert.Nil(t, hs.sh, "Expected not to have container backing if not requested")
 }
 
@@ -84,9 +74,10 @@ func TestSyncWithOptionsStruct(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hs := NewHostSystem(esx.HostSystem)
+	ctx := m.Service.Context
+	hs := NewHostSystem(ctx, esx.HostSystem)
 
-	advOpts, ok := Map.Get(hs.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	advOpts, ok := m.Map().Get(hs.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
 	require.True(t, ok, "Expected to inflate OptionManager from reference")
 
 	option := &types.OptionValue{
@@ -110,13 +101,14 @@ func TestPerHostOptionManager(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hs := NewHostSystem(esx.HostSystem)
-	hs2 := NewHostSystem(esx.HostSystem)
+	ctx := m.Service.Context
+	hs := NewHostSystem(ctx, esx.HostSystem)
+	hs2 := NewHostSystem(ctx, esx.HostSystem)
 
-	advOpts, ok := Map.Get(hs.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	advOpts, ok := m.Map().Get(hs.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
 	require.True(t, ok, "Expected to inflate OptionManager from reference")
 
-	advOpts2 := Map.Get(hs2.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	advOpts2 := m.Map().Get(hs2.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
 
 	option := &types.OptionValue{
 		Key:   "TEST.hello",
@@ -150,12 +142,12 @@ func TestPerHostOptionManager(t *testing.T) {
 
 	assert.Equal(t, option2, hs.Config.Option[1], "Expected mirror to reflect changes")
 
-	hs.configure(SpoofContext(), types.HostConnectSpec{}, true)
+	hs.configure(ctx, types.HostConnectSpec{}, true)
 	assert.Nil(t, hs.sh, "Expected not to have container backing if not requested")
 
-	hs3 := NewHostSystem(esx.HostSystem)
+	hs3 := NewHostSystem(ctx, esx.HostSystem)
 
-	advOpts3 := Map.Get(hs3.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	advOpts3 := m.Map().Get(hs3.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
 	fault = advOpts3.QueryOptions(&types.QueryOptions{Name: option.Key}).(*methods.QueryOptionsBody).Fault()
 	require.IsType(t, &types.InvalidName{}, fault.VimFault(), "Expected host created after update not to inherit change")
 
@@ -175,9 +167,9 @@ func TestHostContainerBacking(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx := SpoofContext()
+	ctx := m.Service.Context
 
-	hs := NewHostSystem(esx.HostSystem)
+	hs := NewHostSystem(ctx, esx.HostSystem)
 	hs.configureContainerBacking(ctx, "alpine", defaultSimVolumes, "vcsim-mgmt-underlay")
 
 	details, err := hs.getNetConfigInterface(ctx, "management")
@@ -204,12 +196,12 @@ func TestMultipleSimHost(t *testing.T) {
 	err := m.Create()
 	require.Nil(t, err, "expected successful creation of model")
 
-	ctx := SpoofContext()
+	ctx := m.Service.Context
 
-	hs := NewHostSystem(esx.HostSystem)
+	hs := NewHostSystem(ctx, esx.HostSystem)
 	hs.configureContainerBacking(ctx, "alpine", defaultSimVolumes)
 
-	hs2 := NewHostSystem(esx.HostSystem)
+	hs2 := NewHostSystem(ctx, esx.HostSystem)
 	hs2.configureContainerBacking(ctx, "alpine", defaultSimVolumes)
 
 	details, err := hs.getNetConfigInterface(ctx, "management")

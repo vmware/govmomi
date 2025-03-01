@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -388,7 +376,7 @@ func TestCloneVm(t *testing.T) {
 
 				vmFolder := folders.VmFolder
 
-				vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+				vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 				vm := object.NewVirtualMachine(c, vmm.Reference())
 
 				task, err := vm.Clone(ctx, vmFolder, test.vmName, test.config)
@@ -556,7 +544,7 @@ func TestConnectVmDevice(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	l := object.VirtualDeviceList{} // used only for Connect/Disconnect function
@@ -654,7 +642,7 @@ func TestVAppConfigAdd(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	tests := []struct {
@@ -770,7 +758,7 @@ func TestVAppConfigEdit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	tests := []struct {
@@ -886,7 +874,7 @@ func TestVAppConfigRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	tests := []struct {
@@ -991,7 +979,7 @@ func TestReconfigVm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	tests := []struct {
@@ -1190,7 +1178,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	c := m.Service.client
+	c := m.Service.client()
 
 	folder := object.NewFolder(c, esx.Datacenter.VmFolder)
 	pool := object.NewResourcePool(c, esx.ResourcePool.Self)
@@ -1238,7 +1226,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm := Map.Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
+	vm := m.Map().Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
 
 	expect := len(esx.VirtualDevice) + len(devices)
 	ndevice := len(vm.Config.Hardware.Device)
@@ -1331,10 +1319,10 @@ func TestAddedDiskCapacity(t *testing.T) {
 			m := ESX()
 
 			Test(func(ctx context.Context, c *vim25.Client) {
-				vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+				vmm := Map(ctx).Any("VirtualMachine").(*VirtualMachine)
 				vm := object.NewVirtualMachine(c, vmm.Reference())
 
-				ds := Map.Any("Datastore").(*Datastore)
+				ds := Map(ctx).Any("Datastore").(*Datastore)
 
 				devices, err := vm.Device(ctx)
 				if err != nil {
@@ -1445,9 +1433,9 @@ func TestEditedDiskCapacity(t *testing.T) {
 			m := ESX()
 
 			Test(func(ctx context.Context, c *vim25.Client) {
-				vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+				vmm := Map(ctx).Any("VirtualMachine").(*VirtualMachine)
 				vm := object.NewVirtualMachine(c, vmm.Reference())
-				ds := Map.Any("Datastore").(*Datastore)
+				ds := Map(ctx).Any("Datastore").(*Datastore)
 
 				// create a new 10GB disk
 				devices, err := vm.Device(ctx)
@@ -1595,10 +1583,10 @@ func TestReconfigureDevicesDatastoreFreespace(t *testing.T) {
 			m := ESX()
 
 			Test(func(ctx context.Context, c *vim25.Client) {
-				vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+				vmm := Map(ctx).Any("VirtualMachine").(*VirtualMachine)
 				vm := object.NewVirtualMachine(c, vmm.Reference())
 
-				ds := Map.Any("Datastore").(*Datastore)
+				ds := Map(ctx).Any("Datastore").(*Datastore)
 				freespaceBefore := ds.Datastore.Summary.FreeSpace
 
 				devices, err := vm.Device(ctx)
@@ -1624,7 +1612,7 @@ func TestReconfigureDevicesDatastoreFreespace(t *testing.T) {
 
 func TestShutdownGuest(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
-		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
+		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
 
 		for _, timeout := range []bool{false, true} {
 			if timeout {
@@ -1711,7 +1699,7 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	simVm := Map.Any("VirtualMachine")
+	simVm := m.Map().Any("VirtualMachine")
 	vm := object.NewVirtualMachine(c.Client, simVm.Reference())
 
 	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
@@ -1850,7 +1838,7 @@ func TestVmMarkAsTemplate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+	vm := object.NewVirtualMachine(c.Client, m.Map().Any("VirtualMachine").Reference())
 
 	err = vm.MarkAsTemplate(ctx)
 	if err == nil {
@@ -1893,7 +1881,7 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	// take snapshot
@@ -1976,8 +1964,8 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 	}
 
 	findDsStorage := func(dsName string) *types.VirtualMachineUsageOnDatastore {
-		host := Map.Get(*vmm.Runtime.Host).(*HostSystem)
-		ds := Map.FindByName(dsName, host.Datastore).(*Datastore)
+		host := m.Map().Get(*vmm.Runtime.Host).(*HostSystem)
+		ds := m.Map().FindByName(dsName, host.Datastore).(*Datastore)
 
 		for _, dsUsage := range vmm.Storage.PerDatastoreUsage {
 			if dsUsage.Datastore == ds.Self {
@@ -2090,7 +2078,7 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 		t.Fatalf("could not parse datastore path: %s", vmm.Config.Files.LogDirectory)
 	}
 
-	f, fault := vmm.createFile(p.String(), "test.log", false)
+	f, fault := vmm.createFile(m.Service.Context, p.String(), "test.log", false)
 	if fault != nil {
 		t.Fatal("could not create log file")
 	}
@@ -2182,7 +2170,7 @@ func TestApplyExtraConfig(t *testing.T) {
 	}
 
 	Test(func(ctx context.Context, c *vim25.Client) {
-		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
+		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
 		applyAndAssertExtraConfigValue(ctx, vm, "world", false)
 		applyAndAssertExtraConfigValue(ctx, vm, "there", false)
 		applyAndAssertExtraConfigValue(ctx, vm, "", true)
@@ -2191,7 +2179,7 @@ func TestApplyExtraConfig(t *testing.T) {
 
 func TestLastModifiedAndChangeVersionAreUpdated(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
-		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
+		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
 		var vmMo mo.VirtualMachine
 		if err := vm.Properties(
 			ctx,
@@ -2262,11 +2250,12 @@ func TestUpgradeVm(t *testing.T) {
 	model.Host = 1
 
 	Test(func(ctx context.Context, c *vim25.Client) {
+		sctx := ctx.(*Context)
 		props := []string{"config.version", "summary.config.hwVersion"}
 
-		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
-		vm2 := Map.Get(vm.Reference()).(*VirtualMachine)
-		Map.WithLock(SpoofContext(), vm2.Reference(), func() {
+		vm := object.NewVirtualMachine(c, sctx.Map.Any("VirtualMachine").Reference())
+		vm2 := sctx.Map.Get(vm.Reference()).(*VirtualMachine)
+		sctx.WithLock(vm2.Reference(), func() {
 			vm2.Config.Version = vmx15
 		})
 
@@ -2274,31 +2263,31 @@ func TestUpgradeVm(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to get vm's host: %v", err)
 		}
-		host2 := Map.Get(host.Reference()).(*HostSystem)
+		host2 := sctx.Map.Get(host.Reference()).(*HostSystem)
 
 		var eb *EnvironmentBrowser
 		{
-			ref := Map.Get(host.Reference()).(*HostSystem).Parent
+			ref := sctx.Map.Get(host.Reference()).(*HostSystem).Parent
 			switch ref.Type {
 			case "ClusterComputeResource":
-				obj := Map.Get(*ref).(*ClusterComputeResource)
-				eb = Map.Get(*obj.EnvironmentBrowser).(*EnvironmentBrowser)
+				obj := sctx.Map.Get(*ref).(*ClusterComputeResource)
+				eb = sctx.Map.Get(*obj.EnvironmentBrowser).(*EnvironmentBrowser)
 			case "ComputeResource":
-				obj := Map.Get(*ref).(*mo.ComputeResource)
-				eb = Map.Get(*obj.EnvironmentBrowser).(*EnvironmentBrowser)
+				obj := sctx.Map.Get(*ref).(*mo.ComputeResource)
+				eb = sctx.Map.Get(*obj.EnvironmentBrowser).(*EnvironmentBrowser)
 			}
 		}
 
 		baseline := func() {
-			Map.WithLock(SpoofContext(), vm2.Reference(), func() {
+			sctx.WithLock(vm2.Reference(), func() {
 				vm2.Config.Version = vmx15
 				vm2.Config.Template = false
 				vm2.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
 			})
-			Map.WithLock(SpoofContext(), host2.Reference(), func() {
+			sctx.WithLock(host2.Reference(), func() {
 				host2.Runtime.InMaintenanceMode = false
 			})
-			Map.WithLock(SpoofContext(), eb.Reference(), func() {
+			sctx.WithLock(eb.Reference(), func() {
 				for i := range eb.QueryConfigOptionDescriptorResponse.Returnval {
 					cod := &eb.QueryConfigOptionDescriptorResponse.Returnval[i]
 					hostFound := false
@@ -2317,7 +2306,7 @@ func TestUpgradeVm(t *testing.T) {
 
 		t.Run("InvalidPowerState", func(t *testing.T) {
 			baseline()
-			Map.WithLock(SpoofContext(), vm2.Reference(), func() {
+			sctx.WithLock(vm2.Reference(), func() {
 				vm2.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOn
 			})
 
@@ -2346,7 +2335,7 @@ func TestUpgradeVm(t *testing.T) {
 		t.Run("InvalidState", func(t *testing.T) {
 			t.Run("MaintenanceMode", func(t *testing.T) {
 				baseline()
-				Map.WithLock(SpoofContext(), host2.Reference(), func() {
+				sctx.WithLock(host2.Reference(), func() {
 					host2.Runtime.InMaintenanceMode = true
 				})
 
@@ -2369,7 +2358,7 @@ func TestUpgradeVm(t *testing.T) {
 
 			t.Run("Template", func(t *testing.T) {
 				baseline()
-				Map.WithLock(SpoofContext(), vm2.Reference(), func() {
+				sctx.WithLock(vm2.Reference(), func() {
 					vm2.Config.Template = true
 				})
 
@@ -2392,7 +2381,7 @@ func TestUpgradeVm(t *testing.T) {
 
 			t.Run("LatestHardwareVersion", func(t *testing.T) {
 				baseline()
-				Map.WithLock(SpoofContext(), vm.Reference(), func() {
+				sctx.WithLock(vm.Reference(), func() {
 					vm2.Config.Version = vmx21
 				})
 
@@ -2436,7 +2425,7 @@ func TestUpgradeVm(t *testing.T) {
 			})
 			t.Run("OnVmHost", func(t *testing.T) {
 				baseline()
-				Map.WithLock(SpoofContext(), eb.Reference(), func() {
+				sctx.WithLock(eb.Reference(), func() {
 					for i := range eb.QueryConfigOptionDescriptorResponse.Returnval {
 						cod := &eb.QueryConfigOptionDescriptorResponse.Returnval[i]
 						if cod.Key == vmx17 {
@@ -2481,7 +2470,7 @@ func TestUpgradeVm(t *testing.T) {
 
 			t.Run("GreaterThanTargetVersion", func(t *testing.T) {
 				baseline()
-				Map.WithLock(SpoofContext(), vm2.Reference(), func() {
+				sctx.WithLock(vm2.Reference(), func() {
 					vm2.Config.Version = vmx20
 				})
 				if tsk, err := vm.UpgradeVM(ctx, vmx17); err != nil {
@@ -2500,10 +2489,10 @@ func TestUpgradeVm(t *testing.T) {
 
 		t.Run("InvalidArgument", func(t *testing.T) {
 			baseline()
-			Map.WithLock(SpoofContext(), vm2.Reference(), func() {
+			sctx.WithLock(vm2.Reference(), func() {
 				vm2.Config.Version = vmx1
 			})
-			Map.WithLock(SpoofContext(), eb.Reference(), func() {
+			sctx.WithLock(eb.Reference(), func() {
 				eb.QueryConfigOptionDescriptorResponse.Returnval = append(
 					eb.QueryConfigOptionDescriptorResponse.Returnval,
 					types.VirtualMachineConfigOptionDescriptor{
@@ -2579,7 +2568,7 @@ func TestUpgradeVm(t *testing.T) {
 		t.Run("UpgradeFrom17To20", func(t *testing.T) {
 			const targetVersion = vmx20
 			baseline()
-			Map.WithLock(SpoofContext(), vm2.Reference(), func() {
+			sctx.WithLock(vm2.Reference(), func() {
 				vm2.Config.Version = vmx17
 			})
 
@@ -2714,7 +2703,7 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 			isGeneratedKey: true,
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+				ctx.WithLock(ctx.Map.CryptoManager(), func() {
 					m := ctx.Map.CryptoManager()
 					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
 						ClusterId: types.KeyProviderId{
@@ -2739,7 +2728,7 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 			isGeneratedKey: true,
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+				ctx.WithLock(ctx.Map.CryptoManager(), func() {
 					m := ctx.Map.CryptoManager()
 					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
 						ClusterId: types.KeyProviderId{
@@ -2753,8 +2742,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "encrypt w already encrypted",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -2824,8 +2813,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "decrypt",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -2849,8 +2838,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "decrypt w powered on",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -2874,8 +2863,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "decrypt w snapshots",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -2897,8 +2886,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "deep recrypt",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -2931,15 +2920,15 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 			isGeneratedKey: true,
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
 						},
 					}
 				})
-				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+				ctx.WithLock(ctx.Map.CryptoManager(), func() {
 					m := ctx.Map.CryptoManager()
 					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
 						ClusterId: types.KeyProviderId{
@@ -2964,15 +2953,15 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 			isGeneratedKey: true,
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "key",
 						ProviderId: &types.KeyProviderId{
 							Id: "key-provider",
 						},
 					}
 				})
-				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+				ctx.WithLock(ctx.Map.CryptoManager(), func() {
 					m := ctx.Map.CryptoManager()
 					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
 						ClusterId: types.KeyProviderId{
@@ -2986,8 +2975,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "deep recrypt w same provider id",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3030,8 +3019,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "deep recrypt w powered on",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3062,8 +3051,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "deep recrypt w snapshots",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3092,8 +3081,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "shallow recrypt",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3126,15 +3115,15 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 			isGeneratedKey: true,
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
 						},
 					}
 				})
-				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+				ctx.WithLock(ctx.Map.CryptoManager(), func() {
 					m := ctx.Map.CryptoManager()
 					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
 						ClusterId: types.KeyProviderId{
@@ -3159,15 +3148,15 @@ func TestEncryptDecryptVM(t *testing.T) {
 			},
 			isGeneratedKey: true,
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "key",
 						ProviderId: &types.KeyProviderId{
 							Id: "key-provider",
 						},
 					}
 				})
-				Map.WithLock(ctx, ctx.Map.CryptoManager(), func() {
+				ctx.WithLock(ctx.Map.CryptoManager(), func() {
 					m := ctx.Map.CryptoManager()
 					m.KmipServers = append(m.KmipServers, types.KmipClusterInfo{
 						ClusterId: types.KeyProviderId{
@@ -3181,8 +3170,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "shallow recrypt w same provider id",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3225,8 +3214,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "shallow recrypt w single snapshot chain",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3260,8 +3249,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "shallow recrypt w snapshot tree",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3318,8 +3307,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "noop",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3341,8 +3330,8 @@ func TestEncryptDecryptVM(t *testing.T) {
 		{
 			name: "register",
 			initStateFn: func(ctx *Context, c *vim25.Client, vmRef types.ManagedObjectReference) error {
-				Map.WithLock(ctx, vmRef, func() {
-					Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
+				ctx.WithLock(vmRef, func() {
+					ctx.Map.Get(vmRef).(*VirtualMachine).Config.KeyId = &types.CryptoKeyId{
 						KeyId: "123",
 						ProviderId: &types.KeyProviderId{
 							Id: "abc",
@@ -3381,11 +3370,12 @@ func TestEncryptDecryptVM(t *testing.T) {
 			model.Host = 1
 
 			Test(func(ctx context.Context, c *vim25.Client) {
-				ref := Map.Any("VirtualMachine").Reference()
+				sctx := ctx.(*Context)
+				ref := sctx.Map.Any("VirtualMachine").Reference()
 				vm := object.NewVirtualMachine(c, ref)
 
 				if tc.initStateFn != nil {
-					if err := tc.initStateFn(SpoofContext(), c, ref); err != nil {
+					if err := tc.initStateFn(sctx, c, ref); err != nil {
 						t.Fatalf("initStateFn failed: %v", err)
 					}
 				}

@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -33,7 +21,7 @@ type StorageResourceManager struct {
 
 func (m *StorageResourceManager) ConfigureStorageDrsForPodTask(ctx *Context, req *types.ConfigureStorageDrsForPod_Task) soap.HasFault {
 	task := CreateTask(m, "configureStorageDrsForPod", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		cluster := Map.Get(req.Pod).(*StoragePod)
+		cluster := ctx.Map.Get(req.Pod).(*StoragePod)
 
 		if s := req.Spec.PodConfigSpec; s != nil {
 			config := &cluster.PodStorageDrsEntry.StorageDrsConfig.PodConfig
@@ -56,11 +44,11 @@ func (m *StorageResourceManager) ConfigureStorageDrsForPodTask(ctx *Context, req
 	}
 }
 
-func (m *StorageResourceManager) pod(ref *types.ManagedObjectReference) *StoragePod {
+func (m *StorageResourceManager) pod(ctx *Context, ref *types.ManagedObjectReference) *StoragePod {
 	if ref == nil {
 		return nil
 	}
-	cluster := Map.Get(*ref).(*StoragePod)
+	cluster := ctx.Map.Get(*ref).(*StoragePod)
 	config := &cluster.PodStorageDrsEntry.StorageDrsConfig.PodConfig
 
 	if !config.Enabled {
@@ -74,7 +62,7 @@ func (m *StorageResourceManager) pod(ref *types.ManagedObjectReference) *Storage
 	return cluster
 }
 
-func (m *StorageResourceManager) RecommendDatastores(req *types.RecommendDatastores) soap.HasFault {
+func (m *StorageResourceManager) RecommendDatastores(ctx *Context, req *types.RecommendDatastores) soap.HasFault {
 	spec := req.StorageSpec.PodSelectionSpec
 	body := new(methods.RecommendDatastoresBody)
 	res := new(types.RecommendDatastoresResponse)
@@ -141,7 +129,7 @@ func (m *StorageResourceManager) RecommendDatastores(req *types.RecommendDatasto
 		for _, d := range req.StorageSpec.ConfigSpec.DeviceChange {
 			devices = append(devices, d.GetVirtualDeviceConfigSpec().Device)
 		}
-		cluster := m.pod(spec.StoragePod)
+		cluster := m.pod(ctx, spec.StoragePod)
 		if cluster == nil {
 			if f := req.StorageSpec.ConfigSpec.Files; f == nil || f.VmPathName == "" {
 				return invalid("configSpec.files")
@@ -163,7 +151,7 @@ func (m *StorageResourceManager) RecommendDatastores(req *types.RecommendDatasto
 	}
 
 	for _, placement := range spec.InitialVmConfig {
-		cluster := m.pod(&placement.StoragePod)
+		cluster := m.pod(ctx, &placement.StoragePod)
 		if cluster == nil {
 			return invalid("podSelectionSpec.storagePod")
 		}
