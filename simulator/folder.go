@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -312,7 +300,7 @@ func (f *Folder) CreateDatacenter(ctx *Context, c *types.CreateDatacenter) soap.
 		ctx.postEvent(&types.DatacenterCreatedEvent{
 			DatacenterEvent: types.DatacenterEvent{
 				Event: types.Event{
-					Datacenter: datacenterEventArgument(dc),
+					Datacenter: datacenterEventArgument(ctx, dc),
 				},
 			},
 			Parent: folderEventArgument(&f.Folder),
@@ -354,14 +342,14 @@ type createVM struct {
 }
 
 // hostsWithDatastore returns hosts that have access to the given datastore path
-func hostsWithDatastore(hosts []types.ManagedObjectReference, path string) []types.ManagedObjectReference {
+func hostsWithDatastore(ctx *Context, hosts []types.ManagedObjectReference, path string) []types.ManagedObjectReference {
 	attached := hosts[:0]
 	var p object.DatastorePath
 	p.FromString(path)
 
 	for _, host := range hosts {
-		h := Map.Get(host).(*HostSystem)
-		if Map.FindByName(p.Datastore, h.Datastore) != nil {
+		h := ctx.Map.Get(host).(*HostSystem)
+		if ctx.Map.FindByName(p.Datastore, h.Datastore) != nil {
 			attached = append(attached, host)
 		}
 	}
@@ -397,7 +385,7 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 				hosts = cr.Host
 			}
 
-			hosts = hostsWithDatastore(hosts, c.req.Config.Files.VmPathName)
+			hosts = hostsWithDatastore(c.ctx, hosts, c.req.Config.Files.VmPathName)
 			host := hosts[rand.Intn(len(hosts))]
 			vm.Runtime.Host = &host
 		})
@@ -451,7 +439,7 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 
 	host := c.ctx.Map.Get(*vm.Runtime.Host).(*HostSystem)
 	c.ctx.Map.AppendReference(c.ctx, host, &host.Vm, vm.Self)
-	vm.EnvironmentBrowser = *hostParent(&host.HostSystem).EnvironmentBrowser
+	vm.EnvironmentBrowser = *hostParent(task.ctx, &host.HostSystem).EnvironmentBrowser
 
 	for i := range vm.Datastore {
 		ds := c.ctx.Map.Get(vm.Datastore[i]).(*Datastore)
@@ -469,7 +457,7 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		}
 	})
 
-	event := vm.event()
+	event := vm.event(c.ctx)
 	c.ctx.postEvent(
 		&types.VmBeingCreatedEvent{
 			VmEvent:    event,
@@ -523,7 +511,7 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			return nil, &types.InvalidArgument{InvalidProperty: "pool"}
 		}
 
-		pool = hostParent(&c.ctx.Map.Get(*host).(*HostSystem).HostSystem).ResourcePool
+		pool = hostParent(c.ctx, &c.ctx.Map.Get(*host).(*HostSystem).HostSystem).ResourcePool
 	} else {
 		if pool == nil {
 			return nil, &types.InvalidArgument{InvalidProperty: "pool"}
@@ -535,7 +523,7 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	}
 
 	s := c.ctx.Map.SearchIndex()
-	r := s.FindByDatastorePath(&types.FindByDatastorePath{
+	r := s.FindByDatastorePath(c.ctx, &types.FindByDatastorePath{
 		This:       s.Reference(),
 		Path:       c.req.Path,
 		Datacenter: c.ctx.Map.getEntityDatacenter(c.Folder).Reference(),
@@ -684,7 +672,7 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 		}
 
 		ctx.postEvent(&types.DvsCreatedEvent{
-			DvsEvent: dvs.event(),
+			DvsEvent: dvs.event(ctx),
 			Parent:   folderEventArgument(&f.Folder),
 		})
 
@@ -943,7 +931,7 @@ func generateRecommendationForReconfigure(ctx *Context, req *types.PlaceVmsXClus
 		vm := vmRef.(*VirtualMachine)
 
 		// Use VM's current host
-		host := Map.Get(vm.Runtime.Host.Reference()).(*HostSystem)
+		host := ctx.Map.Get(vm.Runtime.Host.Reference()).(*HostSystem)
 
 		if host.Parent.Type != "ClusterComputeResource" {
 			addPlacementFault(body, spec.ConfigSpec.Name, &vm.Self, host.Self)

@@ -92,7 +92,7 @@ func (m *DatastoreNamespaceManager) CreateDirectory(ctx *Context, req *types.Cre
 
 	fm := ctx.Map.FileManager()
 
-	fault := fm.MakeDirectory(&types.MakeDirectory{
+	fault := fm.MakeDirectory(ctx, &types.MakeDirectory{
 		This:       fm.Self,
 		Name:       p.String(),
 		Datacenter: &dc.Self,
@@ -153,7 +153,7 @@ func (m *DatastoreNamespaceManager) DeleteDirectory(ctx *Context, req *types.Del
 
 	fm := ctx.Map.FileManager()
 
-	fault := fm.deleteDatastoreFile(&types.DeleteDatastoreFile_Task{
+	fault := fm.deleteDatastoreFile(ctx, &types.DeleteDatastoreFile_Task{
 		Name:       name.String(),
 		Datacenter: req.Datacenter,
 	})

@@ -5,6 +5,7 @@
 package simulator
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -40,17 +41,15 @@ var refValueMap = map[string]string{
 	"StoragePod":                     "group-p",
 }
 
-// Map is the default Registry instance.
-//
-// TODO/WIP: To support the eventual removal of this unsyncronized global
-// variable, the Map should be accessed through any Context.Map that is passed
-// in to functions that may need it.
-var Map = NewRegistry()
+// Map returns simulator.Context.Map from the given ctx
+func Map(ctx context.Context) *Registry {
+	return ctx.(*Context).Map
+}
 
 // RegisterObject interface supports callbacks when objects are created, updated and deleted from the Registry
 type RegisterObject interface {
 	mo.Reference
-	PutObject(mo.Reference)
+	PutObject(*Context, mo.Reference)
 	UpdateObject(*Context, mo.Reference, []types.PropertyChange)
 	RemoveObject(*Context, types.ManagedObjectReference)
 }
@@ -272,8 +271,12 @@ func (r *Registry) Put(item mo.Reference) mo.Reference {
 
 	r.m.Unlock()
 
+	ctx := &Context{
+		Map: r,
+	}
+
 	r.applyHandlers(func(o RegisterObject) {
-		o.PutObject(item)
+		o.PutObject(ctx, item)
 	})
 
 	return item
@@ -489,7 +492,9 @@ func (r *Registry) removeString(ctx *Context, obj mo.Reference, field *[]string,
 }
 
 func (r *Registry) content() types.ServiceContent {
-	return r.Get(vim25.ServiceInstance).(*ServiceInstance).Content
+	return r.Get(vim25.ServiceInstance).(interface {
+		ServiceContent() types.ServiceContent
+	}).ServiceContent()
 }
 
 // IsESX returns true if this Registry maps an ESX model

@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -29,13 +17,13 @@ type SearchIndex struct {
 	mo.SearchIndex
 }
 
-func (s *SearchIndex) FindByDatastorePath(r *types.FindByDatastorePath) soap.HasFault {
+func (s *SearchIndex) FindByDatastorePath(ctx *Context, r *types.FindByDatastorePath) soap.HasFault {
 	res := &methods.FindByDatastorePathBody{Res: new(types.FindByDatastorePathResponse)}
 
-	Map.m.Lock()
-	defer Map.m.Unlock()
+	ctx.Map.m.Lock()
+	defer ctx.Map.m.Unlock()
 
-	for ref, obj := range Map.objects {
+	for ref, obj := range ctx.Map.objects {
 		vm, ok := asVirtualMachineMO(obj)
 		if !ok {
 			continue
@@ -50,10 +38,10 @@ func (s *SearchIndex) FindByDatastorePath(r *types.FindByDatastorePath) soap.Has
 	return res
 }
 
-func (s *SearchIndex) FindByInventoryPath(req *types.FindByInventoryPath) soap.HasFault {
+func (s *SearchIndex) FindByInventoryPath(ctx *Context, req *types.FindByInventoryPath) soap.HasFault {
 	body := &methods.FindByInventoryPathBody{Res: new(types.FindByInventoryPathResponse)}
 
-	root := Map.content().RootFolder
+	root := ctx.Map.content().RootFolder
 	o := &root
 
 	if req.InventoryPath == "/" {
@@ -70,7 +58,7 @@ func (s *SearchIndex) FindByInventoryPath(req *types.FindByInventoryPath) soap.H
 	}
 
 	for _, name := range path {
-		f := s.FindChild(&types.FindChild{Entity: *o, Name: name})
+		f := s.FindChild(ctx, &types.FindChild{Entity: *o, Name: name})
 
 		o = f.(*methods.FindChildBody).Res.Returnval
 		if o == nil {
@@ -83,10 +71,10 @@ func (s *SearchIndex) FindByInventoryPath(req *types.FindByInventoryPath) soap.H
 	return body
 }
 
-func (s *SearchIndex) FindChild(req *types.FindChild) soap.HasFault {
+func (s *SearchIndex) FindChild(ctx *Context, req *types.FindChild) soap.HasFault {
 	body := &methods.FindChildBody{}
 
-	obj := Map.Get(req.Entity)
+	obj := ctx.Map.Get(req.Entity)
 
 	if obj == nil {
 		body.Fault_ = Fault("", &types.ManagedObjectNotFound{Obj: req.Entity})
@@ -116,7 +104,7 @@ func (s *SearchIndex) FindChild(req *types.FindChild) soap.HasFault {
 		children = append(children, e.Vm...)
 	}
 
-	match := Map.FindByName(req.Name, children)
+	match := ctx.Map.FindByName(req.Name, children)
 
 	if match != nil {
 		ref := match.Reference()
@@ -126,15 +114,15 @@ func (s *SearchIndex) FindChild(req *types.FindChild) soap.HasFault {
 	return body
 }
 
-func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
+func (s *SearchIndex) FindByUuid(ctx *Context, req *types.FindByUuid) soap.HasFault {
 	body := &methods.FindByUuidBody{Res: new(types.FindByUuidResponse)}
 
-	Map.m.Lock()
-	defer Map.m.Unlock()
+	ctx.Map.m.Lock()
+	defer ctx.Map.m.Unlock()
 
 	if req.VmSearch {
 		// Find Virtual Machine using UUID
-		for ref, obj := range Map.objects {
+		for ref, obj := range ctx.Map.objects {
 			vm, ok := asVirtualMachineMO(obj)
 			if !ok {
 				continue
@@ -153,7 +141,7 @@ func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
 		}
 	} else {
 		// Find Host System using UUID
-		for ref, obj := range Map.objects {
+		for ref, obj := range ctx.Map.objects {
 			host, ok := asHostSystemMO(obj)
 			if !ok {
 				continue
@@ -168,12 +156,12 @@ func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
 	return body
 }
 
-func (s *SearchIndex) FindByDnsName(req *types.FindByDnsName) soap.HasFault {
+func (s *SearchIndex) FindByDnsName(ctx *Context, req *types.FindByDnsName) soap.HasFault {
 	body := &methods.FindByDnsNameBody{Res: new(types.FindByDnsNameResponse)}
 
 	all := types.FindAllByDnsName(*req)
 
-	switch r := s.FindAllByDnsName(&all).(type) {
+	switch r := s.FindAllByDnsName(ctx, &all).(type) {
 	case *methods.FindAllByDnsNameBody:
 		if len(r.Res.Returnval) > 0 {
 			body.Res.Returnval = &r.Res.Returnval[0]
@@ -185,15 +173,15 @@ func (s *SearchIndex) FindByDnsName(req *types.FindByDnsName) soap.HasFault {
 	return body
 }
 
-func (s *SearchIndex) FindAllByDnsName(req *types.FindAllByDnsName) soap.HasFault {
+func (s *SearchIndex) FindAllByDnsName(ctx *Context, req *types.FindAllByDnsName) soap.HasFault {
 	body := &methods.FindAllByDnsNameBody{Res: new(types.FindAllByDnsNameResponse)}
 
-	Map.m.Lock()
-	defer Map.m.Unlock()
+	ctx.Map.m.Lock()
+	defer ctx.Map.m.Unlock()
 
 	if req.VmSearch {
 		// Find Virtual Machine using DNS name
-		for ref, obj := range Map.objects {
+		for ref, obj := range ctx.Map.objects {
 			vm, ok := asVirtualMachineMO(obj)
 			if !ok {
 				continue
@@ -204,7 +192,7 @@ func (s *SearchIndex) FindAllByDnsName(req *types.FindAllByDnsName) soap.HasFaul
 		}
 	} else {
 		// Find Host System using DNS name
-		for ref, obj := range Map.objects {
+		for ref, obj := range ctx.Map.objects {
 			host, ok := asHostSystemMO(obj)
 			if !ok {
 				continue
@@ -220,12 +208,12 @@ func (s *SearchIndex) FindAllByDnsName(req *types.FindAllByDnsName) soap.HasFaul
 	return body
 }
 
-func (s *SearchIndex) FindByIp(req *types.FindByIp) soap.HasFault {
+func (s *SearchIndex) FindByIp(ctx *Context, req *types.FindByIp) soap.HasFault {
 	body := &methods.FindByIpBody{Res: new(types.FindByIpResponse)}
 
 	all := types.FindAllByIp(*req)
 
-	switch r := s.FindAllByIp(&all).(type) {
+	switch r := s.FindAllByIp(ctx, &all).(type) {
 	case *methods.FindAllByIpBody:
 		if len(r.Res.Returnval) > 0 {
 			body.Res.Returnval = &r.Res.Returnval[0]
@@ -237,15 +225,15 @@ func (s *SearchIndex) FindByIp(req *types.FindByIp) soap.HasFault {
 	return body
 }
 
-func (s *SearchIndex) FindAllByIp(req *types.FindAllByIp) soap.HasFault {
+func (s *SearchIndex) FindAllByIp(ctx *Context, req *types.FindAllByIp) soap.HasFault {
 	body := &methods.FindAllByIpBody{Res: new(types.FindAllByIpResponse)}
 
-	Map.m.Lock()
-	defer Map.m.Unlock()
+	ctx.Map.m.Lock()
+	defer ctx.Map.m.Unlock()
 
 	if req.VmSearch {
 		// Find Virtual Machine using IP
-		for ref, obj := range Map.objects {
+		for ref, obj := range ctx.Map.objects {
 			vm, ok := asVirtualMachineMO(obj)
 			if !ok {
 				continue
@@ -256,7 +244,7 @@ func (s *SearchIndex) FindAllByIp(req *types.FindAllByIp) soap.HasFault {
 		}
 	} else {
 		// Find Host System using IP
-		for ref, obj := range Map.objects {
+		for ref, obj := range ctx.Map.objects {
 			host, ok := asHostSystemMO(obj)
 			if !ok {
 				continue

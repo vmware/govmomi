@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -33,8 +21,8 @@ type VirtualMachineSnapshot struct {
 	DataSets map[string]*DataSet
 }
 
-func (v *VirtualMachineSnapshot) createSnapshotFiles() types.BaseMethodFault {
-	vm := Map.Get(v.Vm).(*VirtualMachine)
+func (v *VirtualMachineSnapshot) createSnapshotFiles(ctx *Context) types.BaseMethodFault {
+	vm := ctx.Map.Get(v.Vm).(*VirtualMachine)
 
 	snapshotDirectory := vm.Config.Files.SnapshotDirectory
 	if snapshotDirectory == "" {
@@ -44,7 +32,7 @@ func (v *VirtualMachineSnapshot) createSnapshotFiles() types.BaseMethodFault {
 	index := 1
 	for {
 		fileName := fmt.Sprintf("%s-Snapshot%d.vmsn", vm.Name, index)
-		f, err := vm.createFile(snapshotDirectory, fileName, false)
+		f, err := vm.createFile(ctx, snapshotDirectory, fileName, false)
 		if err != nil {
 			switch err.(type) {
 			case *types.FileAlreadyExists:
@@ -58,15 +46,15 @@ func (v *VirtualMachineSnapshot) createSnapshotFiles() types.BaseMethodFault {
 		_ = f.Close()
 
 		p, _ := parseDatastorePath(snapshotDirectory)
-		vm.useDatastore(p.Datastore)
+		vm.useDatastore(ctx, p.Datastore)
 		datastorePath := object.DatastorePath{
 			Datastore: p.Datastore,
 			Path:      path.Join(p.Path, fileName),
 		}
 
-		dataLayoutKey := vm.addFileLayoutEx(datastorePath, 0)
-		vm.addSnapshotLayout(v.Self, dataLayoutKey)
-		vm.addSnapshotLayoutEx(v.Self, dataLayoutKey, -1)
+		dataLayoutKey := vm.addFileLayoutEx(ctx, datastorePath, 0)
+		vm.addSnapshotLayout(ctx, v.Self, dataLayoutKey)
+		vm.addSnapshotLayoutEx(ctx, v.Self, dataLayoutKey, -1)
 
 		return nil
 	}

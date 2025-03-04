@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator_test
 
@@ -79,14 +67,14 @@ func Example() {
 	c, _ := govmomi.NewClient(ctx, s.URL, true)
 
 	// Shortcut to choose any VM, rather than using the more verbose Finder or ContainerView.
-	obj := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)
+	obj := model.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
 	// Validate VM is powered on
 	if obj.Runtime.PowerState != "poweredOn" {
 		log.Fatal(obj.Runtime.PowerState)
 	}
 
 	// Wrap the existing vm object, using the same vm.Self (ManagedObjectReference) value as the Map key.
-	simulator.Map.Put(&BusyVM{obj})
+	model.Map().Put(&BusyVM{obj})
 
 	vm := object.NewVirtualMachine(c.Client, obj.Reference())
 

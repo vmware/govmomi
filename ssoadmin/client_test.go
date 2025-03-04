@@ -38,7 +38,7 @@ func TestClient(t *testing.T) {
 			os.Setenv("GOVMOMI_ENVOY_SIDECAR_PORT", client.Client.URL().Port())
 			os.Setenv("GOVMOMI_ENVOY_SIDECAR_HOST", client.Client.URL().Hostname())
 
-			lsim.BreakLookupServiceURLs()
+			lsim.BreakLookupServiceURLs(ctx)
 
 			c, err := ssoadmin.NewClient(ctx, client)
 			require.NoError(t, err)

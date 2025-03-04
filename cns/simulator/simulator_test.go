@@ -58,7 +58,7 @@ func TestSimulator(t *testing.T) {
 	existingNumDisks := len(queryResult.Volumes)
 
 	// Get a simulator DS
-	datastore := simulator.Map.Any("Datastore").(*simulator.Datastore)
+	datastore := model.Map().Any("Datastore").(*simulator.Datastore)
 
 	// Create volume for static provisioning
 	var capacityInMb int64 = 1024
@@ -229,7 +229,7 @@ func TestSimulator(t *testing.T) {
 	}
 
 	// Attach
-	nodeVM := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)
+	nodeVM := model.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
 	attachSpecList := []cnstypes.CnsVolumeAttachDetachSpec{
 		{
 			VolumeId: createVolumeOperationRes.VolumeId,

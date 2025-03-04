@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -113,7 +101,7 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 	}
 
 	seen := make(map[types.ManagedObjectReference]bool)
-	container.add(root, seen)
+	container.add(ctx, root, seen)
 
 	ctx.Session.Registry.Put(container)
 	ctx.Map.AddHandler(container)
@@ -177,7 +165,7 @@ func walk(root mo.Reference, f func(child types.ManagedObjectReference)) {
 	}
 }
 
-func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectReference]bool) {
+func (v *ContainerView) add(ctx *Context, root mo.Reference, seen map[types.ManagedObjectReference]bool) {
 	walk(root, func(child types.ManagedObjectReference) {
 		if v.include(child) {
 			if !seen[child] {
@@ -187,12 +175,12 @@ func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectRefer
 		}
 
 		if v.Recursive {
-			v.add(Map.Get(child), seen)
+			v.add(ctx, ctx.Map.Get(child), seen)
 		}
 	})
 }
 
-func (v *ContainerView) find(root mo.Reference, ref types.ManagedObjectReference, found *bool) bool {
+func (v *ContainerView) find(ctx *Context, root mo.Reference, ref types.ManagedObjectReference, found *bool) bool {
 	walk(root, func(child types.ManagedObjectReference) {
 		if *found {
 			return
@@ -202,19 +190,18 @@ func (v *ContainerView) find(root mo.Reference, ref types.ManagedObjectReference
 			return
 		}
 		if v.Recursive {
-			*found = v.find(Map.Get(child), ref, found)
+			*found = v.find(ctx, ctx.Map.Get(child), ref, found)
 		}
 	})
 
 	return *found
 }
 
-func (v *ContainerView) PutObject(obj mo.Reference) {
+func (v *ContainerView) PutObject(ctx *Context, obj mo.Reference) {
 	ref := obj.Reference()
 
-	ctx := SpoofContext()
 	ctx.WithLock(v, func() {
-		if v.include(ref) && v.find(v.root, ref, types.NewBool(false)) {
+		if v.include(ref) && v.find(ctx, v.root, ref, types.NewBool(false)) {
 			ctx.Update(v, []types.PropertyChange{{Name: "view", Val: append(v.View, ref)}})
 		}
 	})

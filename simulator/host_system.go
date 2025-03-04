@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -53,7 +41,7 @@ func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
 	return h, ok
 }
 
-func NewHostSystem(host mo.HostSystem) *HostSystem {
+func NewHostSystem(ctx *Context, host mo.HostSystem) *HostSystem {
 	if hostPortUnique { // configure unique port for each host
 		port := &esx.HostSystem.Summary.Config.Port
 		*port++
@@ -108,11 +96,11 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 		{&hs.ConfigManager.AdvancedOption, NewOptionManager(nil, nil, &hs.Config.Option)},
 		{&hs.ConfigManager.FirewallSystem, NewHostFirewallSystem(&hs.HostSystem)},
 		{&hs.ConfigManager.StorageSystem, NewHostStorageSystem(&hs.HostSystem)},
-		{&hs.ConfigManager.CertificateManager, NewHostCertificateManager(&hs.HostSystem)},
+		{&hs.ConfigManager.CertificateManager, NewHostCertificateManager(ctx, &hs.HostSystem)},
 	}
 
 	for _, c := range config {
-		ref := Map.Put(c.obj).Reference()
+		ref := ctx.Map.Put(c.obj).Reference()
 
 		*c.ref = &ref
 	}
@@ -382,11 +370,11 @@ func (h *HostSystem) getNetConfigInterface(ctx *Context, nicType string) (*netCo
 	return details, nil
 }
 
-func (h *HostSystem) event() types.HostEvent {
+func (h *HostSystem) event(ctx *Context) types.HostEvent {
 	return types.HostEvent{
 		Event: types.Event{
-			Datacenter:      datacenterEventArgument(h),
-			ComputeResource: h.eventArgumentParent(),
+			Datacenter:      datacenterEventArgument(ctx, h),
+			ComputeResource: h.eventArgumentParent(ctx),
 			Host:            h.eventArgument(),
 		},
 	}
@@ -399,8 +387,8 @@ func (h *HostSystem) eventArgument() *types.HostEventArgument {
 	}
 }
 
-func (h *HostSystem) eventArgumentParent() *types.ComputeResourceEventArgument {
-	parent := hostParent(&h.HostSystem)
+func (h *HostSystem) eventArgumentParent(ctx *Context) *types.ComputeResourceEventArgument {
+	parent := hostParent(ctx, &h.HostSystem)
 
 	return &types.ComputeResourceEventArgument{
 		ComputeResource:     parent.Self,
@@ -408,8 +396,8 @@ func (h *HostSystem) eventArgumentParent() *types.ComputeResourceEventArgument {
 	}
 }
 
-func hostParent(host *mo.HostSystem) *mo.ComputeResource {
-	switch parent := Map.Get(*host.Parent).(type) {
+func hostParent(ctx *Context, host *mo.HostSystem) *mo.ComputeResource {
+	switch parent := ctx.Map.Get(*host.Parent).(type) {
 	case *mo.ComputeResource:
 		return parent
 	case *ClusterComputeResource:
@@ -436,7 +424,7 @@ func addComputeResource(s *types.ComputeResourceSummary, h *HostSystem) {
 func CreateDefaultESX(ctx *Context, f *Folder) {
 	dc := NewDatacenter(ctx, &f.Folder)
 
-	host := NewHostSystem(esx.HostSystem)
+	host := NewHostSystem(ctx, esx.HostSystem)
 
 	summary := new(types.ComputeResourceSummary)
 	addComputeResource(summary, host)
@@ -452,7 +440,7 @@ func CreateDefaultESX(ctx *Context, f *Folder) {
 	ctx.Map.PutEntity(cr, host)
 	cr.EnvironmentBrowser = newEnvironmentBrowser(ctx, host.Reference())
 
-	pool := NewResourcePool()
+	pool := NewResourcePool(ctx)
 	cr.ResourcePool = &pool.Self
 	ctx.Map.PutEntity(cr, pool)
 	pool.Owner = cr.Self
@@ -479,8 +467,8 @@ func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (
 		network = cr.Network
 	}
 
-	pool := NewResourcePool()
-	host := NewHostSystem(template)
+	pool := NewResourcePool(ctx)
+	host := NewHostSystem(ctx, template)
 	host.configure(ctx, spec, false)
 
 	summary := new(types.ComputeResourceSummary)
@@ -519,7 +507,7 @@ func (h *HostSystem) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 			return nil, &types.ResourceInUse{}
 		}
 
-		ctx.postEvent(&types.HostRemovedEvent{HostEvent: h.event()})
+		ctx.postEvent(&types.HostRemovedEvent{HostEvent: h.event(ctx)})
 
 		f := ctx.Map.getEntityParent(h, "Folder").(*Folder)
 		folderRemoveChild(ctx, &f.Folder, h.Reference())

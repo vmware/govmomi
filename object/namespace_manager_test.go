@@ -31,7 +31,7 @@ func TestDatastoreNamespaceManager(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		store := simulator.Map.Get(ds.Reference()).(*simulator.Datastore)
+		store := simulator.Map(ctx).Get(ds.Reference()).(*simulator.Datastore)
 
 		name := "foo"
 

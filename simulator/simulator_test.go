@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -212,14 +200,15 @@ func TestServeHTTP(t *testing.T) {
 	}
 
 	for _, config := range configs {
-		s := New(NewServiceInstance(SpoofContext(), config.content, config.folder))
+		ctx := NewContext()
+		s := New(NewServiceInstance(ctx, config.content, config.folder))
+
 		ts := s.NewServer()
 		defer ts.Close()
 
 		u := ts.URL.User
 		ts.URL.User = nil
 
-		ctx := context.Background()
 		client, err := govmomi.NewClient(ctx, ts.URL, true)
 		if err != nil {
 			t.Fatal(err)
@@ -236,7 +225,7 @@ func TestServeHTTP(t *testing.T) {
 		}
 
 		// Testing http client + reflect client
-		clients := []soap.RoundTripper{client, s.client}
+		clients := []soap.RoundTripper{client, s.client()}
 		for _, c := range clients {
 			now, err := methods.GetCurrentTime(ctx, c)
 			if err != nil {
@@ -300,7 +289,7 @@ func TestServeAbout(t *testing.T) {
 }
 
 func TestServeHTTPS(t *testing.T) {
-	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(NewContext(), esx.ServiceContent, esx.RootFolder))
 	s.TLS = new(tls.Config)
 	ts := s.NewServer()
 	defer ts.Close()
@@ -389,17 +378,25 @@ func (h *errorMarshal) CurrentTime(types.AnyType) soap.HasFault {
 	return h
 }
 
+func (s *errorMarshal) ServiceContent() types.ServiceContent {
+	return s.Content
+}
+
 type errorNoSuchMethod struct {
 	mo.ServiceInstance
 }
 
+func (s *errorNoSuchMethod) ServiceContent() types.ServiceContent {
+	return s.Content
+}
+
 func TestServeHTTPErrors(t *testing.T) {
-	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
+	ctx := NewContext()
+	s := New(NewServiceInstance(ctx, esx.ServiceContent, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
 
-	ctx := context.Background()
 	client, err := govmomi.NewClient(ctx, ts.URL, true)
 	if err != nil {
 		t.Fatal(err)
@@ -412,23 +409,34 @@ func TestServeHTTPErrors(t *testing.T) {
 		t.Error("expected MethodNotFound fault")
 	}
 
+	si := mo.ServiceInstance{Content: ctx.Map.content()}
+
 	// cover the does not implement method error path
-	Map.objects[vim25.ServiceInstance] = &errorNoSuchMethod{}
+	ctx.Map.objects[vim25.ServiceInstance] = &errorNoSuchMethod{
+		ServiceInstance: si,
+	}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the xml encode error path
-	Map.objects[vim25.ServiceInstance] = &errorMarshal{}
+	ctx.Map.objects[vim25.ServiceInstance] = &errorMarshal{
+		ServiceInstance: si,
+	}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the no such object path
-	Map.Remove(SpoofContext(), vim25.ServiceInstance)
-	_, err = methods.GetCurrentTime(ctx, client)
+	treq := types.CurrentTime{
+		This: types.ManagedObjectReference{
+			Type:  "ServiceInstance",
+			Value: "invalid",
+		},
+	}
+	_, err = methods.CurrentTime(ctx, client.Client, &treq)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -439,7 +447,7 @@ func TestServeHTTPErrors(t *testing.T) {
 	if !ok {
 		t.Fatalf("fault=%#v", fault)
 	}
-	if f.Obj != vim25.ServiceInstance {
+	if f.Obj != treq.This {
 		t.Errorf("obj=%#v", f.Obj)
 	}
 
@@ -484,7 +492,7 @@ func TestDelay(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	simvm := Map.Any("VirtualMachine").(*VirtualMachine)
+	simvm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(client.Client, simvm.Reference())
 
 	m.Service.delay.Delay = 1000
@@ -517,7 +525,7 @@ func TestDelayTask(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	simvm := Map.Any("VirtualMachine").(*VirtualMachine)
+	simvm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(client.Client, simvm.Reference())
 
 	TaskDelay.Delay = 1000

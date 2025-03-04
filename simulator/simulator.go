@@ -58,14 +58,13 @@ type Method struct {
 
 // Service decodes incoming requests and dispatches to a Handler
 type Service struct {
-	client *vim25.Client
-	sm     *SessionManager
-	sdk    map[string]*Registry
-	funcs  []handleFunc
-	delay  *DelayConfig
+	sdk   map[string]*Registry
+	funcs []handleFunc
+	delay *DelayConfig
 
 	readAll func(io.Reader) ([]byte, error)
 
+	Context  *Context
 	Listen   *url.URL
 	TLS      *tls.Config
 	ServeMux *http.ServeMux
@@ -83,16 +82,19 @@ type Server struct {
 }
 
 // New returns an initialized simulator Service instance
-func New(instance *ServiceInstance) *Service {
+func New(ctx *Context, instance *ServiceInstance) *Service {
 	s := &Service{
+		Context: ctx,
 		readAll: io.ReadAll,
-		sm:      Map.SessionManager(),
 		sdk:     make(map[string]*Registry),
 	}
-
-	s.client, _ = vim25.NewClient(context.Background(), s)
-
+	s.Context.svc = s
 	return s
+}
+
+func (s *Service) client() *vim25.Client {
+	c, _ := vim25.NewClient(context.Background(), s)
+	return c
 }
 
 type serverFaultBody struct {
@@ -244,9 +246,13 @@ func (s *Service) RoundTrip(ctx context.Context, request, response soap.HasFault
 	}
 
 	res := s.call(&Context{
-		Map:     Map,
+		Map:     s.Context.Map,
 		Context: ctx,
-		Session: internalSession,
+		Session: &Session{
+			UserSession: internalSession.UserSession,
+			Registry:    internalSession.Registry,
+			Map:         s.Context.Map,
+		},
 	}, method)
 
 	if err := res.Fault(); err != nil {
@@ -503,7 +509,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 			// Redirect any Fetch method calls to the PropertyCollector singleton
 			method.This = ctx.Map.content().PropertyCollector
 		}
-		ctx.Map.WithLock(ctx, s.sm, ctx.mapSession)
+		ctx.Map.WithLock(ctx, ctx.sessionManager(), ctx.mapSession)
 		res = s.call(ctx, method)
 	}
 
@@ -559,7 +565,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 func (s *Service) findDatastore(query url.Values) (*Datastore, error) {
 	ctx := context.Background()
 
-	finder := find.NewFinder(s.client, false)
+	finder := find.NewFinder(s.client(), false)
 	dc, err := finder.DatacenterOrDefault(ctx, query.Get("dcPath"))
 	if err != nil {
 		return nil, err
@@ -572,7 +578,7 @@ func (s *Service) findDatastore(query url.Values) (*Datastore, error) {
 		return nil, err
 	}
 
-	return Map.Get(ds.Reference()).(*Datastore), nil
+	return s.Context.Map.Get(ds.Reference()).(*Datastore), nil
 }
 
 const folderPrefix = "/folder/"
@@ -633,7 +639,7 @@ func (s *Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
  </namespace>
 </namespaces>
 `
-	fmt.Fprintf(w, versions, s.client.ServiceContent.About.ApiVersion)
+	fmt.Fprintf(w, versions, s.Context.Map.content().About.ApiVersion)
 }
 
 // ServiceVersionsVsan handler for the /sdk/vsanServiceVersions.xml path.
@@ -649,7 +655,7 @@ func (s *Service) ServiceVersionsVsan(w http.ResponseWriter, r *http.Request) {
  </namespace>
 </namespaces>
 `
-	fmt.Fprintf(w, versions, s.client.ServiceContent.About.ApiVersion)
+	fmt.Fprintf(w, versions, s.Context.Map.content().About.ApiVersion)
 }
 
 // defaultIP returns addr.IP if specified, otherwise attempts to find a non-loopback ipv4 IP
@@ -685,11 +691,12 @@ func defaultIP(addr *net.TCPAddr) string {
 
 // NewServer returns an http Server instance for the given service
 func (s *Service) NewServer() *Server {
-	s.RegisterSDK(Map, Map.Path+"/vimService")
+	ctx := s.Context
+	s.RegisterSDK(ctx.Map, ctx.Map.Path+"/vimService")
 
 	mux := s.ServeMux
-	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
-	mux.HandleFunc(Map.Path+"/vsanServiceVersions.xml", s.ServiceVersionsVsan)
+	mux.HandleFunc(ctx.Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
+	mux.HandleFunc(ctx.Map.Path+"/vsanServiceVersions.xml", s.ServiceVersionsVsan)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
 	mux.HandleFunc(guestPrefix, ServeGuest)
 	mux.HandleFunc(nfcPrefix, ServeNFC)
@@ -704,17 +711,17 @@ func (s *Service) NewServer() *Server {
 	u := &url.URL{
 		Scheme: "http",
 		Host:   net.JoinHostPort(defaultIP(addr), port),
-		Path:   Map.Path,
+		Path:   ctx.Map.Path,
 	}
 	if s.TLS != nil {
 		u.Scheme += "s"
 	}
 
 	// Redirect clients to this http server, rather than HostSystem.Name
-	Map.SessionManager().ServiceHostName = u.Host
+	ctx.sessionManager().ServiceHostName = u.Host
 
 	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
-	m := Map.OptionManager()
+	m := ctx.Map.OptionManager()
 	for i := range m.Setting {
 		setting := m.Setting[i].GetOptionValue()
 
@@ -743,7 +750,7 @@ func (s *Service) NewServer() *Server {
 
 	if s.RegisterEndpoints {
 		for i := range endpoints {
-			endpoints[i](s, Map)
+			endpoints[i](s, ctx.Map)
 		}
 	}
 
@@ -761,7 +768,7 @@ func (s *Service) NewServer() *Server {
 	if s.TLS != nil {
 		ts.TLS = s.TLS
 		ts.TLS.ClientAuth = tls.RequestClientCert // Used by SessionManager.LoginExtensionByCertificate
-		Map.SessionManager().TLSCert = func() string {
+		ctx.Map.SessionManager().TLSCert = func() string {
 			return base64.StdEncoding.EncodeToString(ts.TLS.Certificates[0].Certificate[0])
 		}
 		ts.StartTLS()

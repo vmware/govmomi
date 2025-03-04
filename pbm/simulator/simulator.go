@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -26,6 +14,7 @@ import (
 	"github.com/vmware/govmomi/pbm/methods"
 	"github.com/vmware/govmomi/pbm/types"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
 )
@@ -271,11 +260,11 @@ type PlacementSolver struct {
 	vim.ManagedObjectReference
 }
 
-func (m *PlacementSolver) PbmCheckRequirements(req *types.PbmCheckRequirements) soap.HasFault {
+func (m *PlacementSolver) PbmCheckRequirements(ctx *simulator.Context, req *types.PbmCheckRequirements) soap.HasFault {
 	body := new(methods.PbmCheckRequirementsBody)
 	body.Res = new(types.PbmCheckRequirementsResponse)
 
-	for _, ds := range simulator.Map.All("Datastore") {
+	for _, ds := range ctx.For(vim25.Path).Map.All("Datastore") {
 		// TODO: filter
 		ref := ds.Reference()
 		body.Res.Returnval = append(body.Res.Returnval, types.PbmPlacementCompatibilityResult{
@@ -294,11 +283,11 @@ func (m *PlacementSolver) PbmCheckRequirements(req *types.PbmCheckRequirements) 
 	return body
 }
 
-func (m *PlacementSolver) PbmCheckCompatibility(req *types.PbmCheckCompatibility) soap.HasFault {
+func (m *PlacementSolver) PbmCheckCompatibility(ctx *simulator.Context, _ *types.PbmCheckCompatibility) soap.HasFault {
 	body := new(methods.PbmCheckCompatibilityBody)
 	body.Res = new(types.PbmCheckCompatibilityResponse)
 
-	for _, ds := range simulator.Map.All("Datastore") {
+	for _, ds := range ctx.For(vim25.Path).Map.All("Datastore") {
 		// TODO: filter
 		ref := ds.Reference()
 		body.Res.Returnval = append(body.Res.Returnval, types.PbmPlacementCompatibilityResult{

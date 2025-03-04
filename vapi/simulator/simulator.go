@@ -85,7 +85,7 @@ type download struct {
 
 type handler struct {
 	sync.Mutex
-	sm          *simulator.SessionManager
+	Map         *simulator.Registry
 	ServeMux    *http.ServeMux
 	URL         url.URL
 	Category    map[string]*tags.Category
@@ -113,7 +113,7 @@ func init() {
 // New creates a vAPI simulator.
 func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 	s := &handler{
-		sm:          r.SessionManager(),
+		Map:         r,
 		ServeMux:    http.NewServeMux(),
 		URL:         *u,
 		Category:    make(map[string]*tags.Category),
@@ -288,7 +288,7 @@ func (s *handler) isAuthorized(r *http.Request) bool {
 func (s *handler) hasAuthorization(r *http.Request) (string, bool) {
 	u, p, ok := r.BasicAuth()
 	if ok { // user+pass auth
-		return u, s.sm.Authenticate(s.URL, &vim.Login{UserName: u, Password: p})
+		return u, s.Map.SessionManager().Authenticate(s.URL, &vim.Login{UserName: u, Password: p})
 	}
 	auth := r.Header.Get("Authorization")
 	return "TODO", strings.HasPrefix(auth, "SIGN ") // token auth
@@ -914,7 +914,7 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 			spec.Library.CreationTime = types.NewTime(time.Now())
 			spec.Library.LastModifiedTime = types.NewTime(time.Now())
 			spec.Library.UnsetSecurityPolicyID = spec.Library.SecurityPolicyID == ""
-			dir := libraryPath(&spec.Library, "")
+			dir := s.libraryPath(&spec.Library, "")
 			if err := os.Mkdir(dir, 0750); err != nil {
 				s.error(w, err)
 				return
@@ -1091,7 +1091,7 @@ func (s *handler) syncItem(
 	}
 
 	// Get the path to the destination library item on the local filesystem.
-	dstItemPath := libraryPath(dstLib.Library, dstItem.ID)
+	dstItemPath := s.libraryPath(dstLib.Library, dstItem.ID)
 
 	// Get the source item.
 	srcItem, ok := srcLib.Item[dstItem.SourceID]
@@ -1155,7 +1155,7 @@ func (s *handler) syncItem(
 	}
 
 	// Update the the destination item's files.
-	srcItemPath := libraryPath(srcLib.Library, srcItem.ID)
+	srcItemPath := s.libraryPath(srcLib.Library, srcItem.ID)
 	for i := range dstItem.File {
 		var (
 			dstFile = &dstItem.File[i]
@@ -1350,7 +1350,7 @@ func (s *handler) libraryID(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodDelete:
-		p := libraryPath(l.Library, "")
+		p := s.libraryPath(l.Library, "")
 		if err := os.RemoveAll(p); err != nil {
 			s.error(w, err)
 			return
@@ -1615,7 +1615,7 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodDelete:
-		p := libraryPath(l.Library, id)
+		p := s.libraryPath(l.Library, id)
 		if err := os.RemoveAll(p); err != nil {
 			s.error(w, err)
 			return
@@ -1718,7 +1718,7 @@ func (s *handler) libraryItemStorageByID(id string) ([]library.Storage, bool) {
 		storage[i] = library.Storage{
 			StorageBacking: lib.Storage[0],
 			StorageURIs: []string{
-				path.Join(libraryPath(lib.Library, id), file.Name),
+				path.Join(s.libraryPath(lib.Library, id), file.Name),
 			},
 			Name:    file.Name,
 			Version: file.Version,
@@ -2252,12 +2252,12 @@ func (s *handler) updateFileInfo(id string) *update {
 }
 
 // libraryPath returns the local Datastore fs path for a Library or Item if id is specified.
-func libraryPath(l *library.Library, id string) string {
+func (s *handler) libraryPath(l *library.Library, id string) string {
 	dsref := types.ManagedObjectReference{
 		Type:  "Datastore",
 		Value: l.Storage[0].DatastoreID,
 	}
-	ds := simulator.Map.Get(dsref).(*simulator.Datastore)
+	ds := s.Map.Get(dsref).(*simulator.Datastore)
 
 	if !isValidFileName(l.ID) || !isValidFileName(id) {
 		panic("invalid file name")
@@ -2278,7 +2278,7 @@ func (s *handler) libraryItemFileCreate(
 		return errors.New("invalid file name")
 	}
 
-	dstItemPath := libraryPath(up.Library, up.Session.LibraryItemID)
+	dstItemPath := s.libraryPath(up.Library, up.Session.LibraryItemID)
 	if err := os.MkdirAll(dstItemPath, 0750); err != nil {
 		return err
 	}
@@ -2410,7 +2410,7 @@ func (s *handler) libraryItemFileData(w http.ResponseWriter, r *http.Request) {
 			http.NotFound(w, r)
 			return
 		}
-		p := path.Join(libraryPath(dl.Library, dl.Session.LibraryItemID), name)
+		p := path.Join(s.libraryPath(dl.Library, dl.Session.LibraryItemID), name)
 		f, err := os.Open(p)
 		if err != nil {
 			s.error(w, err)
@@ -2535,7 +2535,7 @@ func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *libra
 	}
 
 	name := item.ovf()
-	desc, err := os.ReadFile(filepath.Join(libraryPath(lib, item.ID), name))
+	desc, err := os.ReadFile(filepath.Join(s.libraryPath(lib, item.ID), name))
 	if err != nil {
 		return nil, err
 	}

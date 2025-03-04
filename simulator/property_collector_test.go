@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -51,12 +39,11 @@ func TestRetrieveProperties(t *testing.T) {
 	}
 
 	for _, config := range configs {
-		s := New(NewServiceInstance(SpoofContext(), config.content, config.folder))
+		ctx := NewContext()
+		s := New(NewServiceInstance(ctx, config.content, config.folder))
 
 		ts := s.NewServer()
 		defer ts.Close()
-
-		ctx := context.Background()
 
 		client, err := govmomi.NewClient(ctx, ts.URL, true)
 		if err != nil {
@@ -204,7 +191,7 @@ func TestRetrieveProperties(t *testing.T) {
 		}
 
 		// Retrieve a nested property
-		Map.Get(dc.Reference()).(*Datacenter).Configuration.DefaultHardwareVersionKey = "foo"
+		ctx.Map.Get(dc.Reference()).(*Datacenter).Configuration.DefaultHardwareVersionKey = "foo"
 		mdc = mo.Datacenter{}
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"configuration.defaultHardwareVersionKey"}, &mdc)
 		if err != nil {
@@ -235,7 +222,7 @@ func TestRetrieveProperties(t *testing.T) {
 		}
 
 		// Expect ManagedObjectNotFoundError
-		Map.Remove(SpoofContext(), dc.Reference())
+		ctx.Map.Remove(ctx, dc.Reference())
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"name"}, &mdc)
 		if err == nil {
 			t.Fatal("expected error")
@@ -245,12 +232,11 @@ func TestRetrieveProperties(t *testing.T) {
 
 func TestWaitForUpdates(t *testing.T) {
 	folder := esx.RootFolder
-	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, folder))
+	ctx := NewContext()
+	s := New(NewServiceInstance(ctx, esx.ServiceContent, folder))
 
 	ts := s.NewServer()
 	defer ts.Close()
-
-	ctx := context.Background()
 
 	c, err := govmomi.NewClient(ctx, ts.URL, true)
 	if err != nil {
@@ -302,7 +288,7 @@ func TestWaitForUpdates(t *testing.T) {
 	wg.Wait()
 
 	// test object not found
-	Map.Remove(SpoofContext(), folder.Reference())
+	ctx.Map.Remove(NewContext(), folder.Reference())
 
 	err = property.Wait(ctx, pc, folder.Reference(), props, cb(true))
 	if err == nil {
@@ -348,7 +334,7 @@ func TestIncrementalWaitForUpdates(t *testing.T) {
 	}
 
 	pc := property.DefaultCollector(c.Client)
-	obj := Map.Any("VirtualMachine").(*VirtualMachine)
+	obj := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	ref := obj.Reference()
 	vm := object.NewVirtualMachine(c.Client, ref)
 
@@ -485,7 +471,7 @@ func TestWaitForUpdatesOneUpdateCalculation(t *testing.T) {
 
 	wait := make(chan bool)
 	pc := property.DefaultCollector(c.Client)
-	obj := Map.Any("VirtualMachine").(*VirtualMachine)
+	obj := m.Map().Any("VirtualMachine").(*VirtualMachine)
 	ref := obj.Reference()
 	vm := object.NewVirtualMachine(c.Client, ref)
 	filter := new(property.WaitFilter).Add(ref, ref.Type, []string{"runtime.powerState"})
@@ -587,7 +573,7 @@ func TestPropertyCollectorWithUnsetValues(t *testing.T) {
 
 	pc := property.DefaultCollector(client.Client)
 
-	vm := Map.Any("VirtualMachine")
+	vm := m.Map().Any("VirtualMachine")
 	vmRef := vm.Reference()
 
 	propSets := [][]string{
@@ -722,9 +708,10 @@ func TestExtractEmbeddedField(t *testing.T) {
 
 	x := new(MyResourcePool)
 
-	Map.Put(x)
+	ctx := NewContext()
+	ctx.Map.Put(x)
 
-	obj, ok := getObject(SpoofContext(), x.Reference())
+	obj, ok := getObject(ctx, x.Reference())
 	if !ok {
 		t.Error("expected obj")
 	}
@@ -735,8 +722,6 @@ func TestExtractEmbeddedField(t *testing.T) {
 }
 
 func TestPropertyCollectorFold(t *testing.T) {
-	ctx := context.Background()
-
 	m := VPX()
 
 	defer m.Remove()
@@ -749,13 +734,15 @@ func TestPropertyCollectorFold(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
+	ctx := m.Service.Context
+
 	client, err := govmomi.NewClient(ctx, s.URL, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	cluster := Map.Any("ClusterComputeResource")
-	compute := Map.Any("ComputeResource")
+	cluster := ctx.Map.Any("ClusterComputeResource")
+	compute := ctx.Map.Any("ComputeResource")
 
 	// Test that we fold duplicate properties (rbvmomi depends on this)
 	var content []types.ObjectContent
@@ -819,8 +806,9 @@ func TestPropertyCollectorFold(t *testing.T) {
 }
 
 func TestPropertyCollectorInvalidSpecName(t *testing.T) {
-	obj := Map.Put(new(Folder))
-	folderPutChild(SpoofContext(), &obj.(*Folder).Folder, new(Folder))
+	ctx := NewContext()
+	obj := ctx.Map.Put(new(Folder))
+	folderPutChild(ctx, &obj.(*Folder).Folder, new(Folder))
 
 	req := types.RetrievePropertiesEx{
 		SpecSet: []types.PropertyFilterSpec{
@@ -851,7 +839,7 @@ func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 		},
 	}
 
-	_, err := collect(SpoofContext(), &req)
+	_, err := collect(ctx, &req)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -883,7 +871,7 @@ func TestPropertyCollectorInvalidProperty(t *testing.T) {
 			Test(func(ctx context.Context, c *vim25.Client) {
 				pc := property.DefaultCollector(c)
 
-				vm := Map.Any("VirtualMachine")
+				vm := Map(ctx).Any("VirtualMachine")
 				vmRef := vm.Reference()
 
 				var vmMo mo.VirtualMachine

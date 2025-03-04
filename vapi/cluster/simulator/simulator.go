@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -36,7 +24,7 @@ import (
 
 func init() {
 	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
-		New(s.Listen).Register(s, r)
+		New(r, s.Listen).Register(s, r)
 	})
 }
 
@@ -47,13 +35,15 @@ type module struct {
 
 // Handler implements the Cluster Modules API simulator
 type Handler struct {
+	Map     *simulator.Registry
 	Modules map[string]module
 	URL     *url.URL
 }
 
 // New creates a Handler instance
-func New(u *url.URL) *Handler {
+func New(r *simulator.Registry, u *url.URL) *Handler {
 	return &Handler{
+		Map:     r,
 		Modules: make(map[string]module),
 		URL:     u,
 	}
@@ -80,7 +70,7 @@ func (h *Handler) modules(w http.ResponseWriter, r *http.Request) {
 		var m internal.CreateModule
 		if vapi.Decode(r, w, &m) {
 			ref := types.ManagedObjectReference{Type: "ClusterComputeResource", Value: m.Spec.ID}
-			if simulator.Map.Get(ref) == nil {
+			if h.Map.Get(ref) == nil {
 				vapi.BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
 				return
 			}

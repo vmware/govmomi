@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -54,7 +42,7 @@ func addStandaloneHostTask(folder *object.Folder, spec types.HostConnectSpec) (*
 
 func TestFolderESX(t *testing.T) {
 	content := esx.ServiceContent
-	s := New(NewServiceInstance(SpoofContext(), content, esx.RootFolder))
+	s := New(NewServiceInstance(NewContext(), content, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -102,12 +90,12 @@ func TestFolderESX(t *testing.T) {
 
 func TestFolderVC(t *testing.T) {
 	content := vpx.ServiceContent
-	s := New(NewServiceInstance(SpoofContext(), content, vpx.RootFolder))
+	ctx := NewContext()
+	s := New(NewServiceInstance(ctx, content, vpx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
 
-	ctx := context.Background()
 	c, err := govmomi.NewClient(ctx, ts.URL, true)
 	if err != nil {
 		t.Fatal(err)
@@ -140,7 +128,7 @@ func TestFolderVC(t *testing.T) {
 	}
 
 	for _, ref := range []object.Reference{ff, dc} {
-		o := Map.Get(ref.Reference())
+		o := ctx.Map.Get(ref.Reference())
 		if o == nil {
 			t.Fatalf("failed to find %#v", ref)
 		}
@@ -219,7 +207,7 @@ func TestFolderVC(t *testing.T) {
 			if !ok {
 				t.Errorf("expected moref, got type=%T", res.Result)
 			}
-			host := Map.Get(ref).(*HostSystem)
+			host := ctx.Map.Get(ref).(*HostSystem)
 			if host.Name != test.name {
 				t.Fail()
 			}
@@ -231,7 +219,7 @@ func TestFolderVC(t *testing.T) {
 				t.Error("expected new host summary Self reference")
 			}
 
-			pool := Map.Get(*host.Parent).(*mo.ComputeResource).ResourcePool
+			pool := ctx.Map.Get(*host.Parent).(*mo.ComputeResource).ResourcePool
 			if *pool == esx.ResourcePool.Self {
 				t.Error("expected new pool Self reference")
 			}
@@ -245,12 +233,12 @@ func TestFolderVC(t *testing.T) {
 
 func TestFolderSpecialCharaters(t *testing.T) {
 	content := vpx.ServiceContent
-	s := New(NewServiceInstance(SpoofContext(), content, vpx.RootFolder))
+	ctx := NewContext()
+	s := New(NewServiceInstance(ctx, content, vpx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
 
-	ctx := context.Background()
 	c, err := govmomi.NewClient(ctx, ts.URL, true)
 	if err != nil {
 		t.Fatal(err)
@@ -275,7 +263,7 @@ func TestFolderSpecialCharaters(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		o := Map.Get(ff.Reference())
+		o := ctx.Map.Get(ff.Reference())
 		if o == nil {
 			t.Fatalf("failed to find %#v", ff)
 		}
@@ -301,8 +289,6 @@ func TestFolderFaults(t *testing.T) {
 }
 
 func TestRegisterVm(t *testing.T) {
-	ctx := context.Background()
-
 	for i, model := range []*Model{ESX(), VPX()} {
 		match := "*"
 		if i == 1 {
@@ -317,6 +303,8 @@ func TestRegisterVm(t *testing.T) {
 
 		s := model.Service.NewServer()
 		defer s.Close()
+
+		ctx := model.Service.Context
 
 		c, err := govmomi.NewClient(ctx, s.URL, true)
 		if err != nil {
@@ -343,7 +331,7 @@ func TestRegisterVm(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		vm := Map.Get(vms[0].Reference()).(*VirtualMachine)
+		vm := ctx.Map.Get(vms[0].Reference()).(*VirtualMachine)
 
 		req := types.RegisterVM_Task{
 			This:       vmFolder.Reference(),
@@ -370,7 +358,7 @@ func TestRegisterVm(t *testing.T) {
 				new(types.NotFound), func() { req.Path = vm.Config.Files.VmPathName },
 			},
 			{
-				new(types.AlreadyExists), func() { Map.Remove(SpoofContext(), vm.Reference()) },
+				new(types.AlreadyExists), func() { ctx.Map.Remove(ctx, vm.Reference()) },
 			},
 			{
 				nil, func() {},
@@ -386,7 +374,7 @@ func TestRegisterVm(t *testing.T) {
 			ct := object.NewTask(c.Client, res.Returnval)
 			_ = ct.Wait(ctx)
 
-			rt := Map.Get(res.Returnval).(*Task)
+			rt := ctx.Map.Get(res.Returnval).(*Task)
 
 			if step.e != nil {
 				fault := rt.Info.Error.Fault
@@ -696,7 +684,7 @@ func TestPlaceVmsXClusterRelocate(t *testing.T) {
 			poolMoRefs = append(poolMoRefs, pool.Reference())
 		}
 
-		vmMoRef := Map.Any("VirtualMachine").(*VirtualMachine).Reference()
+		vmMoRef := Map(ctx).Any("VirtualMachine").(*VirtualMachine).Reference()
 
 		cfgSpec := types.VirtualMachineConfigSpec{}
 
@@ -815,10 +803,10 @@ func TestPlaceVmsXClusterReconfigure(t *testing.T) {
 		}
 		finder.SetDatacenter(datacenter)
 
-		vm := Map.Any("VirtualMachine").(*VirtualMachine)
-		host := Map.Get(vm.Runtime.Host.Reference()).(*HostSystem)
-		cluster := Map.Get(*host.Parent).(*ClusterComputeResource)
-		pool := Map.Get(*cluster.ResourcePool).(*ResourcePool)
+		vm := Map(ctx).Any("VirtualMachine").(*VirtualMachine)
+		host := Map(ctx).Get(vm.Runtime.Host.Reference()).(*HostSystem)
+		cluster := Map(ctx).Get(*host.Parent).(*ClusterComputeResource)
+		pool := Map(ctx).Get(*cluster.ResourcePool).(*ResourcePool)
 
 		var poolMoRefs []types.ManagedObjectReference
 		poolMoRefs = append(poolMoRefs, pool.Reference())

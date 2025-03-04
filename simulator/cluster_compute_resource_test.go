@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -35,7 +23,7 @@ import (
 
 func TestClusterESX(t *testing.T) {
 	content := esx.ServiceContent
-	s := New(NewServiceInstance(SpoofContext(), content, esx.RootFolder))
+	s := New(NewServiceInstance(NewContext(), content, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -61,7 +49,7 @@ func TestClusterESX(t *testing.T) {
 
 func TestClusterVC(t *testing.T) {
 	content := vpx.ServiceContent
-	s := New(NewServiceInstance(SpoofContext(), content, vpx.RootFolder))
+	s := New(NewServiceInstance(NewContext(), content, vpx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -189,8 +177,8 @@ func TestPlaceVmReconfigure(t *testing.T) {
 				t.Fatalf("failed to get default datacenter: %v", err)
 			}
 			finder.SetDatacenter(datacenter)
-			vmMoRef := Map.Any("VirtualMachine").(*VirtualMachine).Reference()
-			clusterMoRef := Map.Any("ClusterComputeResource").(*ClusterComputeResource).Reference()
+			vmMoRef := Map(ctx).Any("VirtualMachine").(*VirtualMachine).Reference()
+			clusterMoRef := Map(ctx).Any("ClusterComputeResource").(*ClusterComputeResource).Reference()
 			clusterObj := object.NewClusterComputeResource(c, clusterMoRef)
 
 			// PlaceVm.
@@ -217,9 +205,9 @@ func TestPlaceVmRelocate(t *testing.T) {
 		}
 		finder.SetDatacenter(datacenter)
 
-		vmMoRef := Map.Any("VirtualMachine").(*VirtualMachine).Reference()
-		hostMoRef := Map.Any("HostSystem").(*HostSystem).Reference()
-		dsMoRef := Map.Any("Datastore").(*Datastore).Reference()
+		vmMoRef := Map(ctx).Any("VirtualMachine").(*VirtualMachine).Reference()
+		hostMoRef := Map(ctx).Any("HostSystem").(*HostSystem).Reference()
+		dsMoRef := Map(ctx).Any("Datastore").(*Datastore).Reference()
 
 		tests := []struct {
 			name         string
@@ -355,7 +343,7 @@ func TestPlaceVmRelocate(t *testing.T) {
 				PlacementType: string(types.PlacementSpecPlacementTypeRelocate),
 			}
 
-			clusterMoRef := Map.Any("ClusterComputeResource").(*ClusterComputeResource).Reference()
+			clusterMoRef := Map(ctx).Any("ClusterComputeResource").(*ClusterComputeResource).Reference()
 			clusterObj := object.NewClusterComputeResource(c, clusterMoRef)
 			_, err = clusterObj.PlaceVm(ctx, placementSpec)
 			if err == nil && test.expectedErr != "" {

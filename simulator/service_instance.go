@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package simulator
 
@@ -33,21 +21,16 @@ type ServiceInstance struct {
 	mo.ServiceInstance
 }
 
-func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Folder) *ServiceInstance {
-	// TODO: This function ignores the passed in Map and operates on the
-	// global Map.
-	Map = NewRegistry()
-	ctx.Map = Map
-
+func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Folder) (*Context, *ServiceInstance) {
 	s := &ServiceInstance{}
 
 	s.Self = vim25.ServiceInstance
 	s.Content = content
 
-	Map.Put(s)
+	ctx.Map.Put(s)
 
 	f := &Folder{Folder: folder}
-	Map.Put(f)
+	ctx.Map.Put(f)
 
 	if content.About.ApiType == "HostAgent" {
 		CreateDefaultESX(ctx, f)
@@ -58,18 +41,22 @@ func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Fo
 	refs := mo.References(content)
 
 	for i := range refs {
-		if Map.Get(refs[i]) != nil {
+		if ctx.Map.Get(refs[i]) != nil {
 			continue
 		}
 		content := types.ObjectContent{Obj: refs[i]}
-		o, err := loadObject(content)
+		o, err := loadObject(ctx, content)
 		if err != nil {
 			panic(err)
 		}
-		Map.Put(o)
+		ctx.Map.Put(o)
 	}
 
-	return s
+	return ctx, s
+}
+
+func (s *ServiceInstance) ServiceContent() types.ServiceContent {
+	return s.Content
 }
 
 func (s *ServiceInstance) RetrieveServiceContent(*types.RetrieveServiceContent) soap.HasFault {
