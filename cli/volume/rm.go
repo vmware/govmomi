@@ -17,6 +17,8 @@ import (
 
 type rm struct {
 	*flags.ClientFlag
+
+	keep bool
 }
 
 func init() {
@@ -26,6 +28,8 @@ func init() {
 func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.keep, "keep", false, "Keep backing disk")
 }
 
 func (cmd *rm) Usage() string {
@@ -55,7 +59,7 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	ids := []types.CnsVolumeId{{Id: f.Arg(0)}}
 
-	task, err := c.DeleteVolume(ctx, ids, true)
+	task, err := c.DeleteVolume(ctx, ids, !cmd.keep)
 	if err != nil {
 		return err
 	}
