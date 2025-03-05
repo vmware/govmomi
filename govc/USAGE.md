@@ -430,6 +430,7 @@ but appear via `govc $cmd -h`:
  - [vm.unregister](#vmunregister)
  - [vm.upgrade](#vmupgrade)
  - [vm.vnc](#vmvnc)
+ - [volume.extend](#volumeextend)
  - [volume.ls](#volumels)
  - [volume.rm](#volumerm)
  - [volume.snapshot.create](#volumesnapshotcreate)
@@ -7631,6 +7632,20 @@ Options:
   -password=             VNC password
   -port=-1               VNC port (-1 for auto-select)
   -port-range=5900-5999  VNC port auto-select range
+```
+
+## volume.extend
+
+```
+Usage: govc volume.extend [OPTIONS] ID
+
+Extend CNS volume.
+
+Examples:
+  govc volume.extend -size 10GB f75989dc-95b9-4db7-af96-8583f24bc59d
+
+Options:
+  -size=0B               New size of new volume
 ```
 
 ## volume.ls
