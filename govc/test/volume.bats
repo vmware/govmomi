@@ -117,10 +117,16 @@ load test_helper
   run govc volume.ls "$vol"
   assert_success
 
+  run govc volume.extend -size 20M "$id"
+  assert_success
+
   run govc volume.rm "$vol"
   assert_success
 
   run govc disk.ls "$id"
+  assert_failure
+
+  run govc volume.extend -size 30M "$id"
   assert_failure
 }
 

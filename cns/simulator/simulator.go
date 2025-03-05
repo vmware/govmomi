@@ -473,27 +473,30 @@ func (m *CnsVolumeManager) CnsDetachVolume(ctx *simulator.Context, req *cnstypes
 // CnsExtendVolume simulates ExtendVolume call for simulated vc
 func (m *CnsVolumeManager) CnsExtendVolume(ctx *simulator.Context, req *cnstypes.CnsExtendVolume) soap.HasFault {
 	task := simulator.CreateTask(m, "CnsExtendVolume", func(task *simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
-		if len(req.ExtendSpecs) == 0 {
-			return nil, &vim25types.InvalidArgument{InvalidProperty: "CnsExtendVolumeSpec"}
+		if len(req.ExtendSpecs) != 1 {
+			return nil, &vim25types.InvalidArgument{InvalidProperty: "InputSpec"} // Same as real VC, currently
 		}
-		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
 
-		for _, extendSpecs := range req.ExtendSpecs {
-			for _, dsVolumes := range m.volumes {
-				for id, volume := range dsVolumes {
-					if id.Id == extendSpecs.VolumeId.Id {
-						volume.BackingObjectDetails.GetCnsBackingObjectDetails().CapacityInMb = extendSpecs.CapacityInMb
-						operationResult = append(operationResult, &cnstypes.CnsVolumeOperationResult{
-							VolumeId: volume.VolumeId,
-						})
-						break
-					}
-				}
+		found := false
+		spec := req.ExtendSpecs[0]
+		res := cnstypes.CnsVolumeOperationResult{
+			VolumeId: spec.VolumeId,
+		}
+
+		for _, volumes := range m.volumes {
+			if volume, ok := volumes[spec.VolumeId]; ok {
+				found = true
+				volume.BackingObjectDetails.GetCnsBackingObjectDetails().CapacityInMb = spec.CapacityInMb
+				break
 			}
 		}
 
+		if !found {
+			res.Fault = &vim25types.LocalizedMethodFault{Fault: new(vim25types.NotFound)}
+		}
+
 		return &cnstypes.CnsVolumeOperationBatchResult{
-			VolumeResults: operationResult,
+			VolumeResults: []cnstypes.BaseCnsVolumeOperationResult{&res},
 		}, nil
 	})
 
