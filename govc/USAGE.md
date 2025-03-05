@@ -7691,6 +7691,7 @@ Examples:
   govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d
 
 Options:
+  -keep=false            Keep backing disk
 ```
 
 ## volume.snapshot.create

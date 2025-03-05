@@ -133,10 +133,14 @@ load test_helper
 @test "volume.rm" {
   vcsim_env
 
-  run env GOVC_SHOW_UNRELEASED=true govc volume.create \
-      -cluster-id my-cluster my-volume
+  export GOVC_SHOW_UNRELEASED=true
+
+  run govc volume.create -cluster-id my-cluster my-volume
   assert_success
   id="$output"
+
+  run govc disk.ls "$id"
+  assert_success
 
   run govc volume.rm invalid
   assert_failure
@@ -146,6 +150,19 @@ load test_helper
 
   run govc volume.rm "$id"
   assert_failure
+
+  run govc disk.ls "$id"
+  assert_failure
+
+  run govc volume.create -cluster-id my-cluster my-volume
+  assert_success
+  id="$output"
+
+  run govc volume.rm -keep "$id"
+  assert_success
+
+  run govc disk.ls "$id"
+  assert_success
 }
 
 @test "volume.snapshot" {
