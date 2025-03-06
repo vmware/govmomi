@@ -3,6 +3,7 @@ module github.com/vmware/govmomi
 go 1.21 // required for slices/maps package and built-in clear function
 
 require (
+	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/a8m/tree v0.0.0-20230208161321-36ae24ddad15
 	github.com/dougm/pretty v0.0.0-20160325215624-add1dbc86daf
 	github.com/google/go-cmp v0.7.0
