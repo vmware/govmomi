@@ -81,7 +81,7 @@ load test_helper
   assert_success
   assert_matches "my-cluster"
 
-  run govc volume.ls -b another-volume # -b invokes CnsQueryVolumeInfo
+  run govc volume.ls -b "$id" # -b invokes CnsQueryVolumeInfo
   assert_success
 
   run govc volume.ls -json -b -n another-volume
@@ -117,20 +117,30 @@ load test_helper
   run govc volume.ls "$vol"
   assert_success
 
+  run govc volume.extend -size 20M "$id"
+  assert_success
+
   run govc volume.rm "$vol"
   assert_success
 
   run govc disk.ls "$id"
+  assert_failure
+
+  run govc volume.extend -size 30M "$id"
   assert_failure
 }
 
 @test "volume.rm" {
   vcsim_env
 
-  run env GOVC_SHOW_UNRELEASED=true govc volume.create \
-      -cluster-id my-cluster my-volume
+  export GOVC_SHOW_UNRELEASED=true
+
+  run govc volume.create -cluster-id my-cluster my-volume
   assert_success
   id="$output"
+
+  run govc disk.ls "$id"
+  assert_success
 
   run govc volume.rm invalid
   assert_failure
@@ -140,6 +150,19 @@ load test_helper
 
   run govc volume.rm "$id"
   assert_failure
+
+  run govc disk.ls "$id"
+  assert_failure
+
+  run govc volume.create -cluster-id my-cluster my-volume
+  assert_success
+  id="$output"
+
+  run govc volume.rm -keep "$id"
+  assert_success
+
+  run govc disk.ls "$id"
+  assert_success
 }
 
 @test "volume.snapshot" {

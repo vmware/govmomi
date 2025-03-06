@@ -13,41 +13,38 @@ import (
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/types"
+	"github.com/vmware/govmomi/units"
 )
 
-type rm struct {
+type extend struct {
 	*flags.ClientFlag
 
-	keep bool
+	size units.ByteSize
 }
 
 func init() {
-	cli.Register("volume.rm", &rm{})
+	cli.Register("volume.extend", &extend{})
 }
 
-func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *extend) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
-	f.BoolVar(&cmd.keep, "keep", false, "Keep backing disk")
+	f.Var(&cmd.size, "size", "New size of new volume")
 }
 
-func (cmd *rm) Usage() string {
+func (cmd *extend) Usage() string {
 	return "ID"
 }
 
-func (cmd *rm) Description() string {
-	return `Remove CNS volume.
-
-Note: if volume.rm returns not found errors,
-consider using 'govc disk.ls -R' to reconcile the datastore inventory.
+func (cmd *extend) Description() string {
+	return `Extend CNS volume.
 
 Examples:
-  govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d`
+  govc volume.extend -size 10GB f75989dc-95b9-4db7-af96-8583f24bc59d`
 }
 
-func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
-	// Despite the method signature, CnsDeleteVolume can only delete 1 at a time.
+func (cmd *extend) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
@@ -57,9 +54,14 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	ids := []types.CnsVolumeId{{Id: f.Arg(0)}}
+	spec := []types.CnsVolumeExtendSpec{{
+		VolumeId: types.CnsVolumeId{
+			Id: f.Arg(0),
+		},
+		CapacityInMb: int64(cmd.size) / units.MB,
+	}}
 
-	task, err := c.DeleteVolume(ctx, ids, !cmd.keep)
+	task, err := c.ExtendVolume(ctx, spec)
 	if err != nil {
 		return err
 	}

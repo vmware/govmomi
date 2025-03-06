@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2023-2023 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package snapshot
 
@@ -27,6 +15,7 @@ import (
 
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
+	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/types"
 )
 
@@ -115,13 +104,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	for _, id := range f.Args() {
 		spec := types.CnsSnapshotQueryFilter{
-			SnapshotQuerySpecs: []types.CnsSnapshotQuerySpec{
-				{
-					VolumeId: types.CnsVolumeId{
-						Id: id,
-					},
+			SnapshotQuerySpecs: []types.CnsSnapshotQuerySpec{{
+				VolumeId: types.CnsVolumeId{
+					Id: id,
 				},
-			},
+			}},
 		}
 
 		for {
@@ -130,19 +117,21 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 				return err
 			}
 
-			info, err := task.WaitForResult(ctx, nil)
+			info, err := cns.GetTaskInfo(ctx, task)
 			if err != nil {
 				return err
 			}
 
-			res, ok := info.Result.(types.CnsSnapshotQueryResult)
-			if ok {
-				for i, e := range res.Entries {
-					if e.Error != nil {
-						return errors.New(e.Error.LocalizedMessage)
-					}
-					result.Entries = append(result.Entries, &res.Entries[i])
+			res, err := cns.GetQuerySnapshotsTaskResult(ctx, info)
+			if err != nil {
+				return err
+			}
+
+			for i, e := range res.Entries {
+				if e.Error != nil {
+					return errors.New(e.Error.LocalizedMessage)
 				}
+				result.Entries = append(result.Entries, &res.Entries[i])
 			}
 
 			if res.Cursor.Offset == res.Cursor.TotalRecords {
