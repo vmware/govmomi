@@ -81,7 +81,7 @@ load test_helper
   assert_success
   assert_matches "my-cluster"
 
-  run govc volume.ls -b another-volume # -b invokes CnsQueryVolumeInfo
+  run govc volume.ls -b "$id" # -b invokes CnsQueryVolumeInfo
   assert_success
 
   run govc volume.ls -json -b -n another-volume

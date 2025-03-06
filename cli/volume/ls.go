@@ -15,6 +15,7 @@ import (
 
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
+	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/types"
 	"github.com/vmware/govmomi/units"
 	vim "github.com/vmware/govmomi/vim25/types"
@@ -248,13 +249,14 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		res, err := task.WaitForResult(ctx, nil)
+		res, err := cns.GetTaskInfo(ctx, task)
 		if err != nil {
 			return err
 		}
 
-		if batch, ok := res.Result.(types.CnsVolumeOperationBatchResult); ok {
-			info = batch.VolumeResults
+		info, err = cns.GetTaskResultArray(ctx, res)
+		if err != nil {
+			return err
 		}
 	}
 

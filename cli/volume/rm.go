@@ -11,8 +11,8 @@ import (
 
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
+	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/types"
-	"github.com/vmware/govmomi/vim25/soap"
 )
 
 type rm struct {
@@ -64,22 +64,19 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	info, err := task.WaitForResult(ctx, nil)
+	info, err := cns.GetTaskInfo(ctx, task)
 	if err != nil {
 		return err
 	}
 
-	if res, ok := info.Result.(types.CnsVolumeOperationBatchResult); ok {
-		for _, r := range res.VolumeResults {
-			fault := r.GetCnsVolumeOperationResult().Fault
+	res, err := cns.GetTaskResult(ctx, info)
+	if err != nil {
+		return err
+	}
 
-			if fault != nil {
-				if fault.Fault != nil {
-					return soap.WrapVimFault(fault.Fault)
-				}
-				return errors.New(fault.LocalizedMessage)
-			}
-		}
+	fault := res.GetCnsVolumeOperationResult().Fault
+	if fault != nil {
+		return errors.New(fault.LocalizedMessage)
 	}
 
 	return nil
