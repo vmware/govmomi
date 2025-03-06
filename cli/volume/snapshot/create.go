@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2023-2023 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package snapshot
 
@@ -27,6 +15,7 @@ import (
 
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
+	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/types"
 )
 
@@ -111,19 +100,20 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	info, err := task.WaitForResult(ctx, nil)
+	info, err := cns.GetTaskInfo(ctx, task)
 	if err != nil {
 		return err
 	}
 
-	if res, ok := info.Result.(types.CnsVolumeOperationBatchResult); ok {
-		if vres, ok := res.VolumeResults[0].(*types.CnsSnapshotCreateResult); ok {
-			if vres.CnsSnapshotOperationResult.Fault != nil {
-				return errors.New(vres.CnsSnapshotOperationResult.Fault.LocalizedMessage)
-			}
-			return cmd.WriteResult(&createResult{VolumeResults: vres, cmd: cmd})
-		}
+	res, err := cns.GetTaskResult(ctx, info)
+	if err != nil {
+		return err
 	}
 
-	return nil
+	scr := res.(*types.CnsSnapshotCreateResult)
+	if scr.CnsSnapshotOperationResult.Fault != nil {
+		return errors.New(scr.CnsSnapshotOperationResult.Fault.LocalizedMessage)
+	}
+
+	return cmd.WriteResult(&createResult{VolumeResults: scr, cmd: cmd})
 }
