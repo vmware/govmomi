@@ -83,7 +83,7 @@ func (v *VirtualMachineSnapshot) removeSnapshotFiles(ctx *Context) types.BaseMet
 
 					host := ctx.Map.Get(*vm.Runtime.Host).(*HostSystem)
 					datastore := ctx.Map.FindByName(p.Datastore, host.Datastore).(*Datastore)
-					dFilePath := path.Join(datastore.Info.GetDatastoreInfo().Url, p.Path)
+					dFilePath := datastore.resolve(ctx, p.Path)
 
 					_ = os.Remove(dFilePath)
 				}

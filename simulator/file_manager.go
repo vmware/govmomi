@@ -7,7 +7,6 @@ package simulator
 import (
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/vmware/govmomi/simulator/esx"
@@ -54,7 +53,7 @@ func (f *FileManager) findDatastore(ctx *Context, ref mo.Reference, name string)
 	return nil, &types.InvalidDatastore{Name: name}
 }
 
-func (f *FileManager) resolve(ctx *Context, dc *types.ManagedObjectReference, name string) (string, types.BaseMethodFault) {
+func (f *FileManager) resolve(ctx *Context, dc *types.ManagedObjectReference, name string, remove ...bool) (string, types.BaseMethodFault) {
 	p, fault := parseDatastorePath(name)
 	if fault != nil {
 		return "", fault
@@ -75,9 +74,7 @@ func (f *FileManager) resolve(ctx *Context, dc *types.ManagedObjectReference, na
 		return "", fault
 	}
 
-	dir := ds.Info.GetDatastoreInfo().Url
-
-	return path.Join(dir, p.Path), nil
+	return ds.resolve(ctx, p.Path, remove...), nil
 }
 
 func (f *FileManager) fault(name string, err error, fault types.BaseFileFault) types.BaseMethodFault {
@@ -94,7 +91,7 @@ func (f *FileManager) fault(name string, err error, fault types.BaseFileFault) t
 }
 
 func (f *FileManager) deleteDatastoreFile(ctx *Context, req *types.DeleteDatastoreFile_Task) types.BaseMethodFault {
-	file, fault := f.resolve(ctx, req.Datacenter, req.Name)
+	file, fault := f.resolve(ctx, req.Datacenter, req.Name, true)
 	if fault != nil {
 		return fault
 	}

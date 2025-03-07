@@ -35,9 +35,12 @@ func (m *DatastoreNamespaceManager) ConvertNamespacePathToUuidPath(ctx *Context,
 	}
 
 	var ds *Datastore
+	ns := ""
+
 	for _, ref := range dc.Datastore {
 		ds = ctx.Map.Get(ref).(*Datastore)
-		if strings.HasPrefix(req.NamespaceUrl, ds.Summary.Url) {
+		ns = strings.TrimPrefix(req.NamespaceUrl, ds.Summary.Url)
+		if ns != req.NamespaceUrl {
 			break
 		}
 		ds = nil
@@ -54,7 +57,7 @@ func (m *DatastoreNamespaceManager) ConvertNamespacePathToUuidPath(ctx *Context,
 	}
 
 	body.Res = &types.ConvertNamespacePathToUuidPathResponse{
-		Returnval: req.NamespaceUrl,
+		Returnval: ds.resolve(ctx, ns),
 	}
 
 	return body
@@ -101,10 +104,8 @@ func (m *DatastoreNamespaceManager) CreateDirectory(ctx *Context, req *types.Cre
 	if fault.Fault() != nil {
 		body.Fault_ = fault.Fault()
 	} else {
-		dir := ds.Info.GetDatastoreInfo().Url
-
 		body.Res = &types.CreateDirectoryResponse{
-			Returnval: path.Join(dir, req.DisplayName),
+			Returnval: ds.resolve(ctx, req.DisplayName),
 		}
 	}
 

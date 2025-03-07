@@ -134,7 +134,7 @@ type Model struct {
 	// total number of inventory objects, set by Count()
 	total int
 
-	dirs []string
+	dir string
 }
 
 // ESX is the default Model for a standalone ESX instance
@@ -473,6 +473,9 @@ func (m *Model) Load(dir string) error {
 func (m *Model) Create() error {
 	ctx := NewContext()
 	m.Service = New(NewServiceInstance(ctx, m.ServiceContent, m.RootFolder))
+	if err := m.createRootTempDir(ctx.Map.OptionManager()); err != nil {
+		return err
+	}
 	return m.CreateInfrastructure(ctx)
 }
 
@@ -818,12 +821,25 @@ func (m *Model) CreateInfrastructure(ctx *Context) error {
 	return nil
 }
 
-func (m *Model) createTempDir(dc string, name string) (string, error) {
-	dir, err := os.MkdirTemp("", fmt.Sprintf("govcsim-%s-%s-", dc, name))
-	if err == nil {
-		m.dirs = append(m.dirs, dir)
+func (m *Model) createRootTempDir(opt *OptionManager) error {
+	var err error
+
+	m.dir, err = os.MkdirTemp("", "govcsim-")
+	if err != nil {
+		return err
 	}
-	return dir, err
+
+	opt.Setting = append(opt.Setting, &types.OptionValue{
+		Key:   "vcsim.home",
+		Value: m.dir,
+	})
+
+	return nil
+}
+
+func (m *Model) createTempDir(name ...string) (string, error) {
+	p := path.Join(m.dir, strings.Join(name, "-"))
+	return p, os.Mkdir(p, 0700)
 }
 
 func (m *Model) createLocalDatastore(dc string, name string, hosts []*object.HostSystem) error {
@@ -860,9 +876,7 @@ func (m *Model) Remove() {
 	}
 	ctx.Map.m.Unlock()
 
-	for _, dir := range m.dirs {
-		_ = os.RemoveAll(dir)
-	}
+	_ = os.RemoveAll(m.dir)
 }
 
 // Run calls f with a Client connected to a simulator server instance, which is stopped after f returns.

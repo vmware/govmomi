@@ -92,20 +92,29 @@ func TestResolveLibraryItemStorage(t *testing.T) {
 				rc := rest.NewClient(vc)
 				lf := finder.NewPathFinder(library.NewManager(rc), vc)
 
+				dsName := "LocalDS_0"
+				if v := tc.topLevelDirectoryCreateSupported; v != nil && *v == false {
+					dsName = "vsanDatastore"
+
+					err := enableVSAN(ctx, vf)
+					if !assert.NoError(t, err) {
+						t.FailNow()
+					}
+				}
+
 				dc, err := vf.Datacenter(ctx, "*")
 				if !assert.NoError(t, err) || !assert.NotNil(t, dc) {
 					t.FailNow()
 				}
 
-				ds, err := vf.Datastore(ctx, "*")
+				ds, err := vf.Datastore(ctx, dsName)
 				if !assert.NoError(t, err) || !assert.NotNil(t, ds) {
 					t.FailNow()
 				}
 
 				var (
-					dsName string
-					dsURL  string
-					moDS   mo.Datastore
+					dsURL string
+					moDS  mo.Datastore
 				)
 				if !assert.NoError(
 					t,
@@ -117,7 +126,6 @@ func TestResolveLibraryItemStorage(t *testing.T) {
 					t.FailNow()
 				}
 
-				dsName = moDS.Name
 				dsURL = moDS.Summary.Url
 
 				storage := []library.Storage{
@@ -132,23 +140,6 @@ func TestResolveLibraryItemStorage(t *testing.T) {
 						},
 					},
 				}
-
-				var fsType string
-				if v := tc.topLevelDirectoryCreateSupported; v != nil && *v {
-					fsType = string(types.HostFileSystemVolumeFileSystemTypeOTHER)
-				} else {
-					fsType = string(types.HostFileSystemVolumeFileSystemTypeVsan)
-				}
-
-				sctx := ctx.(*simulator.Context)
-				sctx.Map.WithLock(
-					sctx,
-					ds.Reference(),
-					func() {
-						ds := sctx.Map.Get(ds.Reference()).(*simulator.Datastore)
-						ds.Summary.Type = fsType
-						ds.Capability.TopLevelDirectoryCreateSupported = tc.topLevelDirectoryCreateSupported
-					})
 
 				nilDSM := tc.datastoreMap == nil
 
@@ -191,4 +182,24 @@ func TestResolveLibraryItemStorage(t *testing.T) {
 			})
 		})
 	}
+}
+
+// TODO(dougm) consider vSAN enablement via simulator.Model
+func enableVSAN(ctx context.Context, vf *find.Finder) error {
+	cluster, err := vf.DefaultClusterComputeResource(ctx)
+	if err != nil {
+		return err
+	}
+
+	task, err := cluster.Reconfigure(ctx, &types.ClusterConfigSpecEx{
+		VsanConfig: &types.VsanClusterConfigInfo{
+			Enabled: types.NewBool(true),
+		},
+	}, true)
+
+	if err != nil {
+		return err
+	}
+
+	return task.Wait(ctx)
 }

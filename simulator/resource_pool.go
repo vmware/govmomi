@@ -279,7 +279,7 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 			file.FromString(info.GetVirtualDeviceFileBackingInfo().FileName)
 			name := path.Base(file.Path)
 			ds := vm.findDatastore(ctx, file.Datastore)
-			lease.files[name] = path.Join(ds.Info.GetDatastoreInfo().Url, file.Path)
+			lease.files[name] = ds.resolve(ctx, file.Path)
 
 			_, disk := d.(*types.VirtualDisk)
 			kind := device.Type(d)
