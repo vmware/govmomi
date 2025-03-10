@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -146,10 +145,9 @@ func (m *VcenterVStorageObjectManager) RegisterDisk(ctx *Context, req *types.Reg
 		return invalid()
 	}
 
-	st, err := os.Stat(filepath.Join(ds.Info.GetDatastoreInfo().Url, u.Path))
+	st, err := os.Stat(ds.resolve(ctx, u.Path))
 	if err != nil {
 		return invalid()
-
 	}
 	if st.IsDir() {
 		return invalid()
@@ -199,7 +197,7 @@ func (m *VcenterVStorageObjectManager) createObject(ctx *Context, req *types.Cre
 	if !ok {
 		objects = make(map[types.ID]*VStorageObject)
 		m.objects[ds.Self] = objects
-		_ = os.MkdirAll(filepath.Join(ds.Info.GetDatastoreInfo().Url, dir), 0750)
+		_ = os.MkdirAll(ds.resolve(ctx, dir), 0750)
 	}
 
 	id := uuid.New().String()

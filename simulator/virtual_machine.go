@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -93,7 +94,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 
 	dc := ctx.Map.getEntityDatacenter(folder.(mo.Entity))
 	ds := ctx.Map.FindByName(vmx.Datastore, dc.Datastore).(*Datastore)
-	dir := path.Join(ds.Info.GetDatastoreInfo().Url, vmx.Path)
+	dir := ds.resolve(ctx, vmx.Path)
 
 	if path.Ext(vmx.Path) == ".vmx" {
 		dir = path.Dir(dir)
@@ -807,7 +808,7 @@ func (vm *VirtualMachine) updateDiskLayouts(ctx *Context) types.BaseMethodFault 
 				}
 
 				datastore := vm.useDatastore(ctx, p.Datastore)
-				dFilePath := path.Join(datastore.Info.GetDatastoreInfo().Url, p.Path)
+				dFilePath := datastore.resolve(ctx, p.Path)
 
 				var fileSize int64
 				// If file can not be opened - fileSize will be 0
@@ -953,7 +954,7 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 		}
 
 		datastore := vm.useDatastore(ctx, p.Datastore)
-		directory := path.Join(datastore.Info.GetDatastoreInfo().Url, p.Path)
+		directory := datastore.resolve(ctx, p.Path)
 
 		if path.Ext(p.Path) == ".vmx" {
 			directory = path.Dir(directory) // vm.Config.Files.VmPathName can be a directory or full path to .vmx
@@ -1027,7 +1028,7 @@ func (vm *VirtualMachine) createFile(ctx *Context, spec string, name string, reg
 	ds := vm.useDatastore(ctx, p.Datastore)
 
 	nhost := len(ds.Host)
-	if ds.Name == "vsanDatastore" && nhost < 3 {
+	if internal.IsDatastoreVSAN(ds.Datastore) && nhost < 3 {
 		fault := new(types.CannotCreateFile)
 		fault.FaultMessage = []types.LocalizableMessage{
 			{
@@ -1043,7 +1044,7 @@ func (vm *VirtualMachine) createFile(ctx *Context, spec string, name string, reg
 		return nil, fault
 	}
 
-	file := path.Join(ds.Info.GetDatastoreInfo().Url, p.Path)
+	file := ds.resolve(ctx, p.Path)
 
 	if name != "" {
 		if path.Ext(p.Path) == ".vmx" {

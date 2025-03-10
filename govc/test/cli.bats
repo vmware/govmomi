@@ -174,7 +174,7 @@ load test_helper
 }
 
 @test "govc format error" {
-  vcsim_env
+  vcsim_env -host 1
 
   vm=DC0_H0_VM0
 
@@ -192,7 +192,7 @@ load test_helper
   assert_failure
   gofmt <<<"$output"
 
-  run govc datastore.create -type local -name vsanDatastore -path "$BATS_TMPDIR" DC0_C0_H0
+  run govc cluster.change -vsan-enabled DC0_C0
   assert_success
 
   run govc vm.create -ds vsanDatastore "$(new_id)"

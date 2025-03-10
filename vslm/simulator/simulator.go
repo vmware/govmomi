@@ -746,6 +746,8 @@ func (*VslmTask) task(ctx *simulator.Context, ref vim.ManagedObjectReference) (v
 	ref.Type = "Task"
 
 	if task, ok := ctx.Map.Get(ref).(*simulator.Task); ok {
+		unlock := ctx.Map.AcquireLock(ctx, ref)
+		defer unlock()
 		return task.Info, nil
 	}
 

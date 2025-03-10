@@ -9,6 +9,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -30,7 +31,7 @@ type searchDatastore struct {
 	recurse bool
 }
 
-func (s *searchDatastore) addFile(file os.FileInfo, res *types.HostDatastoreBrowserSearchResults) {
+func (s *searchDatastore) addFile(fname string, file os.FileInfo, res *types.HostDatastoreBrowserSearchResults) {
 	details := s.SearchSpec.Details
 	if details == nil {
 		details = new(types.FileQueryFlags)
@@ -39,7 +40,8 @@ func (s *searchDatastore) addFile(file os.FileInfo, res *types.HostDatastoreBrow
 	name := file.Name()
 
 	info := types.FileInfo{
-		Path: name,
+		Path:         name,
+		FriendlyName: fname,
 	}
 
 	var finfo types.BaseFileInfo = &info
@@ -135,7 +137,28 @@ func (s *searchDatastore) queryMatch(file os.FileInfo) bool {
 	return false
 }
 
-func (s *searchDatastore) search(ds *types.ManagedObjectReference, folder string, dir string) error {
+func friendlyName(ctx *Context, root bool, ds *Datastore, p string) string {
+	if !root || p == "" || !internal.IsDatastoreVSAN(ds.Datastore) {
+		return ""
+	}
+
+	unlock := ctx.Map.AcquireLock(ctx, ds.Self)
+	defer unlock()
+
+	if ds.namespace == nil {
+		return ""
+	}
+
+	for name, id := range ds.namespace {
+		if p == id {
+			return name
+		}
+	}
+
+	return ""
+}
+
+func (s *searchDatastore) search(ctx *Context, ds *Datastore, folder string, dir string, root bool) error {
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		tracef("search %s: %s", dir, err)
@@ -143,7 +166,7 @@ func (s *searchDatastore) search(ds *types.ManagedObjectReference, folder string
 	}
 
 	res := types.HostDatastoreBrowserSearchResults{
-		Datastore:  ds,
+		Datastore:  &ds.Self,
 		FolderPath: folder,
 	}
 
@@ -153,14 +176,14 @@ func (s *searchDatastore) search(ds *types.ManagedObjectReference, folder string
 		if s.queryMatch(info) {
 			for _, m := range s.SearchSpec.MatchPattern {
 				if ok, _ := path.Match(m, name); ok {
-					s.addFile(info, &res)
+					s.addFile(friendlyName(ctx, root, ds, name), info, &res)
 					break
 				}
 			}
 		}
 
 		if s.recurse && file.IsDir() {
-			_ = s.search(ds, path.Join(folder, name), path.Join(dir, name))
+			_ = s.search(ctx, ds, path.Join(folder, name), path.Join(dir, name), false)
 		}
 	}
 
@@ -187,9 +210,9 @@ func (s *searchDatastore) Run(task *Task) (types.AnyType, types.BaseMethodFault)
 		task.Info.EntityName = ds.Name
 	})
 
-	dir := path.Join(ds.Info.GetDatastoreInfo().Url, p.Path)
+	dir := ds.resolve(task.ctx, p.Path)
 
-	err := s.search(&ds.Self, s.DatastorePath, dir)
+	err := s.search(task.ctx, ds, s.DatastorePath, dir, p.Path == "")
 	if err != nil {
 		ff := types.FileFault{
 			File: p.Path,

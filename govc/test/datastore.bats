@@ -436,3 +436,101 @@ upload_file() {
   run govc datastore.cluster.info -json
   assert_success
 }
+
+@test "vsan datastore" {
+  vcsim_start -host 2
+
+  run govc datastore.info vsanDatastore
+  assert_failure
+
+  run govc cluster.change -vsan-enabled /DC0/host/DC0_C0
+  assert_success
+
+  run govc datastore.info vsanDatastore
+  assert_success
+
+  run govc collect -s datastore/LocalDS_0 capability.topLevelDirectoryCreateSupported
+  assert_success "true"
+
+  run govc collect -s datastore/vsanDatastore capability.topLevelDirectoryCreateSupported
+  assert_success "false"
+
+  export GOVC_RESOURCE_POOL=DC0_C0/Resources
+  export GOVC_NETWORK=DC0_DVPG0
+  export GOVC_DATASTORE=vsanDatastore
+
+  run govc datastore.mkdir "foo"
+  assert_success
+
+  run govc datastore.rm "foo"
+  assert_success
+
+  run govc datastore.mkdir -namespace "bar"
+  assert_success
+  path="$output"
+
+  run govc datastore.rm -namespace "bar"
+  assert_failure
+
+  run govc datastore.rm -namespace "$path"
+  assert_success
+
+  run govc vm.create -ds vsanDatastore "$(new_id)"
+  assert_failure # vSAN requires >= 3 hosts
+
+  run govc cluster.add -cluster DC0_C0 -hostname 10.0.0.42 -username user -password pass
+  assert_success
+
+  run govc dvs.add -dvs DVS0 10.0.0.42
+  assert_success
+
+  run govc vm.create "nginx"
+  assert_success
+
+  uuid=$(govc datastore.ls -H=false -json | jq -r '.[].file[] | select(.friendlyName == "nginx") | .path')
+  run awk -F- "{print NF}" <<<"$uuid" # validate we have a uuid, not "nginx"
+  assert_success "5"
+
+  # friendlyName used by default
+  govc datastore.ls | grep "nginx"
+  govc datastore.ls | grep -v "$uuid"
+
+  # -H=false disables use of friendlyName
+  govc datastore.ls -H=false | grep "$uuid"
+  govc datastore.ls -H=false | grep -v "nginx"
+
+  run govc datastore.download "nginx/nginx.vmx" -
+  assert_success
+
+  run govc datastore.upload - "nginx/nginx.vmx" <<<"$output"
+  assert_success
+
+  run govc datastore.download "$uuid/nginx.vmx" -
+  assert_success
+
+  run govc datastore.upload - "$uuid/nginx.vmx" <<<"$output"
+  assert_success
+
+  govc vm.destroy "nginx"
+  assert_success
+
+  # same friendly name should have a different uuid with a new vm
+  run govc vm.create "nginx"
+  assert_success
+
+  uuid2=$(govc datastore.ls -H=false -json | jq -r '.[].file[] | select(.friendlyName == "nginx") | .path')
+  [ "$uuid" != "$uuid2" ]
+
+  run govc disk.create -size 10M my-disk
+  assert_success
+
+  run govc datastore.ls fcd
+  assert_success
+
+  uuid=$(govc datastore.ls -H=false -json | jq -r '.[].file[] | select(.friendlyName == "fcd") | .path')
+  run awk -F- "{print NF}" <<<"$uuid" # validate we have a uuid, not "nginx"
+  assert_success "5"
+
+  run govc datastore.ls "$uuid"
+  assert_success
+}
