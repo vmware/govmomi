@@ -51,6 +51,16 @@ load test_helper
 
   run govc tags.category.rm "$update_name"
   assert_success
+
+  run govc tags.category.create -id "invalid" custom-id-cat
+  assert_failure
+
+  id="urn:vmomi:InventoryServiceCategory:$(new_id):GLOBAL"
+  run govc tags.category.create -id "$id" custom-id-cat
+  assert_success
+
+  run govc tags.category.info "$id"
+  assert_success
 }
 
 @test "tags" {
@@ -117,6 +127,16 @@ load test_helper
 
   run govc tags.info enoent
   assert_failure # does not exist
+
+  run govc tags.category.create -c "$category_name" -id "invalid" custom-id-tag
+  assert_failure
+
+  id="urn:vmomi:InventoryServiceTag:$(new_id):GLOBAL"
+  run govc tags.create -c "$category_name" -id "$id" custom-id-tag
+  assert_success
+
+  run govc tags.info "$id"
+  assert_success
 }
 
 @test "tags.association" {
