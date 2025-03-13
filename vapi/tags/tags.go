@@ -1,18 +1,6 @@
-/*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package tags
 
@@ -50,6 +38,7 @@ type Tag struct {
 	Name        string   `json:"name,omitempty"`
 	CategoryID  string   `json:"category_id,omitempty"`
 	UsedBy      []string `json:"used_by,omitempty"`
+	TagID       string   `json:"tag_id,omitempty"`
 }
 
 // Patch merges updates from the given src.
@@ -73,6 +62,7 @@ func (c *Manager) CreateTag(ctx context.Context, tag *Tag) (string, error) {
 		Name        string `json:"name"`
 		Description string `json:"description"`
 		CategoryID  string `json:"category_id"`
+		TagID       string `json:"tag_id,omitempty"`
 	}
 	spec := struct {
 		Tag create `json:"create_spec"`
@@ -81,6 +71,7 @@ func (c *Manager) CreateTag(ctx context.Context, tag *Tag) (string, error) {
 			Name:        tag.Name,
 			Description: tag.Description,
 			CategoryID:  tag.CategoryID,
+			TagID:       tag.TagID,
 		},
 	}
 	if isName(tag.CategoryID) {
