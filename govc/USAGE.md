@@ -6117,6 +6117,7 @@ Examples:
 
 Options:
   -d=                    Description
+  -id=                   Category ID
   -m=false               Allow multiple tags per object
   -t=[]                  Object types
 ```
@@ -6205,6 +6206,7 @@ Examples:
 Options:
   -c=                    Category name
   -d=                    Description of tag
+  -id=                   Tag ID
 ```
 
 ## tags.detach

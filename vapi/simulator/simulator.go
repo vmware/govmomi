@@ -595,7 +595,13 @@ func (s *handler) category(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-			id := newID("Category")
+			id := spec.Category.CategoryID
+			if id == "" {
+				id = newID("Category")
+			} else if !strings.HasPrefix(id, "urn:vmomi:InventoryServiceCategory:") {
+				BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
+				return
+			}
 			spec.Category.ID = id
 			s.Category[id] = &spec.Category
 			OK(w, id)
@@ -668,7 +674,13 @@ func (s *handler) tag(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-			id := newID("Tag")
+			id := spec.Tag.TagID
+			if id == "" {
+				id = newID("Tag")
+			} else if !strings.HasPrefix(id, "urn:vmomi:InventoryServiceTag:") {
+				BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
+				return
+			}
 			spec.Tag.ID = id
 			s.Tag[id] = &spec.Tag
 			s.Association[id] = make(map[internal.AssociatedObject]bool)
