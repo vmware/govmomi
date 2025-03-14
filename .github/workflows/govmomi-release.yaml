@@ -31,7 +31,7 @@ on:
 jobs:
   release:
     name: Create Release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     outputs:
       latesttag: ${{ steps.tag.outputs.islatest }}
@@ -152,7 +152,7 @@ jobs:
   pull-request:
     needs: release
     name: Create CHANGELOG.md PR
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     continue-on-error: true
     # only update CHANGELOG for latest semver tag
     if: ${{ !inputs.dryrun && needs.release.outputs.latesttag == 'true' }}

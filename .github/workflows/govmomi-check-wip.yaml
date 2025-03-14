@@ -21,7 +21,7 @@ on:
 
 jobs:
   wip:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check WIP in PR Title
         uses: embano1/wip@v2
