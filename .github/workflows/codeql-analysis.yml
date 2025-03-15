@@ -1,35 +1,33 @@
-name: CodeQL
-"on":
+name: CodeQL Analysis
+
+permissions:
+  contents: read
+
+on:
   push:
-    branches:
-      - main
+    branches: main
   pull_request:
-    branches:
-      - main
+    branches: main
   schedule:
     - cron: 30 23 * * 06
+  workflow_dispatch:
+
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
     strategy:
       fail-fast: false
       matrix:
         language:
-          - go
+        - go
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
-      # Workaround for Go 1.21 compatibility.
-      # TODO: Remove when GitHub Action runners Support Go 1.21+.
       - name: Setup Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
-          go-version-file: "go.mod"
+          go-version-file: go.mod
           cache: false
       - name: Initialize CodeQL
         uses: github/codeql-action/init@c4fb451437765abf5018c6fbf22cce1a7da1e5cc # codeql-bundle-v2.17.1
