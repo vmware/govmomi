@@ -1,30 +1,15 @@
-#  Copyright (c) 2021 VMware, Inc. All Rights Reserved.
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-
 name: Build
+
+permissions:
+  contents: read
 
 on:
   push:
-    branches: ["main"]
-
+    branches: main
   pull_request:
-    branches: ["main"]
-
-  # also run every night
+    branches: main
   schedule:
-    - cron: "0 1 * * *"
-
+    - cron: 0 1 * * *
   workflow_dispatch:
 
 concurrency:
@@ -36,20 +21,19 @@ jobs:
     name: Build Snapshot Release (no upload)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0 # for CHANGELOG
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Setup Go
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
-          go-version: 1.22
+          go-version-file: go.mod
 
-      - name: Restore Go cache
-        uses: actions/cache@v4
+      - name: Restore Go Cache
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: |
             ~/.cache/go-build
@@ -69,7 +53,7 @@ jobs:
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} --next-tag ${NEXT_TAG} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' ${NEXT_TAG}
 
       - name: Archive CHANGELOG
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: CHANGELOG
           path: |
@@ -77,12 +61,12 @@ jobs:
           retention-days: 1
 
       - name: Build Artifacts
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@90a3faa9d0182683851fbfa97ca1a2cb983bfca3 # v6.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: latest
-          # snapshot will disable push/release
+          # Snapshot will disable push/release.
           args: release --clean --snapshot --release-notes RELEASE_CHANGELOG.md
 
       - name: Verify git clean
@@ -96,13 +80,13 @@ jobs:
             exit 1
           fi
 
-      # make artifacts available for inspection
-      # https://docs.github.com/en/actions/guides/storing-workflow-data-as-artifacts
-      - name: Archive run artifacts
-        uses: actions/upload-artifact@v4
+      # Make artifacts available for inspection.
+      # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/storing-and-sharing-data-from-a-workflow
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: dist
-          # upload only some artifacts for introspection to keep storage size small (delete after 1d)
+          # Upload some artifacts for introspection to keep storage size small.
           path: |
             dist/govc_*x86_64.tar.gz
             dist/vcsim_*x86_64.tar.gz
