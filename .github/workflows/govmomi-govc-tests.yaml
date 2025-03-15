@@ -1,25 +1,14 @@
-#  Copyright (c) 2021 VMware, Inc. All Rights Reserved.
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#  http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+name: Tests (govc)
 
-name: govc Tests
+permissions:
+  contents: read
+  actions: read
 
 on:
   push:
-    branches: ["main"]
-
+    branches: main
   pull_request:
-    branches: ["main"]
+    branches: main
 
 concurrency:
   group: govmomi-govc-tests-${{ github.head_ref || github.run_id }}
@@ -31,9 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ["1.22"]
-        platform: ["ubuntu-latest"]
-        cmd: ["govc-test"]
+        go-version: ["1.23"]
+        platform: [ubuntu-latest]
+        cmd: [govc-test]
         experimental: [false]
         timeout: [20]
 
@@ -42,17 +31,17 @@ jobs:
     timeout-minutes: ${{ matrix.timeout }}
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: Check Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
 
-      - name: Restore Go cache
-        uses: actions/cache@v4
+      - name: Restore Go Cache
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: |
             ~/.cache/go-build
@@ -65,30 +54,30 @@ jobs:
         run: |
           make ${{ matrix.cmd }}
 
-      - name: Debug with tmate on failure
+      - name: Debug on Failure
         if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@v3
+        uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # v3.19
 
   govc-docs:
-    name: Verify govc docs are up2date
+    name: Verify Updated Docs
     strategy:
       matrix:
         go-version: ["1.22"]
-        platform: ["ubuntu-latest"]
+        platform: [ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 3
     steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: Check Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v5
+      - name: Setup Go ${{ matrix.go-version }}
+        uses: actions/setup-go@f111f3307d8850f501ac008e886eec1fd1932a34 # v5.3.0
         with:
           go-version: ${{ matrix.go-version }}
         id: go
 
-      - name: Restore Go cache
-        uses: actions/cache@v4
+      - name: Restore Go Cache
+        uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
         with:
           path: |
             ~/.cache/go-build
