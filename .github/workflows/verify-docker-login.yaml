@@ -22,7 +22,7 @@ on:
 jobs:
   login:
     name: Verify Docker Login
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 3
 
     steps:
