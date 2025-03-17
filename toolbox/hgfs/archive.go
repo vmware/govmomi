@@ -238,6 +238,12 @@ func archiveRead(u *url.URL, tr *tar.Reader) error {
 			return err
 		}
 
+		// validate to prevent directory traversal
+		if strings.Contains(header.Name, "..") {
+			log.Printf("skipping invalid entry with '..' in name: %s", header.Name)
+			continue
+		}
+
 		name := filepath.Join(u.Path, header.Name)
 		mode := os.FileMode(header.Mode)
 
