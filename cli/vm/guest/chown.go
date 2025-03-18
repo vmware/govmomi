@@ -74,22 +74,24 @@ func (cmd *chown) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	id, err := strconv.Atoi(ids[0])
+	ownerIDStr := ids[0]
+	ownerID, err := strconv.Atoi(ownerIDStr)
 	if err != nil {
 		return err
 	}
 
 	attr.OwnerId = new(int32)
-	*attr.OwnerId = int32(id)
+	*attr.OwnerId = int32(ownerID)
 
 	if len(ids) == 2 {
-		id, err = strconv.Atoi(ids[1])
+		groupIDStr := ids[1]
+		groupID, err := strconv.Atoi(groupIDStr)
 		if err != nil {
 			return err
 		}
 
 		attr.GroupId = new(int32)
-		*attr.GroupId = int32(id)
+		*attr.GroupId = int32(groupID)
 	}
 
 	return m.ChangeFileAttributes(ctx, cmd.Auth(), f.Arg(1), &attr)
