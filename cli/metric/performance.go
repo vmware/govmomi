@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/vmware/govmomi/cli/flags"
@@ -88,7 +89,12 @@ func (f *PerformanceFlag) Interval(val int32) int32 {
 			if err != nil {
 				panic(err)
 			}
-			interval = int32(n)
+
+			if n > math.MaxInt32 {
+				panic(fmt.Errorf("value out of range for int32: %d", n))
+			} else {
+				interval = int32(n)
+			}
 		}
 	}
 
