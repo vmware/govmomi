@@ -1,24 +1,13 @@
-/*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// © Broadcom. All Rights Reserved.
+// The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+// SPDX-License-Identifier: Apache-2.0
 
 package object
 
 import (
 	"context"
 	"errors"
+	"math"
 	"strconv"
 
 	"github.com/vmware/govmomi/vim25"
@@ -127,9 +116,12 @@ func (m CustomFieldsManager) FindKey(ctx context.Context, name string) (int32, e
 		}
 	}
 
-	k, err := strconv.Atoi(name)
-	if err == nil {
-		// assume literal int key
+	k, err := strconv.ParseInt(name, 10, 32)
+	if err != nil {
+		return -1, ErrKeyNameNotFound
+	}
+
+	if k >= math.MinInt32 && k <= math.MaxInt32 {
 		return int32(k), nil
 	}
 
