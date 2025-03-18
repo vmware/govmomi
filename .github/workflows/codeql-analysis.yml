@@ -2,6 +2,7 @@ name: CodeQL Analysis
 
 permissions:
   contents: read
+  security-events: write
 
 on:
   push:
@@ -20,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         language:
-        - go
+          - go
     steps:
       - name: Checkout Repository
         uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4.0.0
@@ -33,7 +34,12 @@ jobs:
         uses: github/codeql-action/init@c4fb451437765abf5018c6fbf22cce1a7da1e5cc # codeql-bundle-v2.17.1
         with:
           languages: "${{ matrix.language }}"
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@c4fb451437765abf5018c6fbf22cce1a7da1e5cc # codeql-bundle-v2.17.1
+          tools: latest
+      - name: Build
+        # Used instead of codeql-action/autobuild.
+        run: |
+          echo "Building govmomi..." && go build ./ > /dev/null 2>&1 || { echo "error building govmomi"; exit 1; }
+          echo "Building govc..." && (cd govc && make clean > /dev/null 2>&1 && make all > /dev/null 2>&1) || { echo "error building govc"; exit 1; }
+          echo "Building vcsim..." && (cd vcsim && make clean > /dev/null 2>&1 && make all > /dev/null 2>&1) || { echo "error building vcsim"; exit 1; }
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@c4fb451437765abf5018c6fbf22cce1a7da1e5cc # codeql-bundle-v2.17.1
