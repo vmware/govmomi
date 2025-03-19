@@ -1,10 +1,12 @@
 # Create a builder container
-# golang:1.18.0-buster amd64
-FROM golang@sha256:7d39537344486528f8cdb3bd8adb98ab7f0f4236044b6944fed8631da35a4ce5 AS build
+# Reference: https://hub.docker.com/_/golang/tags
+# Note: Official Docker images for Go use Debian.
+ARG GO_VERSION
+FROM golang:1.23.0 AS build
 WORKDIR /go/src/app
 
 # Create appuser to isolate potential vulnerabilities
-# See https://stackoverflow.com/a/55757473/12429735
+# Reference: https://stackoverflow.com/a/55757473/12429735
 ENV USER=appuser
 ENV UID=10001
 RUN adduser \
