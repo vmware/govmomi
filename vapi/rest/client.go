@@ -30,10 +30,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Masterminds/semver/v3"
+
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+)
+
+var (
+	vc8U3Ver = semver.MustParse("8.0.3-0")
 )
 
 // Client extends soap.Client to support JSON encoding, while inheriting security features, debug tracing and session persistence.
@@ -42,6 +48,8 @@ type Client struct {
 
 	*soap.Client
 	sessionID string
+
+	u3OrGreater bool
 }
 
 // Session information
@@ -66,7 +74,20 @@ func (m *LocalizableMessage) Error() string {
 func NewClient(c *vim25.Client) *Client {
 	sc := c.Client.NewServiceClient(Path, "")
 
-	return &Client{Client: sc}
+	restc := &Client{Client: sc}
+
+	// On 8.0U3 and greater, we don't need to Login to get a SessionID.
+	// Instead we can copy the SOAP session cookie
+	clientVer, err := semver.NewVersion(c.ServiceContent.About.Version)
+	if err == nil && clientVer.GreaterThanEqual(vc8U3Ver) {
+		restc.u3OrGreater = true
+
+		if c.SessionCookie() != nil && c.SessionCookie().Value != "" {
+			restc.SessionID(c.SessionCookie().Value)
+		}
+	}
+
+	return restc
 }
 
 // SessionID is set by calling Login() or optionally with the given id param
@@ -314,6 +335,12 @@ func (c *Client) Upload(ctx context.Context, f io.Reader, u *url.URL, param *soa
 
 // Login creates a new session via Basic Authentication with the given url.Userinfo.
 func (c *Client) Login(ctx context.Context, user *url.Userinfo) error {
+	// If this is U3 or bigger, go ahead and reuse the client session token
+	if c.u3OrGreater && c.Client.SessionCookie() != nil && c.Client.SessionCookie().Value != "" {
+		c.SessionID(c.Client.SessionCookie().Value)
+		return nil
+	}
+
 	req := c.Resource(internal.SessionPath).Request(http.MethodPost)
 
 	req.Header.Set(internal.UseHeaderAuthn, "true")
