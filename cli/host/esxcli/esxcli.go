@@ -150,7 +150,7 @@ type result struct {
 	cmd *esxcli
 }
 
-func (r *result) Dump() interface{} {
+func (r *result) Dump() any {
 	return r.Response
 }
 

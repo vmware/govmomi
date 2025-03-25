@@ -32,7 +32,7 @@ func TestProtocolEncoding(t *testing.T) {
 	// govc guest.upload /etc/hosts /tmp/hosts
 	tests := []struct {
 		pkt string
-		dec interface{}
+		dec any
 	}{
 		{
 			"AQAAAP8AAABMAAAANAAAAAAAAIApAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+AAAAAAAAAAAAAAAAAAAAAAAAA==",

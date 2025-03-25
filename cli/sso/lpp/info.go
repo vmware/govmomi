@@ -82,7 +82,7 @@ func (r *lppInfo) Write(w io.Writer) error {
 	return nil
 }
 
-func (r *lppInfo) Dump() interface{} {
+func (r *lppInfo) Dump() any {
 	return r.LocalPasswordPolicy
 }
 

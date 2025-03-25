@@ -92,8 +92,8 @@ func (r infoResultsWriter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.Result)
 }
 
-func (r infoResultsWriter) Dump() interface{} {
-	res := make([]interface{}, len(r.Result))
+func (r infoResultsWriter) Dump() any {
+	res := make([]any, len(r.Result))
 	for i := range r.Result {
 		res[i] = r.Result[0].GetResult()
 	}

@@ -172,7 +172,7 @@ func TestAgency(t *testing.T) {
 	}
 
 	testRuntimeGoalState := func(t *testing.T) {
-		validateExpectedGoalState := func(expGoalState interface{}) error {
+		validateExpectedGoalState := func(expGoalState any) error {
 			runtime, err := agency.Runtime(client.ctx)
 			if err != nil {
 				return err

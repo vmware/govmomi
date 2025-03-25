@@ -61,7 +61,7 @@ func (cmd *ls) Process(ctx context.Context) error {
 
 type groupResult []types.AdminGroup
 
-func (r groupResult) Dump() interface{} {
+func (r groupResult) Dump() any {
 	return []types.AdminGroup(r)
 }
 

@@ -103,7 +103,7 @@ func (a *archive) IsDir() bool {
 }
 
 // Sys implementation of the os.FileInfo interface method.
-func (a *archive) Sys() interface{} {
+func (a *archive) Sys() any {
 	return nil
 }
 

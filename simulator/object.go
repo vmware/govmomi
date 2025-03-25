@@ -53,7 +53,7 @@ func sha1UUID(s string) uuid.UUID {
 }
 
 // deepCopy uses xml encode/decode to copy src to dst
-func deepCopy(src, dst interface{}) {
+func deepCopy(src, dst any) {
 	b, err := xml.Marshal(src)
 	if err != nil {
 		panic(err)

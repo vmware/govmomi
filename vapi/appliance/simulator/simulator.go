@@ -57,12 +57,12 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	s.HandleFunc(shutdown.Path, h.shutdown)
 }
 
-func (h *Handler) decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
+func (h *Handler) decode(r *http.Request, w http.ResponseWriter, val any) bool {
 	return Decode(r, w, val)
 }
 
 // Decode decodes the request Body into val, returns true on success, otherwise false.
-func Decode(request *http.Request, writer http.ResponseWriter, val interface{}) bool {
+func Decode(request *http.Request, writer http.ResponseWriter, val any) bool {
 	defer request.Body.Close()
 	err := json.NewDecoder(request.Body).Decode(val)
 	if err != nil {

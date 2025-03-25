@@ -185,7 +185,7 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 	// Note that we cannot use a []mo.ManagedEntity here, since mo.Network has its own 'Name' field,
 	// the mo.Network.ManagedEntity.Name field will not be set.
 	vrefs := map[string]*struct {
-		dest interface{}
+		dest any
 		refs []types.ManagedObjectReference
 		save func()
 	}{

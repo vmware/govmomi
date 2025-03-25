@@ -119,7 +119,7 @@ func Fault(msg string, fault types.BaseMethodFault) *soap.Fault {
 	return f
 }
 
-func tracef(format string, v ...interface{}) {
+func tracef(format string, v ...any) {
 	if Trace {
 		log.Printf(format, v...)
 	}
@@ -268,12 +268,12 @@ func (s *Service) RoundTrip(ctx context.Context, request, response soap.HasFault
 // and additional namespace attributes required by some client libraries.
 // Go still has issues decoding with such a namespace, but encoding is ok.
 type soapEnvelope struct {
-	XMLName xml.Name    `xml:"soapenv:Envelope"`
-	Enc     string      `xml:"xmlns:soapenc,attr"`
-	Env     string      `xml:"xmlns:soapenv,attr"`
-	XSD     string      `xml:"xmlns:xsd,attr"`
-	XSI     string      `xml:"xmlns:xsi,attr"`
-	Body    interface{} `xml:"soapenv:Body"`
+	XMLName xml.Name `xml:"soapenv:Envelope"`
+	Enc     string   `xml:"xmlns:soapenc,attr"`
+	Env     string   `xml:"xmlns:soapenv,attr"`
+	XSD     string   `xml:"xmlns:xsd,attr"`
+	XSI     string   `xml:"xmlns:xsi,attr"`
+	Body    any      `xml:"soapenv:Body"`
 }
 
 type faultDetail struct {
@@ -498,7 +498,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var res soap.HasFault
-	var soapBody interface{}
+	var soapBody any
 
 	method, err := UnmarshalBody(ctx.Map.typeFunc, body)
 	if err != nil {
@@ -925,7 +925,7 @@ func (e *Element) decoder() *xml.Decoder {
 	return decoder
 }
 
-func (e *Element) Decode(val interface{}) error {
+func (e *Element) Decode(val any) error {
 	return e.decoder().DecodeElement(val, &e.start)
 }
 

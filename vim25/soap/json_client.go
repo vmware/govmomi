@@ -44,7 +44,7 @@ func (c *Client) jsonRoundTrip(ctx context.Context, req, res HasFault) error {
 }
 
 // Invoke calls a managed object method
-func (c *Client) invoke(ctx context.Context, this types.ManagedObjectReference, method string, params interface{}, res HasFault) error {
+func (c *Client) invoke(ctx context.Context, this types.ManagedObjectReference, method string, params any, res HasFault) error {
 	buffer := bytes.Buffer{}
 	if params != nil {
 		marshaller := types.NewJSONEncoder(&buffer)
@@ -77,7 +77,7 @@ func (c *Client) invoke(ctx context.Context, this types.ManagedObjectReference, 
 // unmarshaler checks for errors and tries to load the response body in the
 // result structure. It is assumed that result is pointer to a data structure or
 // interface{}.
-func (c *Client) responseUnmarshaler(result interface{}) func(resp *http.Response) error {
+func (c *Client) responseUnmarshaler(result any) func(resp *http.Response) error {
 	return func(resp *http.Response) error {
 		if resp.StatusCode == http.StatusNoContent ||
 			(!isError(resp.StatusCode) && resp.ContentLength == 0) {
@@ -93,7 +93,7 @@ func (c *Client) responseUnmarshaler(result interface{}) func(resp *http.Respons
 			if e != nil {
 				return e
 			}
-			var serverErr interface{}
+			var serverErr any
 			dec := types.NewJSONDecoder(bytes.NewReader(bodyBytes))
 			e = dec.Decode(&serverErr)
 			if e != nil {
@@ -180,7 +180,7 @@ func (c *Client) getPathForName(this types.ManagedObjectReference, name string) 
 // defined in methods.go. It is expected to have "Req" field that is a non-null
 // pointer to a struct. The struct simple type name is the method name. The
 // struct "This" member is the this MoRef value.
-func unpackSOAPRequest(req HasFault) (this types.ManagedObjectReference, method string, params interface{}, err error) {
+func unpackSOAPRequest(req HasFault) (this types.ManagedObjectReference, method string, params any, err error) {
 	reqBodyPtr := reflect.ValueOf(req)
 	if reqBodyPtr.Kind() != reflect.Ptr {
 		err = fmt.Errorf("Expected pointer to request body as input. %w", errInputError)
@@ -220,7 +220,7 @@ func unpackSOAPRequest(req HasFault) (this types.ManagedObjectReference, method 
 
 // getSOAPResultPtr extract a pointer to the result data structure using go
 // reflection from a SOAP data structure used for marshalling.
-func getSOAPResultPtr(result HasFault) (res interface{}, err error) {
+func getSOAPResultPtr(result HasFault) (res any, err error) {
 	resBodyPtr := reflect.ValueOf(result)
 	if resBodyPtr.Kind() != reflect.Ptr {
 		err = fmt.Errorf("Expected pointer to result body as input. %w", errInputError)

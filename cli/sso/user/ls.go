@@ -60,7 +60,7 @@ func (cmd *ls) Process(ctx context.Context) error {
 
 type userResult []types.AdminUser
 
-func (r userResult) Dump() interface{} {
+func (r userResult) Dump() any {
 	return []types.AdminUser(r)
 }
 
@@ -74,7 +74,7 @@ func (r userResult) Write(w io.Writer) error {
 
 type solutionResult []types.AdminSolutionUser
 
-func (r solutionResult) Dump() interface{} {
+func (r solutionResult) Dump() any {
 	return []types.AdminSolutionUser(r)
 }
 
@@ -88,7 +88,7 @@ func (r solutionResult) Write(w io.Writer) error {
 
 type personResult []types.AdminPersonUser
 
-func (r personResult) Dump() interface{} {
+func (r personResult) Dump() any {
 	return []types.AdminPersonUser(r)
 }
 

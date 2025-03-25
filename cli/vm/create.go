@@ -337,7 +337,7 @@ type place struct {
 	cmd *create
 }
 
-func (p *place) Dump() interface{} {
+func (p *place) Dump() any {
 	return p.Recommendations
 }
 

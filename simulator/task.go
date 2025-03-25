@@ -122,7 +122,7 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 		unlock()
 
 		state := types.TaskInfoStateSuccess
-		var fault interface{}
+		var fault any
 		if err != nil {
 			state = types.TaskInfoStateError
 			fault = types.LocalizedMethodFault{

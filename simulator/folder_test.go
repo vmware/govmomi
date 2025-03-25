@@ -339,7 +339,7 @@ func TestRegisterVm(t *testing.T) {
 		}
 
 		steps := []struct {
-			e interface{}
+			e any
 			f func()
 		}{
 			{
@@ -403,7 +403,7 @@ func TestRegisterVm(t *testing.T) {
 		_ = onTask.Wait(ctx)
 
 		steps = []struct {
-			e interface{}
+			e any
 			f func()
 		}{
 			{

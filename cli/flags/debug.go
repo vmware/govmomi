@@ -360,7 +360,7 @@ func (v *verbose) objectContent(content []types.ObjectContent) []string {
 	return s
 }
 
-func (v *verbose) prettyPrint(val interface{}) string {
+func (v *verbose) prettyPrint(val any) string {
 	p := pretty.Sprintf("%# v\n", val)
 	var res []string
 	scanner := bufio.NewScanner(strings.NewReader(p))
@@ -435,7 +435,7 @@ func (v *verbose) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
 
 	vres := reflect.ValueOf(res).Elem().FieldByName("Res").Elem()
 	ret := vres.FieldByName("Returnval")
-	var s interface{} = "void"
+	var s any = "void"
 
 	if ret.IsValid() {
 		switch x := ret.Interface().(type) {

@@ -143,7 +143,7 @@ func (h *Handler) associations(w http.ResponseWriter, r *http.Request) {
 			if d, ok := h.data[zoneId]; ok {
 				associations := append(d.Associations, clusterIds...)
 				d.Associations = associations
-				res := make(map[string]interface{})
+				res := make(map[string]any)
 				res["success"] = true
 				vapi.StatusOK(w, res)
 				return

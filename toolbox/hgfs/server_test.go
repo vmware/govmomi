@@ -25,7 +25,7 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) Dispatch(op int32, req interface{}, res interface{}) *Packet {
+func (c *Client) Dispatch(op int32, req any, res any) *Packet {
 	var err error
 	p := new(Packet)
 	p.Payload, err = MarshalBinary(req)

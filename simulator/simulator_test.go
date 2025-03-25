@@ -29,7 +29,7 @@ import (
 
 func TestUnmarshal(t *testing.T) {
 	requests := []struct {
-		body interface{}
+		body any
 		data string
 	}{
 		{

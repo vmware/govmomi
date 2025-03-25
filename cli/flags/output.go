@@ -117,9 +117,9 @@ func (flag *OutputFlag) All() bool {
 	return flag.JSON || flag.XML || flag.Dump
 }
 
-func dumpValue(val interface{}) interface{} {
+func dumpValue(val any) any {
 	type dumper interface {
-		Dump() interface{}
+		Dump() any
 	}
 
 	if d, ok := val.(dumper); ok {
@@ -159,7 +159,7 @@ func (*outputAny) Write(io.Writer) error {
 	return nil
 }
 
-func (a *outputAny) Dump() interface{} {
+func (a *outputAny) Dump() any {
 	return a.Value
 }
 
@@ -251,7 +251,7 @@ func (e errorOutput) Write(w io.Writer) error {
 	return nil
 }
 
-func (e errorOutput) Dump() interface{} {
+func (e errorOutput) Dump() any {
 	if f, ok := e.error.(task.Error); ok {
 		return f.LocalizedMethodFault
 	}

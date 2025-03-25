@@ -62,7 +62,7 @@ func (r infoResultsWriter) Write(w io.Writer) error {
 	return info.Write(w)
 }
 
-func (r infoResultsWriter) Dump() interface{} {
+func (r infoResultsWriter) Dump() any {
 	return r.TrustedCertificateInfo
 }
 

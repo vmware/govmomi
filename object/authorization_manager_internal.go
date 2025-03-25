@@ -26,7 +26,7 @@ type disableMethodsRequest struct {
 
 type disableMethodsBody struct {
 	Req *disableMethodsRequest `xml:"urn:internalvim25 DisableMethods,omitempty"`
-	Res interface{}            `xml:"urn:vim25 DisableMethodsResponse,omitempty"`
+	Res any                    `xml:"urn:vim25 DisableMethodsResponse,omitempty"`
 	Err *soap.Fault            `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
 
@@ -54,7 +54,7 @@ type enableMethodsRequest struct {
 
 type enableMethodsBody struct {
 	Req *enableMethodsRequest `xml:"urn:internalvim25 EnableMethods,omitempty"`
-	Res interface{}           `xml:"urn:vim25 EnableMethodsResponse,omitempty"`
+	Res any                   `xml:"urn:vim25 EnableMethodsResponse,omitempty"`
 	Err *soap.Fault           `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
 

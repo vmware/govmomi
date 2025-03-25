@@ -353,7 +353,7 @@ func (m *Model) resolveReferences(ctx *Context) error {
 	return nil
 }
 
-func (m *Model) decode(path string, data interface{}) error {
+func (m *Model) decode(path string, data any) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err

@@ -105,7 +105,7 @@ func (r *infoResult) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
-func (r *infoResult) Dump() interface{} {
+func (r *infoResult) Dump() any {
 	if r.Content != nil {
 		return r.Content
 	}

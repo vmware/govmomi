@@ -83,7 +83,7 @@ func (c Common) ObjectName(ctx context.Context) (string, error) {
 }
 
 // Properties is a wrapper for property.DefaultCollector().RetrieveOne()
-func (c Common) Properties(ctx context.Context, r types.ManagedObjectReference, ps []string, dst interface{}) error {
+func (c Common) Properties(ctx context.Context, r types.ManagedObjectReference, ps []string, dst any) error {
 	return property.DefaultCollector(c.c).RetrieveOne(ctx, r, ps, dst)
 }
 

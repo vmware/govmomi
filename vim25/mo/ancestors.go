@@ -61,7 +61,7 @@ func Ancestors(ctx context.Context, rt soap.RoundTripper, pc, obj types.ManagedO
 		},
 	}
 
-	var ifaces []interface{}
+	var ifaces []any
 	err := RetrievePropertiesForRequest(ctx, rt, req, &ifaces)
 	if err != nil {
 		return nil, err

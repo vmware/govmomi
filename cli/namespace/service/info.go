@@ -70,7 +70,7 @@ func (r *infoWriter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.Service)
 }
 
-func (r *infoWriter) Dump() interface{} {
+func (r *infoWriter) Dump() any {
 	return r.Service
 }
 

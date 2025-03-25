@@ -224,7 +224,7 @@ type placementResult struct {
 	vm        *flags.VirtualMachineFlag
 }
 
-func (res *placementResult) Dump() interface{} {
+func (res *placementResult) Dump() any {
 	return res.Result
 }
 

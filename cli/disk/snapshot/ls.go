@@ -66,7 +66,7 @@ func (r *lsResult) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
-func (r *lsResult) Dump() interface{} {
+func (r *lsResult) Dump() any {
 	return r.Info
 }
 

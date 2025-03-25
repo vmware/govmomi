@@ -71,7 +71,7 @@ func (cmd *ls) Process(ctx context.Context) error {
 
 type infoResult []types.LookupServiceRegistrationInfo
 
-func (r infoResult) Dump() interface{} {
+func (r infoResult) Dump() any {
 	return []types.LookupServiceRegistrationInfo(r)
 }
 
@@ -87,7 +87,7 @@ func (r infoResult) Write(w io.Writer) error {
 
 type infoResultLong []types.LookupServiceRegistrationInfo
 
-func (r infoResultLong) Dump() interface{} {
+func (r infoResultLong) Dump() any {
 	return []types.LookupServiceRegistrationInfo(r)
 }
 
@@ -107,7 +107,7 @@ func (r infoResultLong) Write(w io.Writer) error {
 
 type infoResultURL []types.LookupServiceRegistrationInfo
 
-func (r infoResultURL) Dump() interface{} {
+func (r infoResultURL) Dump() any {
 	return []types.LookupServiceRegistrationInfo(r)
 }
 

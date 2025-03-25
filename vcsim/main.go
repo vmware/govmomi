@@ -186,7 +186,7 @@ func main() {
 		}
 	}
 
-	expvar.Publish("vcsim", expvar.Func(func() interface{} {
+	expvar.Publish("vcsim", expvar.Func(func() any {
 		count := model.Count()
 
 		return struct {

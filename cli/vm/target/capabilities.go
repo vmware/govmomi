@@ -89,6 +89,6 @@ func (r *caplsResult) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
-func (r *caplsResult) Dump() interface{} {
+func (r *caplsResult) Dump() any {
 	return r.HostCapability
 }

@@ -17,7 +17,7 @@ func (s *optionalString) Set(input string) error {
 	return nil
 }
 
-func (s *optionalString) Get() interface{} {
+func (s *optionalString) Get() any {
 	if *s.val == nil {
 		return nil
 	}

@@ -20,7 +20,7 @@ func (b *optionalBool) Set(s string) error {
 	return err
 }
 
-func (b *optionalBool) Get() interface{} {
+func (b *optionalBool) Get() any {
 	if *b.val == nil {
 		return nil
 	}

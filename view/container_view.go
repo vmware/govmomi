@@ -24,7 +24,7 @@ func NewContainerView(c *vim25.Client, ref types.ManagedObjectReference) *Contai
 }
 
 // Retrieve populates dst as property.Collector.Retrieve does, for all entities in the view of types specified by kind.
-func (v ContainerView) Retrieve(ctx context.Context, kind []string, ps []string, dst interface{}, pspec ...types.PropertySpec) error {
+func (v ContainerView) Retrieve(ctx context.Context, kind []string, ps []string, dst any, pspec ...types.PropertySpec) error {
 	pc := property.DefaultCollector(v.Client())
 
 	ospec := types.ObjectSpec{
@@ -79,7 +79,7 @@ func (v ContainerView) Retrieve(ctx context.Context, kind []string, ps []string,
 }
 
 // RetrieveWithFilter populates dst as Retrieve does, but only for entities matching the given filter.
-func (v ContainerView) RetrieveWithFilter(ctx context.Context, kind []string, ps []string, dst interface{}, filter property.Match) error {
+func (v ContainerView) RetrieveWithFilter(ctx context.Context, kind []string, ps []string, dst any, filter property.Match) error {
 	if len(filter) == 0 {
 		return v.Retrieve(ctx, kind, ps, dst)
 	}
