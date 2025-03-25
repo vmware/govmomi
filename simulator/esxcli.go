@@ -367,7 +367,7 @@ func (m *ManagedMethodExecuter) VimEsxCLISystemStatsUptimeGet(_ *Context, _ esxc
 	return &esxcli.Response{Kind: "long", String: uptime}, nil
 }
 
-func (_ *ManagedMethodExecuter) toXML(v interface{}) string {
+func (_ *ManagedMethodExecuter) toXML(v any) string {
 	var out bytes.Buffer
 
 	err := xml.NewEncoder(&out).Encode(v)

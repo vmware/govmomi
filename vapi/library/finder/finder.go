@@ -117,15 +117,15 @@ type FindResult interface {
 	GetName() string
 
 	// GetResult gets the underlying library object.
-	GetResult() interface{}
+	GetResult() any
 }
 
 type findResult struct {
-	result interface{}
+	result any
 	parent FindResult
 }
 
-func (f findResult) GetResult() interface{} {
+func (f findResult) GetResult() any {
 	return f.result
 }
 func (f findResult) GetParent() FindResult {

@@ -69,7 +69,7 @@ func (r *userID) Write(w io.Writer) error {
 	return nil
 }
 
-func (r *userID) Dump() interface{} {
+func (r *userID) Dump() any {
 	return struct {
 		User  *types.AdminUser
 		Group []types.PrincipalId

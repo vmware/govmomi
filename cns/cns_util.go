@@ -84,7 +84,7 @@ func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolum
 			createSpec.Metadata.ContainerClusterArray = nil
 			var updatedEntityMetadata []cnstypes.BaseCnsEntityMetadata
 			for _, entityMetadata := range createSpec.Metadata.EntityMetadata {
-				k8sEntityMetadata := interface{}(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
+				k8sEntityMetadata := any(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
 				k8sEntityMetadata.ClusterID = ""
 				k8sEntityMetadata.ReferredEntity = nil
 				updatedEntityMetadata = append(updatedEntityMetadata, cnstypes.BaseCnsEntityMetadata(k8sEntityMetadata))
@@ -141,7 +141,7 @@ func dropUnknownVolumeMetadataUpdateSpecElements(c *Client, updateSpecList []cns
 			updateSpec.Metadata.ContainerCluster.ClusterDistribution = ""
 			var updatedEntityMetadata []cnstypes.BaseCnsEntityMetadata
 			for _, entityMetadata := range updateSpec.Metadata.EntityMetadata {
-				k8sEntityMetadata := interface{}(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
+				k8sEntityMetadata := any(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
 				k8sEntityMetadata.ClusterID = ""
 				k8sEntityMetadata.ReferredEntity = nil
 				updatedEntityMetadata = append(updatedEntityMetadata, cnstypes.BaseCnsEntityMetadata(k8sEntityMetadata))

@@ -75,7 +75,7 @@ type GuestNicInfo struct {
 	V3      *NicInfoV3 `xdr:"optional"`
 }
 
-func EncodeXDR(val interface{}) ([]byte, error) {
+func EncodeXDR(val any) ([]byte, error) {
 	var buf bytes.Buffer
 
 	_, err := xdr.Marshal(&buf, val)
@@ -86,7 +86,7 @@ func EncodeXDR(val interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func DecodeXDR(buf []byte, val interface{}) error {
+func DecodeXDR(buf []byte, val any) error {
 	r := bytes.NewReader(buf)
 	_, err := xdr.Unmarshal(r, val)
 	return err

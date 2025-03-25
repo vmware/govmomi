@@ -37,7 +37,7 @@ func (c Collector) Client() *vim25.Client {
 
 // Properties wraps property.DefaultCollector().RetrieveOne() and returns
 // properties for the specified managed object reference
-func (c Collector) Properties(ctx context.Context, r types.ManagedObjectReference, ps []string, dst interface{}) error {
+func (c Collector) Properties(ctx context.Context, r types.ManagedObjectReference, ps []string, dst any) error {
 	return property.DefaultCollector(c.c).RetrieveOne(ctx, r, ps, dst)
 }
 

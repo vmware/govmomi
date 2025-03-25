@@ -87,7 +87,7 @@ func TestErrorUnmarshal(t *testing.T) {
 	c := NewClient(addr, true)
 	c.Namespace = "urn:vim25"
 
-	var result interface{}
+	var result any
 	unmarshaler := c.responseUnmarshaler(&result)
 
 	err := unmarshaler(resp)
@@ -152,7 +152,7 @@ func TestSuccessUnmarshal(t *testing.T) {
 	c := NewClient(addr, true)
 	c.Namespace = "urn:vim25"
 
-	var result interface{}
+	var result any
 	unmarshaler := c.responseUnmarshaler(&result)
 
 	err := unmarshaler(resp)

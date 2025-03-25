@@ -142,7 +142,7 @@ type record struct {
 }
 
 // Dump the raw Event rather than the record struct.
-func (r *record) Dump() interface{} {
+func (r *record) Dump() any {
 	return r.event
 }
 

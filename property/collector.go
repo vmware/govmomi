@@ -161,7 +161,7 @@ func (p *Collector) RetrieveProperties(
 // the properties slice is nil, all properties are loaded.
 // Note that pointer types are optional fields that may be left as a nil value.
 // The caller should check such fields for a nil value before dereferencing.
-func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectReference, ps []string, dst interface{}) error {
+func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectReference, ps []string, dst any) error {
 	if len(objs) == 0 {
 		return errors.New("object references is empty")
 	}
@@ -221,7 +221,7 @@ func (p *Collector) RetrieveWithFilter(
 	ctx context.Context,
 	objs []types.ManagedObjectReference,
 	ps []string,
-	dst interface{},
+	dst any,
 	filter Match) error {
 
 	if len(filter) == 0 {
@@ -245,7 +245,7 @@ func (p *Collector) RetrieveWithFilter(
 }
 
 // RetrieveOne calls Retrieve with a single managed object reference via Collector.Retrieve().
-func (p *Collector) RetrieveOne(ctx context.Context, obj types.ManagedObjectReference, ps []string, dst interface{}) error {
+func (p *Collector) RetrieveOne(ctx context.Context, obj types.ManagedObjectReference, ps []string, dst any) error {
 	var objs = []types.ManagedObjectReference{obj}
 	return p.Retrieve(ctx, objs, ps, dst)
 }

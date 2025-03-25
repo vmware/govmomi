@@ -20,13 +20,13 @@ type Header struct {
 	Action   string         `xml:"-"`                         // Action is the 'SOAPAction' HTTP header value. Defaults to "Client.Namespace/Client.Version".
 	Cookie   *HeaderElement `xml:"vcSessionCookie,omitempty"` // Cookie is a vCenter session cookie that can be used with other SDK endpoints (e.g. pbm, vslm).
 	ID       string         `xml:"operationID,omitempty"`     // ID is the operationID used by ESX/vCenter logging for correlation.
-	Security interface{}    `xml:",omitempty"`                // Security is used for SAML token authentication and request signing.
+	Security any            `xml:",omitempty"`                // Security is used for SAML token authentication and request signing.
 }
 
 type Envelope struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
 	Header  *Header  `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header,omitempty"`
-	Body    interface{}
+	Body    any
 }
 
 type Fault struct {

@@ -4,4 +4,4 @@
 
 package types
 
-type AnyType interface{}
+type AnyType any

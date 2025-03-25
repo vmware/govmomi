@@ -104,7 +104,7 @@ type Lister struct {
 	All       bool
 }
 
-func (l Lister) retrieveProperties(ctx context.Context, req types.RetrieveProperties, dst *[]interface{}) error {
+func (l Lister) retrieveProperties(ctx context.Context, req types.RetrieveProperties, dst *[]any) error {
 	res, err := l.Collector.RetrieveProperties(ctx, req)
 	if err != nil {
 		return err
@@ -215,7 +215,7 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 		SpecSet: []types.PropertyFilterSpec{spec},
 	}
 
-	var dst []interface{}
+	var dst []any
 
 	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
@@ -273,7 +273,7 @@ func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 		},
 	}
 
-	var dst []interface{}
+	var dst []any
 
 	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
@@ -340,7 +340,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 		},
 	}
 
-	var dst []interface{}
+	var dst []any
 
 	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
@@ -403,7 +403,7 @@ func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 		},
 	}
 
-	var dst []interface{}
+	var dst []any
 
 	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
@@ -470,7 +470,7 @@ func (l Lister) ListHostSystem(ctx context.Context) ([]Element, error) {
 		},
 	}
 
-	var dst []interface{}
+	var dst []any
 
 	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
@@ -533,7 +533,7 @@ func (l Lister) ListDistributedVirtualSwitch(ctx context.Context) ([]Element, er
 		},
 	}
 
-	var dst []interface{}
+	var dst []any
 
 	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
@@ -598,7 +598,7 @@ func (l Lister) ListVirtualApp(ctx context.Context) ([]Element, error) {
 		},
 	}
 
-	var dst []interface{}
+	var dst []any
 
 	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {

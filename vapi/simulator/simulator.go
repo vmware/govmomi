@@ -373,7 +373,7 @@ func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry)
 
 // StatusOK responds with http.StatusOK and encodes val, if specified, to JSON
 // For use with "/api" endpoints.
-func StatusOK(w http.ResponseWriter, val ...interface{}) {
+func StatusOK(w http.ResponseWriter, val ...any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if len(val) == 0 {
@@ -389,14 +389,14 @@ func StatusOK(w http.ResponseWriter, val ...interface{}) {
 
 // OK responds with http.StatusOK and encodes val, if specified, to JSON
 // For use with "/rest" endpoints where the response is a "value" wrapped structure.
-func OK(w http.ResponseWriter, val ...interface{}) {
+func OK(w http.ResponseWriter, val ...any) {
 	if len(val) == 0 {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
 	s := struct {
-		Value interface{} `json:"value,omitempty"`
+		Value any `json:"value,omitempty"`
 	}{
 		val[0],
 	}
@@ -495,13 +495,13 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.ServeMux.ServeHTTP(w, r)
 }
 
-func (s *handler) decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
+func (s *handler) decode(r *http.Request, w http.ResponseWriter, val any) bool {
 	return Decode(r, w, val)
 }
 
 // Decode the request Body into val.
 // Returns true on success, otherwise false and sends the http.StatusBadRequest response.
-func Decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
+func Decode(r *http.Request, w http.ResponseWriter, val any) bool {
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(val)
 	if err != nil {

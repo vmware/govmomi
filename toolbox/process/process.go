@@ -142,7 +142,7 @@ func (a *File) IsDir() bool {
 }
 
 // Sys implementation of the os.FileInfo interface method.
-func (a *File) Sys() interface{} {
+func (a *File) Sys() any {
 	return nil
 }
 
@@ -212,7 +212,7 @@ func NewManager() *Manager {
 		expire:  time.Minute * 5,
 		entries: make(map[int64]*Process),
 		pids: sync.Pool{
-			New: func() interface{} {
+			New: func() any {
 				return atomic.AddInt64(&pid, 1)
 			},
 		},

@@ -527,7 +527,7 @@ type RequestSecurityToken struct {
 	RenewTarget        *Target   `xml:",omitempty"`
 }
 
-func Unmarshal(data []byte, v interface{}) error {
+func Unmarshal(data []byte, v any) error {
 	dec := xml.NewDecoder(bytes.NewReader(data))
 	dec.TypeFunc = types.TypeFunc()
 	return dec.Decode(v)
@@ -658,7 +658,7 @@ func Renew(ctx context.Context, r soap.RoundTripper, req *RequestSecurityToken) 
 }
 
 // Marshal panics if xml.Marshal returns an error
-func Marshal(val interface{}) string {
+func Marshal(val any) string {
 	b, err := xml.Marshal(val)
 	if err != nil {
 		panic(err)
@@ -669,7 +669,7 @@ func Marshal(val interface{}) string {
 // mkns prepends the given namespace to xml.Name.Local and returns obj encoded as xml.
 // Note that the namespace is required when encoding, but the namespace prefix must not be
 // present when decoding as Go's decoding does not handle namespace prefix.
-func mkns(ns string, obj interface{}, name ...*xml.Name) string {
+func mkns(ns string, obj any, name ...*xml.Name) string {
 	ns += ":"
 	for i := range name {
 		name[i].Space = ""

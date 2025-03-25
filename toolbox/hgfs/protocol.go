@@ -248,7 +248,7 @@ type Packet struct {
 }
 
 // Reply composes a new Packet with the given payload or error
-func (r *Packet) Reply(payload interface{}, err error) ([]byte, error) {
+func (r *Packet) Reply(payload any, err error) ([]byte, error) {
 	p := new(Packet)
 
 	status := uint32(StatusSuccess)
@@ -400,7 +400,7 @@ type ReplyCreateSessionV4 struct {
 func (r *ReplyCreateSessionV4) MarshalBinary() ([]byte, error) {
 	buf := new(bytes.Buffer)
 
-	fields := []interface{}{
+	fields := []any{
 		&r.SessionID,
 		&r.NumCapabilities,
 		&r.MaxPacketSize,
@@ -430,7 +430,7 @@ func (r *ReplyCreateSessionV4) MarshalBinary() ([]byte, error) {
 func (r *ReplyCreateSessionV4) UnmarshalBinary(data []byte) error {
 	buf := bytes.NewBuffer(data)
 
-	fields := []interface{}{
+	fields := []any{
 		&r.SessionID,
 		&r.NumCapabilities,
 		&r.MaxPacketSize,
@@ -548,7 +548,7 @@ func (f *FileNameV3) MarshalBinary() ([]byte, error) {
 func (f *FileNameV3) UnmarshalBinary(data []byte) error {
 	buf := bytes.NewBuffer(data)
 
-	fields := []interface{}{
+	fields := []any{
 		&f.Length, &f.Flags, &f.CaseType, &f.ID,
 	}
 

@@ -73,7 +73,7 @@ Examples:
 }
 
 // write encodes data to file name
-func (cmd *save) write(name string, data interface{}) error {
+func (cmd *save) write(name string, data any) error {
 	f, err := os.Create(filepath.Join(cmd.dir, name) + ".xml")
 	if err != nil {
 		return err
@@ -92,7 +92,7 @@ func (cmd *save) write(name string, data interface{}) error {
 
 type saveMethod struct {
 	Name string
-	Data interface{}
+	Data any
 }
 
 func saveDVS(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {

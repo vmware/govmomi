@@ -74,7 +74,7 @@ func (r lsResultsWriter) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
-func (r lsResultsWriter) Dump() interface{} {
+func (r lsResultsWriter) Dump() any {
 	return r.Policies
 }
 

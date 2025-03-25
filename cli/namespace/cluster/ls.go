@@ -100,7 +100,7 @@ func (r *lsWriter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.Cluster)
 }
 
-func (r *lsWriter) Dump() interface{} {
+func (r *lsWriter) Dump() any {
 	return r.Cluster
 }
 

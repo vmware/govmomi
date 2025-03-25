@@ -150,7 +150,7 @@ func (e *Executor) NewRequest(ctx context.Context, args []string) (*internal.Exe
 	return &sreq, info, nil
 }
 
-func (e *Executor) Execute(ctx context.Context, req *internal.ExecuteSoapRequest, res interface{}) error {
+func (e *Executor) Execute(ctx context.Context, req *internal.ExecuteSoapRequest, res any) error {
 	req.This = e.mme.ManagedObjectReference
 	req.Version = "urn:vim25/5.0"
 

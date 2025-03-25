@@ -19,7 +19,7 @@ import (
 var serializationTests = []struct {
 	name      string
 	file      string
-	data      interface{}
+	data      any
 	goType    reflect.Type
 	expDecErr string
 }{

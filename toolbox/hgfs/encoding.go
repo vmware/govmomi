@@ -11,7 +11,7 @@ import (
 )
 
 // MarshalBinary is a wrapper around binary.Write
-func MarshalBinary(fields ...interface{}) ([]byte, error) {
+func MarshalBinary(fields ...any) ([]byte, error) {
 	buf := new(bytes.Buffer)
 
 	for _, p := range fields {
@@ -39,7 +39,7 @@ func MarshalBinary(fields ...interface{}) ([]byte, error) {
 }
 
 // UnmarshalBinary is a wrapper around binary.Read
-func UnmarshalBinary(data []byte, fields ...interface{}) error {
+func UnmarshalBinary(data []byte, fields ...any) error {
 	buf := bytes.NewBuffer(data)
 
 	for _, p := range fields {

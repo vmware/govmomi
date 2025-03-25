@@ -238,7 +238,7 @@ func (pc *change) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
-func (pc *change) Dump() interface{} {
+func (pc *change) Dump() any {
 	if pc.cmd.simple && len(pc.Update.ChangeSet) == 1 {
 		val := pc.Update.ChangeSet[0].Val
 		if val != nil {
@@ -287,7 +287,7 @@ type dumpFilter struct {
 	types.CreateFilter
 }
 
-func (f *dumpFilter) Dump() interface{} {
+func (f *dumpFilter) Dump() any {
 	return f.CreateFilter
 }
 
@@ -297,10 +297,10 @@ func (f *dumpFilter) Write(w io.Writer) error {
 }
 
 type dumpEntity struct {
-	entity interface{}
+	entity any
 }
 
-func (e *dumpEntity) Dump() interface{} {
+func (e *dumpEntity) Dump() any {
 	return e.entity
 }
 

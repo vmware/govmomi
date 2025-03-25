@@ -106,7 +106,7 @@ func getManagedObject(obj mo.Reference) reflect.Value {
 }
 
 // wrapValue converts slice types to the appropriate ArrayOf type used in property collector responses.
-func wrapValue(rval reflect.Value, rtype reflect.Type) interface{} {
+func wrapValue(rval reflect.Value, rtype reflect.Type) any {
 	pval := rval.Interface()
 
 	if rval.Kind() == reflect.Slice {
@@ -150,7 +150,7 @@ func wrapValue(rval reflect.Value, rtype reflect.Type) interface{} {
 	return pval
 }
 
-func fieldValueInterface(f reflect.StructField, rval reflect.Value, keyed ...bool) interface{} {
+func fieldValueInterface(f reflect.StructField, rval reflect.Value, keyed ...bool) any {
 	if rval.Kind() == reflect.Ptr {
 		rval = rval.Elem()
 	}
@@ -162,8 +162,8 @@ func fieldValueInterface(f reflect.StructField, rval reflect.Value, keyed ...boo
 	return wrapValue(rval, f.Type)
 }
 
-func fieldValue(rval reflect.Value, p string, keyed ...bool) (interface{}, error) {
-	var value interface{}
+func fieldValue(rval reflect.Value, p string, keyed ...bool) (any, error) {
+	var value any
 	fields := strings.Split(p, ".")
 
 	for i, name := range fields {
@@ -211,7 +211,7 @@ func fieldValue(rval reflect.Value, p string, keyed ...bool) (interface{}, error
 	return value, nil
 }
 
-func fieldValueKey(rval reflect.Value, p mo.Field) (interface{}, error) {
+func fieldValueKey(rval reflect.Value, p mo.Field) (any, error) {
 	if rval.Kind() != reflect.Slice {
 		return nil, errInvalidField
 	}
@@ -260,7 +260,7 @@ func fieldValueKey(rval reflect.Value, p mo.Field) (interface{}, error) {
 	return nil, nil
 }
 
-func fieldValueIndex(rval reflect.Value, p mo.Field) (interface{}, error) {
+func fieldValueIndex(rval reflect.Value, p mo.Field) (any, error) {
 	val, err := fieldValueKey(rval, p)
 	if err != nil || val == nil || p.Item == "" {
 		return val, err
@@ -269,7 +269,7 @@ func fieldValueIndex(rval reflect.Value, p mo.Field) (interface{}, error) {
 	return fieldValue(reflect.ValueOf(val), p.Item)
 }
 
-func fieldRefs(f interface{}) []types.ManagedObjectReference {
+func fieldRefs(f any) []types.ManagedObjectReference {
 	switch fv := f.(type) {
 	case types.ManagedObjectReference:
 		return []types.ManagedObjectReference{fv}
@@ -384,7 +384,7 @@ func (rr *retrieveResult) collectFields(ctx *Context, rval reflect.Value, fields
 		}
 		seen[name] = true
 
-		var val interface{}
+		var val any
 		var err error
 		var field mo.Field
 		if field.FromString(name) {

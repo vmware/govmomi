@@ -1097,7 +1097,7 @@ func (vm *VirtualMachine) createFile(ctx *Context, spec string, name string, reg
 
 // Rather than keep an fd open for each VM, open/close the log for each messages.
 // This is ok for now as we do not do any heavy VM logging.
-func (vm *VirtualMachine) logPrintf(format string, v ...interface{}) {
+func (vm *VirtualMachine) logPrintf(format string, v ...any) {
 	f, err := os.OpenFile(vm.log, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0)
 	if err != nil {
 		log.Println(err)

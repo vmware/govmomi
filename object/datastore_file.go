@@ -141,7 +141,7 @@ func (s *fileStat) IsDir() bool {
 	return false
 }
 
-func (s *fileStat) Sys() interface{} {
+func (s *fileStat) Sys() any {
 	return s.header
 }
 

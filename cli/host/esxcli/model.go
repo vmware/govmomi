@@ -77,7 +77,7 @@ type modelInfo struct {
 	Instances   []internal.DynamicTypeMgrMoInstance
 }
 
-func (r modelInfo) Dump() interface{} {
+func (r modelInfo) Dump() any {
 	if len(r.CommandInfo) != 0 {
 		return r.CommandInfo
 	}

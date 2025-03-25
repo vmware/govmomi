@@ -21,7 +21,7 @@ func TestAnyType(t *testing.T) {
 
 	tests := []struct {
 		Input []byte
-		Value interface{}
+		Value any
 	}{
 		{
 			Input: x(`<name xsi:type="xsd:string">test</name>`),
@@ -35,7 +35,7 @@ func TestAnyType(t *testing.T) {
 
 	for _, test := range tests {
 		var r struct {
-			A interface{} `xml:"name,typeattr"`
+			A any `xml:"name,typeattr"`
 		}
 
 		dec := xml.NewDecoder(bytes.NewReader(test.Input))

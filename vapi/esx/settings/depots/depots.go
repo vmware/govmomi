@@ -91,13 +91,13 @@ type ComponentVersion struct {
 // SettingsDepotsMetadataInfo is a partial type mapping for
 // https://developer.vmware.com/apis/vsphere-automation/latest/esx/data-structures/Settings/Depots/MetadataInfo/
 type SettingsDepotsMetadataInfo struct {
-	Addons                map[string]interface{}                    `json:"addons,omitempty"`
-	BaseImages            []interface{}                             `json:"base_images,omitempty"`
+	Addons                map[string]any                            `json:"addons,omitempty"`
+	BaseImages            []any                                     `json:"base_images,omitempty"`
 	FileName              string                                    `json:"file_name"`
-	HardwareSupport       map[string]interface{}                    `json:"hardware_support,omitempty"`
+	HardwareSupport       map[string]any                            `json:"hardware_support,omitempty"`
 	IndependentComponents map[string]SettingsDepotsComponentSummary `json:"independent_components,omitempty"`
-	Solutions             map[string]interface{}                    `json:"solutions,omitempty"`
-	Updates               map[string]interface{}                    `json:"updates,omitempty"`
+	Solutions             map[string]any                            `json:"solutions,omitempty"`
+	Updates               map[string]any                            `json:"updates,omitempty"`
 }
 
 // SettingsDepotsOfflineContentInfo is a type mapping for

@@ -437,7 +437,7 @@ func TestSimulator(t *testing.T) {
 		t.Fatalf("Failed to create snapshots: fault=%+v", createSnapshotsOperationRes.Fault)
 	}
 
-	snapshotCreateResult := interface{}(createSnapshotsTaskResult).(*cnstypes.CnsSnapshotCreateResult)
+	snapshotCreateResult := any(createSnapshotsTaskResult).(*cnstypes.CnsSnapshotCreateResult)
 	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
 	t.Logf("snapshotCreateResult %+v", snapshotCreateResult)
 
@@ -555,7 +555,7 @@ func TestSimulator(t *testing.T) {
 		t.Fatalf("Failed to delete snapshots: fault=%+v", deleteSnapshotsOperationRes.Fault)
 	}
 
-	snapshotDeleteResult := interface{}(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
+	snapshotDeleteResult := any(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
 	t.Logf("snapshotDeleteResult %+v", snapshotDeleteResult)
 
 	// Delete

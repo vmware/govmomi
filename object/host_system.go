@@ -39,7 +39,7 @@ func (h HostSystem) ResourcePool(ctx context.Context) (*ResourcePool, error) {
 	}
 
 	var mcr *mo.ComputeResource
-	var parent interface{}
+	var parent any
 
 	switch mh.Parent.Type {
 	case "ComputeResource":

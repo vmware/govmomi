@@ -71,7 +71,7 @@ func vdmCreateVirtualDisk(ctx *Context, op types.VirtualDeviceConfigSpecFileOper
 		}
 
 		if req.Spec != nil {
-			var spec interface{} = req.Spec
+			var spec any = req.Spec
 			fileBackedSpec, ok := spec.(*types.FileBackedVirtualDiskSpec)
 
 			if !ok {

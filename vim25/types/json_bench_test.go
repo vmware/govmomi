@@ -50,7 +50,7 @@ func BenchmarkDecodeVirtualMachineConfigInfo(b *testing.B) {
 					json.DiscriminatorToTypeFunc(TypeFunc()),
 				)
 
-				var obj interface{}
+				var obj any
 				if err := dec.Decode(&obj); err != nil {
 					b.Fatal(err)
 				}

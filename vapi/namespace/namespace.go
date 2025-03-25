@@ -436,7 +436,7 @@ type DefaultImageRegistry struct {
 // EnableCluster enables vSphere Namespaces on the specified cluster, using the given spec.
 // See https://developer.vmware.com/apis/vsphere-automation/latest/vcenter/api/vcenter/namespace-management/clusters/clusteractionenable/post/
 func (c *Manager) EnableCluster(ctx context.Context, id string, spec *EnableClusterSpec) error {
-	var response interface{}
+	var response any
 	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "enable")
 	fmt.Fprint(os.Stdout, spec)
 	err := c.Do(ctx, url.Request(http.MethodPost, spec), response)
@@ -445,7 +445,7 @@ func (c *Manager) EnableCluster(ctx context.Context, id string, spec *EnableClus
 
 // EnableCluster enables vSphere Namespaces on the specified cluster, using the given spec.
 func (c *Manager) DisableCluster(ctx context.Context, id string) error {
-	var response interface{}
+	var response any
 	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "disable")
 	err := c.Do(ctx, url.Request(http.MethodPost), response)
 	return err
@@ -659,8 +659,8 @@ type NamespacesInstanceSummary struct {
 }
 
 type LocalizableMessage struct {
-	Details  interface{} `json:"details"`
-	Severity string      `json:"severity"`
+	Details  any    `json:"details"`
+	Severity string `json:"severity"`
 }
 
 // NamespacesInstanceInfo https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/Info/

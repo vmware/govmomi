@@ -61,9 +61,9 @@ func (c *Manager) WaitForCompletion(ctx context.Context, taskId string) (string,
 	}
 }
 
-func (c *Manager) getTaskInfo(taskId string) (map[string]interface{}, error) {
+func (c *Manager) getTaskInfo(taskId string) (map[string]any, error) {
 	path := c.Resource(TasksPath).WithSubpath(taskId)
 	req := path.Request(http.MethodGet)
-	var res map[string]interface{}
+	var res map[string]any
 	return res, c.Do(context.Background(), req, &res)
 }

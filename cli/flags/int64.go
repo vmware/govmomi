@@ -20,7 +20,7 @@ func (i *int64Value) Set(s string) error {
 	return err
 }
 
-func (i *int64Value) Get() interface{} {
+func (i *int64Value) Get() any {
 	return int64(*i)
 }
 
@@ -44,7 +44,7 @@ func (i *int64ptrValue) Set(s string) error {
 	return err
 }
 
-func (i *int64ptrValue) Get() interface{} {
+func (i *int64ptrValue) Get() any {
 	if i.val == nil || *i.val == nil {
 		return nil
 	}

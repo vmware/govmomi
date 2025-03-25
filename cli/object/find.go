@@ -184,7 +184,7 @@ func (r findResult) Write(w io.Writer) error {
 	return nil
 }
 
-func (r findResult) Dump() interface{} {
+func (r findResult) Dump() any {
 	return []string(r)
 }
 

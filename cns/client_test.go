@@ -385,7 +385,7 @@ func TestClient(t *testing.T) {
 		t.Fatalf("Failed to create snapshots: fault=%+v", createSnapshotsOperationRes.Fault)
 	}
 
-	snapshotCreateResult := interface{}(createSnapshotsTaskResult).(*cnstypes.CnsSnapshotCreateResult)
+	snapshotCreateResult := any(createSnapshotsTaskResult).(*cnstypes.CnsSnapshotCreateResult)
 	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
 	snapshotCreateTime := snapshotCreateResult.Snapshot.CreateTime
 	t.Logf("snapshotCreateResult: %+v", pretty.Sprint(snapshotCreateResult))
@@ -544,7 +544,7 @@ func TestClient(t *testing.T) {
 		t.Fatalf("Failed to delete snapshots: fault=%+v", deleteSnapshotsOperationRes.Fault)
 	}
 
-	snapshotDeleteResult := interface{}(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
+	snapshotDeleteResult := any(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
 	t.Logf("snapshotDeleteResult: %+v", pretty.Sprint(snapshotCreateResult))
 	t.Logf("DeleteSnapshots: Snapshot deleted successfully. volumeId: %q, snapshot id %q, opId: %q", volumeId, snapshotDeleteResult.SnapshotId, deleteSnapshotsTaskInfo.ActivationId)
 
@@ -908,7 +908,7 @@ func TestClient(t *testing.T) {
 	if attachVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to attach volume: fault=%+v", attachVolumeOperationRes.Fault)
 	}
-	diskUUID := interface{}(attachTaskResult).(*cnstypes.CnsVolumeAttachResult).DiskUUID
+	diskUUID := any(attachTaskResult).(*cnstypes.CnsVolumeAttachResult).DiskUUID
 	t.Logf("Volume attached sucessfully. Disk UUID: %s", diskUUID)
 
 	// Re-Attach same volume to the same node and expect ResourceInUse fault

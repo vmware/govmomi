@@ -77,7 +77,7 @@ func (r *Resource) WithPathEncodedParam(name string, value string) *Resource {
 
 // Request returns a new http.Request for the given method.
 // An optional body can be provided for POST and PATCH methods.
-func (r *Resource) Request(method string, body ...interface{}) *http.Request {
+func (r *Resource) Request(method string, body ...any) *http.Request {
 	rdr := io.MultiReader() // empty body by default
 	if len(body) != 0 {
 		rdr = encode(body[0])
@@ -98,7 +98,7 @@ func (e errorReader) Read([]byte) (int, error) {
 }
 
 // encode body as JSON, deferring any errors until io.Reader is used.
-func encode(body interface{}) io.Reader {
+func encode(body any) io.Reader {
 	var b bytes.Buffer
 	err := json.NewEncoder(&b).Encode(body)
 	if err != nil {
