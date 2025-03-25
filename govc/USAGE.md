@@ -636,9 +636,9 @@ Options:
 ```
 Usage: govc cluster.draft.commit [OPTIONS] CLUSTER
 
-Commits the provided software draft.  
+Commits the provided software draft.
 
-Execution will block the terminal for the duration of the task. 
+Execution will block the terminal for the duration of the task.
 
 Examples:
   govc cluster.draft.commit -cluster-id=domain-c21 -draft-id=13
@@ -653,7 +653,7 @@ Options:
 ```
 Usage: govc cluster.draft.component.add [OPTIONS] CLUSTER
 
-Adds a new component to the software draft.  
+Adds a new component to the software draft.
 
 Examples:
   govc cluster.draft.component.add -cluster-id=domain-c21 -draft-id=13 -component-id=NVD-AIE-800 -component-version=550.54.10-1OEM.800.1.0.20613240
@@ -670,7 +670,7 @@ Options:
 ```
 Usage: govc cluster.draft.component.info [OPTIONS] CLUSTER
 
-Displays the details of a component in a software draft.  
+Displays the details of a component in a software draft.
 
 Examples:
   govc cluster.draft.component.info -cluster-id=domain-c21 -draft-id=13 -component-id=NVD-AIE-800
@@ -701,7 +701,7 @@ Options:
 ```
 Usage: govc cluster.draft.component.rm [OPTIONS] CLUSTER
 
-Removes a component from a software draft.  
+Removes a component from a software draft.
 
 Examples:
   govc cluster.draft.component.rm -cluster-id=domain-c21 -draft-id=13 -component-id=NVD-AIE-800
@@ -4875,7 +4875,7 @@ Options:
 ```
 Usage: govc namespace.rm [OPTIONS] NAME
 
-Deletes a vSphere Namespace. 
+Deletes a vSphere Namespace.
 
 Examples:
   govc namespace.rm test-namespace
@@ -5129,7 +5129,7 @@ Options:
 ```
 Usage: govc namespace.vmclass.rm [OPTIONS] NAME
 
-Deletes a virtual machine class. 
+Deletes a virtual machine class.
 
 Examples:
   govc namespace.vmclass.rm test-class
@@ -5142,7 +5142,7 @@ Options:
 ```
 Usage: govc namespace.vmclass.update [OPTIONS] NAME
 
-Modifies an existing virtual machine class. 
+Modifies an existing virtual machine class.
 
 Examples:
   govc namespace.vmclass.update -cpus=8 -memory=8192 test-class
@@ -6625,7 +6625,7 @@ Options:
 ```
 Usage: govc vlcm.depot.baseimages.ls [OPTIONS] VLCM
 
-Displays the list of available ESXi base images. 
+Displays the list of available ESXi base images.
 
 Examples:
   govc vlcm.depot.baseimages.ls
@@ -6640,7 +6640,7 @@ Usage: govc vlcm.depot.offline.create [OPTIONS] VLCM
 
 Creates an offline image depot.
 
-Execution will block the terminal for the duration of the task. 
+Execution will block the terminal for the duration of the task.
 
 Examples:
   govc vlcm.depot.offline.create -l=<https://your.server.com/filepath>
@@ -6661,7 +6661,7 @@ Options:
 ```
 Usage: govc vlcm.depot.offline.info [OPTIONS] VLCM
 
-Displays the contents of an offline image depot. 
+Displays the contents of an offline image depot.
 
 Examples:
   govc vlcm.depot.offline.info -depot-id=<your depot's identifier>
@@ -6675,7 +6675,7 @@ Options:
 ```
 Usage: govc vlcm.depot.offline.ls [OPTIONS] VLCM
 
-Displays the list of offline image depots. 
+Displays the list of offline image depots.
 
 Examples:
   govc vlcm.depot.offline.ls
@@ -6690,7 +6690,7 @@ Usage: govc vlcm.depot.offline.rm [OPTIONS] VLCM
 
 Deletes an offline image depot.
 
-Execution will block the terminal for the duration of the task. 
+Execution will block the terminal for the duration of the task.
 
 Examples:
   govc vlcm.depot.offline.rm -depot-id=<your depot's identifier>
@@ -7056,7 +7056,7 @@ Options:
 Usage: govc vm.dataset.update [OPTIONS] NAME
 
 Update data set.
-	
+
 Examples:
   govc vm.dataset.update -vm $vm -d "New description." -guest-access READ_ONLY com.example.project2
   govc vm.dataset.update -vm $vm -omit-from-snapshot=false com.example.project3
