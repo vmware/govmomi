@@ -255,7 +255,7 @@ func updateHostTemplate(ip string) error {
 	}
 	esx.HostSystem.Summary.ManagementServerIp = addr
 	if port != "0" { // server starts after the model is created, skipping auto-selected ports for now
-		n, err := strconv.Atoi(port)
+		n, err := strconv.ParseInt(port, 10, 32)
 		if err != nil {
 			return err
 		}
