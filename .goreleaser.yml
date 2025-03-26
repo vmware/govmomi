@@ -1,4 +1,5 @@
 ---
+version: 2
 project_name: govmomi
 
 builds:
@@ -37,7 +38,9 @@ builds:
 
 nfpms:
   - package_name: govmomi
-    builds:
+    vendor: Broadcom
+    license: Apache 2.0
+    ids:
       - govc
       - vcsim
     homepage: https://github.com/vmware/govmomi
@@ -49,7 +52,7 @@ nfpms:
 
 archives:
   - id: govcbuild
-    builds:
+    ids:
       - govc
     name_template: >-
       govc_
@@ -59,14 +62,14 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
     format_overrides: &overrides
       - goos: windows
-        format: zip
+        formats:
+          - zip
     files: &extrafiles
       - CHANGELOG.md
       - LICENSE.txt
       - README.md
-
   - id: vcsimbuild
-    builds:
+    ids:
       - vcsim
     name_template: >-
       vcsim_
@@ -78,7 +81,7 @@ archives:
     files: *extrafiles
 
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 
 checksum:
   name_template: "checksums.txt"
