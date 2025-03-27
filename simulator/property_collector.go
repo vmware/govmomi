@@ -587,11 +587,13 @@ func (pc *PropertyCollector) DestroyPropertyCollector(ctx *Context, c *types.Des
 	body := &methods.DestroyPropertyCollectorBody{}
 
 	for _, ref := range pc.Filter {
+		// Same as DestroyPropertyFilter
+		ctx.Map.RemoveHandler(ctx.Session.Get(ref).(*PropertyFilter))
 		ctx.Session.Remove(ctx, ref)
 	}
 
+	ctx.Map.RemoveHandler(pc)
 	ctx.Session.Remove(ctx, c.This)
-	ctx.Map.Remove(ctx, c.This)
 
 	body.Res = &types.DestroyPropertyCollectorResponse{}
 
