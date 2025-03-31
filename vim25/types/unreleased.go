@@ -134,3 +134,13 @@ type ClusterClusterRelocatePlacementAction struct {
 func init() {
 	t["ClusterClusterRelocatePlacementAction"] = reflect.TypeOf((*ClusterClusterRelocatePlacementAction)(nil)).Elem()
 }
+
+func init() {
+	Add("PodVMOverheadInfo", reflect.TypeOf((*PodVMOverheadInfo)(nil)).Elem())
+}
+
+type PodVMOverheadInfo struct {
+	CrxPageSharingSupported         bool  `xml:"crxPageSharingSupported"`
+	PodVMOverheadWithoutPageSharing int32 `xml:"podVMOverheadWithoutPageSharing"`
+	PodVMOverheadWithPageSharing    int32 `xml:"podVMOverheadWithPageSharing"`
+}
