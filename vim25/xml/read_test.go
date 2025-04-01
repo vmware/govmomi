@@ -5,8 +5,11 @@
 package xml
 
 import (
+	"bytes"
+	"errors"
 	"io"
 	"reflect"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -270,7 +273,7 @@ type PathTestE struct {
 	Before, After string
 }
 
-var pathTests = []interface{}{
+var pathTests = []any{
 	&PathTestA{Items: []PathTestItem{{"A"}, {"D"}}, Before: "1", After: "2"},
 	&PathTestB{Other: []PathTestItem{{"A"}, {"D"}}, Before: "1", After: "2"},
 	&PathTestC{Values1: []string{"A", "C", "D"}, Values2: []string{"B"}, Before: "1", After: "2"},
@@ -321,12 +324,12 @@ type BadPathEmbeddedB struct {
 }
 
 var badPathTests = []struct {
-	v, e interface{}
+	v, e any
 }{
-	{&BadPathTestA{}, &TagPathError{reflect.TypeOf(BadPathTestA{}), "First", "items>item1", "Second", "items"}},
-	{&BadPathTestB{}, &TagPathError{reflect.TypeOf(BadPathTestB{}), "First", "items>item1", "Second", "items>item1>value"}},
-	{&BadPathTestC{}, &TagPathError{reflect.TypeOf(BadPathTestC{}), "First", "", "Second", "First"}},
-	{&BadPathTestD{}, &TagPathError{reflect.TypeOf(BadPathTestD{}), "First", "", "Second", "First"}},
+	{&BadPathTestA{}, &TagPathError{reflect.TypeFor[BadPathTestA](), "First", "items>item1", "Second", "items"}},
+	{&BadPathTestB{}, &TagPathError{reflect.TypeFor[BadPathTestB](), "First", "items>item1", "Second", "items>item1>value"}},
+	{&BadPathTestC{}, &TagPathError{reflect.TypeFor[BadPathTestC](), "First", "", "Second", "First"}},
+	{&BadPathTestD{}, &TagPathError{reflect.TypeFor[BadPathTestD](), "First", "", "Second", "First"}},
 }
 
 func TestUnmarshalBadPaths(t *testing.T) {
@@ -691,7 +694,7 @@ type Pea struct {
 }
 
 type Pod struct {
-	Pea interface{} `xml:"Pea"`
+	Pea any `xml:"Pea"`
 }
 
 // https://golang.org/issue/6836
@@ -1080,50 +1083,46 @@ func TestUnmarshalWhitespaceAttrs(t *testing.T) {
 	}
 }
 
-// https://github.com/vmware/govmomi/issues/246
-func TestNegativeValuesUnsignedFields(t *testing.T) {
+// golang.org/issues/53350
+func TestUnmarshalIntoNil(t *testing.T) {
 	type T struct {
-		I   string
-		O   interface{}
-		U8  uint8  `xml:"u8"`
-		U16 uint16 `xml:"u16"`
-		U32 uint32 `xml:"u32"`
-		U64 uint64 `xml:"u64"`
+		A int `xml:"A"`
 	}
 
-	var tests = []T{
-		{I: "<T><u8>-128</u8></T>", O: uint8(0x80)},
-		{I: "<T><u8>-1</u8></T>", O: uint8(0xff)},
-		{I: "<T><u16>-32768</u16></T>", O: uint16(0x8000)},
-		{I: "<T><u16>-1</u16></T>", O: uint16(0xffff)},
-		{I: "<T><u32>-2147483648</u32></T>", O: uint32(0x80000000)},
-		{I: "<T><u32>-1</u32></T>", O: uint32(0xffffffff)},
-		{I: "<T><u64>-9223372036854775808</u64></T>", O: uint64(0x8000000000000000)},
-		{I: "<T><u64>-1</u64></T>", O: uint64(0xffffffffffffffff)},
+	var nilPointer *T
+	err := Unmarshal([]byte("<T><A>1</A></T>"), nilPointer)
+
+	if err == nil {
+		t.Fatalf("no error in unmarshaling")
 	}
 
-	for _, test := range tests {
-		err := Unmarshal([]byte(test.I), &test)
-		if err != nil {
-			t.Errorf("Unmarshal error: %v", err)
-			continue
-		}
+}
 
-		var expected = test.O
-		var actual interface{}
-		switch reflect.ValueOf(test.O).Type().Kind() {
-		case reflect.Uint8:
-			actual = test.U8
-		case reflect.Uint16:
-			actual = test.U16
-		case reflect.Uint32:
-			actual = test.U32
-		case reflect.Uint64:
-			actual = test.U64
-		}
-
-		if !reflect.DeepEqual(actual, expected) {
-			t.Errorf("Actual: %v, expected: %v", actual, expected)
-		}
+func TestCVE202228131(t *testing.T) {
+	type nested struct {
+		Parent *nested `xml:",any"`
 	}
+	var n nested
+	err := Unmarshal(bytes.Repeat([]byte("<a>"), maxUnmarshalDepth+1), &n)
+	if err == nil {
+		t.Fatal("Unmarshal did not fail")
+	} else if !errors.Is(err, errUnmarshalDepth) {
+		t.Fatalf("Unmarshal unexpected error: got %q, want %q", err, errUnmarshalDepth)
+	}
+}
+
+func TestCVE202230633(t *testing.T) {
+	if testing.Short() || runtime.GOARCH == "wasm" {
+		t.Skip("test requires significant memory")
+	}
+	defer func() {
+		p := recover()
+		if p != nil {
+			t.Fatal("Unmarshal panicked")
+		}
+	}()
+	var example struct {
+		Things []string
+	}
+	Unmarshal(bytes.Repeat([]byte("<a>"), 17_000_000), &example)
 }

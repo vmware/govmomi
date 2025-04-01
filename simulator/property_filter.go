@@ -49,6 +49,7 @@ func (f *PropertyFilter) DestroyPropertyFilter(ctx *Context, c *types.DestroyPro
 		RemoveReference(&f.pc.Filter, c.This)
 	})
 
+	ctx.Map.RemoveHandler(f)
 	ctx.Session.Remove(ctx, c.This)
 
 	body.Res = &types.DestroyPropertyFilterResponse{}

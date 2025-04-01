@@ -208,3 +208,51 @@ func TestUnmarshalInterfaceWithoutTypeAttr(t *testing.T) {
 		}
 	}
 }
+
+// https://github.com/vmware/govmomi/issues/246
+func TestNegativeValuesUnsignedFields(t *testing.T) {
+	type T struct {
+		I   string
+		O   any
+		U8  uint8  `xml:"u8"`
+		U16 uint16 `xml:"u16"`
+		U32 uint32 `xml:"u32"`
+		U64 uint64 `xml:"u64"`
+	}
+
+	var tests = []T{
+		{I: "<T><u8>-128</u8></T>", O: uint8(0x80)},
+		{I: "<T><u8>-1</u8></T>", O: uint8(0xff)},
+		{I: "<T><u16>-32768</u16></T>", O: uint16(0x8000)},
+		{I: "<T><u16>-1</u16></T>", O: uint16(0xffff)},
+		{I: "<T><u32>-2147483648</u32></T>", O: uint32(0x80000000)},
+		{I: "<T><u32>-1</u32></T>", O: uint32(0xffffffff)},
+		{I: "<T><u64>-9223372036854775808</u64></T>", O: uint64(0x8000000000000000)},
+		{I: "<T><u64>-1</u64></T>", O: uint64(0xffffffffffffffff)},
+	}
+
+	for _, test := range tests {
+		err := Unmarshal([]byte(test.I), &test)
+		if err != nil {
+			t.Errorf("Unmarshal error: %v", err)
+			continue
+		}
+
+		var expected = test.O
+		var actual any
+		switch reflect.ValueOf(test.O).Type().Kind() {
+		case reflect.Uint8:
+			actual = test.U8
+		case reflect.Uint16:
+			actual = test.U16
+		case reflect.Uint32:
+			actual = test.U32
+		case reflect.Uint64:
+			actual = test.U64
+		}
+
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf("Actual: %v, expected: %v", actual, expected)
+		}
+	}
+}

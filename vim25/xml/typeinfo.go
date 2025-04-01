@@ -47,7 +47,7 @@ const (
 
 var tinfoMap sync.Map // map[reflect.Type]*typeInfo
 
-var nameType = reflect.TypeOf(Name{})
+var nameType = reflect.TypeFor[Name]()
 
 // getTypeInfo returns the typeInfo structure with details necessary
 // for marshaling and unmarshaling typ.
@@ -61,14 +61,14 @@ func getTypeInfo(typ reflect.Type) (*typeInfo, error) {
 		n := typ.NumField()
 		for i := 0; i < n; i++ {
 			f := typ.Field(i)
-			if (f.PkgPath != "" && !f.Anonymous) || f.Tag.Get("xml") == "-" {
+			if (!f.IsExported() && !f.Anonymous) || f.Tag.Get("xml") == "-" {
 				continue // Private field
 			}
 
 			// For embedded structs, embed its fields.
 			if f.Anonymous {
 				t := f.Type
-				if t.Kind() == reflect.Ptr {
+				if t.Kind() == reflect.Pointer {
 					t = t.Elem()
 				}
 				if t.Kind() == reflect.Struct {
@@ -116,8 +116,8 @@ func structFieldInfo(typ reflect.Type, f *reflect.StructField) (*fieldInfo, erro
 
 	// Split the tag from the xml namespace if necessary.
 	tag := f.Tag.Get("xml")
-	if i := strings.Index(tag, " "); i >= 0 {
-		finfo.xmlns, tag = tag[:i], tag[i+1:]
+	if ns, t, ok := strings.Cut(tag, " "); ok {
+		finfo.xmlns, tag = ns, t
 	}
 
 	// Parse flags.
@@ -232,7 +232,7 @@ func structFieldInfo(typ reflect.Type, f *reflect.StructField) (*fieldInfo, erro
 // in case it exists and has a valid xml field tag, otherwise
 // it returns nil.
 func lookupXMLName(typ reflect.Type) (xmlname *fieldInfo) {
-	for typ.Kind() == reflect.Ptr {
+	for typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
 	}
 	if typ.Kind() != reflect.Struct {
@@ -252,13 +252,6 @@ func lookupXMLName(typ reflect.Type) (xmlname *fieldInfo) {
 		break
 	}
 	return nil
-}
-
-func min(a, b int) int {
-	if a <= b {
-		return a
-	}
-	return b
 }
 
 // addFieldInfo adds finfo to tinfo.fields if there are no
@@ -295,7 +288,7 @@ Loop:
 				conflicts = append(conflicts, i)
 			}
 		} else {
-			if newf.name == oldf.name {
+			if newf.name == oldf.name && newf.xmlns == oldf.xmlns {
 				conflicts = append(conflicts, i)
 			}
 		}
@@ -361,7 +354,7 @@ func (finfo *fieldInfo) value(v reflect.Value, shouldInitNilPointers bool) refle
 	for i, x := range finfo.idx {
 		if i > 0 {
 			t := v.Type()
-			if t.Kind() == reflect.Ptr && t.Elem().Kind() == reflect.Struct {
+			if t.Kind() == reflect.Pointer && t.Elem().Kind() == reflect.Struct {
 				if v.IsNil() {
 					if !shouldInitNilPointers {
 						return reflect.Value{}

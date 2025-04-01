@@ -85,3 +85,34 @@ func typeToString(typ reflect.Type) string {
 
 	panic("don't know what to do for type: " + typ.String())
 }
+
+// Find reflect.Type for an element's type attribute.
+func (p *Decoder) typeForElement(val reflect.Value, start *StartElement) reflect.Type {
+	t := ""
+	for _, a := range start.Attr {
+		if a.Name == xmlSchemaInstance || a.Name == xsiType {
+			t = a.Value
+			break
+		}
+	}
+
+	if t == "" {
+		// No type attribute; fall back to looking up type by interface name.
+		t = val.Type().Name()
+	}
+
+	// Maybe the type is a basic xsd:* type.
+	typ := stringToType(t)
+	if typ != nil {
+		return typ
+	}
+
+	// Maybe the type is a custom type.
+	if p.TypeFunc != nil {
+		if typ, ok := p.TypeFunc(t); ok {
+			return typ
+		}
+	}
+
+	return nil
+}
