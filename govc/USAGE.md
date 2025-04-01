@@ -329,6 +329,7 @@ but appear via `govc $cmd -h`:
  - [session.ls](#sessionls)
  - [session.rm](#sessionrm)
  - [snapshot.create](#snapshotcreate)
+ - [snapshot.export](#snapshotexport)
  - [snapshot.remove](#snapshotremove)
  - [snapshot.revert](#snapshotrevert)
  - [snapshot.tree](#snapshottree)
@@ -5661,6 +5662,22 @@ Options:
   -d=                    Snapshot description
   -m=true                Include memory state
   -q=false               Quiesce guest file system
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## snapshot.export
+
+```
+Usage: govc snapshot.export [OPTIONS] NAME
+
+Export snapshot of VM with given NAME.
+
+NAME can be the snapshot name, tree path, or managed object ID.
+
+Examples:
+  govc snapshot.export -vm my-vm my-snapshot
+
+Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 

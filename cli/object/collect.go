@@ -105,7 +105,10 @@ Examples:
     jq -r 'select(.hardware.device[].macAddress == "00:50:56:99:c4:27") | .name'`, atable)
 }
 
-var stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+var (
+	stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+	writer   = reflect.TypeOf((*flags.OutputWriter)(nil)).Elem()
+)
 
 type change struct {
 	cmd    *collect
@@ -407,9 +410,6 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if cmd.object {
-		if !cmd.All() {
-			cmd.Dump = true
-		}
 		req := types.RetrieveProperties{
 			SpecSet: []types.PropertyFilterSpec{filter.Spec},
 		}
@@ -424,6 +424,13 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		obj, err := mo.ObjectContentToType(content[0])
 		if err != nil {
 			return err
+		}
+		if !cmd.All() {
+			rval := reflect.ValueOf(obj)
+			if rval.Type().Implements(writer) {
+				return cmd.WriteResult(rval.Interface().(flags.OutputWriter))
+			}
+			cmd.Dump = true // fallback to -dump output
 		}
 		return cmd.WriteResult(&dumpEntity{obj})
 	}

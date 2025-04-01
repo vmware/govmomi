@@ -6,6 +6,7 @@ package simulator
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"path"
 
@@ -159,6 +160,64 @@ func (v *VirtualMachineSnapshot) RevertToSnapshotTask(ctx *Context, req *types.R
 	return &methods.RevertToSnapshot_TaskBody{
 		Res: &types.RevertToSnapshot_TaskResponse{
 			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (v *VirtualMachineSnapshot) ExportSnapshot(ctx *Context, req *types.ExportSnapshot) soap.HasFault {
+
+	vm := ctx.Map.Get(v.Vm).(*VirtualMachine)
+
+	lease := newHttpNfcLease(ctx)
+	lease.InitializeProgress = 100
+	lease.TransferProgress = 0
+	lease.Mode = string(types.HttpNfcLeaseModePushOrGet)
+	lease.Capabilities = types.HttpNfcLeaseCapabilities{
+		CorsSupported:     true,
+		PullModeSupported: true,
+	}
+
+	device := object.VirtualDeviceList(v.Config.Hardware.Device)
+	ndevice := make(map[string]int)
+	var urls []types.HttpNfcLeaseDeviceUrl
+
+	for _, d := range device {
+		info, ok := d.GetVirtualDevice().Backing.(types.BaseVirtualDeviceFileBackingInfo)
+		if !ok {
+			continue
+		}
+		var file object.DatastorePath
+		file.FromString(info.GetVirtualDeviceFileBackingInfo().FileName)
+		name := path.Base(file.Path)
+		ds := vm.findDatastore(ctx, file.Datastore)
+		lease.files[name] = ds.resolve(ctx, file.Path)
+
+		_, disk := d.(*types.VirtualDisk)
+		kind := device.Type(d)
+		n := ndevice[kind]
+		ndevice[kind]++
+
+		urls = append(urls, types.HttpNfcLeaseDeviceUrl{
+			Key:       fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
+			ImportKey: fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
+			Url: (&url.URL{
+				Scheme: "https",
+				Host:   "*",
+				Path:   nfcPrefix + path.Join(lease.Reference().Value, name),
+			}).String(),
+			SslThumbprint: "",
+			Disk:          types.NewBool(disk),
+			TargetId:      name,
+			DatastoreKey:  "",
+			FileSize:      0,
+		})
+	}
+
+	lease.ready(ctx, v.Vm, urls)
+
+	return &methods.ExportSnapshotBody{
+		Res: &types.ExportSnapshotResponse{
+			Returnval: lease.Reference(),
 		},
 	}
 }
