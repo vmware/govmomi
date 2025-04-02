@@ -87,6 +87,29 @@ func (l *Lease) Progress(ctx context.Context, percent int32) error {
 	return nil
 }
 
+// Properties returns a mo.HttpNfcLease with the specified properties.
+// If no properties are requested, all properties are returned.
+func (l *Lease) Properties(
+	ctx context.Context,
+	props ...string) (mo.HttpNfcLease, error) {
+
+	if len(props) == 0 {
+		props = []string{
+			"initializeProgress",
+			"transferProgress",
+			"mode",
+			"capabilities",
+			"info",
+			"state",
+			"error",
+		}
+	}
+
+	var o mo.HttpNfcLease
+	pc := property.DefaultCollector(l.c)
+	return o, pc.RetrieveOne(ctx, l.Reference(), props, &o)
+}
+
 type LeaseInfo struct {
 	types.HttpNfcLeaseInfo
 

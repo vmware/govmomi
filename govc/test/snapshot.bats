@@ -16,7 +16,13 @@ test_vm_snapshot() {
   run govc snapshot.revert -vm "$vm"
   assert_failure
 
+  run govc snapshot.export -vm "$vm" "$id"
+  assert_failure
+
   run govc snapshot.create -vm "$vm" "$id"
+  assert_success
+
+  run govc snapshot.export -vm "$vm" "$id"
   assert_success
 
   run govc snapshot.revert -vm "$vm" enoent
