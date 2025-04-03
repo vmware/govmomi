@@ -190,7 +190,8 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 
 	hw := env.VirtualSystem.VirtualHardware[0]
 	if vmx := hw.System.VirtualSystemType; vmx != nil {
-		spec.ConfigSpec.Version = *vmx
+		version := strings.Split(*vmx, ",")[0]
+		spec.ConfigSpec.Version = strings.TrimSpace(version)
 	}
 
 	ndisk := 0
