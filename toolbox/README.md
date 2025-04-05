@@ -12,14 +12,14 @@ overridden and/or extended by consumers.
 
 Feature list from the perspective of vSphere public API interaction.  The properties, objects and methods listed are
 relative to
-the [VirtualMachine](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.VirtualMachine.html)
+the [VirtualMachine](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.VirtualMachine.html)
 managed object type.
 
 ### guest.toolsVersionStatus property
 
 The toolbox reports version as `guestToolsUnmanaged`.
 
-See [ToolsVersionStatus](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestInfo.ToolsVersionStatus.html)
+See [ToolsVersionStatus](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.GuestInfo.ToolsVersionStatus.html)
 
 ### guest.toolsRunningStatus and guest.guestState properties
 
@@ -31,13 +31,13 @@ The VMX requests this value via the `Set_Option broadcastIP` RPC.
 
 The default value can be overridden by setting the `Service.PrimaryIP` function.
 
-See [vim.vm.GuestInfo](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestInfo.html)
+See [vim.vm.GuestInfo](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.GuestInfo.html)
 
 ### guest.net property
 
 This data is pushed to the VMX using the `SendGuestInfo(INFO_IPADDRESS_V3)` RPC.
 
-See [GuestNicInfo](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.GuestInfo.NicInfo.html).
+See [GuestNicInfo](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.GuestInfo.NicInfo.html).
 
 ### ShutdownGuest and RebootGuest methods
 
@@ -47,7 +47,7 @@ The [PowerCommandHandler](power.go) provides power hooks for customized guest sh
 
 Not supported, but authentication can be customized.
 
-See [vim.vm.guest.AuthManager](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.guest.AuthManager.html)
+See [vim.vm.guest.AuthManager](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.guest.AuthManager.html)
 
 ### GuestFileManager object
 
@@ -67,7 +67,7 @@ See [vim.vm.guest.AuthManager](http://pubs.vmware.com/vsphere-60/index.jsp?topic
 | MoveDirectoryInGuest            | Yes       | [mv](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/mv.go)             |
 | MoveFileInGuest                 | Yes       | [mv](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/mv.go)             |
 
-See [vim.vm.guest.FileManager](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.guest.FileManager.html)
+See [vim.vm.guest.FileManager](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.guest.FileManager.html)
 
 ### GuestProcessManager
 
@@ -81,7 +81,7 @@ started by `StartProgramInGuest`.
 | StartProgramInGuest            | Yes       | [start](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/start.go)       |
 | TerminateProcessInGuest        | Yes       | [kill](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/kill.go)         |
 
-See [vim.vm.guest.ProcessManager](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.guest.ProcessManager.html)
+See [vim.vm.guest.ProcessManager](https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.guest.ProcessManager.html)
 
 ## Extensions
 

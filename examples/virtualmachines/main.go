@@ -32,7 +32,7 @@ func main() {
 		defer v.Destroy(ctx)
 
 		// Retrieve summary property for all machines
-		// Reference: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.VirtualMachine.html
+		// Reference: https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.VirtualMachine.html
 		var vms []mo.VirtualMachine
 		err = v.Retrieve(ctx, []string{"VirtualMachine"}, []string{"summary"}, &vms)
 		if err != nil {

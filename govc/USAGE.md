@@ -6846,7 +6846,7 @@ Usage: govc vm.create [OPTIONS] NAME
 Create VM.
 
 For a list of possible '-g' IDs, use 'govc vm.option.info' or see:
-https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
+https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
 
 Examples:
   govc vm.create -on=false vm-name

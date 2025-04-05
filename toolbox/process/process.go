@@ -192,7 +192,7 @@ func (e *Error) Error() string {
 }
 
 // Manager manages processes within the guest.
-// See: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.vm.guest.Manager.html
+// See: https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.guest.Manager.html
 type Manager struct {
 	wg      sync.WaitGroup
 	mu      sync.Mutex
@@ -271,7 +271,7 @@ func (m *Manager) Start(r *vix.StartProgramRequest, p *Process) (int64, error) {
 		m.wg.Done()
 		p.Kill() // cancel context for those waiting on p.ctx.Done()
 
-		// See: http://pubs.vmware.com/vsphere-65/topic/com.vmware.wssdk.apiref.doc/vim.vm.guest.ProcessManager.ProcessInfo.html
+		// See: https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.vm.guest.ProcessManager.ProcessInfo.html
 		// "If the process was started using StartProgramInGuest then the process completion time
 		//  will be available if queried within 5 minutes after it completes."
 		<-time.After(m.expire)
