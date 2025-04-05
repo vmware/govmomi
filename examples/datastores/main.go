@@ -35,7 +35,7 @@ func main() {
 		defer v.Destroy(ctx)
 
 		// Retrieve summary property for all datastores
-		// Reference: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.Datastore.html
+		// Reference: https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.Datastore.html
 		var dss []mo.Datastore
 		err = v.Retrieve(ctx, []string{"Datastore"}, []string{"summary"}, &dss)
 		if err != nil {

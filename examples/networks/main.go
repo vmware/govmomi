@@ -26,7 +26,7 @@ func main() {
 
 		defer v.Destroy(ctx)
 
-		// Reference: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.Network.html
+		// Reference: https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.Network.html
 		var networks []mo.Network
 		err = v.Retrieve(ctx, []string{"Network"}, nil, &networks)
 		if err != nil {

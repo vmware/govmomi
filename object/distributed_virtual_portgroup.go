@@ -38,7 +38,7 @@ func (p DistributedVirtualPortgroup) EthernetCardBackingInfo(ctx context.Context
 		return nil, err
 	}
 
-	// From the docs at https://code.vmware.com/apis/196/vsphere/doc/vim.dvs.DistributedVirtualPortgroup.ConfigInfo.html:
+	// From the docs at https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.dvs.DistributedVirtualPortgroup.ConfigInfo.html:
 	// "This property should always be set unless the user's setting does not have System.Read privilege on the object referred to by this property."
 	// Note that "the object" refers to the Switch, not the PortGroup.
 	if dvp.Config.DistributedVirtualSwitch == nil {

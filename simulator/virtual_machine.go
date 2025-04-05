@@ -1147,11 +1147,10 @@ func (vm *VirtualMachine) create(ctx *Context, spec *types.VirtualMachineConfigS
 
 var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
 
-// From http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.vsphere.networking.doc%2FGUID-DC7478FF-DC44-4625-9AD7-38208C56A552.html
-// "The host generates generateMAC addresses that consists of the VMware OUI 00:0C:29 and the last three octets in hexadecimal
-//
-//	format of the virtual machine UUID.  The virtual machine UUID is based on a hash calculated by using the UUID of the
-//	ESXi physical machine and the path to the configuration file (.vmx) of the virtual machine."
+// From https://techdocs.broadcom.com/us/en/vmware-cis/vsphere/vsphere/8-0/vsphere-networking-8-0/mac-addresses/mac-address-generation-on-esxi-hosts.html
+// > The host generates generateMAC addresses that consists of the VMware OUI 00:0C:29 and the last three octets in hexadecimal
+// > format of the virtual machine UUID.  The virtual machine UUID is based on a hash calculated by using the UUID of the
+// > ESXi physical machine and the path to the configuration file (.vmx) of the virtual machine.
 func (vm *VirtualMachine) generateMAC(unit int32) string {
 	id := []byte(vm.Config.Uuid)
 

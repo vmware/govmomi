@@ -395,7 +395,7 @@ To see the list of supported methods:
 curl -sk https://user:pass@127.0.0.1:8989/about
 ```
 
-[apiref]:https://code.vmware.com/apis/196/vsphere
+[apiref]:https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/
 
 ## Listen address
 
