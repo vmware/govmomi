@@ -27,7 +27,7 @@ var ErrConcurrentCollector = fmt.Errorf(
 // Collector models the PropertyCollector managed object.
 //
 // For more information, see:
-// http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvmodl.query.PropertyCollector.html
+// https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vmodl.query.PropertyCollector.html
 type Collector struct {
 	mu           sync.Mutex
 	roundTripper soap.RoundTripper

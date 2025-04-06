@@ -36,7 +36,7 @@ func main() {
 		defer v.Destroy(ctx)
 
 		// Retrieve summary property for all hosts
-		// Reference: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.HostSystem.html
+		// Reference: https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.HostSystem.html
 		var hss []mo.HostSystem
 		err = v.Retrieve(ctx, []string{"HostSystem"}, []string{"summary"}, &hss)
 		if err != nil {

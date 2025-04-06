@@ -30,7 +30,7 @@ func ToElement(r mo.Reference, prefix string) Element {
 
 	// Comments about types to be expected in folders copied from the
 	// documentation of the Folder managed object:
-	// http://pubs.vmware.com/vsphere-55/topic/com.vmware.wssdk.apiref.doc/vim.Folder.html
+	// https://developer.broadcom.com/xapis/vsphere-web-services-api/latest/vim.Folder.html
 	switch m := r.(type) {
 	case mo.Folder:
 		name = m.Name
