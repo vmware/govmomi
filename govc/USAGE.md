@@ -421,6 +421,7 @@ but appear via `govc $cmd -h`:
  - [vm.network.change](#vmnetworkchange)
  - [vm.option.info](#vmoptioninfo)
  - [vm.option.ls](#vmoptionls)
+ - [vm.policy.ls](#vmpolicyls)
  - [vm.power](#vmpower)
  - [vm.question](#vmquestion)
  - [vm.rdm.attach](#vmrdmattach)
@@ -7469,6 +7470,21 @@ Examples:
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -host=                 Host system [GOVC_HOST]
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.policy.ls
+
+```
+Usage: govc vm.policy.ls [OPTIONS]
+
+List VM storage policies.
+
+Examples:
+  govc vm.policy.ls -vm $name
+  govc vm.policy.ls -vm $name -json
+
+Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 

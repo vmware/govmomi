@@ -63,3 +63,13 @@ load test_helper
   run govc storage.policy.info MyCombinedPolicy
   assert_success
 }
+
+@test "vm.policy.ls" {
+  vcsim_env
+
+  run govc vm.policy.ls -vm DC0_H0_VM0
+  assert_success
+
+  run govc vm.policy.ls -vm DC0_H0_VM0 -json
+  assert_success
+}

@@ -114,6 +114,7 @@ import (
 	_ "github.com/vmware/govmomi/cli/vm/guest"
 	_ "github.com/vmware/govmomi/cli/vm/network"
 	_ "github.com/vmware/govmomi/cli/vm/option"
+	_ "github.com/vmware/govmomi/cli/vm/policy"
 	_ "github.com/vmware/govmomi/cli/vm/rdm"
 	_ "github.com/vmware/govmomi/cli/vm/snapshot"
 	_ "github.com/vmware/govmomi/cli/vm/target"
