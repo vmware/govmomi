@@ -801,7 +801,7 @@ func (f *Finder) NetworkList(ctx context.Context, path string) ([]object.Network
 // With standard vSphere networking, Portgroups cannot have the same name within the same network folder.
 // With NSX, Portgroups can have the same name, even within the same Switch. In this case, using an inventory path
 // results in a MultipleFoundError. A MOID, switch UUID or segment ID can be used instead, as both are unique.
-// See also: https://kb.vmware.com/s/article/79872#Duplicate_names
+// See also: https://knowledge.broadcom.com/external/article?articleNumber=320145#Duplicate_names
 // Examples:
 // - Name:                "dvpg-1"
 // - Inventory Path:      "vds-1/dvpg-1"

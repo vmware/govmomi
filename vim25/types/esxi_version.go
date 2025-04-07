@@ -37,7 +37,7 @@ const (
 )
 
 // HardwareVersion returns the maximum hardware version supported by this
-// version of ESXi, per https://kb.vmware.com/s/article/1003746.
+// version of ESXi, per https://knowledge.broadcom.com/external/article?articleNumber=315655.
 func (ev ESXiVersion) HardwareVersion() HardwareVersion {
 	switch ev {
 	case ESXi2000:

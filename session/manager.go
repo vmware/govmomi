@@ -113,7 +113,6 @@ func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 
 // LoginExtensionByCertificate uses the vCenter SDK tunnel to login using a client certificate.
 // The client certificate can be set using the soap.Client.SetCertificate method.
-// See: https://kb.vmware.com/s/article/2004305
 func (sm *Manager) LoginExtensionByCertificate(ctx context.Context, key string) error {
 	c := sm.client
 	u := c.URL()
