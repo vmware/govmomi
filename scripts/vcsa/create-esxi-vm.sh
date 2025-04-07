@@ -20,7 +20,7 @@ EOF
 
 disk=48
 mem=16
-# 6.7 U3 https://docs.vmware.com/en/VMware-vSphere/6.7/rn/vsphere-esxi-vcenter-server-67-release-notes.html
+# 6.7 U3
 iso=VMware-VMvisor-6.7.0-14320388.x86_64.iso
 
 while getopts d:hi:m:s flag
