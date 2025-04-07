@@ -17984,7 +17984,7 @@ type CustomizationAdapterMapping struct {
 	// In vSphere 7.0 series, the MAC addresses must be specified in the
 	// ascending order of pciSlotNumber, otherwise a MAC address mismatch error
 	// will be reported. For further details, see the
-	// https://kb.vmware.com/s/article/87648
+	// https://knowledge.broadcom.com/external/article?articleNumber=312120
 	MacAddress string `xml:"macAddress,omitempty" json:"macAddress,omitempty"`
 	// The IP settings for the associated virtual network adapter.
 	Adapter CustomizationIPSettings `xml:"adapter" json:"adapter"`
@@ -18463,7 +18463,7 @@ type CustomizationLinuxPrep struct {
 	// Area is a continent or ocean name, and Location is the city, island, or
 	// other regional designation.
 	//
-	// See the <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2145518"target="_blank">List of supported time zones for different vSphere versions in Linux/Unix systems</a>.
+	// See the <a href="https://knowledge.broadcom.com/external/article?articleNumber=320212"target="_blank">List of supported time zones for different vSphere versions in Linux/Unix systems</a>.
 	TimeZone string `xml:"timeZone,omitempty" json:"timeZone,omitempty"`
 	// Specifies whether the hardware clock is in UTC or local time.
 	//   - True when the hardware clock is in UTC.
@@ -18483,7 +18483,7 @@ type CustomizationLinuxPrep struct {
 	//
 	// Please set the compatible customization method to a supported string value
 	// e.g. "GOSC\_METHOD\_1".
-	// See <a href="https://kb.vmware.com/s/article/95903"target="_blank">Supported compatible customization method list</a>.
+	// See <a href="https://knowledge.broadcom.com/external/article?articleNumber=313164"target="_blank">Supported compatible customization method list</a>.
 	CompatibleCustomizationMethod string `xml:"compatibleCustomizationMethod,omitempty" json:"compatibleCustomizationMethod,omitempty" vim:"8.0.3.0"`
 }
 
@@ -18757,8 +18757,8 @@ type CustomizationSysprepText struct {
 
 	// Text for the `sysprep.xml` answer file.
 	//
-	// For additional details, see <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2151684"target="_blank">Using custom sysprep.xml for vCenter Guest Customization</a> and
-	// <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029174"target="_blank">Specifying network settings in custom sysprep.xml</a>.
+	// For additional details, see <a href="https://knowledge.broadcom.com/external/article?articleNumber=336083"target="_blank">Using custom sysprep.xml for vCenter Guest Customization</a> and
+	// <a href="https://knowledge.broadcom.com/external/article?articleNumber=313515"target="_blank">Specifying network settings in custom sysprep.xml</a>.
 	Value string `xml:"value" json:"value"`
 }
 
