@@ -363,6 +363,9 @@ upload_file() {
     run govc datastore.rm -dc DC1 -ds LocalDS_1 "$clone"
     assert_success
   done
+
+  run govc datastore.cp -dc DC0 -ds LocalDS_0 -d preallocated "$vmdk" "$id/$id-thick.vmdk"
+  assert_success
 }
 
 @test "datastore.disk.info" {

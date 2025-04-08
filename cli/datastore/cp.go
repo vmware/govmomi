@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type cp struct {
@@ -30,6 +31,7 @@ type target struct {
 
 	kind  bool
 	force bool
+	spec  types.VirtualDiskSpec
 }
 
 func (cmd *target) FileManager() (*object.DatastoreFileManager, error) {
@@ -71,6 +73,8 @@ func (cmd *target) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.kind, "t", true, "Use file type to choose disk or file manager")
 	f.BoolVar(&cmd.force, "f", false, "If true, overwrite any identically named file at the destination")
+	f.StringVar(&cmd.spec.AdapterType, "a", string(types.VirtualDiskAdapterTypeLsiLogic), "Disk adapter")
+	f.StringVar(&cmd.spec.DiskType, "d", string(types.VirtualDiskTypeThin), "Disk format")
 }
 
 func (cmd *target) Process(ctx context.Context) error {
@@ -130,7 +134,9 @@ func (cmd *cp) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cp := m.CopyFile
 	if cmd.kind {
-		cp = m.Copy
+		cp = func(ctx context.Context, src string, dst string) error {
+			return m.Copy(ctx, src, dst, &cmd.spec)
+		}
 	}
 
 	logger := cmd.ProgressLogger(fmt.Sprintf("Copying %s to %s...", src, dst))

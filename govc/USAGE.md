@@ -1310,6 +1310,8 @@ Examples:
   govc datastore.cp disks/disk1.vmdk -ds-target NFS-2 disks/disk2.vmdk
 
 Options:
+  -a=lsiLogic            Disk adapter
+  -d=thin                Disk format
   -dc-target=            Datacenter destination (defaults to -dc)
   -ds=                   Datastore [GOVC_DATASTORE]
   -ds-target=            Datastore destination (defaults to -ds)
@@ -1536,6 +1538,8 @@ Examples:
   govc datastore.mv -f my.vmx foo/foo.vmx
 
 Options:
+  -a=lsiLogic            Disk adapter
+  -d=thin                Disk format
   -dc-target=            Datacenter destination (defaults to -dc)
   -ds=                   Datastore [GOVC_DATASTORE]
   -ds-target=            Datastore destination (defaults to -ds)
