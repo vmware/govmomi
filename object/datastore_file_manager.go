@@ -16,6 +16,7 @@ import (
 
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // DatastoreFileManager combines FileManager and VirtualDiskManager to manage files on a Datastore
@@ -115,16 +116,21 @@ func (m *DatastoreFileManager) CopyFile(ctx context.Context, src string, dst str
 }
 
 // Copy dispatches to the appropriate FileManager or VirtualDiskManager Copy method based on file name extension
-func (m *DatastoreFileManager) Copy(ctx context.Context, src string, dst string) error {
+func (m *DatastoreFileManager) Copy(ctx context.Context, src string, dst string, spec ...types.BaseVirtualDiskSpec) error {
 	srcp := m.Path(src)
 	dstp := m.Path(dst)
 
 	f := m.FileManager.CopyDatastoreFile
 
 	if srcp.IsVMDK() {
+		var dstSpec types.BaseVirtualDiskSpec
+		if len(spec) != 0 {
+			dstSpec = spec[0]
+		}
+
 		// types.VirtualDiskSpec=nil as it is not implemented by vCenter
 		f = func(ctx context.Context, src string, srcDC *Datacenter, dst string, dstDC *Datacenter, force bool) (*Task, error) {
-			return m.VirtualDiskManager.CopyVirtualDisk(ctx, src, srcDC, dst, dstDC, nil, force)
+			return m.VirtualDiskManager.CopyVirtualDisk(ctx, src, srcDC, dst, dstDC, dstSpec, force)
 		}
 	}
 
