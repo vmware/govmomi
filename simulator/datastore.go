@@ -50,7 +50,18 @@ func (ds *Datastore) model(m *Model) error {
 		}
 
 		info.Url = dir
+	} else {
+		// rewrite local path from a saved vcsim instance
+		dir, err := m.createTempDir(path.Base(u.Path))
+		if err != nil {
+			return err
+		}
+
+		info.Url = dir
 	}
+
+	ds.Summary.Url = info.Url
+
 	return nil
 }
 

@@ -564,6 +564,10 @@ EOF
 
   run govc host.portgroup.add -host DC0_H0 -vswitch vSwitch0 bridge
   assert_success # issue #2016
+
+  # make sure we can write the save/load-ed Datastore
+  run govc import.ova "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
 }
 
 @test "vcsim trace file" {
