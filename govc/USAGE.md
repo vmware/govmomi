@@ -2513,10 +2513,12 @@ Export VM.
 
 Examples:
   govc export.ovf -vm $vm DIR
+  govc export.ovf -vm $vm -lease
 
 Options:
   -f=false               Overwrite existing
   -i=false               Include image files (*.{iso,img})
+  -lease=false           Output NFC Lease only
   -name=                 Specifies target name (defaults to source name)
   -prefix=true           Prepend target name to image filenames if missing
   -sha=0                 Generate manifest using SHA 1, 256, 512 or 0 to skip
@@ -3767,6 +3769,7 @@ Options:
   -folder=               Inventory folder [GOVC_FOLDER]
   -hidden=false          Enable hidden properties
   -host=                 Host system [GOVC_HOST]
+  -lease=false           Output NFC Lease only
   -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
   -options=              Options spec file path for VM deployment
@@ -3783,6 +3786,7 @@ Options:
   -folder=               Inventory folder [GOVC_FOLDER]
   -hidden=false          Enable hidden properties
   -host=                 Host system [GOVC_HOST]
+  -lease=false           Output NFC Lease only
   -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
   -options=              Options spec file path for VM deployment
@@ -5677,8 +5681,11 @@ NAME can be the snapshot name, tree path, or managed object ID.
 
 Examples:
   govc snapshot.export -vm my-vm my-snapshot
+  govc snapshot.export -vm my-vm -lease my-snapshot
 
 Options:
+  -d=.                   Destination directory
+  -lease=false           Output NFC Lease only
   -vm=                   Virtual machine [GOVC_VM]
 ```
 

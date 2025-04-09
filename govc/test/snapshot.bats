@@ -2,8 +2,14 @@
 
 load test_helper
 
-test_vm_snapshot() {
-  vm=$1
+@test "vm.snapshot vcsim" {
+  vcsim_env
+
+  vm=$(new_empty_vm)
+
+  run govc vm.disk.create -vm "$vm" -name "$vm/disk.vmdk" -size 1M
+  assert_success
+
   id=$(new_id)
 
   # No snapshots == no output
@@ -22,8 +28,18 @@ test_vm_snapshot() {
   run govc snapshot.create -vm "$vm" "$id"
   assert_success
 
-  run govc snapshot.export -vm "$vm" "$id"
+  run govc snapshot.export -lease -vm "$vm" "$id"
   assert_success
+
+  dir=$(govc datastore.info -json | jq -r .datastores[].info.url)
+  mkdir "$dir/$id"
+
+  run govc snapshot.export -d "$dir/$id" -vm "$vm" "$id"
+  assert_success
+
+  run ls "$dir/$id"/*.vmdk
+  assert_success
+  assert_output_lines 1
 
   run govc snapshot.revert -vm "$vm" enoent
   assert_failure
@@ -121,20 +137,4 @@ test_vm_snapshot() {
   # new snapshot 2ndroot is current
   result=$(govc snapshot.tree -vm "$vm" -f | grep '\.' | wc -l)
   [ "$result" -eq 1 ]
-}
-
-@test "vm.snapshot vcsim" {
-  vcsim_env
-
-  vm=$(new_empty_vm)
-
-  test_vm_snapshot $vm
-}
-
-@test "vm.snapshot" {
-  esx_env
-
-  vm=$(new_ttylinux_vm)
-
-  test_vm_snapshot $vm
 }

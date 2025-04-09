@@ -38,6 +38,7 @@ type ovfx struct {
 	images   bool
 	prefix   bool
 	sha      int
+	lease    bool
 
 	mf bytes.Buffer
 }
@@ -62,6 +63,7 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.images, "i", false, "Include image files (*.{iso,img})")
 	f.BoolVar(&cmd.prefix, "prefix", true, "Prepend target name to image filenames if missing")
 	f.IntVar(&cmd.sha, "sha", 0, "Generate manifest using SHA 1, 256, 512 or 0 to skip")
+	f.BoolVar(&cmd.lease, "lease", false, "Output NFC Lease only")
 }
 
 func (cmd *ovfx) Usage() string {
@@ -72,18 +74,12 @@ func (cmd *ovfx) Description() string {
 	return `Export VM.
 
 Examples:
-  govc export.ovf -vm $vm DIR`
-}
-
-func (cmd *ovfx) Process(ctx context.Context) error {
-	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
+  govc export.ovf -vm $vm DIR
+  govc export.ovf -vm $vm -lease`
 }
 
 func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
-	if f.NArg() != 1 {
+	if f.NArg() != 1 && !cmd.lease {
 		// TODO: output summary similar to ovftool's
 		return flag.ErrHelp
 	}
@@ -129,6 +125,15 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 	info, err := lease.Wait(ctx, nil)
 	if err != nil {
 		return err
+	}
+
+	if cmd.lease {
+		o, err := lease.Properties(ctx)
+		if err != nil {
+			return err
+		}
+
+		return cmd.WriteResult(o)
 	}
 
 	u := lease.StartUpdater(ctx, info)

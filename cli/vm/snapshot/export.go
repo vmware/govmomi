@@ -7,13 +7,20 @@ package snapshot
 import (
 	"context"
 	"flag"
+	"fmt"
+	"path/filepath"
 
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
+	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/vim25/soap"
 )
 
 type export struct {
 	*flags.VirtualMachineFlag
+
+	lease bool
+	dest  string
 }
 
 func init() {
@@ -23,6 +30,9 @@ func init() {
 func (cmd *export) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.lease, "lease", false, "Output NFC Lease only")
+	f.StringVar(&cmd.dest, "d", ".", "Destination directory")
 }
 
 func (cmd *export) Usage() string {
@@ -35,18 +45,12 @@ func (cmd *export) Description() string {
 NAME can be the snapshot name, tree path, or managed object ID.
 
 Examples:
-  govc snapshot.export -vm my-vm my-snapshot`
-}
-
-func (cmd *export) Process(ctx context.Context) error {
-	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
+  govc snapshot.export -vm my-vm my-snapshot
+  govc snapshot.export -vm my-vm -lease my-snapshot`
 }
 
 func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
-	if f.NArg() != 1 {
+	if f.NArg() != 1 && !cmd.lease {
 		return flag.ErrHelp
 	}
 
@@ -64,15 +68,47 @@ func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	l, err := vm.ExportSnapshot(ctx, s)
+	lease, err := vm.ExportSnapshot(ctx, s)
 	if err != nil {
 		return err
 	}
 
-	o, err := l.Properties(ctx)
+	info, err := lease.Wait(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	return cmd.WriteResult(o)
+	if cmd.lease {
+		o, err := lease.Properties(ctx)
+		if err != nil {
+			return err
+		}
+
+		return cmd.WriteResult(o)
+	}
+
+	u := lease.StartUpdater(ctx, info)
+	defer u.Done()
+
+	for _, i := range info.Items {
+		err := cmd.Download(ctx, lease, i)
+		if err != nil {
+			return err
+		}
+	}
+
+	return lease.Complete(ctx)
+}
+
+func (cmd *export) Download(ctx context.Context, lease *nfc.Lease, item nfc.FileItem) error {
+	path := filepath.Join(cmd.dest, item.Path)
+
+	logger := cmd.ProgressLogger(fmt.Sprintf("Downloading %s... ", item.Path))
+	defer logger.Wait()
+
+	opts := soap.Download{
+		Progress: logger,
+	}
+
+	return lease.DownloadFile(ctx, path, item, opts)
 }
