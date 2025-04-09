@@ -25,6 +25,8 @@ type ovfx struct {
 	*OptionsFlag
 
 	Importer importer.Importer
+
+	lease bool
 }
 
 func init() {
@@ -49,6 +51,7 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.Importer.Name, "name", "", "Name to use for new entity")
 	f.BoolVar(&cmd.Importer.VerifyManifest, "m", false, "Verify checksum of uploaded files against manifest (.mf)")
 	f.BoolVar(&cmd.Importer.Hidden, "hidden", false, "Enable hidden properties")
+	f.BoolVar(&cmd.lease, "lease", false, "Output NFC Lease only")
 }
 
 func (cmd *ovfx) Process(ctx context.Context) error {
@@ -88,7 +91,25 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cmd.Importer.Archive = archive
 
-	moref, err := cmd.Importer.Import(context.TODO(), fpath, cmd.Options)
+	return cmd.Import(ctx, fpath)
+}
+
+func (cmd *ovfx) Import(ctx context.Context, fpath string) error {
+	if cmd.lease {
+		_, lease, err := cmd.Importer.ImportVApp(ctx, fpath, cmd.Options)
+		if err != nil {
+			return err
+		}
+
+		o, err := lease.Properties(ctx)
+		if err != nil {
+			return err
+		}
+
+		return cmd.WriteResult(o)
+	}
+
+	moref, err := cmd.Importer.Import(ctx, fpath, cmd.Options)
 	if err != nil {
 		return err
 	}
