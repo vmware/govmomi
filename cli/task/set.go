@@ -43,7 +43,8 @@ func (cmd *set) Description() string {
 
 Examples:
   id=$(govc task.create com.vmware.govmomi.simulator.test)
-  govc task.set $id -s error`
+  govc task.set $id -s error
+  govc task.set $id -p 100 -s success`
 }
 
 func (cmd *set) Usage() string {
@@ -67,6 +68,13 @@ func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	task := object.NewTask(c, ref)
 
+	if cmd.progress != 0 {
+		err := task.UpdateProgress(ctx, cmd.progress)
+		if err != nil {
+			return err
+		}
+	}
+
 	var fault *types.LocalizedMethodFault
 
 	if cmd.err != "" {
@@ -79,13 +87,6 @@ func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	if cmd.state != "" {
 		err := task.SetState(ctx, types.TaskInfoState(cmd.state), nil, fault)
-		if err != nil {
-			return err
-		}
-	}
-
-	if cmd.progress != 0 {
-		err := task.UpdateProgress(ctx, cmd.progress)
 		if err != nil {
 			return err
 		}
