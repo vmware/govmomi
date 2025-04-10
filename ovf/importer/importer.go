@@ -17,6 +17,7 @@ import (
 	"github.com/vmware/govmomi/nfc"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
+	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
@@ -118,7 +119,7 @@ func (imp *Importer) ImportVApp(ctx context.Context, fpath string, opts Options)
 		return nil, nil, err
 	}
 	if spec.Error != nil {
-		return nil, nil, errors.New(spec.Error[0].LocalizedMessage)
+		return nil, nil, &task.Error{LocalizedMethodFault: &spec.Error[0]}
 	}
 	if spec.Warning != nil {
 		for _, w := range spec.Warning {

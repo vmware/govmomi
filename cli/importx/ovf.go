@@ -8,11 +8,14 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf/importer"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ovfx struct {
@@ -27,6 +30,7 @@ type ovfx struct {
 	Importer importer.Importer
 
 	lease bool
+	net   string // No need for *flags.NetworkFlag here
 }
 
 func init() {
@@ -52,6 +56,7 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.Importer.VerifyManifest, "m", false, "Verify checksum of uploaded files against manifest (.mf)")
 	f.BoolVar(&cmd.Importer.Hidden, "hidden", false, "Enable hidden properties")
 	f.BoolVar(&cmd.lease, "lease", false, "Output NFC Lease only")
+	f.StringVar(&cmd.net, "net", "", "Network")
 }
 
 func (cmd *ovfx) Process(ctx context.Context) error {
@@ -91,10 +96,32 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cmd.Importer.Archive = archive
 
-	return cmd.Import(ctx, fpath)
+	if err = cmd.Import(ctx, fpath); err != nil {
+		if fault.Is(err, &types.OvfNoHostNic{}) {
+			hint := "specify Network with '-net' or '-options'"
+			return fmt.Errorf("%s (%s)", err.Error(), hint)
+		}
+		return err
+	}
+	return nil
 }
 
 func (cmd *ovfx) Import(ctx context.Context, fpath string) error {
+	if cmd.net != "" {
+		if len(cmd.Options.NetworkMapping) == 0 {
+			env, err := importer.Spec(fpath, cmd.Importer.Archive, false, false)
+			if err != nil {
+				return err
+			}
+
+			cmd.Options.NetworkMapping = env.NetworkMapping
+		}
+
+		for i := range cmd.Options.NetworkMapping {
+			cmd.Options.NetworkMapping[i].Network = cmd.net
+		}
+	}
+
 	if cmd.lease {
 		_, lease, err := cmd.Importer.ImportVApp(ctx, fpath, cmd.Options)
 		if err != nil {

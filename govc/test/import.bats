@@ -216,6 +216,12 @@ load test_helper
   run govc import.ovf -options - "$ovf" <<<"$options"
   assert_success # using raw MO id
   grep "invalid NetworkMapping.Name" <<<"$output"
+
+  run govc import.ovf -name netflag -net enoent "$ovf"
+  assert_failure
+
+  run govc import.ovf -name netflag -net "VM Network" "$ovf"
+  assert_success
 }
 
 @test "import invalid disk provisioning" {
