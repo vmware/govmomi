@@ -3772,6 +3772,7 @@ Options:
   -lease=false           Output NFC Lease only
   -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
+  -net=                  Network
   -options=              Options spec file path for VM deployment
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
@@ -3789,6 +3790,7 @@ Options:
   -lease=false           Output NFC Lease only
   -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
+  -net=                  Network
   -options=              Options spec file path for VM deployment
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
