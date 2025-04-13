@@ -13,8 +13,11 @@ import (
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/fault"
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf/importer"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -164,7 +167,7 @@ func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
 		return "", err
 	}
 
-	cmd.Importer.Datastore, err = cmd.DatastoreFlag.Datastore()
+	cmd.Importer.Datastore, err = cmd.datastore()
 	if err != nil {
 		return "", err
 	}
@@ -219,4 +222,60 @@ func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
 	}
 
 	return f.Arg(0), nil
+}
+
+func (f *ovfx) datastore() (*object.Datastore, error) {
+	ctx := context.Background()
+
+	ds, err := f.Datastore()
+	if err == nil {
+		return ds, nil
+	}
+	if _, ok := err.(*find.NotFoundError); !ok {
+		return nil, err
+	}
+
+	finder, err := f.DatastoreFlag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	pod, err := finder.DatastoreCluster(ctx, f.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	var folder mo.Folder
+
+	err = pod.Properties(ctx, pod.Reference(), []string{"childEntity"}, &folder)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(folder.ChildEntity) == 0 {
+		return nil, fmt.Errorf("datastore cluster %q has no datastores", f.Name)
+	}
+
+	pc := property.DefaultCollector(pod.Client())
+
+	var stores []mo.Datastore
+
+	err = pc.Retrieve(ctx, folder.ChildEntity, []string{"info.freeSpace"}, &stores)
+	if err != nil {
+		return nil, err
+	}
+
+	// choose Datastore from DatastoreCluster (StoragePod) with the most free space
+	var ref types.ManagedObjectReference
+	var max int64
+
+	for _, ds := range stores {
+		space := ds.Info.GetDatastoreInfo().FreeSpace
+		if space > max {
+			max = space
+			ref = ds.Reference()
+		}
+	}
+
+	return object.NewDatastore(pod.Client(), ref), nil
 }
