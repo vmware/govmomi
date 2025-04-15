@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"sync"
@@ -132,6 +133,22 @@ func newHttpNfcLease(ctx *Context) *HttpNfcLease {
 	nfcLease.Store(lease.Reference(), lease)
 
 	return lease
+}
+
+func leaseURL(ctx *Context) *url.URL {
+	opt := ctx.Map.OptionManager().find("vcsim.server.url")
+
+	u, _ := url.Parse(opt.Value.(string))
+
+	// See NfcLease.DeviceUrl doc:
+	//  If a "*" is returned the client must substitute "*" with the
+	//  hostname or IP address used when connecting to the server.
+	// This is the case when connecting directly to an ESX host.
+	if ctx.Map.IsESX() {
+		u.Host = "*"
+	}
+
+	return u
 }
 
 func (l *HttpNfcLease) HttpNfcLeaseComplete(ctx *Context, req *types.HttpNfcLeaseComplete) soap.HasFault {

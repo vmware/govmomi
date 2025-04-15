@@ -6,7 +6,6 @@ package simulator
 
 import (
 	"fmt"
-	"net/url"
 	"path"
 	"strings"
 
@@ -269,6 +268,7 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 		device := object.VirtualDeviceList(vm.Config.Hardware.Device)
 		ndevice := make(map[string]int)
 		var urls []types.HttpNfcLeaseDeviceUrl
+		u := leaseURL(ctx)
 
 		for _, d := range device {
 			info, ok := d.GetVirtualDevice().Backing.(types.BaseVirtualDeviceFileBackingInfo)
@@ -286,14 +286,11 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 			n := ndevice[kind]
 			ndevice[kind]++
 
+			u.Path = nfcPrefix + path.Join(ref.Value, name)
 			urls = append(urls, types.HttpNfcLeaseDeviceUrl{
-				Key:       fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
-				ImportKey: fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
-				Url: (&url.URL{
-					Scheme: "https",
-					Host:   "*",
-					Path:   nfcPrefix + path.Join(ref.Value, name),
-				}).String(),
+				Key:           fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
+				ImportKey:     fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
+				Url:           u.String(),
 				SslThumbprint: "",
 				Disk:          types.NewBool(disk),
 				TargetId:      name,
