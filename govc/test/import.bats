@@ -271,3 +271,20 @@ load test_helper
   assert_equal ttylinux "$name"
   assert_equal 16.1 "$version"
 }
+
+@test "import datastore cluster" {
+  vcsim_env -pod 1 -ds 3
+
+  unset GOVC_DATASTORE
+
+  pod=DC0_POD0
+
+  run govc import.ova -ds $pod "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_failure # datastore cluster "DC0_POD0" has no datastores
+
+  run govc object.mv /DC0/datastore/LocalDS_* $pod
+  assert_success
+
+  run govc import.ova -ds $pod "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
+}
