@@ -186,3 +186,19 @@ func BreakLookupServiceURLs(ctx context.Context) {
 		}
 	}
 }
+
+// UnresolveLookupServiceURLs makes the path of all lookup service urls invalid
+func UnresolveLookupServiceURLs(ctx context.Context) {
+	setting := simulator.Map(ctx).OptionManager().Setting
+
+	for _, s := range setting {
+		o := s.GetOptionValue()
+		if strings.HasSuffix(o.Key, ".uri") {
+			val := o.Value.(string)
+			u, _ := url.Parse(val)
+			port := u.Port()
+			u.Host = "fake-name-will-not-dns-resolve:" + port
+			o.Value = u.String()
+		}
+	}
+}

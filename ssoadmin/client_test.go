@@ -30,6 +30,16 @@ func TestClient(t *testing.T) {
 			verifyClient(t, ctx, c)
 		})
 	})
+	t.Run("With DNS errors, lookup client should rewrite URLs to VC's Host", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, client *vim25.Client) {
+			lsim.UnresolveLookupServiceURLs(ctx)
+
+			c, err := ssoadmin.NewClient(ctx, client)
+			require.NoError(t, err)
+
+			verifyClient(t, ctx, c)
+		})
+	})
 	t.Run("With Envoy sidecar and a malfunctioning lookup service, ssoadmin client creation should still succeed", func(t *testing.T) {
 		model := simulator.VPX()
 		model.Create()
