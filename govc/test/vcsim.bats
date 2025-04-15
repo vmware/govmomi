@@ -585,3 +585,74 @@ EOF
 
   rm "$file"
 }
+
+@test "vcsim jsonrpc" {
+  vcsim_start
+
+  url=$(govc env -x GOVC_URL) # w/o username:password@
+
+  run govc session.login -u "$url" -X POST /api <<EOF
+{
+  "jsonrpc": "2.0",
+  "method": "invoke",
+  "params": {
+    "serviceId": "com.vmware.cis.session",
+    "operationId": "create",
+    "ctx": {
+      "securityCtx": {
+        "schemeId": "com.vmware.vapi.std.security.user_pass",
+        "userName": "$(govc env GOVC_USERNAME)",
+        "password": "$(govc env GOVC_PASSWORD)"
+      }
+    }
+  },
+  "id": "0"
+}
+EOF
+  assert_success
+
+  session=$(jq -r .result.output.SECRET <<<"$output")
+  [ -n "$session" ]
+
+  run govc session.login -X POST /api <<EOF
+{
+  "jsonrpc": "2.0",
+  "method": "invoke",
+  "params": {
+    "serviceId": "com.vmware.cis.session",
+    "operationId": "delete"
+  },
+  "id": "123"
+}
+EOF
+  assert_success
+
+  id=$(jq -r .id <<<"$output")
+  assert_equal "$id" "123"
+
+  run govc session.login -r -X GET /rest/vcenter/certificate-authority/get-root
+  assert_success
+
+  run jq -r .value <<<"$output"
+  assert_success
+
+  run openssl x509 -text <<<"$output"
+  assert_success
+
+  run govc host.cert.csr -host DC0_H0
+  assert_success
+  csr="${output//$'\n'/\\n}"
+
+  run govc session.login -r -X POST /rest/vcenter/certificate-authority/sign-cert <<EOF
+{ "csr": "$csr", "duration": 30}
+EOF
+  assert_success
+
+  run jq -r .value <<<"$output"
+  assert_success
+
+  cert="$output"
+  run openssl x509 -text <<<"$cert"
+  assert_success
+  assert_matches DNS:DC0_H0
+}

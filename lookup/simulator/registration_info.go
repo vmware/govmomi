@@ -33,10 +33,7 @@ func registrationInfo(ctx *simulator.Context) []types.LookupServiceRegistrationI
 		}
 	}
 
-	trust := []string{""}
-	if sm.TLSCert != nil {
-		trust[0] = sm.TLSCert()
-	}
+	trust := []string{sm.TLSCert()}
 	sdk := opts["vcsim.server.url"] + vim25.Path
 	admin := opts["config.vpxd.sso.default.admin"]
 	owner := opts["config.vpxd.sso.solutionUser.name"]
