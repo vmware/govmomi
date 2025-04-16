@@ -743,12 +743,12 @@ func (s *Service) NewServer() *Server {
 			}
 		}
 	}
-	m.Setting = append(m.Setting,
-		&types.OptionValue{
+	m.UpdateOptions(&types.UpdateOptions{
+		ChangedValue: []types.BaseOptionValue{&types.OptionValue{
 			Key:   "vcsim.server.url",
 			Value: u.String(),
-		},
-	)
+		}},
+	})
 
 	u.User = s.Listen.User
 	if u.User == nil {

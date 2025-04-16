@@ -6,7 +6,6 @@ package simulator
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"path"
 
@@ -180,6 +179,7 @@ func (v *VirtualMachineSnapshot) ExportSnapshot(ctx *Context, req *types.ExportS
 	device := object.VirtualDeviceList(v.Config.Hardware.Device)
 	ndevice := make(map[string]int)
 	var urls []types.HttpNfcLeaseDeviceUrl
+	u := leaseURL(ctx)
 
 	for _, d := range device {
 		info, ok := d.GetVirtualDevice().Backing.(types.BaseVirtualDeviceFileBackingInfo)
@@ -197,14 +197,11 @@ func (v *VirtualMachineSnapshot) ExportSnapshot(ctx *Context, req *types.ExportS
 		n := ndevice[kind]
 		ndevice[kind]++
 
+		u.Path = nfcPrefix + path.Join(lease.Reference().Value, name)
 		urls = append(urls, types.HttpNfcLeaseDeviceUrl{
-			Key:       fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
-			ImportKey: fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
-			Url: (&url.URL{
-				Scheme: "https",
-				Host:   "*",
-				Path:   nfcPrefix + path.Join(lease.Reference().Value, name),
-			}).String(),
+			Key:           fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
+			ImportKey:     fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
+			Url:           u.String(),
 			SslThumbprint: "",
 			Disk:          types.NewBool(disk),
 			TargetId:      name,

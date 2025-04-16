@@ -287,4 +287,31 @@ load test_helper
 
   run govc import.ova -ds $pod "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
+
+  run govc import.ova -ds $pod -name test-url -lease -json "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
+
+  run jq -r .info.deviceUrl[].url <<<"$output"
+  assert_success
+
+  # Device URL.Host should be the same as vcsim's https://127.0.0.1:$port/nfc/.../disk-0.vmdk
+  run govc env -x -u "$output" GOVC_URL_HOST
+  assert_success "$(govc env -x GOVC_URL_HOST)"
+}
+
+@test "import esx" {
+  vcsim_env -esx
+
+  run govc import.ova "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
+
+  run govc import.ova -name test-url -lease -json "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
+
+  run jq -r .info.deviceUrl[].url <<<"$output"
+  assert_success
+
+  # Device URL.Host should be '*' https://*:$port/nfc/.../disk-0.vmdk
+  run govc env -x -u "$output" GOVC_URL_HOST
+  assert_success "*"
 }
