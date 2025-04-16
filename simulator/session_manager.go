@@ -6,6 +6,8 @@ package simulator
 
 import (
 	"context"
+	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -30,7 +32,7 @@ type SessionManager struct {
 	nopLocker
 
 	ServiceHostName string
-	TLSCert         func() string
+	TLS             func() *tls.Config
 	ValidLogin      func(*types.Login) bool
 
 	sessions map[string]Session
@@ -120,6 +122,13 @@ func (s *SessionManager) Authenticate(u url.URL, req *types.Login) bool {
 
 	pass, _ := u.User.Password()
 	return req.UserName == u.User.Username() && req.Password == pass
+}
+
+func (s *SessionManager) TLSCert() string {
+	if s.TLS == nil {
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString(s.TLS().Certificates[0].Certificate[0])
 }
 
 func (s *SessionManager) Login(ctx *Context, req *types.Login) soap.HasFault {

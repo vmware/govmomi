@@ -9,7 +9,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
@@ -777,9 +776,7 @@ func (s *Service) NewServer() *Server {
 	if s.TLS != nil {
 		ts.TLS = s.TLS
 		ts.TLS.ClientAuth = tls.RequestClientCert // Used by SessionManager.LoginExtensionByCertificate
-		ctx.Map.SessionManager().TLSCert = func() string {
-			return base64.StdEncoding.EncodeToString(ts.TLS.Certificates[0].Certificate[0])
-		}
+		ctx.Map.SessionManager().TLS = func() *tls.Config { return ts.TLS }
 		ts.StartTLS()
 	} else {
 		ts.Start()

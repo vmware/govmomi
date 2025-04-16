@@ -270,7 +270,7 @@ func (*ConfigurationManagementService) GetTrustedCertificates(ctx *simulator.Con
 			}
 			res = append(res, base64.StdEncoding.EncodeToString(block.Bytes))
 		}
-	} else if m.TLSCert != nil {
+	} else if m.TLS != nil {
 		res = append(res, m.TLSCert())
 	}
 

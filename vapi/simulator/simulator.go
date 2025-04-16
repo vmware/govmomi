@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/md5"
+	"crypto/rand"
 	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
@@ -22,6 +23,7 @@ import (
 	"hash"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
 	"net/url"
 	"os"
@@ -167,8 +169,10 @@ func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 		{internal.VCenterOVFLibraryItem + "/", s.libraryItemOVFID},
 		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
+		{"/vcenter/certificate-authority/", s.certificateAuthority},
 		{internal.DebugEcho, s.debugEcho},
 		// /api/ patterns.
+		{vapi.Path, s.jsonRPC},
 		{internal.SecurityPoliciesPath, s.librarySecurityPolicies},
 		{internal.TrustedCertificatesPath, s.libraryTrustedCertificates},
 		{internal.TrustedCertificatesPath + "/", s.libraryTrustedCertificatesID},
@@ -179,7 +183,10 @@ func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 		s.HandleFunc(h.p, h.m)
 	}
 
-	return []string{rest.Path + "/", vapi.Path + "/"}, s
+	return []string{
+		rest.Path, rest.Path + "/",
+		vapi.Path, vapi.Path + "/",
+	}, s
 }
 
 func (s *handler) withClient(f func(context.Context, *vim25.Client) error) error {
@@ -266,8 +273,13 @@ func (s *handler) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 }
 
 func (s *handler) isAuthorized(r *http.Request) bool {
-	if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, internal.SessionPath) && s.action(r) == "" {
-		return true
+	if r.Method == http.MethodPost && s.action(r) == "" {
+		if r.URL.Path == vapi.Path {
+			return true
+		}
+		if strings.HasSuffix(r.URL.Path, internal.SessionPath) {
+			return true
+		}
 	}
 	id := r.Header.Get(internal.SessionCookieName)
 	if id == "" {
@@ -562,6 +574,106 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		OK(w)
 	case http.MethodGet:
 		OK(w, s.Session[id])
+	}
+}
+
+// just enough json-rpc to support Supervisor upgrade testing
+func (s *handler) jsonRPC(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var rpc, out map[string]any
+
+	if Decode(r, w, &rpc) {
+		params := rpc["params"].(map[string]any)
+
+		switch params["serviceId"] {
+		case "com.vmware.cis.session":
+			switch params["operationId"] {
+			case "create":
+				id := uuid.New().String()
+				now := time.Now()
+				s.Session[id] = &rest.Session{User: id, Created: now, LastAccessed: now}
+				out = map[string]any{"SECRET": id}
+			case "delete":
+			}
+		}
+
+		res := map[string]any{
+			"jsonrpc": rpc["jsonrpc"],
+			"id":      rpc["id"],
+			"result": map[string]any{
+				"output": out,
+			},
+		}
+
+		StatusOK(w, res)
+	}
+}
+
+func (s *handler) certificateAuthority(w http.ResponseWriter, r *http.Request) {
+	signer := s.Map.SessionManager().TLS().Certificates[0]
+
+	switch path.Base(r.URL.Path) {
+	case "get-root":
+		var encoded bytes.Buffer
+		_ = pem.Encode(&encoded, &pem.Block{Type: "CERTIFICATE", Bytes: signer.Leaf.Raw})
+		OK(w, encoded.String())
+	case "sign-cert":
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+
+		var req struct {
+			Duration string `json:"duration"`
+			CSR      string `json:"csr"`
+		}
+
+		if Decode(r, w, &req) {
+			block, _ := pem.Decode([]byte(req.CSR))
+			csr, err := x509.ParseCertificateRequest(block.Bytes)
+			if err != nil {
+				BadRequest(w, err.Error())
+				return
+			}
+			duration, err := strconv.ParseInt(req.Duration, 10, 64)
+			if err != nil {
+				BadRequest(w, err.Error())
+				return
+			}
+
+			serialNumber, _ := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
+			now := time.Now()
+			cert := &x509.Certificate{
+				SerialNumber:   serialNumber,
+				Subject:        csr.Subject,
+				DNSNames:       csr.DNSNames,
+				IPAddresses:    csr.IPAddresses,
+				NotBefore:      now,
+				NotAfter:       now.Add(time.Hour * 24 * time.Duration(duration)),
+				AuthorityKeyId: signer.Leaf.SubjectKeyId,
+			}
+
+			der, err := x509.CreateCertificate(rand.Reader, cert, signer.Leaf, csr.PublicKey, signer.PrivateKey)
+			if err != nil {
+				BadRequest(w, err.Error())
+				return
+			}
+
+			var encoded bytes.Buffer
+			err = pem.Encode(&encoded, &pem.Block{Type: "CERTIFICATE", Bytes: der})
+			if err != nil {
+				BadRequest(w, err.Error())
+				return
+			}
+
+			OK(w, encoded.String())
+		}
+	default:
+		http.NotFound(w, r)
 	}
 }
 
