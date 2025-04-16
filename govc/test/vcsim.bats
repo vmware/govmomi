@@ -644,7 +644,7 @@ EOF
   csr="${output//$'\n'/\\n}"
 
   run govc session.login -r -X POST /rest/vcenter/certificate-authority/sign-cert <<EOF
-{ "csr": "$csr", "duration": 30}
+{ "csr": "$csr", "duration": "30"}
 EOF
   assert_success
 

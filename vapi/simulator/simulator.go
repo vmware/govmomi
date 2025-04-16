@@ -628,13 +628,18 @@ func (s *handler) certificateAuthority(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var req struct {
-			Duration int64  `json:"duration"`
+			Duration string `json:"duration"`
 			CSR      string `json:"csr"`
 		}
 
 		if Decode(r, w, &req) {
 			block, _ := pem.Decode([]byte(req.CSR))
 			csr, err := x509.ParseCertificateRequest(block.Bytes)
+			if err != nil {
+				BadRequest(w, err.Error())
+				return
+			}
+			duration, err := strconv.ParseInt(req.Duration, 10, 64)
 			if err != nil {
 				BadRequest(w, err.Error())
 				return
@@ -648,7 +653,7 @@ func (s *handler) certificateAuthority(w http.ResponseWriter, r *http.Request) {
 				DNSNames:       csr.DNSNames,
 				IPAddresses:    csr.IPAddresses,
 				NotBefore:      now,
-				NotAfter:       now.Add(time.Hour * 24 * time.Duration(req.Duration)),
+				NotAfter:       now.Add(time.Hour * 24 * time.Duration(duration)),
 				AuthorityKeyId: signer.Leaf.SubjectKeyId,
 			}
 
