@@ -27,6 +27,8 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 60
     outputs:
       latesttag: ${{ steps.tag.outputs.islatest }}
@@ -147,6 +149,8 @@ jobs:
     needs: release
     name: Create CHANGELOG.md PR
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     continue-on-error: true
     # Only update CHANGELOG for latest semver tag.
     if: ${{ !inputs.dryrun && needs.release.outputs.latesttag == 'true' }}
