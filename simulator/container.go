@@ -70,6 +70,11 @@ type networkSettings struct {
 }
 
 type containerDetails struct {
+	Config struct {
+		Hostname   string
+		Domainname string
+		DNS        []string `json:"dns"`
+	}
 	State struct {
 		Running bool
 		Paused  bool
@@ -95,16 +100,6 @@ func constructContainerName(name, uid string) string {
 
 func constructVolumeName(containerName, uid, volumeName string) string {
 	return constructContainerName(containerName, uid) + "--" + sanitizeName(volumeName)
-}
-
-func extractNameAndUid(containerName string) (name string, uid string, err error) {
-	parts := strings.Split(strings.TrimPrefix(containerName, "vcsim-"), "-")
-	if len(parts) != 2 {
-		err = fmt.Errorf("container name does not match expected vcsim-name-uid format: %s", containerName)
-		return
-	}
-
-	return parts[0], parts[1], nil
 }
 
 func prefixToMask(prefix int) string {
@@ -477,6 +472,15 @@ func (c *container) inspect() (out []byte, detail containerDetails, err error) {
 	}
 
 	detail = details[0]
+
+	// DNS setting
+	f, oerr := os.Open("/etc/docker/daemon.json")
+	if oerr != nil {
+		return
+	}
+	err = json.NewDecoder(f).Decode(&detail.Config)
+	_ = f.Close()
+
 	return
 }
 

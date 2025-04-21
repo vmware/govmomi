@@ -93,6 +93,9 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties() error {
 
 	svm.vm.Guest.IpAddress = netS.IPAddress
 	svm.vm.Summary.Guest.IpAddress = netS.IPAddress
+	if svm.vm.Guest.HostName == "" {
+		svm.vm.Guest.HostName = detail.Config.Hostname
+	}
 
 	if len(svm.vm.Guest.Net) != 0 {
 		net := &svm.vm.Guest.Net[0]
@@ -105,6 +108,27 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties() error {
 				State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
 			}},
 		}
+
+		gsi := types.GuestStackInfo{
+			DnsConfig: &types.NetDnsConfigInfo{
+				Dhcp:         false,
+				HostName:     svm.vm.Guest.HostName,
+				DomainName:   detail.Config.Domainname,
+				IpAddress:    detail.Config.DNS,
+				SearchDomain: nil,
+			},
+			IpRouteConfig: &types.NetIpRouteConfigInfo{
+				IpRoute: []types.NetIpRouteConfigInfoIpRoute{{
+					Network:      "0.0.0.0",
+					PrefixLength: 0,
+					Gateway: types.NetIpRouteConfigInfoGateway{
+						IpAddress: netS.Gateway,
+						Device:    "0",
+					},
+				}},
+			},
+		}
+		svm.vm.Guest.IpStack = []types.GuestStackInfo{gsi}
 	}
 
 	for _, d := range svm.vm.Config.Hardware.Device {

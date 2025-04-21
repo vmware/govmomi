@@ -288,14 +288,35 @@ EOF
   fi
 
   ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$name")
-  run govc object.collect -s vm/$vm guest.ipAddress
+  run govc collect -s vm/$vm guest.ipAddress
   assert_success "$ip"
 
-  run govc object.collect -s vm/$vm summary.guest.ipAddress
+  run govc collect -s vm/$vm summary.guest.ipAddress
   assert_success "$ip"
 
-  netip=$(govc object.collect -json -o vm/$vm guest.net | jq -r .guest.net[].ipAddress[0])
+  netip=$(govc collect -json -o vm/$vm guest.net | jq -r .guest.net[].ipAddress[0])
   [ "$netip" = "$ip" ]
+
+  run docker inspect -f '{{.Config.Hostname}}' "$name"
+  assert_success
+  hostname="$output"
+
+  run docker inspect -f '{{.NetworkSettings.Gateway}}' "$name"
+  assert_success
+  gateway="$output"
+
+  run govc collect -s -json vm/$vm guest.ipStack
+  assert_success
+  ipStack="$output"
+
+  run jq -r .[].dnsConfig.hostName <<<"$ipStack"
+  assert_success "$hostname"
+
+  run govc collect -s vm/$vm guest.hostName
+  assert_success "$hostname"
+
+  run jq -r .[].ipRouteConfig.ipRoute[].gateway.ipAddress <<<"$ipStack"
+  assert_success "$gateway"
 
   run govc vm.ip $vm # covers VirtualMachine.WaitForIP
   assert_success "$ip"
@@ -310,7 +331,7 @@ EOF
   assert_success
 
   # wait for power state == off after guest shutdown above
-  run govc object.collect -s vm/$vm -runtime.powerState poweredOff
+  run govc collect -s vm/$vm -runtime.powerState poweredOff
   assert_success
 
   run docker inspect -f '{{.State.Status}}' "$name"
@@ -346,7 +367,7 @@ EOF
   run docker inspect "$name"
   assert_success
 
-  ip=$(govc object.collect -s vm/$vm guest.ipAddress)
+  ip=$(govc collect -s vm/$vm guest.ipAddress)
   run docker run --rm curlimages/curl curl -f "http://$ip/vcsim.bats"
   assert_success
 
