@@ -27,20 +27,19 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 60
     outputs:
       latesttag: ${{ steps.tag.outputs.islatest }}
-
     steps:
       - name: Docker Login
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0 # for CHANGELOG
           ref: ${{ github.ref }} # branch provided on dispatch
-
       - name: Validate Branch and Tag
         run: |
           # do not allow release on main branch
@@ -63,12 +62,10 @@ jobs:
 
           # set tag environment variable
           echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
-
       - name: Setup Go
         uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
         with:
           go-version: '1.23'
-
       - name: Update version.go
         run: |
           # strip semantic v
@@ -85,7 +82,6 @@ jobs:
           # commit changes
           git add internal/version/version.go
           git commit -s -m "chore: Update version.go for ${TAG}"
-
       - name: Create Tag
         id: tag
         run: |
@@ -101,12 +97,13 @@ jobs:
           else
             echo "islatest=false >> $GITHUB_OUTPUT"
           fi
-
       - name: Push to Release Branch
         if: ${{ !inputs.dryrun }}
+        env:
+          GOVMOMI_RELEASE: ${{ secrets.GOVMOMI_RELEASE }}
         run: |
+          git remote set-url origin https://x-access-token:${GOVMOMI_RELEASE}@github.com/${{ github.repository }}
           git push --atomic --follow-tags origin ${{ github.ref }}
-
       - name: Create Release CHANGELOG
         env:
           IMAGE: quay.io/git-chglog/git-chglog
@@ -115,7 +112,6 @@ jobs:
         run: |
           # generate CHANGELOG for this Github release tag only
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' ${TAG}
-
       - name: Archive CHANGELOG
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         continue-on-error: true
@@ -124,7 +120,6 @@ jobs:
           path: |
             ./RELEASE_CHANGELOG.md
           retention-days: 14
-
       - name: Simulate Release without Pushing Artifacts
         if: ${{ inputs.dryrun }}
         uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
@@ -133,31 +128,29 @@ jobs:
         with:
           version: latest
           args: release --snapshot --clean --release-notes RELEASE_CHANGELOG.md
-
       - name: Create Release
         if: ${{ !inputs.dryrun }}
         uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GOVMOMI_RELEASE }}
         with:
           version: latest
           args: release --clean --release-notes RELEASE_CHANGELOG.md # will push artefacts and container images
-
   pull-request:
     needs: release
     name: Create CHANGELOG.md PR
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     continue-on-error: true
     # Only update CHANGELOG for latest semver tag.
     if: ${{ !inputs.dryrun && needs.release.outputs.latesttag == 'true' }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0 # for CHANGELOG
           ref: main
-
       - name: Commit CHANGELOG
         env:
           IMAGE: quay.io/git-chglog/git-chglog
@@ -166,7 +159,6 @@ jobs:
         run: |
           # update CHANGELOG
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' -t .chglog/CHANGELOG.tpl.md
-
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
@@ -181,7 +173,6 @@ jobs:
 
             > **Note**
             > Due to a [limitation](https://github.com/peter-evans/create-pull-request/blob/master/docs/concepts-guidelines.md#triggering-further-workflow-runs) in Github Actions please **close and immediately reopen** this PR to trigger the required workflow checks before merging.
-
       - name: Pull Request Information
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
