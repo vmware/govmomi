@@ -121,7 +121,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	spec.Files.VmPathName = vmx.String()
 
 	dsPath := path.Dir(spec.Files.VmPathName)
-	vm.uid = sha1UUID(spec.Files.VmPathName)
+	vm.uid = internal.OID(spec.Files.VmPathName)
 
 	defaults := types.VirtualMachineConfigSpec{
 		NumCPUs:           1,

@@ -152,6 +152,11 @@ go-test: ## Runs go unit tests with race detector enabled
   -v $(TEST_OPTS) \
   ./...
 
+.PHONY: go-fips140-test
+go-fips140-test: ## Test simulator can be used with fips140=only
+	GODEBUG=fips140=only $(GO) test ./property
+
+go-test: ## Runs go unit tests with race detector enabled
 .PHONY: govc-test
 govc-test: install
 govc-test: ## Runs govc bats tests
@@ -159,4 +164,4 @@ govc-test: ## Runs govc bats tests
 	(cd govc/test && ./vendor/github.com/bats-core/bats-core/bin/bats -t .)
 
 .PHONY: test
-test: go-test govc-test	## Runs go-test and govc-test
+test: go-test go-fips140-test govc-test	## Runs go-test and govc-test

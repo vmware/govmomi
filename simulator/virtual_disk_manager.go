@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
-
 	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -246,7 +244,7 @@ func virtualDiskUUID(dc *types.ManagedObjectReference, file string) string {
 	if dc != nil {
 		file = dc.String() + file
 	}
-	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(file)).String()
+	return newUUID(file)
 }
 
 func (m *VirtualDiskManager) QueryVirtualDiskUuid(ctx *Context, req *types.QueryVirtualDiskUuid) soap.HasFault {

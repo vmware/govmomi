@@ -397,10 +397,16 @@ func (c *Client) loadThumbprints(name string) error {
 	return scanner.Err()
 }
 
+var fips140 = strings.Contains(os.Getenv("GODEBUG"), "fips140=only")
+
 // ThumbprintSHA1 returns the thumbprint of the given cert in the same format used by the SDK and Client.SetThumbprint.
 //
 // See: SSLVerifyFault.Thumbprint, SessionManagerGenericServiceTicket.Thumbprint, HostConnectSpec.SslThumbprint
+// When GODEBUG contains "fips140=only", this function returns an empty string.
 func ThumbprintSHA1(cert *x509.Certificate) string {
+	if fips140 {
+		return ""
+	}
 	sum := sha1.Sum(cert.Raw)
 	hex := make([]string, len(sum))
 	for i, b := range sum {
