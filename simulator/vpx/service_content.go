@@ -7,6 +7,7 @@ package vpx
 import (
 	"github.com/google/uuid"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -29,7 +30,7 @@ var ServiceContent = types.ServiceContent{
 		ProductLineId:         "vpx",
 		ApiType:               "VirtualCenter",
 		ApiVersion:            "6.5",
-		InstanceUuid:          uuid.NewSHA1(uuid.NameSpaceOID, uuid.NodeID()).String(),
+		InstanceUuid:          internal.OID(string(uuid.NodeID())).String(),
 		LicenseProductName:    "VMware VirtualCenter Server",
 		LicenseProductVersion: "6.0",
 	},

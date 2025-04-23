@@ -212,13 +212,13 @@ EOF
 
   # VM uuids are stable, based on path to .vmx
   run govc object.collect -s vm/DC0_H0_VM0 config.uuid config.instanceUuid
-  assert_success "$(printf "265104de-1472-547c-b873-6dc7883fb6cb\nb4689bed-97f0-5bcd-8a4c-07477cc8f06f")"
+  assert_success "$(printf "63d40cc5-9cba-5cc1-884a-f7f19070ecea\nb170c191-7587-5f8e-9a15-08c6a0a11ca5")"
 
   dups=$(govc object.collect -s -type m / config.uuid | sort | uniq -d | wc -l)
   assert_equal 0 "$dups"
 
   run govc object.collect -s host/DC0_H0/DC0_H0 summary.hardware.uuid
-  assert_success dcf7fb3c-4a1c-5a05-b730-5e09f3704e2f
+  assert_success efc5827c-ee19-5d35-84ef-a77d6ea6ee4c
 
   dups=$(govc object.collect -s -type m / summary.hardware.uuid | sort | uniq -d | wc -l)
   assert_equal 0 "$dups"
