@@ -2,6 +2,10 @@
 version: 2
 project_name: govmomi
 
+env:
+  - GO_VERSION=1.24
+  - ALPINE_VERSION=3.21
+
 builds:
   - id: govc
     no_main_check: true
@@ -111,6 +115,30 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://github.com/vmware/govmomi"
       - "--platform=linux/amd64"
+      - "--build-arg=GO_VERSION={{.Env.GO_VERSION}}"
+
+  - image_templates:
+      - "vmware/govc:{{ .Tag }}-runner"
+      - "vmware/govc:alpine-{{ .Tag }}-runner"
+      - "vmware/govc:{{ .ShortCommit }}-runner"
+      - "vmware/govc:alpine-{{ .ShortCommit }}-runner"
+      - "vmware/govc:latest-runner"
+      - "vmware/govc:alpine-latest-runner"
+    dockerfile: Dockerfile.govc.runner
+    ids:
+      - govc
+    extra_files:
+      - scripts/runner/entrypoint.sh
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.url=https://github.com/vmware/govmomi"
+      - "--platform=linux/amd64"
+      - "--build-arg=ALPINE_VERSION={{.Env.ALPINE_VERSION}}"
+
   - image_templates:
       - "vmware/vcsim:{{ .Tag }}"
       - "vmware/vcsim:{{ .ShortCommit }}"
@@ -126,3 +154,4 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.url=https://github.com/vmware/govmomi"
       - "--platform=linux/amd64"
+      - "--build-arg=GO_VERSION={{.Env.GO_VERSION}}"

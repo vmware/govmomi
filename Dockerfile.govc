@@ -1,12 +1,14 @@
-# Create a builder container
-# Reference: https://hub.docker.com/_/golang/tags
-# Note: Official Docker images for Go use Debian.
+# © Broadcom. All Rights Reserved.
+# The term “Broadcom” refers to Broadcom Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: Apache-2.0
+
+# --- Builder Stage ---
+# Uses the official Go Docker image for the build.
+
 ARG GO_VERSION
-FROM golang:1.23.0 AS build
+FROM golang:${GO_VERSION} AS build
 WORKDIR /go/src/app
 
-# Create appuser to isolate potential vulnerabilities
-# Reference: https://stackoverflow.com/a/55757473/12429735
 ENV USER=appuser
 ENV UID=10001
 RUN adduser \
@@ -17,31 +19,23 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
-# Create a new tmp directory so no bad actors can manipulate it
 RUN mkdir /temporary-tmp-directory && chmod 777 /temporary-tmp-directory
 
-###############################################################################
-# Final stage
+# --- Final Stage ---
+
 FROM scratch
 
-# Allow container to use latest TLS certificates
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-# Copy over appuser to run as non-root
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
 
-# Copy over the /tmp directory for golang/os.TmpDir
 COPY --chown=appuser --from=build /temporary-tmp-directory /tmp
 
-# Copy application from external build
 COPY govc /govc
 
-# Run all commands as non-root
 USER appuser:appuser
 
-# session cache, etc
 ENV GOVMOMI_HOME=/tmp
 
-# Set CMD to application with container defaults
 CMD ["/govc"]
