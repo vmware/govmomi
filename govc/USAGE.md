@@ -3809,10 +3809,20 @@ Options:
 ```
 Usage: govc import.vmdk [OPTIONS] PATH_TO_VMDK [REMOTE_DIRECTORY]
 
+Import vmdk to datastore.
+
+The local vmdk must be in streamOptimized format.
+
+Examples:
+  govc import.vmdk my.vmdk
+  govc import.vmdk -i my.vmdk # output vmdk info only
+  govc import.vmdk -json -i my.vmdk | jq .capacity | xargs numfmt --to=iec --suffix=B --format="%.1f"
+
 Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -folder=               Inventory folder [GOVC_FOLDER]
   -force=false           Overwrite existing disk
+  -i=false               Output vmdk info only
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 

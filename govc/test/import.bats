@@ -168,6 +168,23 @@ load test_helper
   assert_success # exists, but -force was used
 }
 
+@test "import.vmdk -i" {
+  # ClientFlag.Process errors otherwise, but not using client with -i flag
+  export GOVC_URL="unused"
+
+  run govc import.vmdk -i "$GOVC_IMAGES/${TTYLINUX_NAME}.ovf"
+  assert_failure
+
+  run govc import.vmdk -i "$GOVC_TEST_VMDK_SRC"
+  assert_success
+
+  run govc import.vmdk -json -i "$GOVC_TEST_VMDK_SRC"
+  assert_success
+
+  run jq . <<<"$output"
+  assert_success
+}
+
 @test "import duplicate dvpg names" {
   vcsim_env
 
