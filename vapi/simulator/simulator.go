@@ -1346,16 +1346,32 @@ func createFile(dstPath string) error {
 }
 
 // TODO: considering using object.DatastoreFileManager.Copy here instead
-func openFile(dstPath string, flag int, perm os.FileMode) (*os.File, error) {
+func openFile(src io.Reader, dstPath string, flag int, perm os.FileMode) (*os.File, error) {
 	backing := simulator.VirtualDiskBackingFileName(dstPath)
 	if backing == dstPath {
 		// dstPath is not a .vmdk file
 		return os.OpenFile(dstPath, flag, perm)
 	}
 
-	// Generate the descriptor file using dstPath
-	extent := vmdk.Extent{Info: filepath.Base(backing)}
-	desc := vmdk.NewDescriptor(extent)
+	var desc *vmdk.Descriptor
+
+	if _, ok := src.(*os.File); ok {
+		// Local file copy
+		var err error
+		desc, err = vmdk.ParseDescriptor(src)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Library import
+		info, err := vmdk.Seek(src)
+		if err != nil {
+			return nil, err
+		}
+		desc = info.Descriptor
+	}
+
+	desc.Extent[0].Info = filepath.Base(backing)
 
 	f, err := os.OpenFile(dstPath, flag, perm)
 	if err != nil {
@@ -1375,12 +1391,6 @@ func openFile(dstPath string, flag int, perm os.FileMode) (*os.File, error) {
 	return os.OpenFile(backing, flag, perm)
 }
 
-func sourceFile(srcPath string) (*os.File, error) {
-	// Open ${name}-flat.vmdk if src is a .vmdk
-	srcPath = simulator.VirtualDiskBackingFileName(srcPath)
-	return os.Open(srcPath)
-}
-
 func copyFile(dstPath, srcPath string) error {
 	srcStat, err := os.Stat(srcPath)
 	if err != nil {
@@ -1391,13 +1401,13 @@ func copyFile(dstPath, srcPath string) error {
 		return fmt.Errorf("%q is not a regular file", srcPath)
 	}
 
-	src, err := sourceFile(srcPath)
+	src, err := os.Open(srcPath)
 	if err != nil {
 		return fmt.Errorf("failed to open %q: %w", srcPath, err)
 	}
 	defer src.Close()
 
-	dst, err := openFile(dstPath, createOrCopyFlags, createOrCopyMode)
+	dst, err := openFile(src, dstPath, createOrCopyFlags, createOrCopyMode)
 	if err != nil {
 		return fmt.Errorf("failed to create %q: %w", dstPath, err)
 	}
@@ -2415,12 +2425,6 @@ func (s *handler) libraryItemFileCreate(
 
 		dstFilePath := path.Join(dstItemPath, fileName)
 
-		dst, err := openFile(dstFilePath, createOrCopyFlags, createOrCopyMode)
-		if err != nil {
-			return library.File{}, err
-		}
-		defer dst.Close()
-
 		var h hash.Hash
 
 		if doChecksum {
@@ -2429,6 +2433,12 @@ func (s *handler) libraryItemFileCreate(
 				src = io.TeeReader(src, h)
 			}
 		}
+
+		dst, err := openFile(src, dstFilePath, createOrCopyFlags, createOrCopyMode)
+		if err != nil {
+			return library.File{}, err
+		}
+		defer dst.Close()
 
 		n, err := copyReaderToWriter(dst, dstFilePath, src, fileName)
 		if err != nil {

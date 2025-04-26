@@ -241,12 +241,12 @@ func ExampleManager_CreateLibrary_subscribed() {
 	//   created library item my-image
 	//     uploaded library item file ttylinux-pc_i486-16.1.ovf, cached=true, size=5005
 	//     uploaded library item file ttylinux-pc_i486-16.1.mf, cached=true, size=159
-	//     uploaded library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1048576
+	//     uploaded library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1047552
 	// created library my-sub-lib
 	//   got subscribed library item my-image
 	//     library item file ttylinux-pc_i486-16.1.ovf, cached=true, size=5005
 	//     library item file ttylinux-pc_i486-16.1.mf, cached=true, size=159
-	//     library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1048576
+	//     library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1047552
 }
 
 func ExampleManager_CreateLibrary_subscribed_ondemand() {
@@ -449,7 +449,7 @@ func ExampleManager_CreateLibrary_subscribed_ondemand() {
 	//   created library item my-image
 	//     uploaded library item file ttylinux-pc_i486-16.1.ovf, cached=true, size=5005
 	//     uploaded library item file ttylinux-pc_i486-16.1.mf, cached=true, size=159
-	//     uploaded library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1048576
+	//     uploaded library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1047552
 	// created library my-sub-lib
 	//   got subscribed library item my-image
 	//     library item file ttylinux-pc_i486-16.1.ovf, cached=true, size=5005
@@ -458,5 +458,5 @@ func ExampleManager_CreateLibrary_subscribed_ondemand() {
 	//   sync'd (force=true) subscribed library item my-image
 	//     library item file ttylinux-pc_i486-16.1.ovf, cached=true, size=5005
 	//     library item file ttylinux-pc_i486-16.1.mf, cached=true, size=159
-	//     library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1048576
+	//     library item file ttylinux-pc_i486-16.1-disk1.vmdk, cached=true, size=1047552
 }

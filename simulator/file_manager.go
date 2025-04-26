@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vmdk"
 )
 
 type FileManager struct {
@@ -106,6 +107,45 @@ func (f *FileManager) deleteDatastoreFile(ctx *Context, req *types.DeleteDatasto
 	err = os.RemoveAll(file)
 	if err != nil {
 		return f.fault(file, err, new(types.CannotDeleteFile))
+	}
+
+	return nil
+}
+
+func (f *FileManager) DiskDescriptor(ctx *Context, dc *types.ManagedObjectReference, name string) (*vmdk.Descriptor, string, types.BaseMethodFault) {
+	path, fault := f.resolve(ctx, dc, name)
+	if fault != nil {
+		return nil, "", fault
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, "", f.fault(name, err, new(types.FileFault))
+	}
+
+	defer file.Close()
+
+	desc, err := vmdk.ParseDescriptor(file)
+	if err != nil {
+		return nil, "", f.fault(name, err, new(types.FileFault))
+	}
+
+	return desc, path, nil
+}
+
+func (f *FileManager) SaveDiskDescriptor(ctx *Context, desc *vmdk.Descriptor, path string) types.BaseMethodFault {
+	file, err := os.Create(path)
+	if err != nil {
+		return f.fault(path, err, new(types.FileFault))
+	}
+
+	if err = desc.Write(file); err != nil {
+		_ = file.Close()
+		return f.fault(path, err, new(types.FileFault))
+	}
+
+	if err = file.Close(); err != nil {
+		return f.fault(path, err, new(types.FileFault))
 	}
 
 	return nil

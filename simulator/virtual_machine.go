@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -28,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vmdk"
 )
 
 type VirtualMachine struct {
@@ -685,11 +687,15 @@ func (vm *VirtualMachine) addFileLayoutEx(ctx *Context, datastorePath object.Dat
 
 	switch fileType {
 	case types.VirtualMachineFileLayoutExFileTypeNvram, types.VirtualMachineFileLayoutExFileTypeSnapshotList:
-		vm.addConfigLayout(ctx, datastorePath.Path)
+		if !slices.Contains(vm.Layout.ConfigFile, datastorePath.Path) {
+			vm.Layout.ConfigFile = append(vm.Layout.ConfigFile, datastorePath.Path)
+		}
 	case types.VirtualMachineFileLayoutExFileTypeLog:
-		vm.addLogLayout(ctx, datastorePath.Path)
+		if !slices.Contains(vm.Layout.LogFile, datastorePath.Path) {
+			vm.Layout.LogFile = append(vm.Layout.LogFile, datastorePath.Path)
+		}
 	case types.VirtualMachineFileLayoutExFileTypeSwap:
-		vm.addSwapLayout(ctx, datastorePath.String())
+		vm.Layout.SwapFile = datastorePath.String()
 	}
 
 	vm.LayoutEx.File = append(vm.LayoutEx.File, types.VirtualMachineFileLayoutExFileInfo{
@@ -707,36 +713,6 @@ func (vm *VirtualMachine) addFileLayoutEx(ctx *Context, datastorePath object.Dat
 	vm.updateStorage(ctx)
 
 	return newKey
-}
-
-func (vm *VirtualMachine) addConfigLayout(ctx *Context, name string) {
-	for _, config := range vm.Layout.ConfigFile {
-		if config == name {
-			return
-		}
-	}
-
-	vm.Layout.ConfigFile = append(vm.Layout.ConfigFile, name)
-
-	vm.updateStorage(ctx)
-}
-
-func (vm *VirtualMachine) addLogLayout(ctx *Context, name string) {
-	for _, log := range vm.Layout.LogFile {
-		if log == name {
-			return
-		}
-	}
-
-	vm.Layout.LogFile = append(vm.Layout.LogFile, name)
-
-	vm.updateStorage(ctx)
-}
-
-func (vm *VirtualMachine) addSwapLayout(ctx *Context, name string) {
-	vm.Layout.SwapFile = name
-
-	vm.updateStorage(ctx)
 }
 
 func (vm *VirtualMachine) addSnapshotLayout(ctx *Context, snapshot types.ManagedObjectReference, dataKey int32) {
@@ -757,8 +733,6 @@ func (vm *VirtualMachine) addSnapshotLayout(ctx *Context, snapshot types.Managed
 		Key:          snapshot,
 		SnapshotFile: snapshotFiles,
 	})
-
-	vm.updateStorage(ctx)
 }
 
 func (vm *VirtualMachine) addSnapshotLayoutEx(ctx *Context, snapshot types.ManagedObjectReference, dataKey int32, memoryKey int32) {
@@ -873,10 +847,10 @@ func (vm *VirtualMachine) updateStorage(ctx *Context) types.BaseMethodFault {
 			}
 		}
 
-		dsUsage.Committed = file.Size
+		dsUsage.Committed += file.Size
 
 		if path.Ext(file.Name) == ".vmdk" {
-			dsUsage.Unshared = file.Size
+			dsUsage.Unshared += file.Size
 		}
 
 		for _, disk := range disks {
@@ -884,7 +858,7 @@ func (vm *VirtualMachine) updateStorage(ctx *Context) types.BaseMethodFault {
 			backing := disk.Backing.(types.BaseVirtualDeviceFileBackingInfo).GetVirtualDeviceFileBackingInfo()
 
 			if backing.FileName == file.Name {
-				dsUsage.Uncommitted = disk.CapacityInBytes
+				dsUsage.Uncommitted += disk.CapacityInBytes
 			}
 		}
 
@@ -898,7 +872,8 @@ func (vm *VirtualMachine) updateStorage(ctx *Context) types.BaseMethodFault {
 		Timestamp: time.Now(),
 	}
 
-	for _, usage := range datastoresUsage {
+	for i, usage := range datastoresUsage {
+		datastoresUsage[i].Uncommitted -= usage.Committed
 		storageSummary.Committed += usage.Committed
 		storageSummary.Uncommitted += usage.Uncommitted
 		storageSummary.Unshared += usage.Unshared
@@ -932,17 +907,23 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 		}
 	}
 
+	vmPathName := vm.Config.Files.VmPathName
+	// vm.Config.Files.VmPathName can be a directory or full path to .vmx
+	if path.Ext(vmPathName) == ".vmx" {
+		vmPathName = path.Dir(vmPathName)
+	}
+
 	// Directories will be used to locate VM files.
 	// Does not include information about virtual disk file locations.
 	locations := []string{
-		vm.Config.Files.VmPathName,
+		vmPathName,
 		vm.Config.Files.SnapshotDirectory,
 		vm.Config.Files.LogDirectory,
 		vm.Config.Files.SuspendDirectory,
 		vm.Config.Files.FtMetadataDirectory,
 	}
 
-	for _, directory := range locations {
+	for _, directory := range slices.Compact(locations) {
 		if directory == "" {
 			continue
 		}
@@ -955,10 +936,6 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 
 		datastore := vm.useDatastore(ctx, p.Datastore)
 		directory := datastore.resolve(ctx, p.Path)
-
-		if path.Ext(p.Path) == ".vmx" {
-			directory = path.Dir(directory) // vm.Config.Files.VmPathName can be a directory or full path to .vmx
-		}
 
 		if _, err := os.Stat(directory); err != nil {
 			// Can not access the directory
@@ -974,7 +951,7 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 		for _, file := range files {
 			datastorePath := object.DatastorePath{
 				Datastore: p.Datastore,
-				Path:      strings.TrimPrefix(file.Name(), datastore.Info.GetDatastoreInfo().Url),
+				Path:      path.Join(p.Path, file.Name()),
 			}
 			info, _ := file.Info()
 			vm.addFileLayoutEx(ctx, datastorePath, info.Size())
@@ -1400,6 +1377,7 @@ func (vm *VirtualMachine) configureDevice(
 			err := vdmCreateVirtualDisk(ctx, spec.FileOperation, &types.CreateVirtualDisk_Task{
 				Datacenter: &dc.Self,
 				Name:       info.FileName,
+				Spec:       &types.FileBackedVirtualDiskSpec{CapacityKb: x.CapacityInKB},
 			})
 			if err != nil {
 				return err
@@ -1548,7 +1526,7 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 				{Name: "summary.config.numVirtualDisks", Val: vm.Summary.Config.NumVirtualDisks - 1},
 			})
 
-			vm.updateDiskLayouts(ctx)
+			vm.RefreshStorageInfo(ctx, nil)
 		case types.BaseVirtualEthernetCard:
 			var net types.ManagedObjectReference
 

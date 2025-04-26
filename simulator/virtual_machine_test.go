@@ -1980,15 +1980,15 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 		disk := d.(*types.VirtualDisk)
 		info := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
 		diskLayoutCount := len(vmm.Layout.Disk)
-		summaryStorageNew := vmm.Summary.Storage
+		summaryStorageOld := vmm.Summary.Storage
 
 		p, fault := parseDatastorePath(info.FileName)
 		if fault != nil {
 			t.Fatalf("could not parse datastore path for disk file: %s", info.FileName)
 		}
 
-		storageNew := findDsStorage(p.Datastore)
-		if storageNew == nil {
+		storageOld := findDsStorage(p.Datastore)
+		if storageOld == nil {
 			t.Fatalf("could not find vm usage on datastore: %s", p.Datastore)
 		}
 
@@ -2002,11 +2002,9 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 			t.Error(err)
 		}
 
-		summaryStorageOld := summaryStorageNew
-		summaryStorageNew = vmm.Summary.Storage
+		summaryStorageNew := vmm.Summary.Storage
 
-		storageOld := storageNew
-		storageNew = findDsStorage(p.Datastore)
+		storageNew := findDsStorage(p.Datastore)
 		if storageNew == nil {
 			t.Fatalf("could not find vm usage on datastore: %s", p.Datastore)
 		}
@@ -2018,7 +2016,7 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 			{int64(len(vmm.Layout.Disk)), int64(diskLayoutCount - 1)},
 			{summaryStorageNew.Committed, summaryStorageOld.Committed - diskFile.Size},
 			{summaryStorageNew.Unshared, summaryStorageOld.Unshared - diskFile.Size},
-			{summaryStorageNew.Uncommitted, summaryStorageOld.Uncommitted - disk.CapacityInBytes + diskFile.Size},
+			{summaryStorageNew.Uncommitted, summaryStorageOld.Uncommitted - disk.CapacityInBytes},
 			{storageNew.Committed, storageOld.Committed - diskFile.Size},
 			{storageNew.Unshared, storageOld.Unshared - diskFile.Size},
 			{storageNew.Uncommitted, storageOld.Uncommitted - disk.CapacityInBytes + diskFile.Size},
@@ -2030,16 +2028,17 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 			}
 		}
 
+		summaryStorageOld = summaryStorageNew
+		storageOld = storageNew
+
 		// add disk
 		disk.CapacityInBytes = 1000000000
 		if err = vm.AddDevice(ctx, d); err != nil {
 			t.Error(err)
 		}
 
-		summaryStorageOld = summaryStorageNew
 		summaryStorageNew = vmm.Summary.Storage
 
-		storageOld = storageNew
 		storageNew = findDsStorage(p.Datastore)
 		if storageNew == nil {
 			t.Fatalf("could not find vm usage on datastore: %s", p.Datastore)
@@ -2057,7 +2056,7 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 			{int64(len(vmm.Layout.Disk)), int64(diskLayoutCount)},
 			{summaryStorageNew.Committed, summaryStorageOld.Committed + diskFile.Size},
 			{summaryStorageNew.Unshared, summaryStorageOld.Unshared + diskFile.Size},
-			{summaryStorageNew.Uncommitted, summaryStorageOld.Uncommitted + disk.CapacityInBytes - diskFile.Size},
+			{summaryStorageNew.Uncommitted, summaryStorageOld.Uncommitted + disk.CapacityInBytes},
 			{storageNew.Committed, storageOld.Committed + diskFile.Size},
 			{storageNew.Unshared, storageOld.Unshared + diskFile.Size},
 			{storageNew.Uncommitted, storageOld.Uncommitted + disk.CapacityInBytes - diskFile.Size},
