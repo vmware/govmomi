@@ -25,11 +25,11 @@ import (
 	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
-	"github.com/vmware/govmomi/vmdk"
 )
 
 type VirtualMachine struct {
@@ -1351,7 +1351,6 @@ func (vm *VirtualMachine) configureDevice(
 			}
 		}
 
-		summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
 		switch b := d.Backing.(type) {
 		case *types.VirtualDiskSparseVer2BackingInfo:
 			// Sparse disk creation not supported in ESX
@@ -1361,6 +1360,40 @@ func (vm *VirtualMachine) configureDevice(
 				},
 			}
 		case types.BaseVirtualDeviceFileBackingInfo:
+			parent := ""
+
+			switch backing := d.Backing.(type) {
+			case *types.VirtualDiskFlatVer2BackingInfo:
+				if backing.Parent != nil {
+					parent = backing.Parent.FileName
+				}
+			case *types.VirtualDiskSeSparseBackingInfo:
+				if backing.Parent != nil {
+					parent = backing.Parent.FileName
+				}
+			case *types.VirtualDiskSparseVer2BackingInfo:
+				if backing.Parent != nil {
+					parent = backing.Parent.FileName
+				}
+			}
+
+			if parent != "" {
+				desc, _, err := ctx.Map.FileManager().DiskDescriptor(ctx, &dc.Self, parent)
+				if err != nil {
+					return &types.InvalidDeviceSpec{
+						InvalidVmConfig: types.InvalidVmConfig{
+							Property: "virtualDeviceSpec.device.backing.parent.fileName",
+						},
+					}
+				}
+
+				// Disk Capacity is always same as the parent's
+				x.CapacityInBytes = int64(desc.Capacity())
+				x.CapacityInKB = x.CapacityInBytes / 1024
+			}
+
+			summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
+
 			info := b.GetVirtualDeviceFileBackingInfo()
 			var path object.DatastorePath
 			path.FromString(info.FileName)
@@ -2816,6 +2849,63 @@ func (vm *VirtualMachine) DetachDiskTask(ctx *Context, req *types.DetachDisk_Tas
 
 	return &methods.DetachDisk_TaskBody{
 		Res: &types.DetachDisk_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (vm *VirtualMachine) PromoteDisksTask(ctx *Context, req *types.PromoteDisks_Task) soap.HasFault {
+	task := CreateTask(vm, "promoteDisks", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
+		devices = devices.SelectByType((*types.VirtualDisk)(nil))
+		var cap int64
+
+		for i := range req.Disks {
+			d := devices.FindByKey(req.Disks[i].Key)
+			if d == nil {
+				return nil, &types.InvalidArgument{InvalidProperty: "disks"}
+			}
+
+			disk := d.(*types.VirtualDisk)
+
+			switch backing := disk.Backing.(type) {
+			case *types.VirtualDiskFlatVer2BackingInfo:
+				if backing.Parent != nil {
+					cap += disk.CapacityInBytes
+					if req.Unlink {
+						backing.Parent = nil
+					}
+				}
+			case *types.VirtualDiskSeSparseBackingInfo:
+				if backing.Parent != nil {
+					cap += disk.CapacityInBytes
+					if req.Unlink {
+						backing.Parent = nil
+					}
+				}
+			case *types.VirtualDiskSparseVer2BackingInfo:
+				if backing.Parent != nil {
+					cap += disk.CapacityInBytes
+					if req.Unlink {
+						backing.Parent = nil
+					}
+				}
+			}
+		}
+
+		// Built-in default delay. `simulator.TaskDelay` can be used to add additional time
+		// Translates to roughly 1s per 1GB
+		sleep := time.Duration(cap/units.MB) * time.Millisecond
+		if sleep > 0 {
+			log.Printf("%s: sleep %s for %s", t.Info.DescriptionId, sleep, units.ByteSize(cap))
+			time.Sleep(sleep)
+		}
+
+		return nil, nil
+	})
+
+	return &methods.PromoteDisks_TaskBody{
+		Res: &types.PromoteDisks_TaskResponse{
 			Returnval: task.Run(ctx),
 		},
 	}

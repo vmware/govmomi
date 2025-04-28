@@ -755,6 +755,50 @@ load test_helper
   [ $result -eq 2 ]
 }
 
+@test "vm.disk.promote" {
+  vcsim_env
+
+  export GOVC_VM=DC0_H0_VM0
+
+  run govc vm.disk.promote
+  assert_failure
+
+  run govc vm.disk.promote invalid-disk-name
+  assert_failure
+
+  run govc device.info disk-*-0
+  assert_success
+  grep -v "Parent:" <<<"$output" # No parent disk
+
+  run govc vm.disk.promote disk-*-0
+  assert_success
+
+  run govc disk.create -size 10M my-disk
+  assert_success
+  id="$output"
+
+  run govc disk.ls -json "$id"
+  assert_success
+
+  run jq -r .objects[].config.backing.filePath <<<"$output"
+  assert_success
+  path="$output"
+
+  run govc vm.disk.attach -link -disk "$path"
+  assert_success
+
+  run govc device.info disk-*-1
+  assert_success
+  assert_line "Parent: $path" # Has parent disk
+
+  run govc vm.disk.promote disk-*-1
+  assert_success
+
+  run govc device.info disk-*-1
+  assert_success
+  grep -v "Parent:" <<<"$output" # No more parent disk
+}
+
 @test "vm.create new disk with datastore argument" {
   vcsim_env
 
