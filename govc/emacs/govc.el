@@ -1137,7 +1137,7 @@ Optionally filter by FILTER and inherit SESSION."
 
 (defun govc-datastore-ls-entries ()
   "Wrapper for govc datastore.ls."
-  (let* ((data (govc-json "datastore.ls" "-l" "-p" govc-filter))
+  (let* ((data (govc-json "datastore.ls" (if current-prefix-arg "-a") "-l" "-p" govc-filter))
          (file (plist-get (elt data 0) :file)))
     (-map (lambda (ent)
             (let ((name (plist-get ent :path))
@@ -1164,7 +1164,7 @@ Optionally filter by FILTER and inherit SESSION."
   (interactive)
   (let ((id (tabulated-list-get-id)))
     (if current-prefix-arg
-        (govc-shell-command (list "datastore.ls" "-l" "-p" "-R" id))
+        (govc-shell-command (list "datastore.ls" (if current-prefix-arg "-a") "-l" "-p" "-R" id))
       (if (s-ends-with? "/" id)
           (progn (setq govc-filter id)
                  (tabulated-list-revert))

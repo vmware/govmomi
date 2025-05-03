@@ -1078,3 +1078,18 @@ func (v *VirtualMachine) ExportSnapshot(ctx context.Context, snapshot *types.Man
 	}
 	return nfc.NewLease(v.c, resp.Returnval), nil
 }
+
+func (v *VirtualMachine) PromoteDisks(ctx context.Context, unlink bool, disks []types.VirtualDisk) (*Task, error) {
+	req := types.PromoteDisks_Task{
+		This:   v.Reference(),
+		Unlink: unlink,
+		Disks:  disks,
+	}
+
+	res, err := methods.PromoteDisks_Task(ctx, v.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.Client(), res.Returnval), nil
+}

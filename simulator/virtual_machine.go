@@ -14,6 +14,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -24,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -685,11 +687,15 @@ func (vm *VirtualMachine) addFileLayoutEx(ctx *Context, datastorePath object.Dat
 
 	switch fileType {
 	case types.VirtualMachineFileLayoutExFileTypeNvram, types.VirtualMachineFileLayoutExFileTypeSnapshotList:
-		vm.addConfigLayout(ctx, datastorePath.Path)
+		if !slices.Contains(vm.Layout.ConfigFile, datastorePath.Path) {
+			vm.Layout.ConfigFile = append(vm.Layout.ConfigFile, datastorePath.Path)
+		}
 	case types.VirtualMachineFileLayoutExFileTypeLog:
-		vm.addLogLayout(ctx, datastorePath.Path)
+		if !slices.Contains(vm.Layout.LogFile, datastorePath.Path) {
+			vm.Layout.LogFile = append(vm.Layout.LogFile, datastorePath.Path)
+		}
 	case types.VirtualMachineFileLayoutExFileTypeSwap:
-		vm.addSwapLayout(ctx, datastorePath.String())
+		vm.Layout.SwapFile = datastorePath.String()
 	}
 
 	vm.LayoutEx.File = append(vm.LayoutEx.File, types.VirtualMachineFileLayoutExFileInfo{
@@ -707,36 +713,6 @@ func (vm *VirtualMachine) addFileLayoutEx(ctx *Context, datastorePath object.Dat
 	vm.updateStorage(ctx)
 
 	return newKey
-}
-
-func (vm *VirtualMachine) addConfigLayout(ctx *Context, name string) {
-	for _, config := range vm.Layout.ConfigFile {
-		if config == name {
-			return
-		}
-	}
-
-	vm.Layout.ConfigFile = append(vm.Layout.ConfigFile, name)
-
-	vm.updateStorage(ctx)
-}
-
-func (vm *VirtualMachine) addLogLayout(ctx *Context, name string) {
-	for _, log := range vm.Layout.LogFile {
-		if log == name {
-			return
-		}
-	}
-
-	vm.Layout.LogFile = append(vm.Layout.LogFile, name)
-
-	vm.updateStorage(ctx)
-}
-
-func (vm *VirtualMachine) addSwapLayout(ctx *Context, name string) {
-	vm.Layout.SwapFile = name
-
-	vm.updateStorage(ctx)
 }
 
 func (vm *VirtualMachine) addSnapshotLayout(ctx *Context, snapshot types.ManagedObjectReference, dataKey int32) {
@@ -757,8 +733,6 @@ func (vm *VirtualMachine) addSnapshotLayout(ctx *Context, snapshot types.Managed
 		Key:          snapshot,
 		SnapshotFile: snapshotFiles,
 	})
-
-	vm.updateStorage(ctx)
 }
 
 func (vm *VirtualMachine) addSnapshotLayoutEx(ctx *Context, snapshot types.ManagedObjectReference, dataKey int32, memoryKey int32) {
@@ -873,10 +847,10 @@ func (vm *VirtualMachine) updateStorage(ctx *Context) types.BaseMethodFault {
 			}
 		}
 
-		dsUsage.Committed = file.Size
+		dsUsage.Committed += file.Size
 
 		if path.Ext(file.Name) == ".vmdk" {
-			dsUsage.Unshared = file.Size
+			dsUsage.Unshared += file.Size
 		}
 
 		for _, disk := range disks {
@@ -884,7 +858,7 @@ func (vm *VirtualMachine) updateStorage(ctx *Context) types.BaseMethodFault {
 			backing := disk.Backing.(types.BaseVirtualDeviceFileBackingInfo).GetVirtualDeviceFileBackingInfo()
 
 			if backing.FileName == file.Name {
-				dsUsage.Uncommitted = disk.CapacityInBytes
+				dsUsage.Uncommitted += disk.CapacityInBytes
 			}
 		}
 
@@ -898,7 +872,8 @@ func (vm *VirtualMachine) updateStorage(ctx *Context) types.BaseMethodFault {
 		Timestamp: time.Now(),
 	}
 
-	for _, usage := range datastoresUsage {
+	for i, usage := range datastoresUsage {
+		datastoresUsage[i].Uncommitted -= usage.Committed
 		storageSummary.Committed += usage.Committed
 		storageSummary.Uncommitted += usage.Uncommitted
 		storageSummary.Unshared += usage.Unshared
@@ -932,17 +907,23 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 		}
 	}
 
+	vmPathName := vm.Config.Files.VmPathName
+	// vm.Config.Files.VmPathName can be a directory or full path to .vmx
+	if path.Ext(vmPathName) == ".vmx" {
+		vmPathName = path.Dir(vmPathName)
+	}
+
 	// Directories will be used to locate VM files.
 	// Does not include information about virtual disk file locations.
 	locations := []string{
-		vm.Config.Files.VmPathName,
+		vmPathName,
 		vm.Config.Files.SnapshotDirectory,
 		vm.Config.Files.LogDirectory,
 		vm.Config.Files.SuspendDirectory,
 		vm.Config.Files.FtMetadataDirectory,
 	}
 
-	for _, directory := range locations {
+	for _, directory := range slices.Compact(locations) {
 		if directory == "" {
 			continue
 		}
@@ -955,10 +936,6 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 
 		datastore := vm.useDatastore(ctx, p.Datastore)
 		directory := datastore.resolve(ctx, p.Path)
-
-		if path.Ext(p.Path) == ".vmx" {
-			directory = path.Dir(directory) // vm.Config.Files.VmPathName can be a directory or full path to .vmx
-		}
 
 		if _, err := os.Stat(directory); err != nil {
 			// Can not access the directory
@@ -974,7 +951,7 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 		for _, file := range files {
 			datastorePath := object.DatastorePath{
 				Datastore: p.Datastore,
-				Path:      strings.TrimPrefix(file.Name(), datastore.Info.GetDatastoreInfo().Url),
+				Path:      path.Join(p.Path, file.Name()),
 			}
 			info, _ := file.Info()
 			vm.addFileLayoutEx(ctx, datastorePath, info.Size())
@@ -1374,7 +1351,6 @@ func (vm *VirtualMachine) configureDevice(
 			}
 		}
 
-		summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
 		switch b := d.Backing.(type) {
 		case *types.VirtualDiskSparseVer2BackingInfo:
 			// Sparse disk creation not supported in ESX
@@ -1384,6 +1360,40 @@ func (vm *VirtualMachine) configureDevice(
 				},
 			}
 		case types.BaseVirtualDeviceFileBackingInfo:
+			parent := ""
+
+			switch backing := d.Backing.(type) {
+			case *types.VirtualDiskFlatVer2BackingInfo:
+				if backing.Parent != nil {
+					parent = backing.Parent.FileName
+				}
+			case *types.VirtualDiskSeSparseBackingInfo:
+				if backing.Parent != nil {
+					parent = backing.Parent.FileName
+				}
+			case *types.VirtualDiskSparseVer2BackingInfo:
+				if backing.Parent != nil {
+					parent = backing.Parent.FileName
+				}
+			}
+
+			if parent != "" {
+				desc, _, err := ctx.Map.FileManager().DiskDescriptor(ctx, &dc.Self, parent)
+				if err != nil {
+					return &types.InvalidDeviceSpec{
+						InvalidVmConfig: types.InvalidVmConfig{
+							Property: "virtualDeviceSpec.device.backing.parent.fileName",
+						},
+					}
+				}
+
+				// Disk Capacity is always same as the parent's
+				x.CapacityInBytes = int64(desc.Capacity())
+				x.CapacityInKB = x.CapacityInBytes / 1024
+			}
+
+			summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
+
 			info := b.GetVirtualDeviceFileBackingInfo()
 			var path object.DatastorePath
 			path.FromString(info.FileName)
@@ -1400,6 +1410,7 @@ func (vm *VirtualMachine) configureDevice(
 			err := vdmCreateVirtualDisk(ctx, spec.FileOperation, &types.CreateVirtualDisk_Task{
 				Datacenter: &dc.Self,
 				Name:       info.FileName,
+				Spec:       &types.FileBackedVirtualDiskSpec{CapacityKb: x.CapacityInKB},
 			})
 			if err != nil {
 				return err
@@ -1548,7 +1559,7 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 				{Name: "summary.config.numVirtualDisks", Val: vm.Summary.Config.NumVirtualDisks - 1},
 			})
 
-			vm.updateDiskLayouts(ctx)
+			vm.RefreshStorageInfo(ctx, nil)
 		case types.BaseVirtualEthernetCard:
 			var net types.ManagedObjectReference
 
@@ -2838,6 +2849,63 @@ func (vm *VirtualMachine) DetachDiskTask(ctx *Context, req *types.DetachDisk_Tas
 
 	return &methods.DetachDisk_TaskBody{
 		Res: &types.DetachDisk_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (vm *VirtualMachine) PromoteDisksTask(ctx *Context, req *types.PromoteDisks_Task) soap.HasFault {
+	task := CreateTask(vm, "promoteDisks", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
+		devices = devices.SelectByType((*types.VirtualDisk)(nil))
+		var cap int64
+
+		for i := range req.Disks {
+			d := devices.FindByKey(req.Disks[i].Key)
+			if d == nil {
+				return nil, &types.InvalidArgument{InvalidProperty: "disks"}
+			}
+
+			disk := d.(*types.VirtualDisk)
+
+			switch backing := disk.Backing.(type) {
+			case *types.VirtualDiskFlatVer2BackingInfo:
+				if backing.Parent != nil {
+					cap += disk.CapacityInBytes
+					if req.Unlink {
+						backing.Parent = nil
+					}
+				}
+			case *types.VirtualDiskSeSparseBackingInfo:
+				if backing.Parent != nil {
+					cap += disk.CapacityInBytes
+					if req.Unlink {
+						backing.Parent = nil
+					}
+				}
+			case *types.VirtualDiskSparseVer2BackingInfo:
+				if backing.Parent != nil {
+					cap += disk.CapacityInBytes
+					if req.Unlink {
+						backing.Parent = nil
+					}
+				}
+			}
+		}
+
+		// Built-in default delay. `simulator.TaskDelay` can be used to add additional time
+		// Translates to roughly 1s per 1GB
+		sleep := time.Duration(cap/units.MB) * time.Millisecond
+		if sleep > 0 {
+			log.Printf("%s: sleep %s for %s", t.Info.DescriptionId, sleep, units.ByteSize(cap))
+			time.Sleep(sleep)
+		}
+
+		return nil, nil
+	})
+
+	return &methods.PromoteDisks_TaskBody{
+		Res: &types.PromoteDisks_TaskResponse{
 			Returnval: task.Run(ctx),
 		},
 	}

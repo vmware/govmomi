@@ -25,38 +25,57 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+const (
+	SectorSize = 512
+)
+
 var (
 	ErrInvalidFormat = errors.New("vmdk: invalid format (must be streamOptimized)")
 )
 
 // Info is used to inspect a vmdk and generate an ovf template
 type Info struct {
+	// SparseExtentHeaderOnDisk https://github.com/vmware/open-vmdk/blob/master/vmdk/vmware_vmdk.h#L24
 	Header struct {
 		MagicNumber uint32
 		Version     uint32
 		Flags       uint32
-		Capacity    uint64
-	}
+		Capacity    int64
 
-	Capacity   uint64
-	Size       int64
-	Name       string
-	ImportName string
+		_ uint64     // grainSize
+		_ uint64     // descriptorOffset
+		_ uint64     // descriptorSize
+		_ uint32     // numGTEsPerGT
+		_ uint64     // rgdOffset
+		_ uint64     // gdOffset
+		_ uint64     // overHead
+		_ bool       // uncleanShutdown
+		_ uint8      // singleEndLineChar
+		_ uint8      // nonEndLineChar
+		_ uint8      // doubleEndLineChar1
+		_ uint8      // doubleEndLineChar2
+		_ uint16     // compressAlgorithm
+		_ [433]uint8 // pad
+	} `json:"header"`
+
+	Descriptor *Descriptor `json:"descriptor"`
+	Capacity   int64       `json:"capacity"`
+	Size       int64       `json:"size"`
+	Name       string      `json:"name"`
+	ImportName string      `json:"importName"`
 }
 
-// Stat looks at the vmdk header to make sure the format is streamOptimized and
-// extracts the disk capacity required to properly generate the ovf descriptor.
+// Stat opens file name and calls Seek() to read the vmdk header and descriptor.
+// Size field is set to the file size, for use as Content-Length when uploading.
+// Name field is set to filepath.Base(name).
+// ImportName is set to Name with .vmdk extension removed.
 func Stat(name string) (*Info, error) {
 	f, err := os.Open(filepath.Clean(name))
 	if err != nil {
 		return nil, err
 	}
 
-	var di Info
-
-	var buf bytes.Buffer
-
-	_, err = io.CopyN(&buf, f, int64(binary.Size(di.Header)))
+	di, err := Seek(f)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +85,24 @@ func Stat(name string) (*Info, error) {
 		return nil, err
 	}
 
-	err = f.Close()
+	_ = f.Close()
+
+	di.Size = fi.Size()
+	di.Name = filepath.Base(name)
+	di.ImportName = strings.TrimSuffix(di.Name, ".vmdk")
+
+	return di, nil
+}
+
+// Seek reads the vmdk header and descriptor.
+// ErrInvalidFormat is returned if the format (MagicNumber) is not streamOptimized.
+// Capacity field is set for use with ovf descriptor generation.
+func Seek(f io.Reader) (*Info, error) {
+	var di Info
+
+	var buf bytes.Buffer
+
+	_, err := io.CopyN(&buf, f, int64(binary.Size(di.Header)))
 	if err != nil {
 		return nil, err
 	}
@@ -87,12 +123,14 @@ func Stat(name string) (*Info, error) {
 		return nil, ErrInvalidFormat
 	}
 
-	di.Capacity = di.Header.Capacity * 512 // VMDK_SECTOR_SIZE
-	di.Size = fi.Size()
-	di.Name = filepath.Base(name)
-	di.ImportName = strings.TrimSuffix(di.Name, ".vmdk")
+	di.Capacity = di.Header.Capacity * SectorSize
+	di.Descriptor, err = ParseDescriptor(io.LimitReader(f, SectorSize))
 
-	return &di, nil
+	return &di, err
+}
+
+func (info *Info) Write(w io.Writer) error {
+	return info.Descriptor.Write(w)
 }
 
 // ovfenv is the minimal descriptor template required to import a vmdk

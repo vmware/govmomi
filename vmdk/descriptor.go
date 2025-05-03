@@ -6,12 +6,15 @@ package vmdk
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"slices"
 	"strconv"
 	"strings"
 	"text/template"
+
+	"github.com/vmware/govmomi/units"
 )
 
 type Descriptor struct {
@@ -33,7 +36,7 @@ func (cid DiskContentID) String() string {
 type Extent struct {
 	Type       string `json:"type"`
 	Permission string `json:"permission"`
-	Size       uint64 `json:"size"`
+	Size       int64  `json:"size"`
 	Info       string `json:"info"`
 }
 
@@ -63,7 +66,8 @@ func ParseDescriptor(r io.Reader) (*Descriptor, error) {
 	// NOTE: not doing any validation currently, or using this function yet.
 	// Will add validation as needed when use-cases are implemented.
 	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
+		token := bytes.Trim(scanner.Bytes(), "\x00")
+		line := strings.TrimSpace(string(token))
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
@@ -118,7 +122,7 @@ func (d *Descriptor) parseExtent(line string) bool {
 	}
 
 	s = strings.SplitN(s[1], " ", 2)
-	size, err := strconv.ParseUint(s[0], 10, 64)
+	size, err := strconv.ParseInt(s[0], 10, 64)
 	if len(s) != 2 || err != nil {
 		return false
 	}
@@ -144,7 +148,7 @@ CID={{ .CID }}
 parentCID={{ .ParentCID }}
 createType="{{ .Type }}"
 
-# Extent description{{range .Extent }}
+# Extent description ({{ cap }} capacity){{range .Extent }}
 {{ .Permission }} {{ .Size }} {{ .Type }} "{{ .Info }}"{{end}}
 
 # The Disk Data Base
@@ -153,9 +157,24 @@ ddb.{{ $key }} = "{{ $val }}"{{end}}
 `
 
 func (d *Descriptor) Write(w io.Writer) error {
-	t, err := template.New("vmdk").Parse(descriptor)
+	t, err := template.New("vmdk").Funcs(template.FuncMap{
+		"cap": func() string {
+			return units.ByteSize(d.Capacity()).String()
+		},
+	}).Parse(descriptor)
 	if err != nil {
 		return err
 	}
 	return t.Execute(w, d)
+}
+
+// Capacity in bytes of the vmdk
+func (d *Descriptor) Capacity() int64 {
+	var size int64
+
+	for i := range d.Extent {
+		size += d.Extent[i].Size * SectorSize
+	}
+
+	return size
 }

@@ -59,12 +59,14 @@ func ServeNFC(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status := http.StatusOK
-	var dst hash.Hash
+	var sum hash.Hash
+	var dst io.Writer = w
 	var src io.ReadCloser
 
 	switch r.Method {
 	case http.MethodPut, http.MethodPost:
-		dst = sha1.New()
+		sum = sha1.New()
+		dst = sum
 		src = r.Body
 	case http.MethodGet:
 		f, err := os.Open(file)
@@ -79,9 +81,9 @@ func ServeNFC(w http.ResponseWriter, r *http.Request) {
 
 	n, err := io.Copy(dst, src)
 	_ = src.Close()
-	if dst != nil {
+	if sum != nil {
 		lease.metadata[name] = metadata{
-			sha1: dst.Sum(nil),
+			sha1: sum.Sum(nil),
 			size: n,
 		}
 	}

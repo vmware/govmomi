@@ -196,6 +196,9 @@ func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
 	s.delSession(session.Key)
 	pc := ctx.Map.content().PropertyCollector
 
+	ctx.Session.Registry.m.Lock()
+	defer ctx.Session.Registry.m.Unlock()
+
 	for ref, obj := range ctx.Session.Registry.objects {
 		if ref == pc {
 			continue // don't unregister the PropertyCollector singleton

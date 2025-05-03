@@ -90,6 +90,22 @@ func match(p string, devices object.VirtualDeviceList) object.VirtualDeviceList 
 	return matches
 }
 
+// Match returns devices where VirtualDeviceList.Name matches any of the strings in given args.
+// See also: path.Match, govc device.info, govc device.ls
+func Match(devices object.VirtualDeviceList, args []string) (object.VirtualDeviceList, error) {
+	var found object.VirtualDeviceList
+
+	for _, name := range args {
+		matches := match(name, devices)
+		if len(matches) == 0 {
+			return nil, fmt.Errorf("device '%s' not found", name)
+		}
+		found = append(found, matches...)
+	}
+
+	return found, nil
+}
+
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
@@ -126,14 +142,12 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		res.Devices = toInfoList(devices)
 	} else {
-		for _, name := range f.Args() {
-			matches := match(name, devices)
-			if len(matches) == 0 {
-				return fmt.Errorf("device '%s' not found", name)
-			}
-
-			res.Devices = append(res.Devices, toInfoList(matches)...)
+		devices, err = Match(devices, f.Args())
+		if err != nil {
+			return err
 		}
+
+		res.Devices = append(res.Devices, toInfoList(devices)...)
 	}
 
 	return cmd.WriteResult(&res)

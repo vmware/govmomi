@@ -409,6 +409,7 @@ but appear via `govc $cmd -h`:
  - [vm.disk.attach](#vmdiskattach)
  - [vm.disk.change](#vmdiskchange)
  - [vm.disk.create](#vmdiskcreate)
+ - [vm.disk.promote](#vmdiskpromote)
  - [vm.guest.tools](#vmguesttools)
  - [vm.info](#vminfo)
  - [vm.instantclone](#vminstantclone)
@@ -3809,10 +3810,20 @@ Options:
 ```
 Usage: govc import.vmdk [OPTIONS] PATH_TO_VMDK [REMOTE_DIRECTORY]
 
+Import vmdk to datastore.
+
+The local vmdk must be in streamOptimized format.
+
+Examples:
+  govc import.vmdk my.vmdk
+  govc import.vmdk -i my.vmdk # output vmdk info only
+  govc import.vmdk -json -i my.vmdk | jq .capacity | xargs numfmt --to=iec --suffix=B --format="%.1f"
+
 Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -folder=               Inventory folder [GOVC_FOLDER]
   -force=false           Overwrite existing disk
+  -i=false               Output vmdk info only
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
@@ -7188,6 +7199,23 @@ Options:
   -sharing=              Sharing (sharingNone|sharingMultiWriter)
   -size=10.0GB           Size of new disk
   -thick=false           Thick provision new disk
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.disk.promote
+
+```
+Usage: govc vm.disk.promote [OPTIONS] DISK...
+
+Promote VM disk.
+
+Examples:
+  govc device.info -vm $name disk-*
+  govc vm.disk.promote -vm $name disk-1000-0
+  govc vm.disk.promote -vm $name disk-*
+
+Options:
+  -unlink=true           Unlink
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
