@@ -1287,6 +1287,47 @@ func (vm *VirtualMachine) configureDevice(
 		var net types.ManagedObjectReference
 		var name string
 
+		if b, ok := d.Backing.(*types.VirtualEthernetCardOpaqueNetworkBackingInfo); ok &&
+			b.OpaqueNetworkType == "nsx.LogicalSwitch" {
+
+			// For NSX opaque networks, replace the backing with the actual DVPG.
+			var dvpg *DistributedVirtualPortgroup
+
+			var find func(types.ManagedObjectReference)
+			find = func(child types.ManagedObjectReference) {
+				d, ok := ctx.Map.Get(child).(*DistributedVirtualPortgroup)
+				if ok && d.Config.LogicalSwitchUuid == b.OpaqueNetworkId {
+					dvpg = d
+					return
+				}
+				walk(ctx.Map.Get(child), find)
+			}
+			f := ctx.Map.getEntityDatacenter(vm).NetworkFolder
+			walk(ctx.Map.Get(f), find) // search in NetworkFolder and any sub folders
+
+			if dvpg == nil {
+				log.Printf("DPVG for NSX LogicalSwitch %s cannot be found", b.OpaqueNetworkId)
+				fault := new(types.NotFound)
+				fault.FaultMessage = []types.LocalizableMessage{
+					{
+						Key: "com.vmware.nsx.attachFailed",
+						Message: fmt.Sprintf("The operation failed due to An error occurred during host configuration: "+
+							"Failed to attach VIF: The requested object : LogicalSwitch/%s could not be found. Object identifiers are case sensitive.", b.OpaqueNetworkId),
+					},
+				}
+				return fault
+			}
+
+			dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+
+			d.Backing = &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
+				Port: types.DistributedVirtualSwitchPortConnection{
+					PortgroupKey: dvpg.Key,
+					SwitchUuid:   dvs.Uuid,
+				},
+			}
+		}
+
 		switch b := d.Backing.(type) {
 		case *types.VirtualEthernetCardNetworkBackingInfo:
 			name = b.DeviceName
