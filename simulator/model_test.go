@@ -23,6 +23,7 @@ func compareModel(t *testing.T, m *Model) {
 	if pgs > 0 {
 		pgs++ // uplinks
 	}
+	pgs += m.OpaqueNetwork // pg for each opaque network
 
 	tests := []struct {
 		expect int

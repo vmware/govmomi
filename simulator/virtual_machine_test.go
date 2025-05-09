@@ -260,7 +260,107 @@ func TestCreateVm(t *testing.T) {
 	}
 }
 
-func TestCreateVmWithSpecialCharaters(t *testing.T) {
+func TestCreateVmWithNsxOpaqueBacking(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+	m.OpaqueNetwork = 1
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		finder.SetDatacenter(dc)
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		vmFolder := folders.VmFolder
+
+		ds, err := finder.DefaultDatastore(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		network, err := finder.Network(ctx, "/DC0/network/DC0_NSX0")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		networkSummary, err := network.(*object.OpaqueNetwork).Summary(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		networkBacking, err := network.EthernetCardBackingInfo(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var devices object.VirtualDeviceList
+		ethCard, _ := devices.CreateEthernetCard("vmxnet3", networkBacking)
+		devices = append(devices, ethCard)
+		create, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+
+		spec := types.VirtualMachineConfigSpec{
+			Name: "nsx-opaque-network",
+			Files: &types.VirtualMachineFileInfo{
+				VmPathName: fmt.Sprintf("[%s]", ds.Name()),
+			},
+			DeviceChange: create,
+		}
+
+		hosts, err := finder.HostSystemList(ctx, "*/*")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		nhosts := len(hosts)
+		host := hosts[rand.Intn(nhosts)]
+		pool, err := host.ResourcePool(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		task, err := vmFolder.CreateVM(ctx, spec, pool, host)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		info, err := task.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		vm := m.Map().Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
+		ethCards := object.VirtualDeviceList(vm.Config.Hardware.Device).SelectByType((*types.VirtualVmxnet3)(nil))
+		if len(ethCards) != 1 {
+			t.Fatal("expected 1 vmxnet3 device")
+		}
+
+		backing, ok := ethCards[0].GetVirtualDevice().Backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
+		if !ok {
+			t.Fatal("expected DVPG backing type")
+		}
+
+		dvpg := m.Map().Get(types.ManagedObjectReference{
+			Type:  "DistributedVirtualPortgroup",
+			Value: backing.Port.PortgroupKey},
+		).(*DistributedVirtualPortgroup)
+
+		if networkSummary.OpaqueNetworkId != dvpg.Config.LogicalSwitchUuid {
+			t.Fatal(
+				fmt.Sprintf("expected DVPG with LogicalSwitchUUID %s but got %s",
+					networkSummary.OpaqueNetworkId, dvpg.Config.LogicalSwitchUuid),
+			)
+		}
+	}, m)
+}
+
+func TestCreateVmWithSpecialCharacters(t *testing.T) {
 	tests := []struct {
 		name     string
 		expected string
