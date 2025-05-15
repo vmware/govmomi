@@ -524,18 +524,25 @@ func Decode(r *http.Request, w http.ResponseWriter, val any) bool {
 	return true
 }
 
-func (s *handler) expiredSession(id string, now time.Time) bool {
+func (s *handler) expiredSession(id string, now time.Time, timeout time.Duration) bool {
 	expired := true
 	s.Lock()
 	session, ok := s.Session[id]
 	if ok {
-		expired = now.Sub(session.LastAccessed) > simulator.SessionIdleTimeout
+		expired = now.Sub(session.LastAccessed) > timeout
 		if expired {
 			delete(s.Session, id)
 		}
 	}
 	s.Unlock()
 	return expired
+}
+
+func (s *handler) newContext() *simulator.Context {
+	return &simulator.Context{
+		Context: context.Background(),
+		Map:     s.Map,
+	}
 }
 
 func (s *handler) session(w http.ResponseWriter, r *http.Request) {
@@ -560,7 +567,7 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		id = uuid.New().String()
 		now := time.Now()
 		s.Session[id] = &rest.Session{User: user, Created: now, LastAccessed: now}
-		simulator.SessionIdleWatch(context.Background(), id, s.expiredSession)
+		simulator.SessionIdleWatch(s.newContext(), id, s.expiredSession)
 		if useHeaderAuthn != "true" {
 			http.SetCookie(w, &http.Cookie{
 				Name:  internal.SessionCookieName,

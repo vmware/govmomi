@@ -27,11 +27,6 @@ type OptionManager struct {
 	mirror *[]types.BaseOptionValue
 }
 
-func asOptionManager(ctx *Context, obj mo.Reference) (*OptionManager, bool) {
-	om, ok := ctx.Map.Get(obj.Reference()).(*OptionManager)
-	return om, ok
-}
-
 // NewOptionManager constructs the type. If mirror is non-nil it takes precedence over settings, and settings is ignored.
 // Args:
 //   - ref - used to set OptionManager.Self if non-nil
