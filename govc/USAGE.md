@@ -3460,6 +3460,7 @@ Set option NAME to VALUE.
 Examples:
   govc host.option.set Config.HostAgent.plugins.solo.enableMob true
   govc host.option.set Config.HostAgent.log.level verbose
+  govc host.option.set Config.HostAgent.vmacore.soap.sessionTimeout 90
 
 Options:
   -host=                 Host system [GOVC_HOST]
@@ -5296,8 +5297,11 @@ Usage: govc option.set [OPTIONS] NAME VALUE
 Set option NAME to VALUE.
 
 Examples:
+  # Change log levels
   govc option.set log.level info
   govc option.set logger.Vsan verbose
+  # Increase vCenter session timeout to 90 minutes
+  govc option.set config.vmacore.soap.sessionTimeout 90
 
 Options:
 ```

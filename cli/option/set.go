@@ -47,8 +47,11 @@ func (cmd *Set) Description() string {
 	return SetDescription + `
 
 Examples:
+  # Change log levels
   govc option.set log.level info
-  govc option.set logger.Vsan verbose`
+  govc option.set logger.Vsan verbose
+  # Increase vCenter session timeout to 90 minutes
+  govc option.set config.vmacore.soap.sessionTimeout 90`
 }
 
 func (cmd *Set) Update(ctx context.Context, f *flag.FlagSet, m *object.OptionManager) error {
