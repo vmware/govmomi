@@ -10,9 +10,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/session/keepalive"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/simulator/sim25"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 )
@@ -23,14 +24,21 @@ var (
 	keepAliveIdle      = sessionIdleTimeout / 2
 )
 
-func init() {
-	simulator.SessionIdleTimeout = sessionIdleTimeout
-}
-
 func ExampleHandlerSOAP() {
-	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
-		// No need for initial Login() here as simulator.Run already has
-		m := session.NewManager(c)
+	simulator.Run(func(ctx context.Context, vc *vim25.Client) error {
+		// Using the authenticated vc client, timeout will apply to new sessions.
+		sim25.SetSessionTimeout(ctx, vc, sessionIdleTimeout)
+
+		c, err := govmomi.NewClient(ctx, vc.URL(), true)
+		if err != nil {
+			return err
+		}
+		m := c.SessionManager
+
+		err = m.Login(ctx, simulator.DefaultLogin) // New session
+		if err != nil {
+			return err
+		}
 
 		// check twice if session is valid, sleeping > SessionIdleTimeout in between
 		check := func() {
@@ -53,7 +61,7 @@ func ExampleHandlerSOAP() {
 		// this starts the keep alive handler when Login is called, and stops the handler when Logout is called
 		c.RoundTripper = keepalive.NewHandlerSOAP(c.RoundTripper, keepAliveIdle, nil)
 
-		err := m.Login(ctx, simulator.DefaultLogin)
+		err = m.Login(ctx, simulator.DefaultLogin)
 		if err != nil {
 			return err
 		}
@@ -82,8 +90,11 @@ func ExampleHandlerSOAP() {
 
 func ExampleHandlerREST() {
 	simulator.Run(func(ctx context.Context, vc *vim25.Client) error {
+		// Using the authenticated vc client, timeout will apply to new sessions.
+		sim25.SetSessionTimeout(ctx, vc, sessionIdleTimeout)
+
 		c := rest.NewClient(vc)
-		err := c.Login(ctx, simulator.DefaultLogin)
+		err := c.Login(ctx, simulator.DefaultLogin) // New session
 		if err != nil {
 			return err
 		}

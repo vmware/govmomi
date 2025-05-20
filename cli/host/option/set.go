@@ -46,7 +46,8 @@ func (cmd *set) Description() string {
 
 Examples:
   govc host.option.set Config.HostAgent.plugins.solo.enableMob true
-  govc host.option.set Config.HostAgent.log.level verbose`
+  govc host.option.set Config.HostAgent.log.level verbose
+  govc host.option.set Config.HostAgent.vmacore.soap.sessionTimeout 90`
 }
 
 func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {
