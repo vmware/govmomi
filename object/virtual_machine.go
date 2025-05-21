@@ -649,7 +649,7 @@ func (v VirtualMachine) CreateSnapshot(ctx context.Context, name string, descrip
 }
 
 // CreateSnapshotEx creates a new snapshot of a virtual machine.
-func (v VirtualMachine) CreateSnapshotEx(ctx context.Context, name string, description string, memory bool, quiesceSpec *types.VirtualMachineGuestQuiesceSpec) (*Task, error) {
+func (v VirtualMachine) CreateSnapshotEx(ctx context.Context, name string, description string, memory bool, quiesceSpec types.BaseVirtualMachineGuestQuiesceSpec) (*Task, error) {
 	req := types.CreateSnapshotEx_Task{
 		This:        v.Reference(),
 		Name:        name,

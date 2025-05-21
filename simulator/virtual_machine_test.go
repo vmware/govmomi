@@ -1820,6 +1820,137 @@ func TestVmSnapshot(t *testing.T) {
 	}
 }
 
+func TestVmSnapshotEx(t *testing.T) {
+	esx := ESX()
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		simVm := esx.Map().Any("VirtualMachine")
+		vm := object.NewVirtualMachine(c, simVm.Reference())
+
+		_, err := fieldValue(reflect.ValueOf(simVm), "snapshot")
+		if err != errEmptyField {
+			t.Fatal("snapshot property should be 'nil' if there are no snapshots")
+		}
+
+		quiesceSpec := &types.VirtualMachineGuestQuiesceSpec{
+			Timeout: 100,
+		}
+
+		task, err := vm.CreateSnapshotEx(ctx, "root", "description", true, quiesceSpec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		info, err := task.WaitForResult(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		snapRef, ok := info.Result.(types.ManagedObjectReference)
+		if !ok {
+			t.Fatal("expected ManagedObjectRefrence result for CreateSnapshot")
+		}
+
+		_, err = vm.FindSnapshot(ctx, snapRef.Value)
+		if err != nil {
+			t.Fatal(err, "snapshot should be found by result reference")
+		}
+
+		_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
+		if err == errEmptyField {
+			t.Fatal("snapshot property should not be 'nil' if there are snapshots")
+		}
+		// NOTE: fieldValue cannot be used for nil check
+		if len(simVm.(*VirtualMachine).RootSnapshot) == 0 {
+			t.Fatal("rootSnapshot property should have elements if there are snapshots")
+		}
+
+		task, err = vm.CreateSnapshotEx(ctx, "child", "description", true, quiesceSpec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = vm.FindSnapshot(ctx, "child")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		task, err = vm.RevertToCurrentSnapshot(ctx, true)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		task, err = vm.RevertToSnapshot(ctx, "root", true)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		task, err = vm.RemoveSnapshot(ctx, "child", false, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
+		if err == errEmptyField {
+			t.Fatal("snapshot property should not be 'nil' if there are snapshots")
+		}
+		// NOTE: fieldValue cannot be used for nil check
+		if len(simVm.(*VirtualMachine).RootSnapshot) == 0 {
+			t.Fatal("rootSnapshot property should have elements if there are snapshots")
+		}
+
+		_, err = vm.FindSnapshot(ctx, "child")
+		if err == nil {
+			t.Fatal("child should be removed")
+		}
+
+		task, err = vm.RemoveAllSnapshot(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
+		if err != errEmptyField {
+			t.Fatal("snapshot property should be 'nil' if there are no snapshots")
+		}
+		// NOTE: fieldValue cannot be used for nil check
+		if len(simVm.(*VirtualMachine).RootSnapshot) != 0 {
+			t.Fatal("rootSnapshot property should not have elements if there are no snapshots")
+		}
+
+		_, err = vm.FindSnapshot(ctx, "root")
+		if err == nil {
+			t.Fatal("all snapshots should be removed")
+		}
+
+	}, esx)
+}
+
 func TestVmMarkAsTemplate(t *testing.T) {
 	ctx := context.Background()
 

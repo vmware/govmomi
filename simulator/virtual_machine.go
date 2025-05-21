@@ -2687,7 +2687,33 @@ func (vm *VirtualMachine) CustomizeVMTask(ctx *Context, req *types.CustomizeVM_T
 }
 
 func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnapshot_Task) soap.HasFault {
-	task := CreateTask(vm, "createSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+	body := &methods.CreateSnapshot_TaskBody{}
+
+	r := &types.CreateSnapshotEx_Task{
+		Name:        req.Name,
+		Description: req.Description,
+		Memory:      req.Memory,
+	}
+
+	if req.Quiesce {
+		r.QuiesceSpec = &types.VirtualMachineGuestQuiesceSpec{}
+	}
+
+	res := vm.CreateSnapshotExTask(ctx, r)
+
+	if res.Fault() != nil {
+		body.Fault_ = res.Fault()
+	} else {
+		body.Res = &types.CreateSnapshot_TaskResponse{
+			Returnval: res.(*methods.CreateSnapshotEx_TaskBody).Res.Returnval,
+		}
+	}
+
+	return body
+}
+
+func (vm *VirtualMachine) CreateSnapshotExTask(ctx *Context, req *types.CreateSnapshotEx_Task) soap.HasFault {
+	task := CreateTask(vm, "createSnapshotEx", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		var changes []types.PropertyChange
 
 		if vm.Snapshot == nil {
@@ -2701,6 +2727,11 @@ func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnap
 
 		ctx.Map.Put(snapshot)
 
+		quiesced := false
+		if req.QuiesceSpec != nil {
+			quiesced = true
+		}
+
 		treeItem := types.VirtualMachineSnapshotTree{
 			Snapshot:        snapshot.Self,
 			Vm:              snapshot.Vm,
@@ -2709,7 +2740,7 @@ func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnap
 			Id:              atomic.AddInt32(&vm.sid, 1),
 			CreateTime:      time.Now(),
 			State:           vm.Runtime.PowerState,
-			Quiesced:        req.Quiesce,
+			Quiesced:        quiesced,
 			BackupManifest:  "",
 			ReplaySupported: types.NewBool(false),
 		}
@@ -2740,8 +2771,8 @@ func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnap
 		return snapshot.Self, nil
 	})
 
-	return &methods.CreateSnapshot_TaskBody{
-		Res: &types.CreateSnapshot_TaskResponse{
+	return &methods.CreateSnapshotEx_TaskBody{
+		Res: &types.CreateSnapshotEx_TaskResponse{
 			Returnval: task.Run(ctx),
 		},
 	}
