@@ -648,6 +648,24 @@ func (v VirtualMachine) CreateSnapshot(ctx context.Context, name string, descrip
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// CreateSnapshotEx creates a new snapshot of a virtual machine.
+func (v VirtualMachine) CreateSnapshotEx(ctx context.Context, name string, description string, memory bool, quiesceSpec *types.VirtualMachineGuestQuiesceSpec) (*Task, error) {
+	req := types.CreateSnapshotEx_Task{
+		This:        v.Reference(),
+		Name:        name,
+		Description: description,
+		Memory:      memory,
+		QuiesceSpec: quiesceSpec,
+	}
+
+	res, err := methods.CreateSnapshotEx_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
 // RemoveAllSnapshot removes all snapshots of a virtual machine
 func (v VirtualMachine) RemoveAllSnapshot(ctx context.Context, consolidate *bool) (*Task, error) {
 	req := types.RemoveAllSnapshots_Task{
