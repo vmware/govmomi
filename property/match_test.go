@@ -12,7 +12,7 @@ import (
 )
 
 func TestMatchProperty(t *testing.T) {
-	tests := []struct {
+	for _, test := range []struct {
 		key  string
 		val  types.AnyType
 		pass types.AnyType
@@ -33,9 +33,8 @@ func TestMatchProperty(t *testing.T) {
 		{"float32s", float32(32.32), "32.32", "42.0"},
 		{"float64", float64(64.64), float64(64.64), float64(42.0)},
 		{"float64s", float64(64.64), "64.64", "42.0"},
-	}
-
-	for _, test := range tests {
+		{"matchFunc", "bar", func(s any) bool { return s.(string) == "bar" }, func(s any) bool { return s.(string) == "foo" }},
+	} {
 		p := types.DynamicProperty{Name: test.key, Val: test.val}
 
 		for match, value := range map[bool]types.AnyType{true: test.pass, false: test.fail} {

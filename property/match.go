@@ -42,6 +42,12 @@ func (m Match) Property(prop types.DynamicProperty) bool {
 		return true
 	}
 
+	if matchFunc, ok := match.(func(any) bool); ok {
+		if matchFunc(prop.Val) {
+			return true
+		}
+	}
+
 	ptype := reflect.TypeOf(prop.Val)
 
 	if strings.HasPrefix(ptype.Name(), "ArrayOf") {
