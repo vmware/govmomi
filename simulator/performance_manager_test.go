@@ -174,6 +174,15 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
+	vm.Datastore = nil // e.g. vCLS VMs have no Datastore
+	if info, err := p.AvailableMetric(ctx, vm.Reference(), 20); err != nil {
+		t.Fatal(err)
+	} else {
+		if len(info) == 0 {
+			t.Fatal("Expected non-empty list of vm")
+		}
+	}
+
 	host := ctx.Map.Any("HostSystem").(*HostSystem)
 	if info, err := p.AvailableMetric(ctx, host.Reference(), 20); err != nil {
 		t.Fatal(err)
