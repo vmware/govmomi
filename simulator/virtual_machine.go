@@ -2580,6 +2580,19 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 		{Name: "config.tools.pendingCustomization", Val: ""},
 	}
 
+	if len(vm.Guest.Net) != len(vm.imc.NicSettingMap) {
+		ctx.postEvent(&types.CustomizationNetworkSetupFailed{
+			CustomizationFailed: types.CustomizationFailed{
+				CustomizationEvent: event,
+				Reason:             "NicSettingMismatch",
+			},
+		})
+
+		vm.imc = nil
+		ctx.Update(vm, changes)
+		return
+	}
+
 	hostname := ""
 	address := ""
 

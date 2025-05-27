@@ -1317,6 +1317,36 @@ load test_helper
   assert_success
 }
 
+@test "vm.customize failures" {
+  vcsim_env -autostart=false
+
+  vm=DC0_H0_VM0
+
+  run govc vm.network.add -vm $vm -net "VM Network"
+  assert_success
+
+  run govc vm.customize -vm $vm -ip 10.0.0.42 -netmask 255.255.0.0 -ip 10.0.0.43 -netmask 255.255.0.0
+  assert_success
+
+  run govc collect -s vm/$vm config.tools.pendingCustomization
+  assert_success
+  [ "$output" != "" ]
+
+  run govc device.remove -vm $vm ethernet-0
+  assert_success
+
+  run govc vm.power -on $vm
+  assert_success
+
+  run govc collect -s vm/$vm config.tools.pendingCustomization
+  assert_success
+  [ "$output" == "" ]
+
+  run govc events -type CustomizationNetworkSetupFailed vm/$vm
+  assert_success
+  assert_output_lines 1
+}
+
 @test "vm.check.config" {
   vcsim_env -cluster 2
 

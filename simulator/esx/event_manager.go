@@ -240,6 +240,12 @@ var EventInfo = []types.EventDescriptionEventDetail{
 		FullFormat:  "Customization of VM {{.Vm.Name}} succeeded",
 	},
 	{
+		Key:         "CustomizationNetworkSetupFailed",
+		Description: "Cannot complete customization network setup",
+		Category:    "error",
+		FullFormat:  "An error occurred while setting up network properties of the guest OS",
+	},
+	{
 		Key:         "DrsVmMigratedEvent",
 		Description: "DRS VM migrated",
 		Category:    "info",
