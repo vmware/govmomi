@@ -290,9 +290,40 @@ load test_helper
     run govc namespace.vmclass.create -cpus=16 -memory=16000 test-class-1
     assert_success
 
-    c=$(govc namespace.vmclass.info -json test-class-1 | jq)
-    assert_equal "16" $(echo $c | jq -r '."cpu_count"')
-    assert_equal "16000" $(echo $c | jq -r '."memory_mb"')
+    run govc namespace.vmclass.info -json test-class-1
+    assert_success
+    class="$output"
+
+    run jq .cpu_count <<<"$class"
+    assert_success 16
+
+    run jq .memory_mb <<<"$class"
+    assert_success 16000
+
+    run govc namespace.vmclass.create -spec '{"numCPUs":6,"memoryMB":1024}' test-class-2
+    assert_success
+
+    run govc namespace.vmclass.info -json test-class-2
+    assert_success
+    class="$output"
+
+    run jq .cpu_count <<<"$class"
+    assert_success 6
+
+    run jq .memory_mb <<<"$class"
+    assert_success 1024
+
+    run govc namespace.vmclass.info test-class-2
+    assert_success
+
+    spec=$(grep "ConfigSpec:" <<<"$output" | awk '{print $2}')
+
+    run jq .numCPUs <<<"$spec"
+    assert_success 6
+
+    run jq .memoryMB <<<"$spec"
+    assert_success 1024
+
 }
 
 @test "namespace.vmclass.update" {
@@ -375,5 +406,3 @@ load test_helper
   run govc namespace.registervm -vm $vm test-namespace-1
   assert_success
 }
-
-

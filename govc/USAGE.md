@@ -5112,10 +5112,12 @@ the first or last character. This name is unique in this vCenter server.
 
 Examples:
   govc namespace.vmclass.create -cpus=8 -memory=8192 test-class-01
+  govc namespace.vmclass.create -spec '{"numCPUs":8,"memoryMB":8192}' test-class-02
 
 Options:
   -cpus=0                The number of CPUs.
   -memory=0              The amount of memory (in MB).
+  -spec=                 VirtualMachineConfigSpec json
 ```
 
 ## namespace.vmclass.info
@@ -5170,6 +5172,7 @@ Examples:
 Options:
   -cpus=0                The number of CPUs.
   -memory=0              The amount of memory (in MB).
+  -spec=                 VirtualMachineConfigSpec json
 ```
 
 ## object.destroy
