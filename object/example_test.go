@@ -514,8 +514,19 @@ func ExampleNetworkReference_EthernetCardBackingInfo() {
 			return err
 		}
 
+		// The NSX OpaqueNetwork backing should replaced with the DVPG.
+		dvpgNet, err := finder.Network(ctx, "DC0_NSXPG0")
+		if err != nil {
+			return err
+		}
+
+		dvpgBacking, err := dvpgNet.EthernetCardBackingInfo(ctx)
+		if err != nil {
+			return err
+		}
+
 		nics := list.SelectByType((*types.VirtualEthernetCard)(nil)) // All VM NICs (DC0_DVPG0 + DC0_NSX0)
-		match := list.SelectByBackingInfo(backing)                   // VM NIC with DC0_NSX0 backing
+		match := list.SelectByBackingInfo(dvpgBacking)               // VM NIC with DC0_NSX0 backing
 
 		fmt.Printf("%d of %d NICs match backing\n", len(match), len(nics))
 
