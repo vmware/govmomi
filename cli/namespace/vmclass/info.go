@@ -5,7 +5,11 @@
 package vmclass
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -13,6 +17,7 @@ import (
 
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vapi/namespace"
+	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/vmware/govmomi/cli"
 	"github.com/vmware/govmomi/cli/flags"
@@ -26,8 +31,48 @@ func (r infoResult) Write(w io.Writer) error {
 	fmt.Fprintf(tw, "ID:\t%s\n", r.Id)
 	fmt.Fprintf(tw, "CPUs:\t%d\n", r.CpuCount)
 	fmt.Fprintf(tw, "Memory:\t%s\n", units.ByteSize(r.MemoryMb*1024*1024))
+	if len(r.ConfigSpec) != 0 {
+		// While ConfigSpec already is JSON, vmodl keys are sorted.
+		// Use vim25/types.NewJSONEncoder for consistency, order is as
+		// defined in the VirtualMachineConfigSpec struct.
+		spec, err := configSpecFromJSON(r.ConfigSpec)
+		if err != nil {
+			return err
+		}
+		buf, err := configSpecToJSON(spec)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(tw, "ConfigSpec:\t%s\n", string(buf))
+		fmt.Fprintf(tw, "ConfigSpecHash:\t%s\n", configSpecSHA(buf))
+	}
 
 	return tw.Flush()
+}
+
+func configSpecFromJSON(m json.RawMessage) (*types.VirtualMachineConfigSpec, error) {
+	var spec types.VirtualMachineConfigSpec
+	err := types.NewJSONDecoder(bytes.NewReader(m)).Decode(&spec)
+	if err != nil {
+		return nil, err
+	}
+	return &spec, nil
+}
+
+func configSpecToJSON(spec *types.VirtualMachineConfigSpec) ([]byte, error) {
+	var buf bytes.Buffer
+	err := types.NewJSONEncoder(&buf).Encode(spec)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes.TrimSuffix(buf.Bytes(), []byte{'\n'}), nil
+}
+
+func configSpecSHA(buf []byte) string {
+	h := sha256.New()
+	_, _ = h.Write(buf)
+	return hex.EncodeToString(h.Sum(nil))[:17]
 }
 
 type info struct {

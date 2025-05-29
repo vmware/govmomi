@@ -452,6 +452,7 @@ func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 				entry.CpuReservation = spec.CpuReservation
 				entry.MemoryReservation = spec.MemoryReservation
 				entry.Devices = spec.Devices
+				entry.ConfigSpec = spec.ConfigSpec
 
 				vapi.StatusOK(w)
 				return
@@ -472,6 +473,7 @@ func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 			MemoryReservation: spec.MemoryReservation,
 			CpuReservation:    spec.CpuReservation,
 			Devices:           spec.Devices,
+			ConfigSpec:        spec.ConfigSpec,
 		}
 
 		vmClassesMap[spec.Id] = &newClass

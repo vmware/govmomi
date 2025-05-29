@@ -759,27 +759,22 @@ type VirtualMachineClassInfo struct {
 	Devices           VirtualDevices       `json:"devices"`
 	CpuReservation    int64                `json:"cpu_reservation,omitempty"`
 	MemoryReservation int64                `json:"memory_reservation,omitempty"`
+	ConfigSpec        json.RawMessage      `json:"config_spec,omitempty"`
 }
 
 // VirtualMachineClassCreateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/CreateSpec/
 type VirtualMachineClassCreateSpec struct {
-	Id                string         `json:"id"`
-	CpuCount          int64          `json:"cpu_count"`
-	MemoryMb          int64          `json:"memory_MB"`
-	CpuReservation    int64          `json:"cpu_reservation,omitempty"`
-	MemoryReservation int64          `json:"memory_reservation,omitempty"`
-	Devices           VirtualDevices `json:"devices"`
+	Id                string          `json:"id"`
+	CpuCount          int64           `json:"cpu_count"`
+	MemoryMb          int64           `json:"memory_MB"`
+	CpuReservation    int64           `json:"cpu_reservation,omitempty"`
+	MemoryReservation int64           `json:"memory_reservation,omitempty"`
+	Devices           VirtualDevices  `json:"devices"`
+	ConfigSpec        json.RawMessage `json:"config_spec,omitempty"`
 }
 
 // VirtualMachineClassUpdateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/UpdateSpec/
-type VirtualMachineClassUpdateSpec struct {
-	Id                string         `json:"id"`
-	CpuCount          int64          `json:"cpu_count"`
-	MemoryMb          int64          `json:"memory_MB"`
-	CpuReservation    int64          `json:"cpu_reservation,omitempty"`
-	MemoryReservation int64          `json:"memory_reservation,omitempty"`
-	Devices           VirtualDevices `json:"devices"`
-}
+type VirtualMachineClassUpdateSpec = VirtualMachineClassCreateSpec
 
 // DirectPathIoDevice https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/DynamicDirectPathIODevice/
 type DirectPathIoDevice struct {

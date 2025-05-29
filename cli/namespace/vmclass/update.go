@@ -6,6 +6,7 @@ package vmclass
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 
 	"github.com/vmware/govmomi/cli"
@@ -17,6 +18,8 @@ type update struct {
 	*flags.ClientFlag
 
 	spec namespace.VirtualMachineClassUpdateSpec
+
+	configSpec string
 }
 
 func init() {
@@ -29,6 +32,7 @@ func (cmd *update) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.Int64Var(&cmd.spec.CpuCount, "cpus", 0, "The number of CPUs.")
 	f.Int64Var(&cmd.spec.MemoryMb, "memory", 0, "The amount of memory (in MB).")
+	f.StringVar(&cmd.configSpec, "spec", "", "VirtualMachineConfigSpec json")
 }
 
 func (cmd *update) Process(ctx context.Context) error {
@@ -47,13 +51,24 @@ Examples:
 }
 
 func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
-	rc, err := cmd.RestClient()
+	cmd.spec.Id = f.Arg(0)
+	if f.NArg() != 1 {
+		return flag.ErrHelp
+	}
 
+	if cmd.configSpec != "" {
+		cmd.spec.ConfigSpec = json.RawMessage(cmd.configSpec)
+
+		err := mergeConfigSpec(&cmd.spec)
+		if err != nil {
+			return err
+		}
+	}
+
+	rc, err := cmd.RestClient()
 	if err != nil {
 		return err
 	}
-
-	cmd.spec.Id = f.Arg(0)
 
 	nm := namespace.NewManager(rc)
 
