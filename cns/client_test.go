@@ -509,6 +509,91 @@ func TestClient(t *testing.T) {
 	}
 	t.Logf("Volume: %q deleted sucessfully", createVolumeFromSnapshotVolumeId)
 
+	// Test CreateLinkedClone functionality by calling CreateVolume with VolumeSource set to snapshot and linkedclone
+	// flag set to true
+	cnsCreateLinkedCloneCreateSpec := cnstypes.CnsVolumeCreateSpec{
+		Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0-create-lc",
+		VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+		Datastores: dsList,
+		Metadata: cnstypes.CnsVolumeMetadata{
+			ContainerCluster: containerCluster,
+		},
+		BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+			CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+				CapacityInMb: snapshotSize,
+			},
+		},
+		VolumeSource: &cnstypes.CnsSnapshotVolumeSource{
+			VolumeId: cnstypes.CnsVolumeId{
+				Id: volumeId,
+			},
+			SnapshotId: cnstypes.CnsSnapshotId{
+				Id: snapshotId,
+			},
+			LinkedClone: true,
+		},
+	}
+	var cnsCreateLinkedCloneCreateSpecList []cnstypes.CnsVolumeCreateSpec
+	cnsCreateLinkedCloneCreateSpecList = append(cnsCreateLinkedCloneCreateSpecList, cnsCreateLinkedCloneCreateSpec)
+	t.Logf("Creating linkedclone using the spec: %+v", pretty.Sprint(cnsCreateLinkedCloneCreateSpec))
+	createLinkedCloneTask, err := cnsClient.CreateVolume(ctx, cnsCreateLinkedCloneCreateSpecList)
+	if err != nil {
+		t.Errorf("Failed to create linkedclone. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createLinkedCloneTaskInfo, err := GetTaskInfo(ctx, createLinkedCloneTask)
+	if err != nil {
+		t.Errorf("Failed to linked clone. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createLinkedCloneTaskResult, err := GetTaskResult(ctx, createLinkedCloneTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to create linkedclone. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if createLinkedCloneTaskResult == nil {
+		t.Fatalf("Empty create task results")
+		t.FailNow()
+	}
+	createLinkedCloneOperationRes := createLinkedCloneTaskResult.GetCnsVolumeOperationResult()
+	if createLinkedCloneOperationRes.Fault != nil {
+		t.Fatalf("Failed to create linkedclone: fault=%+v", createLinkedCloneOperationRes.Fault)
+	}
+	createLinkedCloneVolumeId := createLinkedCloneOperationRes.VolumeId.Id
+	createLinkedCloneResult := (createLinkedCloneTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("createLinkedCloneResult %+v", createLinkedCloneResult)
+	t.Logf("LinkedClone created from (volume %s snapshot %s) sucessfully. volumeId: %s", volumeId, snapshotId,
+		createLinkedCloneVolumeId)
+
+	//  Clean up linkedclone created above
+	var deleteLinkedCloneVolumeIDList []cnstypes.CnsVolumeId
+	deleteLinkedCloneVolumeIDList = append(deleteLinkedCloneVolumeIDList, cnstypes.CnsVolumeId{Id: createLinkedCloneVolumeId})
+	t.Logf("Deleting volume: %+v", deleteLinkedCloneVolumeIDList)
+	deleteLinkedCloneTask, err := cnsClient.DeleteVolume(ctx, deleteLinkedCloneVolumeIDList, true)
+	if err != nil {
+		t.Errorf("Failed to delete linkedclone. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	deleteLinkedCloneTaskInfo, err := GetTaskInfo(ctx, deleteLinkedCloneTask)
+	if err != nil {
+		t.Errorf("Failed to delete linkedclone. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	deleteLinkedCloneTaskResult, err := GetTaskResult(ctx, deleteLinkedCloneTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to delete linkedclone. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if deleteLinkedCloneTaskResult == nil {
+		t.Fatalf("Empty delete task results")
+		t.FailNow()
+	}
+	deleteLinkedCloneOperationRes := deleteLinkedCloneTaskResult.GetCnsVolumeOperationResult()
+	if deleteLinkedCloneOperationRes.Fault != nil {
+		t.Fatalf("Failed to delete linkedclone: fault=%+v", deleteLinkedCloneOperationRes.Fault)
+	}
+	t.Logf("LinkedClone: %q deleted sucessfully", createLinkedCloneVolumeId)
+
 	// Test DeleteSnapshot API
 	// Construct the CNS SnapshotDeleteSpec list
 	var cnsSnapshotDeleteSpecList []cnstypes.CnsSnapshotDeleteSpec
