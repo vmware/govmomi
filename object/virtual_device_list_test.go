@@ -747,7 +747,7 @@ func TestCreateSCSIController(t *testing.T) {
 			t.Error("should fail")
 		}
 
-		for _, name := range []string{"", "scsi", "pvscsi", "buslogic", "lsilogic", "lsilogic-sas"} {
+		for _, name := range []string{"", "scsi", "pvscsi", "buslogic", "lsilogic", "lsilogic-sas", "lsilogicsas"} {
 			_, err = l.CreateSCSIController(name)
 			if err != nil {
 				t.Error(err)
