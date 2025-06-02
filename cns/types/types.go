@@ -813,8 +813,9 @@ func init() {
 type CnsSnapshotVolumeSource struct {
 	CnsVolumeSource
 
-	VolumeId   CnsVolumeId   `xml:"volumeId,omitempty" json:"volumeId"`
-	SnapshotId CnsSnapshotId `xml:"snapshotId,omitempty" json:"snapshotId"`
+	VolumeId    CnsVolumeId   `xml:"volumeId,omitempty" json:"volumeId"`
+	SnapshotId  CnsSnapshotId `xml:"snapshotId,omitempty" json:"snapshotId"`
+	LinkedClone bool          `xml:"linkedClone,omitempty" json:"linkedClone"`
 }
 
 func init() {
