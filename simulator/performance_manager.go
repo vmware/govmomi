@@ -109,7 +109,9 @@ func (p *PerformanceManager) buildAvailablePerfMetricsQueryResponse(ids []types.
 				r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: strconv.Itoa(i)})
 			}
 		case "$physDisk":
-			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: datastoreURL})
+			if datastoreURL != "" {
+				r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: datastoreURL})
+			}
 		case "$file":
 			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "DISKFILE"})
 			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "DELTAFILE"})
@@ -128,7 +130,11 @@ func (p *PerformanceManager) queryAvailablePerfMetric(ctx *Context, entity types
 	switch entity.Type {
 	case "VirtualMachine":
 		vm := ctx.Map.Get(entity).(*VirtualMachine)
-		return p.buildAvailablePerfMetricsQueryResponse(p.vmMetrics, int(vm.Summary.Config.NumCpu), vm.Datastore[0].Value)
+		ds := ""
+		if len(vm.Datastore) != 0 {
+			ds = vm.Datastore[0].Value
+		}
+		return p.buildAvailablePerfMetricsQueryResponse(p.vmMetrics, int(vm.Summary.Config.NumCpu), ds)
 	case "HostSystem":
 		host := ctx.Map.Get(entity).(*HostSystem)
 		return p.buildAvailablePerfMetricsQueryResponse(p.hostMetrics, int(host.Hardware.CpuInfo.NumCpuThreads), host.Datastore[0].Value)
