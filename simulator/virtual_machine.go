@@ -1047,9 +1047,20 @@ func (vm *VirtualMachine) createFile(ctx *Context, spec string, name string, reg
 
 	_, err := os.Stat(file)
 	if err == nil {
-		fault := &types.FileAlreadyExists{FileFault: types.FileFault{File: file}}
-		log.Printf("%T: %s", fault, file)
-		return nil, fault
+		switch path.Ext(file) {
+		case ".nvram":
+			f, err := os.Open(file)
+			if err != nil {
+				return nil, &types.FileFault{
+					File: file,
+				}
+			}
+			return f, nil
+		default:
+			fault := &types.FileAlreadyExists{FileFault: types.FileFault{File: file}}
+			log.Printf("%T: %s", fault, file)
+			return nil, fault
+		}
 	}
 
 	// Create parent directory if needed
