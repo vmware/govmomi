@@ -146,6 +146,29 @@ func (ds *Datastore) RefreshDatastore(*Context, *types.RefreshDatastore) soap.Ha
 	return r
 }
 
+func (ds *Datastore) DatastoreEnterMaintenanceMode(ctx *Context, spec *types.DatastoreEnterMaintenanceMode) soap.HasFault {
+	ds.Summary.MaintenanceMode = string(types.DatastoreSummaryMaintenanceModeStateInMaintenance)
+
+	return &methods.DatastoreEnterMaintenanceModeBody{
+		Res: &types.DatastoreEnterMaintenanceModeResponse{
+			Returnval: types.StoragePlacementResult{},
+		},
+	}
+}
+
+func (ds *Datastore) DatastoreExitMaintenanceModeTask(ctx *Context, spec *types.DatastoreExitMaintenanceMode_Task) soap.HasFault {
+	task := CreateTask(ds, "exitMaintenanceMode", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		ds.Summary.MaintenanceMode = string(types.DatastoreSummaryMaintenanceModeStateNormal)
+		return nil, nil
+	})
+
+	return &methods.DatastoreExitMaintenanceMode_TaskBody{
+		Res: &types.DatastoreExitMaintenanceMode_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
 func (ds *Datastore) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(ds, "destroy", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		if len(ds.Vm) != 0 {
