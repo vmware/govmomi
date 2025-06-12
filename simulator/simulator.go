@@ -57,9 +57,10 @@ type Method struct {
 
 // Service decodes incoming requests and dispatches to a Handler
 type Service struct {
-	sdk   map[string]*Registry
-	funcs []handleFunc
-	delay *DelayConfig
+	sdk           map[string]*Registry
+	funcs         []handleFunc
+	delay         *DelayConfig
+	faultInjector *FaultInjector
 
 	readAll func(io.Reader) ([]byte, error)
 
@@ -83,9 +84,10 @@ type Server struct {
 // New returns an initialized simulator Service instance
 func New(ctx *Context, instance *ServiceInstance) *Service {
 	s := &Service{
-		Context: ctx,
-		readAll: io.ReadAll,
-		sdk:     make(map[string]*Registry),
+		Context:       ctx,
+		readAll:       io.ReadAll,
+		sdk:           make(map[string]*Registry),
+		faultInjector: NewFaultInjector(),
 	}
 	s.Context.svc = s
 	return s
@@ -94,6 +96,56 @@ func New(ctx *Context, instance *ServiceInstance) *Service {
 func (s *Service) client() *vim25.Client {
 	c, _ := vim25.NewClient(context.Background(), s)
 	return c
+}
+
+// FaultInjector returns the fault injector for this service
+func (s *Service) FaultInjector() *FaultInjector {
+	return s.faultInjector
+}
+
+// AddFaultRule adds a fault injection rule
+func (s *Service) AddFaultRule(rule *FaultInjectionRule) {
+	if s.faultInjector != nil {
+		s.faultInjector.AddRule(rule)
+	}
+}
+
+// RemoveFaultRule removes a fault injection rule by index
+func (s *Service) RemoveFaultRule(index int) bool {
+	if s.faultInjector != nil {
+		return s.faultInjector.RemoveRule(index)
+	}
+	return false
+}
+
+// ClearFaultRules removes all fault injection rules
+func (s *Service) ClearFaultRules() {
+	if s.faultInjector != nil {
+		s.faultInjector.ClearRules()
+	}
+}
+
+// GetFaultRules returns all fault injection rules
+func (s *Service) GetFaultRules() []*FaultInjectionRule {
+	if s.faultInjector != nil {
+		return s.faultInjector.GetRules()
+	}
+	return nil
+}
+
+// GetFaultStats returns fault injection statistics
+func (s *Service) GetFaultStats() map[string]interface{} {
+	if s.faultInjector != nil {
+		return s.faultInjector.GetStats()
+	}
+	return make(map[string]interface{})
+}
+
+// ResetFaultStats resets fault injection statistics
+func (s *Service) ResetFaultStats() {
+	if s.faultInjector != nil {
+		s.faultInjector.ResetStats()
+	}
 }
 
 type serverFaultBody struct {
@@ -197,7 +249,19 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		}
 	}
 
-	// We have a valid call. Introduce a delay if requested
+	// We have a valid call. Check for fault injection first
+	var objectName string
+	if entity, ok := handler.(mo.Entity); ok {
+		objectName = entityName(entity)
+	}
+
+	if s.faultInjector != nil {
+		if rule := s.faultInjector.ShouldInjectFault(method, objectName); rule != nil {
+			return s.faultInjector.CreateFault(rule, method)
+		}
+	}
+
+	// Introduce a delay if requested
 	if s.delay != nil {
 		s.delay.delay(method.Name)
 	}
