@@ -44,6 +44,10 @@ func TestClient(t *testing.T) {
 	datastore := os.Getenv("CNS_DATASTORE")
 	datastore2 := os.Getenv("CNS_DATASTORE2")
 
+	// set CNS_RUN_SHARED_DISK_TESTS environment to true, if you want to run shared disk related tests
+	// example: export CNS_RUN_SHARED_DISK_TESTS='true'
+	run_shared_disk_tests_tests := os.Getenv("CNS_RUN_SHARED_DISK_TESTS")
+
 	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
 	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
 	// example: export CNS_RUN_FILESHARE_TESTS='true'
@@ -1050,6 +1054,14 @@ func TestClient(t *testing.T) {
 		},
 		Vm: nodeVM.Reference(),
 	}
+
+	if run_shared_disk_tests_tests == "true" && isvSphereVersion91orAbove {
+		cnsVolumeAttachSpec.DiskMode = "independent_persistent"
+		cnsVolumeAttachSpec.Sharing = "sharingMultiWriter"
+		cnsVolumeAttachSpec.UnitNumber = 23
+		cnsVolumeAttachSpec.ControllerKey = 1000
+	}
+
 	cnsVolumeAttachSpecList = append(cnsVolumeAttachSpecList, cnsVolumeAttachSpec)
 	t.Logf("Attaching volume using the spec: %+v", cnsVolumeAttachSpec)
 	attachTask, err := cnsClient.AttachVolume(ctx, cnsVolumeAttachSpecList)
