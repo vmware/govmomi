@@ -49,6 +49,9 @@ func TestClient(t *testing.T) {
 	// set CNS_RUN_TRANSACTION_TESTS environment to true, if you want to run CNS Transaction tests
 	// example: export CNS_RUN_TRANSACTION_TESTS='true'
 	run_cns_transaction_tests := os.Getenv("CNS_RUN_TRANSACTION_TESTS")
+	// set CNS_RUN_SHARED_DISK_TESTS environment to true, if you want to run shared disk related tests
+	// example: export CNS_RUN_SHARED_DISK_TESTS='true'
+	run_shared_disk_tests_tests := os.Getenv("CNS_RUN_SHARED_DISK_TESTS")
 
 	// set CNS_RUN_MULTICLUSTER_PER_ZONE_TESTS environment to true, if you want to run tests
 	// on deployment with Zone with multiple vSphere Clusters
@@ -332,14 +335,10 @@ func TestClient(t *testing.T) {
 		}
 		reCreateVolumeOperationRes := reCreateTaskResult.GetCnsVolumeOperationResult()
 		t.Logf("reCreateVolumeOperationRes.: %+v", pretty.Sprint(reCreateVolumeOperationRes))
-		if reCreateVolumeOperationRes.Fault != nil {
-			t.Logf("reCreateVolumeOperationRes.Fault: %+v", pretty.Sprint(reCreateVolumeOperationRes.Fault))
-			_, ok := reCreateVolumeOperationRes.Fault.Fault.(*cnstypes.CnsAlreadyRegisteredFault)
-			if !ok {
-				t.Fatalf("Fault is not a CnsAlreadyRegisteredFault")
-			}
+		if reCreateVolumeOperationRes.Fault == nil {
+			t.Logf("re-create same volume did not fail as expected")
 		} else {
-			t.Fatalf("re-create same volume should fail with CnsAlreadyRegisteredFault")
+			t.Fatalf("re-creating same volume failed with fault: %+v", pretty.Sprint(reCreateVolumeOperationRes.Fault))
 		}
 	}
 
@@ -1200,6 +1199,84 @@ func TestClient(t *testing.T) {
 		t.Fatalf("Failed to detach volume: fault=%+v", detachVolumeOperationRes.Fault)
 	}
 	t.Logf("Volume detached successfully")
+
+	if run_shared_disk_tests_tests == "true" && isvSphereVersion91orAbove {
+		// Test AttachVolume API with multiwriter parameters
+		var cnsVolumeAttachSpecList []cnstypes.CnsVolumeAttachDetachSpec
+		cnsVolumeAttachSpec := cnstypes.CnsVolumeAttachDetachSpec{
+			VolumeId: cnstypes.CnsVolumeId{
+				Id: volumeId,
+			},
+			Vm:            nodeVM.Reference(),
+			DiskMode:      "independent_persistent",
+			Sharing:       "sharingMultiWriter",
+			UnitNumber:    23,
+			ControllerKey: 1000,
+		}
+
+		cnsVolumeAttachSpecList = append(cnsVolumeAttachSpecList, cnsVolumeAttachSpec)
+		t.Logf("Attaching volume using the spec: %+v", cnsVolumeAttachSpec)
+		attachTask, err := cnsClient.AttachVolume(ctx, cnsVolumeAttachSpecList)
+		if err != nil {
+			t.Errorf("Failed to attach volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		attachTaskInfo, err := GetTaskInfo(ctx, attachTask)
+		if err != nil {
+			t.Errorf("Failed to attach volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		attachTaskResult, err := GetTaskResult(ctx, attachTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to attach volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if attachTaskResult == nil {
+			t.Fatalf("Empty attach task results")
+			t.FailNow()
+		}
+		attachVolumeOperationRes := attachTaskResult.GetCnsVolumeOperationResult()
+		if attachVolumeOperationRes.Fault != nil {
+			t.Fatalf("Failed to attach volume: fault=%+v", attachVolumeOperationRes.Fault)
+		}
+		diskUUID := any(attachTaskResult).(*cnstypes.CnsVolumeAttachResult).DiskUUID
+		t.Logf("Volume attached sucessfully with shared disk params. Disk UUID: %s", diskUUID)
+
+		// Test DetachVolume API
+		var cnsVolumeDetachSpecList []cnstypes.CnsVolumeAttachDetachSpec
+		cnsVolumeDetachSpec := cnstypes.CnsVolumeAttachDetachSpec{
+			VolumeId: cnstypes.CnsVolumeId{
+				Id: volumeId,
+			},
+			Vm: nodeVM.Reference(),
+		}
+		cnsVolumeDetachSpecList = append(cnsVolumeDetachSpecList, cnsVolumeDetachSpec)
+		t.Logf("Detaching volume using the spec: %+v", cnsVolumeDetachSpec)
+		detachTask, err := cnsClient.DetachVolume(ctx, cnsVolumeDetachSpecList)
+		if err != nil {
+			t.Errorf("Failed to detach volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		detachTaskInfo, err := GetTaskInfo(ctx, detachTask)
+		if err != nil {
+			t.Errorf("Failed to detach volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		detachTaskResult, err := GetTaskResult(ctx, detachTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to detach volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if detachTaskResult == nil {
+			t.Fatalf("Empty detach task results")
+			t.FailNow()
+		}
+		detachVolumeOperationRes := detachTaskResult.GetCnsVolumeOperationResult()
+		if detachVolumeOperationRes.Fault != nil {
+			t.Fatalf("Failed to detach volume: fault=%+v", detachVolumeOperationRes.Fault)
+		}
+		t.Logf("Volume detached sucessfully")
+	}
 
 	// Test QueryVolumeAsync API only for vSphere version 7.0.3 onwards
 	if isvSphereVersion70U3orAbove(ctx, c.ServiceContent.About) {
