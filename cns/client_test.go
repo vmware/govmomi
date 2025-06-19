@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/dougm/pretty"
+	"github.com/google/uuid"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
@@ -29,6 +30,7 @@ import (
 
 const VSphere70u3VersionInt = 703
 const VSphere80u3VersionInt = 803
+const VSphere91VersionInt = 910
 
 func TestClient(t *testing.T) {
 	// set CNS_DEBUG to true if you need to emit soap traces from these tests
@@ -40,6 +42,7 @@ func TestClient(t *testing.T) {
 	url := os.Getenv("CNS_VC_URL") // example: export CNS_VC_URL='https://username:password@vc-ip/sdk'
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
+	datastore2 := os.Getenv("CNS_DATASTORE2")
 
 	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
 	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
@@ -140,6 +143,15 @@ func TestClient(t *testing.T) {
 			},
 		},
 	}
+
+	pvclaimUID := "901e87eb-c2bd-11e9-806f-005056a0c9a0"
+	isvSphereVersion91orAbove := isvSphereVersion91orAbove(ctx, c.ServiceContent.About)
+	if isvSphereVersion91orAbove {
+		t.Logf("setting volumeID: %q in the cnsVolumeCreateSpec", pvclaimUID)
+		cnsVolumeCreateSpec.VolumeId = cnstypes.CnsVolumeId{
+			Id: pvclaimUID,
+		}
+	}
 	cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
 	t.Logf("Creating volume using the spec: %+v", pretty.Sprint(cnsVolumeCreateSpec))
 	createTask, err := cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
@@ -168,7 +180,61 @@ func TestClient(t *testing.T) {
 	volumeId := createVolumeOperationRes.VolumeId.Id
 	volumeCreateResult := (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
 	t.Logf("volumeCreateResult %+v", volumeCreateResult)
+	if isvSphereVersion91orAbove {
+		if volumeId != pvclaimUID {
+			t.Fatalf("failed to create volume with supplied volume ID: %q volume "+
+				"created with diffrent UUID: %q", pvclaimUID, volumeId)
+		}
+	}
 	t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
+
+	// Creating Volume with same ID again on different datastore
+	// to observe CnsVolumeAlreadyExistsFault
+	if isvSphereVersion91orAbove {
+		if datastore2 != "" {
+			ds2, err := finder.Datastore(ctx, datastore2)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var ds2List []vim25types.ManagedObjectReference
+			ds2List = append(ds2List, ds2.Reference())
+			cnsVolumeCreateSpec.Datastores = ds2List
+			var cnsVolumeCreateSpecList2 []cnstypes.CnsVolumeCreateSpec
+
+			t.Logf("Creating Volume again on diffrent datastore using same generated Volume ID")
+			cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList2, cnsVolumeCreateSpec)
+			t.Logf("Creating volume using the spec: %+v", pretty.Sprint(cnsVolumeCreateSpec))
+			createTask, err := cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			createTaskInfo, err := GetTaskInfo(ctx, createTask)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			createTaskResult, err := GetTaskResult(ctx, createTaskInfo)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			if createTaskResult == nil {
+				t.Fatalf("Empty create task results")
+				t.FailNow()
+			}
+			createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
+			if createVolumeOperationRes.Fault != nil {
+				t.Logf("createVolumeOperationRes.Fault: %+v", pretty.Sprint(createVolumeOperationRes))
+				_, ok := createVolumeOperationRes.Fault.Fault.(cnstypes.CnsVolumeAlreadyExistsFault)
+				if !ok {
+					t.Fatalf("Fault is not CnsVolumeAlreadyExistsFault")
+				}
+			} else {
+				t.Fatalf("expecting CnsVolumeAlreadyExistsFault while creating volume with same ID on different datastore")
+			}
+		}
+	}
 
 	if cnsClient.Version != ReleaseVSAN67u3 {
 		// Test creating static volume using existing CNS volume should fail
@@ -363,6 +429,16 @@ func TestClient(t *testing.T) {
 		},
 		Description: desc,
 	}
+
+	var generatedSnapshotUUIDFromClient string
+	if isvSphereVersion91orAbove {
+		generatedSnapshotUUIDFromClient = uuid.New().String()
+		t.Logf("setting SnapshotID: %q in the cnsSnapshotCreateSpec", generatedSnapshotUUIDFromClient)
+		cnsSnapshotCreateSpec.SnapshotId = cnstypes.CnsSnapshotId{
+			Id: generatedSnapshotUUIDFromClient,
+		}
+	}
+
 	cnsSnapshotCreateSpecList = append(cnsSnapshotCreateSpecList, cnsSnapshotCreateSpec)
 	t.Logf("Creating snapshot using the spec: %+v", pretty.Sprint(cnsSnapshotCreateSpecList))
 	createSnapshotsTask, err := cnsClient.CreateSnapshots(ctx, cnsSnapshotCreateSpecList)
@@ -389,6 +465,12 @@ func TestClient(t *testing.T) {
 	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
 	snapshotCreateTime := snapshotCreateResult.Snapshot.CreateTime
 	t.Logf("snapshotCreateResult: %+v", pretty.Sprint(snapshotCreateResult))
+	if isvSphereVersion91orAbove {
+		if snapshotId != generatedSnapshotUUIDFromClient {
+			t.Fatalf("failed to create snapshot with snapshot id: %q snapshot "+
+				"created with diffrent id: %q", generatedSnapshotUUIDFromClient, snapshotId)
+		}
+	}
 	t.Logf("CreateSnapshots: Snapshot created successfully. volumeId: %q, snapshot id %q, time stamp %+v, opId: %q", volumeId, snapshotId, snapshotCreateTime, createSnapshotsTaskInfo.ActivationId)
 
 	// Test QuerySnapshots API on 7.0 U3 or above
@@ -1587,6 +1669,28 @@ func isvSphereVersion80U3orAbove(ctx context.Context, aboutInfo vim25types.About
 		}
 		// Check if the current vSphere version is 8.0.3 or higher
 		if vSphereVersionInt >= VSphere80u3VersionInt {
+			return true
+		}
+	}
+	// For all other versions
+	return false
+}
+
+// isvSphereVersion91orAbove checks if specified version is 9.1 or higher
+// The method takes aboutInfo{} as input which contains details about
+// VC version, build number and so on.
+// If the version is 9.1 higher, the method returns true, else returns false
+// along with appropriate errors during failure cases
+func isvSphereVersion91orAbove(ctx context.Context, aboutInfo vim25types.AboutInfo) bool {
+	items := strings.Split(aboutInfo.Version, ".")
+	version := strings.Join(items[:], "")
+	if len(version) >= 3 {
+		vSphereVersionInt, err := strconv.Atoi(version[0:3])
+		if err != nil {
+			return false
+		}
+		// Check if the current vSphere version is 9.1.0 or higher
+		if vSphereVersionInt >= VSphere91VersionInt {
 			return true
 		}
 	}
