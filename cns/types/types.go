@@ -79,6 +79,7 @@ type CnsVolumeCreateSpec struct {
 	types.DynamicData
 	Name                 string                                `xml:"name" json:"name"`
 	VolumeType           string                                `xml:"volumeType" json:"volumeType"`
+	VolumeId             CnsVolumeId                           `xml:"volumeId,omitempty" json:"volumeId"`
 	Datastores           []types.ManagedObjectReference        `xml:"datastores,omitempty" json:"datastores"`
 	Metadata             CnsVolumeMetadata                     `xml:"metadata,omitempty" json:"metadata"`
 	BackingObjectDetails BaseCnsBackingObjectDetails           `xml:"backingObjectDetails,typeattr" json:"backingObjectDetails"`
@@ -590,6 +591,17 @@ func init() {
 	types.Add("CnsVolumeNotFoundFault", reflect.TypeOf((*CnsVolumeNotFoundFault)(nil)).Elem())
 }
 
+type CnsVolumeAlreadyExistsFault struct {
+	CnsFault
+
+	VolumeId  CnsVolumeId                  `xml:"volumeId" json:"volumeId"`
+	Datastore types.ManagedObjectReference `xml:"datastore,omitempty" json:"datastore"`
+}
+
+func init() {
+	types.Add("CnsVolumeAlreadyExistsFault", reflect.TypeOf((*CnsVolumeAlreadyExistsFault)(nil)).Elem())
+}
+
 type CnsAlreadyRegisteredFault struct {
 	CnsFault `xml:"fault,typeattr"`
 
@@ -713,8 +725,9 @@ type CnsCreateSnapshotsResponse struct {
 type CnsSnapshotCreateSpec struct {
 	types.DynamicData
 
-	VolumeId    CnsVolumeId `xml:"volumeId" json:"volumeId"`
-	Description string      `xml:"description" json:"description"`
+	VolumeId    CnsVolumeId   `xml:"volumeId" json:"volumeId"`
+	Description string        `xml:"description" json:"description"`
+	SnapshotId  CnsSnapshotId `xml:"snapshotId,omitempty" json:"snapshotId"`
 }
 
 func init() {
