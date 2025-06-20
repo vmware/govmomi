@@ -46,6 +46,11 @@ func Map(ctx context.Context) *Registry {
 	return ctx.(*Context).Map
 }
 
+// ServiceFromContext returns the simulator Service from the given ctx
+func ServiceFromContext(ctx context.Context) *Service {
+	return ctx.(*Context).svc
+}
+
 // RegisterObject interface supports callbacks when objects are created, updated and deleted from the Registry
 type RegisterObject interface {
 	mo.Reference
