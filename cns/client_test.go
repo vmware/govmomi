@@ -1048,7 +1048,11 @@ func TestClient(t *testing.T) {
 		VolumeId: cnstypes.CnsVolumeId{
 			Id: volumeId,
 		},
-		Vm: nodeVM.Reference(),
+		Vm:            nodeVM.Reference(),
+		DiskMode:      "independent_persistent",
+		Sharing:       "sharingMultiWriter",
+		UnitNumber:    23,
+		ControllerKey: 1000,
 	}
 	cnsVolumeAttachSpecList = append(cnsVolumeAttachSpecList, cnsVolumeAttachSpec)
 	t.Logf("Attaching volume using the spec: %+v", cnsVolumeAttachSpec)
