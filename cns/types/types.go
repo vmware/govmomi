@@ -79,7 +79,7 @@ type CnsVolumeCreateSpec struct {
 	types.DynamicData
 	Name                 string                                `xml:"name" json:"name"`
 	VolumeType           string                                `xml:"volumeType" json:"volumeType"`
-	VolumeId             CnsVolumeId                           `xml:"volumeId,omitempty" json:"volumeId"`
+	VolumeId             *CnsVolumeId                          `xml:"volumeId,omitempty" json:"volumeId"`
 	Datastores           []types.ManagedObjectReference        `xml:"datastores,omitempty" json:"datastores"`
 	Metadata             CnsVolumeMetadata                     `xml:"metadata,omitempty" json:"metadata"`
 	BackingObjectDetails BaseCnsBackingObjectDetails           `xml:"backingObjectDetails,typeattr" json:"backingObjectDetails"`
@@ -725,9 +725,9 @@ type CnsCreateSnapshotsResponse struct {
 type CnsSnapshotCreateSpec struct {
 	types.DynamicData
 
-	VolumeId    CnsVolumeId   `xml:"volumeId" json:"volumeId"`
-	Description string        `xml:"description" json:"description"`
-	SnapshotId  CnsSnapshotId `xml:"snapshotId,omitempty" json:"snapshotId"`
+	VolumeId    CnsVolumeId    `xml:"volumeId" json:"volumeId"`
+	Description string         `xml:"description" json:"description"`
+	SnapshotId  *CnsSnapshotId `xml:"snapshotId,omitempty" json:"snapshotId"`
 }
 
 func init() {

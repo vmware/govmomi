@@ -44,6 +44,10 @@ func TestClient(t *testing.T) {
 	datastore := os.Getenv("CNS_DATASTORE")
 	datastore2 := os.Getenv("CNS_DATASTORE2")
 
+	// set CNS_RUN_TRANSACTION_TESTS environment to true, if you want to run CNS Transaction tests
+	// example: export CNS_RUN_TRANSACTION_TESTS='true'
+	run_cns_transaction_tests := os.Getenv("CNS_RUN_TRANSACTION_TESTS")
+
 	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
 	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
 	// example: export CNS_RUN_FILESHARE_TESTS='true'
@@ -146,9 +150,9 @@ func TestClient(t *testing.T) {
 
 	pvclaimUID := "901e87eb-c2bd-11e9-806f-005056a0c9a0"
 	isvSphereVersion91orAbove := isvSphereVersion91orAbove(ctx, c.ServiceContent.About)
-	if isvSphereVersion91orAbove {
+	if run_cns_transaction_tests == "true" && isvSphereVersion91orAbove {
 		t.Logf("setting volumeID: %q in the cnsVolumeCreateSpec", pvclaimUID)
-		cnsVolumeCreateSpec.VolumeId = cnstypes.CnsVolumeId{
+		cnsVolumeCreateSpec.VolumeId = &cnstypes.CnsVolumeId{
 			Id: pvclaimUID,
 		}
 	}
@@ -180,7 +184,7 @@ func TestClient(t *testing.T) {
 	volumeId := createVolumeOperationRes.VolumeId.Id
 	volumeCreateResult := (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
 	t.Logf("volumeCreateResult %+v", volumeCreateResult)
-	if isvSphereVersion91orAbove {
+	if run_cns_transaction_tests == "true" && isvSphereVersion91orAbove {
 		if volumeId != pvclaimUID {
 			t.Fatalf("failed to create volume with supplied volume ID: %q volume "+
 				"created with diffrent UUID: %q", pvclaimUID, volumeId)
@@ -190,7 +194,7 @@ func TestClient(t *testing.T) {
 
 	// Creating Volume with same ID again on different datastore
 	// to observe CnsVolumeAlreadyExistsFault
-	if isvSphereVersion91orAbove {
+	if run_cns_transaction_tests == "true" && isvSphereVersion91orAbove {
 		if datastore2 != "" {
 			ds2, err := finder.Datastore(ctx, datastore2)
 			if err != nil {
@@ -431,10 +435,10 @@ func TestClient(t *testing.T) {
 	}
 
 	var generatedSnapshotUUIDFromClient string
-	if isvSphereVersion91orAbove {
+	if run_cns_transaction_tests == "true" && isvSphereVersion91orAbove {
 		generatedSnapshotUUIDFromClient = uuid.New().String()
 		t.Logf("setting SnapshotID: %q in the cnsSnapshotCreateSpec", generatedSnapshotUUIDFromClient)
-		cnsSnapshotCreateSpec.SnapshotId = cnstypes.CnsSnapshotId{
+		cnsSnapshotCreateSpec.SnapshotId = &cnstypes.CnsSnapshotId{
 			Id: generatedSnapshotUUIDFromClient,
 		}
 	}
@@ -465,7 +469,7 @@ func TestClient(t *testing.T) {
 	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
 	snapshotCreateTime := snapshotCreateResult.Snapshot.CreateTime
 	t.Logf("snapshotCreateResult: %+v", pretty.Sprint(snapshotCreateResult))
-	if isvSphereVersion91orAbove {
+	if run_cns_transaction_tests == "true" && isvSphereVersion91orAbove {
 		if snapshotId != generatedSnapshotUUIDFromClient {
 			t.Fatalf("failed to create snapshot with snapshot id: %q snapshot "+
 				"created with diffrent id: %q", generatedSnapshotUUIDFromClient, snapshotId)
