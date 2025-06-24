@@ -179,6 +179,15 @@ func TestClient(t *testing.T) {
 	}
 	createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
 	if createVolumeOperationRes.Fault != nil {
+		if cnsFault, ok := createVolumeOperationRes.Fault.Fault.(*cnstypes.CnsFault); ok {
+			if cause := cnsFault.FaultCause; cause != nil {
+				if inner, ok := cause.Fault.(*vim25types.NotSupported); ok {
+					t.Logf("Caught NotSupported fault: %q", cause.LocalizedMessage)
+				} else {
+					t.Logf("Inner fault type: %T", inner)
+				}
+			}
+		}
 		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
 	}
 	volumeId := createVolumeOperationRes.VolumeId.Id
@@ -230,7 +239,7 @@ func TestClient(t *testing.T) {
 			createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
 			if createVolumeOperationRes.Fault != nil {
 				t.Logf("createVolumeOperationRes.Fault: %+v", pretty.Sprint(createVolumeOperationRes))
-				_, ok := createVolumeOperationRes.Fault.Fault.(cnstypes.CnsVolumeAlreadyExistsFault)
+				_, ok := createVolumeOperationRes.Fault.Fault.(*cnstypes.CnsVolumeAlreadyExistsFault)
 				if !ok {
 					t.Fatalf("Fault is not CnsVolumeAlreadyExistsFault")
 				}
@@ -282,7 +291,7 @@ func TestClient(t *testing.T) {
 		t.Logf("reCreateVolumeOperationRes.: %+v", pretty.Sprint(reCreateVolumeOperationRes))
 		if reCreateVolumeOperationRes.Fault != nil {
 			t.Logf("reCreateVolumeOperationRes.Fault: %+v", pretty.Sprint(reCreateVolumeOperationRes.Fault))
-			_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+			_, ok := reCreateVolumeOperationRes.Fault.Fault.(*cnstypes.CnsAlreadyRegisteredFault)
 			if !ok {
 				t.Fatalf("Fault is not a CnsAlreadyRegisteredFault")
 			}
@@ -1416,7 +1425,7 @@ func TestClient(t *testing.T) {
 		var volumeID string
 		if createVolumeOperationRes.Fault != nil {
 			t.Logf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
-			fault, ok := createVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+			fault, ok := createVolumeOperationRes.Fault.Fault.(*cnstypes.CnsAlreadyRegisteredFault)
 			if !ok {
 				t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
 			} else {
@@ -1465,7 +1474,7 @@ func TestClient(t *testing.T) {
 			t.Logf("reCreateVolumeOperationRes.: %+v", pretty.Sprint(reCreateVolumeOperationRes))
 			if reCreateVolumeOperationRes.Fault != nil {
 				t.Logf("Failed to create volume: fault=%+v", reCreateVolumeOperationRes.Fault)
-				_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+				_, ok := reCreateVolumeOperationRes.Fault.Fault.(*cnstypes.CnsAlreadyRegisteredFault)
 				if !ok {
 					t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
 				} else {

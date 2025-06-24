@@ -477,7 +477,7 @@ func TestSimulator(t *testing.T) {
 	}
 	t.Logf("snapshotQueryFilter with unknown volumeId in SnapshotQuerySpecs: %+v", snapshotQueryFilter)
 	querySnapshotsTaskResult = QuerySnapshotsFunc(snapshotQueryFilter)
-	_, ok := querySnapshotsTaskResult.Entries[0].Error.Fault.(cnstypes.CnsVolumeNotFoundFault)
+	_, ok := querySnapshotsTaskResult.Entries[0].Error.Fault.(*cnstypes.CnsVolumeNotFoundFault)
 	if !ok {
 		t.Fatalf("Unexpected error returned while CnsVolumeNotFoundFault is expected. Error: %+v \n", querySnapshotsTaskResult.Entries[0].Error.Fault)
 	}
@@ -494,7 +494,7 @@ func TestSimulator(t *testing.T) {
 	}
 	t.Logf("snapshotQueryFilter with unknown snapshotId in SnapshotQuerySpecs: %+v", snapshotQueryFilter)
 	querySnapshotsTaskResult = QuerySnapshotsFunc(snapshotQueryFilter)
-	_, ok = querySnapshotsTaskResult.Entries[0].Error.Fault.(cnstypes.CnsSnapshotNotFoundFault)
+	_, ok = querySnapshotsTaskResult.Entries[0].Error.Fault.(*cnstypes.CnsSnapshotNotFoundFault)
 	if !ok {
 		t.Fatalf("Unexpected error returned while CnsSnapshotNotFoundFault is expected. Error: %+v \n", querySnapshotsTaskResult.Entries[0].Error.Fault)
 	}
