@@ -186,7 +186,7 @@ func (r *lsWriter) backing(id types.CnsVolumeId) string {
 		}
 
 		if fault := res.Fault; fault != nil {
-			if f, ok := fault.Fault.(types.CnsFault); ok {
+			if f, ok := fault.Fault.(*types.CnsFault); ok {
 				if strings.Contains(f.Reason, id.Id) {
 					return f.Reason
 				}

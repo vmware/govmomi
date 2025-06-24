@@ -572,13 +572,14 @@ func init() {
 }
 
 type CnsFault struct {
-	types.BaseMethodFault `xml:"fault,typeattr"`
+	types.MethodFault
 
 	Reason string `xml:"reason,omitempty" json:"reason"`
 }
 
 func init() {
 	types.Add("CnsFault", reflect.TypeOf((*CnsFault)(nil)).Elem())
+	types.Add("NotSupported", reflect.TypeOf((*types.NotSupported)(nil)).Elem())
 }
 
 type CnsVolumeNotFoundFault struct {

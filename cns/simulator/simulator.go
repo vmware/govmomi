@@ -6,8 +6,9 @@ package simulator
 
 import (
 	"context"
-	"slices"
 	"time"
+
+	"slices"
 
 	"github.com/google/uuid"
 
@@ -724,7 +725,7 @@ func (m *CnsVolumeManager) CnsQuerySnapshots(ctx *simulator.Context, req *cnstyp
 				// volumeId in snapshotQuerySpecs does not exist
 				snapshotQueryResultEntries = append(snapshotQueryResultEntries, cnstypes.CnsSnapshotQueryResultEntry{
 					Error: &vim25types.LocalizedMethodFault{
-						Fault: cnstypes.CnsVolumeNotFoundFault{
+						Fault: &cnstypes.CnsVolumeNotFoundFault{
 							VolumeId: snapshotQuerySpec.VolumeId,
 						},
 					},
@@ -742,7 +743,7 @@ func (m *CnsVolumeManager) CnsQuerySnapshots(ctx *simulator.Context, req *cnstyp
 				if isSnapshotQueryFilter && len(snapshotQueryResultEntries) == 0 {
 					snapshotQueryResultEntries = append(snapshotQueryResultEntries, cnstypes.CnsSnapshotQueryResultEntry{
 						Error: &vim25types.LocalizedMethodFault{
-							Fault: cnstypes.CnsSnapshotNotFoundFault{
+							Fault: &cnstypes.CnsSnapshotNotFoundFault{
 								VolumeId:   snapshotQuerySpec.VolumeId,
 								SnapshotId: *snapshotQuerySpec.SnapshotId,
 							},
