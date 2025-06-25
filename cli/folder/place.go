@@ -86,12 +86,13 @@ type place struct {
 	*flags.VirtualMachineFlag
 	*flags.OutputFlag
 
-	pool flags.StringList
-	Type typeFlag
+	pool              flags.StringList
+	Type              typeFlag
+	CandidateNetworks flags.StringList
 }
 
 func init() {
-	cli.Register("folder.place", &place{}, true)
+	cli.Register("folder.place", &place{}, false)
 }
 
 func (cmd *place) Register(ctx context.Context, f *flag.FlagSet) {
@@ -106,6 +107,7 @@ func (cmd *place) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.Var(&cmd.pool, "pool", "Resource Pools to use for placement.")
 	f.Var(&cmd.Type, "type", fmt.Sprintf("Placement type (%s)", strings.Join(allTypes, "|")))
+	f.Var(&cmd.CandidateNetworks, "candidate-networks", "Candidate network names (repeat for multiple nics)")
 }
 
 func (cmd *place) Usage() string {
@@ -116,7 +118,13 @@ func (cmd *place) Description() string {
 	return `Get a placement recommendation for an existing VM
 
 Examples:
-  govc folder.place -rp $rp1Name -rp $rp2Name -rp $rp3Name-vm $vmName`
+  govc folder.place -rp $rp1Name -rp $rp2Name -rp $rp3Name -vm $vmName -type relocate -candidate-networks "netA|netB" -candidate-networks "netC"
+  Each use of the "-candidate-networks" flag represents a different NIC.
+  Within each value, "|" separates multiple candidate networks for that NIC.
+  For example:
+      -candidate-networks "netA|netB" → NIC 0 can connect to netA or netB
+      -candidate-networks "netC"      → NIC 1 can connect only to netC
+`
 }
 
 func (cmd *place) Process(ctx context.Context) error {
@@ -136,13 +144,12 @@ func (cmd *place) Process(ctx context.Context) error {
 }
 
 func (cmd *place) Run(ctx context.Context, f *flag.FlagSet) error {
-	c, err := cmd.Client()
+	client, err := cmd.Client()
 	if err != nil {
 		return err
 	}
-
 	// Use latest version to pick up latest PlaceVmsXCluster API.
-	err = c.UseServiceVersion()
+	err = client.UseServiceVersion()
 	if err != nil {
 		return err
 	}
@@ -175,9 +182,41 @@ func (cmd *place) Run(ctx context.Context, f *flag.FlagSet) error {
 	default:
 		return errors.New("please specify a valid type")
 	}
+	var candidateNetworks []types.PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks
+	if len(cmd.CandidateNetworks) > 0 {
+		client, err := cmd.Client()
+		if err != nil {
+			return err
+		}
+		finder := find.NewFinder(client, false)
+
+		dc, err := cmd.Datacenter()
+		if err != nil {
+			return err
+		}
+		finder.SetDatacenter(dc)
+
+		for _, nic := range cmd.CandidateNetworks {
+			// Each 'nic' string is like "netA|netB"
+			netNames := strings.Split(nic, "|")
+			var refs []types.ManagedObjectReference
+
+			for _, name := range netNames {
+				fmt.Printf(">>> Looking up network: %q\n", name)
+				netObj, err := finder.Network(ctx, name)
+				if err != nil {
+					return fmt.Errorf("network %q not found: %w", name, err)
+				}
+				refs = append(refs, netObj.Reference())
+			}
+			candidateNetworks = append(candidateNetworks, types.PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks{
+				Networks: refs,
+			})
+		}
+	}
 
 	// PlaceVMsXCluster is only valid against the root folder.
-	folder := object.NewRootFolder(c)
+	folder := object.NewRootFolder(client)
 
 	refs := make([]types.ManagedObjectReference, 0, len(cmd.pool))
 
@@ -191,9 +230,10 @@ func (cmd *place) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	vmPlacementSpecs := []types.PlaceVmsXClusterSpecVmPlacementSpec{{
-		Vm:           types.NewReference(vm.Reference()),
-		ConfigSpec:   types.VirtualMachineConfigSpec{},
-		RelocateSpec: relocateSpec,
+		Vm:                types.NewReference(vm.Reference()),
+		ConfigSpec:        types.VirtualMachineConfigSpec{},
+		RelocateSpec:      relocateSpec,
+		CandidateNetworks: candidateNetworks,
 	}}
 
 	placementSpec := types.PlaceVmsXClusterSpec{
