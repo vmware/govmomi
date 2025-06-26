@@ -71,6 +71,20 @@ func (c *Client) QueryProfile(ctx context.Context, rtype types.PbmProfileResourc
 	return res.Returnval, nil
 }
 
+func (c *Client) QueryProfileDetails(ctx context.Context, category string, fetchAllFields bool) (*types.PbmQueryProfileDetailsResponse, error) {
+	req := types.PbmQueryProfileDetails{
+		This:            c.ServiceContent.ProfileManager,
+		ProfileCategory: category,
+		FetchAllFields:  fetchAllFields,
+	}
+
+	res, err := methods.PbmQueryProfileDetails(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (c *Client) RetrieveContent(ctx context.Context, ids []types.PbmProfileId) ([]types.BasePbmProfile, error) {
 	req := types.PbmRetrieveContent{
 		This:       c.ServiceContent.ProfileManager,
@@ -333,4 +347,35 @@ func (c *Client) SupportsEncryption(
 		}
 	}
 	return false, nil
+}
+func (c *Client) ResolveK8sCompliantNames(ctx context.Context) error {
+	req := types.PbmResolveK8sCompliantNames{
+		This: c.ServiceContent.ProfileManager,
+	}
+
+	_, err := methods.PbmResolveK8sCompliantNames(ctx, c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateK8sCompliantNames(ctx context.Context, profileID string,
+	k8sCompliantName string, otherK8sCompliantNames []string) error {
+	req := types.PbmUpdateK8sCompliantNames{
+		This: c.ServiceContent.ProfileManager,
+		K8sCompliantNameSpec: types.PbmProfileK8sCompliantNameSpec{
+			ProfileId:              profileID,
+			K8sCompliantName:       k8sCompliantName,
+			OtherK8sCompliantNames: otherK8sCompliantNames,
+		},
+	}
+
+	_, err := methods.PbmUpdateK8sCompliantNames(ctx, c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
