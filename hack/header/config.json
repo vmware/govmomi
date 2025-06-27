@@ -19,7 +19,9 @@
     "scripts/**",
     "vim25/json/**",
     "vim25/xml/**",
-    "govc/**/*.sh"
+    "govc/**/*.sh",
+    "gen/**/*.yaml",
+    "dist/**/*"
   ],
   "maxScanLines": 10
 }
