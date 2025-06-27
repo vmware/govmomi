@@ -359,3 +359,207 @@ func TestClientCookie(t *testing.T) {
 		assert.False(t, ok)
 	})
 }
+
+func TestStoragePolicyK8sCompliantNames(t *testing.T) {
+	t.Run("Validate K8sCompliantName set for existing storage profiles", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, c *vim25.Client) {
+			pc, err := pbm.NewClient(ctx, c)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("PBM version=%s", pc.ServiceContent.AboutInfo.Version)
+
+			// Query all the profiles on the vCenter and verify that all profiles have K8sCompliantName set.
+			category := types.PbmProfileCategoryEnumREQUIREMENT
+			profileDetails, err := pc.QueryProfileDetails(ctx, string(category), true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, profile := range profileDetails.Returnval {
+				assert.True(t, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName != "")
+			}
+		})
+	})
+	t.Run("Validate K8sCompliantName set after new policy creation", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, c *vim25.Client) {
+			pc, err := pbm.NewClient(ctx, c)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("PBM version=%s", pc.ServiceContent.AboutInfo.Version)
+
+			category := types.PbmProfileCategoryEnumREQUIREMENT
+			validK8sCompliantName := "kubernetes-vsan-testpolicy"
+			// Create one storage profile with some K8sCompliantName passed
+			// VSAN profile with 2 capability instances - hostFailuresToTolerate = 2, stripeWidth = 1
+			pbmCreateSpecForVSAN := pbm.CapabilityProfileCreateSpec{
+				Name:        "Kubernetes-VSAN-TestPolicy",
+				Description: "VSAN Test policy create",
+				Category:    string(types.PbmProfileCategoryEnumREQUIREMENT),
+				CapabilityList: []pbm.Capability{
+					{
+						ID:        "hostFailuresToTolerate",
+						Namespace: "VSAN",
+						PropertyList: []pbm.Property{
+							{
+								ID:       "hostFailuresToTolerate",
+								Value:    "2",
+								DataType: "int",
+							},
+						},
+					},
+					{
+						ID:        "stripeWidth",
+						Namespace: "VSAN",
+						PropertyList: []pbm.Property{
+							{
+								ID:       "stripeWidth",
+								Value:    "1",
+								DataType: "int",
+							},
+						},
+					},
+				},
+				K8sCompliantName: validK8sCompliantName,
+			}
+
+			createSpecVSAN, err := pbm.CreateCapabilityProfileSpec(pbmCreateSpecForVSAN)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			vsanProfileID, err := pc.CreateProfile(ctx, *createSpecVSAN)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("VSAN Profile: %q with Name %q successfully created", vsanProfileID.UniqueId, createSpecVSAN.Name)
+
+			profileDetails, err := pc.QueryProfileDetails(ctx, string(category), true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, profile := range profileDetails.Returnval {
+				if profile.Profile.GetPbmCapabilityProfile().ProfileId.UniqueId == vsanProfileID.UniqueId {
+					assert.True(t, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName != "")
+					assert.True(t, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName == validK8sCompliantName)
+					t.Logf("Profile %q:%q has K8sCompliant Name %q set now on VCDB", createSpecVSAN.Name,
+						vsanProfileID.UniqueId, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName)
+					break
+				}
+			}
+		})
+	})
+	t.Run("Validate K8sCompliantName and OtherK8sCompliantNames set correctly after update", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, c *vim25.Client) {
+			pc, err := pbm.NewClient(ctx, c)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("PBM version=%s", pc.ServiceContent.AboutInfo.Version)
+
+			category := types.PbmProfileCategoryEnumREQUIREMENT
+			validK8sCompliantName := "kubernetes-vsan-testpolicy"
+			validK8sCompliantName2 := "kubernetes-vsan-testpolicy-renamed"
+			otherK8sCompliantNames := []string{"kubernetes-vsan-testpolicy-old"}
+
+			// Create one storage profile with some K8sCompliantName passed
+			// VSAN profile with 2 capability instances - hostFailuresToTolerate = 2, stripeWidth = 1
+			pbmCreateSpecForVSAN := pbm.CapabilityProfileCreateSpec{
+				Name:        "Kubernetes-VSAN-TestPolicy",
+				Description: "VSAN Test policy create",
+				Category:    string(types.PbmProfileCategoryEnumREQUIREMENT),
+				CapabilityList: []pbm.Capability{
+					{
+						ID:        "hostFailuresToTolerate",
+						Namespace: "VSAN",
+						PropertyList: []pbm.Property{
+							{
+								ID:       "hostFailuresToTolerate",
+								Value:    "2",
+								DataType: "int",
+							},
+						},
+					},
+					{
+						ID:        "stripeWidth",
+						Namespace: "VSAN",
+						PropertyList: []pbm.Property{
+							{
+								ID:       "stripeWidth",
+								Value:    "1",
+								DataType: "int",
+							},
+						},
+					},
+				},
+				K8sCompliantName: validK8sCompliantName,
+			}
+
+			createSpecVSAN, err := pbm.CreateCapabilityProfileSpec(pbmCreateSpecForVSAN)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			vsanProfileID, err := pc.CreateProfile(ctx, *createSpecVSAN)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Logf("VSAN Profile: %q with Name %q successfully created", vsanProfileID.UniqueId, createSpecVSAN.Name)
+
+			// Update K8sCompliantName and otherK8sCompliantNames of the policy, with both valid values
+			err = pc.UpdateK8sCompliantNames(ctx, vsanProfileID.UniqueId, validK8sCompliantName, otherK8sCompliantNames)
+			assert.NoError(t, err)
+
+			profileDetails, err := pc.QueryProfileDetails(ctx, string(category), true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, profile := range profileDetails.Returnval {
+				if profile.Profile.GetPbmCapabilityProfile().ProfileId.UniqueId == vsanProfileID.UniqueId {
+					assert.True(t, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName != "")
+					assert.True(t, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName == validK8sCompliantName)
+					assert.EqualValues(t, profile.Profile.GetPbmCapabilityProfile().OtherK8sCompliantNames, otherK8sCompliantNames)
+					break
+				}
+			}
+			t.Logf("Profile %q:%q has updated otherK8sCompliant Names on VCDB", createSpecVSAN.Name, vsanProfileID.UniqueId)
+
+			// Try to update K8sCompliantName, which should fail since the value is immutable
+			err = pc.UpdateK8sCompliantNames(ctx, vsanProfileID.UniqueId, validK8sCompliantName2, otherK8sCompliantNames)
+			assert.EqualError(t, err, "ServerFaultCode: Invalid Argument")
+
+			// Try to update otherK8sCompliantNames with another unique name, which should succeed
+			otherK8sCompliantNamesSuccess := []string{validK8sCompliantName + "-old-1"}
+			otherK8sCompliantNamesSuccess = append(otherK8sCompliantNamesSuccess, otherK8sCompliantNames...)
+			err = pc.UpdateK8sCompliantNames(ctx, vsanProfileID.UniqueId, validK8sCompliantName, otherK8sCompliantNamesSuccess)
+			assert.NoError(t, err)
+
+			// Try to update otherK8sCompliantNames with duplicate name, which should fail
+			otherK8sCompliantNamesFail := []string{validK8sCompliantName}
+			otherK8sCompliantNamesFail = append(otherK8sCompliantNamesFail, otherK8sCompliantNames...)
+			err = pc.UpdateK8sCompliantNames(ctx, vsanProfileID.UniqueId, validK8sCompliantName, otherK8sCompliantNamesFail)
+			assert.EqualError(t, err, "ServerFaultCode: Duplicate Name")
+
+			// Resolve K8sCompliantName and otherK8sCompliantNames for the policy
+			otherK8sCompliantNamesResolved := []string{}
+			otherK8sCompliantNamesResolved = append(otherK8sCompliantNamesResolved, otherK8sCompliantNamesSuccess...)
+			otherK8sCompliantNamesResolved = append(otherK8sCompliantNamesResolved, validK8sCompliantName+"-latebinding")
+			err = pc.ResolveK8sCompliantNames(ctx)
+			assert.NoError(t, err)
+
+			profileDetails, err = pc.QueryProfileDetails(ctx, string(category), true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, profile := range profileDetails.Returnval {
+				if profile.Profile.GetPbmCapabilityProfile().ProfileId.UniqueId == vsanProfileID.UniqueId {
+					assert.True(t, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName != "")
+					assert.True(t, profile.Profile.GetPbmCapabilityProfile().K8sCompliantName == validK8sCompliantName)
+					assert.EqualValues(t, profile.Profile.GetPbmCapabilityProfile().OtherK8sCompliantNames, otherK8sCompliantNamesResolved)
+					break
+				}
+			}
+			t.Logf("Profile %q:%q has resolved and updated otherK8sCompliant Names on VCDB", createSpecVSAN.Name, vsanProfileID.UniqueId)
+		})
+	})
+}

@@ -5,8 +5,14 @@
 package simulator
 
 import (
+	"regexp"
 	"slices"
+	"strings"
 	"time"
+	"unicode"
+
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 
 	"github.com/google/uuid"
 
@@ -86,8 +92,44 @@ type ProfileManager struct {
 	profileDetails map[string]types.PbmProfileDetails
 }
 
+// This function  is to deal with non-ascii characters like some non-english languages
+// to convert to more similar and meaningful characters for further consideration.
+func isMn(r rune) bool {
+	return unicode.Is(unicode.Mn, r)
+}
+
+func getK8sCompliantNameForPolicy(policyName string) string {
+	t := transform.Chain(norm.NFD, transform.RemoveFunc(isMn), norm.NFC)
+	policyName, _, _ = transform.String(t, policyName)
+	str := strings.ToLower(policyName)
+	reg := regexp.MustCompile("[^a-z0-9.]+")
+
+	convertedString := reg.ReplaceAllString(str, "-")
+
+	// K8sCompliantName cannot begin with '-' or '.', simply add '0' to resolve it.
+	if convertedString[0] == '-' || convertedString[0] == '.' {
+		convertedString = "0" + convertedString
+	}
+
+	// K8sCompliantName cannot end with '-' or '.' as well, add another '0' if so.
+	if convertedString[len(convertedString)-1] == '-' || convertedString[len(convertedString)-1] == '.' {
+		convertedString += "0"
+	}
+
+	return convertedString
+}
+
 func (m *ProfileManager) init(_ *simulator.Registry) {
 	m.profiles = slices.Clone(vcenter67DefaultProfiles)
+	// Set K8s compliant names for default profiles
+	for i := range m.profiles {
+		b, ok := m.profiles[i].(types.BasePbmCapabilityProfile)
+		if !ok {
+			continue
+		}
+		p := b.GetPbmCapabilityProfile()
+		p.K8sCompliantName = getK8sCompliantNameForPolicy(p.Name)
+	}
 
 	// Ensure the default encryption profile has the encryption IOFILTER as this
 	// is required when detecting whether a policy supports encryption.
@@ -126,6 +168,31 @@ func (m *ProfileManager) PbmQueryProfile(req *types.PbmQueryProfile) soap.HasFau
 
 		body.Res.Returnval = append(body.Res.Returnval, types.PbmProfileId{
 			UniqueId: p.ProfileId.UniqueId,
+		})
+	}
+
+	return body
+}
+
+func (m *ProfileManager) PbmQueryProfileDetails(req *types.PbmQueryProfileDetails) soap.HasFault {
+	body := new(methods.PbmQueryProfileDetailsBody)
+	body.Res = new(types.PbmQueryProfileDetailsResponse)
+
+	for i := range m.profiles {
+		b, ok := m.profiles[i].(types.BasePbmCapabilityProfile)
+		if !ok {
+			continue
+		}
+		p := b.GetPbmCapabilityProfile()
+
+		if req.ProfileCategory != "" {
+			if p.ProfileCategory != req.ProfileCategory {
+				continue
+			}
+		}
+
+		body.Res.Returnval = append(body.Res.Returnval, types.PbmProfileDetails{
+			Profile: p,
 		})
 	}
 
@@ -202,6 +269,7 @@ func (m *ProfileManager) PbmCreate(ctx *simulator.Context, req *types.PbmCreate)
 		IsDefault:                false,
 		SystemCreatedProfileType: "",
 		LineOfService:            "",
+		K8sCompliantName:         req.CreateSpec.K8sCompliantName,
 	}
 
 	m.profiles = append(m.profiles, profile)
@@ -254,6 +322,49 @@ func (m *ProfileManager) PbmQueryIOFiltersFromProfileId(req *types.PbmQueryIOFil
 	}
 
 	return &body
+}
+
+func (m *ProfileManager) PbmResolveK8sCompliantNames(req *types.PbmResolveK8sCompliantNames) soap.HasFault {
+	body := new(methods.PbmResolveK8sCompliantNamesBody)
+	body.Res = new(types.PbmResolveK8sCompliantNamesResponse)
+
+	for i := range m.profiles {
+		b, ok := m.profiles[i].(types.BasePbmCapabilityProfile)
+		if !ok {
+			continue
+		}
+		p := b.GetPbmCapabilityProfile()
+		p.OtherK8sCompliantNames = append(p.OtherK8sCompliantNames, p.K8sCompliantName+"-latebinding")
+	}
+	return body
+}
+
+func (m *ProfileManager) PbmUpdateK8sCompliantNames(req *types.PbmUpdateK8sCompliantNames) soap.HasFault {
+	body := new(methods.PbmUpdateK8sCompliantNamesBody)
+	body.Res = new(types.PbmUpdateK8sCompliantNamesResponse)
+
+	for i := range m.profiles {
+		b, ok := m.profiles[i].(types.BasePbmCapabilityProfile)
+		if !ok {
+			continue
+		}
+		p := b.GetPbmCapabilityProfile()
+		if p.ProfileId.UniqueId == req.K8sCompliantNameSpec.ProfileId {
+			if p.K8sCompliantName == "" {
+				p.K8sCompliantName = req.K8sCompliantNameSpec.K8sCompliantName
+			} else if p.K8sCompliantName != req.K8sCompliantNameSpec.K8sCompliantName {
+				body.Fault_ = simulator.Fault("Invalid Argument", &vim.RuntimeFault{})
+				break
+			}
+			if slices.Contains(req.K8sCompliantNameSpec.OtherK8sCompliantNames, p.K8sCompliantName) {
+				body.Fault_ = simulator.Fault("Duplicate Name", &vim.RuntimeFault{})
+				break
+			}
+			p.OtherK8sCompliantNames = req.K8sCompliantNameSpec.OtherK8sCompliantNames
+			break
+		}
+	}
+	return body
 }
 
 type PlacementSolver struct {
