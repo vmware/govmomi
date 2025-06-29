@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"net"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/vmware/govmomi/nfc"
@@ -702,6 +703,35 @@ func (m snapshotMap) add(parent string, tree []types.VirtualMachineSnapshotTree)
 	}
 }
 
+func findParentSnapshotHelper(parentPath, target string, parent *types.VirtualMachineSnapshotTree) *types.ManagedObjectReference {
+	for _, child := range parent.ChildSnapshotList {
+		childNames := []string{child.Snapshot.Value, child.Name}
+		fullPath := path.Join(parentPath, child.Name)
+		childNames = append(childNames, fullPath)
+		if slices.Contains(childNames, target) {
+			return &parent.Snapshot
+		}
+		if p := findParentSnapshotHelper(fullPath, target, &child); p != nil {
+			return p
+		}
+	}
+	return nil
+}
+
+func (v VirtualMachine) getRootSnapshots(ctx context.Context) ([]types.VirtualMachineSnapshotTree, error) {
+	var o mo.VirtualMachine
+
+	if err := v.Properties(ctx, v.Reference(), []string{"snapshot"}, &o); err != nil {
+		return nil, err
+	}
+
+	if o.Snapshot == nil || len(o.Snapshot.RootSnapshotList) == 0 {
+		return nil, errors.New("no snapshots for this VM")
+	}
+
+	return o.Snapshot.RootSnapshotList, nil
+}
+
 // SnapshotSize calculates the size of a given snapshot in bytes. If the
 // snapshot is current, disk files not associated with any parent snapshot are
 // included in size calculations. This allows for measuring and including the
@@ -764,19 +794,13 @@ func SnapshotSize(info types.ManagedObjectReference, parent *types.ManagedObject
 // 2) snapshot name (may not be unique)
 // 3) snapshot tree path (may not be unique)
 func (v VirtualMachine) FindSnapshot(ctx context.Context, name string) (*types.ManagedObjectReference, error) {
-	var o mo.VirtualMachine
-
-	err := v.Properties(ctx, v.Reference(), []string{"snapshot"}, &o)
+	rootSnapshots, err := v.getRootSnapshots(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if o.Snapshot == nil || len(o.Snapshot.RootSnapshotList) == 0 {
-		return nil, errors.New("no snapshots for this VM")
-	}
-
 	m := make(snapshotMap)
-	m.add("", o.Snapshot.RootSnapshotList)
+	m.add("", rootSnapshots)
 
 	s := m[name]
 	switch len(s) {
@@ -787,6 +811,29 @@ func (v VirtualMachine) FindSnapshot(ctx context.Context, name string) (*types.M
 	default:
 		return nil, fmt.Errorf("%q resolves to %d snapshots", name, len(s))
 	}
+}
+
+func (v VirtualMachine) FindParentSnapshot(ctx context.Context, name string) (*types.ManagedObjectReference, error) {
+	if _, err := v.FindSnapshot(ctx, name); err != nil {
+		return nil, err
+	}
+
+	rootSnapshots, err := v.getRootSnapshots(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	notFoundErr := fmt.Errorf("parent snapshot for %q not found", name)
+	for _, rootSnapshot := range rootSnapshots {
+		if rootSnapshot.Name == name || rootSnapshot.Snapshot.Value == name {
+			return nil, notFoundErr
+		}
+		if parent := findParentSnapshotHelper(rootSnapshot.Name, name, &rootSnapshot); parent != nil {
+			return parent, nil
+		}
+	}
+
+	return nil, notFoundErr
 }
 
 // RemoveSnapshot removes a named snapshot
