@@ -1970,12 +1970,63 @@ func TestVmSnapshotEx(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		if err = task.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+
+		info, err = task.WaitForResult(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		snapRefChild, ok := info.Result.(types.ManagedObjectReference)
+		if !ok {
+			t.Fatal("expected ManagedObjectRefrence result for CreateSnapshot")
+		}
+
+		parent, err := vm.FindParentSnapshot(ctx, "child")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if parent == nil || parent.Value != snapRef.Value {
+			t.Fatal("parent snapshot of child should be root")
+		}
+
+		rootParent, err := vm.FindParentSnapshot(ctx, "root")
+		if err == nil || rootParent != nil {
+			t.Fatal("root should not have a parent")
+		}
+
+		parent, err = vm.FindParentSnapshot(ctx, "invalid")
+		if err == nil || parent != nil {
+			t.Fatal("should return not found when the snapshot does not exist")
+		}
+
+		task, err = vm.CreateSnapshotEx(ctx, "grandkid", "description", true, quiesceSpec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		err = task.Wait(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		_, err = vm.FindSnapshot(ctx, "child")
+		parent, err = vm.FindParentSnapshot(ctx, "grandkid")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if parent == nil || parent.Value != snapRefChild.Value {
+			t.Fatal("parent snapshot of grandkid should be child")
+		}
+
+		task, err = vm.RemoveSnapshot(ctx, "grandkid", false, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
