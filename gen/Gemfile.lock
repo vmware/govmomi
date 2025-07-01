@@ -7,7 +7,7 @@ GEM
       racc (~> 1.4)
     power_assert (2.0.5)
     racc (1.8.1)
-    test-unit (3.6.8)
+    test-unit (3.6.9)
       power_assert
     yaml (0.4.0)
 
