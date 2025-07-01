@@ -17,6 +17,7 @@ import (
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/pbm"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -43,10 +44,16 @@ func TestClient(t *testing.T) {
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
 	datastore2 := os.Getenv("CNS_DATASTORE2")
+	spbmProfileName := os.Getenv("CNS_SPBM_PROFILE_NAME")
 
 	// set CNS_RUN_TRANSACTION_TESTS environment to true, if you want to run CNS Transaction tests
 	// example: export CNS_RUN_TRANSACTION_TESTS='true'
 	run_cns_transaction_tests := os.Getenv("CNS_RUN_TRANSACTION_TESTS")
+
+	// set CNS_RUN_MULTICLUSTER_PER_ZONE_TESTS environment to true, if you want to run tests
+	// on deployment with Zone with multiple vSphere Clusters
+	// example: export CNS_RUN_MULTICLUSTER_PER_ZONE_TESTS='true'
+	run_cns_multicluster_per_zone_tests := os.Getenv("CNS_RUN_MULTICLUSTER_PER_ZONE_TESTS")
 
 	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
 	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
@@ -137,7 +144,6 @@ func TestClient(t *testing.T) {
 	cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
 		Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0",
 		VolumeType: string(cnstypes.CnsVolumeTypeBlock),
-		Datastores: dsList,
 		Metadata: cnstypes.CnsVolumeMetadata{
 			ContainerCluster: containerCluster,
 		},
@@ -155,6 +161,36 @@ func TestClient(t *testing.T) {
 		cnsVolumeCreateSpec.VolumeId = &cnstypes.CnsVolumeId{
 			Id: pvclaimUID,
 		}
+	}
+
+	if run_cns_multicluster_per_zone_tests == "true" && isvSphereVersion91orAbove {
+		var clusters []vim25types.ManagedObjectReference
+		computeResources, err := finder.ComputeResourceList(ctx, "*")
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, computeResource := range computeResources {
+			clusters = append(clusters, computeResource.Reference())
+		}
+		t.Logf("set cnsVolumeCreateSpec.ActiveClusters=%v", clusters)
+		cnsVolumeCreateSpec.ActiveClusters = clusters
+
+		pbmclient, err := pbm.NewClient(ctx, c.Client)
+		if err != nil {
+			t.Fatal(err)
+		}
+		storagePolicyID, err := pbmclient.ProfileIDByName(ctx, spbmProfileName)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("set cnsVolumeCreateSpec.Profile=%s", storagePolicyID)
+		cnsVolumeCreateSpec.Profile = []vim25types.BaseVirtualMachineProfileSpec{
+			&vim25types.VirtualMachineDefinedProfileSpec{
+				ProfileId: storagePolicyID,
+			},
+		}
+	} else {
+		cnsVolumeCreateSpec.Datastores = dsList
 	}
 	cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
 	t.Logf("Creating volume using the spec: %+v", pretty.Sprint(cnsVolumeCreateSpec))
@@ -199,7 +235,14 @@ func TestClient(t *testing.T) {
 				"created with diffrent UUID: %q", pvclaimUID, volumeId)
 		}
 	}
-	t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
+	t.Logf("Volume created successfully. volumeId: %s", volumeId)
+
+	if run_cns_multicluster_per_zone_tests == "true" && isvSphereVersion91orAbove {
+		if len(volumeCreateResult.PlacementResults[0].Clusters) == 0 {
+			t.Fatalf("clusters in the placement result in createvolumeresult can not be empty. "+
+				"volumeCreateResult.PlacementResults :%q", pretty.Sprint(volumeCreateResult.PlacementResults))
+		}
+	}
 
 	// Creating Volume with same ID again on different datastore
 	// to observe CnsVolumeAlreadyExistsFault
@@ -573,7 +616,7 @@ func TestClient(t *testing.T) {
 	createVolumeFromSnapshotVolumeId := createVolumeFromSnapshotOperationRes.VolumeId.Id
 	createVolumeFromSnapshotResult := (createVolumeFromSnapshotTaskResult).(*cnstypes.CnsVolumeCreateResult)
 	t.Logf("createVolumeFromSnapshotResult %+v", createVolumeFromSnapshotResult)
-	t.Logf("Volume created from snapshot %s sucessfully. volumeId: %s", snapshotId, createVolumeFromSnapshotVolumeId)
+	t.Logf("Volume created from snapshot %s successfully. volumeId: %s", snapshotId, createVolumeFromSnapshotVolumeId)
 
 	//  Clean up volume created from snapshot above
 	var deleteVolumeFromSnapshotVolumeIDList []cnstypes.CnsVolumeId
@@ -602,7 +645,7 @@ func TestClient(t *testing.T) {
 	if deleteVolumeFromSnapshotOperationRes.Fault != nil {
 		t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeFromSnapshotOperationRes.Fault)
 	}
-	t.Logf("Volume: %q deleted sucessfully", createVolumeFromSnapshotVolumeId)
+	t.Logf("Volume: %q deleted successfully", createVolumeFromSnapshotVolumeId)
 
 	// Test CreateLinkedClone functionality by calling CreateVolume with VolumeSource set to snapshot and linkedclone
 	// flag set to true
@@ -657,7 +700,7 @@ func TestClient(t *testing.T) {
 	createLinkedCloneVolumeId := createLinkedCloneOperationRes.VolumeId.Id
 	createLinkedCloneResult := (createLinkedCloneTaskResult).(*cnstypes.CnsVolumeCreateResult)
 	t.Logf("createLinkedCloneResult %+v", createLinkedCloneResult)
-	t.Logf("LinkedClone created from (volume %s snapshot %s) sucessfully. volumeId: %s", volumeId, snapshotId,
+	t.Logf("LinkedClone created from (volume %s snapshot %s) successfully. volumeId: %s", volumeId, snapshotId,
 		createLinkedCloneVolumeId)
 
 	//  Clean up linkedclone created above
@@ -687,7 +730,7 @@ func TestClient(t *testing.T) {
 	if deleteLinkedCloneOperationRes.Fault != nil {
 		t.Fatalf("Failed to delete linkedclone: fault=%+v", deleteLinkedCloneOperationRes.Fault)
 	}
-	t.Logf("LinkedClone: %q deleted sucessfully", createLinkedCloneVolumeId)
+	t.Logf("LinkedClone: %q deleted successfully", createLinkedCloneVolumeId)
 
 	// Test DeleteSnapshot API
 	// Construct the CNS SnapshotDeleteSpec list
@@ -852,7 +895,7 @@ func TestClient(t *testing.T) {
 		t.Fatalf("Failed to extend volume: fault=%+v", extendVolumeOperationRes.Fault)
 	}
 	extendVolumeId := extendVolumeOperationRes.VolumeId.Id
-	t.Logf("Volume extended sucessfully. Volume ID: %s", extendVolumeId)
+	t.Logf("Volume extended successfully. Volume ID: %s", extendVolumeId)
 
 	// Verify volume is extended to the specified size
 	t.Logf("Calling QueryVolume after ExtendVolume using queryFilter: %+v", queryFilter)
@@ -866,7 +909,7 @@ func TestClient(t *testing.T) {
 	if newCapacityInMb != queryCapacity {
 		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryCapacity)
 	} else {
-		t.Logf("Volume extended sucessfully to the new size. Volume ID: %s New Size: %d", extendVolumeId, newCapacityInMb)
+		t.Logf("Volume extended successfully to the new size. Volume ID: %s New Size: %d", extendVolumeId, newCapacityInMb)
 	}
 
 	// Test UpdateVolumeMetadata
@@ -1050,7 +1093,7 @@ func TestClient(t *testing.T) {
 	}
 
 	vmRef := vmTaskInfo.Result.(object.Reference)
-	t.Logf("Node VM created sucessfully. vmRef: %+v", vmRef.Reference())
+	t.Logf("Node VM created successfully. vmRef: %+v", vmRef.Reference())
 
 	nodeVM := object.NewVirtualMachine(cnsClient.vim25Client, vmRef.Reference())
 	defer nodeVM.Destroy(ctx)
@@ -1089,7 +1132,7 @@ func TestClient(t *testing.T) {
 		t.Fatalf("Failed to attach volume: fault=%+v", attachVolumeOperationRes.Fault)
 	}
 	diskUUID := any(attachTaskResult).(*cnstypes.CnsVolumeAttachResult).DiskUUID
-	t.Logf("Volume attached sucessfully. Disk UUID: %s", diskUUID)
+	t.Logf("Volume attached successfully. Disk UUID: %s", diskUUID)
 
 	// Re-Attach same volume to the same node and expect ResourceInUse fault
 	t.Logf("Re-Attaching volume using the spec: %+v", cnsVolumeAttachSpec)
@@ -1156,7 +1199,7 @@ func TestClient(t *testing.T) {
 	if detachVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to detach volume: fault=%+v", detachVolumeOperationRes.Fault)
 	}
-	t.Logf("Volume detached sucessfully")
+	t.Logf("Volume detached successfully")
 
 	// Test QueryVolumeAsync API only for vSphere version 7.0.3 onwards
 	if isvSphereVersion70U3orAbove(ctx, c.ServiceContent.About) {
@@ -1206,7 +1249,7 @@ func TestClient(t *testing.T) {
 	if deleteVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeOperationRes.Fault)
 	}
-	t.Logf("Volume: %q deleted sucessfully", volumeId)
+	t.Logf("Volume: %q deleted successfully", volumeId)
 
 	if run_fileshare_tests == "true" && cnsClient.Version != ReleaseVSAN67u3 {
 		// Test creating vSAN file-share Volume
@@ -1265,7 +1308,7 @@ func TestClient(t *testing.T) {
 			t.Fatalf("Failed to create Fileshare volume: fault=%+v", createVolumeOperationRes.Fault)
 		}
 		filevolumeId := createVolumeOperationRes.VolumeId.Id
-		t.Logf("Fileshare volume created sucessfully. filevolumeId: %s", filevolumeId)
+		t.Logf("Fileshare volume created successfully. filevolumeId: %s", filevolumeId)
 
 		// Test QueryVolume API
 		volumeIDList = []cnstypes.CnsVolumeId{{Id: filevolumeId}}
@@ -1385,7 +1428,7 @@ func TestClient(t *testing.T) {
 		if deleteVolumeOperationRes.Fault != nil {
 			t.Fatalf("Failed to delete fileshare volume: fault=%+v", deleteVolumeOperationRes.Fault)
 		}
-		t.Logf("fileshare volume:%q deleted sucessfully", filevolumeId)
+		t.Logf("fileshare volume:%q deleted successfully", filevolumeId)
 	}
 	if backingDiskURLPath != "" && cnsClient.Version != ReleaseVSAN67u3 && cnsClient.Version != ReleaseVSAN70 {
 		// Test CreateVolume API with existing VMDK
@@ -1434,7 +1477,7 @@ func TestClient(t *testing.T) {
 			}
 		} else {
 			volumeID = createVolumeOperationRes.VolumeId.Id
-			t.Logf("Volume created sucessfully with backingDiskURLPath: %s. volumeId: %s", backingDiskURLPath, volumeID)
+			t.Logf("Volume created successfully with backingDiskURLPath: %s. volumeId: %s", backingDiskURLPath, volumeID)
 
 			// Test re creating volume using BACKING_DISK_URL_PATH
 			var reCreateCnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
@@ -1520,7 +1563,7 @@ func TestClient(t *testing.T) {
 		if deleteVolumeOperationRes.Fault != nil {
 			t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeOperationRes.Fault)
 		}
-		t.Logf("volume:%q deleted sucessfully", volumeID)
+		t.Logf("volume:%q deleted successfully", volumeID)
 	}
 
 	// Test CnsReconfigVolumePolicy API
@@ -1567,7 +1610,7 @@ func TestClient(t *testing.T) {
 		volumeId = createVolumeOperationRes.VolumeId.Id
 		volumeCreateResult = (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
 		t.Logf("volumeCreateResult %+v", volumeCreateResult)
-		t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
+		t.Logf("Volume created successfully. volumeId: %s", volumeId)
 
 		t.Logf("Calling reconfigpolicy on volume %v with policy %+v \n", volumeId, spbmPolicyId4Reconfig)
 		reconfigSpecs := []cnstypes.CnsVolumePolicyReconfigSpec{
