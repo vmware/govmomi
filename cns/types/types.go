@@ -950,3 +950,34 @@ func init() {
 type CnsSyncDatastoreResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
+
+type CnsSyncVolume CnsSyncVolumeRequestType
+
+func init() {
+	types.Add("vsan:CnsSyncVolume", reflect.TypeOf((*CnsSyncVolume)(nil)).Elem())
+}
+
+type CnsSyncVolumeRequestType struct {
+	This      types.ManagedObjectReference `xml:"_this"`
+	SyncSpecs []CnsSyncVolumeSpec          `xml:"syncSpecs,omitempty"`
+}
+
+func init() {
+	types.Add("vsan:CnsSyncVolumeRequestType", reflect.TypeOf((*CnsSyncVolumeRequestType)(nil)).Elem())
+}
+
+type CnsSyncVolumeResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type CnsSyncVolumeSpec struct {
+	types.DynamicData
+
+	VolumeId  CnsVolumeId                   `xml:"volumeId"`
+	Datastore *types.ManagedObjectReference `xml:"datastore,omitempty"`
+	SyncMode  []string                      `xml:"syncMode,omitempty"`
+}
+
+func init() {
+	types.Add("vsan:CnsSyncVolumeSpec", reflect.TypeOf((*CnsSyncVolumeSpec)(nil)).Elem())
+}
