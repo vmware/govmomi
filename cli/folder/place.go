@@ -119,11 +119,11 @@ func (cmd *place) Description() string {
 
 Examples:
   govc folder.place -rp $rp1Name -rp $rp2Name -rp $rp3Name -vm $vmName -type relocate -candidate-networks "netA|netB" -candidate-networks "netC"
-  Each use of the "-candidate-networks" flag represents a different NIC.
-  Within each value, "|" separates multiple candidate networks for that NIC.
+  Each use of the "-candidate-networks" flag corresponds to one NIC of the VM.
+  Within the value of each flag, use "|" to specify multiple candidate networks for that NIC.
   For example:
-      -candidate-networks "netA|netB" → NIC 0 can connect to netA or netB
-      -candidate-networks "netC"      → NIC 1 can connect only to netC
+      -candidate-networks "netA|netB" → NIC 0 can connect to either netA or netB.
+      -candidate-networks "netC"      → NIC 1 can connect only to netC.
 `
 }
 
