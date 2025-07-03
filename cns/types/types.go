@@ -214,8 +214,12 @@ type CnsDetachVolumeResponse struct {
 type CnsVolumeAttachDetachSpec struct {
 	types.DynamicData
 
-	VolumeId CnsVolumeId                  `xml:"volumeId" json:"volumeId"`
-	Vm       types.ManagedObjectReference `xml:"vm" json:"vm"`
+	VolumeId      CnsVolumeId                  `xml:"volumeId" json:"volumeId"`
+	Vm            types.ManagedObjectReference `xml:"vm" json:"vm"`
+	DiskMode      string                       `xml:"diskMode,omitempty" json:"diskMode"`
+	Sharing       string                       `xml:"sharing,omitempty" json:"sharing"`
+	ControllerKey int64                        `xml:"controllerKey,omitempty" json:"controllerKey"`
+	UnitNumber    int64                        `xml:"unitNumber,omitempty" json:"unitNumber"`
 }
 
 func init() {
