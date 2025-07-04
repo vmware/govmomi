@@ -30,6 +30,14 @@ func init() {
 	t["ArrayOfPlaceVmsXClusterSpecVmPlacementSpec"] = reflect.TypeOf((*ArrayOfPlaceVmsXClusterSpecVmPlacementSpec)(nil)).Elem()
 }
 
+type ArrayOfPlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks struct {
+	PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks []PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks `xml:"PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks,omitempty"`
+}
+
+func init() {
+	t["ArrayOfPlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks"] = reflect.TypeOf((*ArrayOfPlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks)(nil)).Elem()
+}
+
 type PlaceVmsXCluster PlaceVmsXClusterRequestType
 
 func init() {
@@ -102,13 +110,24 @@ func init() {
 type PlaceVmsXClusterSpecVmPlacementSpec struct {
 	DynamicData
 
-	Vm           *ManagedObjectReference     `xml:"vm,omitempty"`
-	ConfigSpec   VirtualMachineConfigSpec    `xml:"configSpec"`
-	RelocateSpec *VirtualMachineRelocateSpec `xml:"relocateSpec,omitempty"`
+	Vm                *ManagedObjectReference                                `xml:"vm,omitempty"`
+	ConfigSpec        VirtualMachineConfigSpec                               `xml:"configSpec"`
+	RelocateSpec      *VirtualMachineRelocateSpec                            `xml:"relocateSpec,omitempty"`
+	CandidateNetworks []PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks `xml:"candidateNetworks,omitempty"`
 }
 
 func init() {
 	t["PlaceVmsXClusterSpecVmPlacementSpec"] = reflect.TypeOf((*PlaceVmsXClusterSpecVmPlacementSpec)(nil)).Elem()
+}
+
+type PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks struct {
+	DynamicData
+
+	Networks []ManagedObjectReference `xml:"networks,omitempty"`
+}
+
+func init() {
+	t["PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks"] = reflect.TypeOf((*PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks)(nil)).Elem()
 }
 
 const RecommendationReasonCodeXClusterPlacement = RecommendationReasonCode("xClusterPlacement")
