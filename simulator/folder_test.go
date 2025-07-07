@@ -632,6 +632,41 @@ func TestPlaceVmsXClusterCreateAndPowerOn(t *testing.T) {
 
 	Test(func(ctx context.Context, c *vim25.Client) {
 		finder := find.NewFinder(c, false)
+		spec := types.PlaceVmsXClusterSpec{}
+
+		pools, err := finder.ResourcePoolList(ctx, "/DC0/host/DC0_C*/*")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, pool := range pools {
+			spec.ResourcePools = append(spec.ResourcePools, pool.Reference())
+		}
+
+		spec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
+			ConfigSpec: types.VirtualMachineConfigSpec{
+				Name: "test-vm",
+			},
+		}}
+
+		folder := object.NewRootFolder(c)
+		res, err := folder.PlaceVmsXCluster(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(res.PlacementInfos) != len(spec.VmPlacementSpecs) {
+			t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(spec.VmPlacementSpecs))
+		}
+	}, vpx)
+}
+
+func TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks(t *testing.T) {
+	vpx := VPX()
+	vpx.Cluster = 3
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
 		datacenter, err := finder.DefaultDatacenter(ctx)
 		if err != nil {
 			t.Fatalf("failed to get default datacenter: %v", err)
