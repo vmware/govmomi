@@ -3534,6 +3534,16 @@ func init() {
 	t["BaseVmMigratedEvent"] = reflect.TypeOf((*VmMigratedEvent)(nil)).Elem()
 }
 
+func (b *VmPlacementPolicy) GetVmPlacementPolicy() *VmPlacementPolicy { return b }
+
+type BaseVmPlacementPolicy interface {
+	GetVmPlacementPolicy() *VmPlacementPolicy
+}
+
+func init() {
+	t["BaseVmPlacementPolicy"] = reflect.TypeOf((*VmPlacementPolicy)(nil)).Elem()
+}
+
 func (b *VmPoweredOffEvent) GetVmPoweredOffEvent() *VmPoweredOffEvent { return b }
 
 type BaseVmPoweredOffEvent interface {

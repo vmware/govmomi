@@ -89740,6 +89740,32 @@ type VirtualMachineConfigSpec struct {
 	//
 	// SEV-SNP is enabled when set to true, and disabled otherwise.
 	SevSnpEnabled *bool `xml:"sevSnpEnabled" json:"sevSnpEnabled,omitempty" vim:"9.0.0.0"`
+	// An optional list of `VmPlacementPolicy` for this VM.
+	//
+	// Each policy
+	// describes a constraint or preference that can influence where, when
+	// and how this VM should be placed.
+	//
+	// If this ConfigSpec is specified during an operation (such as while
+	// finding a suitable placement for a VM to create that VM), then
+	// the placement policies specified here will be automatically enforced
+	// without requiring the client to separately create any vSphere placement
+	// policy (such as vSphere compute-policies). For more details, see
+	// `VmPlacementPolicy` and different types of placement policies
+	// derived from it.
+	//
+	// Note: These placement policies are only applicable when a VM is managed
+	// by Supervisor. They will be automatically populated by Supervisor based
+	// on the placement constraints defined in Supervisor. This field will be
+	// ignored except when set by Supervisor.
+	//
+	// Since setting this field only denotes any additional placement policies
+	// to be enforced on this VM, any existing placement constraints
+	// or preferences that this VM is already part of will still apply if this
+	// field is left unset. For example, if this VM is already part of any
+	// existing vSphere compute-policies or affinity rules, then they will still
+	// be considered during this VM's placement.
+	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.0.0.0"`
 }
 
 func init() {
@@ -91763,6 +91789,25 @@ type VirtualMachineRelocateSpec struct {
 	// Encryption requirement for the virtual machine's metadata
 	// files (non-disk files).
 	CryptoSpec BaseCryptoSpec `xml:"cryptoSpec,omitempty,typeattr" json:"cryptoSpec,omitempty"`
+	// An optional list of `VmPlacementPolicy` for this VM.
+	//
+	// Each policy
+	// describes a constraint or preference that can influence where, when
+	// and how this VM should be placed.
+	//
+	// If this RelocateSpec is specified during an operation (such as while
+	// finding a suitable placement for a VM before to relocate that VM), then
+	// the placement policies specified here will be automatically enforced
+	// without requiring the client to separately create any vSphere placement
+	// policy (such as vSphere compute-policies) and associate this VM with it.
+	// For more details, see `VmPlacementPolicy` and different types of
+	// placement policies derived from it.
+	//
+	// Note: These placement policies are only applicable when a VM is managed
+	// by Supervisor. They will be automatically populated by Supervisor based
+	// on the placement constraints defined in Supervisor. This field will be
+	// ignored except when set by Supervisor.
+	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.0.0.0"`
 }
 
 func init() {
@@ -93150,6 +93195,240 @@ type VirtualMachineVirtualPMem struct {
 func init() {
 	t["VirtualMachineVirtualPMem"] = reflect.TypeOf((*VirtualMachineVirtualPMem)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineVirtualPMem"] = "7.0.3.0"
+}
+
+// Specification of a placement policy that anti-affines this VM (for which
+// this placement policy is being specified) with multiple groups of VMs.
+//
+// This policy allows specifying multiple groups of VMs such that this VM is
+// anti-affined with every VM of the other VM groups. Each of these other
+// groups is identified by a unique vSphere tag. Effectively, this VM will
+// be anti-affined with any VM that has any of those other tags.
+//
+// However, note that while the policy will anti-affine a given VM with
+// multiple "other" groups of VMs, there is no implied affinity or
+// anti-affinity:
+// 1\) Within the VMs of any one of those "other" groups.
+// 2\) Between the VMs of any two of those "other" groups.
+// Below example will explain this in more detail.
+//
+// Consider a VM that needs to be anti-affined with a VM that has either
+// tag-2 or tag-3 attached to it. This can be expressed by specifying
+// `VirtualMachineVmToVmGroupsAntiAffinity` policy in this VM's
+// `VirtualMachineConfigSpec.vmPlacementPolicies` or
+// `VirtualMachineRelocateSpec.vmPlacementPolicies` and it would imply:
+// \- This VM will be anti-affined with every VM that has tag-2.
+// \- This VM will be anti-affined with every VM that has tag-3.
+// \- Any VM that has either tag-2 or tag-3 will be anti-affined with
+// this VM.
+// \- To enforce the above anti-affinity while placing this VM, or any VM
+// with tag-2 or tag-3, a compute-policy will be automatically created
+// in this vCenter.
+// \- To associate the compute-policy representing this VmToVmGroupsAntiAffinity
+// VmPlacementPolicy with this VM, one of the tags associated with this
+// VM will be used.
+// \- In this example, one of this VM's tags, let's say tag-1, could be
+// used to link this VM with such a compute-policy. Then this compute-
+// policy would mean that any VM with "tag-1" will be anti-affined with
+// any VM with "tag-2" or "tag-3".
+// \- VMs that have "tag-2" will not have any affinity/anti-affinity among
+// themselves.
+// \- VMs that have "tag-3" will not have any affinity/anti-affinity among
+// themselves.
+// \- VMs that have "tag-2" will not have any affinity/anti-affinity with
+// VMs that have "tag-3". Likewise for VMs with "tag-3".
+//
+// Note:
+// \- This placement policy is different than `VirtualMachineVmVmAntiAffinity`
+// because `VirtualMachineVmVmAntiAffinity` allows specifying only 1 VM group
+// and all the VMs within that group become anti-affined with each other,
+// whereas, this placement policy allows anti-affining a given VM (with
+// a given tag) with multiple groups VMs (represented via different tags).
+type VirtualMachineVmToVmGroupsAntiAffinity struct {
+	VmPlacementPolicy
+
+	// Tag identifying this VM to associate this `VirtualMachineVmToVmGroupsAntiAffinity`
+	// placement policy with this VM.
+	//
+	// When a `VirtualMachineVmToVmGroupsAntiAffinity` placement policy is specified for a
+	// VM, then one of the tags attached to this VM needs to link this VM with
+	// the corresponding compute-policy representing this
+	// `VirtualMachineVmToVmGroupsAntiAffinity` placement policy. This is needed because
+	// when a VM is placed by vSphere DRS or HA, the compute-policies to be
+	// enforced are derived from the tag(s) attached to that VM.
+	// For example, consider a VM with tag-1 needs to be anti-affined with VMs
+	// of tag-2 and tag-3. When this placement policy needs to be specified for
+	// this VM, then tag-1 can be used as this VM's tag and the placement
+	// policy would say: \[tag-1\] ANTI-AFFINE \[tag-2, tag-3\].
+	//
+	// If left unset, system will automatically generate a new vSphere tag
+	// and attach to this VM.
+	SelfTag string `xml:"selfTag,omitempty" json:"selfTag,omitempty"`
+	// Tags identifying the "other" VM groups that need to be anti-affined with
+	// this VM.
+	//
+	// A VM with any tag from the list of tags in `VirtualMachineVmToVmGroupsAntiAffinity.antiAffinedVmGroupTags`
+	// will be anti-affined with the VM that has `VirtualMachineVmToVmGroupsAntiAffinity.selfTag` tag.
+	// any VM that has any of the other tags in
+	//
+	// This field must have at least one value that must be different from the
+	// value of `VirtualMachineVmToVmGroupsAntiAffinity.selfTag`. If this field is left unset or empty, then
+	// this `VirtualMachineVmToVmGroupsAntiAffinity` placement policy will be ignored while
+	// placing this VM.
+	AntiAffinedVmGroupTags []string `xml:"antiAffinedVmGroupTags,omitempty" json:"antiAffinedVmGroupTags,omitempty"`
+	// Specifies the strictness of this `VirtualMachineVmToVmGroupsAntiAffinity` placement
+	// policy while placing a VM for which this policy has been specified.
+	//
+	// For details, see
+	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
+	//
+	// If this field is left unset, then the default value of
+	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// will be assumed.
+	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
+	// Specifies the topology for enforcing this `VirtualMachineVmToVmGroupsAntiAffinity`
+	// placement policy while placing a VM for which this policy is specified.
+	//
+	// For possible values, see
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
+	//
+	// For example:
+	// \- If this is set to
+	// `VSphereZone`
+	// for a `VirtualMachineVmToVmGroupsAntiAffinity` placement, then the groups of VMs
+	// anti-affined by this policy should be placed in different vSphere Zones.
+	// \- If this is set to
+	// `Host`,
+	// for a `VirtualMachineVmToVmGroupsAntiAffinity` placement, then the groups of VMs
+	// anti-affined by this policy should be placed on different ESXi hosts.
+	//
+	// If this field is left unset, then the default value of
+	// `Host` will be assumed.
+	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
+}
+
+func init() {
+	t["VirtualMachineVmToVmGroupsAntiAffinity"] = reflect.TypeOf((*VirtualMachineVmToVmGroupsAntiAffinity)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVmToVmGroupsAntiAffinity"] = "9.0.0.0"
+}
+
+// Specification of a VM placement policy that affines a group of
+// VMs among themselves.
+type VirtualMachineVmVmAffinity struct {
+	VmPlacementPolicy
+
+	// Name of the vSphere tag identifying the VMs that need to be affined
+	// with each other.
+	//
+	// When this type of placement policy is specified for a VM
+	// (via `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies`), then that VM is affined with
+	// all the other VMs that have `VirtualMachineVmVmAffinity.affinedVmsTagName` a vSphere tag.
+	// This means that DRS will attempt to place all the VMs with
+	// `VirtualMachineVmVmAffinity.affinedVmsTagName` on the same target host/cluster/vSphereZone
+	// (where the topology of the target is specified by
+	// `VirtualMachineVmVmAffinity.policyTopology`).
+	//
+	// Example: VmVmAffinity placement policy with `VirtualMachineVmVmAffinity.affinedVmsTagName`
+	// equal to "test-workloads" would mean that all the VMs that have a
+	// vSphere tag with the name "test-workloads" should be placed on the
+	// same target host/cluster/vSphereZone (as indicated by
+	// `VirtualMachineVmVmAffinity.policyTopology`).
+	AffinedVmsTagName string `xml:"affinedVmsTagName" json:"affinedVmsTagName"`
+	// Specifies the strictness of this VmVmAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For details, see
+	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
+	//
+	// If this field is left unset, then the default value of
+	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// will be assumed.
+	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
+	// Specifies the topology for enforcing this VmVmAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For possible values, see
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
+	//
+	// For example:
+	// \- If this is set to
+	// `VSphereZone`,
+	// the VMs that have `VirtualMachineVmVmAffinity.affinedVmsTagName`
+	// tag attached to them should be placed in the same vSphere Zone.
+	// \- If this is set to
+	// `Host`,
+	// the VMs that have `VirtualMachineVmVmAffinity.affinedVmsTagName`
+	// tag attached to them should be placed on the same ESXi host.
+	//
+	// If this field is left unset, then the default value of
+	// `Host` will be assumed.
+	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
+}
+
+func init() {
+	t["VirtualMachineVmVmAffinity"] = reflect.TypeOf((*VirtualMachineVmVmAffinity)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVmVmAffinity"] = "9.0.0.0"
+}
+
+// Specification of a VM placement policy that anti-affines a group of
+// VMs among themselves.
+type VirtualMachineVmVmAntiAffinity struct {
+	VmPlacementPolicy
+
+	// Name of the vSphere tag identifying the VMs that need to be anti-affined
+	// with each other.
+	//
+	// When this type of placement policy is specified for a VM,
+	// (via `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies`), then that VM is anti-affined
+	// to all the other VMs that have `VirtualMachineVmVmAntiAffinity.antiAffinedVmsTagName`. This means
+	// that DRS will attempt to place all the VMs with
+	// `VirtualMachineVmVmAntiAffinity.antiAffinedVmsTagName` tag on different target hosts/clusters/
+	// vSphereZones (where the topology of the target is specified by
+	// `VirtualMachineVmVmAntiAffinity.policyTopology`).
+	//
+	// For example - VmVmAntiAffinity placement policy with
+	// `VirtualMachineVmVmAntiAffinity.antiAffinedVmsTagName` equal to "prod-workloads" would mean that
+	// all the VMs that have a vSphere tag with the name "prod-workloads" should
+	// be placed on different target hosts/clusters/vSphereZones (as indicated by
+	// `VirtualMachineVmVmAntiAffinity.policyTopology`).
+	AntiAffinedVmsTagName string `xml:"antiAffinedVmsTagName" json:"antiAffinedVmsTagName"`
+	// Specifies the strictness of this VmVmAntiAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For
+	// details, see
+	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
+	//
+	// If this field is left unset, then the default value of
+	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// will be assumed.
+	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
+	// Specifies the topology for enforcing this VmVmAntiAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For possible values, see
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
+	//
+	// For example:
+	// \- If this is set to
+	// `VSphereZone`, the VMs
+	// that have `VirtualMachineVmVmAntiAffinity.antiAffinedVmsTagName` tag attached to them should be
+	// placed in different vSphere Zones.
+	// \- If this is set to
+	// `Host`, the VMs that
+	// have `VirtualMachineVmVmAntiAffinity.antiAffinedVmsTagName` tag attached to them should be placed
+	// on different ESXi hosts (but they may be placed in the same vSphere Zone).
+	//
+	// If this field is left unset, then the default value of
+	// `Host` will be assumed.
+	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
+}
+
+func init() {
+	t["VirtualMachineVmVmAntiAffinity"] = reflect.TypeOf((*VirtualMachineVmVmAntiAffinity)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVmVmAntiAffinity"] = "9.0.0.0"
 }
 
 // This data object type encapsulates configuration settings
@@ -97060,6 +97339,68 @@ type VmOrphanedEvent struct {
 
 func init() {
 	t["VmOrphanedEvent"] = reflect.TypeOf((*VmOrphanedEvent)(nil)).Elem()
+}
+
+// Describes the constraints and/or preferences that can influence where a VM
+// needs to be placed.
+//
+// A `VmPlacementPolicy` for a VM can be specified in VM's
+// `VirtualMachineConfigSpec` or `VirtualMachineRelocateSpec` and that policy will be enforced
+// when that VM's placement decision is made. The placement policies specified
+// via `VirtualMachineConfigSpec.vmPlacementPolicies` are enforced whenever a VM with
+// that ConfigSpec needs to be placed for creation or power-on. Similarly,
+// placement policies specified via `VirtualMachineRelocateSpec.vmPlacementPolicies`
+// are enforced whenever a VM with that RelocateSpec needs to be placed for
+// relocating.
+//
+// This allows clients to express placement constraints/preferences directly as
+// a part of `VirtualMachineConfigSpec` or `VirtualMachineRelocateSpec` instead of requiring the
+// clients to first create separate vCenter constructs for expressing the same
+// constraint/preference. For example, if a VM's `VirtualMachineConfigSpec` or
+// `VirtualMachineRelocateSpec` has an affinity or anti-affinity towards other VMs
+// (see `VirtualMachineVmVmAffinity` and `VirtualMachineVmVmAntiAffinity`), then vSphere DRS and
+// vSphere HA can interpret and enforce that desired affinity/anti-affinity
+// without requiring the client to first create a cluster level
+// `ClusterAffinityRuleSpec` or
+// `ClusterAntiAffinityRuleSpec` and then associate the VM with it.
+//
+// Placement policies can be of different types. This base class only defines
+// the common properties that the different types of policies can have. The
+// specific constraints and/or preferences that dictate how exactly a VM's
+// placement can be impacted are described in each sub-type of policy derived
+// from this base `VmPlacementPolicy` class.
+//
+// Note: `VmPlacementPolicy` is only applicable for VMs managed by
+// Supervisor and they will be automatically populated by Supervisor based on
+// the placement constraints defined in Supervisor. These placement policies
+// will be ignored except when set by Supervisor.
+type VmPlacementPolicy struct {
+	DynamicData
+
+	// The names of vSphere tags that should be attached to this VM.
+	//
+	// Tags can
+	// be specified in this field for enforcing VmPlacementPolicies while placing
+	// this VM.
+	//
+	// For a given tag name in this field:
+	// \- If this VM already has a tag attached to it with the same name, then
+	// that tag will continue to remain attached to the VM.
+	// \- If this VM does not have a tag attached to it with the same name, then
+	// a new tag with this name will be attached to this VM.
+	//
+	// Note:
+	// \- Any tag specified below will only get attached to this VM when the VM is
+	// managed by Supervisor. This field will be ignored except when set by
+	// Supervisor.
+	//
+	// If this field is left unset, then no new tags will be attached to this VM.
+	TagsToAttach []string `xml:"tagsToAttach,omitempty" json:"tagsToAttach,omitempty"`
+}
+
+func init() {
+	t["VmPlacementPolicy"] = reflect.TypeOf((*VmPlacementPolicy)(nil)).Elem()
+	minAPIVersionForType["VmPlacementPolicy"] = "9.0.0.0"
 }
 
 // Initial VM configuration for the specified pod.

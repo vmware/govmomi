@@ -15986,6 +15986,208 @@ func init() {
 	t["VmFaultToleranceInvalidFileBackingDeviceType"] = reflect.TypeOf((*VmFaultToleranceInvalidFileBackingDeviceType)(nil)).Elem()
 }
 
+// Specifies the strictness of a placement policy to be enforced while
+// placing a VM at different stages of a VM's lifecycle.
+//
+// This field may not apply to all types of placement policies derived from
+type VmPlacementPolicyVmPlacementPolicyStrictness string
+
+const (
+	// A VmPlacementPolicy with this strictness is enforced on a best-effort
+	// basis and only once while placing the VM for the operation where this
+	// policy has been specified via `VirtualMachineConfigSpec.vmPlacementPolicies`
+	// or `VirtualMachineRelocateSpec.vmPlacementPolicies`.
+	//
+	// The same policy is not
+	// enforced after that operation.
+	//
+	// Below is a detailed explanation:
+	// If an operation requires specifying a VM's `VirtualMachineConfigSpec` or
+	// `VirtualMachineRelocateSpec` and there is a VmPlacementPolicy specified in
+	// that `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies` with this
+	// VmPlacementPolicyStrictness, then it means the following:
+	//
+	// (1) This VmPlacementPolicy will be considered as "preferred". This
+	// means that if a VM with this VmPlacementPolicy cannot be successfully
+	// placed on any host due to this policy, then the policy will be dropped
+	// and a placement recommendation can still be generated even if it
+	// results in violating that policy. This is denoted by the
+	// "PreferredDuringPlacement" part of this strictness value.
+	//
+	// (2) This VmPlacementPolicy will be enforced for that operation only.
+	// Once that operation is complete and the VM has been placed, the same
+	// policy will not be enforced for any subsequent operation. This
+	// essentially means that such a VmPlacementPolicy will not be converted
+	// into a vSphere compute-policy and hence it will be ignored thereafer
+	// during that VM's execution. This is denoted by the
+	// "IgnoredDuringExecution" part of this strictness value.
+	VmPlacementPolicyVmPlacementPolicyStrictnessPreferredDuringPlacementIgnoredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("PreferredDuringPlacementIgnoredDuringExecution")
+	// A VmPlacementPolicy with this strictness is enforced on a best-effort
+	// basis whenever a VM linked with this policy (via that VM's
+	// `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies`) needs to be placed.
+	//
+	// Below is a detailed explanation:
+	// If an operation requires specifying a VM's `VirtualMachineConfigSpec` or
+	// `VirtualMachineRelocateSpec` and there is a VmPlacementPolicy specified in
+	// that `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies` with this
+	// VmPlacementPolicyStrictness, then it means the following:
+	//
+	// (1) This VmPlacementPolicy will be considered as "preferred". This
+	// means that if a VM with this VmPlacementPolicy cannot be successfully
+	// placed on any host due to this policy, then the policy will be dropped
+	// and a placement recommendation can still be generated even if it
+	// results in violating that policy. This is denoted by the
+	// "PreferredDuringPlacement" part of this strictness value.
+	//
+	// (2) This VmPlacementPolicy will be enforced for that operation as well
+	// as beyond that when that VM is in execution. This essentially means
+	// that this VmPlacementPolicy will be effectively converted into a
+	// vSphere compute-policy and that compute-policy will be enforced on a
+	// "preferred" basis whenever that VM needs to be placed thereafter.
+	// This is denoted by the "PreferredDuringExecution" part of this
+	// strictness value.
+	VmPlacementPolicyVmPlacementPolicyStrictnessPreferredDuringPlacementPreferredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("PreferredDuringPlacementPreferredDuringExecution")
+	// A VmPlacementPolicy with this strictness is enforced on a strict
+	// basis and only once while placing the VM for the operation where this
+	// policy has been specified via `VirtualMachineConfigSpec.vmPlacementPolicies`
+	// or `VirtualMachineRelocateSpec.vmPlacementPolicies`.
+	//
+	// The same policy is not
+	// enforced after that operation.
+	//
+	// Below is a detailed explanation:
+	// If an operation requires specifying a VM's `VirtualMachineConfigSpec` or
+	// `VirtualMachineRelocateSpec` and there is a VmPlacementPolicy specified in
+	// that `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies` with this
+	// VmPlacementPolicyStrictness, then it means the following:
+	//
+	// (1) This VmPlacementPolicy will be considered as "required". This
+	// means that if a VM with this VmPlacementPolicy cannot be successfully
+	// placed on any host due to this policy, then the policy will still be
+	// honored and no placement recommendation will be generated. The policy
+	// must be satisfied to find a successful placement target for the VM.
+	// This is denoted by the "RequiredDuringPlacement" part of this
+	// strictness value.
+	//
+	// (2) This VmPlacementPolicy will be enforced for that operation only.
+	// Once that operation is complete and the VM has been placed, the same
+	// policy will not be enforced for any subsequent operation. This
+	// essentially means that such a VmPlacementPolicy will not be converted
+	// into a vSphere compute-policy and hence it will be ignored thereafer
+	// during that VM's execution. This is denoted by the
+	// "IgnoredDuringExecution" part of this strictness value.
+	VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementIgnoredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("RequiredDuringPlacementIgnoredDuringExecution")
+	// A VmPlacementPolicy with this strictness is enforced on a strict
+	// basis while placing the VM for the operation where this policy has
+	// been specified via `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies`).
+	//
+	// After that, the same policy
+	// will be enforced on a best-effort basis.
+	//
+	// Below is a detailed explanation:
+	// If an operation requires specifying a VM's `VirtualMachineConfigSpec` or
+	// `VirtualMachineRelocateSpec` and there is a VmPlacementPolicy specified in
+	// that `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies` with this
+	// VmPlacementPolicyStrictness, then it means the following:
+	//
+	// (1) This VmPlacementPolicy will be considered as "required" while
+	// computing the placement for that operation. This means that if a VM
+	// with this VmPlacementPolicy cannot be successfully placed on any host
+	// due to this policy, then the policy will still be honored and no
+	// placement recommendation will be generated for that operation. The
+	// policy must be satisfied to find a successful placement target for
+	// the VM for that operation. This is denoted by the
+	// "RequiredDuringPlacement" part of this strictness value.
+	//
+	// (2) This VmPlacementPolicy will be enforced for that operation as well
+	// as beyond that when that VM is in execution. This essentially means
+	// that this VmPlacementPolicy will be effectively converted into a
+	// vSphere compute-policy and that compute-policy will be enforced on a
+	// "preferred" basis whenever that VM needs to be placed thereafter.
+	// This is denoted by the "PreferredDuringExecution" part of this
+	// strictness value.
+	VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementPreferredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("RequiredDuringPlacementPreferredDuringExecution")
+)
+
+func (e VmPlacementPolicyVmPlacementPolicyStrictness) Values() []VmPlacementPolicyVmPlacementPolicyStrictness {
+	return []VmPlacementPolicyVmPlacementPolicyStrictness{
+		VmPlacementPolicyVmPlacementPolicyStrictnessPreferredDuringPlacementIgnoredDuringExecution,
+		VmPlacementPolicyVmPlacementPolicyStrictnessPreferredDuringPlacementPreferredDuringExecution,
+		VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementIgnoredDuringExecution,
+		VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementPreferredDuringExecution,
+	}
+}
+
+func (e VmPlacementPolicyVmPlacementPolicyStrictness) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VmPlacementPolicyVmPlacementPolicyStrictness"] = reflect.TypeOf((*VmPlacementPolicyVmPlacementPolicyStrictness)(nil)).Elem()
+	minAPIVersionForType["VmPlacementPolicyVmPlacementPolicyStrictness"] = "9.0.0.0"
+}
+
+// Defines the infrastructure topology for which a VM placement policy
+// should be enforced.
+//
+// For example, for any policy that defines affinity or anti-affinity
+// between VMs, the topology defines the granularity of the infrastructure
+// at which the affinity or anti-affinity needs to be enforced.
+// If 2 VMs are anti-affined, then:
+// \- Topology of host means those 2 VMs should be placed on 2 different hosts.
+// \- Topology of zone means those 2 VMs should be placed in 2 different zones.
+//
+// Note:
+// \- This field may not apply to all types of placement policies derived from
+type VmPlacementPolicyVmPlacementPolicyTopology string
+
+const (
+	// Any VM placement policy with this `VmPlacementPolicyVmPlacementPolicyTopology_enum` will
+	// be enforced at the granularity of ESXi host.
+	//
+	// For example, a VM-VM affinity policy with this
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum` would imply that the associated VMs
+	// need to be placed on the same ESXi host.
+	VmPlacementPolicyVmPlacementPolicyTopologyHost = VmPlacementPolicyVmPlacementPolicyTopology("Host")
+	// Any VM placement policy with this `VmPlacementPolicyVmPlacementPolicyTopology_enum` will be
+	// enforced at the granularity of a vCenter compute cluster.
+	//
+	// For example, a VM-VM affinity policy with this
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum` would imply that the associated VMs
+	// need to be placed in the same vCenter compute cluster.
+	VmPlacementPolicyVmPlacementPolicyTopologyClusterComputeResource = VmPlacementPolicyVmPlacementPolicyTopology("ClusterComputeResource")
+	// Any VM placement policy with this `VmPlacementPolicyVmPlacementPolicyTopology_enum` will be
+	// enforced at the granularity of vSphere Zone.
+	//
+	// For example, a VM-VM affinity policy with this
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum` would imply that the associated VMs
+	// need to be placed in the same vSphere Zone.
+	VmPlacementPolicyVmPlacementPolicyTopologyVSphereZone = VmPlacementPolicyVmPlacementPolicyTopology("VSphereZone")
+)
+
+func (e VmPlacementPolicyVmPlacementPolicyTopology) Values() []VmPlacementPolicyVmPlacementPolicyTopology {
+	return []VmPlacementPolicyVmPlacementPolicyTopology{
+		VmPlacementPolicyVmPlacementPolicyTopologyHost,
+		VmPlacementPolicyVmPlacementPolicyTopologyClusterComputeResource,
+		VmPlacementPolicyVmPlacementPolicyTopologyVSphereZone,
+	}
+}
+
+func (e VmPlacementPolicyVmPlacementPolicyTopology) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VmPlacementPolicyVmPlacementPolicyTopology"] = reflect.TypeOf((*VmPlacementPolicyVmPlacementPolicyTopology)(nil)).Elem()
+	minAPIVersionForType["VmPlacementPolicyVmPlacementPolicyTopology"] = "9.0.0.0"
+}
+
 type VmShutdownOnIsolationEventOperation string
 
 const (
