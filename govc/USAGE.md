@@ -159,6 +159,7 @@ but appear via `govc $cmd -h`:
  - [firewall.ruleset.find](#firewallrulesetfind)
  - [folder.create](#foldercreate)
  - [folder.info](#folderinfo)
+ - [folder.place](#folderplace)
  - [gpu.host.info](#gpuhostinfo)
  - [gpu.host.profile.ls](#gpuhostprofilels)
  - [gpu.vm.add](#gpuvmadd)
@@ -2752,6 +2753,29 @@ Options:
 Usage: govc folder.info [OPTIONS] [PATH]...
 
 Options:
+```
+
+## folder.place
+
+```
+Usage: govc folder.place [OPTIONS] PATH...
+
+Get a placement recommendation for an existing VM
+
+Examples:
+  govc folder.place -rp $rp1Name -rp $rp2Name -rp $rp3Name -vm $vmName -type relocate -candidate-networks "netA|netB" -candidate-networks "netC"
+  Each use of the "-candidate-networks" flag corresponds to one NIC of the VM.
+  Within the value of each flag, use "|" to specify multiple candidate networks for that NIC.
+  For example:
+      -candidate-networks "netA|netB" → NIC 0 can connect to either netA or netB.
+      -candidate-networks "netC"      → NIC 1 can connect only to netC.
+
+
+Options:
+  -candidate-networks=[]  Candidate network names (repeat for multiple nics)
+  -pool=[]                Resource Pools to use for placement.
+  -type=                  Placement type (createAndPowerOn|relocate|reconfigure)
+  -vm=                    Virtual machine [GOVC_VM]
 ```
 
 ## gpu.host.info

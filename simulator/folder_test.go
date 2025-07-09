@@ -632,7 +632,6 @@ func TestPlaceVmsXClusterCreateAndPowerOn(t *testing.T) {
 
 	Test(func(ctx context.Context, c *vim25.Client) {
 		finder := find.NewFinder(c, false)
-
 		spec := types.PlaceVmsXClusterSpec{}
 
 		pools, err := finder.ResourcePoolList(ctx, "/DC0/host/DC0_C*/*")
@@ -648,6 +647,69 @@ func TestPlaceVmsXClusterCreateAndPowerOn(t *testing.T) {
 			ConfigSpec: types.VirtualMachineConfigSpec{
 				Name: "test-vm",
 			},
+		}}
+
+		folder := object.NewRootFolder(c)
+		res, err := folder.PlaceVmsXCluster(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(res.PlacementInfos) != len(spec.VmPlacementSpecs) {
+			t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(spec.VmPlacementSpecs))
+		}
+	}, vpx)
+}
+
+func TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks(t *testing.T) {
+	vpx := VPX()
+	vpx.Cluster = 3
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		datacenter, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatalf("failed to get default datacenter: %v", err)
+		}
+		finder.SetDatacenter(datacenter)
+
+		netA, err := finder.Network(ctx, "VM Network")
+		if err != nil {
+			t.Fatalf("unexpected error while getting network reference: %v", err)
+		}
+		netB, err := finder.Network(ctx, "DC0_DVPG0")
+		if err != nil {
+			t.Fatalf("unexpected error while getting network reference: %v", err)
+		}
+
+		candidateNetworks := []types.PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks{
+			{
+				Networks: []types.ManagedObjectReference{
+					netA.Reference(), netB.Reference(),
+				},
+			},
+			{
+				Networks: []types.ManagedObjectReference{
+					netA.Reference(),
+				},
+			},
+		}
+		spec := types.PlaceVmsXClusterSpec{}
+
+		pools, err := finder.ResourcePoolList(ctx, "/DC0/host/DC0_C*/*")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, pool := range pools {
+			spec.ResourcePools = append(spec.ResourcePools, pool.Reference())
+		}
+
+		spec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
+			ConfigSpec: types.VirtualMachineConfigSpec{
+				Name: "test-vm",
+			},
+			CandidateNetworks: candidateNetworks,
 		}}
 
 		folder := object.NewRootFolder(c)
@@ -686,6 +748,19 @@ func TestPlaceVmsXClusterRelocate(t *testing.T) {
 
 		vmMoRef := Map(ctx).Any("VirtualMachine").(*VirtualMachine).Reference()
 
+		netA, err := finder.Network(context.Background(), "VM Network")
+		if err != nil {
+			t.Fatalf("unexpected error while getting network reference: %v", err)
+		}
+		netB, err := finder.Network(context.Background(), "DC0_DVPG0")
+		if err != nil {
+			t.Fatalf("unexpected error while getting network reference: %v", err)
+		}
+
+		candidateNetworks := []types.PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks{
+			{Networks: []types.ManagedObjectReference{netA.Reference(), netB.Reference()}}, // NIC 0
+			{Networks: []types.ManagedObjectReference{netA.Reference()}},                   // NIC 1
+		}
 		cfgSpec := types.VirtualMachineConfigSpec{}
 
 		tests := []struct {
@@ -754,9 +829,10 @@ func TestPlaceVmsXClusterRelocate(t *testing.T) {
 			}
 
 			placeVmsXClusterSpec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
-				ConfigSpec:   test.configSpec,
-				Vm:           test.vmMoRef,
-				RelocateSpec: test.relocateSpec,
+				ConfigSpec:        test.configSpec,
+				Vm:                test.vmMoRef,
+				RelocateSpec:      test.relocateSpec,
+				CandidateNetworks: candidateNetworks,
 			}}
 
 			folder := object.NewRootFolder(c)
