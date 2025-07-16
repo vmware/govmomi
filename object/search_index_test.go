@@ -92,6 +92,17 @@ func TestSearch(t *testing.T) {
 		if !reflect.DeepEqual(ref, shost) {
 			t.Errorf("%#v != %#v\n", ref, shost)
 		}
+
+		shosts, err := s.FindAllByUuid(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(shosts) != 1 {
+			t.Errorf("len(shosts) != 1: %d\n", len(shosts))
+		}
+		if !reflect.DeepEqual(ref, shosts[0]) {
+			t.Errorf("%#v != %#v\n", ref, shosts[0])
+		}
 	}
 
 	vms, err := folders.VmFolder.Children(context.Background())
@@ -119,6 +130,17 @@ func TestSearch(t *testing.T) {
 		}
 		if !reflect.DeepEqual(ref, svm) {
 			t.Errorf("%#v != %#v\n", ref, svm)
+		}
+
+		svms, err := s.FindAllByUuid(context.Background(), dc, vm.Config.Uuid, true, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(svms) != 1 {
+			t.Errorf("len(svms) != 1: %d\n", len(svms))
+		}
+		if !reflect.DeepEqual(ref, svms[0]) {
+			t.Errorf("%#v != %#v\n", ref, svms[0])
 		}
 
 		if vm.Guest.HostName != "" {
