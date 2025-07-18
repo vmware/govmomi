@@ -85,3 +85,13 @@ const (
 func init() {
 	types.Add("CnsKubernetesEntityType", reflect.TypeOf((*CnsKubernetesEntityType)(nil)).Elem())
 }
+
+type CnsSyncVolumeMode string
+
+const (
+	CnsSyncVolumeModeSPACE_USAGE = CnsSyncVolumeMode("SPACE_USAGE")
+)
+
+func init() {
+	types.Add("vsan:CnsSyncVolumeMode", reflect.TypeOf((*CnsSyncVolumeMode)(nil)).Elem())
+}

@@ -1761,6 +1761,37 @@ func TestClient(t *testing.T) {
 		t.Fatalf("%+v", syncDatastoreTaskInfo.Error)
 	}
 	t.Logf("syncDatastore on %v with full sync successful\n", dsUrl)
+
+	// Test CnsSyncVolume API
+	/*
+		t.Logf("Calling syncVolume for volumeId: %v ...\n", volumeId)
+		var cnsSyncVolumeSpecs []cnstypes.CnsSyncVolumeSpec
+		dataStore := ds.Reference()
+		cnsSyncVolumeSpec := cnstypes.CnsSyncVolumeSpec{
+			VolumeId: cnstypes.CnsVolumeId{
+				Id: volumeId,
+			},
+			Datastore: &dataStore,
+			SyncMode:  []string{string(cnstypes.CnsSyncVolumeModeSPACE_USAGE)},
+		}
+		cnsSyncVolumeSpecs = append(cnsSyncVolumeSpecs, cnsSyncVolumeSpec)
+		syncVolumeTask, err := cnsClient.SyncVolume(ctx, cnsSyncVolumeSpecs)
+		if err != nil {
+			t.Errorf("Failed to sync volume %v. Error: %+v \n", volumeId, err)
+			t.Fatal(err)
+		}
+		syncVolumeTaskInfo, err := GetTaskInfo(ctx, syncVolumeTask)
+		if err != nil {
+			t.Errorf("Failed to get sync volume taskInfo. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if syncVolumeTaskInfo.State != vim25types.TaskInfoStateSuccess {
+			t.Errorf("Failed to sync volume. Error: %+v \n", syncVolumeTaskInfo.Error)
+			t.Fatalf("%+v", syncVolumeTaskInfo.Error)
+		}
+		t.Logf("syncVolume for volumeId: %v successful...\n", volumeId)
+	*/
+
 }
 
 // isvSphereVersion70U3orAbove checks if specified version is 7.0 Update 3 or higher

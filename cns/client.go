@@ -307,3 +307,16 @@ func (c *Client) SyncDatastore(ctx context.Context, dsURL string, fullSync bool)
 	}
 	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
+
+// SyncVolume calls the CnsSyncVolume API
+func (c *Client) SyncVolume(ctx context.Context, syncSpecs []cnstypes.CnsSyncVolumeSpec) (*object.Task, error) {
+	req := cnstypes.CnsSyncVolume{
+		This:      CnsVolumeManagerInstance,
+		SyncSpecs: syncSpecs,
+	}
+	res, err := methods.CnsSyncVolume(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
