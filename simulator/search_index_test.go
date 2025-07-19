@@ -78,31 +78,69 @@ func TestSearchIndex(t *testing.T) {
 			t.Errorf("moref mismatch %s != %s", ref, vm.Reference())
 		}
 
+		refs, err := si.FindAllByUuid(ctx, dc, vm.Config.Uuid, true, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(refs) != 1 {
+			t.Errorf("len(refs) %d != 1", len(refs))
+		}
+		if refs[0].Reference() != vm.Reference() {
+			t.Errorf("moref mismatch %s != %s", refs[0], vm.Reference())
+		}
+
 		ref, err = si.FindByUuid(ctx, dc, vm.Config.Uuid, true, types.NewBool(false))
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		if ref.Reference() != vm.Reference() {
 			t.Errorf("moref mismatch %s != %s", ref, vm.Reference())
+		}
+
+		refs, err = si.FindAllByUuid(ctx, dc, vm.Config.Uuid, true, types.NewBool(false))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(refs) != 1 {
+			t.Errorf("len(refs) %d != 1", len(refs))
+		}
+		if refs[0].Reference() != vm.Reference() {
+			t.Errorf("moref mismatch %s != %s", refs[0], vm.Reference())
 		}
 
 		ref, err = si.FindByUuid(ctx, dc, vm.Config.InstanceUuid, true, types.NewBool(true))
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		if ref.Reference() != vm.Reference() {
 			t.Errorf("moref mismatch %s != %s", ref, vm.Reference())
+		}
+
+		refs, err = si.FindAllByUuid(ctx, dc, vm.Config.InstanceUuid, true, types.NewBool(true))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(refs) != 1 {
+			t.Errorf("len(refs) %d != 1", len(refs))
+		}
+		if refs[0].Reference() != vm.Reference() {
+			t.Errorf("moref mismatch %s != %s", refs[0], vm.Reference())
 		}
 
 		ref, err = si.FindByUuid(ctx, dc, vm.Config.Uuid, false, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		if ref != nil {
 			t.Error("expected nil")
+		}
+
+		refs, err = si.FindAllByUuid(ctx, dc, vm.Config.Uuid, false, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if refs != nil {
+			t.Error("refs != nil")
 		}
 
 		host := model.Map().Any("HostSystem").(*HostSystem)
@@ -111,9 +149,19 @@ func TestSearchIndex(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		if ref.Reference() != host.Reference() {
 			t.Errorf("moref mismatch %s != %s", ref, host.Reference())
+		}
+
+		refs, err = si.FindAllByUuid(ctx, dc, host.Summary.Hardware.Uuid, false, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(refs) != 1 {
+			t.Errorf("len(refs) %d != 1", len(refs))
+		}
+		if refs[0].Reference() != host.Reference() {
+			t.Errorf("moref mismatch %s != %s", refs[0], host.Reference())
 		}
 
 		rootFolder, err := finder.Folder(ctx, "/")
@@ -128,6 +176,41 @@ func TestSearchIndex(t *testing.T) {
 
 		if ref.Reference() != rootFolder.Reference() {
 			t.Errorf("moref mismatch %s != %s", ref, rootFolder.Reference())
+		}
+
+		{
+			// Duplicate UUIDs to test multiple results from FindAllByUuid().
+
+			if len(vms) == 1 {
+				t.Errorf("len(vms) %d == 1", len(vms))
+			}
+
+			task, err := vms[1].Reconfigure(ctx, types.VirtualMachineConfigSpec{
+				InstanceUuid: vm.Config.InstanceUuid,
+				Uuid:         vm.Config.Uuid,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := task.Wait(ctx); err != nil {
+				t.Fatal(err)
+			}
+
+			refs, err = si.FindAllByUuid(ctx, dc, vm.Config.InstanceUuid, true, types.NewBool(true))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(refs) != 2 {
+				t.Errorf("len(refs) %d != 2", len(refs))
+			}
+
+			refs, err = si.FindAllByUuid(ctx, dc, vm.Config.Uuid, true, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(refs) != 2 {
+				t.Errorf("len(refs) %d != 2", len(refs))
+			}
 		}
 	}
 }
