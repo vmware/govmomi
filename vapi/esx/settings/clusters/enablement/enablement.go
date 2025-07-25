@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	// BasePath The base endpoint for the clusters configuration enablement API
+	// BasePath The base endpoint for the clusters enablement configuration API
 	BasePath      = settings.BasePath + "/%s/enablement"
 	Configuration = BasePath + "/configuration"
 	Transition    = Configuration + "/transition"
@@ -38,6 +38,7 @@ func NewManager(client *rest.Client) *Manager {
 }
 
 // EnableClusterConfiguration enables cluster configuration profiles
+// Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) EnableClusterConfiguration(clusterId string) (string, error) {
 	path := c.getBaseTransitionUrl(clusterId, "enable")
@@ -47,6 +48,7 @@ func (c *Manager) EnableClusterConfiguration(clusterId string) (string, error) {
 }
 
 // ImportFromReferenceHost imports the configuration of an existing ESXi host
+// Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) ImportFromReferenceHost(clusterId, hostId string) (string, error) {
 	path := c.getBaseTransitionUrl(clusterId, "importFromHost")
@@ -56,6 +58,7 @@ func (c *Manager) ImportFromReferenceHost(clusterId, hostId string) (string, err
 }
 
 // ImportFromFile imports the configuration in the provided json string
+// Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) ImportFromFile(clusterId string, spec FileSpec) (string, error) {
 	path := c.getBaseTransitionUrl(clusterId, "importFromFile")
@@ -65,6 +68,7 @@ func (c *Manager) ImportFromFile(clusterId string, spec FileSpec) (string, error
 }
 
 // ValidateConfiguration performs server-side validation of the pending cluster configuration
+// Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) ValidateConfiguration(clusterId string) (string, error) {
 	path := c.getBaseTransitionUrl(clusterId, "validateConfig")
@@ -73,7 +77,18 @@ func (c *Manager) ValidateConfiguration(clusterId string) (string, error) {
 	return res, c.Do(context.Background(), req, &res)
 }
 
+// CheckEligibility performs server-side validation of whether the cluster is eligible for configuration management via profiles
+// Returns a task identifier and an error
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
+func (c *Manager) CheckEligibility(clusterId string) (string, error) {
+	path := c.getBaseTransitionUrl(clusterId, "checkEligibility")
+	req := path.Request(http.MethodPost, nil)
+	var res string
+	return res, c.Do(context.Background(), req, &res)
+}
+
 // RunPrecheck performs server-side pre-checks of the pending cluster configuration
+// Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) RunPrecheck(clusterId string) (string, error) {
 	path := c.getBaseTransitionUrl(clusterId, "precheck")
@@ -83,6 +98,7 @@ func (c *Manager) RunPrecheck(clusterId string) (string, error) {
 }
 
 // Cancel deletes the pending cluster configuration
+// Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) Cancel(clusterId string) (string, error) {
 	path := c.Resource(fmt.Sprintf(Transition, clusterId)).WithParam("action", "cancel")
@@ -92,6 +108,7 @@ func (c *Manager) Cancel(clusterId string) (string, error) {
 }
 
 // GetClusterConfigurationStatus returns the status of the current pending cluster configuration
+// Returns the config status and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) GetClusterConfigurationStatus(clusterId string) (string, error) {
 	path := c.Resource(fmt.Sprintf(Transition, clusterId))
