@@ -15,9 +15,9 @@ import (
 
 const (
 	// BasePath The base endpoint for the clusters enablement configuration API
-	BasePath      = settings.BasePath + "/%s/enablement"
-	Configuration = BasePath + "/configuration"
-	Transition    = Configuration + "/transition"
+	BasePath          = settings.BasePath + "/%s/enablement"
+	ConfigurationPath = BasePath + "/configuration"
+	TransitionPath    = ConfigurationPath + "/transition"
 )
 
 type FileSpec struct {
@@ -41,7 +41,7 @@ func NewManager(client *rest.Client) *Manager {
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) EnableClusterConfiguration(clusterId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "enable")
+	path := c.getUrlWithActionAndTask(clusterId, "enable")
 	req := path.Request(http.MethodPost, nil)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -51,7 +51,7 @@ func (c *Manager) EnableClusterConfiguration(clusterId string) (string, error) {
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) ImportFromReferenceHost(clusterId, hostId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "importFromHost")
+	path := c.getUrlWithActionAndTask(clusterId, "importFromHost")
 	req := path.Request(http.MethodPost, hostId)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -61,7 +61,7 @@ func (c *Manager) ImportFromReferenceHost(clusterId, hostId string) (string, err
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) ImportFromFile(clusterId string, spec FileSpec) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "importFromFile")
+	path := c.getUrlWithActionAndTask(clusterId, "importFromFile")
 	req := path.Request(http.MethodPost, spec)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -71,7 +71,7 @@ func (c *Manager) ImportFromFile(clusterId string, spec FileSpec) (string, error
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) ValidateConfiguration(clusterId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "validateConfig")
+	path := c.getUrlWithActionAndTask(clusterId, "validateConfig")
 	req := path.Request(http.MethodPost, nil)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -81,7 +81,7 @@ func (c *Manager) ValidateConfiguration(clusterId string) (string, error) {
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) CheckEligibility(clusterId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "checkEligibility")
+	path := c.getUrlWithActionAndTask(clusterId, "checkEligibility")
 	req := path.Request(http.MethodPost, nil)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -91,7 +91,7 @@ func (c *Manager) CheckEligibility(clusterId string) (string, error) {
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) RunPrecheck(clusterId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "precheck")
+	path := c.getUrlWithActionAndTask(clusterId, "precheck")
 	req := path.Request(http.MethodPost, nil)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -101,7 +101,7 @@ func (c *Manager) RunPrecheck(clusterId string) (string, error) {
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) Cancel(clusterId string) (string, error) {
-	path := c.Resource(fmt.Sprintf(Transition, clusterId)).WithParam("action", "cancel")
+	path := c.Resource(fmt.Sprintf(TransitionPath, clusterId)).WithParam("action", "cancel")
 	req := path.Request(http.MethodPost, nil)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -111,12 +111,12 @@ func (c *Manager) Cancel(clusterId string) (string, error) {
 // Returns the config status and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
 func (c *Manager) GetClusterConfigurationStatus(clusterId string) (string, error) {
-	path := c.Resource(fmt.Sprintf(Transition, clusterId))
+	path := c.Resource(fmt.Sprintf(TransitionPath, clusterId))
 	req := path.Request(http.MethodGet)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
 }
 
-func (c *Manager) getBaseTransitionUrl(clusterId, action string) *rest.Resource {
-	return c.Resource(fmt.Sprintf(Transition, clusterId)).WithParam("action", action).WithParam("vmw-task", "true")
+func (c *Manager) getUrlWithActionAndTask(clusterId, action string) *rest.Resource {
+	return c.Resource(fmt.Sprintf(TransitionPath, clusterId)).WithParam("action", action).WithParam("vmw-task", "true")
 }

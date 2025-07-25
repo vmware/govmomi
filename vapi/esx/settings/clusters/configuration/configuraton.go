@@ -15,7 +15,9 @@ import (
 
 const (
 	// BasePath The base endpoint for the clusters configuration API
-	BasePath = settings.BasePath + "/%s/configuration"
+	BasePath        = settings.BasePath + "/%s/configuration"
+	RecentTasksPath = BasePath + "/reports/recent-tasks"
+	SchemaPath      = BasePath + "/schema"
 )
 
 // Manager extends rest.Client, adding cluster configuration enablement related methods.
@@ -81,6 +83,18 @@ type ConfigManagerPolicySpec struct {
 	SerialRemediation bool `json:"serial_remediation"`
 }
 
+type RecentTasksInfo struct {
+	CheckCompliance string `json:"check_compliance"`
+	Precheck        string `json:"precheck"`
+	Apply           string `json:"apply"`
+	DraftTasks      []any  `json:"draft_tasks"`
+}
+
+type SchemaInfo struct {
+	Source string `json:"source"`
+	Schema string `json:"schema"`
+}
+
 // GetConfiguration returns the cluster configuration
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration
 func (c *Manager) GetConfiguration(clusterId string) (Info, error) {
@@ -102,7 +116,7 @@ func (c *Manager) ExportConfiguration(clusterId string) (ExportResult, error) {
 // ApplyConfiguration applies the current configuration to the provided hosts in the cluster
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration
 func (c *Manager) ApplyConfiguration(clusterId string, spec ApplySpec) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "apply")
+	path := c.getUrlWithActionAndTask(clusterId, "apply")
 	req := path.Request(http.MethodPost, spec)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -111,7 +125,7 @@ func (c *Manager) ApplyConfiguration(clusterId string, spec ApplySpec) (string, 
 // CheckCompliance initiates a compliance check on the cluster
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration
 func (c *Manager) CheckCompliance(clusterId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "checkCompliance")
+	path := c.getUrlWithActionAndTask(clusterId, "checkCompliance")
 	req := path.Request(http.MethodPost)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -120,7 +134,7 @@ func (c *Manager) CheckCompliance(clusterId string) (string, error) {
 // Validate initiates a validation check on the pending cluster configuration
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration
 func (c *Manager) Validate(clusterId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "validate")
+	path := c.getUrlWithActionAndTask(clusterId, "validate")
 	req := path.Request(http.MethodPost)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -129,7 +143,7 @@ func (c *Manager) Validate(clusterId string) (string, error) {
 // Precheck initiates a precheck on the pending cluster configuration
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration
 func (c *Manager) Precheck(clusterId string) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "precheck")
+	path := c.getUrlWithActionAndTask(clusterId, "precheck")
 	req := path.Request(http.MethodPost)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -138,12 +152,30 @@ func (c *Manager) Precheck(clusterId string) (string, error) {
 // Import imports the provided configuration
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration
 func (c *Manager) Import(clusterId string, spec ImportSpec) (string, error) {
-	path := c.getBaseTransitionUrl(clusterId, "importConfig")
+	path := c.getUrlWithActionAndTask(clusterId, "importConfig")
 	req := path.Request(http.MethodPost, spec)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
 }
 
-func (c *Manager) getBaseTransitionUrl(clusterId, action string) *rest.Resource {
+// GetRecentTasks returns the task identifiers for the latest configuration operations of each type
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/reports/recent-tasks
+func (c *Manager) GetRecentTasks(clusterId string) (RecentTasksInfo, error) {
+	path := c.Resource(fmt.Sprintf(RecentTasksPath, clusterId))
+	req := path.Request(http.MethodGet)
+	var res RecentTasksInfo
+	return res, c.Do(context.Background(), req, &res)
+}
+
+// GetSchema returns the configuration schema for the cluster
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/schema
+func (c *Manager) GetSchema(clusterId string) (SchemaInfo, error) {
+	path := c.Resource(fmt.Sprintf(SchemaPath, clusterId))
+	req := path.Request(http.MethodGet)
+	var res SchemaInfo
+	return res, c.Do(context.Background(), req, &res)
+}
+
+func (c *Manager) getUrlWithActionAndTask(clusterId, action string) *rest.Resource {
 	return c.Resource(fmt.Sprintf(BasePath, clusterId)).WithParam("action", action).WithParam("vmw-task", "true")
 }
