@@ -9,18 +9,18 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/vmware/govmomi/vapi/esx/settings"
+	"github.com/vmware/govmomi/vapi/esx/settings/clusters"
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
 const (
 	// BasePath The base endpoint for the clusters configuration API
-	BasePath        = settings.BasePath + "/%s/configuration"
+	BasePath        = clusters.BasePath + "/%s/configuration"
 	RecentTasksPath = BasePath + "/reports/recent-tasks"
 	SchemaPath      = BasePath + "/schema"
 )
 
-// Manager extends rest.Client, adding cluster configuration enablement related methods.
+// Manager extends rest.Client, adding cluster configuration related methods.
 type Manager struct {
 	*rest.Client
 }

@@ -9,13 +9,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/vmware/govmomi/vapi/esx/settings"
+	"github.com/vmware/govmomi/vapi/esx/settings/clusters"
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
 const (
 	// BasePath The base endpoint for the clusters enablement configuration API
-	BasePath          = settings.BasePath + "/%s/enablement"
+	BasePath          = clusters.BasePath + "/%s/enablement"
 	ConfigurationPath = BasePath + "/configuration"
 	TransitionPath    = ConfigurationPath + "/transition"
 )
@@ -23,6 +23,11 @@ const (
 type FileSpec struct {
 	Config   string `json:"config"`
 	Filename string `json:"filename"`
+}
+
+type DraftImportResult struct {
+	Status string `json:"status"`
+	Draft  string `json:"draft"`
 }
 
 // Manager extends rest.Client, adding cluster configuration enablement related methods.
@@ -60,10 +65,10 @@ func (c *Manager) ImportFromReferenceHost(clusterId, hostId string) (string, err
 // ImportFromFile imports the configuration in the provided json string
 // Returns a task identifier and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition
-func (c *Manager) ImportFromFile(clusterId string, spec FileSpec) (string, error) {
+func (c *Manager) ImportFromFile(clusterId string, spec FileSpec) (DraftImportResult, error) {
 	path := c.getUrlWithActionAndTask(clusterId, "importFromFile")
 	req := path.Request(http.MethodPost, spec)
-	var res string
+	var res DraftImportResult
 	return res, c.Do(context.Background(), req, &res)
 }
 
