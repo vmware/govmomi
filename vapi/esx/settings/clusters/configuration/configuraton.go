@@ -107,7 +107,7 @@ func (c *Manager) GetConfiguration(clusterId string) (Info, error) {
 // ExportConfiguration returns the cluster configuration
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration
 func (c *Manager) ExportConfiguration(clusterId string) (ExportResult, error) {
-	path := c.Resource(fmt.Sprintf(BasePath, clusterId)).WithAction("exportConfig")
+	path := c.Resource(fmt.Sprintf(BasePath, clusterId)).WithParam("action", "exportConfig")
 	req := path.Request(http.MethodPost)
 	var res ExportResult
 	return res, c.Do(context.Background(), req, &res)

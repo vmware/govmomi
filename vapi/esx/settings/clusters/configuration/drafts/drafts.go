@@ -124,7 +124,7 @@ func (c *Manager) CreateDraft(clusterId string, spec CreateSpec) (string, error)
 // ApplyDraft commits the draft with the specified ID
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
 func (c *Manager) ApplyDraft(clusterId, draftId string) (ApplyResult, error) {
-	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithAction("apply")
+	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithParam("action", "apply")
 	req := path.Request(http.MethodPost)
 	var res ApplyResult
 	return res, c.Do(context.Background(), req, &res)
@@ -133,7 +133,7 @@ func (c *Manager) ApplyDraft(clusterId, draftId string) (ApplyResult, error) {
 // UpdateDraft updates the configuration of the draft with the specified ID
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
 func (c *Manager) UpdateDraft(clusterId, draftId string, spec UpdateSpec) error {
-	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithAction("update")
+	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithParam("action", "update")
 	req := path.Request(http.MethodPost, spec)
 	return c.Do(context.Background(), req, nil)
 }
@@ -141,7 +141,7 @@ func (c *Manager) UpdateDraft(clusterId, draftId string, spec UpdateSpec) error 
 // ImportFromHost sets a reference host to use as the source for the draft configuration
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
 func (c *Manager) ImportFromHost(clusterId, draftId string, spec ImportSpec) (string, error) {
-	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithAction("importFromHost").WithParam("vmw-task", "true")
+	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithParam("action", "importFromHost").WithParam("vmw-task", "true")
 	req := path.Request(http.MethodPost, spec)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
@@ -150,7 +150,7 @@ func (c *Manager) ImportFromHost(clusterId, draftId string, spec ImportSpec) (st
 // Precheck runs pre-checks for the provided draft on the specified cluster
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
 func (c *Manager) Precheck(clusterId, draftId string) (string, error) {
-	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithAction("precheck").WithParam("vmw-task", "true")
+	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithParam("action", "precheck").WithParam("vmw-task", "true")
 	req := path.Request(http.MethodPost)
 	var res string
 	return res, c.Do(context.Background(), req, &res)
