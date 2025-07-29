@@ -145,13 +145,27 @@ func init() {
 
 type ClusterClusterRelocatePlacementAction struct {
 	ClusterAction
-	TargetHost   *ManagedObjectReference     `xml:"targetHost,omitempty"`
-	Pool         ManagedObjectReference      `xml:"pool"`
-	RelocateSpec *VirtualMachineRelocateSpec `xml:"relocateSpec,omitempty"`
+	TargetHost        *ManagedObjectReference     `xml:"targetHost,omitempty"`
+	Pool              ManagedObjectReference      `xml:"pool"`
+	RelocateSpec      *VirtualMachineRelocateSpec `xml:"relocateSpec,omitempty"`
+	AvailableNetworks []ManagedObjectReference    `xml:"availableNetworks,omitempty"`
 }
 
 func init() {
 	t["ClusterClusterRelocatePlacementAction"] = reflect.TypeOf((*ClusterClusterRelocatePlacementAction)(nil)).Elem()
+}
+
+type ClusterXClusterInitialPlacementAction struct {
+	ClusterAction
+
+	TargetHost        *ManagedObjectReference   `xml:"targetHost,omitempty"`
+	Pool              ManagedObjectReference    `xml:"pool"`
+	ConfigSpec        *VirtualMachineConfigSpec `xml:"configSpec,omitempty"`
+	AvailableNetworks []ManagedObjectReference  `xml:"availableNetworks,omitempty"`
+}
+
+func init() {
+	t["ClusterXClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterXClusterInitialPlacementAction)(nil)).Elem()
 }
 
 func init() {
