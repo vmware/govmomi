@@ -81,6 +81,11 @@ type ImportSpec struct {
 	Host string `json:"host"`
 }
 
+type ApplyResult struct {
+	Commit    string `json:"commit"`
+	ApplyTask string `json:"apply_task"`
+}
+
 // ListDrafts returns all active drafts
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
 func (c *Manager) ListDrafts(clusterId string) (map[string]Draft, error) {
@@ -101,27 +106,28 @@ func (c *Manager) GetDraft(clusterId, draftId string) (Draft, error) {
 
 // DeleteDraft deletes a draft
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
-func (c *Manager) DeleteDraft(clusterId, draftId string) (Draft, error) {
+func (c *Manager) DeleteDraft(clusterId, draftId string) error {
 	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId))
 	req := path.Request(http.MethodDelete)
-	var res Draft
-	return res, c.Do(context.Background(), req, &res)
+	return c.Do(context.Background(), req, nil)
 }
 
 // CreateDraft creates a draft with the provided configuration
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
-func (c *Manager) CreateDraft(clusterId string, spec CreateSpec) error {
+func (c *Manager) CreateDraft(clusterId string, spec CreateSpec) (string, error) {
 	path := c.Resource(fmt.Sprintf(BasePath, clusterId))
 	req := path.Request(http.MethodPost, spec)
-	return c.Do(context.Background(), req, nil)
+	var res string
+	return res, c.Do(context.Background(), req, &res)
 }
 
 // ApplyDraft commits the draft with the specified ID
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/configuration/drafts
-func (c *Manager) ApplyDraft(clusterId, draftId string) error {
+func (c *Manager) ApplyDraft(clusterId, draftId string) (ApplyResult, error) {
 	path := c.Resource(fmt.Sprintf(DraftPath, clusterId, draftId)).WithAction("apply")
 	req := path.Request(http.MethodPost)
-	return c.Do(context.Background(), req, nil)
+	var res ApplyResult
+	return res, c.Do(context.Background(), req, &res)
 }
 
 // UpdateDraft updates the configuration of the draft with the specified ID
