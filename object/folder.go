@@ -6,6 +6,7 @@ package object
 
 import (
 	"context"
+	"reflect"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -215,6 +216,7 @@ func (f Folder) MoveInto(ctx context.Context, list []types.ManagedObjectReferenc
 }
 
 func (f Folder) PlaceVmsXCluster(ctx context.Context, spec types.PlaceVmsXClusterSpec) (*types.PlaceVmsXClusterResult, error) {
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
 	req := types.PlaceVmsXCluster{
 		This:          f.Reference(),
 		PlacementSpec: spec,

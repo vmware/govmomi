@@ -774,7 +774,7 @@ func addPlacementFault(body *methods.PlaceVmsXClusterBody, vmName string, vmRef 
 	body.Res.Returnval.Faults = append(body.Res.Returnval.Faults, faults)
 }
 
-func generateRelocatePlacementAction(ctx *Context, inputRelocateSpec *types.VirtualMachineRelocateSpec, pool *ResourcePool,
+func generateRelocatePlacementAction(ctx *Context, vmSpec types.PlaceVmsXClusterSpecVmPlacementSpec, pool *ResourcePool,
 	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) *types.ClusterClusterRelocatePlacementAction {
 	var relocateSpec *types.VirtualMachineRelocateSpec
 
@@ -788,7 +788,7 @@ func generateRelocatePlacementAction(ctx *Context, inputRelocateSpec *types.Virt
 	}
 
 	if datastoreRequired {
-		relocateSpec = inputRelocateSpec
+		relocateSpec = vmSpec.RelocateSpec
 
 		ds := ctx.Map.Get(cluster.Datastore[rand.Intn(len(cluster.Datastore))]).(*Datastore)
 
@@ -797,6 +797,27 @@ func generateRelocatePlacementAction(ctx *Context, inputRelocateSpec *types.Virt
 		for _, diskLocator := range relocateSpec.Disk {
 			diskLocator.Datastore = ds.Reference()
 		}
+	}
+
+	// Get all networks available in the cluster.
+	clusterNetworks := make(map[string]bool)
+	for _, netRef := range cluster.Network {
+		clusterNetworks[netRef.Value] = true
+	}
+
+	// Select candidate networks that are also available in the target cluster.
+	unique := make(map[string]types.ManagedObjectReference)
+	for _, nic := range vmSpec.CandidateNetworks {
+		for _, cand := range nic.Networks {
+			if clusterNetworks[cand.Value] {
+				unique[cand.Value] = cand
+			}
+		}
+	}
+
+	// Store in AvailableNetworks.
+	for _, ref := range unique {
+		placementAction.AvailableNetworks = append(placementAction.AvailableNetworks, ref)
 	}
 
 	placementAction.RelocateSpec = relocateSpec
@@ -852,7 +873,7 @@ func generateRecommendationForRelocate(ctx *Context, req *types.PlaceVmsXCluster
 			Target:     &cluster.Self,
 		}
 
-		placementAction := generateRelocatePlacementAction(ctx, spec.RelocateSpec, pool, cluster, hostRequired, datastoreRequired)
+		placementAction := generateRelocatePlacementAction(ctx, spec, pool, cluster, hostRequired, datastoreRequired)
 
 		reco.Action = append(reco.Action, placementAction)
 
@@ -1002,11 +1023,10 @@ func fillConfigSpecWithDatastore(ctx *Context, inputConfigSpec, configSpec *type
 	}
 }
 
-func generateInitialPlacementAction(ctx *Context, inputConfigSpec *types.VirtualMachineConfigSpec, pool *ResourcePool,
-	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) *types.ClusterClusterInitialPlacementAction {
-	var configSpec *types.VirtualMachineConfigSpec
+func generateInitialPlacementAction(ctx *Context, vmSpec *types.PlaceVmsXClusterSpecVmPlacementSpec, pool *ResourcePool,
+	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) types.BaseClusterAction {
 
-	placementAction := types.ClusterClusterInitialPlacementAction{
+	placementAction := &types.ClusterClusterInitialPlacementActionEx{
 		Pool: pool.Self,
 	}
 
@@ -1016,18 +1036,40 @@ func generateInitialPlacementAction(ctx *Context, inputConfigSpec *types.Virtual
 	}
 
 	if datastoreRequired {
-		configSpec = inputConfigSpec
+		configSpec := vmSpec.ConfigSpec // value copy
 
 		// TODO: This is just an initial implementation aimed at returning some data but it is not
 		// necessarily fully consistent, like we should ensure the host, if also required, has the
 		// datastore mounted.
 		ds := ctx.Map.Get(cluster.Datastore[rand.Intn(len(cluster.Datastore))]).(*Datastore)
 
-		fillConfigSpecWithDatastore(ctx, inputConfigSpec, configSpec, ds)
+		fillConfigSpecWithDatastore(ctx, &vmSpec.ConfigSpec, &configSpec, ds)
+		placementAction.ConfigSpec = &configSpec
+	} else {
+		placementAction.ConfigSpec = &vmSpec.ConfigSpec
 	}
 
-	placementAction.ConfigSpec = configSpec
-	return &placementAction
+	// Get all networks available in the cluster.
+	clusterNetworks := make(map[string]bool)
+	for _, netRef := range cluster.Network {
+		clusterNetworks[netRef.Value] = true
+	}
+
+	// Select candidate networks that are also available in the target cluster.
+	unique := make(map[string]types.ManagedObjectReference)
+	for _, nic := range vmSpec.CandidateNetworks {
+		for _, cand := range nic.Networks {
+			if clusterNetworks[cand.Value] {
+				unique[cand.Value] = cand
+			}
+		}
+	}
+
+	// Store in AvailableNetworks.
+	for _, ref := range unique {
+		placementAction.AvailableNetworks = append(placementAction.AvailableNetworks, ref)
+	}
+	return placementAction
 }
 
 func generateRecommendationForCreateAndPowerOn(ctx *Context, req *types.PlaceVmsXCluster) *methods.PlaceVmsXClusterBody {
@@ -1072,7 +1114,7 @@ func generateRecommendationForCreateAndPowerOn(ctx *Context, req *types.PlaceVms
 			Target:     &cluster.Self,
 		}
 
-		placementAction := generateInitialPlacementAction(ctx, &spec.ConfigSpec, pool, cluster, hostRequired, datastoreRequired)
+		placementAction := generateInitialPlacementAction(ctx, &spec, pool, cluster, hostRequired, datastoreRequired)
 
 		reco.Action = append(reco.Action, placementAction)
 
