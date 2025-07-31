@@ -1794,6 +1794,55 @@ func TestClient(t *testing.T) {
 
 }
 
+func TestUnregisterVolume(t *testing.T) {
+	ctx := context.Background()
+	// Setup: create a CNS client and a volume to unregister
+	url := os.Getenv("CNS_VC_URL")
+	if url == "" {
+		t.Skip("CNS_VC_URL is not set")
+	}
+	u, err := soap.ParseURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := govmomi.NewClient(ctx, u, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cnsClient, err := NewClient(ctx, c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Replace with a valid volume ID for your environment
+	volumeID := "your-volume-id"
+	spec := []cnstypes.CnsUnregisterVolumeSpec{
+		{
+			VolumeId: cnstypes.CnsVolumeId{Id: volumeID},
+		},
+	}
+	task, err := cnsClient.UnregisterVolume(ctx, spec)
+	if err != nil {
+		t.Fatalf("UnregisterVolume failed: %+v", err)
+	}
+	taskInfo, err := GetTaskInfo(ctx, task)
+	if err != nil {
+		t.Fatalf("GetTaskInfo failed: %+v", err)
+	}
+	taskResult, err := GetTaskResult(ctx, taskInfo)
+	if err != nil {
+		t.Fatalf("GetTaskResult failed: %+v", err)
+	}
+	if taskResult == nil {
+		t.Fatalf("Empty unregister task results")
+	}
+	operationRes := taskResult.GetCnsVolumeOperationResult()
+	if operationRes.Fault != nil {
+		t.Fatalf("Failed to unregister volume: fault=%+v", operationRes.Fault)
+	}
+	t.Logf("Volume unregistered successfully: %s", volumeID)
+}
+
 // isvSphereVersion70U3orAbove checks if specified version is 7.0 Update 3 or higher
 // The method takes aboutInfo{} as input which contains details about
 // VC version, build number and so on.
