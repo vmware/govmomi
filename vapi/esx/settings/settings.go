@@ -5,5 +5,6 @@
 package settings
 
 const (
+	// BasePath the base endpoint shared by all desired state APIs
 	BasePath = "/api/esx/settings"
 )
