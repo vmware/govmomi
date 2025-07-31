@@ -987,3 +987,33 @@ type CnsSyncVolumeSpec struct {
 func init() {
 	types.Add("vsan:CnsSyncVolumeSpec", reflect.TypeOf((*CnsSyncVolumeSpec)(nil)).Elem())
 }
+
+type CnsUnregisterVolume CnsUnregisterVolumeRequestType
+
+func init() {
+	types.Add("vsan:CnsUnregisterVolume", reflect.TypeOf((*CnsUnregisterVolume)(nil)).Elem())
+}
+
+type CnsUnregisterVolumeRequestType struct {
+	This           types.ManagedObjectReference `xml:"_this" json:"-"`
+	UnregisterSpec []CnsUnregisterVolumeSpec    `xml:"unregisterSpec,omitempty" json:"UnregisterSpec,omitempty"`
+}
+
+func init() {
+	types.Add("vsan:CnsUnregisterVolumeRequestType", reflect.TypeOf((*CnsUnregisterVolumeRequestType)(nil)).Elem())
+}
+
+type CnsUnregisterVolumeResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
+}
+
+type CnsUnregisterVolumeSpec struct {
+	types.DynamicData
+
+	VolumeId         CnsVolumeId `xml:"volumeId" json:"volumeId"`
+	TargetVolumeType string      `xml:"targetVolumeType" json:"targetVolumeType"`
+}
+
+func init() {
+	types.Add("vsan:CnsUnregisterVolumeSpec", reflect.TypeOf((*CnsUnregisterVolumeSpec)(nil)).Elem())
+}
