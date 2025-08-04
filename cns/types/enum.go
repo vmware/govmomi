@@ -95,3 +95,14 @@ const (
 func init() {
 	types.Add("vsan:CnsSyncVolumeMode", reflect.TypeOf((*CnsSyncVolumeMode)(nil)).Elem())
 }
+
+type CnsUnregisterTargetVolumeType string
+
+const (
+	CnsUnregisterTargetVolumeTypeFCD         = CnsUnregisterTargetVolumeType("FCD")
+	CnsUnregisterTargetVolumeTypeLEGACY_DISK = CnsUnregisterTargetVolumeType("LEGACY_DISK")
+)
+
+func init() {
+	types.Add("vsan:CnsUnregisterTargetVolumeType", reflect.TypeOf((*CnsUnregisterTargetVolumeType)(nil)).Elem())
+}

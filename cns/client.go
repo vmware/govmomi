@@ -320,3 +320,17 @@ func (c *Client) SyncVolume(ctx context.Context, syncSpecs []cnstypes.CnsSyncVol
 	}
 	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
+
+// UnregisterVolume calls the CNS UnregisterVolume API
+func (c *Client) UnregisterVolume(ctx context.Context, spec []cnstypes.CnsUnregisterVolumeSpec) (*object.Task, error) {
+	req := cnstypes.CnsUnregisterVolume{
+		This:           CnsVolumeManagerInstance,
+		UnregisterSpec: spec,
+	}
+
+	res, err := methods.CnsUnregisterVolume(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
