@@ -224,7 +224,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	var info []types.BaseCnsVolumeOperationResult
 
 	for {
-		res, err := c.QueryVolume(ctx, cmd.CnsQueryFilter)
+		res, err := c.QueryVolume(ctx, &cmd.CnsQueryFilter)
 		if err != nil {
 			return err
 		}

@@ -234,7 +234,7 @@ func init() {
 
 type CnsQueryVolumeRequestType struct {
 	This   types.ManagedObjectReference `xml:"_this" json:"-"`
-	Filter CnsQueryFilter               `xml:"filter" json:"filter"`
+	Filter BaseCnsQueryFilter           `xml:"filter,typeattr" json:"filter"`
 }
 
 func init() {
@@ -446,6 +446,10 @@ func init() {
 	types.Add("CnsVSANFileCreateSpec", reflect.TypeOf((*CnsVSANFileCreateSpec)(nil)).Elem())
 }
 
+type BaseCnsQueryFilter interface {
+	GetCnsQueryFilter() *CnsQueryFilter
+}
+
 type CnsQueryFilter struct {
 	types.DynamicData
 
@@ -461,8 +465,44 @@ type CnsQueryFilter struct {
 	HealthStatus                 string                         `xml:"healthStatus,omitempty" json:"healthStatus"`
 }
 
+func (f *CnsQueryFilter) GetCnsQueryFilter() *CnsQueryFilter {
+	return f
+}
+
+func (f *CnsKubernetesQueryFilter) GetCnsQueryFilter() *CnsQueryFilter {
+	return &f.CnsQueryFilter
+}
+
 func init() {
 	types.Add("CnsQueryFilter", reflect.TypeOf((*CnsQueryFilter)(nil)).Elem())
+}
+
+// CnsKubernetesQueryFilter enables querying CNS volumes using Kubernetes metadata such as
+// namespaces, pod names, PVC names, and PV names.
+//
+// - Values in the PodNames, PvcNames, and PvNames lists are treated as OR conditions.
+// - Values in the Namespaces list are also treated as OR conditions.
+// - When PodNames, PvcNames, or PvNames are specified along with Namespaces,
+//   the filter applies an AND condition — i.e., the pod, PVC must belong to the specified namespace.
+// - When only Namespaces are provided (without any pod, PVC names),
+//   all volumes associated with those namespaces will be returned.
+//
+// This allows flexible volume queries such as:
+// - Listing all volumes in one or more namespaces.
+// - Querying volumes associated with specific PVCs or pods within a given namespace.
+// - Finding volumes by specific PV names within specified namespaces.
+type CnsKubernetesQueryFilter struct {
+	CnsQueryFilter
+
+	Namespaces []string `xml:"namespaces,omitempty" json:"namespaces,omitempty"`
+	PodNames   []string `xml:"podNames,omitempty" json:"podNames,omitempty"`
+	PvcNames   []string `xml:"pvcNames,omitempty" json:"pvcNames,omitempty"`
+	PvNames    []string `xml:"pvNames,omitempty" json:"pvNames,omitempty"`
+}
+
+func init() {
+	types.Add("CnsKubernetesQueryFilter", reflect.TypeOf((*CnsKubernetesQueryFilter)(nil)).Elem())
+
 }
 
 type CnsQuerySelection struct {
