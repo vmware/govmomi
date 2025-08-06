@@ -157,7 +157,7 @@ func (c *Client) DetachVolume(ctx context.Context, detachSpecList []cnstypes.Cns
 }
 
 // QueryVolume calls the CNS QueryVolume API.
-func (c *Client) QueryVolume(ctx context.Context, queryFilter cnstypes.CnsQueryFilter) (*cnstypes.CnsQueryResult, error) {
+func (c *Client) QueryVolume(ctx context.Context, queryFilter cnstypes.BaseCnsQueryFilter) (*cnstypes.CnsQueryResult, error) {
 	req := cnstypes.CnsQueryVolume{
 		This:   CnsVolumeManagerInstance,
 		Filter: queryFilter,

@@ -51,7 +51,7 @@ func TestSimulator(t *testing.T) {
 	}
 	// Query
 	queryFilter := cnstypes.CnsQueryFilter{}
-	queryResult, err := cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err := cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -287,7 +287,7 @@ func TestSimulator(t *testing.T) {
 
 	// Query
 	queryFilter = cnstypes.CnsQueryFilter{}
-	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -321,7 +321,7 @@ func TestSimulator(t *testing.T) {
 
 	// QueryVolume
 	queryFilter = cnstypes.CnsQueryFilter{}
-	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Fatalf("Failed to query volume with QueryFilter: err=%+v", err)
 	}
@@ -585,7 +585,7 @@ func TestSimulator(t *testing.T) {
 	}
 
 	queryFilter = cnstypes.CnsQueryFilter{}
-	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Fatalf("Failed to query volume with QueryFilter: err=%+v", err)
 	}

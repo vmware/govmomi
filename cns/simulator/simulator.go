@@ -6,9 +6,8 @@ package simulator
 
 import (
 	"context"
-	"time"
-
 	"slices"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -285,15 +284,15 @@ func matchesFilter(filter cnstypes.CnsQueryFilter, volume *types.CnsVolume) bool
 	return true
 }
 
-func (m *CnsVolumeManager) queryVolume(filter cnstypes.CnsQueryFilter) []cnstypes.CnsVolume {
+func (m *CnsVolumeManager) queryVolume(filter cnstypes.BaseCnsQueryFilter) []cnstypes.CnsVolume {
 	var matches []cnstypes.CnsVolume
 
 	for ds, volumes := range m.volumes {
-		if !matchesDatastore(filter, ds) {
+		if !matchesDatastore(*filter.GetCnsQueryFilter(), ds) {
 			continue
 		}
 		for _, volume := range volumes {
-			if matchesFilter(filter, volume) {
+			if matchesFilter(*filter.GetCnsQueryFilter(), volume) {
 				matches = append(matches, *volume)
 			}
 		}
@@ -321,7 +320,7 @@ func (m *CnsVolumeManager) CnsQueryAllVolume(ctx context.Context, req *cnstypes.
 	return &methods.CnsQueryAllVolumeBody{
 		Res: &cnstypes.CnsQueryAllVolumeResponse{
 			Returnval: cnstypes.CnsQueryResult{
-				Volumes: m.queryVolume(req.Filter),
+				Volumes: m.queryVolume(req.Filter.GetCnsQueryFilter()),
 			},
 		},
 	}
