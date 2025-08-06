@@ -964,8 +964,8 @@ func init() {
 }
 
 type CnsSyncVolumeRequestType struct {
-	This      types.ManagedObjectReference `xml:"_this"`
-	SyncSpecs []CnsSyncVolumeSpec          `xml:"syncSpecs,omitempty"`
+	This      types.ManagedObjectReference `xml:"_this" json:"-"`
+	SyncSpecs []CnsSyncVolumeSpec          `xml:"syncSpecs,omitempty" json:"syncSpecs,omitempty"`
 }
 
 func init() {
@@ -973,15 +973,15 @@ func init() {
 }
 
 type CnsSyncVolumeResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type CnsSyncVolumeSpec struct {
 	types.DynamicData
 
-	VolumeId  CnsVolumeId                   `xml:"volumeId"`
-	Datastore *types.ManagedObjectReference `xml:"datastore,omitempty"`
-	SyncMode  []string                      `xml:"syncMode,omitempty"`
+	VolumeId  CnsVolumeId                   `xml:"volumeId" json:"volumeId"`
+	Datastore *types.ManagedObjectReference `xml:"datastore,omitempty" json:"datastore,omitempty"`
+	SyncMode  []string                      `xml:"syncMode,omitempty" json:"syncMode,omitempty"`
 }
 
 func init() {
