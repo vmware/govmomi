@@ -28,14 +28,15 @@ import (
 func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 
 	type testCase struct {
-		name            string
-		ctx             context.Context
-		client          *vim25.Client
-		mo              mo.VirtualMachine
-		fetchProperties bool
-		diskUUID        string
-		diskInfo        vmdk.VirtualDiskInfo
-		err             string
+		name             string
+		ctx              context.Context
+		client           *vim25.Client
+		mo               mo.VirtualMachine
+		fetchProperties  bool
+		diskUUID         string
+		diskInfo         vmdk.VirtualDiskInfo
+		excludeSnapshots bool
+		err              string
 	}
 
 	t.Run("w cached properties", func(t *testing.T) {
@@ -386,6 +387,131 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 					UniqueSize:      (5 * 1024 * 1024) + 100 + 100 + 200 + 300,
 				},
 			},
+			{
+				name: "one disk w/o chain entries, it should return 0 for size and unique size",
+				mo: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						Hardware: types.VirtualHardware{
+							Device: []types.BaseVirtualDevice{
+								getDisk(&types.VirtualDiskFlatVer2BackingInfo{
+									VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+										FileName: fileName,
+									},
+									Uuid: diskUUID,
+								}),
+							},
+						},
+					},
+					LayoutEx: &types.VirtualMachineFileLayoutEx{
+						Disk: []types.VirtualMachineFileLayoutExDiskLayout{
+							{
+								Key:   deviceKey,
+								Chain: []types.VirtualMachineFileLayoutExDiskUnit{},
+							},
+						},
+						File: []types.VirtualMachineFileLayoutExFileInfo{
+							{
+								Key:        1,
+								Size:       100,
+								UniqueSize: 100,
+							},
+						},
+					},
+				},
+				diskUUID: diskUUID,
+				diskInfo: vmdk.VirtualDiskInfo{
+					CapacityInBytes: tenGiBInBytes,
+					DeviceKey:       deviceKey,
+					FileName:        fileName,
+					Size:            0,
+					UniqueSize:      0,
+				},
+			},
+			{
+				name: "one disk w multiple chain entries and includeSnapshots is false, it should exclude the snapshot delta disks, only the size offile keys (8, 9) should be included",
+				mo: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						Hardware: types.VirtualHardware{
+							Device: []types.BaseVirtualDevice{
+								getDisk(&types.VirtualDiskFlatVer2BackingInfo{
+									VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+										FileName: fileName,
+									},
+									Uuid: diskUUID,
+								}),
+							},
+						},
+					},
+					LayoutEx: &types.VirtualMachineFileLayoutEx{
+						Disk: []types.VirtualMachineFileLayoutExDiskLayout{
+							{
+								Key: deviceKey,
+								Chain: []types.VirtualMachineFileLayoutExDiskUnit{
+									{
+										FileKey: []int32{
+											4,
+											5,
+										},
+									},
+									{
+										FileKey: []int32{
+											6,
+											7,
+										},
+									},
+									{
+										FileKey: []int32{
+											8,
+											9,
+										},
+									},
+								},
+							},
+						},
+						File: []types.VirtualMachineFileLayoutExFileInfo{
+							{
+								Key:        4,
+								Size:       1 * 1024 * 1024 * 1024, // 1 GiB
+								UniqueSize: 5 * 1024 * 1024,        // 500 MiB
+							},
+							{
+								Key:        5,
+								Size:       950,
+								UniqueSize: 100,
+							},
+							{
+								Key:        6,
+								Size:       500,
+								UniqueSize: 100,
+							},
+							{
+								Key:        7,
+								Size:       500,
+								UniqueSize: 200,
+							},
+							{
+								Key:        8,
+								Size:       1000,
+								UniqueSize: 300,
+							},
+							{
+								Key:        9,
+								Size:       1000,
+								UniqueSize: 300,
+							},
+						},
+					},
+				},
+				excludeSnapshots: true,
+				diskUUID:         diskUUID,
+				diskInfo: vmdk.VirtualDiskInfo{
+					CapacityInBytes: tenGiBInBytes,
+					DeviceKey:       deviceKey,
+					FileName:        fileName,
+					Size:            1000 + 1000,
+					UniqueSize:      300 + 300,
+				},
+			},
 		}
 
 		for i := range testCases {
@@ -393,11 +519,14 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 			t.Run(tc.name, func(t *testing.T) {
 				var ctx context.Context
 				dii, err := vmdk.GetVirtualDiskInfoByUUID(
-					ctx, nil, tc.mo, false, tc.diskUUID)
+					ctx, nil, tc.mo, false, tc.excludeSnapshots, tc.diskUUID)
 
 				if tc.err != "" {
 					assert.EqualError(t, err, tc.err)
+				} else {
+					assert.NoError(t, err)
 				}
+
 				assert.Equal(t, tc.diskInfo, dii)
 			})
 		}
@@ -416,6 +545,9 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 			}
 			finder.SetDatacenter(datacenter)
 			vmList, err := finder.VirtualMachineList(ctx, "*")
+			if err != nil {
+				t.Fatalf("failed to get vm list: %s", err)
+			}
 			if len(vmList) == 0 {
 				t.Fatal("vmList == 0")
 			}
@@ -574,10 +706,13 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 						tc.client,
 						tc.mo,
 						tc.fetchProperties,
+						tc.excludeSnapshots,
 						tc.diskUUID)
 
 					if tc.err != "" {
 						assert.EqualError(t, err, tc.err)
+					} else {
+						assert.NoError(t, err)
 					}
 					assert.Equal(t, tc.diskInfo, dii)
 				})
