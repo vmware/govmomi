@@ -23,6 +23,10 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+func init() {
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
+}
+
 func addStandaloneHostTask(folder *object.Folder, spec types.HostConnectSpec) (*object.Task, error) {
 	// TODO: add govmomi wrapper
 	req := types.AddStandaloneHost_Task{
@@ -712,6 +716,7 @@ func TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks(t *testing.T) {
 			CandidateNetworks: candidateNetworks,
 		}}
 
+		types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
 		folder := object.NewRootFolder(c)
 		res, err := folder.PlaceVmsXCluster(ctx, spec)
 		if err != nil {
@@ -724,23 +729,21 @@ func TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks(t *testing.T) {
 
 		// Validate AvailableNetworks returned in placement recommendations.
 		for _, pinfo := range res.PlacementInfos {
-			for _, base := range pinfo.Recommendation.Action {
+			for i, action := range pinfo.Recommendation.Action {
 				// Ensure the action is of expected extended type.
-				action, ok := base.(*types.ClusterXClusterInitialPlacementAction)
+				initPlaceAction, ok := action.(*types.ClusterClusterInitialPlacementActionEx)
 				if !ok {
-					t.Fatalf("expected ClusterXClusterInitialPlacementAction, got %T", pinfo.Recommendation.Action)
+					t.Errorf("Action[%d] is not ClusterClusterInitialPlacementActionEx, got %T", i, action)
+					continue
 				}
-
-				// Check if AvailableNetworks field is populated.
-				if len(action.AvailableNetworks) == 0 {
+				if len(initPlaceAction.AvailableNetworks) == 0 {
 					t.Errorf("AvailableNetworks is empty for VM %v", pinfo.Vm)
 				} else {
 					t.Logf("AvailableNetworks for VM %v:", pinfo.Vm)
-					for _, net := range action.AvailableNetworks {
+					for _, net := range initPlaceAction.AvailableNetworks {
 						t.Logf("- %s", net.Value)
 					}
 				}
-
 				// Define the expected networks that should be present in AvailableNetworks.
 				expected := map[string]bool{
 					netA.Reference().Value: true,
@@ -748,7 +751,7 @@ func TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks(t *testing.T) {
 				}
 
 				// Verify that all returned networks are part of the expected set.
-				for _, actual := range action.AvailableNetworks {
+				for _, actual := range initPlaceAction.AvailableNetworks {
 					if !expected[actual.Value] {
 						t.Errorf("unexpected network in availableNetworks: %s", actual.Value)
 					}

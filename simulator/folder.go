@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/url"
 	"path"
+	"reflect"
 	"strings"
 	"time"
 
@@ -24,6 +25,11 @@ import (
 
 type Folder struct {
 	mo.Folder
+}
+
+// Register override for simulator use
+func init() {
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
 }
 
 func asFolderMO(obj mo.Reference) (*mo.Folder, bool) {
@@ -1024,9 +1030,9 @@ func fillConfigSpecWithDatastore(ctx *Context, inputConfigSpec, configSpec *type
 }
 
 func generateInitialPlacementAction(ctx *Context, vmSpec *types.PlaceVmsXClusterSpecVmPlacementSpec, pool *ResourcePool,
-	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) *types.ClusterXClusterInitialPlacementAction {
+	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) types.BaseClusterAction {
 
-	placementAction := types.ClusterXClusterInitialPlacementAction{
+	placementAction := &types.ClusterClusterInitialPlacementActionEx{
 		Pool: pool.Self,
 	}
 
@@ -1069,7 +1075,7 @@ func generateInitialPlacementAction(ctx *Context, vmSpec *types.PlaceVmsXCluster
 	for _, ref := range unique {
 		placementAction.AvailableNetworks = append(placementAction.AvailableNetworks, ref)
 	}
-	return &placementAction
+	return placementAction
 }
 
 func generateRecommendationForCreateAndPowerOn(ctx *Context, req *types.PlaceVmsXCluster) *methods.PlaceVmsXClusterBody {

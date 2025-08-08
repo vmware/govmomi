@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 	"text/tabwriter"
 
@@ -144,6 +145,10 @@ func (cmd *place) Process(ctx context.Context) error {
 }
 
 func (cmd *place) Run(ctx context.Context, f *flag.FlagSet) error {
+
+	// Register runtime override before any unmarshalling/type casting.
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
+
 	client, err := cmd.Client()
 	if err != nil {
 		return err
@@ -268,7 +273,7 @@ func (res *placementResult) Dump() any {
 	return res.Result
 }
 
-func (res *placementResult) initialPlacementAction(w io.Writer, pinfo types.PlaceVmsXClusterResultPlacementInfo, action *types.ClusterXClusterInitialPlacementAction) error {
+func (res *placementResult) initialPlacementAction(w io.Writer, pinfo types.PlaceVmsXClusterResultPlacementInfo, action *types.ClusterClusterInitialPlacementAction) error {
 
 	spec := action.ConfigSpec
 	if spec == nil {
@@ -297,14 +302,16 @@ func (res *placementResult) initialPlacementAction(w io.Writer, pinfo types.Plac
 	}
 
 	// Display the available network references from the placement recommendation.
-	if len(action.AvailableNetworks) > 0 {
-		fmt.Fprintf(w, "  AvailableNetworks:\n")
-		for _, net := range action.AvailableNetworks {
-			path, err := find.InventoryPath(res.ctx, res.vimClient, net)
-			if err != nil {
-				return err
+	if act, ok := any(action).(*types.ClusterClusterInitialPlacementActionEx); ok {
+		if len(act.AvailableNetworks) > 0 {
+			fmt.Fprintf(w, "  AvailableNetworks:\n")
+			for _, net := range act.AvailableNetworks {
+				path, err := find.InventoryPath(res.ctx, res.vimClient, net)
+				if err != nil {
+					return err
+				}
+				fmt.Fprintf(w, "\t- %s\n", path)
 			}
-			fmt.Fprintf(w, "\t- %s\n", path)
 		}
 	}
 
@@ -352,7 +359,6 @@ func (res *placementResult) relocatePlacementAction(w io.Writer, pinfo types.Pla
 			fmt.Fprintf(w, "\t- %s\n", path)
 		}
 	}
-
 	return nil
 }
 
@@ -422,7 +428,7 @@ func (res placementResult) Write(w io.Writer) error {
 
 		for _, action := range pinfo.Recommendation.Action {
 
-			if initPlaceAction, ok := action.(*types.ClusterXClusterInitialPlacementAction); ok {
+			if initPlaceAction, ok := action.(*types.ClusterClusterInitialPlacementAction); ok {
 				err := res.initialPlacementAction(w, pinfo, initPlaceAction)
 				if err != nil {
 					return err

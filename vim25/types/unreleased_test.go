@@ -6,6 +6,7 @@ package types_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi/property"
@@ -36,4 +37,39 @@ func TestPodVMOverheadInfo(t *testing.T) {
 			t.Errorf("%#v", props.Capability.PodVMOverheadInfo)
 		}
 	})
+}
+
+func TestTypeClusterClusterInitialPlacementActionEx(t *testing.T) {
+	var ok bool
+
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementAction)(nil)).Elem())
+	fn := types.TypeFunc()
+
+	_, ok = fn("unknown")
+	if ok {
+		t.Errorf("Expected ok==false")
+	}
+
+	actual, ok := fn("ClusterClusterInitialPlacementAction")
+	if !ok {
+		t.Errorf("Expected ok==true")
+	}
+
+	expected := reflect.TypeOf(types.ClusterClusterInitialPlacementAction{})
+
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
+	}
+
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
+
+	actual, ok = fn("ClusterClusterInitialPlacementAction")
+	if !ok {
+		t.Errorf("Expected ok==true")
+	}
+
+	expected = reflect.TypeOf(types.ClusterClusterInitialPlacementActionEx{})
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
+	}
 }
