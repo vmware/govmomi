@@ -1138,7 +1138,6 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 	}
 
 	pools := req.PlacementSpec.ResourcePools
-	specs := req.PlacementSpec.VmPlacementSpecs
 
 	if len(pools) == 0 {
 		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "resourcePools"})
@@ -1159,12 +1158,6 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 			return body
 		}
 		clusters[pool.Owner] = struct{}{}
-	}
-
-	// MVP: Only a single VM placement spec is supported.
-	if len(specs) != 1 {
-		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "vmPlacementSpecs"})
-		return body
 	}
 
 	placementType := types.PlaceVmsXClusterSpecPlacementType(req.PlacementSpec.PlacementType)
