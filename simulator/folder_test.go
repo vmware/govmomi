@@ -1042,3 +1042,46 @@ func TestPlaceVmsXClusterReconfigure(t *testing.T) {
 		}
 	}, vpx)
 }
+
+func TestPlaceVmsXClusterCreateAndPowerOnWithMultipleVms(t *testing.T) {
+	vpx := VPX()
+	vpx.Cluster = 3
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		spec := types.PlaceVmsXClusterSpec{}
+
+		pools, err := finder.ResourcePoolList(ctx, "/DC0/host/DC0_C*/*")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, pool := range pools {
+			spec.ResourcePools = append(spec.ResourcePools, pool.Reference())
+		}
+
+		spec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
+			ConfigSpec: types.VirtualMachineConfigSpec{
+				Name: "test-vm0",
+			},
+		}, {
+			ConfigSpec: types.VirtualMachineConfigSpec{
+				Name: "test-vm1",
+			},
+		}}
+
+		folder := object.NewRootFolder(c)
+		res, err := folder.PlaceVmsXCluster(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(res.PlacementInfos) != 2 {
+			t.Errorf("Expected 2 PlacementInfos. Received %d", len(res.PlacementInfos))
+		}
+
+		if len(res.PlacementInfos) != len(spec.VmPlacementSpecs) {
+			t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(spec.VmPlacementSpecs))
+		}
+	}, vpx)
+}
