@@ -6,6 +6,7 @@ package types_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi/property"
@@ -36,4 +37,47 @@ func TestPodVMOverheadInfo(t *testing.T) {
 			t.Errorf("%#v", props.Capability.PodVMOverheadInfo)
 		}
 	})
+}
+
+func TestTypeClusterClusterInitialPlacementActionEx(t *testing.T) {
+	var ok bool
+
+	// Register the original base type for "ClusterClusterInitialPlacementAction".
+	// It simulates the default SDK behavior before override.
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementAction)(nil)).Elem())
+	fn := types.TypeFunc()
+
+	// Lookup an unknown type - should return ok==false.
+	_, ok = fn("unknown")
+	if ok {
+		t.Errorf("Expected ok==false")
+	}
+
+	// Lookup the registered base type ClusterClusterInitialPlacementAction - should return ok==true.
+	actual, ok := fn("ClusterClusterInitialPlacementAction")
+	if !ok {
+		t.Errorf("Expected ok==true")
+	}
+
+	expected := reflect.TypeOf(types.ClusterClusterInitialPlacementAction{})
+
+	// Validate that the type lookup matches the base type.
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
+	}
+
+	// Override the registered type with our extended struct ClusterClusterInitialPlacementActionEx.
+	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
+
+	// Lookup the same name again - should now return the extended type.
+	actual, ok = fn("ClusterClusterInitialPlacementAction")
+	if !ok {
+		t.Errorf("Expected ok==true")
+	}
+
+	// Expected type is now the extended struct.
+	expected = reflect.TypeOf(types.ClusterClusterInitialPlacementActionEx{})
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
+	}
 }

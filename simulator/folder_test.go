@@ -721,6 +721,38 @@ func TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks(t *testing.T) {
 		if len(res.PlacementInfos) != len(spec.VmPlacementSpecs) {
 			t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(spec.VmPlacementSpecs))
 		}
+
+		// Validate AvailableNetworks returned in placement recommendations.
+		for _, pinfo := range res.PlacementInfos {
+			for i, action := range pinfo.Recommendation.Action {
+				// Ensure the action is of expected extended type.
+				initPlaceAction, ok := action.(*types.ClusterClusterInitialPlacementActionEx)
+				if !ok {
+					t.Errorf("Action[%d] is not ClusterClusterInitialPlacementActionEx, got %T", i, action)
+					continue
+				}
+				if len(initPlaceAction.AvailableNetworks) == 0 {
+					t.Errorf("AvailableNetworks is empty for VM %v", pinfo.Vm)
+				} else {
+					t.Logf("AvailableNetworks for VM %v:", pinfo.Vm)
+					for _, net := range initPlaceAction.AvailableNetworks {
+						t.Logf("- %s", net.Value)
+					}
+				}
+				// Define the expected networks that should be present in AvailableNetworks.
+				expected := map[string]bool{
+					netA.Reference().Value: true,
+					netB.Reference().Value: true,
+				}
+
+				// Verify that all returned networks are part of the expected set.
+				for _, actual := range initPlaceAction.AvailableNetworks {
+					if !expected[actual.Value] {
+						t.Errorf("unexpected network in availableNetworks: %s", actual.Value)
+					}
+				}
+			}
+		}
 	}, vpx)
 }
 
@@ -850,14 +882,36 @@ func TestPlaceVmsXClusterRelocate(t *testing.T) {
 					t.Errorf("Test %v: %d PlacementInfos vs %d VmPlacementSpecs", testNo, len(res.PlacementInfos), len(placeVmsXClusterSpec.VmPlacementSpecs))
 				}
 
+				// Validate AvailableNetworks returned in placement recommendations.
 				for _, pinfo := range res.PlacementInfos {
 					for _, action := range pinfo.Recommendation.Action {
-						if relocateAction, ok := action.(*types.ClusterClusterRelocatePlacementAction); ok {
-							if relocateAction.TargetHost == nil {
-								t.Errorf("Test %v: received nil host recommendation", testNo)
-							}
-						} else {
+						relocateAction, ok := action.(*types.ClusterClusterRelocatePlacementAction)
+						if !ok {
 							t.Errorf("Test %v: received wrong action type in recommendation", testNo)
+							continue
+						}
+						if relocateAction.TargetHost == nil {
+							t.Errorf("Test %v: received nil host recommendation", testNo)
+						}
+						// Check if AvailableNetworks field is populated.
+						if len(relocateAction.AvailableNetworks) == 0 {
+							t.Errorf("AvailableNetworks is empty for VM %v", pinfo.Vm)
+						} else {
+							t.Logf("AvailableNetworks for VM %v:", pinfo.Vm)
+							for _, net := range relocateAction.AvailableNetworks {
+								t.Logf("- %s", net.Value)
+							}
+						}
+						// Define the expected networks that should be present in AvailableNetworks.
+						expected := map[string]bool{
+							netA.Reference().Value: true,
+							netB.Reference().Value: true,
+						}
+						// Verify that all returned networks are part of the expected set.
+						for _, actual := range relocateAction.AvailableNetworks {
+							if !expected[actual.Value] {
+								t.Errorf("unexpected network in availableNetworks: %s", actual.Value)
+							}
 						}
 					}
 				}
