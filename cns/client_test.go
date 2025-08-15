@@ -348,7 +348,7 @@ func TestClient(t *testing.T) {
 	volumeIDList = append(volumeIDList, cnstypes.CnsVolumeId{Id: volumeId})
 	queryFilter.VolumeIds = volumeIDList
 	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
-	queryResult, err := cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err := cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
@@ -394,7 +394,7 @@ func TestClient(t *testing.T) {
 	volumeIDListBackingDiskObjectIdTest = append(volumeIDListBackingDiskObjectIdTest, cnstypes.CnsVolumeId{Id: volumeId})
 	queryFilterBackingDiskObjectIdTest.VolumeIds = volumeIDListBackingDiskObjectIdTest
 	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilterBackingDiskObjectIdTest))
-	queryResultBackingDiskObjectIdTest, err := cnsClient.QueryVolume(ctx, queryFilterBackingDiskObjectIdTest)
+	queryResultBackingDiskObjectIdTest, err := cnsClient.QueryVolume(ctx, &queryFilterBackingDiskObjectIdTest)
 	if err != nil {
 		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
 		t.Fatal(err)
@@ -423,7 +423,7 @@ func TestClient(t *testing.T) {
 	volumeIDListBackingDiskPathTest = append(volumeIDListBackingDiskPathTest, cnstypes.CnsVolumeId{Id: volumeId})
 	queryFilterBackingDiskPathTest.VolumeIds = volumeIDListBackingDiskPathTest
 	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilterBackingDiskPathTest))
-	queryResultBackingDiskPathTest, err := cnsClient.QueryVolume(ctx, queryFilterBackingDiskPathTest)
+	queryResultBackingDiskPathTest, err := cnsClient.QueryVolume(ctx, &queryFilterBackingDiskPathTest)
 	if err != nil {
 		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
 		t.Fatal(err)
@@ -550,7 +550,7 @@ func TestClient(t *testing.T) {
 	queryVolumeIDList = append(queryVolumeIDList, cnstypes.CnsVolumeId{Id: volumeId})
 	queryFilter.VolumeIds = queryVolumeIDList
 	t.Logf("CreateVolumeFromSnapshot: calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
-	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
@@ -898,7 +898,7 @@ func TestClient(t *testing.T) {
 
 	// Verify volume is extended to the specified size
 	t.Logf("Calling QueryVolume after ExtendVolume using queryFilter: %+v", queryFilter)
-	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
@@ -1013,13 +1013,28 @@ func TestClient(t *testing.T) {
 	}
 
 	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
-	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
 	if err != nil {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
 	t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
+	// Test QueryVolume API with CnsKubernetesQueryFilter
+	var k8sQueryFilter cnstypes.CnsKubernetesQueryFilter
+	k8sQueryFilter.Namespaces = []string{"default"}
+	k8sQueryFilter.CnsQueryFilter.ContainerClusterIds = []string{"demo-cluster-id"}
+	t.Logf("Calling QueryVolume using k8squeryFilter: %+v", pretty.Sprint(k8sQueryFilter))
+	queryResult, err = cnsClient.QueryVolume(ctx, &k8sQueryFilter)
+	if err != nil {
+		t.Errorf("Failed to query volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if len(queryResult.Volumes) > 0 {
+		t.Logf("Successfully Queried Volumes using k8squeryFilter. queryResult: %+v", pretty.Sprint(queryResult))
+	} else {
+		t.Fatal("failed to query volumes using k8squeryFilter")
+	}
 	// Test QueryAll
 	querySelection := cnstypes.CnsQuerySelection{
 		Names: []string{
@@ -1155,14 +1170,21 @@ func TestClient(t *testing.T) {
 		t.FailNow()
 	}
 	reAttachVolumeOperationRes := attachTaskResult.GetCnsVolumeOperationResult()
-	if reAttachVolumeOperationRes.Fault != nil {
-		t.Logf("reAttachVolumeOperationRes.Fault: %+v", pretty.Sprint(reAttachVolumeOperationRes.Fault))
-		_, ok := reAttachVolumeOperationRes.Fault.Fault.(*vim25types.ResourceInUse)
-		if !ok {
-			t.Fatalf("Fault is not ResourceInUse")
+	if isvSphereVersion91orAbove {
+		if reAttachVolumeOperationRes.Fault != nil {
+			t.Fatalf("re-attach same volume should not fail with ResourceInUse fault")
 		}
 	} else {
-		t.Fatalf("re-attach same volume should fail with ResourceInUse fault")
+		if reAttachVolumeOperationRes.Fault != nil {
+			t.Fatalf("re-attach same volume should not fail with ResourceInUse fault")
+			t.Logf("reAttachVolumeOperationRes.Fault: %+v", pretty.Sprint(reAttachVolumeOperationRes.Fault))
+			_, ok := reAttachVolumeOperationRes.Fault.Fault.(*vim25types.ResourceInUse)
+			if !ok {
+				t.Fatalf("Fault is not ResourceInUse")
+			}
+		} else {
+			t.Fatalf("re-attach same volume should fail with ResourceInUse fault")
+		}
 	}
 
 	// Test DetachVolume API
@@ -1391,7 +1413,7 @@ func TestClient(t *testing.T) {
 		volumeIDList = []cnstypes.CnsVolumeId{{Id: filevolumeId}}
 		queryFilter.VolumeIds = volumeIDList
 		t.Logf("Calling QueryVolume using queryFilter: %+v", queryFilter)
-		queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+		queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
 		if err != nil {
 			t.Errorf("Failed to query volume. Error: %+v \n", err)
 			t.Fatal(err)
@@ -1609,7 +1631,7 @@ func TestClient(t *testing.T) {
 		volumeIDList = append(volumeIDList, cnstypes.CnsVolumeId{Id: volumeID})
 		queryFilter.VolumeIds = volumeIDList
 		t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
-		queryResult, err := cnsClient.QueryVolume(ctx, queryFilter)
+		queryResult, err := cnsClient.QueryVolume(ctx, &queryFilter)
 		if err != nil {
 			t.Errorf("Failed to query volume. Error: %+v \n", err)
 			t.Fatal(err)
@@ -1761,6 +1783,179 @@ func TestClient(t *testing.T) {
 		t.Fatalf("%+v", syncDatastoreTaskInfo.Error)
 	}
 	t.Logf("syncDatastore on %v with full sync successful\n", dsUrl)
+
+	// Test CnsSyncVolume API
+
+	t.Logf("Calling syncVolume for volumeId: %v ...\n", volumeId)
+	var cnsSyncVolumeSpecs []cnstypes.CnsSyncVolumeSpec
+	dataStore := ds.Reference()
+	cnsSyncVolumeSpec := cnstypes.CnsSyncVolumeSpec{
+		VolumeId: cnstypes.CnsVolumeId{
+			Id: volumeId,
+		},
+		Datastore: &dataStore,
+		SyncMode:  []string{string(cnstypes.CnsSyncVolumeModeSPACE_USAGE)},
+	}
+
+	cnsSyncVolumeSpecs = append(cnsSyncVolumeSpecs, cnsSyncVolumeSpec)
+	syncVolumeTask, err := cnsClient.SyncVolume(ctx, cnsSyncVolumeSpecs)
+	if err != nil {
+		t.Errorf("Failed to sync volume %v. Error: %+v \n", volumeId, err)
+		t.Fatal(err)
+	}
+	syncVolumeTaskInfo, err := GetTaskInfo(ctx, syncVolumeTask)
+	if err != nil {
+		t.Errorf("Failed to get sync volume taskInfo. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if syncVolumeTaskInfo.State != vim25types.TaskInfoStateSuccess {
+		t.Errorf("Failed to sync volume. Error: %+v \n", syncVolumeTaskInfo.Error)
+		t.Fatalf("%+v", syncVolumeTaskInfo.Error)
+	}
+	t.Logf("syncVolume for volumeId: %v successful...\n", volumeId)
+
+}
+
+func TestUnregisterVolume(t *testing.T) {
+	ctx := context.Background()
+	// Setup: create a CNS client and a volume to unregister
+	url := os.Getenv("CNS_VC_URL")
+	if url == "" {
+		t.Skip("CNS_VC_URL is not set")
+	}
+	datacenter := os.Getenv("CNS_DATACENTER")
+	datastore := os.Getenv("CNS_DATASTORE")
+	u, err := soap.ParseURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := govmomi.NewClient(ctx, u, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isvSphereVersion91orAbove(context.Background(), c.ServiceContent.About) {
+		t.Skip("This test requires vSphere 9.1 or above")
+	}
+
+	cnsClient, err := NewClient(ctx, c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder := find.NewFinder(cnsClient.vim25Client, false)
+	dc, err := finder.Datacenter(ctx, datacenter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc)
+	ds, err := finder.Datastore(ctx, datastore)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	props := []string{"info", "summary"}
+	pc := property.DefaultCollector(c.Client)
+	var dsSummaries []mo.Datastore
+	err = pc.Retrieve(ctx, []vim25types.ManagedObjectReference{ds.Reference()}, props, &dsSummaries)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var dsList []vim25types.ManagedObjectReference
+	dsList = append(dsList, ds.Reference())
+
+	var containerClusterArray []cnstypes.CnsContainerCluster
+	containerCluster := cnstypes.CnsContainerCluster{
+		ClusterType:         string(cnstypes.CnsClusterTypeKubernetes),
+		ClusterId:           "demo-cluster-id",
+		VSphereUser:         "Administrator@vsphere.local",
+		ClusterFlavor:       string(cnstypes.CnsClusterFlavorVanilla),
+		ClusterDistribution: "OpenShift",
+	}
+	containerClusterArray = append(containerClusterArray, containerCluster)
+
+	// Test CreateVolume API
+	volumeName := "pvc-" + uuid.New().String()
+	var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+	cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+		Name:       volumeName,
+		VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+		Metadata: cnstypes.CnsVolumeMetadata{
+			ContainerCluster: containerCluster,
+		},
+		BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+			CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+				CapacityInMb: 5120,
+			},
+		},
+		Datastores: dsList,
+	}
+
+	cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
+
+	createTask, err := cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
+	if err != nil {
+		t.Errorf("Failed to create volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createTaskInfo, err := GetTaskInfo(ctx, createTask)
+	if err != nil {
+		t.Errorf("Failed to create volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createTaskResult, err := GetTaskResult(ctx, createTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to create volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if createTaskResult == nil {
+		t.Fatalf("Empty create task results")
+		t.FailNow()
+	}
+	createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
+	if createVolumeOperationRes.Fault != nil {
+		if cnsFault, ok := createVolumeOperationRes.Fault.Fault.(*cnstypes.CnsFault); ok {
+			if cause := cnsFault.FaultCause; cause != nil {
+				if inner, ok := cause.Fault.(*vim25types.NotSupported); ok {
+					t.Logf("Caught NotSupported fault: %q", cause.LocalizedMessage)
+				} else {
+					t.Logf("Inner fault type: %T", inner)
+				}
+			}
+		}
+		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
+	}
+	volumeId := createVolumeOperationRes.VolumeId.Id
+	volumeCreateResult := (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("volumeCreateResult %+v", volumeCreateResult)
+	t.Logf("Volume created successfully. volumeId: %s", volumeId)
+
+	spec := []cnstypes.CnsUnregisterVolumeSpec{
+		{
+			VolumeId:         cnstypes.CnsVolumeId{Id: volumeId},
+			TargetVolumeType: string(cnstypes.CnsUnregisterTargetVolumeTypeFCD),
+		},
+	}
+	task, err := cnsClient.UnregisterVolume(ctx, spec)
+	if err != nil {
+		t.Fatalf("UnregisterVolume failed: %+v", err)
+	}
+	taskInfo, err := GetTaskInfo(ctx, task)
+	if err != nil {
+		t.Fatalf("GetTaskInfo failed: %+v", err)
+	}
+	taskResult, err := GetTaskResult(ctx, taskInfo)
+	if err != nil {
+		t.Fatalf("GetTaskResult failed: %+v", err)
+	}
+	if taskResult == nil {
+		t.Fatalf("Empty unregister task results")
+	}
+	operationRes := taskResult.GetCnsVolumeOperationResult()
+	if operationRes.Fault != nil {
+		t.Fatalf("Failed to unregister volume: fault=%+v", operationRes.Fault)
+	}
+	t.Logf("Volume unregistered successfully: %s", volumeId)
 }
 
 // isvSphereVersion70U3orAbove checks if specified version is 7.0 Update 3 or higher

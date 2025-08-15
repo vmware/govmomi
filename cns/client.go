@@ -157,7 +157,7 @@ func (c *Client) DetachVolume(ctx context.Context, detachSpecList []cnstypes.Cns
 }
 
 // QueryVolume calls the CNS QueryVolume API.
-func (c *Client) QueryVolume(ctx context.Context, queryFilter cnstypes.CnsQueryFilter) (*cnstypes.CnsQueryResult, error) {
+func (c *Client) QueryVolume(ctx context.Context, queryFilter cnstypes.BaseCnsQueryFilter) (*cnstypes.CnsQueryResult, error) {
 	req := cnstypes.CnsQueryVolume{
 		This:   CnsVolumeManagerInstance,
 		Filter: queryFilter,
@@ -302,6 +302,33 @@ func (c *Client) SyncDatastore(ctx context.Context, dsURL string, fullSync bool)
 		FullSync:     &fullSync,
 	}
 	res, err := methods.CnsSyncDatastore(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
+
+// SyncVolume calls the CnsSyncVolume API
+func (c *Client) SyncVolume(ctx context.Context, syncSpecs []cnstypes.CnsSyncVolumeSpec) (*object.Task, error) {
+	req := cnstypes.CnsSyncVolume{
+		This:      CnsVolumeManagerInstance,
+		SyncSpecs: syncSpecs,
+	}
+	res, err := methods.CnsSyncVolume(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
+
+// UnregisterVolume calls the CNS UnregisterVolume API
+func (c *Client) UnregisterVolume(ctx context.Context, spec []cnstypes.CnsUnregisterVolumeSpec) (*object.Task, error) {
+	req := cnstypes.CnsUnregisterVolume{
+		This:           CnsVolumeManagerInstance,
+		UnregisterSpec: spec,
+	}
+
+	res, err := methods.CnsUnregisterVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}

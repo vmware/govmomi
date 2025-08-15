@@ -85,3 +85,24 @@ const (
 func init() {
 	types.Add("CnsKubernetesEntityType", reflect.TypeOf((*CnsKubernetesEntityType)(nil)).Elem())
 }
+
+type CnsSyncVolumeMode string
+
+const (
+	CnsSyncVolumeModeSPACE_USAGE = CnsSyncVolumeMode("SPACE_USAGE")
+)
+
+func init() {
+	types.Add("vsan:CnsSyncVolumeMode", reflect.TypeOf((*CnsSyncVolumeMode)(nil)).Elem())
+}
+
+type CnsUnregisterTargetVolumeType string
+
+const (
+	CnsUnregisterTargetVolumeTypeFCD         = CnsUnregisterTargetVolumeType("FCD")
+	CnsUnregisterTargetVolumeTypeLEGACY_DISK = CnsUnregisterTargetVolumeType("LEGACY_DISK")
+)
+
+func init() {
+	types.Add("vsan:CnsUnregisterTargetVolumeType", reflect.TypeOf((*CnsUnregisterTargetVolumeType)(nil)).Elem())
+}
