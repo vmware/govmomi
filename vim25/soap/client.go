@@ -181,7 +181,7 @@ func newClientWithTransport(u *url.URL, insecure bool, t *http.Transport) *Clien
 	c.t.TLSClientConfig = &tls.Config{InsecureSkipVerify: c.k, MinVersion: tls.VersionTLS10}
 	// Don't bother setting DialTLS if InsecureSkipVerify=true
 	if !c.k {
-		c.t.DialTLS = c.dialTLS
+		c.t.DialTLSContext = c.dialTLSContext
 	}
 
 	c.Client.Transport = c.t
