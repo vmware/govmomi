@@ -123,7 +123,10 @@ func (l *List) Write(w io.Writer) error {
 			propagate = "Yes"
 		}
 
-		name := l.Roles.ById(perm.RoleId).Name
+		name := fmt.Sprintf("%d", perm.RoleId)
+		if r := l.Roles.ById(perm.RoleId); r != nil {
+			name = r.Name
+		}
 
 		p := "-"
 		if perm.Entity != nil {
