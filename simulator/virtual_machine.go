@@ -2787,7 +2787,7 @@ func (vm *VirtualMachine) CreateSnapshotExTask(ctx *Context, req *types.CreateSn
 
 		snapshot := &VirtualMachineSnapshot{}
 		snapshot.Vm = vm.Reference()
-		snapshot.Config = *vm.Config
+		snapshot.Config = copyConfigFromVmConfig(vm.Config)
 		snapshot.DataSets = copyDataSetsForVmClone(vm.DataSets)
 
 		ctx.Map.Put(snapshot)
