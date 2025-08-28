@@ -173,59 +173,26 @@ type PodVMOverheadInfo struct {
 // inside that cluster), the chosen host and the chosen datastores for the disks of
 // the virtual machine.
 type ClusterClusterInitialPlacementActionEx struct {
-	ClusterAction
-
-	// The host where the virtual machine should be initially placed.
-	//
-	// This field is optional because the primary use case of
-	// `Folder.PlaceVmsXCluster` is to select the best cluster for placing VMs. This
-	// `ClusterClusterInitialPlacementAction.targetHost` denotes the best host
-	// within the best cluster and it is only returned if the client asks for it,
-	// which is determined by `PlaceVmsXClusterSpec.hostRecommRequired`.
-	// If `PlaceVmsXClusterSpec.hostRecommRequired` is set to true, then the
-	// targetHost is returned with a valid value and if it is either set to false
-	// or left unset, then targetHost is also left unset. When this field is unset,
-	// then it means that the client did not ask for the target host within the
-	// recommended cluster. It does not mean that there is no recommended host
-	// for placing this VM in the recommended cluster.
-	//
-	// Refers instance of `HostSystem`.
-	TargetHost *ManagedObjectReference `xml:"targetHost,omitempty" json:"targetHost,omitempty"`
-
-	// The chosen resource pool for placing the virtual machine.
-	//
-	// This is non-optional because recommending the best cluster (by recommending the
-	// resource pool in the best cluster) is the primary use case for the
-	// `ClusterClusterInitialPlacementAction`.
-	//
-	// Refers instance of `ResourcePool`.
-	Pool ManagedObjectReference `xml:"pool" json:"pool"`
-
-	// The config spec of the virtual machine to be placed.
-	//
-	// The `Folder.PlaceVmsXCluster` method takes input of `VirtualMachineConfigSpec`
-	// from client and populates the backing for each virtual disk and the VM home
-	// path in it unless the input ConfigSpec already provides them. The existing
-	// settings in the input ConfigSpec are preserved and not overridden in the
-	// returned ConfigSpec in this action as well as the resulting
-	// `ClusterRecommendation`. This field is set based on whether the client needs
-	// `Folder.PlaceVmsXCluster` to recommend a backing datastore for the disks of
-	// the candidate VMs or not, which is specified via
-	// `PlaceVmsXClusterSpec.datastoreRecommRequired`. If
-	// `PlaceVmsXClusterSpec.datastoreRecommRequired` is set to true, then this
-	// `ClusterClusterInitialPlacementAction.configSpec` is also set with the
-	// backing of each disk populated. If
-	// `PlaceVmsXClusterSpec.datastoreRecommRequired` is either set to false or left
-	// unset, then this field is also left unset. When this field is left unset,
-	// then it means that the client did not ask to populate the backing datastore
-	// for the disks of the candidate VMs.
-	ConfigSpec *VirtualMachineConfigSpec `xml:"configSpec,omitempty" json:"configSpec,omitempty"`
+	ClusterClusterInitialPlacementAction
 
 	AvailableNetworks []ManagedObjectReference `xml:"availableNetworks,omitempty" json:"availableNetworks,omitempty"`
 }
 
+type BaseClusterClusterInitialPlacementAction interface {
+	GetClusterClusterInitialPlacementAction() *ClusterClusterInitialPlacementAction
+}
+
+func (a ClusterClusterInitialPlacementAction) GetClusterClusterInitialPlacementAction() *ClusterClusterInitialPlacementAction {
+	return &a
+}
+
+func (a ClusterClusterInitialPlacementActionEx) GetClusterClusterInitialPlacementAction() *ClusterClusterInitialPlacementAction {
+	return &a.ClusterClusterInitialPlacementAction
+}
+
 func init() {
 	minAPIVersionForType["ClusterClusterInitialPlacementActionEx"] = "9.1.0.0"
+	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
 	t["ClusterClusterInitialPlacementActionEx"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
-	Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem())
+	t["BaseClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
 }

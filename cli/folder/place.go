@@ -10,7 +10,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"reflect"
 	"strings"
 	"text/tabwriter"
 
@@ -145,10 +144,6 @@ func (cmd *place) Process(ctx context.Context) error {
 }
 
 func (cmd *place) Run(ctx context.Context, f *flag.FlagSet) error {
-
-	// Register runtime override before any unmarshalling/type casting.
-	types.Add("ClusterClusterInitialPlacementAction", reflect.TypeOf((*types.ClusterClusterInitialPlacementActionEx)(nil)).Elem())
-
 	client, err := cmd.Client()
 	if err != nil {
 		return err
