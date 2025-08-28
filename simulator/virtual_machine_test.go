@@ -1936,6 +1936,18 @@ func TestVmSnapshotEx(t *testing.T) {
 			Timeout: 100,
 		}
 
+		// Add a extra config to the vm to test the immutability of the snapshot's config.
+		if _, err = vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+			ExtraConfig: []types.BaseOptionValue{
+				&types.OptionValue{
+					Key:   "foo",
+					Value: "bar",
+				},
+			},
+		}); err != nil {
+			t.Fatal(err)
+		}
+
 		task, err := vm.CreateSnapshotEx(ctx, "root", "description", true, quiesceSpec)
 		if err != nil {
 			t.Fatal(err)
@@ -2022,6 +2034,37 @@ func TestVmSnapshotEx(t *testing.T) {
 		_, err = vm.FindSnapshot(ctx, "child")
 		if err == nil {
 			t.Fatal("child should be removed")
+		}
+
+		// Test the immutability of the snapshot's config.
+		// Reconfigure the vm's extra config
+		if _, err = vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+			ExtraConfig: []types.BaseOptionValue{
+				&types.OptionValue{
+					Key:   "foo",
+					Value: "notBar",
+				},
+			},
+		}); err != nil {
+			t.Fatal(err)
+		}
+
+		// fetch the snapshot's config
+		var moVM mo.VirtualMachine
+		if err := vm.Properties(ctx, vm.Reference(), []string{"snapshot", "config"}, &moVM); err != nil {
+			t.Fatal(err)
+		}
+		var moSnapshot mo.VirtualMachineSnapshot
+		if err = vm.Properties(ctx, *moVM.Snapshot.CurrentSnapshot, []string{"config"}, &moSnapshot); err != nil {
+			t.Fatal(err)
+		}
+		ecList := object.OptionValueList(moSnapshot.Config.ExtraConfig)
+		raw, exists := ecList.GetString("foo")
+		if !exists {
+			t.Fatal("extra config should exist in the snapshot's config")
+		}
+		if raw != "bar" {
+			t.Fatalf("extra config should be 'bar' in the snapshot's config, got %s", raw)
 		}
 
 		task, err = vm.RemoveAllSnapshot(ctx, nil)
