@@ -30,3 +30,23 @@ func PlaceVmsXCluster(ctx context.Context, r soap.RoundTripper, req *types.Place
 
 	return resBody.Res, nil
 }
+
+type UpdatePodVMPropertyBody struct {
+	Req    *types.UpdatePodVMProperty         `xml:"urn:vim25 UpdatePodVMProperty"`
+	Res    *types.UpdatePodVMPropertyResponse `xml:"UpdatePodVMPropertyResponse,omitempty"`
+	Fault_ *soap.Fault                        `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *UpdatePodVMPropertyBody) Fault() *soap.Fault { return b.Fault_ }
+
+func UpdatePodVMProperty(ctx context.Context, r soap.RoundTripper, req *types.UpdatePodVMProperty) (*types.UpdatePodVMPropertyResponse, error) {
+	var reqBody, resBody UpdatePodVMPropertyBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return reqBody.Res, nil
+}
