@@ -1027,7 +1027,9 @@ func generateInitialPlacementAction(ctx *Context, vmSpec *types.PlaceVmsXCluster
 	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) types.BaseClusterAction {
 
 	placementAction := &types.ClusterClusterInitialPlacementActionEx{
-		Pool: pool.Self,
+		ClusterClusterInitialPlacementAction: types.ClusterClusterInitialPlacementAction{
+			Pool: pool.Self,
+		},
 	}
 
 	if hostRequired {
