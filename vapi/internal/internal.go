@@ -24,6 +24,7 @@ const (
 	LibraryItemUpdateSessionFile   = "/com/vmware/content/library/item/updatesession/file"
 	LibraryItemDownloadSession     = "/com/vmware/content/library/item/download-session"
 	LibraryItemDownloadSessionFile = "/com/vmware/content/library/item/downloadsession/file"
+	LibraryUsages                  = "/com/vmware/content/library/usages"
 	LocalLibraryPath               = "/com/vmware/content/local-library"
 	SubscribedLibraryPath          = "/com/vmware/content/subscribed-library"
 	SecurityPoliciesPath           = "/api/content/security-policies"
@@ -35,6 +36,22 @@ const (
 	SessionCookieName              = "vmware-api-session-id"
 	UseHeaderAuthn                 = "vmware-use-header-authn"
 	DebugEcho                      = "/vc-sim/debug/echo"
+)
+
+// VAPI sub path
+const (
+	LibraryUsagesSubPath = "usages"
+)
+
+// VAPI URL params
+const (
+	LibraryParam      = "library"
+	LibraryUsageParam = "usage"
+)
+
+// VAPI actions
+const (
+	LibraryUsageAddAction = "add"
 )
 
 // AssociatedObject is the same structure as types.ManagedObjectReference,
@@ -79,4 +96,8 @@ type SubscriptionDestinationSpec struct {
 type SubscriptionItemDestinationSpec struct {
 	Force         bool                      `json:"force_sync_content"`
 	Subscriptions []SubscriptionDestination `json:"subscriptions,omitempty"`
+}
+
+type LibraryUsageDestination struct {
+	ID string `json:"usage"`
 }
