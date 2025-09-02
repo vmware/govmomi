@@ -78,3 +78,93 @@ func TestManagerCreateLibrary(t *testing.T) {
 		}
 	})
 }
+
+func TestManagerLibraryUsage(t *testing.T) {
+	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
+		c := rest.NewClient(vc)
+
+		err := c.Login(ctx, simulator.DefaultLogin)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ds, err := find.NewFinder(vc).DefaultDatastore(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		m := library.NewManager(c)
+
+		libName := "example"
+		libType := "LOCAL"
+		id, err := m.CreateLibrary(ctx, library.Library{
+			Name: libName,
+			Type: libType,
+			Storage: []library.StorageBacking{{
+				DatastoreID: ds.Reference().Value,
+				Type:        "DATASTORE",
+			}},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Add library usage
+		resourceUrn := "vmomi:service:wcp"
+		addUsage := library.AddUsage{ResourceUrn: resourceUrn}
+		usageID, err := m.AddLibraryUsage(ctx, id, addUsage)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if usageID == "" {
+			t.Fatal("library usage ID should be generated")
+		}
+
+		// Get library usage
+		usage, err := m.GetLibraryUsage(ctx, id, usageID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("returned usage: %+v", usage)
+		if usage.ID != usageID {
+			t.Fatalf("library usage ID should be matched: '%s', '%s'", usageID, usage.ID)
+		}
+		if usage.ResourceUrn != resourceUrn {
+			t.Fatalf("library usage URN should be matched: '%s', '%s'", resourceUrn, usage.ResourceUrn)
+		}
+		if usage.AdditionTime == nil {
+			t.Fatalf("library usage addition time should be set: '%s', '%s'", usageID, usage.ID)
+		}
+
+		// List library usages
+		usageList, err := m.ListLibraryUsage(ctx, id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(usageList.LibraryUsageList) == 0 {
+			t.Fatalf("Library usage should not be empty: %s", id)
+		}
+
+		l, err := m.GetLibraryByID(ctx, id)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = m.DeleteLibrary(ctx, l)
+		if err == nil {
+			t.Fatalf("Library %s in use should not allowed for delete", id)
+		}
+
+		// Remove library usage
+		err = m.RemoveLibraryUsage(ctx, id, usageID)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Force delete library
+		err = m.ForceDeleteLibrary(ctx, l)
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}

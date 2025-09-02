@@ -87,18 +87,19 @@ type download struct {
 
 type handler struct {
 	sync.Mutex
-	Map         *simulator.Registry
-	ServeMux    *http.ServeMux
-	URL         url.URL
-	Category    map[string]*tags.Category
-	Tag         map[string]*tags.Tag
-	Association map[string]map[internal.AssociatedObject]bool
-	Session     map[string]*rest.Session
-	Library     map[string]*content
-	Update      map[string]update
-	Download    map[string]download
-	Policies    []library.ContentSecurityPoliciesInfo
-	Trust       map[string]library.TrustedCertificate
+	Map          *simulator.Registry
+	ServeMux     *http.ServeMux
+	URL          url.URL
+	Category     map[string]*tags.Category
+	Tag          map[string]*tags.Tag
+	Association  map[string]map[internal.AssociatedObject]bool
+	Session      map[string]*rest.Session
+	Library      map[string]*content
+	Update       map[string]update
+	Download     map[string]download
+	Policies     []library.ContentSecurityPoliciesInfo
+	Trust        map[string]library.TrustedCertificate
+	LibraryUsage map[string]map[string]library.Usage
 }
 
 func init() {
@@ -165,6 +166,8 @@ func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 		{internal.LibraryItemFileData + "/", s.libraryItemFileData},
 		{internal.LibraryItemFilePath, s.libraryItemFile},
 		{internal.LibraryItemFilePath + "/", s.libraryItemFileID},
+		{internal.LibraryUsages, s.usages},
+		{internal.LibraryUsages + "/", s.usagesID},
 		{internal.VCenterOVFLibraryItem, s.libraryItemOVF},
 		{internal.VCenterOVFLibraryItem + "/", s.libraryItemOVFID},
 		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
@@ -1491,6 +1494,11 @@ func (s *handler) libraryID(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodDelete:
+		action := s.action(r)
+		if _, usageExists := s.LibraryUsage[id]; action != "force-delete" && usageExists {
+			s.error(w, fmt.Errorf("library is in use"))
+			return
+		}
 		p := s.libraryPath(l.Library, "")
 		if err := os.RemoveAll(p); err != nil {
 			s.error(w, err)
@@ -1500,6 +1508,7 @@ func (s *handler) libraryID(w http.ResponseWriter, r *http.Request) {
 			s.deleteVM(item.Template)
 		}
 		delete(s.Library, id)
+		delete(s.LibraryUsage, id)
 		OK(w)
 	case http.MethodPatch:
 		var spec struct {
@@ -1633,6 +1642,145 @@ func (s *handler) subscriptionsID(w http.ResponseWriter, r *http.Request) {
 
 		OK(w, id)
 	}
+}
+
+func (s *handler) usages(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		log.Printf(" === usages: method not allowed")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.URL.Query().Get("library")
+	_, ok := s.Library[id]
+	if !ok {
+		log.Printf("library not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	var res library.UsageList
+
+	for _, val := range s.LibraryUsage[id] {
+		res.LibraryUsageList = append(res.LibraryUsageList, library.UsageSummary{ID: val.ID, ResourceUrn: val.ResourceUrn})
+	}
+	OK(w, res)
+}
+
+func (s *handler) usagesID(w http.ResponseWriter, r *http.Request) {
+	log.Printf("usagesID: %+v %s %s", r.Method, s.action(r), r.URL.Path)
+
+	libraryID := s.id(r)
+	_, ok := s.Library[libraryID]
+	if !ok {
+		log.Printf("library not found: %s", libraryID)
+		http.NotFound(w, r)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodPost:
+		switch s.action(r) {
+		case "get":
+			var dst internal.LibraryUsageDestination
+			if !s.decode(r, w, &dst) {
+				return
+			}
+			usage := s.findUsage(libraryID, dst.ID)
+			if usage == nil {
+				http.NotFound(w, r)
+				return
+			}
+			OK(w, *usage)
+		case "add":
+			var spec library.AddUsage
+			if !s.decode(r, w, &spec) {
+				return
+			}
+			usageID := uuid.New().String()
+			s.addUsage(libraryID, usageID, spec)
+			// log.Fatalf("added usages: %+v", s.LibraryUsage)
+
+			OK(w, usageID)
+		case "remove":
+			var dst internal.LibraryUsageDestination
+			if !s.decode(r, w, &dst) {
+				return
+			}
+			usageID := dst.ID
+			usage := s.findUsage(libraryID, usageID)
+			if usage == nil {
+				log.Printf("library usage not found: %s %s", libraryID, usageID)
+				http.NotFound(w, r)
+				return
+			}
+			s.removeUsage(libraryID, usageID)
+			OK(w)
+		default:
+			log.Fatalf("action: '%+v' not implemented. Request: %+v", s.action(r), r)
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+}
+
+func (s *handler) findUsage(libraryID, usageID string) *library.Usage {
+	_, ok := s.LibraryUsage[libraryID]
+	if !ok {
+		log.Printf("library not found: %s", libraryID)
+		return nil
+	}
+
+	usage, exists := s.LibraryUsage[libraryID][usageID]
+	if !exists {
+		log.Printf("library usage not found: %s  %s", libraryID, usageID)
+		return nil
+	}
+
+	return &usage
+}
+
+func (s *handler) removeUsage(libraryID, usageID string) {
+	_, ok := s.LibraryUsage[libraryID]
+	if !ok {
+		log.Printf("library not found: %s", libraryID)
+		return
+	}
+
+	_, exists := s.LibraryUsage[libraryID][usageID]
+	if !exists {
+		log.Printf("library usage not found:%s  %s", libraryID, usageID)
+		return
+	}
+
+	delete(s.LibraryUsage[libraryID], usageID)
+}
+
+func (s *handler) addUsage(libraryID, usageID string, addUsage library.AddUsage) {
+	if s.LibraryUsage == nil {
+		s.LibraryUsage = make(map[string]map[string]library.Usage)
+	}
+	if _, ok := s.LibraryUsage[libraryID][usageID]; !ok {
+		s.LibraryUsage[libraryID] = make(map[string]library.Usage)
+
+	}
+
+	_, ok := s.LibraryUsage[libraryID]
+	if !ok {
+		log.Printf("library not found: %s", libraryID)
+		return
+	}
+
+	timeNow := time.Now()
+	s.LibraryUsage[libraryID][usageID] = library.Usage{
+		ID:           usageID,
+		ResourceUrn:  addUsage.ResourceUrn,
+		AdditionTime: &timeNow,
+	}
+
 }
 
 func (s *handler) libraryItem(w http.ResponseWriter, r *http.Request) {
