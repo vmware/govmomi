@@ -2797,6 +2797,11 @@ func (vm *VirtualMachine) CreateSnapshotExTask(ctx *Context, req *types.CreateSn
 			quiesced = true
 		}
 
+		snapPowerState := vm.Runtime.PowerState
+		if !req.Memory {
+			snapPowerState = types.VirtualMachinePowerStatePoweredOff
+		}
+
 		treeItem := types.VirtualMachineSnapshotTree{
 			Snapshot:        snapshot.Self,
 			Vm:              snapshot.Vm,
@@ -2804,7 +2809,7 @@ func (vm *VirtualMachine) CreateSnapshotExTask(ctx *Context, req *types.CreateSn
 			Description:     req.Description,
 			Id:              atomic.AddInt32(&vm.sid, 1),
 			CreateTime:      time.Now(),
-			State:           vm.Runtime.PowerState,
+			State:           snapPowerState,
 			Quiesced:        quiesced,
 			BackupManifest:  "",
 			ReplaySupported: types.NewBool(false),
