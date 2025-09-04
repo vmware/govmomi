@@ -5,7 +5,9 @@
 package types_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/xml"
 	"reflect"
 	"testing"
 
@@ -79,5 +81,81 @@ func TestTypeClusterClusterInitialPlacementActionEx(t *testing.T) {
 	expected = reflect.TypeOf(types.ClusterClusterInitialPlacementActionEx{})
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
+	}
+}
+
+func TestTypeResourcePoolRuntimeInfoEx(t *testing.T) {
+	fn := types.TypeFunc()
+
+	// By default, the registry should return the BASE type.
+	actual, ok := fn("ResourcePoolRuntimeInfo")
+	if !ok {
+		t.Fatalf("expected ok for ResourcePoolRuntimeInfo")
+	}
+	if want := reflect.TypeOf(types.ResourcePoolRuntimeInfo{}); !reflect.DeepEqual(want, actual) {
+		t.Fatalf("default mapping should be base; want=%#v got=%#v", want, actual)
+	}
+
+	// override: map the name to Ex and verify.
+	prev := actual
+	types.Add("ResourcePoolRuntimeInfo", reflect.TypeOf(types.ResourcePoolRuntimeInfoEx{}))
+	defer types.Add("ResourcePoolRuntimeInfo", prev)
+
+	actual2, ok := fn("ResourcePoolRuntimeInfo")
+	if !ok {
+		t.Fatalf("expected ok for ResourcePoolRuntimeInfo after override")
+	}
+	if want := reflect.TypeOf(types.ResourcePoolRuntimeInfoEx{}); !reflect.DeepEqual(want, actual2) {
+		t.Fatalf("override mapping failed; want=%#v got=%#v", want, actual2)
+	}
+}
+
+func TestResourcePoolRuntimeInfoEx_XMLOmitempty(t *testing.T) {
+	// Case 1: VmRp is nil → <vmRp> MUST be omitted due to ,omitempty on the wrapper pointer.
+	exNil := &types.ResourcePoolRuntimeInfoEx{} // VmRp == nil
+	bNil, err := xml.Marshal(exNil)
+	if err != nil {
+		t.Fatalf("marshal (nil VmRp) failed: %v", err)
+	}
+	if bytes.Contains(bNil, []byte("<vmRp")) {
+		t.Fatalf("expected no <vmRp> element when VmRp is nil, got: %s", string(bNil))
+	}
+
+	// Case 2: VmRp has one item → <vmRp> MUST be present with child item(s).
+	exOne := &types.ResourcePoolRuntimeInfoEx{
+		VmRp: &types.ArrayOfResourcePoolVmResourceProfileUsage{
+			ResourcePoolVmResourceProfileUsage: []types.ResourcePoolVmResourceProfileUsage{
+				{
+					Id:                           "small-vm",
+					ReservedForPool:              4,
+					ReservationUsedForVms:        0,
+					ReservationUsedForChildPools: 0,
+				},
+			},
+		},
+	}
+	bOne, err := xml.Marshal(exOne)
+	if err != nil {
+		t.Fatalf("marshal (one VmRp) failed: %v", err)
+	}
+	if !bytes.Contains(bOne, []byte("<vmRp")) {
+		t.Fatalf("expected <vmRp> element when VmRp has items, got: %s", string(bOne))
+	}
+	if !bytes.Contains(bOne, []byte("<ResourcePoolVmResourceProfileUsage")) {
+		t.Fatalf("expected ResourcePoolVmResourceProfileUsage item, got: %s", string(bOne))
+	}
+
+	// Case 3: empty wrapper (non-nil, zero items) → <vmRp/> WILL be present.
+	exEmpty := &types.ResourcePoolRuntimeInfoEx{
+		VmRp: &types.ArrayOfResourcePoolVmResourceProfileUsage{
+			ResourcePoolVmResourceProfileUsage: nil, // or: []types.ResourcePoolVmResourceProfileUsage{}
+		},
+	}
+	bEmpty, err := xml.Marshal(exEmpty)
+	if err != nil {
+		t.Fatalf("marshal (empty wrapper) failed: %v", err)
+	}
+	if !bytes.Contains(bEmpty, []byte("<vmRp")) {
+		t.Fatalf("expected <vmRp> element when wrapper is non-nil (even if empty), got: %s", string(bEmpty))
 	}
 }
