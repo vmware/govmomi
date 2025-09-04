@@ -1836,7 +1836,7 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal("rootSnapshot property should have elements if there are snapshots")
 	}
 
-	task, err = vm.CreateSnapshot(ctx, "child", "description", true, true)
+	task, err = vm.CreateSnapshot(ctx, "child", "description", false, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1846,9 +1846,25 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = vm.FindSnapshot(ctx, "child")
+	childRef, err := vm.FindSnapshot(ctx, "child")
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	var moVM mo.VirtualMachine
+	err = vm.Properties(ctx, vm.Reference(), []string{"snapshot"}, &moVM)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if moVM.Snapshot == nil {
+		t.Fatal("snapshot property should not be 'nil' if there are snapshots")
+	}
+
+	if snap := findSnapshotInTree(moVM.Snapshot.RootSnapshotList, *childRef); snap == nil {
+		t.Fatal("snapshot 'child' not found in snapshot tree")
+	} else if snap.State != types.VirtualMachinePowerStatePoweredOff {
+		t.Errorf("unexpected state for snapshot 'child': %s", snap.State)
 	}
 
 	task, err = vm.RevertToCurrentSnapshot(ctx, true)
