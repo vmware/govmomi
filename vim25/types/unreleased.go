@@ -196,3 +196,45 @@ func init() {
 	t["ClusterClusterInitialPlacementActionEx"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
 	t["BaseClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
 }
+
+type ResourcePoolVmResourceProfileUsage struct {
+	Id                           string `xml:"id"                            json:"id"`
+	ReservedForPool              int64  `xml:"reservedForPool"               json:"reservedForPool"`
+	ReservationUsedForVms        int64  `xml:"reservationUsedForVms"         json:"reservationUsedForVms"`
+	ReservationUsedForChildPools int64  `xml:"reservationUsedForChildPools"  json:"reservationUsedForChildPools"`
+}
+
+func init() {
+	t["ResourcePoolVmResourceProfileUsage"] = reflect.TypeOf((*ResourcePoolVmResourceProfileUsage)(nil)).Elem()
+}
+
+type ArrayOfResourcePoolVmResourceProfileUsage struct {
+	ResourcePoolVmResourceProfileUsage []ResourcePoolVmResourceProfileUsage `xml:"ResourcePoolVmResourceProfileUsage,omitempty"`
+}
+
+func init() {
+	t["ArrayOfResourcePoolVmResourceProfileUsage"] = reflect.TypeOf((*ArrayOfResourcePoolVmResourceProfileUsage)(nil)).Elem()
+}
+
+type ResourcePoolRuntimeInfoEx struct {
+	// Embed the released base type to inherit all fields.
+	ResourcePoolRuntimeInfo
+
+	VmRp []ResourcePoolVmResourceProfileUsage `xml:"vmRp>ResourcePoolVmResourceProfileUsage,omitempty" json:"vmRp,omitempty"`
+}
+
+type BaseResourcePoolRuntimeInfo interface {
+	GetResourcePoolRuntimeInfo() *ResourcePoolRuntimeInfo
+}
+
+func (r ResourcePoolRuntimeInfo) GetResourcePoolRuntimeInfo() *ResourcePoolRuntimeInfo { return &r }
+
+func (r ResourcePoolRuntimeInfoEx) GetResourcePoolRuntimeInfo() *ResourcePoolRuntimeInfo {
+	return &r.ResourcePoolRuntimeInfo
+}
+
+func init() {
+	minAPIVersionForType["ResourcePoolRuntimeInfoEx"] = "9.1.0.0"
+	t["ResourcePoolRuntimeInfoEx"] = reflect.TypeOf((*ResourcePoolRuntimeInfoEx)(nil)).Elem()
+	t["BaseResourcePoolRuntimeInfo"] = reflect.TypeOf((*ResourcePoolRuntimeInfoEx)(nil)).Elem()
+}
