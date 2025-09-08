@@ -1,6 +1,6 @@
 module github.com/vmware/govmomi/govc
 
-go 1.23.0
+go 1.24.0
 
 replace github.com/vmware/govmomi => ../
 
@@ -13,5 +13,5 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
-	golang.org/x/text v0.28.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
 )
