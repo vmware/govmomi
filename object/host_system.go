@@ -148,20 +148,17 @@ func (h HostSystem) UpdatePodVMProperty(ctx context.Context, propertyPath string
 		PropertyPath: propertyPath,
 	}
 
-	if propertyPath == "podVMOverheadInfo" {
+	switch propertyPath {
+	case "podVMOverheadInfo":
 		req.Property = podVMInfo.PodVMOverheadInfo
-	} else if propertyPath == "hasPodVM" {
+	case "hasPodVM":
 		req.Property = podVMInfo.HasPodVM
-	} else if propertyPath == "podVMInfo" {
+	case "podVMInfo":
 		req.Property = podVMInfo
-	} else {
+	default:
 		return fmt.Errorf("unsupported propertyPath: %s", propertyPath)
 	}
 
 	_, err := methods.UpdatePodVMProperty(ctx, h.c, &req)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
