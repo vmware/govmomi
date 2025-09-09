@@ -11,6 +11,12 @@ import (
 )
 
 // HardwareVersion is a VMX hardware version.
+//
+// Please see https://knowledge.broadcom.com/external/article/315655 for more
+// information on when a hardware version was introduced.
+//
+// Please refer to https://knowledge.broadcom.com/external/article/312100 for
+// what ESX/ESXi versions support which hardware versions.
 type HardwareVersion uint8
 
 const (
@@ -18,27 +24,67 @@ const (
 )
 
 const (
+	// VMX3 was introduced in ESX 2.x.
 	VMX3 HardwareVersion = iota + 3
+
+	// VMX4 was introduced in ESX 3.x.
 	VMX4
 
 	vmx5 // invalid
 
+	// VMX6 was introduced in Workstation 6.0.x and is not supported by
+	// ESX/ESXi per https://knowledge.broadcom.com/external/article/312100.
 	VMX6
+
+	// VMX7 was introduced in ESXi 4.x.
 	VMX7
+
+	// VMX8 was introduced in ESXi 5.0.
 	VMX8
+
+	// VMX9 was introduced in ESXi 5.1.
 	VMX9
+
+	// VMX10 was introduced in ESXi 5.5.
 	VMX10
+
+	// VMX11 was introduced in ESXi 6.0.
 	VMX11
+
+	// VMX12 was introduced in Workstation 12.x. and is not supported by
+	// ESX/ESXi per https://knowledge.broadcom.com/external/article/312100.
 	VMX12
+
+	// VMX13 was introduced in ESXi 6.5.
 	VMX13
+
+	// VMX14 was introduced in ESXi 6.7.
 	VMX14
+
+	// VMX15 was introduced in ESXi 6.7 U2.
 	VMX15
+
+	// VMX16 was introduced in Workstation 15.x and is not supported by
+	// ESX/ESXi per https://knowledge.broadcom.com/external/article/312100.
 	VMX16
+
+	// VMX17 was introduced in ESXi 7.0.
 	VMX17
+
+	// VMX18 was introduced in ESXi 7.0 U1 (7.0.1).
 	VMX18
+
+	// VMX19 was introduced in ESXi 7.0 U2 (7.0.2).
 	VMX19
+
+	// VMX20 was introduced in ESXi 8.0.
 	VMX20
+
+	// VMX21 was introduced in ESXi 8.0 U2 (8.0.2).
 	VMX21
+
+	// VMX22 was introduced in ESX 9.0.
+	VMX22
 )
 
 const (
@@ -48,7 +94,7 @@ const (
 
 	// MaxValidHardwareVersion is the maximum, valid hardware version supported
 	// by VMware hypervisors in the wild.
-	MaxValidHardwareVersion = VMX21
+	MaxValidHardwareVersion = VMX22
 )
 
 // IsSupported returns true if the hardware version is known to and supported by
