@@ -214,6 +214,7 @@ func TestHardwareVersion(t *testing.T) {
 	testCases = append(testCases, testCasesForVersion(19, VMX19, "vmx-19")...)
 	testCases = append(testCases, testCasesForVersion(20, VMX20, "vmx-20")...)
 	testCases = append(testCases, testCasesForVersion(21, VMX21, "vmx-21")...)
+	testCases = append(testCases, testCasesForVersion(22, VMX22, "vmx-22")...)
 
 	t.Run("GetHardwareVersions", func(t *testing.T) {
 		a, e := uniqueExpectedVersions, GetHardwareVersions()
