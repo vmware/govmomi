@@ -44787,7 +44787,7 @@ type HostRuntimeInfo struct {
 	// Host persistent state encryption information.
 	StateEncryption *HostRuntimeInfoStateEncryptionInfo `xml:"stateEncryption,omitempty" json:"stateEncryption,omitempty" vim:"7.0.3.0"`
 	// PodVM related info for a host
-	PodVMInfo *HostRuntimeInfoPodVMInfo `xml:"podVMInfo,omitempty" json:"podVMInfo,omitempty" vim:"9.0.0.0"`
+	PodVMInfo *HostRuntimeInfoPodVMInfo `xml:"podVMInfo,omitempty" json:"podVMInfo,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
