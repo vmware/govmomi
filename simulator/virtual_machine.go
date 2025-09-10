@@ -153,7 +153,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	vm.Runtime.ConnectionState = types.VirtualMachineConnectionStateConnected
 	vm.Summary.Runtime = vm.Runtime
 
-	vm.Capability.ChangeTrackingSupported = types.NewBool(changeTrackingSupported(spec))
+	vm.Capability.ChangeTrackingSupported = changeTrackingSupported(spec)
 
 	vm.Summary.QuickStats.GuestHeartbeatStatus = types.ManagedEntityStatusGray
 	vm.Summary.OverallStatus = types.ManagedEntityStatusGreen
@@ -2226,7 +2226,7 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 							supportedHardwareVersions[cod.Key] = struct{}{}
 						}
 						if latestHardwareVersion == "" {
-							if def := cod.DefaultConfigOption; def != nil && *def {
+							if def := cod.DefaultConfigOption; def {
 								latestHardwareVersion = cod.Key
 							}
 						}

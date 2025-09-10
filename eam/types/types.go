@@ -210,7 +210,7 @@ type AgencyConfigInfo struct {
 	IpPool *types.IpPool `xml:"ipPool,omitempty" json:"ipPool,omitempty"`
 	// Defines the resource pools where VMs to be deployed.
 	//
-	// If specified, the VMs for every compute resouce in the scope will be
+	// If specified, the VMs for every compute resource in the scope will be
 	// deployed to its corresponding resource pool.
 	// If not specified, the agent VMs for each compute resource will be
 	// deployed under top level nested resource pool created for the agent
@@ -219,14 +219,15 @@ type AgencyConfigInfo struct {
 	ResourcePools []AgencyVMResourcePool `xml:"resourcePools,omitempty" json:"resourcePools,omitempty"`
 	// Defines the folders where VMs to be deployed.
 	//
-	// If specified, the VMs for every compute resouce in the scope will be
+	// If specified, the VMs for every compute resource in the scope will be
 	// deployed to its corresponding folder. The link is made between the
 	// compute resource parent and the datacenter the folder belongs to
 	// `AgencyVMFolder.datacenterId`.
 	// If not specified, the agent VMs for each compute resource will be
 	// deployed in top level folder created in each datacenter for the agent
 	// VMs.
-	Folders []AgencyVMFolder `xml:"folders,omitempty" json:"folders,omitempty"`
+	Folders         []AgencyVMFolder `xml:"folders,omitempty" json:"folders,omitempty"`
+	OmitDRSBlocking *bool            `xml:"omitDRSBlocking" json:"omitDRSBlocking,omitempty"`
 }
 
 func init() {
@@ -435,8 +436,15 @@ type AgentConfigInfo struct {
 	// virtual machines are installed on the hosts covered by the scope.
 	// If `AgencyConfigInfoEx.vmPlacementPolicy` is set, the VM needs to
 	// be agnostic to the different host versions inside the cluster.
-	OvfPackageUrl        string `xml:"ovfPackageUrl,omitempty" json:"ovfPackageUrl,omitempty"`
-	AuthenticationScheme string `xml:"authenticationScheme,omitempty" json:"authenticationScheme,omitempty"`
+	OvfPackageUrl string `xml:"ovfPackageUrl,omitempty" json:"ovfPackageUrl,omitempty"`
+	// The authentication scheme needed to access the OVF URL.
+	//
+	// The supported schemes are listed in `AgentConfigInfoAuthenticationScheme_enum`
+	// Default value is `NONE` if not specified.
+	//
+	// If the scheme is not `null` and is not set to `NONE`
+	// then `AgentConfigInfo.ovfPackageUrl` must point to the VC
+	AuthenticationScheme string `xml:"authenticationScheme,omitempty" json:"authenticationScheme,omitempty" vim:"9.0"`
 	// Specifies an SSL trust policy to be use for verification of the
 	// server that hosts the `AgentConfigInfo.ovfPackageUrl`.
 	//
@@ -511,7 +519,7 @@ type AgentConfigInfo struct {
 	// The agency owner should do it using other means, e.g.
 	// `AgencyConfigInfo.manuallyMarkAgentVmAvailableAfterPowerOn` or
 	// `AgencyConfigInfo.manuallyMarkAgentVmAvailableAfterProvisioning`
-	// hooks. Support for this has been removed. Seting this to
+	// hooks. Support for this has been removed. Setting this to
 	// <code>true</code> will no longer have any effect.
 	//
 	// If set to <code>true</code>, the hosts in the scope must be configured
@@ -546,8 +554,13 @@ type AgentConfigInfo struct {
 	// NOTE: The property needs to be configured on each update, otherwise
 	// vSphere ESX Agent Manager will unset this configuration for all future
 	// agent VMs.
-	VmStoragePolicies       []BaseAgentStoragePolicy `xml:"vmStoragePolicies,omitempty,typeattr" json:"vmStoragePolicies,omitempty"`
-	VmResourceConfiguration string                   `xml:"vmResourceConfiguration,omitempty" json:"vmResourceConfiguration,omitempty"`
+	VmStoragePolicies []BaseAgentStoragePolicy `xml:"vmStoragePolicies,omitempty,typeattr" json:"vmStoragePolicies,omitempty"`
+	// Specifies the resource configuration to be used when deploying an Agent
+	// VM.
+	//
+	// It must correspond to the Configuration element of the
+	// DeploymentOptionSection in the OVF specification.
+	VmResourceConfiguration string `xml:"vmResourceConfiguration,omitempty" json:"vmResourceConfiguration,omitempty" vim:"8.3"`
 }
 
 func init() {
@@ -913,6 +926,14 @@ func init() {
 	types.Add("eam:ArrayOfIssue", reflect.TypeOf((*ArrayOfIssue)(nil)).Elem())
 }
 
+type ArrayOfSolutionsAlternativeVmSpec struct {
+	SolutionsAlternativeVmSpec []SolutionsAlternativeVmSpec `xml:"SolutionsAlternativeVmSpec,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsAlternativeVmSpec", reflect.TypeOf((*ArrayOfSolutionsAlternativeVmSpec)(nil)).Elem())
+}
+
 // A boxed array of `SolutionsClusterSolutionComplianceResult`. To be used in `Any` placeholders.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -1032,6 +1053,14 @@ type ArrayOfSolutionsVMNetworkMapping struct {
 
 func init() {
 	types.Add("eam:ArrayOfSolutionsVMNetworkMapping", reflect.TypeOf((*ArrayOfSolutionsVMNetworkMapping)(nil)).Elem())
+}
+
+type ArrayOfSolutionsVmSelectionSpecMapping struct {
+	SolutionsVmSelectionSpecMapping []SolutionsVmSelectionSpecMapping `xml:"SolutionsVmSelectionSpecMapping,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsVmSelectionSpecMapping", reflect.TypeOf((*ArrayOfSolutionsVmSelectionSpecMapping)(nil)).Elem())
 }
 
 // A boxed array of `VibVibInfo`. To be used in `Any` placeholders.
@@ -1157,7 +1186,7 @@ type ClusterAgentAgentIssue struct {
 	Agent types.ManagedObjectReference `xml:"agent" json:"agent"`
 	// The cluster for which this issue is raised.
 	//
-	// Migth be null if the cluster
+	// Might be null if the cluster
 	// is missing in vCenter Server inventory.
 	//
 	// Refers instance of `ComputeResource`.
@@ -1202,20 +1231,45 @@ func init() {
 	types.AddMinAPIVersionForType("eam:ClusterAgentCertificateNotTrusted", "8.2")
 }
 
+type ClusterAgentClusterTransitionFailed struct {
+	ClusterAgentAgentIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentClusterTransitionFailed", reflect.TypeOf((*ClusterAgentClusterTransitionFailed)(nil)).Elem())
+}
+
+// An agent virtual machine operation cannot be executed on host, because the
+// host is in maintenance mode that blocks the virtual machine operation.
+//
+// This is not a remediable issue. To remediate, take the host ouf of
+// maintenance mode.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ClusterAgentHostInMaintenanceMode struct {
 	ClusterAgentVmIssue
 }
 
 func init() {
 	types.Add("eam:ClusterAgentHostInMaintenanceMode", reflect.TypeOf((*ClusterAgentHostInMaintenanceMode)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:ClusterAgentHostInMaintenanceMode", "8.3")
 }
 
+// An agent virtual machine operation cannot be executed on host, because the
+// host is in partial maintenance mode that blocks the virtual machine
+// operation.
+//
+// This is not a remediable issue. To remediate, take the host ouf of partial
+// maintenance mode.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ClusterAgentHostInPartialMaintenanceMode struct {
 	ClusterAgentVmIssue
 }
 
 func init() {
 	types.Add("eam:ClusterAgentHostInPartialMaintenanceMode", reflect.TypeOf((*ClusterAgentHostInPartialMaintenanceMode)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:ClusterAgentHostInPartialMaintenanceMode", "8.3")
 }
 
 // The cluster agent Virtual Machine could not be powered-on, because the
@@ -1344,36 +1398,81 @@ func init() {
 	types.Add("eam:ClusterAgentOvfInvalidProperty", reflect.TypeOf((*ClusterAgentOvfInvalidProperty)(nil)).Elem())
 }
 
+// A cluster agent failed to be transitioned to a LCCM Solution.
+//
+// This is an active remediable issue. To remediate, resolve the issue via vLCM
+// System VMs API
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ClusterAgentTransitionFailed struct {
 	ClusterAgentAgentIssue
 }
 
 func init() {
 	types.Add("eam:ClusterAgentTransitionFailed", reflect.TypeOf((*ClusterAgentTransitionFailed)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:ClusterAgentTransitionFailed", "9.0")
 }
 
+type ClusterAgentVmHookDynamicUpdateFailed struct {
+	ClusterAgentVmHookFailed
+}
+
+func init() {
+	types.Add("eam:ClusterAgentVmHookDynamicUpdateFailed", reflect.TypeOf((*ClusterAgentVmHookDynamicUpdateFailed)(nil)).Elem())
+}
+
+// The VM hook remediation failed.
+//
+// In order to remediate the issue:
+// Resolve the issue via apply API and process the hook within the
+// timeout configured for the System VM Solution this issue's VM belongs to.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ClusterAgentVmHookFailed struct {
 	ClusterAgentVmIssue
 }
 
 func init() {
 	types.Add("eam:ClusterAgentVmHookFailed", reflect.TypeOf((*ClusterAgentVmHookFailed)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:ClusterAgentVmHookFailed", "9.0")
 }
 
+// The VM hook remediation timed out.
+//
+// In order to remediate the issue:
+// Resolve the issue via apply API and process the hook within the
+// timeout configured for the System VM Solution this issue's VM belongs to.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ClusterAgentVmHookTimedout struct {
 	ClusterAgentVmIssue
 }
 
 func init() {
 	types.Add("eam:ClusterAgentVmHookTimedout", reflect.TypeOf((*ClusterAgentVmHookTimedout)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:ClusterAgentVmHookTimedout", "9.0")
 }
 
+// The connection state of the cluster agent Virtual Machine is
+// `inaccessible`.
+//
+// In order to remediate the issue:
+//   - Mark the VM for removal using the `EsxAgentManager.EsxAgentManager_MarkForRemoval`
+//     API.
+//   - Do the necessary changes to ensure that the connection state of the VM is
+//     `connected`.
+//
+// NOTE: When the HA is enabled on the cluster these issues may be transient and
+// automatically remediated.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ClusterAgentVmInaccessible struct {
 	ClusterAgentVmIssue
 }
 
 func init() {
 	types.Add("eam:ClusterAgentVmInaccessible", reflect.TypeOf((*ClusterAgentVmInaccessible)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:ClusterAgentVmInaccessible", "8.3")
 }
 
 // Base class for all cluster bound Virtual Machines.
@@ -1393,7 +1492,7 @@ func init() {
 }
 
 // A cluster agent Virtual Machine is expected to be deployed on a cluster, but
-// the cluster agent Virtual Machine has not been deployed or has been exlicitly
+// the cluster agent Virtual Machine has not been deployed or has been explicitly
 // deleted from the cluster.
 //
 // Typically more specific issue (a subclass of this
@@ -1463,12 +1562,20 @@ func init() {
 	types.Add("eam:ClusterAgentVmPoweredOn", reflect.TypeOf((*ClusterAgentVmPoweredOn)(nil)).Elem())
 }
 
+// An agent virtual machine is protected from modifications
+// (example: HA recovery).
+//
+// This is an active remediable issue. To remediate, vSphere ESX Agent Manager
+// modifies the virtual machine.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ClusterAgentVmProtected struct {
 	ClusterAgentVmIssue
 }
 
 func init() {
 	types.Add("eam:ClusterAgentVmProtected", reflect.TypeOf((*ClusterAgentVmProtected)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:ClusterAgentVmProtected", "9.0")
 }
 
 // A cluster agent Virtual Machine is expected to be powered on, but the agent
@@ -1500,7 +1607,7 @@ type CreateAgencyRequestType struct {
 	// The configuration that describes how to deploy the agents in the
 	// created agency.
 	AgencyConfigInfo BaseAgencyConfigInfo `xml:"agencyConfigInfo,typeattr" json:"agencyConfigInfo"`
-	// Deprecated. No sence to create agency in other state than
+	// Deprecated. No sense to create agency in other state than
 	// <code>enabled</code>. <code>disabled</code> is deprecated
 	// whereas <code>uninstalled</code> is useless.
 	// The initial goal state of the agency. See
@@ -1826,6 +1933,18 @@ type GetMaintenanceModePolicyResponse struct {
 	Returnval string `xml:"returnval" json:"returnval"`
 }
 
+type HooksDynamicUpdateSpec struct {
+	types.DynamicData
+
+	Vm                types.ManagedObjectReference `xml:"vm" json:"vm"`
+	HookType          string                       `xml:"hookType" json:"hookType"`
+	AlternativeVmSpec *SolutionsAlternativeVmSpec  `xml:"alternativeVmSpec,omitempty" json:"alternativeVmSpec,omitempty"`
+}
+
+func init() {
+	types.Add("eam:HooksDynamicUpdateSpec", reflect.TypeOf((*HooksDynamicUpdateSpec)(nil)).Elem())
+}
+
 // Limits the hooks reported to the user.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -1878,9 +1997,9 @@ func init() {
 // takes the host out of maintenance mode and initiates the agent virtual
 // machine operation.
 //
-// Resolving this issue in vSphere Lifecyle Manager environemnt will be no-op.
+// Resolving this issue in vSphere Lifecycle Manager environment will be no-op.
 // In those cases user must take the host out of Maintenance Mode manually or
-// wait vSphere Lifecycle Maanger cluster remediation to complete (if any).
+// wait vSphere Lifecycle Manager cluster remediation to complete (if any).
 //
 // This structure may be used only with operations rendered under `/eam`.
 type HostInMaintenanceMode struct {
@@ -1891,14 +2010,30 @@ func init() {
 	types.Add("eam:HostInMaintenanceMode", reflect.TypeOf((*HostInMaintenanceMode)(nil)).Elem())
 }
 
+// An agent virtual machine operation cannot be executed on host, because the
+// host is in partial maintenance mode that blocks the virtual machine
+// operation.
+//
+// This is not a remediable issue. To remediate, take the host ouf of partial
+// maintenance mode.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type HostInPartialMaintenanceMode struct {
 	AgentIssue
 
+	// The virtual machine to which this issue is related.
+	//
+	// Unset if the
+	// operation that is blocked by partial maintenance mode is preventing the
+	// virtual machine deployment.
+	//
+	// Refers instance of `VirtualMachine`.
 	Vm *types.ManagedObjectReference `xml:"vm,omitempty" json:"vm,omitempty"`
 }
 
 func init() {
 	types.Add("eam:HostInPartialMaintenanceMode", reflect.TypeOf((*HostInPartialMaintenanceMode)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:HostInPartialMaintenanceMode", "8.3")
 }
 
 // An agent virtual machine is expected to be removed from a host, but the agent virtual machine has not
@@ -2219,21 +2354,21 @@ func init() {
 	types.Add("eam:InvalidUrlFault", reflect.TypeOf((*InvalidUrlFault)(nil)).Elem())
 }
 
-// An issue represents a problem encountered while deploying and configurating agents
+// An issue represents a problem encountered while deploying and configuring agents
 // in a vCenter installation.
 //
 // An issue conveys the type of problem and the
-// entitity on which the problem has been encountered. Most issues are related to agents,
+// entity on which the problem has been encountered. Most issues are related to agents,
 // but they can also relate to an agency or a host.
 //
-// The set of issues provided by the vSphere ESX Agent Manager describes the discrepency between
+// The set of issues provided by the vSphere ESX Agent Manager describes the discrepancy between
 // the _desired_ agent deployment state, as defined by the agency configurations,
 // and the _actual_ deployment. The (@link EamObject.RuntimeInfo.Status.status)
 // of an agency or agent is green if it has reached its goal state. It is
 // marked as yellow if the vSphere ESX Agent Manager is actively working to bring the object
-// to its goal state. It is red if there is a discrepency between the current state and
+// to its goal state. It is red if there is a discrepancy between the current state and
 // the desired state. In the red state, a set of issues are filed on the object that
-// describe the reason for the discrepency between the desired and actual states.
+// describe the reason for the discrepancy between the desired and actual states.
 //
 // Issues are characterized as either active or passive remediable issues. For an active
 // remediable issue, the vSphere ESX Agent Manager can actively try to solve the issue. For
@@ -2243,7 +2378,7 @@ func init() {
 // caused by an incomplete host configuration.
 //
 // When <code>resolve</code> is called for an active remediable issue, the vSphere ESX Agent Manager
-// starts performing the appropiate remediation steps for the particular issue. For a passive
+// starts performing the appropriate remediation steps for the particular issue. For a passive
 // remediable issue, the EAM manager simply checks if the condition
 // still exists, and if not it removes the issue.
 //
@@ -2317,7 +2452,7 @@ type Issue struct {
 	// The point in time when this issue was generated.
 	//
 	// Note that issues can be
-	// regenerated periodically, so this time does not neccessarily reflect the
+	// regenerated periodically, so this time does not necessarily reflect the
 	// first time the issue was detected.
 	Time time.Time `xml:"time" json:"time"`
 }
@@ -2329,7 +2464,7 @@ func init() {
 // Managed ESXi Server is unreachable from vCenter Server or vSphere ESX Agent
 // Manager.
 //
-// Currently all operations on the affected host are imposible. Reasons
+// Currently all operations on the affected host are impossible. Reasons
 // for this might be :
 //   - ESXi Server is not connected from vCenter Server
 //   - ESXi Server powered off
@@ -3005,6 +3140,17 @@ func init() {
 type SetMaintenanceModePolicyResponse struct {
 }
 
+type SolutionsAlternativeVmSpec struct {
+	types.DynamicData
+
+	SelectionCriteria SolutionsVmSelectionSpec        `xml:"selectionCriteria" json:"selectionCriteria"`
+	Devices           *types.VirtualMachineConfigSpec `xml:"devices,omitempty" json:"devices,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsAlternativeVmSpec", reflect.TypeOf((*SolutionsAlternativeVmSpec)(nil)).Elem())
+}
+
 // Specification describing a desired state to be applied.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -3046,6 +3192,8 @@ type SolutionsApplySpec struct {
 	// The deployment unit represents a single VM instance deployment. It is
 	// returned by the `Solutions.Compliance` operation.
 	//
+	// This filtering is not supported in case of subsequent
+	// `Hooks#processDynamicUpdate` is invoked.
 	// If omitted - the configured solutions by `SolutionsApplySpec.solutions` are applied
 	// on all of the deployment units in the cluster.
 	DeploymentUnits []string `xml:"deploymentUnits,omitempty" json:"deploymentUnits,omitempty"`
@@ -3098,25 +3246,21 @@ type SolutionsClusterBoundSolutionConfig struct {
 	// compatibility of the devices with the selected host and datastore where
 	// the VM is deployed needs to be ensured by the client.
 	//
-	// 1\. For VM initial placement the devices are added to the VM
-	// configuration. 2. For VM reconfiguration it is checked if a relocation
-	// is needed based on the provided `SolutionsClusterBoundSolutionConfig.devices` and the rest of the
-	// desired specification change. If relocation is not needed then only VM
-	// reconfiguration is executed. Otherwise (e.g. a network device not
-	// present on the host where the VM is located) the VM is first relocated
-	// and then VM reconfiguration is executed. For the reconfiguration it is
-	// checked what devices need to be added, removed, and edited on the
-	// existing VMs.
+	// 1\. For VM initial placement the devices are added to the VM configuration.
+	// 2\. For the reconfiguration it is checked what devices need to be added,
+	// removed, and edited on the existing VMs. NOTE: No VM relocation is
+	// executed before the VM reconfiguration.
 	//
 	// The supported property of vim.vm.ConfigSpec is
-	// vim.vm.ConfigSpec.deviceChange. The property
-	// vim.vm.device.VirtualDeviceSpec.operation is ignored. Device keys/Ids
-	// needs to be negative integers.
+	// vim.vm.ConfigSpec.deviceChange. The supported
+	// vim.vm.device.VirtualDeviceSpec.operation is Operation#add. For
+	// vim.vm.device.VirtualEthernetCard the unique identifier is
+	// vim.vm.device.VirtualDevice#unitNumber.
 	//
-	// NOTE: Devices are added only during VM initial placement. VM
-	// reconfiguration with the provided devices is currently not supported.
 	// If omitted - no additional devices will be added to the VMs.
-	Devices *types.VirtualMachineConfigSpec `xml:"devices,omitempty" json:"devices,omitempty"`
+	Devices            *types.VirtualMachineConfigSpec `xml:"devices,omitempty" json:"devices,omitempty"`
+	RemediationPolicy  BaseSolutionsRemediationPolicy  `xml:"remediationPolicy,omitempty,typeattr" json:"remediationPolicy,omitempty"`
+	AlternativeVmSpecs []SolutionsAlternativeVmSpec    `xml:"alternativeVmSpecs,omitempty" json:"alternativeVmSpecs,omitempty"`
 }
 
 func init() {
@@ -3141,6 +3285,17 @@ type SolutionsClusterSolutionComplianceResult struct {
 
 func init() {
 	types.Add("eam:SolutionsClusterSolutionComplianceResult", reflect.TypeOf((*SolutionsClusterSolutionComplianceResult)(nil)).Elem())
+}
+
+type SolutionsClusterTransitionSpec struct {
+	types.DynamicData
+
+	Solution      string                       `xml:"solution" json:"solution"`
+	SourceCluster types.ManagedObjectReference `xml:"sourceCluster" json:"sourceCluster"`
+}
+
+func init() {
+	types.Add("eam:SolutionsClusterTransitionSpec", reflect.TypeOf((*SolutionsClusterTransitionSpec)(nil)).Elem())
 }
 
 // Result of a compliance check of a desired state on a compute resource.
@@ -3240,7 +3395,7 @@ type SolutionsHookConfig struct {
 
 	// Type of the configured hook, possible values - `HooksHookType_enum`.
 	Type string `xml:"type" json:"type"`
-	// Type of acknoledgement of the configured hook.
+	// Type of acknowledgement of the configured hook.
 	Acknowledgement BaseSolutionsHookAcknowledgeConfig `xml:"acknowledgement,typeattr" json:"acknowledgement"`
 	// The maximum time in seconds to wait for a hook to be processed.
 	//
@@ -3271,6 +3426,11 @@ type SolutionsHookInfo struct {
 	Config SolutionsHookConfig `xml:"config" json:"config"`
 	// Time the hook was raised.
 	RaisedAt time.Time `xml:"raisedAt" json:"raisedAt"`
+	// True if `Hooks#processDynamicUpdate` method invocation completed
+	// successfully for this hook.
+	//
+	// Otherwise defaults to False.
+	DynamicUpdateProcessed bool `xml:"dynamicUpdateProcessed" json:"dynamicUpdateProcessed"`
 }
 
 func init() {
@@ -3283,6 +3443,7 @@ func init() {
 type SolutionsHostBoundSolutionConfig struct {
 	SolutionsTypeSpecificSolutionConfig
 
+	OmitDRSBlocking *bool `xml:"omitDRSBlocking" json:"omitDRSBlocking,omitempty"`
 	// If set to true - default network and datastore configured on host will
 	// take precedence over
 	// `SolutionsHostBoundSolutionConfig.datastores` and
@@ -3347,6 +3508,19 @@ func init() {
 	types.Add("eam:SolutionsInteractiveHookAcknowledgeConfig", reflect.TypeOf((*SolutionsInteractiveHookAcknowledgeConfig)(nil)).Elem())
 }
 
+type SolutionsMultiSourceTransitionSpec struct {
+	types.DynamicData
+
+	Solution               string                            `xml:"solution" json:"solution"`
+	AgencyIds              []string                          `xml:"agencyIds,omitempty" json:"agencyIds,omitempty"`
+	SourceVmSelectionSpecs []SolutionsVmSelectionSpecMapping `xml:"sourceVmSelectionSpecs,omitempty" json:"sourceVmSelectionSpecs,omitempty"`
+	Module                 string                            `xml:"module,omitempty" json:"module,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsMultiSourceTransitionSpec", reflect.TypeOf((*SolutionsMultiSourceTransitionSpec)(nil)).Elem())
+}
+
 // One OVF Property.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -3361,6 +3535,14 @@ type SolutionsOvfProperty struct {
 
 func init() {
 	types.Add("eam:SolutionsOvfProperty", reflect.TypeOf((*SolutionsOvfProperty)(nil)).Elem())
+}
+
+type SolutionsParallelRemediationPolicy struct {
+	SolutionsRemediationPolicy
+}
+
+func init() {
+	types.Add("eam:SolutionsParallelRemediationPolicy", reflect.TypeOf((*SolutionsParallelRemediationPolicy)(nil)).Elem())
 }
 
 // Specifies a user defined profile ID to be applied during Virtual Machine
@@ -3382,7 +3564,23 @@ func init() {
 	types.Add("eam:SolutionsProfileIdStoragePolicy", reflect.TypeOf((*SolutionsProfileIdStoragePolicy)(nil)).Elem())
 }
 
-// Result of a compliance check of a desired state dor a solution(on a host).
+type SolutionsRemediationPolicy struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("eam:SolutionsRemediationPolicy", reflect.TypeOf((*SolutionsRemediationPolicy)(nil)).Elem())
+}
+
+type SolutionsSequentialRemediationPolicy struct {
+	SolutionsRemediationPolicy
+}
+
+func init() {
+	types.Add("eam:SolutionsSequentialRemediationPolicy", reflect.TypeOf((*SolutionsSequentialRemediationPolicy)(nil)).Elem())
+}
+
+// Result of a compliance check of a desired state for a solution(on a host).
 //
 // This structure may be used only with operations rendered under `/eam`.
 type SolutionsSolutionComplianceResult struct {
@@ -3407,7 +3605,7 @@ type SolutionsSolutionComplianceResult struct {
 	UpgradingVm *types.ManagedObjectReference `xml:"upgradingVm,omitempty" json:"upgradingVm,omitempty"`
 	// Hook, ESX Agent Manager is awaiting to be processed for this solution.
 	Hook *SolutionsHookInfo `xml:"hook,omitempty" json:"hook,omitempty"`
-	// Issues, ESX Agent Manager has encountered while attempting to acheive
+	// Issues, ESX Agent Manager has encountered while attempting to achieve
 	// the solution's requested desired state.
 	Issues []BaseIssue `xml:"issues,omitempty,typeattr" json:"issues,omitempty"`
 	// Last desired state for the solution, requested from ESX Agent Manager,
@@ -3478,7 +3676,8 @@ type SolutionsSolutionConfig struct {
 	//
 	// If omitted - the default resource
 	// configuration specified in the OVF descriptor is used.
-	VmResourceSpec *SolutionsVmResourceSpec `xml:"vmResourceSpec,omitempty" json:"vmResourceSpec,omitempty"`
+	VmResourceSpec     *SolutionsVmResourceSpec `xml:"vmResourceSpec,omitempty" json:"vmResourceSpec,omitempty"`
+	RedeploymentPolicy string                   `xml:"redeploymentPolicy,omitempty" json:"redeploymentPolicy,omitempty"`
 }
 
 func init() {
@@ -3564,7 +3763,8 @@ type SolutionsUrlVMSource struct {
 	//
 	// If omitted - URL will
 	// be trusted using well known methods.
-	CertificatePEM string `xml:"certificatePEM,omitempty" json:"certificatePEM,omitempty"`
+	CertificatePEM       string `xml:"certificatePEM,omitempty" json:"certificatePEM,omitempty"`
+	AuthenticationScheme string `xml:"authenticationScheme,omitempty" json:"authenticationScheme,omitempty"`
 }
 
 func init() {
@@ -3609,8 +3809,14 @@ type SolutionsValidateSpec struct {
 	types.DynamicData
 
 	// Desired state to be validated.
-	DesiredState   []SolutionsSolutionConfig `xml:"desiredState" json:"desiredState"`
-	TransitionSpec *SolutionsTransitionSpec  `xml:"transitionSpec,omitempty" json:"transitionSpec,omitempty"`
+	DesiredState []SolutionsSolutionConfig `xml:"desiredState" json:"desiredState"`
+	// Transition specification to be validated.
+	//
+	// Mutually exclusive with `#multiSourceTransitionSpec` and
+	// `#clusterTransitionSpec`.
+	TransitionSpec            *SolutionsTransitionSpec            `xml:"transitionSpec,omitempty" json:"transitionSpec,omitempty" vim:"9.0"`
+	MultiSourceTransitionSpec *SolutionsMultiSourceTransitionSpec `xml:"multiSourceTransitionSpec,omitempty" json:"multiSourceTransitionSpec,omitempty"`
+	ClusterTransitionSpec     *SolutionsClusterTransitionSpec     `xml:"clusterTransitionSpec,omitempty" json:"clusterTransitionSpec,omitempty"`
 }
 
 func init() {
@@ -3654,12 +3860,41 @@ func init() {
 	types.Add("eam:SolutionsVmResourceSpec", reflect.TypeOf((*SolutionsVmResourceSpec)(nil)).Elem())
 }
 
+type SolutionsVmSelectionSpec struct {
+	types.DynamicData
+
+	SelectionType    string `xml:"selectionType" json:"selectionType"`
+	ExtraConfigValue string `xml:"extraConfigValue,omitempty" json:"extraConfigValue,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsVmSelectionSpec", reflect.TypeOf((*SolutionsVmSelectionSpec)(nil)).Elem())
+}
+
+type SolutionsVmSelectionSpecMapping struct {
+	types.DynamicData
+
+	VmId            types.ManagedObjectReference `xml:"vmId" json:"vmId"`
+	VmSelectionSpec SolutionsVmSelectionSpec     `xml:"vmSelectionSpec" json:"vmSelectionSpec"`
+}
+
+func init() {
+	types.Add("eam:SolutionsVmSelectionSpecMapping", reflect.TypeOf((*SolutionsVmSelectionSpecMapping)(nil)).Elem())
+}
+
+// An agent failed to be transitioned to a LCCM Solution.
+//
+// This is an active remediable issue. To remediate, resolve the issue via vLCM
+// System VMs API
+//
+// This structure may be used only with operations rendered under `/eam`.
 type TransitionFailed struct {
 	AgentIssue
 }
 
 func init() {
 	types.Add("eam:TransitionFailed", reflect.TypeOf((*TransitionFailed)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:TransitionFailed", "9.0")
 }
 
 type Uninstall UninstallRequestType
@@ -3813,7 +4048,7 @@ func init() {
 // since the VIB package is in an invalid format.
 //
 // The installation is unlikely to
-// succeed until the solution provding the bundle has been upgraded or patched to
+// succeed until the solution providing the bundle has been upgraded or patched to
 // provide a valid VIB package.
 //
 // This is an active remediable issue. To remediate, vSphere ESX Agent Manager attempts the VIB installation again.
@@ -4068,28 +4303,58 @@ func init() {
 	types.Add("eam:VmDeployed", reflect.TypeOf((*VmDeployed)(nil)).Elem())
 }
 
+// The VM hook remediation failed.
+//
+// In order to remediate the issue:
+// Resolve the issue via vLCM System VMs API and process the hook within the
+// timeout configured for the System VM Solution this issue's VM belongs to.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type VmHookFailed struct {
 	VmIssue
 }
 
 func init() {
 	types.Add("eam:VmHookFailed", reflect.TypeOf((*VmHookFailed)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:VmHookFailed", "9.0")
 }
 
+// The VM hook remediation timed out.
+//
+// In order to remediate the issue:
+// Resolve the issue via vLCM System VMs API and process the hook within the
+// timeout configured for the System VM Solution this issue's VM belongs to.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type VmHookTimedout struct {
 	VmIssue
 }
 
 func init() {
 	types.Add("eam:VmHookTimedout", reflect.TypeOf((*VmHookTimedout)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:VmHookTimedout", "9.0")
 }
 
+// The connection state of the agent Virtual Machine is
+// `inaccessible`.
+//
+// In order to remediate the issue:
+//   - Mark the VM for removal using the `EsxAgentManager.EsxAgentManager_MarkForRemoval`
+//     API.
+//   - Do the necessary changes to ensure that the connection state of the VM is
+//     `connected`.
+//
+// NOTE: When the HA is enabled on the cluster these issues may be transient and
+// automatically remediated.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type VmInaccessible struct {
 	VmIssue
 }
 
 func init() {
 	types.Add("eam:VmInaccessible", reflect.TypeOf((*VmInaccessible)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:VmInaccessible", "8.3")
 }
 
 // Base class for all issues related to the deployed virtual machine for a
@@ -4191,12 +4456,20 @@ func init() {
 	types.Add("eam:VmPoweredOn", reflect.TypeOf((*VmPoweredOn)(nil)).Elem())
 }
 
+// An agent virtual machine is protected from modifications
+// (example: HA recovery).
+//
+// This is an active remediable issue. To remediate, vSphere ESX Agent Manager
+// modifies the virtual machine.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type VmProtected struct {
 	VmIssue
 }
 
 func init() {
 	types.Add("eam:VmProtected", reflect.TypeOf((*VmProtected)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:VmProtected", "9.0")
 }
 
 // An agent virtual machine is expected to be deployed on a host, but the agent
@@ -4205,9 +4478,9 @@ func init() {
 // This is an active remediable issue. To remediate, vSphere ESX Agent Manager
 // takes the host out of Maintenance Mode and deploys the agent virtual machine.
 //
-// Resolving this issue in vSphere Lifecyle Manager environemnt will be no-op.
+// Resolving this issue in vSphere Lifecycle Manager environment will be no-op.
 // In those cases user must take the host out of Maintenance Mode manually or
-// wait vSphere Lifecycle Maanger cluster remediation to complete (if any).
+// wait vSphere Lifecycle Manager cluster remediation to complete (if any).
 //
 // This structure may be used only with operations rendered under `/eam`.
 type VmRequiresHostOutOfMaintenanceMode struct {
@@ -4232,7 +4505,7 @@ func init() {
 	types.Add("eam:VmSuspended", reflect.TypeOf((*VmSuspended)(nil)).Elem())
 }
 
-// Deprecated eAM does not try to override any action powerfull user has taken.
+// Deprecated eAM does not try to override any action powerful user has taken.
 //
 // An agent virtual machine is expected to be located in a designated agent
 // virtual machine folder, but is found in a different folder.
@@ -4258,7 +4531,7 @@ func init() {
 	types.Add("eam:VmWrongFolder", reflect.TypeOf((*VmWrongFolder)(nil)).Elem())
 }
 
-// Deprecated eAM does not try to override any action powerfull user has taken.
+// Deprecated eAM does not try to override any action powerful user has taken.
 //
 // An agent virtual machine is expected to be located in a designated agent
 // virtual machine resource pool, but is found in a different resource pool.

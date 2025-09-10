@@ -10,32 +10,32 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type ManagedObjectTypes string
+type ManagedObjectType string
 
 const (
-	ManagedObjectTypesVslmServiceInstance         = ManagedObjectTypes("VslmServiceInstance")
-	ManagedObjectTypesVslmStorageLifecycleManager = ManagedObjectTypes("VslmStorageLifecycleManager")
-	ManagedObjectTypesVslmTask                    = ManagedObjectTypes("VslmTask")
-	ManagedObjectTypesVslmSessionManager          = ManagedObjectTypes("VslmSessionManager")
-	ManagedObjectTypesVslmVStorageObjectManager   = ManagedObjectTypes("VslmVStorageObjectManager")
+	ManagedObjectTypeVslmServiceInstance         = ManagedObjectType("VslmServiceInstance")
+	ManagedObjectTypeVslmStorageLifecycleManager = ManagedObjectType("VslmStorageLifecycleManager")
+	ManagedObjectTypeVslmTask                    = ManagedObjectType("VslmTask")
+	ManagedObjectTypeVslmSessionManager          = ManagedObjectType("VslmSessionManager")
+	ManagedObjectTypeVslmVStorageObjectManager   = ManagedObjectType("VslmVStorageObjectManager")
 )
 
-func (e ManagedObjectTypes) Values() []ManagedObjectTypes {
-	return []ManagedObjectTypes{
-		ManagedObjectTypesVslmServiceInstance,
-		ManagedObjectTypesVslmStorageLifecycleManager,
-		ManagedObjectTypesVslmTask,
-		ManagedObjectTypesVslmSessionManager,
-		ManagedObjectTypesVslmVStorageObjectManager,
+func (e ManagedObjectType) Values() []ManagedObjectType {
+	return []ManagedObjectType{
+		ManagedObjectTypeVslmServiceInstance,
+		ManagedObjectTypeVslmStorageLifecycleManager,
+		ManagedObjectTypeVslmTask,
+		ManagedObjectTypeVslmSessionManager,
+		ManagedObjectTypeVslmVStorageObjectManager,
 	}
 }
 
-func (e ManagedObjectTypes) Strings() []string {
+func (e ManagedObjectType) Strings() []string {
 	return types.EnumValuesAsStrings(e.Values())
 }
 
 func init() {
-	types.Add("vslm:ManagedObjectTypes", reflect.TypeOf((*ManagedObjectTypes)(nil)).Elem())
+	types.Add("vslm:ManagedObjectType", reflect.TypeOf((*ManagedObjectType)(nil)).Elem())
 }
 
 type VslmEventType string

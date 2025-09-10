@@ -831,6 +831,26 @@ func UnregisterProvider_Task(ctx context.Context, r soap.RoundTripper, req *type
 	return resBody.Res, nil
 }
 
+type UpgradeVASAProvider_TaskBody struct {
+	Req    *types.UpgradeVASAProvider_Task         `xml:"urn:sms UpgradeVASAProvider_Task,omitempty"`
+	Res    *types.UpgradeVASAProvider_TaskResponse `xml:"urn:sms UpgradeVASAProvider_TaskResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *UpgradeVASAProvider_TaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func UpgradeVASAProvider_Task(ctx context.Context, r soap.RoundTripper, req *types.UpgradeVASAProvider_Task) (*types.UpgradeVASAProvider_TaskResponse, error) {
+	var reqBody, resBody UpgradeVASAProvider_TaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type VasaProviderReconnect_TaskBody struct {
 	Req    *types.VasaProviderReconnect_Task         `xml:"urn:sms VasaProviderReconnect_Task,omitempty"`
 	Res    *types.VasaProviderReconnect_TaskResponse `xml:"urn:sms VasaProviderReconnect_TaskResponse,omitempty"`

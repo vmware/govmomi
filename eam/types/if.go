@@ -80,6 +80,16 @@ func init() {
 	types.Add("BaseClusterAgentAgentIssue", reflect.TypeOf((*ClusterAgentAgentIssue)(nil)).Elem())
 }
 
+func (b *ClusterAgentVmHookFailed) GetClusterAgentVmHookFailed() *ClusterAgentVmHookFailed { return b }
+
+type BaseClusterAgentVmHookFailed interface {
+	GetClusterAgentVmHookFailed() *ClusterAgentVmHookFailed
+}
+
+func init() {
+	types.Add("BaseClusterAgentVmHookFailed", reflect.TypeOf((*ClusterAgentVmHookFailed)(nil)).Elem())
+}
+
 func (b *ClusterAgentVmIssue) GetClusterAgentVmIssue() *ClusterAgentVmIssue { return b }
 
 type BaseClusterAgentVmIssue interface {
@@ -244,6 +254,18 @@ type BaseSolutionsHookAcknowledgeConfig interface {
 
 func init() {
 	types.Add("BaseSolutionsHookAcknowledgeConfig", reflect.TypeOf((*SolutionsHookAcknowledgeConfig)(nil)).Elem())
+}
+
+func (b *SolutionsRemediationPolicy) GetSolutionsRemediationPolicy() *SolutionsRemediationPolicy {
+	return b
+}
+
+type BaseSolutionsRemediationPolicy interface {
+	GetSolutionsRemediationPolicy() *SolutionsRemediationPolicy
+}
+
+func init() {
+	types.Add("BaseSolutionsRemediationPolicy", reflect.TypeOf((*SolutionsRemediationPolicy)(nil)).Elem())
 }
 
 func (b *SolutionsStoragePolicy) GetSolutionsStoragePolicy() *SolutionsStoragePolicy { return b }

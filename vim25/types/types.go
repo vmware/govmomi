@@ -949,7 +949,7 @@ type AddVirtualSwitchResponse struct {
 }
 
 // Fault thrown if an attempt to disable the Administrator permission
-// on a host of which the Administator permission has already been disabled.
+// on a host of which the Administrator permission has already been disabled.
 type AdminDisabled struct {
 	HostConfigFault
 }
@@ -965,7 +965,7 @@ func init() {
 }
 
 // Fault thrown if an attempt to enable the Administrator permission
-// on a host of which the Administator permission is not disabled.
+// on a host of which the Administrator permission is not disabled.
 type AdminNotDisabled struct {
 	HostConfigFault
 }
@@ -1139,11 +1139,11 @@ type AlarmDescription struct {
 	VirtualMachinePowerState []BaseElementDescription `xml:"virtualMachinePowerState,typeattr" json:"virtualMachinePowerState"`
 	// `DatastoreSummary.accessible` and
 	// `description`
-	DatastoreConnectionState []BaseElementDescription `xml:"datastoreConnectionState,omitempty,typeattr" json:"datastoreConnectionState,omitempty"`
+	DatastoreConnectionState []BaseElementDescription `xml:"datastoreConnectionState,typeattr" json:"datastoreConnectionState"`
 	// *Host System Power State enum description*
-	HostSystemPowerState []BaseElementDescription `xml:"hostSystemPowerState,omitempty,typeattr" json:"hostSystemPowerState,omitempty"`
+	HostSystemPowerState []BaseElementDescription `xml:"hostSystemPowerState,typeattr" json:"hostSystemPowerState"`
 	// *Guest Heartbeat Status enum description*
-	VirtualMachineGuestHeartbeatStatus []BaseElementDescription `xml:"virtualMachineGuestHeartbeatStatus,omitempty,typeattr" json:"virtualMachineGuestHeartbeatStatus,omitempty"`
+	VirtualMachineGuestHeartbeatStatus []BaseElementDescription `xml:"virtualMachineGuestHeartbeatStatus,typeattr" json:"virtualMachineGuestHeartbeatStatus"`
 	// *ManagedEntity Status enum description*
 	EntityStatus []BaseElementDescription `xml:"entityStatus,typeattr" json:"entityStatus"`
 	// Action class descriptions for an alarm.
@@ -2031,7 +2031,7 @@ type ApplyHostConfig_TaskResponse struct {
 
 // The `ApplyHostProfileConfigurationResult` data object contains the remediation
 // results for a host: the time that the remediation happens, the status,
-// the errors, and optinal compliance result after reboot.
+// the errors, and optional compliance result after reboot.
 type ApplyHostProfileConfigurationResult struct {
 	DynamicData
 
@@ -6066,6 +6066,16 @@ func init() {
 	t["ArrayOfPhysicalNicProfile"] = reflect.TypeOf((*ArrayOfPhysicalNicProfile)(nil)).Elem()
 }
 
+// A boxed array of `PlaceVmsXClusterSpecCandidateNetworks`. To be used in `Any` placeholders.
+type ArrayOfPlaceVmsXClusterSpecCandidateNetworks struct {
+	PlaceVmsXClusterSpecCandidateNetworks []PlaceVmsXClusterSpecCandidateNetworks `xml:"PlaceVmsXClusterSpecCandidateNetworks,omitempty" json:"_value"`
+}
+
+func init() {
+	t["ArrayOfPlaceVmsXClusterSpecCandidateNetworks"] = reflect.TypeOf((*ArrayOfPlaceVmsXClusterSpecCandidateNetworks)(nil)).Elem()
+	minAPIVersionForType["ArrayOfPlaceVmsXClusterSpecCandidateNetworks"] = "9.1.0.0"
+}
+
 // A boxed array of `PlacementAffinityRule`. To be used in `Any` placeholders.
 type ArrayOfPlacementAffinityRule struct {
 	PlacementAffinityRule []PlacementAffinityRule `xml:"PlacementAffinityRule,omitempty" json:"_value"`
@@ -6327,6 +6337,15 @@ func init() {
 	t["ArrayOfRelation"] = reflect.TypeOf((*ArrayOfRelation)(nil)).Elem()
 }
 
+// A boxed array of `ReplicationGroupId`. To be used in `Any` placeholders.
+type ArrayOfReplicationGroupId struct {
+	ReplicationGroupId []ReplicationGroupId `xml:"ReplicationGroupId,omitempty" json:"_value"`
+}
+
+func init() {
+	t["ArrayOfReplicationGroupId"] = reflect.TypeOf((*ArrayOfReplicationGroupId)(nil)).Elem()
+}
+
 // A boxed array of `ReplicationInfoDiskSettings`. To be used in `Any` placeholders.
 type ArrayOfReplicationInfoDiskSettings struct {
 	ReplicationInfoDiskSettings []ReplicationInfoDiskSettings `xml:"ReplicationInfoDiskSettings,omitempty" json:"_value"`
@@ -6343,6 +6362,16 @@ type ArrayOfResourceConfigSpec struct {
 
 func init() {
 	t["ArrayOfResourceConfigSpec"] = reflect.TypeOf((*ArrayOfResourceConfigSpec)(nil)).Elem()
+}
+
+// A boxed array of `ResourcePoolVmResourceProfileUsage`. To be used in `Any` placeholders.
+type ArrayOfResourcePoolVmResourceProfileUsage struct {
+	ResourcePoolVmResourceProfileUsage []ResourcePoolVmResourceProfileUsage `xml:"ResourcePoolVmResourceProfileUsage,omitempty" json:"_value"`
+}
+
+func init() {
+	t["ArrayOfResourcePoolVmResourceProfileUsage"] = reflect.TypeOf((*ArrayOfResourcePoolVmResourceProfileUsage)(nil)).Elem()
+	minAPIVersionForType["ArrayOfResourcePoolVmResourceProfileUsage"] = "9.1.0.0"
 }
 
 // A boxed array of `RetrieveVStorageObjSpec`. To be used in `Any` placeholders.
@@ -7564,6 +7593,16 @@ func init() {
 	t["ArrayOfVmEventArgument"] = reflect.TypeOf((*ArrayOfVmEventArgument)(nil)).Elem()
 }
 
+// A boxed array of `VmPlacementPolicy`. To be used in `Any` placeholders.
+type ArrayOfVmPlacementPolicy struct {
+	VmPlacementPolicy []BaseVmPlacementPolicy `xml:"VmPlacementPolicy,omitempty,typeattr" json:"_value"`
+}
+
+func init() {
+	t["ArrayOfVmPlacementPolicy"] = reflect.TypeOf((*ArrayOfVmPlacementPolicy)(nil)).Elem()
+	minAPIVersionForType["ArrayOfVmPlacementPolicy"] = "9.1.0.0"
+}
+
 // A boxed array of `VmPodConfigForPlacement`. To be used in `Any` placeholders.
 type ArrayOfVmPodConfigForPlacement struct {
 	VmPodConfigForPlacement []VmPodConfigForPlacement `xml:"VmPodConfigForPlacement,omitempty" json:"_value"`
@@ -8422,6 +8461,12 @@ type BaseConfigInfoFileBackingInfo struct {
 	DeltaSizeInMB int64 `xml:"deltaSizeInMB,omitempty" json:"deltaSizeInMB,omitempty"`
 	// key id used to encrypt the backing disk.
 	KeyId *CryptoKeyId `xml:"keyId,omitempty" json:"keyId,omitempty"`
+	// Flag indicates whether the file backing is shared across
+	// multiple fcd disk chains.
+	//
+	// This flag is intended for internal use only and is
+	// primarily used in the relocation workflow.
+	SharedFileBacking *bool `xml:"sharedFileBacking" json:"sharedFileBacking,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -8830,7 +8875,7 @@ func init() {
 
 // An CannotAccessLocalSourceFault exception is thrown when a
 // an attempt is made to upload license content
-// and the local source cannot be accesed.
+// and the local source cannot be accessed.
 type CannotAccessLocalSource struct {
 	VimFault
 }
@@ -9535,6 +9580,10 @@ type Capability struct {
 	HostSeedingSupported *bool `xml:"hostSeedingSupported" json:"hostSeedingSupported,omitempty" vim:"7.0.2.0"`
 	// Specifies if scalable shares for resource pools is supported.
 	ScalableSharesSupported *bool `xml:"scalableSharesSupported" json:"scalableSharesSupported,omitempty"`
+	// Deprecated as of vSphere 9.0 with no replacement. In a future release
+	// of vSphere, the vCLS functionality will be disabled, vCLS
+	// system VMs will be deleted, and vCLS APIs will be removed.
+	//
 	// Specifies if highly available distributed clustering service is supported.
 	HadcsSupported *bool `xml:"hadcsSupported" json:"hadcsSupported,omitempty" vim:"7.0.1.1"`
 	// Specifies if desired configuration management platform is supported
@@ -10821,6 +10870,31 @@ type ClusterClusterInitialPlacementAction struct {
 	//
 	// Refers instance of `ResourcePool`.
 	Pool ManagedObjectReference `xml:"pool" json:"pool"`
+	// List of all networks available to all virtual NICs of the virtual machine
+	// on the chosen cluster.
+	//
+	// This field is set if the input spec to
+	// `Folder.PlaceVmsXCluster` has
+	// `PlaceVmsXClusterSpecVmPlacementSpec.candidateNetworks`
+	// specified.
+	// When `PlaceVmsXClusterSpecVmPlacementSpec.candidateNetworks`
+	// is supplied to the cross cluster placement API, the API response will set
+	// this field by selecting networks specified for all virtual network
+	// interfaces in
+	// `PlaceVmsXClusterSpecVmPlacementSpec.candidateNetworks` that
+	// are available on the chosen cluster.
+	// Example: Assume
+	// `PlaceVmsXClusterSpecVmPlacementSpec.candidateNetworks` is
+	// specified with three network interfaces specified with the following
+	// networks:
+	// \- NIC 0: \[A, B, C\]
+	// \- NIC 1: \[B, E, F\]
+	// \- NIC 2: \[B, H, I\]
+	// If the available networks on the chosen cluster are B, F, and I, this
+	// field will contain \[B, F, I\] networks.
+	//
+	// Refers instances of `Network`.
+	AvailableNetworks []ManagedObjectReference `xml:"availableNetworks,omitempty" json:"availableNetworks,omitempty" vim:"9.1.0.0"`
 	// The config spec of the virtual machine to be placed.
 	//
 	// The `Folder.PlaceVmsXCluster` method takes
@@ -11246,11 +11320,19 @@ type ClusterComputeResourceSummary struct {
 	// Valid values are enumerated by the `ClusterMaintenanceModeStatus`
 	// type.
 	ClusterMaintenanceModeStatus string `xml:"clusterMaintenanceModeStatus,omitempty" json:"clusterMaintenanceModeStatus,omitempty" vim:"7.0.0.2"`
+	// Deprecated as of vSphere 9.0 with no replacement. In a future release
+	// of vSphere, the vCLS functionality will be disabled, vCLS
+	// system VMs will be deleted, and vCLS APIs will be removed.
+	//
 	// The health status of the vSphere Cluster Services in the cluster.
 	//
 	// Supported values are enumerated by the `VcsHealthStatus`
 	// type.
 	VcsHealthStatus string `xml:"vcsHealthStatus,omitempty" json:"vcsHealthStatus,omitempty" vim:"7.0.1.1"`
+	// Deprecated as of vSphere 9.0 with no replacement. In a future release
+	// of vSphere, the vCLS functionality will be disabled, vCLS
+	// system VMs will be deleted, and vCLS APIs will be removed.
+	//
 	// An array of hosts and number of resource slots on the host for
 	// vSphere Cluster Services in the cluster.
 	//
@@ -11292,6 +11374,11 @@ func init() {
 	t["ClusterComputeResourceValidationResultBase"] = reflect.TypeOf((*ClusterComputeResourceValidationResultBase)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 with no replacement. In a future release
+// of vSphere, the vCLS functionality will be disabled, vCLS
+// system VMs will be deleted, and vCLS APIs will be removed.
+//
+// Do not use.
 type ClusterComputeResourceVcsSlots struct {
 	DynamicData
 
@@ -11356,6 +11443,10 @@ func init() {
 type ClusterConfigInfoEx struct {
 	ComputeResourceConfigInfo
 
+	// Deprecated as of vSphere 9.0 with no replacement. In a future release
+	// of vSphere, the vCLS functionality will be disabled, vCLS
+	// system VMs will be deleted, and vCLS APIs will be removed.
+	//
 	// Configuration for vCLS system VMs deployment.
 	SystemVMsConfig *ClusterSystemVMsConfigInfo `xml:"systemVMsConfig,omitempty" json:"systemVMsConfig,omitempty" vim:"7.0.3.0"`
 	// Cluster-wide configuration of the vSphere HA service.
@@ -11645,6 +11736,10 @@ func init() {
 type ClusterConfigSpecEx struct {
 	ComputeResourceConfigSpec
 
+	// Deprecated as of vSphere 9.0 with no replacement. In a future release
+	// of vSphere, the vCLS functionality will be disabled, vCLS
+	// system VMs will be deleted, and vCLS APIs will be removed.
+	//
 	// Configuration for vCLS system VMs deployment.
 	SystemVMsConfig *ClusterSystemVMsConfigSpec `xml:"systemVMsConfig,omitempty" json:"systemVMsConfig,omitempty" vim:"7.0.3.0"`
 	// HA configuration; includes default settings for virtual machines.
@@ -11699,7 +11794,7 @@ type ClusterConfigSpecEx struct {
 	// generated automatically per member hosts, which are identified
 	// by using cluster reconfiguration task id as
 	// `TaskInfo.parentTaskKey`, and should be monitored
-	// and tracked separatedly.
+	// and tracked separately.
 	VsanConfig *VsanClusterConfigInfo `xml:"vsanConfig,omitempty" json:"vsanConfig,omitempty"`
 	// VSAN configuration for individual hosts.
 	//
@@ -11880,6 +11975,8 @@ type ClusterDasAdmissionControlPolicy struct {
 	// Percentage of resource reduction that a cluster of VMs can tolerate
 	// in case of a failover.
 	ResourceReductionToToleratePercent *int32 `xml:"resourceReductionToToleratePercent" json:"resourceReductionToToleratePercent,omitempty"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Flag that determines whether strict admission control for persistent
 	// memory is enabled.
 	//
@@ -12157,7 +12254,7 @@ type ClusterDasFailoverLevelAdvancedRuntimeInfo struct {
 	TotalVms int32 `xml:"totalVms" json:"totalVms"`
 	// The total number of hosts in the cluster.
 	TotalHosts int32 `xml:"totalHosts" json:"totalHosts"`
-	// The total number of connected hosts that are not in maintance mode and that
+	// The total number of connected hosts that are not in maintenance mode and that
 	// do not have any DAS-related config issues on them.
 	TotalGoodHosts int32                                                 `xml:"totalGoodHosts" json:"totalGoodHosts"`
 	HostSlots      []ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots `xml:"hostSlots,omitempty" json:"hostSlots,omitempty"`
@@ -12433,6 +12530,10 @@ func init() {
 	t["ClusterDasVmSettings"] = reflect.TypeOf((*ClusterDasVmSettings)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 with no replacement. In a future release
+// of vSphere, the vCLS functionality will be disabled, vCLS
+// system VMs will be deleted, and vCLS APIs will be removed.
+//
 // An incremental update to a Datastore list.
 type ClusterDatastoreUpdateSpec struct {
 	ArrayUpdateSpec
@@ -12446,7 +12547,7 @@ func init() {
 	minAPIVersionForType["ClusterDatastoreUpdateSpec"] = "7.0.3.0"
 }
 
-// The `ClusterDependencyRuleInfo` data object indentifies VM-to-VM
+// The `ClusterDependencyRuleInfo` data object identifies VM-to-VM
 // dependencies.
 //
 // A VM-VM Dependency rule identifies the following groups.
@@ -12471,7 +12572,7 @@ type ClusterDependencyRuleInfo struct {
 	// machines.
 	// `ClusterVmGroup*.*ClusterGroupInfo.name`
 	VmGroup string `xml:"vmGroup" json:"vmGroup"`
-	// Depdendency virtual group name
+	// Dependency virtual group name
 	// (`ClusterVmGroup*.*ClusterGroupInfo.name`).
 	//
 	// The virtual group may contain one or more virtual machines.
@@ -12619,7 +12720,7 @@ type ClusterDrsConfigInfo struct {
 	// To disable DRS load balancing, please use the lowest DRS aggressiveness
 	// level, setting `ClusterDrsConfigInfo.vmotionRate` to 5, and/or
 	// setting `ClusterDrsConfigInfo.defaultVmBehavior` to manual.
-	// The former only generates manadatory move recommendations, not load
+	// The former only generates mandatory move recommendations, not load
 	// balancing recommendations. The latter only generates recommendations,
 	// without executing them.
 	// To remove all the child resource pools, please find the root resource
@@ -12856,9 +12957,9 @@ func init() {
 // then three operations are provided for updating the DRS configuration for a virtual machine.
 // These operations are listed below (see `ArrayUpdateSpec` for more
 // information on these operations).
-//   - add: add a configuration for the virtual machine, overwritting the existing
+//   - add: add a configuration for the virtual machine, overwriting the existing
 //     configuration if one exists
-//   - edit: incrmentally update the existing configuration; an existing configuration
+//   - edit: incrementally update the existing configuration; an existing configuration
 //     must exist
 //   - remove: remove the existing configuration; an existing configuration must exist
 //
@@ -13052,7 +13153,7 @@ func init() {
 // or it has insufficient resources, HA attempts to restart those virtual
 // machines on another host in the cluster.
 //
-// To support the availabilty of a failover host,
+// To support the availability of a failover host,
 // the vCenter Server will prevent users from powering on virtual machines
 // on that host, or from using vMotion to migrate virtual machines to the host.
 // Also, DRS does not use the failover host for load balancing.
@@ -13176,6 +13277,8 @@ type ClusterFailoverResourcesAdmissionControlInfo struct {
 	CurrentCpuFailoverResourcesPercent int32 `xml:"currentCpuFailoverResourcesPercent" json:"currentCpuFailoverResourcesPercent"`
 	// The percentage of memory resources in the cluster available for failover.
 	CurrentMemoryFailoverResourcesPercent int32 `xml:"currentMemoryFailoverResourcesPercent" json:"currentMemoryFailoverResourcesPercent"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// The percentage of persistent memory resources in the cluster available
 	// for failover.
 	CurrentPMemFailoverResourcesPercent int32 `xml:"currentPMemFailoverResourcesPercent,omitempty" json:"currentPMemFailoverResourcesPercent,omitempty" vim:"7.0.2.0"`
@@ -13236,11 +13339,15 @@ type ClusterFailoverResourcesAdmissionControlPolicy struct {
 	// If users want to override the percentage values,
 	// they must disable the auto-compute by setting this field to false.
 	AutoComputePercentages *bool `xml:"autoComputePercentages" json:"autoComputePercentages,omitempty"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Percentage of persistent memory resources in the cluster to reserve for
 	// the failover.
 	//
 	// You can specify up to 100% of persistent memory resources for failover.
 	PMemFailoverResourcesPercent int32 `xml:"pMemFailoverResourcesPercent,omitempty" json:"pMemFailoverResourcesPercent,omitempty" vim:"7.0.2.0"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Flag to enable user input values for
 	// `ClusterFailoverResourcesAdmissionControlPolicy.pMemFailoverResourcesPercent`
 	// By default, this is true and the default calculation is done using the
@@ -13270,7 +13377,9 @@ func init() {
 }
 
 // An `ClusterFtVmHostRuleInfo` object provides control of the
-// placement of virtual machines across two host groups. The virtual machines
+// placement of virtual machines across two host groups.
+//
+// The virtual machines
 // and hosts referenced by an FT VM-Host rule must be in the same cluster.
 //
 // An FT VM-Host rule identifies the following groups.
@@ -13519,7 +13628,7 @@ type ClusterIoFilterInfo struct {
 	// The set of possible values are described in
 	// `IoFilterOperation_enum`.
 	// If opType is `uninstall`,
-	// and the uninstallation of the filter was sucessful on all the hosts
+	// and the uninstallation of the filter was successful on all the hosts
 	// in the cluster, the filter will be removed from the cluster's filter
 	// list.
 	OpType string `xml:"opType" json:"opType"`
@@ -13842,11 +13951,17 @@ func init() {
 type ClusterResourceUsageSummary struct {
 	DynamicData
 
-	CpuUsedMHz        int32 `xml:"cpuUsedMHz" json:"cpuUsedMHz"`
-	CpuCapacityMHz    int32 `xml:"cpuCapacityMHz" json:"cpuCapacityMHz"`
-	MemUsedMB         int32 `xml:"memUsedMB" json:"memUsedMB"`
-	MemCapacityMB     int32 `xml:"memCapacityMB" json:"memCapacityMB"`
-	PMemAvailableMB   int64 `xml:"pMemAvailableMB,omitempty" json:"pMemAvailableMB,omitempty"`
+	CpuUsedMHz     int32 `xml:"cpuUsedMHz" json:"cpuUsedMHz"`
+	CpuCapacityMHz int32 `xml:"cpuCapacityMHz" json:"cpuCapacityMHz"`
+	MemUsedMB      int32 `xml:"memUsedMB" json:"memUsedMB"`
+	MemCapacityMB  int32 `xml:"memCapacityMB" json:"memCapacityMB"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
+	// Do not use.
+	PMemAvailableMB int64 `xml:"pMemAvailableMB,omitempty" json:"pMemAvailableMB,omitempty"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
+	// Do not use.
 	PMemCapacityMB    int64 `xml:"pMemCapacityMB,omitempty" json:"pMemCapacityMB,omitempty"`
 	StorageUsedMB     int64 `xml:"storageUsedMB" json:"storageUsedMB"`
 	StorageCapacityMB int64 `xml:"storageCapacityMB" json:"storageCapacityMB"`
@@ -14013,6 +14128,10 @@ func init() {
 	t["ClusterStatusChangedEvent"] = reflect.TypeOf((*ClusterStatusChangedEvent)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 with no replacement. In a future release
+// of vSphere, the vCLS functionality will be disabled, vCLS
+// system VMs will be deleted, and vCLS APIs will be removed.
+//
 // Configuration for System VMs deployment.
 type ClusterSystemVMsConfigInfo struct {
 	DynamicData
@@ -14043,6 +14162,10 @@ func init() {
 	minAPIVersionForType["ClusterSystemVMsConfigInfo"] = "7.0.3.0"
 }
 
+// Deprecated as of vSphere 9.0 with no replacement. In a future release
+// of vSphere, the vCLS functionality will be disabled, vCLS
+// system VMs will be deleted, and vCLS APIs will be removed.
+//
 // Configuration for System VMs deployment.
 type ClusterSystemVMsConfigSpec struct {
 	DynamicData
@@ -14068,6 +14191,10 @@ func init() {
 	minAPIVersionForType["ClusterSystemVMsConfigSpec"] = "7.0.3.0"
 }
 
+// Deprecated as of vSphere 9.0 with no replacement. In a future release
+// of vSphere, the vCLS functionality will be disabled, vCLS
+// system VMs will be deleted, and vCLS APIs will be removed.
+//
 // An incremental update to a TagCategory list.
 type ClusterTagCategoryUpdateSpec struct {
 	ArrayUpdateSpec
@@ -14147,7 +14274,7 @@ type ClusterVmComponentProtectionSettings struct {
 	//
 	// APD is a condition where a storage has become inaccessible
 	// for unknown reasons. It only indicates loss of connectivity and does not indicate
-	// storage device failure or LUN removal (Permenant Device Loss or PDL). The details
+	// storage device failure or LUN removal (Permanent Device Loss or PDL). The details
 	// of APD and PDL are described in `HostMountInfoInaccessibleReason_enum`.
 	//
 	// This property is meaningful only when vSphere HA is turned on. Valid values are
@@ -14207,7 +14334,7 @@ type ClusterVmComponentProtectionSettings struct {
 	// `none` for cluster setting and
 	// `useClusterDefault` for per-VM setting.
 	VmReactionOnAPDCleared string `xml:"vmReactionOnAPDCleared,omitempty" json:"vmReactionOnAPDCleared,omitempty"`
-	// VM storage protection setting for storage failures categorized as Permenant Device
+	// VM storage protection setting for storage failures categorized as Permanent Device
 	// Loss (PDL).
 	//
 	// PDL indicates storage device failure or LUN removal. In case of PDL,
@@ -14258,7 +14385,9 @@ func init() {
 }
 
 // A `ClusterVmHostRuleInfo` object identifies virtual machines
-// and host groups that determine virtual machine placement. The virtual
+// and host groups that determine virtual machine placement.
+//
+// The virtual
 // machines and hosts referenced by a VM-Host rule must be in the same cluster.
 //
 // A VM-Host rule identifies the following groups.
@@ -14306,7 +14435,7 @@ func init() {
 // configuration for a single virtual machine.
 //
 // This makes it possible to
-// override the defaut behavior for an individual virtual machine.
+// override the default behavior for an individual virtual machine.
 type ClusterVmOrchestrationInfo struct {
 	DynamicData
 
@@ -14525,7 +14654,7 @@ func init() {
 type ComplianceLocator struct {
 	DynamicData
 
-	// Exression for which the Locator corresponds to
+	// Expression for which the Locator corresponds to
 	ExpressionName string `xml:"expressionName" json:"expressionName"`
 	// Complete path to the profile/policy which was responsible for the
 	// generation of the ComplianceExpression.
@@ -14984,7 +15113,7 @@ type ConfigTarget struct {
 	MaxCpusPerHost int32 `xml:"maxCpusPerHost,omitempty" json:"maxCpusPerHost,omitempty"`
 	// Presence of System Management Controller, indicates the host is
 	// Apple hardware, and thus capable of running Mac OS guest as VM.
-	SmcPresent *bool `xml:"smcPresent" json:"smcPresent,omitempty"`
+	SmcPresent bool `xml:"smcPresent" json:"smcPresent"`
 	// List of datastores available for virtual disks and associated storage.
 	Datastore []VirtualMachineDatastoreInfo `xml:"datastore,omitempty" json:"datastore,omitempty"`
 	// List of networks available for virtual network adapters.
@@ -15543,7 +15672,7 @@ type ConvertNamespacePathToUuidPathRequestType struct {
 	//
 	// Refers instance of `Datacenter`.
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
-	// Namesapce URL of the form
+	// Namespace URL of the form
 	// > \[ds://\]/vmfs/volumes/\[_datastore-uuid_\]/\[_directory-name_\]/...
 	// >
 	NamespaceUrl string `xml:"namespaceUrl" json:"namespaceUrl"`
@@ -15742,7 +15871,7 @@ type CpuIncompatible1ECX struct {
 	// Flag to indicate bit 0 is incompatible.
 	Sse3 bool `xml:"sse3" json:"sse3"`
 	// Flag to indicate bit 1 is incompatible.
-	Pclmulqdq *bool `xml:"pclmulqdq" json:"pclmulqdq,omitempty"`
+	Pclmulqdq bool `xml:"pclmulqdq" json:"pclmulqdq"`
 	// Flag to indicate bit 9 is incompatible.
 	Ssse3 bool `xml:"ssse3" json:"ssse3"`
 	// Flag to indicate bit 19 is incompatible.
@@ -15750,7 +15879,7 @@ type CpuIncompatible1ECX struct {
 	// Flag to indicate bit 20 is incompatible.
 	Sse42 bool `xml:"sse42" json:"sse42"`
 	// Flag to indicate bit 25 is incompatible.
-	Aes *bool `xml:"aes" json:"aes,omitempty"`
+	Aes bool `xml:"aes" json:"aes"`
 	// Flag to indicate that bits other than 0/1/9/19/20/25 are incompatible.
 	//
 	// I.e. the detected incompatibilities cannot be completely described by
@@ -16291,25 +16420,29 @@ type CreateDiskFromSnapshotRequestType struct {
 	Profile []BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile,omitempty"`
 	// Crypto information of the new disk.
 	// If unset and if profile contains an encryption iofilter and
-	// if snapshto is unencrypted, then cyrpto will be of
+	// if snapshto is unencrypted, then crypto will be of
 	// type CryptoSpecEncrypt, and filled with keyId that is
 	// automatically generated and keyProviderId that is the
 	// default kms cluster.
 	// If unset and if profile is a default policy and if snapshot
 	// is unenrypted, then crypto is treated as CryptoSpecNoOp.
 	// If unset and if profile contains an encryption iofilter and
-	// if snapshot is encrypted, then cyrpto is treated as
+	// if snapshot is encrypted, then crypto is treated as
 	// CryptoSpecNoOp.
 	// If unset and if profile is a default policy and if
-	// snapshot is encrypted, then cyrpto is treated as
+	// snapshot is encrypted, then crypto is treated as
 	// CryptoSpecDecrypt.
 	// To recrypt the disk during creating disk, crypto has to be
 	// present.
 	Crypto BaseCryptoSpec `xml:"crypto,omitempty,typeattr" json:"crypto,omitempty"`
-	// Relative location in the specified datastore where disk needs
-	// to be created. If not specified disk gets created at the
-	// defualt VStorageObject location on the specified datastore.
+	// Relative location where disk has to be created, used in
+	// `targetDatastore` and `datastore` parameters.
+	// If not specified disk gets created at default `VStorageObject`
+	// location of `targetDatastore` or `datastore`.
 	Path string `xml:"path,omitempty" json:"path,omitempty"`
+	// Indicates whether a linkedClone Disk needs to be created
+	// from the snapshot.
+	IsLinkedClone *bool `xml:"isLinkedClone" json:"isLinkedClone,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -17037,7 +17170,7 @@ func init() {
 // The parameters of `HostStorageSystem.CreateSoftwareAdapter`.
 type CreateSoftwareAdapterRequestType struct {
 	This ManagedObjectReference `xml:"_this" json:"-"`
-	// A data object that specifices the parameters necessary
+	// A data object that specifies the parameters necessary
 	// to create a software host bus adapter of a specific type.
 	Spec BaseHostHbaCreateSpec `xml:"spec,typeattr" json:"spec"`
 }
@@ -17984,7 +18117,7 @@ type CustomizationAdapterMapping struct {
 	// In vSphere 7.0 series, the MAC addresses must be specified in the
 	// ascending order of pciSlotNumber, otherwise a MAC address mismatch error
 	// will be reported. For further details, see the
-	// https://knowledge.broadcom.com/external/article?articleNumber=312120
+	// https://kb.vmware.com/s/article/87648
 	MacAddress string `xml:"macAddress,omitempty" json:"macAddress,omitempty"`
 	// The IP settings for the associated virtual network adapter.
 	Adapter CustomizationIPSettings `xml:"adapter" json:"adapter"`
@@ -18013,13 +18146,13 @@ type CustomizationCloudinitPrep struct {
 	//
 	// It is in json or yaml format.
 	// The max size of the metadata is 524288 bytes.
-	// See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/instancedata.html#"target="_blank">Instance Metadata</a>.
+	// See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/instancedata.html#" target="_blank">Instance Metadata</a>.
 	Metadata string `xml:"metadata" json:"metadata"`
 	// Userdata is the user custom content that cloud-init processes to
 	// configure the VM.
 	//
 	// The max size of the userdata is 524288 bytes.
-	// See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/format.html"target="_blank">User-Data formats</a>.
+	// See detail information about <a href="https://cloudinit.readthedocs.io/en/latest/topics/format.html" target="_blank">User-Data formats</a>.
 	Userdata string `xml:"userdata,omitempty" json:"userdata,omitempty"`
 }
 
@@ -18093,6 +18226,16 @@ type CustomizationDhcpIpV6Generator struct {
 
 func init() {
 	t["CustomizationDhcpIpV6Generator"] = reflect.TypeOf((*CustomizationDhcpIpV6Generator)(nil)).Elem()
+}
+
+// Disable IPv4 configuration on the virtual network adapter.
+type CustomizationDisableIpV4 struct {
+	CustomizationIpGenerator
+}
+
+func init() {
+	t["CustomizationDisableIpV4"] = reflect.TypeOf((*CustomizationDisableIpV4)(nil)).Elem()
+	minAPIVersionForType["CustomizationDisableIpV4"] = "9.1.0.0"
 }
 
 // Base for customization events.
@@ -18208,7 +18351,7 @@ func init() {
 // The GuiRunOnce data object type maps to the GuiRunOnce key in the
 // `sysprep.xml` answer file. These values are transferred into the
 // `sysprep.xml` file that VirtualCenter stores on the target virtual disk. For
-// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
 type CustomizationGuiRunOnce struct {
 	DynamicData
 
@@ -18225,7 +18368,7 @@ func init() {
 //
 // These values are plugged directly into the `sysprep.xml` file
 // that VirtualCenter stores on the target virtual disk. For more detailed
-// information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+// information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
 type CustomizationGuiUnattended struct {
 	DynamicData
 
@@ -18246,7 +18389,7 @@ type CustomizationGuiUnattended struct {
 	// The time zone index for the virtual machine.
 	//
 	// Numbers correspond to time zones
-	// listed at <a href="https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values"target="_blank">Microsoft Time Zone Index Values</a>.
+	// listed at <a href="https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values" target="_blank">Microsoft Time Zone Index Values</a>.
 	TimeZone int32 `xml:"timeZone" json:"timeZone"`
 	// Flag to determine whether or not the machine automatically logs on as
 	// Administrator.
@@ -18307,6 +18450,24 @@ type CustomizationIPSettings struct {
 	SecondaryWINS string `xml:"secondaryWINS,omitempty" json:"secondaryWINS,omitempty"`
 	// NetBIOS setting for Windows.
 	NetBIOS CustomizationNetBIOSMode `xml:"netBIOS,omitempty" json:"netBIOS,omitempty"`
+	// Flag to specify whether or not the virtual network adapter is primary.
+	//
+	// The primary NIC setting determines the default and only gateway for the virtual machine.
+	// The virtual machine can use any NIC to connect to virtual and physical machines
+	// that are directly connected to the same network as the NIC,
+	// but it can only use the primary NIC to connect to machines on networks that require a gateway connection.
+	// For more details about primary NIC settings, refer to the <a href="https://knowledge.broadcom.com/external/article?legacyId=402816" target="_blank">Primary NIC setting on virtual machines in vSphere</a>.
+	//
+	// Guidelines for using the field:
+	//   - Only one adapter should set the field to `true`
+	//     if multiple adapters are present.
+	//   - The adapter marked as primary must be configured with
+	//     a static IP address and a static gateway.
+	//   - If no adapter is explicitly marked as primary,
+	//     the first adapter will be defaulted to be primary
+	//     only when it's configured with a static IP address and a static gateway,
+	//     otherwise no adapter will be treated as the primary.
+	Primary *bool `xml:"primary" json:"primary,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -18333,7 +18494,7 @@ func init() {
 // The Identification data object type maps to the Identification key in the
 // `sysprep.xml` answer file. These values are transferred into the
 // `sysprep.xml` file that VirtualCenter stores on the target virtual disk. For
-// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
 type CustomizationIdentification struct {
 	DynamicData
 
@@ -18403,7 +18564,7 @@ func init() {
 //
 // These values are transferred into the
 // `sysprep.xml` file that VirtualCenter stores on the target virtual disk. For
-// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
 // LicenseFilePrintData provides licensing information for Windows server operating
 // systems.
 type CustomizationLicenseFilePrintData struct {
@@ -18421,6 +18582,19 @@ type CustomizationLicenseFilePrintData struct {
 
 func init() {
 	t["CustomizationLicenseFilePrintData"] = reflect.TypeOf((*CustomizationLicenseFilePrintData)(nil)).Elem()
+}
+
+// Flexible guest customization settings for Linux operating system.
+//
+// Flexible guest customization is designed for scenarios where only the
+// network configuration of an operating system requires modification.
+type CustomizationLinuxFlexPrep struct {
+	CustomizationIdentitySettings
+}
+
+func init() {
+	t["CustomizationLinuxFlexPrep"] = reflect.TypeOf((*CustomizationLinuxFlexPrep)(nil)).Elem()
+	minAPIVersionForType["CustomizationLinuxFlexPrep"] = "9.1.0.0"
 }
 
 // Failed to set Linux identity.
@@ -18456,14 +18630,14 @@ type CustomizationLinuxPrep struct {
 	Domain string `xml:"domain" json:"domain"`
 	// The case-sensitive timezone, such as Europe/Sofia.
 	//
-	// <a href="timezone.html"title="Display list of Valid timeZone values...">
+	// <a href="timezone.html" title="Display list of Valid timeZone values...">
 	// **Valid timeZone values**</a> are based on the tz (timezone)
 	// database used by Linux and other Unix systems.
 	// The values are strings (xsd:string) in the form "Area/Location," in which
 	// Area is a continent or ocean name, and Location is the city, island, or
 	// other regional designation.
 	//
-	// See the <a href="https://knowledge.broadcom.com/external/article?articleNumber=320212"target="_blank">List of supported time zones for different vSphere versions in Linux/Unix systems</a>.
+	// See the <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2145518" target="_blank">List of supported time zones for different vSphere versions in Linux/Unix systems</a>.
 	TimeZone string `xml:"timeZone,omitempty" json:"timeZone,omitempty"`
 	// Specifies whether the hardware clock is in UTC or local time.
 	//   - True when the hardware clock is in UTC.
@@ -18483,8 +18657,20 @@ type CustomizationLinuxPrep struct {
 	//
 	// Please set the compatible customization method to a supported string value
 	// e.g. "GOSC\_METHOD\_1".
-	// See <a href="https://knowledge.broadcom.com/external/article?articleNumber=313164"target="_blank">Supported compatible customization method list</a>.
+	// See <a href="https://kb.vmware.com/s/article/95903" target="_blank">Supported compatible customization method list</a>.
 	CompatibleCustomizationMethod string `xml:"compatibleCustomizationMethod,omitempty" json:"compatibleCustomizationMethod,omitempty" vim:"8.0.3.0"`
+	// Require root accounts to change their password on first login after
+	// customization.
+	ResetPassword *bool `xml:"resetPassword" json:"resetPassword,omitempty" vim:"9.1.0.0"`
+	// Password set for root accounts.
+	//
+	// The password value must be a non-empty string. If this field is not set,
+	// the root password will remain unchanged.
+	//
+	// Set the plainText flag to indicate whether the value is plain text or encrypted.
+	Password *CustomizationPassword `xml:"password,omitempty" json:"password,omitempty" vim:"9.1.0.0"`
+	// Additional key/value pairs to support third party customization.
+	ExtraConfig []BaseOptionValue `xml:"extraConfig,omitempty,typeattr" json:"extraConfig,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -18581,7 +18767,8 @@ type CustomizationSpec struct {
 	// Network identity and settings, similar to Microsoft's Sysprep tool.
 	//
 	// This is a
-	// Sysprep, LinuxPrep, CloudinitPrep, or SysprepText object.
+	// Sysprep, LinuxPrep, WindowsFlexPrep, LinuxFlexPrep, CloudinitPrep or
+	// SysprepText object.
 	Identity BaseCustomizationIdentitySettings `xml:"identity,typeattr" json:"identity"`
 	// Global IP settings constitute the IP settings that are not specific to a
 	// particular virtual network adapter.
@@ -18706,7 +18893,7 @@ func init() {
 //
 // The sysprep
 // type encloses all the individual keys listed in a `sysprep.xml` file. For
-// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+// more detailed information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
 type CustomizationSysprep struct {
 	CustomizationIdentitySettings
 
@@ -18723,6 +18910,16 @@ type CustomizationSysprep struct {
 	// Required only
 	// for Windows 2000 Server and Windows Server 2003.
 	LicenseFilePrintData *CustomizationLicenseFilePrintData `xml:"licenseFilePrintData,omitempty" json:"licenseFilePrintData,omitempty"`
+	// The script to run before and after GOS customization.
+	//
+	// The script must be a batch file for Windows virtual machines.
+	// For additional information, refer to <a href="https://knowledge.broadcom.com/external/article?legacyId=74880" target="_blank">Setting the customization script for virtual machines in vSphere</a>.
+	ScriptText string `xml:"scriptText,omitempty" json:"scriptText,omitempty" vim:"9.1.0.0"`
+	// Require local Administrators group accounts to change their password
+	// at the first logon after customization.
+	ResetPassword *bool `xml:"resetPassword" json:"resetPassword,omitempty" vim:"9.1.0.0"`
+	// Additional key/value pairs to support third party customization.
+	ExtraConfig []BaseOptionValue `xml:"extraConfig,omitempty,typeattr" json:"extraConfig,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -18757,8 +18954,8 @@ type CustomizationSysprepText struct {
 
 	// Text for the `sysprep.xml` answer file.
 	//
-	// For additional details, see <a href="https://knowledge.broadcom.com/external/article?articleNumber=336083"target="_blank">Using custom sysprep.xml for vCenter Guest Customization</a> and
-	// <a href="https://knowledge.broadcom.com/external/article?articleNumber=313515"target="_blank">Specifying network settings in custom sysprep.xml</a>.
+	// For additional details, see <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2151684" target="_blank">Using custom sysprep.xml for vCenter Guest Customization</a> and
+	// <a href="https://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=1029174" target="_blank">Specifying network settings in custom sysprep.xml</a>.
 	Value string `xml:"value" json:"value"`
 }
 
@@ -18816,7 +19013,7 @@ func init() {
 // The UserData data object type maps to the UserData key in the `sysprep.xml`
 // answer file. These values are transferred directly into the `sysprep.xml`
 // file that VirtualCenter stores on the target virtual disk. For more detailed
-// information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx"target="_blank">Performing Unattended Installations</a>.
+// information, see <a href="https://technet.microsoft.com/en-us/library/cc771830(v=ws.10).aspx" target="_blank">Performing Unattended Installations</a>.
 type CustomizationUserData struct {
 	DynamicData
 
@@ -18893,6 +19090,19 @@ func init() {
 	t["CustomizationWinOptions"] = reflect.TypeOf((*CustomizationWinOptions)(nil)).Elem()
 }
 
+// Flexible guest customization settings for Windows operating system.
+//
+// Flexible guest customization is designed for scenarios where only the
+// network configuration of an operating system requires modification.
+type CustomizationWindowsFlexPrep struct {
+	CustomizationIdentitySettings
+}
+
+func init() {
+	t["CustomizationWindowsFlexPrep"] = reflect.TypeOf((*CustomizationWindowsFlexPrep)(nil)).Elem()
+	minAPIVersionForType["CustomizationWindowsFlexPrep"] = "9.1.0.0"
+}
+
 // The parameters of `VirtualMachineGuestCustomizationManager.CustomizeGuest_Task`.
 type CustomizeGuestRequestType struct {
 	This ManagedObjectReference `xml:"_this" json:"-"`
@@ -18906,7 +19116,7 @@ type CustomizeGuestRequestType struct {
 	// Is a `CustomizationSpec`.
 	// It specifies the virtual machine's configuration.
 	Spec CustomizationSpec `xml:"spec" json:"spec"`
-	// addtional key/value pair list to support
+	// additional key/value pair list to support
 	// third party customization.
 	ConfigParams []BaseOptionValue `xml:"configParams,omitempty,typeattr" json:"configParams,omitempty"`
 }
@@ -19665,7 +19875,7 @@ type DVSConfigInfo struct {
 	CreateTime time.Time `xml:"createTime" json:"createTime"`
 	// Boolean to indicate if network I/O control is enabled on the
 	// switch.
-	NetworkResourceManagementEnabled *bool `xml:"networkResourceManagementEnabled" json:"networkResourceManagementEnabled,omitempty"`
+	NetworkResourceManagementEnabled bool `xml:"networkResourceManagementEnabled" json:"networkResourceManagementEnabled"`
 	// Default host proxy switch maximum port number
 	DefaultProxySwitchMaxNumPorts int32 `xml:"defaultProxySwitchMaxNumPorts,omitempty" json:"defaultProxySwitchMaxNumPorts,omitempty"`
 	// VDS health check configuration.
@@ -19727,7 +19937,7 @@ type DVSConfigSpec struct {
 	// deleting free standalone ports, a fault is raised.
 	NumStandalonePorts int32 `xml:"numStandalonePorts,omitempty" json:"numStandalonePorts,omitempty"`
 	// Deprecated as of vSphere API 5.0
-	// The default value of this propoerty is maxint and there is no reason
+	// The default value of this property is maxint and there is no reason
 	// for users to change it to a lower value.
 	//
 	// The maximum number of DistributedVirtualPorts allowed in the switch.
@@ -20365,7 +20575,7 @@ type DVSNetworkResourceManagementCapability struct {
 	UserDefinedNetworkResourcePoolsSupported bool `xml:"userDefinedNetworkResourcePoolsSupported" json:"userDefinedNetworkResourcePoolsSupported"`
 	// Flag to indicate whether Network Resource Control version 3 is supported.
 	//
-	// The API supported by Network Resouce Control version 3 include:
+	// The API supported by Network Resource Control version 3 include:
 	//  1. VM virtual NIC network resource specification
 	//     `VirtualEthernetCardResourceAllocation`
 	//  2. VM virtual NIC network resource pool specification
@@ -21148,10 +21358,10 @@ type DatastoreCapability struct {
 	// Deprecated as of vSphere8.0 U3, and there is no replacement for it.
 	//
 	// Indicates whether the datastore supports Storage I/O Resource Management.
-	StorageIORMSupported *bool `xml:"storageIORMSupported" json:"storageIORMSupported,omitempty"`
+	StorageIORMSupported bool `xml:"storageIORMSupported" json:"storageIORMSupported"`
 	// Indicates whether the datastore supports native snapshot feature which is
 	// based on Copy-On-Write.
-	NativeSnapshotSupported *bool `xml:"nativeSnapshotSupported" json:"nativeSnapshotSupported,omitempty"`
+	NativeSnapshotSupported bool `xml:"nativeSnapshotSupported" json:"nativeSnapshotSupported"`
 	// Indicates whether the datastore supports traditional top-level
 	// directory creation.
 	//
@@ -21404,7 +21614,7 @@ type DatastoreInfo struct {
 	// The maximum capacity of a virtual disk which can be created on this volume.
 	MaxVirtualDiskCapacity int64 `xml:"maxVirtualDiskCapacity,omitempty" json:"maxVirtualDiskCapacity,omitempty"`
 	// The maximum size of a snapshot or a swap file that can reside on this file system volume.
-	MaxMemoryFileSize int64 `xml:"maxMemoryFileSize,omitempty" json:"maxMemoryFileSize,omitempty"`
+	MaxMemoryFileSize int64 `xml:"maxMemoryFileSize" json:"maxMemoryFileSize"`
 	// Time when the free-space and capacity values in `DatastoreInfo` and
 	// `DatastoreSummary` were updated.
 	Timestamp *time.Time `xml:"timestamp" json:"timestamp,omitempty"`
@@ -22127,6 +22337,8 @@ type DeleteVStorageObjectRequestType struct {
 	Id ID `xml:"id" json:"id"`
 	// The datastore where the virtual storage object
 	// is located.
+	//
+	// Required privileges: Datastore.FileManagement
 	//
 	// Refers instance of `Datastore`.
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
@@ -22895,7 +23107,7 @@ type DeviceUnsupportedForVmVersion struct {
 
 	// The current version of the virtual machine.
 	CurrentVersion string `xml:"currentVersion" json:"currentVersion"`
-	// The minimum expected virtual mahcine version needed to
+	// The minimum expected virtual machine version needed to
 	// support this device.
 	ExpectedVersion string `xml:"expectedVersion" json:"expectedVersion"`
 }
@@ -23770,7 +23982,7 @@ type DisableRulesetResponse struct {
 // The parameters of `VirtualMachine.DisableSecondaryVM_Task`.
 type DisableSecondaryVMRequestType struct {
 	This ManagedObjectReference `xml:"_this" json:"-"`
-	// The secondary virtual machine specified will be disabed.
+	// The secondary virtual machine specified will be disabled.
 	// This field must specify a secondary virtual machine that is part of the fault
 	// tolerant group that this virtual machine is currently associated with. It can
 	// only be invoked from the primary virtual machine in the group.
@@ -24387,7 +24599,7 @@ func init() {
 }
 
 // The `DistributedVirtualPortgroupProblem`
-// data object defines the error while excuting NSX port group operations.
+// data object defines the error while executing NSX port group operations.
 type DistributedVirtualPortgroupProblem struct {
 	DynamicData
 
@@ -25165,7 +25377,7 @@ type DpuStatusInfoOperationalInfo struct {
 	// A description of the state of the sensor
 	// such as: N watts, Y RPM, or other measurement.
 	Reading string `xml:"reading" json:"reading"`
-	// If provided by underying API, the base units in which the sensor
+	// If provided by underlying API, the base units in which the sensor
 	// reading is specified, "RPM", "WATTS" and so forth.
 	Units string `xml:"units,omitempty" json:"units,omitempty"`
 	// Reports the ISO 8601 Timestamp when this sensor was last updated by
@@ -25336,6 +25548,8 @@ func init() {
 	t["DrsResourceConfigureSyncedEvent"] = reflect.TypeOf((*DrsResourceConfigureSyncedEvent)(nil)).Elem()
 }
 
+// Deprecated as of vSphere API 9.1, DRS no longer fires this event.
+//
 // This event records when a virtual machine comes into compliance with DRS rules.
 type DrsRuleComplianceEvent struct {
 	VmEvent
@@ -25620,7 +25834,7 @@ func init() {
 	t["DvsEvent"] = reflect.TypeOf((*DvsEvent)(nil)).Elem()
 }
 
-// The event argument is a Host object.
+// The event argument is a distributed virtual switch object.
 type DvsEventArgument struct {
 	EntityEventArgument
 
@@ -25653,7 +25867,7 @@ func init() {
 // This class defines Network Filter configuration.
 //
 // ** Supported Qualifier and Actions **
-// <table border="1"width="100%">
+// <table border="1" width="100%">
 // <tr>
 // <th>Network Filter Config</th>
 // <th>Supported classes</th>
@@ -26522,7 +26736,7 @@ type DvsResourceRuntimeInfo struct {
 	// This is the sum of all reservations
 	// allocated to `DVSVmVnicNetworkResourcePool` on this switch and the
 	// sum of reservation taken by `VirtualEthernetCard` whose
-	// backing is not associdated with any `DVSVmVnicNetworkResourcePool`.
+	// backing is not associated with any `DVSVmVnicNetworkResourcePool`.
 	// Units in Mbits/s.
 	Usage int32 `xml:"usage,omitempty" json:"usage,omitempty"`
 	// Available: Current available resource for reservation (capacity - usage).
@@ -26530,7 +26744,7 @@ type DvsResourceRuntimeInfo struct {
 	// Units in Mbits/s.
 	Available int32 `xml:"available,omitempty" json:"available,omitempty"`
 	// The reservation taken by `VirtualEthernetCard` of which the
-	// backing is not associdated with any `DVSVmVnicNetworkResourcePool`
+	// backing is not associated with any `DVSVmVnicNetworkResourcePool`
 	AllocatedResource []DvsVnicAllocatedResource `xml:"allocatedResource,omitempty" json:"allocatedResource,omitempty"`
 	// The runtime information of `DVSVmVnicNetworkResourcePool`.
 	VmVnicNetworkResourcePoolRuntime []DvsVmVnicNetworkResourcePoolRuntimeInfo `xml:"vmVnicNetworkResourcePoolRuntime,omitempty" json:"vmVnicNetworkResourcePoolRuntime,omitempty"`
@@ -26625,7 +26839,7 @@ func init() {
 // This class defines Traffic Filter configuration.
 //
 // ** Supported Qualifier and Actions **
-// <table border="1"width="100%">
+// <table border="1" width="100%">
 // <tr>
 // <th>Traffic Filter Config</th>
 // <th>Supported classes</th>
@@ -26864,7 +27078,7 @@ type DvsVmVnicNetworkResourcePoolRuntimeInfo struct {
 	// Units in Mbits/s.
 	Capacity int32 `xml:"capacity,omitempty" json:"capacity,omitempty"`
 	// usage: Reservation taken by all `VirtualEthernetCard` for which the
-	// backing is associdated with this `DVSVmVnicNetworkResourcePool`.
+	// backing is associated with this `DVSVmVnicNetworkResourcePool`.
 	//
 	// Units in Mbits/s.
 	Usage int32 `xml:"usage,omitempty" json:"usage,omitempty"`
@@ -26887,7 +27101,7 @@ type DvsVmVnicNetworkResourcePoolRuntimeInfo struct {
 	// is in good state. The reservations for all virtual network adapters can
 	// be fulfilled.
 	Status string `xml:"status" json:"status"`
-	// The virtual network adapaters that
+	// The virtual network adapters that
 	// are currently associated with the resource pool
 	AllocatedResource []DvsVnicAllocatedResource `xml:"allocatedResource,omitempty" json:"allocatedResource,omitempty"`
 }
@@ -27289,7 +27503,7 @@ type EVCMode struct {
 	// Use this property to compare track values from two modes.
 	// Do not use this property to determine the presence or absence of
 	// specific features.
-	Track []string `xml:"track,omitempty" json:"track,omitempty"`
+	Track []string `xml:"track" json:"track"`
 	// Index for ordering the set of modes that apply to a given CPU vendor.
 	//
 	// Use this property to compare vendor tier values from two modes.
@@ -30557,7 +30771,7 @@ type FileBackedVirtualDiskSpec struct {
 	Crypto BaseCryptoSpec `xml:"crypto,omitempty,typeattr" json:"crypto,omitempty"`
 	// Optional sector format.
 	//
-	// If not specified, an appropriate default format will be choosen by
+	// If not specified, an appropriate default format will be chosen by
 	// the storage system. If available, native\_512 is preferred.
 	// For the list of supported values, see `DatastoreSectorFormat_enum`.
 	SectorFormat string `xml:"sectorFormat,omitempty" json:"sectorFormat,omitempty" vim:"9.0.0.0"`
@@ -30751,7 +30965,7 @@ type FileQueryFlags struct {
 	// last modified.
 	Modification bool `xml:"modification" json:"modification"`
 	// The flag to indicate whether or not to return the file owner.
-	FileOwner *bool `xml:"fileOwner" json:"fileOwner,omitempty"`
+	FileOwner bool `xml:"fileOwner" json:"fileOwner"`
 }
 
 func init() {
@@ -31340,7 +31554,7 @@ type FolderFailedHostResult struct {
 	// Host for which fault belongs to.
 	//
 	// Only set when the HostSystem
-	// reference is avaibale as a result of Host being part of inventory.
+	// reference is available as a result of Host being part of inventory.
 	//
 	// Refers instance of `HostSystem`.
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
@@ -32972,9 +33186,9 @@ type GuestOsDescriptor struct {
 	// Maximum number of processors supported for this guest.
 	SupportedMaxCPUs int32 `xml:"supportedMaxCPUs" json:"supportedMaxCPUs"`
 	// Maximum number of sockets supported for this guest.
-	NumSupportedPhysicalSockets int32 `xml:"numSupportedPhysicalSockets,omitempty" json:"numSupportedPhysicalSockets,omitempty"`
+	NumSupportedPhysicalSockets int32 `xml:"numSupportedPhysicalSockets" json:"numSupportedPhysicalSockets"`
 	// Maximum number of cores per socket for this guest.
-	NumSupportedCoresPerSocket int32 `xml:"numSupportedCoresPerSocket,omitempty" json:"numSupportedCoresPerSocket,omitempty"`
+	NumSupportedCoresPerSocket int32 `xml:"numSupportedCoresPerSocket" json:"numSupportedCoresPerSocket"`
 	// Minimum memory requirements supported for this guest, in MB.
 	SupportedMinMemMB int32 `xml:"supportedMinMemMB" json:"supportedMinMemMB"`
 	// Maximum memory requirements supported for this guest, in MB.
@@ -32994,7 +33208,7 @@ type GuestOsDescriptor struct {
 	// Recommended default disk size for this guest, in MB.
 	RecommendedDiskSizeMB int32 `xml:"recommendedDiskSizeMB" json:"recommendedDiskSizeMB"`
 	// Recommended default CD-ROM type for this guest.
-	RecommendedCdromController string `xml:"recommendedCdromController,omitempty" json:"recommendedCdromController,omitempty"`
+	RecommendedCdromController string `xml:"recommendedCdromController" json:"recommendedCdromController"`
 	// List of supported ethernet cards for this guest.
 	SupportedEthernetCard []string `xml:"supportedEthernetCard" json:"supportedEthernetCard"`
 	// Recommended default ethernet controller type for this guest.
@@ -33004,67 +33218,67 @@ type GuestOsDescriptor struct {
 	SupportsSlaveDisk *bool `xml:"supportsSlaveDisk" json:"supportsSlaveDisk,omitempty"`
 	// Specifies the CPU feature compatibility masks.
 	CpuFeatureMask []HostCpuIdInfo `xml:"cpuFeatureMask,omitempty" json:"cpuFeatureMask,omitempty"`
-	// Flag that indicates wether the guest requires an SMC (Apple hardware).
+	// Flag that indicates whether the guest requires an SMC (Apple hardware).
 	//
 	// This is logically equivalent to GuestOS = Mac OS
-	SmcRequired *bool `xml:"smcRequired" json:"smcRequired,omitempty"`
+	SmcRequired bool `xml:"smcRequired" json:"smcRequired"`
 	// Flag to indicate whether or not this guest can support Wake-on-LAN.
 	SupportsWakeOnLan bool `xml:"supportsWakeOnLan" json:"supportsWakeOnLan"`
 	// Flag indicating whether or not this guest supports the virtual
 	// machine interface.
-	SupportsVMI *bool `xml:"supportsVMI" json:"supportsVMI,omitempty"`
+	SupportsVMI bool `xml:"supportsVMI" json:"supportsVMI"`
 	// Whether the memory size for this guest can be changed
 	// while the virtual machine is running.
-	SupportsMemoryHotAdd *bool `xml:"supportsMemoryHotAdd" json:"supportsMemoryHotAdd,omitempty"`
+	SupportsMemoryHotAdd bool `xml:"supportsMemoryHotAdd" json:"supportsMemoryHotAdd"`
 	// Whether virtual CPUs can be added to this guest
 	// while the virtual machine is running.
-	SupportsCpuHotAdd *bool `xml:"supportsCpuHotAdd" json:"supportsCpuHotAdd,omitempty"`
+	SupportsCpuHotAdd bool `xml:"supportsCpuHotAdd" json:"supportsCpuHotAdd"`
 	// Whether virtual CPUs can be removed from this guest
 	// while the virtual machine is running.
-	SupportsCpuHotRemove *bool `xml:"supportsCpuHotRemove" json:"supportsCpuHotRemove,omitempty"`
+	SupportsCpuHotRemove bool `xml:"supportsCpuHotRemove" json:"supportsCpuHotRemove"`
 	// Supported firmware types for this guest.
 	//
 	// Possible values are described in
 	// `GuestOsDescriptorFirmwareType_enum`
-	SupportedFirmware []string `xml:"supportedFirmware,omitempty" json:"supportedFirmware,omitempty"`
+	SupportedFirmware []string `xml:"supportedFirmware" json:"supportedFirmware"`
 	// Recommended firmware type for this guest.
 	//
 	// Possible values are described in
 	// `GuestOsDescriptorFirmwareType_enum`
-	RecommendedFirmware string `xml:"recommendedFirmware,omitempty" json:"recommendedFirmware,omitempty"`
+	RecommendedFirmware string `xml:"recommendedFirmware" json:"recommendedFirmware"`
 	// List of supported USB controllers for this guest.
 	SupportedUSBControllerList []string `xml:"supportedUSBControllerList,omitempty" json:"supportedUSBControllerList,omitempty"`
 	// Recommended default USB controller type for this guest.
 	RecommendedUSBController string `xml:"recommendedUSBController,omitempty" json:"recommendedUSBController,omitempty"`
 	// Whether this guest supports 3D graphics.
-	Supports3D *bool `xml:"supports3D" json:"supports3D,omitempty"`
+	Supports3D bool `xml:"supports3D" json:"supports3D"`
 	// Recommended 3D graphics for this guest.
-	Recommended3D *bool `xml:"recommended3D" json:"recommended3D,omitempty"`
+	Recommended3D bool `xml:"recommended3D" json:"recommended3D"`
 	// Whether SMC (Apple hardware) is recommended for this guest.
-	SmcRecommended *bool `xml:"smcRecommended" json:"smcRecommended,omitempty"`
+	SmcRecommended bool `xml:"smcRecommended" json:"smcRecommended"`
 	// Whether I/O Controller Hub is recommended for this guest.
-	Ich7mRecommended *bool `xml:"ich7mRecommended" json:"ich7mRecommended,omitempty"`
+	Ich7mRecommended bool `xml:"ich7mRecommended" json:"ich7mRecommended"`
 	// Whether USB controller is recommended for this guest.
-	UsbRecommended *bool `xml:"usbRecommended" json:"usbRecommended,omitempty"`
+	UsbRecommended bool `xml:"usbRecommended" json:"usbRecommended"`
 	// Support level of this Guest
 	// Possible values are described in
 	// `GuestOsDescriptorSupportLevel_enum`
-	SupportLevel string `xml:"supportLevel,omitempty" json:"supportLevel,omitempty"`
+	SupportLevel string `xml:"supportLevel" json:"supportLevel"`
 	// Whether or not this guest should be allowed for selection
 	// during virtual machine creation.
-	SupportedForCreate *bool `xml:"supportedForCreate" json:"supportedForCreate,omitempty"`
+	SupportedForCreate bool `xml:"supportedForCreate" json:"supportedForCreate"`
 	// Video RAM size limits supported by this guest, in KB.
-	VRAMSizeInKB *IntOption `xml:"vRAMSizeInKB,omitempty" json:"vRAMSizeInKB,omitempty"`
+	VRAMSizeInKB IntOption `xml:"vRAMSizeInKB" json:"vRAMSizeInKB"`
 	// Maximum number of floppies supported by this guest.
-	NumSupportedFloppyDevices int32 `xml:"numSupportedFloppyDevices,omitempty" json:"numSupportedFloppyDevices,omitempty"`
+	NumSupportedFloppyDevices int32 `xml:"numSupportedFloppyDevices" json:"numSupportedFloppyDevices"`
 	// List of NICs supported by this guest that support Wake-On-Lan.
 	WakeOnLanEthernetCard []string `xml:"wakeOnLanEthernetCard,omitempty" json:"wakeOnLanEthernetCard,omitempty"`
 	// Whether or not this guest can use pvscsi as boot adapter.
-	SupportsPvscsiControllerForBoot *bool `xml:"supportsPvscsiControllerForBoot" json:"supportsPvscsiControllerForBoot,omitempty"`
+	SupportsPvscsiControllerForBoot bool `xml:"supportsPvscsiControllerForBoot" json:"supportsPvscsiControllerForBoot"`
 	// Whether or not this guest should have disk uuid enabled by default.
-	DiskUuidEnabled *bool `xml:"diskUuidEnabled" json:"diskUuidEnabled,omitempty"`
+	DiskUuidEnabled bool `xml:"diskUuidEnabled" json:"diskUuidEnabled"`
 	// Whether or not this guest supports hot plug of PCI devices.
-	SupportsHotPlugPCI *bool `xml:"supportsHotPlugPCI" json:"supportsHotPlugPCI,omitempty"`
+	SupportsHotPlugPCI bool `xml:"supportsHotPlugPCI" json:"supportsHotPlugPCI"`
 	// Whether or not this guest supports Secure Boot.
 	//
 	// If some of the OS
@@ -33767,7 +33981,7 @@ type HasPrivilegeOnEntitiesRequestType struct {
 	//
 	// Refers instances of `ManagedEntity`.
 	Entity []ManagedObjectReference `xml:"entity" json:"entity"`
-	// The session ID to check privileges for. A sesssion ID can be
+	// The session ID to check privileges for. A session ID can be
 	// obtained from `UserSession.key`.
 	SessionId string `xml:"sessionId" json:"sessionId"`
 	// The array of privilege IDs to check.
@@ -33797,7 +34011,7 @@ type HasPrivilegeOnEntityRequestType struct {
 	//
 	// Refers instance of `ManagedEntity`.
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
-	// The session ID to check privileges for. A sesssion ID can be
+	// The session ID to check privileges for. A session ID can be
 	// obtained from `UserSession.key`.
 	SessionId string `xml:"sessionId" json:"sessionId"`
 	// The array of privilege IDs to check.
@@ -34334,7 +34548,7 @@ type HostActiveDirectorySpec struct {
 	// and the <code>userName</code> and <code>password</code> fields
 	// will be ignored.
 	CamServer string `xml:"camServer,omitempty" json:"camServer,omitempty"`
-	// Thumbprint for the SSL certficate of CAM server
+	// Thumbprint for the SSL certificate of CAM server
 	Thumbprint string `xml:"thumbprint,omitempty" json:"thumbprint,omitempty"`
 	// PEM-encoded certificate of the CAM server
 	// This field replaces `HostActiveDirectorySpec.thumbprint`.
@@ -34822,7 +35036,7 @@ type HostCapability struct {
 	// `VirtualDevice.unitNumber`
 	// This property is only available for devices on the pci controller.
 	PreAssignedPCIUnitNumbersSupported bool `xml:"preAssignedPCIUnitNumbersSupported" json:"preAssignedPCIUnitNumbersSupported"`
-	// Indicates whether the screenshot retrival over https is supported for this host's
+	// Indicates whether the screenshot retrieval over https is supported for this host's
 	// virtual machines.
 	//
 	// If true, a screenshot can be retrieved at the HTTPS relative path
@@ -34844,11 +35058,11 @@ type HostCapability struct {
 	ScaledScreenshotSupported bool `xml:"scaledScreenshotSupported" json:"scaledScreenshotSupported"`
 	// Indicates whether the storage of a powered-on virtual machine may be
 	// relocated.
-	StorageVMotionSupported *bool `xml:"storageVMotionSupported" json:"storageVMotionSupported,omitempty"`
+	StorageVMotionSupported bool `xml:"storageVMotionSupported" json:"storageVMotionSupported"`
 	// Indicates whether the storage of a powered-on virtual machine may be
 	// relocated while simultaneously changing the execution host of the
 	// virtual machine.
-	VmotionWithStorageVMotionSupported *bool `xml:"vmotionWithStorageVMotionSupported" json:"vmotionWithStorageVMotionSupported,omitempty"`
+	VmotionWithStorageVMotionSupported bool `xml:"vmotionWithStorageVMotionSupported" json:"vmotionWithStorageVMotionSupported"`
 	// Indicates whether the network of a powered-on virtual machine can be
 	// changed while simultaneously changing the execution host of the
 	// virtual machine.
@@ -34863,14 +35077,14 @@ type HostCapability struct {
 	MaxVirtualDiskDescVersionSupported int32 `xml:"maxVirtualDiskDescVersionSupported,omitempty" json:"maxVirtualDiskDescVersionSupported,omitempty" vim:"8.0.1.0"`
 	// Indicates whether a dedicated nic can be selected for vSphere Replication
 	// LWD traffic, i.e., from the primary host to the VR server.
-	HbrNicSelectionSupported *bool `xml:"hbrNicSelectionSupported" json:"hbrNicSelectionSupported,omitempty"`
+	HbrNicSelectionSupported bool `xml:"hbrNicSelectionSupported" json:"hbrNicSelectionSupported"`
 	// Indicates whether a dedicated nic can be selected for vSphere Replication
 	// NFC traffic, i.e., from the VR server to the secondary host.
-	VrNfcNicSelectionSupported *bool `xml:"vrNfcNicSelectionSupported" json:"vrNfcNicSelectionSupported,omitempty"`
+	VrNfcNicSelectionSupported bool `xml:"vrNfcNicSelectionSupported" json:"vrNfcNicSelectionSupported"`
 	// Deprecated as of vSphere API 6.0.
 	//
 	// Indicates whether this host supports record and replay
-	RecordReplaySupported *bool `xml:"recordReplaySupported" json:"recordReplaySupported,omitempty"`
+	RecordReplaySupported bool `xml:"recordReplaySupported" json:"recordReplaySupported"`
 	// Deprecated as of vSphere API 6.0.
 	//
 	// Indicates whether this host supports Fault Tolerance
@@ -34891,7 +35105,7 @@ type HostCapability struct {
 	// contain values for this property when some other property on the DataObject changes.
 	// If this update is a result of a call to WaitForUpdatesEx with a non-empty
 	// version parameter, the value for this property may not be current.
-	FtSupported *bool `xml:"ftSupported" json:"ftSupported,omitempty"`
+	FtSupported bool `xml:"ftSupported" json:"ftSupported"`
 	// Deprecated as of vSphere API 4.1, use
 	// `HostCapability.replayCompatibilityIssues`.
 	//
@@ -34910,7 +35124,7 @@ type HostCapability struct {
 	// lists the set of possible values.
 	ReplayCompatibilityIssues []string `xml:"replayCompatibilityIssues,omitempty" json:"replayCompatibilityIssues,omitempty"`
 	// Indicates whether this host supports smp fault tolerance
-	SmpFtSupported *bool `xml:"smpFtSupported" json:"smpFtSupported,omitempty"`
+	SmpFtSupported bool `xml:"smpFtSupported" json:"smpFtSupported"`
 	// Deprecated as of vSphere API 6.0.
 	//
 	// For a host which doesn't support Fault Tolerance, indicates all the reasons
@@ -34937,8 +35151,8 @@ type HostCapability struct {
 	// destination host for the clone.
 	//
 	// See also `VirtualMachineCloneSpec.snapshot`.
-	CloneFromSnapshotSupported *bool `xml:"cloneFromSnapshotSupported" json:"cloneFromSnapshotSupported,omitempty"`
-	// Flag indicating whether explicitly creating arbirary configurations of
+	CloneFromSnapshotSupported bool `xml:"cloneFromSnapshotSupported" json:"cloneFromSnapshotSupported"`
+	// Flag indicating whether explicitly creating arbitrary configurations of
 	// delta disk backings is supported.
 	//
 	// A delta disk backing is a way to preserve a virtual disk backing
@@ -34958,13 +35172,13 @@ type HostCapability struct {
 	// virtual machines will not affect the operation of the other virtual machine.
 	//
 	// See also `VirtualDiskSparseVer1BackingInfo.parent`, `VirtualDiskSparseVer2BackingInfo.parent`, `VirtualDiskFlatVer1BackingInfo.parent`, `VirtualDiskFlatVer2BackingInfo.parent`, `VirtualDiskRawDiskMappingVer1BackingInfo.parent`, `VirtualMachine.PromoteDisks_Task`, `VirtualMachineRelocateSpec.diskMoveType`, `VirtualMachineRelocateSpecDiskLocator.diskMoveType`.
-	DeltaDiskBackingsSupported *bool `xml:"deltaDiskBackingsSupported" json:"deltaDiskBackingsSupported,omitempty"`
+	DeltaDiskBackingsSupported bool `xml:"deltaDiskBackingsSupported" json:"deltaDiskBackingsSupported"`
 	// Indicates whether network traffic shaping on a
 	// per virtual machine basis is supported.
-	PerVMNetworkTrafficShapingSupported *bool `xml:"perVMNetworkTrafficShapingSupported" json:"perVMNetworkTrafficShapingSupported,omitempty"`
+	PerVMNetworkTrafficShapingSupported bool `xml:"perVMNetworkTrafficShapingSupported" json:"perVMNetworkTrafficShapingSupported"`
 	// Flag indicating whether this host supports the integrity measurement using
 	// a TPM device.
-	TpmSupported *bool `xml:"tpmSupported" json:"tpmSupported,omitempty"`
+	TpmSupported bool `xml:"tpmSupported" json:"tpmSupported"`
 	// TPM version if supported by this host.
 	TpmVersion string `xml:"tpmVersion,omitempty" json:"tpmVersion,omitempty"`
 	// Flag indicating whether Intel TXT is enabled on this host.
@@ -34985,12 +35199,12 @@ type HostCapability struct {
 	SupportedCpuFeature []HostCpuIdInfo `xml:"supportedCpuFeature,omitempty" json:"supportedCpuFeature,omitempty"`
 	// Indicates whether the host supports configuring hardware
 	// virtualization (HV) support for virtual machines.
-	VirtualExecUsageSupported *bool `xml:"virtualExecUsageSupported" json:"virtualExecUsageSupported,omitempty"`
+	VirtualExecUsageSupported bool `xml:"virtualExecUsageSupported" json:"virtualExecUsageSupported"`
 	// Deprecated as of vSphere8.0 U3, and there is no replacement for it.
 	//
 	// Indicates whether the host supports storage I/O resource
 	// management.
-	StorageIORMSupported *bool `xml:"storageIORMSupported" json:"storageIORMSupported,omitempty"`
+	StorageIORMSupported bool `xml:"storageIORMSupported" json:"storageIORMSupported"`
 	// Deprecated as of vSphere API 8.0. VMDirectPath Gen 2 is no longer supported and
 	// there is no replacement.
 	//
@@ -35034,7 +35248,7 @@ type HostCapability struct {
 	SupportedVmfsMajorVersion []int32 `xml:"supportedVmfsMajorVersion,omitempty" json:"supportedVmfsMajorVersion,omitempty"`
 	// Indicates whether the host supports vStorage Hardware
 	// acceleration.
-	VStorageCapable *bool `xml:"vStorageCapable" json:"vStorageCapable,omitempty"`
+	VStorageCapable bool `xml:"vStorageCapable" json:"vStorageCapable"`
 	// Indicates whether this host supports unrestricted relocation of virtual
 	// machines with snapshots.
 	//
@@ -35043,7 +35257,7 @@ type HostCapability struct {
 	// restrict the layout of snapshot files or disks of the virtual machine, nor
 	// its power state. If the virtual machine is powered on, a storage vmotion
 	// will be performed to relocate its snapshots and disks.
-	SnapshotRelayoutSupported *bool `xml:"snapshotRelayoutSupported" json:"snapshotRelayoutSupported,omitempty"`
+	SnapshotRelayoutSupported bool `xml:"snapshotRelayoutSupported" json:"snapshotRelayoutSupported"`
 	// Indicates whether this host supports ip address based restrictions in
 	// the firewall configuration.
 	FirewallIpRulesSupported *bool `xml:"firewallIpRulesSupported" json:"firewallIpRulesSupported,omitempty"`
@@ -35067,32 +35281,32 @@ type HostCapability struct {
 	MaxHostSupportedVcpus int32 `xml:"maxHostSupportedVcpus,omitempty" json:"maxHostSupportedVcpus,omitempty"`
 	// Indicates whether the host is capable of mounting/unmounting
 	// VMFS datastores.
-	VmfsDatastoreMountCapable *bool `xml:"vmfsDatastoreMountCapable" json:"vmfsDatastoreMountCapable,omitempty"`
+	VmfsDatastoreMountCapable bool `xml:"vmfsDatastoreMountCapable" json:"vmfsDatastoreMountCapable"`
 	// Indicates whether the host is capable of accessing a VMFS disk
 	// when there are eight or more hosts accessing the disk already.
-	EightPlusHostVmfsSharedAccessSupported *bool `xml:"eightPlusHostVmfsSharedAccessSupported" json:"eightPlusHostVmfsSharedAccessSupported,omitempty"`
+	EightPlusHostVmfsSharedAccessSupported bool `xml:"eightPlusHostVmfsSharedAccessSupported" json:"eightPlusHostVmfsSharedAccessSupported"`
 	// Indicates whether the host supports nested hardware-assisted virtualization.
-	NestedHVSupported *bool `xml:"nestedHVSupported" json:"nestedHVSupported,omitempty"`
+	NestedHVSupported bool `xml:"nestedHVSupported" json:"nestedHVSupported"`
 	// Indicates whether the host supports virtual CPU performance counters.
-	VPMCSupported *bool `xml:"vPMCSupported" json:"vPMCSupported,omitempty"`
+	VPMCSupported bool `xml:"vPMCSupported" json:"vPMCSupported"`
 	// Indicates whether the host supports VMCI for communication
 	// between virtual machines.
-	InterVMCommunicationThroughVMCISupported *bool `xml:"interVMCommunicationThroughVMCISupported" json:"interVMCommunicationThroughVMCISupported,omitempty"`
+	InterVMCommunicationThroughVMCISupported bool `xml:"interVMCommunicationThroughVMCISupported" json:"interVMCommunicationThroughVMCISupported"`
 	// Indicates whether the host supports scheduled hardware upgrades.
 	//
 	// See also `VirtualMachineConfigInfo.scheduledHardwareUpgradeInfo`.
 	ScheduledHardwareUpgradeSupported *bool `xml:"scheduledHardwareUpgradeSupported" json:"scheduledHardwareUpgradeSupported,omitempty"`
 	// Indicated whether the host supports feature capabilities
 	// for EVC mode.
-	FeatureCapabilitiesSupported *bool `xml:"featureCapabilitiesSupported" json:"featureCapabilitiesSupported,omitempty"`
+	FeatureCapabilitiesSupported bool `xml:"featureCapabilitiesSupported" json:"featureCapabilitiesSupported"`
 	// Indicates whether the host supports latency sensitivity for the
 	// virtual machines.
-	LatencySensitivitySupported *bool `xml:"latencySensitivitySupported" json:"latencySensitivitySupported,omitempty"`
+	LatencySensitivitySupported bool `xml:"latencySensitivitySupported" json:"latencySensitivitySupported"`
 	// Indicates that host supports Object-based Storage System and
 	// Storage-Profile based disk provisioning.
 	StoragePolicySupported *bool `xml:"storagePolicySupported" json:"storagePolicySupported,omitempty"`
 	// Indicates if 3D hardware acceleration for virtual machines is supported.
-	Accel3dSupported *bool `xml:"accel3dSupported" json:"accel3dSupported,omitempty"`
+	Accel3dSupported bool `xml:"accel3dSupported" json:"accel3dSupported"`
 	// Indicates that this host uses a reliable memory aware allocation policy.
 	ReliableMemoryAware *bool `xml:"reliableMemoryAware" json:"reliableMemoryAware,omitempty"`
 	// Indicates whether the host supports Multiple Instance TCP/IP stack
@@ -35110,7 +35324,7 @@ type HostCapability struct {
 	HostAccessManagerSupported *bool `xml:"hostAccessManagerSupported" json:"hostAccessManagerSupported,omitempty"`
 	// Indicates whether a dedicated nic can be selected for vSphere Provisioning
 	// NFC traffic.
-	ProvisioningNicSelectionSupported *bool `xml:"provisioningNicSelectionSupported" json:"provisioningNicSelectionSupported,omitempty"`
+	ProvisioningNicSelectionSupported bool `xml:"provisioningNicSelectionSupported" json:"provisioningNicSelectionSupported"`
 	// Whether this host supports NFS41 file systems.
 	Nfs41Supported *bool `xml:"nfs41Supported" json:"nfs41Supported,omitempty"`
 	// Whether this host support NFS41 Kerberos 5\* security type.
@@ -35139,10 +35353,14 @@ type HostCapability struct {
 	//
 	// See also `HostActiveDirectoryAuthentication.EnableSmartCardAuthentication`.
 	SmartCardAuthenticationSupported *bool `xml:"smartCardAuthenticationSupported" json:"smartCardAuthenticationSupported,omitempty"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Indicates whether this host supports persistent memory.
 	//
 	// If value is not specified, it should be considered as not supported.
 	PMemSupported *bool `xml:"pMemSupported" json:"pMemSupported,omitempty"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Indicates whether this host supports snapshots for VMs with virtual
 	// devices backed by persistent memory.
 	//
@@ -35276,6 +35494,8 @@ type HostCapability struct {
 	// See `HostStorageSystem.ConnectNvmeControllerEx_Task` and
 	// `HostStorageSystem.DisconnectNvmeControllerEx_Task`.
 	NvmeBatchOperationsSupported *bool `xml:"nvmeBatchOperationsSupported" json:"nvmeBatchOperationsSupported,omitempty" vim:"7.0.3.0"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Indicates whether this host supports failover for VMs with virtual
 	// devices backed by persistent memory.
 	//
@@ -35301,6 +35521,8 @@ type HostCapability struct {
 	MaxSupportedPtpPorts int32 `xml:"maxSupportedPtpPorts,omitempty" json:"maxSupportedPtpPorts,omitempty" vim:"7.0.3.0"`
 	// Indicates whether this host supports SGX registration.
 	SgxRegistrationSupported *bool `xml:"sgxRegistrationSupported" json:"sgxRegistrationSupported,omitempty" vim:"8.0.0.1"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Indicates whether this host supports snapshots of VMs configured
 	// with independent vNVDIMMs.
 	//
@@ -35364,7 +35586,9 @@ type HostCapability struct {
 	// Indicates whether this host supports license entitlements
 	EntitlementSupported *bool `xml:"entitlementSupported" json:"entitlementSupported,omitempty" vim:"9.0.0.0"`
 	// Contains the memory overhead info for PodVMs for this host.
-	PodVMOverheadInfo *PodVMOverheadInfo `xml:"podVMOverheadInfo" vim:"9.0.1.0"`
+	PodVMOverheadInfo *PodVMOverheadInfo `xml:"podVMOverheadInfo,omitempty" json:"podVMOverheadInfo,omitempty" vim:"9.1.0.0"`
+	// Indicates whether "FCD Linked Clone feature" supported on this host.
+	FcdLinkedCloneSupported *bool `xml:"fcdLinkedCloneSupported" json:"fcdLinkedCloneSupported,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -35897,7 +36121,7 @@ type HostConfigInfo struct {
 	SharedPassthruGpuTypes []string `xml:"sharedPassthruGpuTypes,omitempty" json:"sharedPassthruGpuTypes,omitempty"`
 	// Graphics configuration for a host.
 	GraphicsConfig *HostGraphicsConfig `xml:"graphicsConfig,omitempty" json:"graphicsConfig,omitempty"`
-	// Array of shared passthru GPU capablities.
+	// Array of shared passthru GPU capabilities.
 	//
 	// See also `HostSharedGpuCapabilities`.
 	SharedGpuCapabilities []HostSharedGpuCapabilities `xml:"sharedGpuCapabilities,omitempty" json:"sharedGpuCapabilities,omitempty"`
@@ -36166,7 +36390,7 @@ type HostConfigSummary struct {
 	// The flag to indicate whether or not VMotion is enabled on this host.
 	VmotionEnabled bool `xml:"vmotionEnabled" json:"vmotionEnabled"`
 	// The flag to indicate whether or not Fault Tolerance logging is enabled on this host.
-	FaultToleranceEnabled *bool `xml:"faultToleranceEnabled" json:"faultToleranceEnabled,omitempty"`
+	FaultToleranceEnabled bool `xml:"faultToleranceEnabled" json:"faultToleranceEnabled"`
 	// List of feature-specific version information.
 	//
 	// Each element refers
@@ -36226,7 +36450,7 @@ func init() {
 type HostConfigureVFlashResourceResponse struct {
 }
 
-// A base clase for faults that are related to connecting or
+// A base class for faults that are related to connecting or
 // adding a host to the inventory.
 type HostConnectFault struct {
 	VimFault
@@ -36414,7 +36638,7 @@ type HostConnectSpec struct {
 	//
 	// Setting for a gateway for communication to the host.
 	//
-	// If set all trafic to the
+	// If set all traffic to the
 	// host will pass through this gateway.
 	HostGateway *HostGatewaySpec `xml:"hostGateway,omitempty" json:"hostGateway,omitempty"`
 }
@@ -36452,7 +36676,7 @@ func init() {
 // should be used only to mask hardware version 8 and lower (older)
 // virtual machines. Although CpuIdInfo can mask all virtual machines
 // regardless of hardware version, its application is limited and has been
-// superceded by FeatureMask.
+// superseded by FeatureMask.
 //
 // For each register (eax,ebx,ecx,edx), the string is a bit mask of the form:
 //
@@ -36880,7 +37104,7 @@ type HostDatastoreSystemCapabilities struct {
 	// Indicates whether local datastores are supported.
 	LocalDatastoreSupported bool `xml:"localDatastoreSupported" json:"localDatastoreSupported"`
 	// Indicates whether vmfs extent expansion is supported.
-	VmfsExtentExpansionSupported *bool `xml:"vmfsExtentExpansionSupported" json:"vmfsExtentExpansionSupported,omitempty"`
+	VmfsExtentExpansionSupported bool `xml:"vmfsExtentExpansionSupported" json:"vmfsExtentExpansionSupported"`
 }
 
 func init() {
@@ -38117,7 +38341,7 @@ func init() {
 // This is a base type for derived types
 // that have more specific details about specific filesystem types.
 //
-// # Typically a FileSystem is exposed as a datatore
+// # Typically a FileSystem is exposed as a datastore
 //
 // See also `DatastoreInfo`, `HostVmfsVolume`, `HostNasVolume`, `HostVffsVolume`, `HostLocalFileSystemVolume`
 //
@@ -38585,7 +38809,7 @@ type HostHardwareInfo struct {
 	NumaInfo *HostNumaInfo `xml:"numaInfo,omitempty" json:"numaInfo,omitempty"`
 	// Presence of System Management Controller, indicates the host is
 	// Apple hardware, and thus capable of running Mac OS guest as VM.
-	SmcPresent *bool `xml:"smcPresent" json:"smcPresent,omitempty"`
+	SmcPresent bool `xml:"smcPresent" json:"smcPresent"`
 	// The list of Peripheral Component Interconnect (PCI) devices
 	// available on this host.
 	PciDevice []HostPciDevice `xml:"pciDevice,omitempty" json:"pciDevice,omitempty"`
@@ -39234,9 +39458,9 @@ type HostInternetScsiHbaIPCapabilities struct {
 	HostNameAsTargetAddress *bool `xml:"hostNameAsTargetAddress" json:"hostNameAsTargetAddress,omitempty"`
 	// True if the host bus adapter supports setting its name and alias
 	NameAliasSettable *bool `xml:"nameAliasSettable" json:"nameAliasSettable,omitempty"`
-	// True if IPv4 addresssing can be enabled or disabled on the host bus adapter.
+	// True if IPv4 addressing can be enabled or disabled on the host bus adapter.
 	Ipv4EnableSettable *bool `xml:"ipv4EnableSettable" json:"ipv4EnableSettable,omitempty"`
-	// True if IPv6 addresssing can be enabled or disabled on the host bus adapter.
+	// True if IPv6 addressing can be enabled or disabled on the host bus adapter.
 	Ipv6EnableSettable *bool `xml:"ipv6EnableSettable" json:"ipv6EnableSettable,omitempty"`
 	// True if the Host bus adapter supports setting IPv6 Prefix Length.
 	Ipv6PrefixLengthSettable *bool `xml:"ipv6PrefixLengthSettable" json:"ipv6PrefixLengthSettable,omitempty"`
@@ -39649,7 +39873,7 @@ func init() {
 type HostIpConfigIpV6AddressConfiguration struct {
 	DynamicData
 
-	// Ipv6 adrresses configured on the interface.
+	// Ipv6 addresses configured on the interface.
 	//
 	// The global addresses can be configured
 	// through DHCP, stateless or manual configuration. Link local addresses can be
@@ -40075,6 +40299,8 @@ type HostListSummaryQuickStats struct {
 	DistributedCpuFairness int32 `xml:"distributedCpuFairness,omitempty" json:"distributedCpuFairness,omitempty"`
 	// The fairness of distributed memory resource allocation on the host.
 	DistributedMemoryFairness int32 `xml:"distributedMemoryFairness,omitempty" json:"distributedMemoryFairness,omitempty"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// The available capacity in MB.
 	AvailablePMemCapacity int32 `xml:"availablePMemCapacity,omitempty" json:"availablePMemCapacity,omitempty"`
 	// The system uptime of the host in seconds.
@@ -40283,7 +40509,7 @@ type HostLowLevelProvisioningManagerVmMigrationStatus struct {
 	// completed successfully.
 	//
 	// More specifically, for an in-progress migration, it is considered
-	// successful if it has had a sucessful switch over, otherwise it is
+	// successful if it has had a successful switch over, otherwise it is
 	// considered unsuccessful. Likewise, the status of a completed
 	// migration operation is also based on the switch over completion
 	// status.
@@ -40555,7 +40781,7 @@ type HostMountInfo struct {
 	// If the datastore becomes accessible following an inaccessible condition,
 	// the property `HostMountInfo.inaccessibleReason` will be unset.
 	InaccessibleReason string `xml:"inaccessibleReason,omitempty" json:"inaccessibleReason,omitempty"`
-	// The name of the vmknic used during mount for NFSv3 datstore.
+	// The name of the vmknic used during mount for NFSv3 datastore.
 	//
 	// Populated by the vmk control layer if the NAS
 	// volume is mounted successfully with a vmknic binding.
@@ -40653,7 +40879,7 @@ type HostMultipathInfoHppLogicalUnitPolicy struct {
 	Iops int64 `xml:"iops,omitempty" json:"iops,omitempty"`
 	// The preferred path for the given device.
 	//
-	// If no prefered path is specified by the user, algorithem at ESX
+	// If no preferred path is specified by the user, algorithm at ESX
 	// side will choose the random possible path.
 	Path string `xml:"path,omitempty" json:"path,omitempty"`
 	// This value can control at what interval (in ms) the latency of
@@ -41022,16 +41248,15 @@ type HostNasVolumeSpec struct {
 	// Name of the vmknic to be used by this mount.
 	//
 	// This field will be updated by a client with vmknic that will be used
-	// for NAS volume mount operation for vmknic binding for NFSv3
+	// for NAS volume mount operation for vmknic binding.
 	VmknicToBind string `xml:"vmknicToBind,omitempty" json:"vmknicToBind,omitempty" vim:"8.0.1.0"`
 	// Indicates whether a client wants to bind this mount to vmknic.
 	//
 	// This field will be set to true by a client if vmknic should bind
-	// during NAS volume mount operation for NFSv3
-	// else it will be set to false
+	// during NAS volume mount operation, else it will be set to false.
 	VmknicBound *bool `xml:"vmknicBound" json:"vmknicBound,omitempty" vim:"8.0.1.0"`
 	// Indicates the number of TCP connections for the particular
-	// NFSv3 Server during NAS volume mount operation.
+	// NFS Server during NAS volume mount operation.
 	//
 	// If unset or set to 0, it defaults to one connection
 	Connections int32 `xml:"connections,omitempty" json:"connections,omitempty" vim:"8.0.1.0"`
@@ -41263,7 +41488,7 @@ type HostNetCapabilities struct {
 	DhcpOnVnicSupported bool `xml:"dhcpOnVnicSupported" json:"dhcpOnVnicSupported"`
 	// The flag to indicate whether the host is capable of communicating
 	// using ipv6 protocol
-	IpV6Supported *bool `xml:"ipV6Supported" json:"ipV6Supported,omitempty"`
+	IpV6Supported bool `xml:"ipV6Supported" json:"ipV6Supported"`
 	// The flag to indicate whether the host supports Backup NFC NIOC system
 	// traffic, Unset means Backup NFC NIOC system traffic is not supported.
 	BackupNfcNiocSupported *bool `xml:"backupNfcNiocSupported" json:"backupNfcNiocSupported,omitempty" vim:"7.0.1.0"`
@@ -42445,7 +42670,7 @@ type HostNvmeOpaqueTransportParameters struct {
 	//
 	// Corresponds to the TRTYPE field in the Discovery Log Page Entry
 	// as specified by the NVME over Fabrics spec.
-	// The set of possible values is desribed in `HostNvmeTransportType_enum`.
+	// The set of possible values is described in `HostNvmeTransportType_enum`.
 	Trtype string `xml:"trtype" json:"trtype"`
 	// The transport address.
 	//
@@ -42711,6 +42936,8 @@ func init() {
 	t["HostOvercommittedEvent"] = reflect.TypeOf((*HostOvercommittedEvent)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // The VMFS file system.
 type HostPMemVolume struct {
 	HostFileSystemVolume
@@ -43077,7 +43304,7 @@ type HostPersistentMemoryInfo struct {
 
 	// Amount of configured persistent memory available on a host in MB.
 	CapacityInMB int64 `xml:"capacityInMB,omitempty" json:"capacityInMB,omitempty"`
-	// Unique persistent memory host indentifier.
+	// Unique persistent memory host identifier.
 	VolumeUUID string `xml:"volumeUUID,omitempty" json:"volumeUUID,omitempty"`
 }
 
@@ -43307,7 +43534,7 @@ func init() {
 	t["HostPlugStoreTopologyTarget"] = reflect.TypeOf((*HostPlugStoreTopologyTarget)(nil)).Elem()
 }
 
-// This data type describes the avaialable capacity
+// This data type describes the available capacity
 // for VM traffic on a physical NIC
 type HostPnicNetworkResourceInfo struct {
 	DynamicData
@@ -44027,7 +44254,7 @@ type HostProxySwitch struct {
 	NsxtStatus string `xml:"nsxtStatus,omitempty" json:"nsxtStatus,omitempty"`
 	// Additional information regarding the NSX-T proxy switch status
 	NsxtStatusDetail string `xml:"nsxtStatusDetail,omitempty" json:"nsxtStatusDetail,omitempty"`
-	// ENS Status From VmKernal.
+	// ENS Status From VmKernel.
 	EnsInfo *HostProxySwitchEnsInfo `xml:"ensInfo,omitempty" json:"ensInfo,omitempty" vim:"8.0.0.1"`
 	// Indicate if network offloading is enabled on the proxy switch of
 	// this host.
@@ -44072,7 +44299,7 @@ func init() {
 }
 
 // This data object type describes
-// the Ens status from VmKernal.
+// the Ens status from VmKernel.
 type HostProxySwitchEnsInfo struct {
 	DynamicData
 
@@ -44267,7 +44494,7 @@ type HostRdmaDevice struct {
 	Backing BaseHostRdmaDeviceBacking `xml:"backing,omitempty,typeattr" json:"backing,omitempty"`
 	// Current device connection state.
 	ConnectionInfo HostRdmaDeviceConnectionInfo `xml:"connectionInfo" json:"connectionInfo"`
-	// Supported capabilies of the RDMA device.
+	// Supported capabilities of the RDMA device.
 	Capability HostRdmaDeviceCapability `xml:"capability" json:"capability"`
 }
 
@@ -44285,7 +44512,7 @@ func init() {
 	t["HostRdmaDeviceBacking"] = reflect.TypeOf((*HostRdmaDeviceBacking)(nil)).Elem()
 }
 
-// Represents device capabilies, e.g.
+// Represents device capabilities, e.g.
 //
 // supported protocols.
 type HostRdmaDeviceCapability struct {
@@ -44786,8 +45013,8 @@ type HostRuntimeInfo struct {
 	PartialMaintenanceMode []HostPartialMaintenanceModeRuntimeInfo `xml:"partialMaintenanceMode,omitempty" json:"partialMaintenanceMode,omitempty" vim:"8.0.3.0"`
 	// Host persistent state encryption information.
 	StateEncryption *HostRuntimeInfoStateEncryptionInfo `xml:"stateEncryption,omitempty" json:"stateEncryption,omitempty" vim:"7.0.3.0"`
-	// PodVM related info for a host
-	PodVMInfo *HostRuntimeInfoPodVMInfo `xml:"podVMInfo,omitempty" json:"podVMInfo,omitempty" vim:"9.1.0.0"`
+	// PodVM related information for a host.
+	PodVMInfo *PodVMInfo `xml:"podVMInfo,omitempty" json:"podVMInfo,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -45514,7 +45741,7 @@ type HostSnmpSystemAgentLimits struct {
 	// SNMP input buffer size
 	MaxBufferSize int32 `xml:"maxBufferSize" json:"maxBufferSize"`
 	// Supported Capability for this agent
-	Capability HostSnmpAgentCapability `xml:"capability,omitempty" json:"capability,omitempty"`
+	Capability HostSnmpAgentCapability `xml:"capability" json:"capability"`
 }
 
 func init() {
@@ -45713,7 +45940,7 @@ type HostSslThumbprintInfo struct {
 	// interfering with each other on the life cycle of the thumbprint with
 	// their unique tags.
 	// Each solution should use a unique tag to identify itself.
-	OwnerTag string `xml:"ownerTag,omitempty" json:"ownerTag,omitempty"`
+	OwnerTag string `xml:"ownerTag" json:"ownerTag"`
 	// Specify the SSL thumbprints to register on the host.
 	SslThumbprints []string `xml:"sslThumbprints,omitempty" json:"sslThumbprints,omitempty"`
 }
@@ -45965,7 +46192,7 @@ func init() {
 	t["HostSystemComplianceCheckState"] = reflect.TypeOf((*HostSystemComplianceCheckState)(nil)).Elem()
 }
 
-// This data object provides information about the health of the phyical
+// This data object provides information about the health of the physical
 // system.
 //
 // The data is retrieved from numeric sensor probes.
@@ -46053,7 +46280,7 @@ type HostSystemReconnectSpec struct {
 	// machine state in vCenter Server e.g.
 	//
 	// the virtual machine inventory
-	// and autostart rules, has to be propogated to the host. Any virtual
+	// and autostart rules, has to be propagated to the host. Any virtual
 	// machines that may have been unregistered or orphaned will be
 	// reregistered according to the vCenter Server inventory. Any autostart
 	// rules that may have changed on the host will be similarly restored.
@@ -46165,6 +46392,10 @@ func init() {
 	t["HostSystemSwapConfigurationDisabledOption"] = reflect.TypeOf((*HostSystemSwapConfigurationDisabledOption)(nil)).Elem()
 }
 
+// Deprecated as of vSphere API 9.0 with no direct replacement. Still,
+// you may consider using Memory Tiering APIs
+// `NVMe`.
+//
 // Use option to indicate that the host cache may be used for system
 // swap.
 //
@@ -46336,7 +46567,7 @@ type HostTpmAttestationReport struct {
 	// This flag indicates whether the provided TPM events are a complete and reliable
 	// information about host boot status.
 	//
-	// TPM event log may be incomplete (and therfore unreliable) if certain modules have
+	// TPM event log may be incomplete (and therefore unreliable) if certain modules have
 	// inappropriate origin or if the package information is incomplete. Only first 1000
 	// events are recorded by the kernel. Further events will not be recorded in the log
 	// and will cause the log to be marked as unreliable.
@@ -46367,7 +46598,7 @@ func init() {
 // This event type exists to simplify parsing of the security-related information
 // by internal and third-party solutions. Each boot option may be passed to kernel
 // multiple times and/or in different forms. Replicating the parsing logic of the
-// kernel would be neither convinient, nor secure for the client applications.
+// kernel would be neither convenient, nor secure for the client applications.
 //
 // Each instance of this event reports details of a single security-related
 // boot option, as set in the kernel.
@@ -46713,7 +46944,7 @@ func init() {
 // VMFS volume with the same Uuid mounted somewhere in the same
 // datacenter.
 //
-// Simple diagram representing the possible operations on UnresolvedVmfsVolume
+// # Simple diagram representing the possible operations on UnresolvedVmfsVolume
 //
 //	---------------------------------------------------------------------------
 //	|                resignature                 forceMount                   |
@@ -47170,14 +47401,17 @@ type HostVStorageObjectCreateDiskFromSnapshotRequestType struct {
 	Profile []BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile,omitempty"`
 	// Crypto information of the new disk.
 	Crypto BaseCryptoSpec `xml:"crypto,omitempty,typeattr" json:"crypto,omitempty"`
-	// Relative location in the specified datastore where disk needs
-	// to be created. If not specified disk gets created at defualt
-	// VStorageObject location on the specified datastore.
+	// Relative location where disk has to be created, used in
+	// `targetDatastore` and `datastore` parameters.
+	// If not specified disk gets created at default `VStorageObject`
+	// location of `targetDatastore` or `datastore`.
 	Path string `xml:"path,omitempty" json:"path,omitempty"`
 	// Provisioining type of the disk as specified in above
 	// mentioned profile. The list of supported values can be found in
 	// `BaseConfigInfoDiskFileBackingInfoProvisioningType_enum`
 	ProvisioningType string `xml:"provisioningType,omitempty" json:"provisioningType,omitempty" vim:"8.0.0.1"`
+	// Indicates whether a linkedClone Disk needs to be created from the snapshot.
+	IsLinkedClone *bool `xml:"isLinkedClone" json:"isLinkedClone,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -47610,6 +47844,8 @@ type HostVirtualNicSpec struct {
 	// This attribute
 	// allows the vmkernel adapter to specify its own default gateway.
 	IpRouteSpec *HostVirtualNicIpRouteSpec `xml:"ipRouteSpec,omitempty" json:"ipRouteSpec,omitempty"`
+	// Deprecated as of vSphere API 9, use `HostVirtualNic.owner` instead.
+	//
 	// Set to true when the vmkernel adapter is configured by
 	// other system indirectly other than by the user directly.
 	SystemOwned *bool `xml:"systemOwned" json:"systemOwned,omitempty"`
@@ -48547,7 +48783,7 @@ type HttpNfcLeaseManifestEntry struct {
 	Sha1 string `xml:"sha1" json:"sha1"`
 	// Checksum of the data stream sent/recieved by host.
 	//
-	// See `HttpNfcLeaseManifestEntryChecksumType_enum` for used algoritm.
+	// See `HttpNfcLeaseManifestEntryChecksumType_enum` for used algorithm.
 	Checksum string `xml:"checksum,omitempty" json:"checksum,omitempty"`
 	// Algorithm used to produce checksum in respective property.
 	//
@@ -48904,7 +49140,7 @@ func init() {
 //
 // This class is the abstract base for `VirtualMachineImportSpec` and
 // `VirtualAppImportSpec`. These three classes form a composite structure
-// that allows us to contain arbitrarily complex entitites in a single ImportSpec.
+// that allows us to contain arbitrarily complex entities in a single ImportSpec.
 type ImportSpec struct {
 	DynamicData
 
@@ -49819,10 +50055,10 @@ type InsufficientNetworkResourcePoolCapacity struct {
 	InsufficientResourcesFault
 
 	// Distributed Virtual Switch containing the resource pool
-	// having unsufficient network bandwitdh.
+	// having insufficient network bandwidth.
 	DvsName string `xml:"dvsName" json:"dvsName"`
 	// UUID of the distributed Virtual Switch containing the resource pool
-	// having unsufficient network bandwitdh.
+	// having insufficient network bandwidth.
 	DvsUuid string `xml:"dvsUuid" json:"dvsUuid"`
 	// Key of the resource pool on which network bandwidth is requested.
 	ResourcePoolKey string `xml:"resourcePoolKey" json:"resourcePoolKey"`
@@ -49880,7 +50116,7 @@ func init() {
 }
 
 // This fault is thrown when Distributed Power Management cannot perform
-// a given opeartion because there is insufficient CPU resource
+// a given operation because there is insufficient CPU resource
 // on standby hosts (if any) to meet the requirements of the operation.
 type InsufficientStandbyCpuResource struct {
 	InsufficientStandbyResource
@@ -49930,7 +50166,7 @@ func init() {
 }
 
 // This fault is thrown when Distributed Power Management cannot perform
-// a given opeartion because there are insufficient CPU/memory resources
+// a given operation because there are insufficient CPU/memory resources
 // on standby hosts (if any) to meet the requirements of the operation.
 type InsufficientStandbyResource struct {
 	InsufficientResourcesFault
@@ -50851,7 +51087,7 @@ func init() {
 // associated with a profile in the Virtual Center inventory.
 //
 // This could
-// be because there is no host assciated with the profile or because the
+// be because there is no host associated with the profile or because the
 // associated host is incompatible with the profile.
 type InvalidProfileReferenceHost struct {
 	RuntimeFault
@@ -50950,7 +51186,7 @@ func init() {
 }
 
 // This fault is thrown when an operation will cause the structure of a resource
-// pool hiearchy to exceed its limit.
+// pool hierarchy to exceed its limit.
 //
 // The limits are typically imposed by the total
 // number of nodes, maximum fan-out, and total depth of the hierarchy.
@@ -51018,6 +51254,25 @@ type InvalidStateFault BaseInvalidState
 
 func init() {
 	t["InvalidStateFault"] = reflect.TypeOf((*InvalidStateFault)(nil)).Elem()
+}
+
+// Thrown when the API request is associated with an access token
+// that the server does not accept.
+//
+// The token might be malformed,
+// with an invalid signature or content, expired validity, etc.
+type InvalidToken struct {
+	RuntimeFault
+}
+
+func init() {
+	t["InvalidToken"] = reflect.TypeOf((*InvalidToken)(nil)).Elem()
+}
+
+type InvalidTokenFault InvalidToken
+
+func init() {
+	t["InvalidTokenFault"] = reflect.TypeOf((*InvalidTokenFault)(nil)).Elem()
 }
 
 // InvalidType is thrown when a managed object request refers to
@@ -52713,7 +52968,7 @@ type LicenseManagerLicenseInfo struct {
 	CostUnit string `xml:"costUnit" json:"costUnit"`
 	// Additional properties associated with this license
 	Properties []KeyAnyValue `xml:"properties,omitempty" json:"properties,omitempty"`
-	// Key-value lables for this license
+	// Key-value labels for this license
 	Labels []KeyValue `xml:"labels,omitempty" json:"labels,omitempty"`
 }
 
@@ -55026,7 +55281,7 @@ func init() {
 	t["MismatchedVMotionNetworkNamesFault"] = reflect.TypeOf((*MismatchedVMotionNetworkNamesFault)(nil)).Elem()
 }
 
-// A MissingBmcSuppport fault is thrown when a host's BMC doesn't support IPMI.
+// A MissingBmcSupport fault is thrown when a host's BMC doesn't support IPMI.
 //
 // BMC (Board Management Controller) is a piece of hardware required for IPMI.
 type MissingBmcSupport struct {
@@ -55699,7 +55954,7 @@ type MoveVirtualDiskRequestType struct {
 	//
 	// Refers instance of `Datacenter`.
 	DestDatacenter *ManagedObjectReference `xml:"destDatacenter,omitempty" json:"destDatacenter,omitempty"`
-	// If true, overwrite any indentically named disk at the destination.
+	// If true, overwrite any identically named disk at the destination.
 	// If not specified, it is assumed to be false
 	Force *bool `xml:"force" json:"force,omitempty"`
 	// User can specify new set of profile when moving virtual disk.
@@ -56104,7 +56359,7 @@ type NetDhcpConfigInfoDhcpOptions struct {
 	// key='2', value='reboot 10;'
 	// output reported at per interface scope:
 	// key='1', value='prepend domain-name-servers 192.0.2.1;'
-	// key='2', value='equire subnet-mask, domain-name-servers;'
+	// key='2', value='require subnet-mask, domain-name-servers;'
 	Config []KeyValue `xml:"config,omitempty" json:"config,omitempty"`
 }
 
@@ -56240,7 +56495,7 @@ type NetIpConfigInfo struct {
 	IpAddress []NetIpConfigInfoIpAddress `xml:"ipAddress,omitempty" json:"ipAddress,omitempty"`
 	// Client side DHCP for a given interface.
 	Dhcp *NetDhcpConfigInfo `xml:"dhcp,omitempty" json:"dhcp,omitempty"`
-	// Enable or disable ICMPv6 router solictitation requests from a given interface
+	// Enable or disable ICMPv6 router solicitation requests from a given interface
 	// to acquire an IPv6 address and default gateway route from zero, one or more
 	// routers on the connected network.
 	//
@@ -56290,7 +56545,7 @@ type NetIpConfigInfoIpAddress struct {
 	State string `xml:"state,omitempty" json:"state,omitempty"`
 	// The time when will this address expire.
 	//
-	// Durning this time
+	// During this time
 	// `state` may change states but is still visible
 	// from the network.
 	Lifetime *time.Time `xml:"lifetime" json:"lifetime,omitempty"`
@@ -56442,7 +56697,7 @@ type NetIpRouteConfigSpecIpRouteSpec struct {
 	// field (:). For example, 2001:DB8:101::230:6eff:fe04:d9ff. The address can
 	// also consist of symbol '::' to represent multiple 16-bit groups of
 	// contiguous 0's only once in an address as described in RFC 2373.
-	// To Specify a default network use the value: 0 with prefixLenth 0.
+	// To Specify a default network use the value: 0 with prefixLength 0.
 	Network string `xml:"network" json:"network"`
 	// The prefix length.
 	//
@@ -56471,7 +56726,7 @@ type NetIpStackInfo struct {
 	// issues. This property maps to RFC 4293 ipNetToPhysicalTable.
 	Neighbor []NetIpStackInfoNetToMedia `xml:"neighbor,omitempty" json:"neighbor,omitempty"`
 	// Zero one or more entries of discovered IP routers that are directly
-	// reachable from a an interface on this system.
+	// reachable from an interface on this system.
 	//
 	// This property maps to RFC 4293 ipDefaultRouterTable.
 	DefaultRouter []NetIpStackInfoDefaultRouter `xml:"defaultRouter,omitempty" json:"defaultRouter,omitempty"`
@@ -56487,7 +56742,7 @@ type NetIpStackInfoDefaultRouter struct {
 	// Unicast IP address of a next-hop router.
 	IpAddress string `xml:"ipAddress" json:"ipAddress"`
 	// This value will contain the name of the interface as reported by the
-	// operationg system.
+	// operating system.
 	Device string `xml:"device" json:"device"`
 	// When this entry will no longer valid.
 	//
@@ -56507,7 +56762,7 @@ func init() {
 	t["NetIpStackInfoDefaultRouter"] = reflect.TypeOf((*NetIpStackInfoDefaultRouter)(nil)).Elem()
 }
 
-// Information from an IP stack about known mappings betwwen an IP address
+// Information from an IP stack about known mappings between an IP address
 // and the underlying physical address it maps to as learned by:
 // IPv4: Address Resolution Protocol (ARP) RFC 826
 // IPv6: Neighbor Discovery Protocol (NDP) RFC 4861
@@ -57670,7 +57925,7 @@ type NotEnoughResourcesToStartVmEvent struct {
 	VmEvent
 
 	// The reason why the virtual machine could not be restarted
-	Reason string `xml:"reason,omitempty" json:"reason,omitempty"`
+	Reason string `xml:"reason" json:"reason"`
 }
 
 func init() {
@@ -58254,7 +58509,7 @@ type NvdimmNamespaceCreateSpec struct {
 
 	// Friendly name of the namespace to be created.
 	//
-	// A friendly name can be provided by user to assosiate a name to
+	// A friendly name can be provided by user to associate a name to
 	// the created namespace, but such a name is not mandatory and is
 	// empty string by default.
 	FriendlyName string `xml:"friendlyName,omitempty" json:"friendlyName,omitempty"`
@@ -58435,7 +58690,7 @@ type NvdimmRegionInfo struct {
 	// If this region is part of interleave set (represented by non zero
 	// `NvdimmRegionInfo.setId`) and the region is interleaved across
 	// multiple dimms (represented by more that one element in
-	// `NvdimmInterleaveSetInfo.deviceList` for assosiated set id
+	// `NvdimmInterleaveSetInfo.deviceList` for associated set id
 	// `NvdimmRegionInfo.setId`), this size represents part of the
 	// interleave set size - (total interleave set size / number
 	// of dimms in `NvdimmInterleaveSetInfo.deviceList`).
@@ -59297,7 +59552,7 @@ type OvfCreateDescriptorParams struct {
 	// If unset, the entity's
 	// product name is used if available. Otherwise, the VI entity name is used.
 	Name string `xml:"name,omitempty" json:"name,omitempty"`
-	// The contents of the Annontation section of the top-level OVF Entity.
+	// The contents of the Annotation section of the top-level OVF Entity.
 	//
 	// If unset,
 	// any existing annotation on the entity is left unchanged.
@@ -59403,7 +59658,7 @@ type OvfCreateImportSpecParams struct {
 	//
 	// If set, all the disks in the deployed OVF will
 	// have get the same specified disk type (e.g., thin provisioned).
-	// The valide values for disk provisioning are:
+	// The valid values for disk provisioning are:
 	//   - `monolithicSparse`
 	//   - `monolithicFlat`
 	//   - `twoGbMaxExtentSparse`
@@ -59478,7 +59733,7 @@ func init() {
 	minAPIVersionForType["OvfDatastoreMapping"] = "9.0.0.0"
 }
 
-// A deployment option as defined in the OVF specfication.
+// A deployment option as defined in the OVF specification.
 //
 // This corresponds to the Configuration element of the DeploymentOptionSection in the
 // specification.
@@ -59913,7 +60168,7 @@ func init() {
 	t["OvfHardwareExportFault"] = reflect.TypeOf((*OvfHardwareExportFault)(nil)).Elem()
 }
 
-// Class used to indicate that the value in HostResoruce did not map to
+// Class used to indicate that the value in HostResource did not map to
 // a valid reference element.
 type OvfHostResourceConstraint struct {
 	OvfConstraint
@@ -60202,7 +60457,7 @@ type OvfManagerCommonParams struct {
 	// passed in key/value pairs are looked up before any messages
 	// included in the OVF descriptor itself.
 	MsgBundle []KeyValue `xml:"msgBundle,omitempty" json:"msgBundle,omitempty"`
-	// An optional argument for modifing the OVF parsing.
+	// An optional argument for modifying the OVF parsing.
 	//
 	// When the server parses an OVF
 	// descriptor a set of options can be used to modify the parsing. The argument is a list
@@ -60806,7 +61061,7 @@ type OvfUnknownDevice struct {
 
 	// The unknown device
 	Device BaseVirtualDevice `xml:"device,omitempty,typeattr" json:"device,omitempty"`
-	// The name of the Virtual Machine containing the unkown device
+	// The name of the Virtual Machine containing the unknown device
 	VmName string `xml:"vmName" json:"vmName"`
 }
 
@@ -61178,6 +61433,9 @@ func init() {
 	t["OvfXmlFormatFault"] = reflect.TypeOf((*OvfXmlFormatFault)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
+// Do not use.
 type PMemDatastoreInfo struct {
 	DatastoreInfo
 
@@ -61657,7 +61915,7 @@ func init() {
 //
 // For ESX systems, a single instance of this data object exists. It cannot
 // be modified. It has these properties:
-// <table border="1"width="100%">
+// <table border="1" width="100%">
 // <tr>
 // <th>key</th>
 // <th>samplingPeriod</th>
@@ -61703,7 +61961,7 @@ func init() {
 //
 // Default properties for the four built-in historical intervals
 // include:
-// <table border="1"width="100%">
+// <table border="1" width="100%">
 // <tr>
 // <th>key</th>
 // <th>samplingPeriod</th>
@@ -62288,7 +62546,7 @@ type PermissionUpdatedEvent struct {
 	Propagate bool `xml:"propagate" json:"propagate"`
 	// The previous associated role.
 	PrevRole *RoleEventArgument `xml:"prevRole,omitempty" json:"prevRole,omitempty"`
-	// Previous propogate value.
+	// Previous propagate value.
 	PrevPropagate *bool `xml:"prevPropagate" json:"prevPropagate,omitempty"`
 }
 
@@ -62413,35 +62671,35 @@ func init() {
 	t["PhysicalNic"] = reflect.TypeOf((*PhysicalNic)(nil)).Elem()
 }
 
-// The capability of the CDP-awared device that connects to a Physical NIC.
+// The capability of the CDP-aware device that connects to a Physical NIC.
 //
 // `PhysicalNicCdpInfo`
 type PhysicalNicCdpDeviceCapability struct {
 	DynamicData
 
-	// The CDP-awared device has the capability of a routing for
+	// The CDP-aware device has the capability of a routing for
 	// at least one network layer protocol
 	Router bool `xml:"router" json:"router"`
-	// The CDP-awared device has the capability of transparent
+	// The CDP-aware device has the capability of transparent
 	// bridging
 	TransparentBridge bool `xml:"transparentBridge" json:"transparentBridge"`
-	// The CDP-awared device has the capability of source-route
+	// The CDP-aware device has the capability of source-route
 	// bridging
 	SourceRouteBridge bool `xml:"sourceRouteBridge" json:"sourceRouteBridge"`
-	// The CDP-awared device has the capability of switching.
+	// The CDP-aware device has the capability of switching.
 	//
 	// The
 	// difference between this capability and transparentBridge is
 	// that a switch does not run the Spanning-Tree Protocol. This
 	// device is assumed to be deployed in a physical loop-free topology.
 	NetworkSwitch bool `xml:"networkSwitch" json:"networkSwitch"`
-	// The CDP-awared device has the capability of a host, which
+	// The CDP-aware device has the capability of a host, which
 	// Sends and receives packets for at least one network layer protocol.
 	Host bool `xml:"host" json:"host"`
-	// The CDP-awared device is IGMP-enabled, which does not forward IGMP
+	// The CDP-aware device is IGMP-enabled, which does not forward IGMP
 	// Report packets on nonrouter ports.
 	IgmpEnabled bool `xml:"igmpEnabled" json:"igmpEnabled"`
-	// The CDP-awared device has the capability of a repeater
+	// The CDP-aware device has the capability of a repeater
 	Repeater bool `xml:"repeater" json:"repeater"`
 }
 
@@ -62450,7 +62708,7 @@ func init() {
 }
 
 // CDP (Cisco Discovery Protocol) is a link level protocol that allows
-// for discovering the CDP-awared network hardware at either end of a
+// for discovering the CDP-aware network hardware at either end of a
 // DIRECT connection.
 //
 // It's only good for direct connection because CDP
@@ -62586,14 +62844,14 @@ type PhysicalNicHintInfo struct {
 	// The list of network names that were detected on this
 	// physical network adapter.
 	Network []PhysicalNicNameHint `xml:"network,omitempty" json:"network,omitempty"`
-	// If the uplink directly connects to a CDP-awared network device
+	// If the uplink directly connects to a CDP-aware network device
 	// and the device's CDP broadcast is enabled, this property will be
 	// set to return the CDP information that vmkernel received on this
 	// Physical NIC.
 	//
 	// CDP data contains the device information and port ID that
 	// the Physical NIC connects to. If the uplink is not connecting to a
-	// CDP-awared device or CDP is not enabled on the device, this
+	// CDP-aware device or CDP is not enabled on the device, this
 	// property will be unset.
 	// `PhysicalNicCdpInfo`
 	ConnectedSwitchPort *PhysicalNicCdpInfo `xml:"connectedSwitchPort,omitempty" json:"connectedSwitchPort,omitempty"`
@@ -62739,6 +62997,27 @@ func init() {
 
 type PlaceVmResponse struct {
 	Returnval PlacementResult `xml:"returnval" json:"returnval"`
+}
+
+// Represents the list of candidate networks for a single network interface.
+type PlaceVmsXClusterSpecCandidateNetworks struct {
+	DynamicData
+
+	// The list of candidate networks for a single network interface.
+	//
+	// When this
+	// parameter is specified, virtual machines will only be placed on clusters
+	// whose hosts are connected to one of the specified network.
+	// Note - Only one of the listed network will be used for attaching the
+	// virtual NIC.
+	//
+	// Refers instances of `Network`.
+	Networks []ManagedObjectReference `xml:"networks,omitempty" json:"networks,omitempty"`
+}
+
+func init() {
+	t["PlaceVmsXClusterSpecCandidateNetworks"] = reflect.TypeOf((*PlaceVmsXClusterSpecCandidateNetworks)(nil)).Elem()
+	minAPIVersionForType["PlaceVmsXClusterSpecCandidateNetworks"] = "9.1.0.0"
 }
 
 // Describes a placement action of a single virtual machine.
@@ -63083,6 +63362,51 @@ type PodStorageDrsEntry struct {
 
 func init() {
 	t["PodStorageDrsEntry"] = reflect.TypeOf((*PodStorageDrsEntry)(nil)).Elem()
+}
+
+// This data object type contains the PodVM specific runtime
+// information for an ESX host.
+type PodVMInfo struct {
+	DynamicData
+
+	// Indicates if the host has a powered on PodVM.
+	HasPodVM bool `xml:"hasPodVM" json:"hasPodVM"`
+	// Contains the memory overhead info for PodVMs on the host.
+	PodVMOverheadInfo PodVMOverheadInfo `xml:"podVMOverheadInfo" json:"podVMOverheadInfo"`
+}
+
+func init() {
+	t["PodVMInfo"] = reflect.TypeOf((*PodVMInfo)(nil)).Elem()
+	minAPIVersionForType["PodVMInfo"] = "9.1.0.0"
+}
+
+// Contains information about CRX Page Sharing support on an ESX host and
+// the PodVM memory overhead to be used by sched-ext in its calculations accordingly.
+//
+// Sched-ext will determine which of these values to use based on both host level
+// and cluster level information that it has available.
+// Even if CRX Page sharing is supported on a particular host, sched-ext will use
+// the overhead with page sharing only if all the hosts in the cluster have this support,
+// else it will fall back on the overhead without page sharing in its calculations.
+// These overhead values will be updated at runtime by Spherelet, which is a daemon on ESX
+// and is responsible for managing PodVMs.
+type PodVMOverheadInfo struct {
+	DynamicData
+
+	// Indicates whether CRX Page sharing
+	// feature is supported on the host.
+	CrxPageSharingSupported bool `xml:"crxPageSharingSupported" json:"crxPageSharingSupported"`
+	// Memory overhead value in MB to be used by sched-ext
+	// if CRX Page Sharing is `*not*` supported on the host.
+	PodVMOverheadWithoutPageSharing int32 `xml:"podVMOverheadWithoutPageSharing" json:"podVMOverheadWithoutPageSharing"`
+	// Memory overhead value in MB to be used by sched-ext
+	// if CRX Page Sharing is supported on the host.
+	PodVMOverheadWithPageSharing int32 `xml:"podVMOverheadWithPageSharing" json:"podVMOverheadWithPageSharing"`
+}
+
+func init() {
+	t["PodVMOverheadInfo"] = reflect.TypeOf((*PodVMOverheadInfo)(nil)).Elem()
+	minAPIVersionForType["PodVMOverheadInfo"] = "9.1.0.0"
 }
 
 // The `PolicyOption` data object represents one or more configuration
@@ -63578,7 +63902,7 @@ func init() {
 	t["ProfileApplyProfileProperty"] = reflect.TypeOf((*ProfileApplyProfileProperty)(nil)).Elem()
 }
 
-// This event records that a Profile was associated with a managed entitiy.
+// This event records that a Profile was associated with a managed entity.
 type ProfileAssociatedEvent struct {
 	ProfileEvent
 }
@@ -63587,7 +63911,7 @@ func init() {
 	t["ProfileAssociatedEvent"] = reflect.TypeOf((*ProfileAssociatedEvent)(nil)).Elem()
 }
 
-// This event records that the profile has beed edited
+// This event records that the profile has been edited
 type ProfileChangedEvent struct {
 	ProfileEvent
 }
@@ -64738,9 +65062,9 @@ type QueryChangedDiskAreasRequestType struct {
 	// Typically, callers will make multiple calls to this function, starting
 	// with startOffset 0 and then examine the "length" property in the
 	// returned DiskChangeInfo structure, repeatedly calling queryChangedDiskAreas
-	// until a map forthe entire virtual disk has been obtained.
+	// until a map for the entire virtual disk has been obtained.
 	StartOffset int64 `xml:"startOffset" json:"startOffset"`
-	// Identifyer referring to a point in the past that should be used
+	// Identifier referring to a point in the past that should be used
 	// as the point in time at which to begin including changes to the disk in
 	// the result. A typical use case would be a backup application obtaining a
 	// changeId from a virtual disk's backing info when performing a
@@ -65079,7 +65403,7 @@ type QueryConnectionInfoViaSpecRequestType struct {
 	This ManagedObjectReference `xml:"_this" json:"-"`
 	// The connection spec for the host to be queried. It must contain
 	// values for all parameters required by `Datacenter.QueryConnectionInfo`
-	// See `Datacenter.QueryConnectionInfo` or a list of thrown expections.
+	// See `Datacenter.QueryConnectionInfo` or a list of thrown exceptions.
 	Spec HostConnectSpec `xml:"spec" json:"spec"`
 }
 
@@ -65125,7 +65449,7 @@ type QueryCryptoKeyStatusRequestType struct {
 	// 0x02. check the VMs which use that key.
 	// 0x04. check the hosts using this key as host key.
 	// 0x08. Check 3rd party program which use that key.
-	// Other bits - reserved and will be igonred.
+	// Other bits - reserved and will be ignored.
 	CheckKeyBitMap int32 `xml:"checkKeyBitMap" json:"checkKeyBitMap"`
 }
 
@@ -68825,7 +69149,7 @@ type RegisterVM_TaskResponse struct {
 type Relation struct {
 	DynamicData
 
-	// If contraint is not set, the relation holds for all versions.
+	// If constraint is not set, the relation holds for all versions.
 	//
 	// and if a constraint is defined it will be one of
 	// `SoftwarePackageConstraint_enum`.
@@ -70160,7 +70484,7 @@ type ReplicationConfigSpec struct {
 	// The primary will negotiate the best compression with
 	// the server on the secondary if this is enabled.
 	NetCompressionEnabled *bool `xml:"netCompressionEnabled" json:"netCompressionEnabled,omitempty"`
-	// Flag that indicates whether or not encription should
+	// Flag that indicates whether or not encryption should
 	// be used when sending traffic over the network.
 	//
 	// The primary will use the remoteCertificateThumbprint
@@ -70179,7 +70503,7 @@ type ReplicationConfigSpec struct {
 	//
 	// The SHA256 thumbprint of the remote server certificate.
 	//
-	// This field is only relevant when net encription is enabled.
+	// This field is only relevant when net encryption is enabled.
 	RemoteCertificateThumbprint string `xml:"remoteCertificateThumbprint,omitempty" json:"remoteCertificateThumbprint,omitempty"`
 	// Flag that indicates whether DataSets files are replicated or not.
 	DataSetsReplicationEnabled *bool `xml:"dataSetsReplicationEnabled" json:"dataSetsReplicationEnabled,omitempty" vim:"8.0.0.0"`
@@ -70241,7 +70565,7 @@ func init() {
 //
 // {
 //
-// faultDomainId: <a validfaultdomainid>
+// faultDomainId: <a valid fault domain id>
 //
 // deviceGroupId: ffffffff-ffff-ffff-ffff-ffffffffffff
 //
@@ -70417,7 +70741,7 @@ func init() {
 type ReplicationVmInProgressFault struct {
 	ReplicationVmFault
 
-	// The requsted activity for VM replication
+	// The requested activity for VM replication
 	RequestedActivity string `xml:"requestedActivity" json:"requestedActivity"`
 	// The in-progress activity for VM replication
 	InProgressActivity string `xml:"inProgressActivity" json:"inProgressActivity"`
@@ -71149,7 +71473,7 @@ type ResourcePoolQuickStats struct {
 	// Host memory utilization statistics, in MB.
 	//
 	// This
-	// is also known as consummed host memory. This is between 0 and
+	// is also known as consumed host memory. This is between 0 and
 	// the configured resource limit. Valid while a virtual machine is
 	// running. This includes the overhead memory of a virtual machine.
 	HostMemoryUsage int64 `xml:"hostMemoryUsage,omitempty" json:"hostMemoryUsage,omitempty"`
@@ -71313,6 +71637,14 @@ type ResourcePoolRuntimeInfo struct {
 	//
 	// Values are in Mhz.
 	Cpu ResourcePoolResourceUsage `xml:"cpu" json:"cpu"`
+	// Runtime resource usage for VM resource profiles.
+	//
+	// For a given
+	// VM resource profile, values are in number of instances for
+	// that profile.
+	// If unset, there is no information available for the usage of
+	// VM resource profiles in this resource pool.
+	VmRp []ResourcePoolVmResourceProfileUsage `xml:"vmRp,omitempty" json:"vmRp,omitempty" vim:"9.1.0.0"`
 	// Deprecated as of vSphere API 6.5.
 	// Use `ManagedEntity.overallStatus`.
 	//
@@ -71357,6 +71689,39 @@ type ResourcePoolSummary struct {
 
 func init() {
 	t["ResourcePoolSummary"] = reflect.TypeOf((*ResourcePoolSummary)(nil)).Elem()
+}
+
+// Specifies information about the usage of a Virtual Machine Resource profile
+// in a resource pool.
+//
+// The unit for usage is in terms of number of instances of a given VM resource
+// profile.
+type ResourcePoolVmResourceProfileUsage struct {
+	DynamicData
+
+	// Specifies the identifier of the VM resource profile whose usage information
+	// is encapsulated by this VmResourceProfileUsage.
+	Id string `xml:"id" json:"id"`
+	// Specifies how many instances of this VM resource profile are reserved
+	// in this resource pool.
+	//
+	// Note that this indicates the configured reservation
+	// for this resource pool and it does not indicate currently available
+	// reservation.
+	ReservedForPool int64 `xml:"reservedForPool" json:"reservedForPool"`
+	// Specifies how many reserved instances of this VM resource profile in
+	// this resource pool are being used by virtual machines that are direct
+	// descendants of this resource pool.
+	ReservationUsedForVms int64 `xml:"reservationUsedForVms" json:"reservationUsedForVms"`
+	// Specifies how many reserved instances of this VM resource profile in
+	// this resource pool have been allocated to any of its child resource
+	// pools.
+	ReservationUsedForChildPools int64 `xml:"reservationUsedForChildPools" json:"reservationUsedForChildPools"`
+}
+
+func init() {
+	t["ResourcePoolVmResourceProfileUsage"] = reflect.TypeOf((*ResourcePoolVmResourceProfileUsage)(nil)).Elem()
+	minAPIVersionForType["ResourcePoolVmResourceProfileUsage"] = "9.1.0.0"
 }
 
 // This event records when a conflict with a resource pool's resource
@@ -72244,7 +72609,7 @@ type RetrieveVStorageInfrastructureObjectPolicyResponse struct {
 	Returnval []VslmInfrastructureObjectPolicy `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
-// This data object is a pair of the virtural storage object id and
+// This data object is a pair of the virtual storage object id and
 // its datastore.
 type RetrieveVStorageObjSpec struct {
 	DynamicData
@@ -72667,7 +73032,7 @@ type RuleViolation struct {
 	// The rule that is violated.
 	//
 	// It can be an affinity or anti-affinity rule.
-	Rule BaseClusterRuleInfo `xml:"rule,omitempty,typeattr" json:"rule,omitempty"`
+	Rule BaseClusterRuleInfo `xml:"rule,typeattr" json:"rule"`
 }
 
 func init() {
@@ -73182,7 +73547,7 @@ type ScheduledTaskInfo struct {
 	// This field will have information about either the
 	// ManagedEntity or the ManagedObject on which the scheduled
 	// task is defined.
-	TaskObject *ManagedObjectReference `xml:"taskObject,omitempty" json:"taskObject,omitempty"`
+	TaskObject ManagedObjectReference `xml:"taskObject" json:"taskObject"`
 }
 
 func init() {
@@ -73401,7 +73766,7 @@ type ScsiLun struct {
 	// set for Raw Device Mapped (RDM) LUNs, the host startup or LUN rescan
 	// take comparatively shorter duration than when it is unset.
 	PerenniallyReserved *bool `xml:"perenniallyReserved" json:"perenniallyReserved,omitempty"`
-	// Indicates if LUN has the prequisite properties to enable Clustered Vmdk
+	// Indicates if LUN has the prerequisite properties to enable Clustered Vmdk
 	// feature once formatted into VMFS Datastore.
 	ClusteredVmdkSupported *bool `xml:"clusteredVmdkSupported" json:"clusteredVmdkSupported,omitempty"`
 	// Indicates the current device protocol.
@@ -74164,7 +74529,7 @@ type ServiceLocator struct {
 	Credential BaseServiceLocatorCredential `xml:"credential,typeattr" json:"credential"`
 	// The SSL thumbprint of the certificate of the service endpoint.
 	//
-	// Superceded by `ServiceLocator.sslCertificate`.
+	// Superseded by `ServiceLocator.sslCertificate`.
 	// Note: If both <code>sslThumbprint</code> and <code>sslCertificate</code> are set,
 	// <code>sslThumbprint</code> must correspond to the <code>sslCertificate</code>.
 	SslThumbprint string `xml:"sslThumbprint,omitempty" json:"sslThumbprint,omitempty"`
@@ -76747,12 +77112,12 @@ type StorageIORMConfigOption struct {
 	CongestionThresholdOption IntOption `xml:"congestionThresholdOption" json:"congestionThresholdOption"`
 	// statsCollectionEnabledOption provides default value for
 	// `StorageIORMConfigSpec.statsCollectionEnabled`
-	StatsCollectionEnabledOption *BoolOption `xml:"statsCollectionEnabledOption,omitempty" json:"statsCollectionEnabledOption,omitempty"`
+	StatsCollectionEnabledOption BoolOption `xml:"statsCollectionEnabledOption" json:"statsCollectionEnabledOption"`
 	// Deprecated as of vSphere8.0 U3, and there is no replacement for it.
 	//
 	// reservationEnabledOption provides default value for
 	// `StorageIORMConfigSpec.reservationEnabled`
-	ReservationEnabledOption *BoolOption `xml:"reservationEnabledOption,omitempty" json:"reservationEnabledOption,omitempty"`
+	ReservationEnabledOption BoolOption `xml:"reservationEnabledOption" json:"reservationEnabledOption"`
 }
 
 func init() {
@@ -76822,7 +77187,7 @@ type StorageIORMInfo struct {
 	// Mode of congestion threshold specification
 	// For more information, see
 	// `StorageIORMThresholdMode_enum`
-	CongestionThresholdMode string `xml:"congestionThresholdMode,omitempty" json:"congestionThresholdMode,omitempty"`
+	CongestionThresholdMode string `xml:"congestionThresholdMode" json:"congestionThresholdMode"`
 	// The latency beyond which the storage array is considered congested.
 	//
 	// If storage I/O resource management is enabled on a datastore,
@@ -76841,11 +77206,11 @@ type StorageIORMInfo struct {
 	// Deprecated as of vSphere API 6.5, use `StorageIORMInfo.enabled` instead.
 	//
 	// Flag indicating whether service is running in stats collection mode.
-	StatsCollectionEnabled *bool `xml:"statsCollectionEnabled" json:"statsCollectionEnabled,omitempty"`
+	StatsCollectionEnabled bool `xml:"statsCollectionEnabled" json:"statsCollectionEnabled"`
 	// Deprecated as of vSphere8.0 U3, and there is no replacement for it.
 	//
 	// Flag indicating whether IO reservations support is enabled.
-	ReservationEnabled *bool `xml:"reservationEnabled" json:"reservationEnabled,omitempty"`
+	ReservationEnabled bool `xml:"reservationEnabled" json:"reservationEnabled"`
 	// Flag indicating whether stats aggregation is disabled.
 	StatsAggregationDisabled *bool `xml:"statsAggregationDisabled" json:"statsAggregationDisabled,omitempty"`
 	// Deprecated as of vSphere8.0 U3, and there is no replacement for it.
@@ -78729,7 +79094,7 @@ func init() {
 }
 
 // Thrown when tools install or upgrade fails because the
-// operation was canclled by the user.
+// operation was cancelled by the user.
 type ToolsUpgradeCancelled struct {
 	VmToolsUpgradeFault
 }
@@ -78742,6 +79107,38 @@ type ToolsUpgradeCancelledFault ToolsUpgradeCancelled
 
 func init() {
 	t["ToolsUpgradeCancelledFault"] = reflect.TypeOf((*ToolsUpgradeCancelledFault)(nil)).Elem()
+}
+
+type TransitGatewayConfigInfo struct {
+	DynamicData
+
+	ID   string `xml:"ID" json:"ID"`
+	Name string `xml:"name" json:"name"`
+}
+
+func init() {
+	t["TransitGatewayConfigInfo"] = reflect.TypeOf((*TransitGatewayConfigInfo)(nil)).Elem()
+}
+
+type TransitGatewayConfigSpec struct {
+	DynamicData
+
+	Name string `xml:"name,omitempty" json:"name,omitempty"`
+}
+
+func init() {
+	t["TransitGatewayConfigSpec"] = reflect.TypeOf((*TransitGatewayConfigSpec)(nil)).Elem()
+}
+
+type TransitGatewayCreateSpec struct {
+	DynamicData
+
+	ID   string `xml:"ID" json:"ID"`
+	Name string `xml:"name" json:"name"`
+}
+
+func init() {
+	t["TransitGatewayCreateSpec"] = reflect.TypeOf((*TransitGatewayCreateSpec)(nil)).Elem()
 }
 
 // The `TraversalSpec` data object type specifies
@@ -80142,7 +80539,7 @@ type UpdateInternetScsiAuthenticationPropertiesRequestType struct {
 	// the authentication settings to set.
 	AuthenticationProperties HostInternetScsiHbaAuthenticationProperties `xml:"authenticationProperties" json:"authenticationProperties"`
 	// The set the targets to configure. Optional,
-	// when obmitted will configura the authentication properties
+	// when omitted will configure the authentication properties
 	// for the adapter instead.
 	TargetSet *HostInternetScsiHbaTargetSet `xml:"targetSet,omitempty" json:"targetSet,omitempty"`
 }
@@ -80452,7 +80849,7 @@ func init() {
 type UpdateLinkedChildrenRequestType struct {
 	This ManagedObjectReference `xml:"_this" json:"-"`
 	// a set of LinkInfo objects that either add a new link
-	// or modify an exisiting link.
+	// or modify an existing link.
 	AddChangeSet []VirtualAppLinkInfo `xml:"addChangeSet,omitempty" json:"addChangeSet,omitempty"`
 	// a set of entities that should no longer link to this vApp.
 	//
@@ -80501,7 +80898,13 @@ func init() {
 // The parameters of `HostAccessManager.UpdateLockdownExceptions`.
 type UpdateLockdownExceptionsRequestType struct {
 	This ManagedObjectReference `xml:"_this" json:"-"`
-	// the new list of lockdown mode exceptions.
+	// the new list of lockdown mode exceptions,
+	// or a list of users to set or unset as lockdown exceptions
+	// depending on the '+' or '-' prefix of each user name.
+	// If a user name starts with '+' then it will be
+	// added to the current list of lockdown exceptions.
+	// If a user name starts with '-' then it will be
+	// removed from the current list of lockdown exceptions.
 	Users []string `xml:"users,omitempty" json:"users,omitempty"`
 }
 
@@ -80988,7 +81391,13 @@ func init() {
 // The parameters of `HostAccessManager.UpdateSystemUsers`.
 type UpdateSystemUsersRequestType struct {
 	This ManagedObjectReference `xml:"_this" json:"-"`
-	// the new list of local system users.
+	// the new list of local system users, or a list of
+	// users to set or unset as system users depending
+	// on the '+' or '-' prefix of each user name.
+	// If a user name starts with '+' then it will be
+	// added to the current list of system users.
+	// If a user name starts with '-' then it will be
+	// removed from the current list of system users.
 	Users []string `xml:"users,omitempty" json:"users,omitempty"`
 }
 
@@ -81804,16 +82213,16 @@ type UserSession struct {
 	// the server determines this locale.
 	MessageLocale string `xml:"messageLocale" json:"messageLocale"`
 	// Whether or not this session belongs to a VC Extension.
-	ExtensionSession *bool `xml:"extensionSession" json:"extensionSession,omitempty"`
+	ExtensionSession bool `xml:"extensionSession" json:"extensionSession"`
 	// The client identity.
 	//
 	// It could be IP address, or pipe name depended
 	// on client binding
-	IpAddress string `xml:"ipAddress,omitempty" json:"ipAddress,omitempty"`
+	IpAddress string `xml:"ipAddress" json:"ipAddress"`
 	// The name of user agent or application
-	UserAgent string `xml:"userAgent,omitempty" json:"userAgent,omitempty"`
+	UserAgent string `xml:"userAgent" json:"userAgent"`
 	// Number of API invocations since the session started
-	CallCount int64 `xml:"callCount,omitempty" json:"callCount,omitempty"`
+	CallCount int64 `xml:"callCount" json:"callCount"`
 }
 
 func init() {
@@ -82049,7 +82458,7 @@ type VAppConfigInfo struct {
 	EntityConfig []VAppEntityConfigInfo `xml:"entityConfig,omitempty" json:"entityConfig,omitempty"`
 	// Description for the vApp.
 	Annotation string `xml:"annotation" json:"annotation"`
-	// vCenter-specific 128-bit UUID of a vApp, represented as a hexademical
+	// vCenter-specific 128-bit UUID of a vApp, represented as a hexadecimal
 	// string.
 	//
 	// This identifier is used by vCenter to uniquely identify all
@@ -82675,6 +83084,8 @@ type VCenterUpdateVStorageObjectMetadataExRequestType struct {
 	Id ID `xml:"id" json:"id"`
 	// The datastore to query for the virtual storage objects.
 	//
+	// Required privileges: Datastore.FileManagement
+	//
 	// Refers instance of `Datastore`.
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	// array of key/value strings. (keys must be unique
@@ -82739,7 +83150,7 @@ func init() {
 	t["VFlashModuleNotSupportedFault"] = reflect.TypeOf((*VFlashModuleNotSupportedFault)(nil)).Elem()
 }
 
-// The vFlash module version of the vFlash cache asscociated with the
+// The vFlash module version of the vFlash cache associated with the
 // virtual disk of a VM is not compatible with the supported versions of
 // the specified vFlash module on the host.
 type VFlashModuleVersionIncompatible struct {
@@ -82751,7 +83162,7 @@ type VFlashModuleVersionIncompatible struct {
 	VmRequestModuleVersion string `xml:"vmRequestModuleVersion" json:"vmRequestModuleVersion"`
 	// The minimum supported version of the specified module on the host.
 	HostMinSupportedVerson string `xml:"hostMinSupportedVerson" json:"hostMinSupportedVerson"`
-	// The verson of the specified module on the host.
+	// The version of the specified module on the host.
 	HostModuleVersion string `xml:"hostModuleVersion" json:"hostModuleVersion"`
 }
 
@@ -83294,6 +83705,7 @@ type VMwareDVSPortSetting struct {
 	// and an appropriately populated
 	// *ipfix configuration*
 	// that specifies a collector IP address and port.
+	// Since the 9.1 release, ipfix monitoring can not be enabled on uplink portgroups.
 	IpfixEnabled *BoolPolicy `xml:"ipfixEnabled,omitempty" json:"ipfixEnabled,omitempty"`
 	// If true, a copy of packets sent to the switch will always be forwarded to
 	// an uplink in addition to the regular packet forwarded done by the switch.
@@ -83352,6 +83764,8 @@ type VMwareDVSPortgroupPolicy struct {
 	// for an individual port to override the setting in
 	// `DVPortgroupConfigInfo.defaultPortConfig` of
 	// a portgroup.
+	//
+	// Since the 9.1 release, it can not be set to True on uplink portgroups.
 	IpfixOverrideAllowed *bool `xml:"ipfixOverrideAllowed" json:"ipfixOverrideAllowed,omitempty"`
 	// Allow the setting of
 	// `VMwareDVSPortSetting.macManagementPolicy`
@@ -83576,7 +83990,7 @@ type VMwareDvsLacpCapability struct {
 	// Flag to indicate whether the vSphere Distributed Switch supports more
 	// than one Link Aggregation Control Protocol group to be configured.
 	//
-	// It is suppported in vSphere Distributed Switch Version 5.5 or later.
+	// It is supported in vSphere Distributed Switch Version 5.5 or later.
 	MultiLacpGroupSupported *bool `xml:"multiLacpGroupSupported" json:"multiLacpGroupSupported,omitempty"`
 	// Flag to indicate whether LACP Fast Mode is supported on the
 	// vSphere Distributed Switch.
@@ -83610,8 +84024,15 @@ type VMwareDvsLacpGroupConfig struct {
 	LoadbalanceAlgorithm string `xml:"loadbalanceAlgorithm,omitempty" json:"loadbalanceAlgorithm,omitempty"`
 	// The VLAN Specification of the Uplink Ports in the Link Aggregation group.
 	Vlan *VMwareDvsLagVlanConfig `xml:"vlan,omitempty" json:"vlan,omitempty"`
+	// Deprecated as of vSphere API 9.1.
+	//
 	// Ipfix configuration of the Link Aggregation
 	// Control Protocol group.
+	//
+	// Since the 9.1 release, ipfix monitoring can not be enabled on
+	// Link Aggregation group anymore. Because
+	// `VMwareDVSPortgroupPolicy.ipfixOverrideAllowed`
+	// can not be set to True on uplink portgroups.
 	Ipfix *VMwareDvsLagIpfixConfig `xml:"ipfix,omitempty" json:"ipfix,omitempty"`
 	// Names for the Uplink Ports in the group.
 	//
@@ -83647,8 +84068,15 @@ func init() {
 	t["VMwareDvsLacpGroupSpec"] = reflect.TypeOf((*VMwareDvsLacpGroupSpec)(nil)).Elem()
 }
 
+// Deprecated as of vSphere API 9.1.
+//
 // This class defines the ipfix configuration of the Link Aggregation
 // Control Protocol group.
+//
+// Since the 9.1 release, ipfix monitoring can not be enabled on
+// Link Aggregation group anymore. Because
+// `VMwareDVSPortgroupPolicy.ipfixOverrideAllowed`
+// can not be set to True on uplink portgroups.
 type VMwareDvsLagIpfixConfig struct {
 	DynamicData
 
@@ -83739,8 +84167,8 @@ type VMwareIpfixConfig struct {
 	// Deprecated as of vSphere API 9.0
 	// Since from 9.0, client still can set the value of IpfixConfig.idleFlowTimeout
 	// when creating/reconfiguring DVS, but no matter what value they set,
-	// it will be overrided to 15 by backend.
-	// In 9.0, idleFlow still functions with this overrided timeout '15',
+	// it will be overridden to 15 by backend.
+	// In 9.0, idleFlow still functions with this overridden timeout '15',
 	// but it would be fully replaced by CT-based IPFIX in newer releases.
 	//
 	// The number of seconds after which "idle" flows are forced to be
@@ -83753,6 +84181,10 @@ type VMwareIpfixConfig struct {
 	//
 	// Set to 0 to disable sampling. Legal value range is 0-16384.
 	// Default: 4096.
+	// Since the 9.1 release, the ipfix sampling rate is no longer supported
+	// if NSX is enabled on this DVS host switch on that ESXi host.
+	// Any specified value for the sampling rate during DVS creation or
+	// reconfiguration will be ignored on ESXi hosts.
 	SamplingRate int32 `xml:"samplingRate" json:"samplingRate"`
 	// Whether to limit analysis to traffic that has both source and
 	// destination served by the same host.
@@ -84024,7 +84456,7 @@ func init() {
 	t["VStorageObjectAssociations"] = reflect.TypeOf((*VStorageObjectAssociations)(nil)).Elem()
 }
 
-// This data object contains infomation of a VM Disk associations.
+// This data object contains information of a VM Disk associations.
 type VStorageObjectAssociationsVmDiskAssociations struct {
 	DynamicData
 
@@ -84060,6 +84492,16 @@ type VStorageObjectConfigInfo struct {
 	// supported types. If not set, the default value is
 	// `native_512`.
 	VirtualDiskFormat string `xml:"virtualDiskFormat,omitempty" json:"virtualDiskFormat,omitempty" vim:"9.0.0.0"`
+	// Base disk path of a linked clone disk.
+	//
+	// Unset, if the virtual storage object is not a linked clone.
+	LinkedCloneBasePath string `xml:"linkedCloneBasePath,omitempty" json:"linkedCloneBasePath,omitempty" vim:"9.1.0.0"`
+	// The ID of the parent virtual storage object this linked clone virtual
+	// storage object.
+	//
+	// Unset, if the virtual storage object is not a linked clone or if the
+	// parent of the linked clone is a vanilla disk
+	LinkedCloneParentId *ID `xml:"linkedCloneParentId,omitempty" json:"linkedCloneParentId,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -84120,6 +84562,35 @@ func init() {
 }
 
 type VStorageObjectCreateSnapshot_TaskResponse struct {
+	Returnval ManagedObjectReference `xml:"returnval" json:"returnval"`
+}
+
+// The parameters of `VStorageObjectManagerBase.VStorageObjectDeleteSnapshotEx2_Task`.
+type VStorageObjectDeleteSnapshotEx2RequestType struct {
+	This ManagedObjectReference `xml:"_this" json:"-"`
+	// The ID of the virtual storage object.
+	Id ID `xml:"id" json:"id"`
+	// The datastore where the source virtual storage object
+	// is located.
+	//
+	// Refers instance of `Datastore`.
+	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
+	// The ID of the snapshot of a virtual storage object.
+	SnapshotId ID `xml:"snapshotId" json:"snapshotId"`
+}
+
+func init() {
+	t["VStorageObjectDeleteSnapshotEx2RequestType"] = reflect.TypeOf((*VStorageObjectDeleteSnapshotEx2RequestType)(nil)).Elem()
+	minAPIVersionForType["VStorageObjectDeleteSnapshotEx2RequestType"] = "9.0.0.0"
+}
+
+type VStorageObjectDeleteSnapshotEx2_Task VStorageObjectDeleteSnapshotEx2RequestType
+
+func init() {
+	t["VStorageObjectDeleteSnapshotEx2_Task"] = reflect.TypeOf((*VStorageObjectDeleteSnapshotEx2_Task)(nil)).Elem()
+}
+
+type VStorageObjectDeleteSnapshotEx2_TaskResponse struct {
 	Returnval ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
@@ -84307,6 +84778,8 @@ type VStorageObjectSnapshot struct {
 	Id ID `xml:"id" json:"id"`
 	// VClock associated with the FCD when the operation completes.
 	Vclock VslmVClockInfo `xml:"vclock" json:"vclock"`
+	// Storage space utilization of snapshots in MB excluding the running point
+	UsedCapacity int64 `xml:"usedCapacity,omitempty" json:"usedCapacity,omitempty" vim:"9.0.0.0"`
 }
 
 func init() {
@@ -84318,7 +84791,7 @@ func init() {
 type VStorageObjectSnapshotDetails struct {
 	DynamicData
 
-	// Path of the snaphost object
+	// Path of the snapshot object
 	Path string `xml:"path,omitempty" json:"path,omitempty"`
 	// Changed block tracking ID of the snapshot
 	ChangedBlockTrackingId string `xml:"changedBlockTrackingId,omitempty" json:"changedBlockTrackingId,omitempty"`
@@ -85742,7 +86215,7 @@ type VirtualDeviceOption struct {
 	PlugAndPlay bool `xml:"plugAndPlay" json:"plugAndPlay"`
 	// Indicates if this type of device can be hot-removed from the virtual machine
 	// via a reconfigure operation when the virtual machine is powered on.
-	HotRemoveSupported *bool `xml:"hotRemoveSupported" json:"hotRemoveSupported,omitempty"`
+	HotRemoveSupported bool  `xml:"hotRemoveSupported" json:"hotRemoveSupported"`
 	NumaSupported      *bool `xml:"numaSupported" json:"numaSupported,omitempty" vim:"8.0.0.1"`
 }
 
@@ -86078,7 +86551,7 @@ type VirtualDiskConfigSpec struct {
 	//
 	// If left unset then migrate is used when virtual flash resource on the source host
 	// is accessible and when the backing vFlash module version is compatible with the
-	// specific vFalsh module on the target host; otherwise flush is used for write back
+	// specific vFlash module on the target host; otherwise flush is used for write back
 	// cache, or a no-op for write through cache. This setting can avoid VM migration failure
 	// due to incompatibility.
 	// If true then migrate is always used. VM migration may fail if the backing vFlash module
@@ -86264,7 +86737,9 @@ type VirtualDiskFlatVer2BackingInfo struct {
 	WriteThrough *bool `xml:"writeThrough" json:"writeThrough,omitempty"`
 	// Flag to indicate to the underlying filesystem, whether the
 	// virtual disk backing file should be allocated lazily (using
-	// thin provisioning). This flag is only used for file systems
+	// thin provisioning).
+	//
+	// This flag is only used for file systems
 	// that support configuring the provisioning policy on a per file
 	// basis, such as VMFS3.
 	//
@@ -86463,9 +86938,9 @@ type VirtualDiskFlatVer2BackingOption struct {
 	// host accessing it must support thin-provisioning. This flag indicates only
 	// the host capability. See `DatastoreCapability.perFileThinProvisioningSupported`
 	// for datastore capability.
-	ThinProvisioned *BoolOption `xml:"thinProvisioned,omitempty" json:"thinProvisioned,omitempty"`
+	ThinProvisioned BoolOption `xml:"thinProvisioned" json:"thinProvisioned"`
 	// Flag to indicate if this backing supports eager scrubbing.
-	EagerlyScrub *BoolOption `xml:"eagerlyScrub,omitempty" json:"eagerlyScrub,omitempty"`
+	EagerlyScrub BoolOption `xml:"eagerlyScrub" json:"eagerlyScrub"`
 	// Deprecated as of vSphere API 5.1, please use
 	// `VirtualDiskFlatVer2BackingOption.deltaDiskFormatsSupported`.
 	//
@@ -86474,9 +86949,9 @@ type VirtualDiskFlatVer2BackingOption struct {
 	// Valid values are:
 	//   - `redoLogFormat`
 	//   - `nativeFormat`
-	DeltaDiskFormat *ChoiceOption `xml:"deltaDiskFormat,omitempty" json:"deltaDiskFormat,omitempty"`
+	DeltaDiskFormat ChoiceOption `xml:"deltaDiskFormat" json:"deltaDiskFormat"`
 	// Delta disk formats supported for each datastore type.
-	DeltaDiskFormatsSupported []VirtualDiskDeltaDiskFormatsSupported `xml:"deltaDiskFormatsSupported,omitempty" json:"deltaDiskFormatsSupported,omitempty"`
+	DeltaDiskFormatsSupported []VirtualDiskDeltaDiskFormatsSupported `xml:"deltaDiskFormatsSupported" json:"deltaDiskFormatsSupported"`
 	// Virtual disk format.
 	//
 	// See `DatastoreSectorFormat_enum` for the list of supported types.
@@ -86503,6 +86978,8 @@ func init() {
 	t["VirtualDiskId"] = reflect.TypeOf((*VirtualDiskId)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // This data object type contains information about backing a virtual disk
 // using non-volatile memory technologies (persistent memory).
 //
@@ -86543,6 +87020,8 @@ func init() {
 	t["VirtualDiskLocalPMemBackingInfo"] = reflect.TypeOf((*VirtualDiskLocalPMemBackingInfo)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // This data object type contains the available options when backing
 // a virtualdisk using persistent memory.
 type VirtualDiskLocalPMemBackingOption struct {
@@ -86611,7 +87090,7 @@ type VirtualDiskOption struct {
 	// Minimum, maximum, and default values for Storage I/O allocation.
 	//
 	// See also `StorageIOAllocationInfo`.
-	IoAllocationOption *StorageIOAllocationOption `xml:"ioAllocationOption,omitempty" json:"ioAllocationOption,omitempty"`
+	IoAllocationOption StorageIOAllocationOption `xml:"ioAllocationOption" json:"ioAllocationOption"`
 	// Deprecated since vSphere 7.0 because vFlash Read Cache
 	// end of availability.
 	//
@@ -87236,7 +87715,7 @@ type VirtualDiskSparseVer2BackingInfo struct {
 	// The space in use for this sparse disk.
 	//
 	// This information is provided
-	// when retrieving configuration information for an exisiting virtual
+	// when retrieving configuration information for an existing virtual
 	// machine. The client cannot modify this information using reconfigure
 	// on a virtual machine.
 	SpaceUsedInKB int64 `xml:"spaceUsedInKB,omitempty" json:"spaceUsedInKB,omitempty"`
@@ -87738,7 +88217,7 @@ type VirtualEthernetCardResourceAllocation struct {
 	// The utilization of the virtual network adapter will not
 	// exceed this limit, even if there are available resources.
 	// To clear the value of this property and revert it to unset,
-	// set the vaule to "-1" in an update operation.
+	// set the value to "-1" in an update operation.
 	// Units in Mbits/sec.
 	Limit *int64 `xml:"limit" json:"limit,omitempty"`
 }
@@ -87908,7 +88387,7 @@ type VirtualHardwareOption struct {
 	// List of acceptable values for the number of CPUs supported by this
 	// `ConfigOption`.
 	//
-	// This is usually superceded by the information available in the
+	// This is usually superseded by the information available in the
 	// guest operating system descriptors.
 	// The guest operating system descriptor describes a maximum CPU
 	// count, but the acceptable values are still constrained to the
@@ -87916,7 +88395,7 @@ type VirtualHardwareOption struct {
 	NumCPU []int32 `xml:"numCPU" json:"numCPU"`
 	// The minimum, maximum and default number of cores per socket that
 	// can be used when distributing virtual CPUs.
-	NumCoresPerSocket *IntOption `xml:"numCoresPerSocket,omitempty" json:"numCoresPerSocket,omitempty"`
+	NumCoresPerSocket IntOption `xml:"numCoresPerSocket" json:"numCoresPerSocket"`
 	// Whether auto cores per socket is supported.
 	AutoCoresPerSocket *BoolOption `xml:"autoCoresPerSocket,omitempty" json:"autoCoresPerSocket,omitempty" vim:"8.0.0.1"`
 	// Can the number of virtual CPUs be changed
@@ -87945,14 +88424,14 @@ type VirtualHardwareOption struct {
 	NumUSBControllers IntOption `xml:"numUSBControllers" json:"numUSBControllers"`
 	// The minimum, maximum, and default number of XHCI (USB 3.0) controllers for
 	// this virtual machine configuration.
-	NumUSBXHCIControllers *IntOption `xml:"numUSBXHCIControllers,omitempty" json:"numUSBXHCIControllers,omitempty"`
+	NumUSBXHCIControllers IntOption `xml:"numUSBXHCIControllers" json:"numUSBXHCIControllers"`
 	// The minimum, maximum, and default number of SIO controllers for
 	// this virtual machine configuration.
 	NumSIOControllers IntOption `xml:"numSIOControllers" json:"numSIOControllers"`
 	// The minimum, maximum, and default number of PS2 controllers for
 	// this virtual machine configuration.
 	NumPS2Controllers IntOption `xml:"numPS2Controllers" json:"numPS2Controllers"`
-	// List of propery names which limits are given be a licensing
+	// List of property names which limits are given be a licensing
 	// restriction of the underlying product, e.g., a limit that is
 	// not derived based on the product or hardware features.
 	//
@@ -87965,7 +88444,7 @@ type VirtualHardwareOption struct {
 	// supported for this virtual machine configuration.
 	NumSupportedWwnNodes *IntOption `xml:"numSupportedWwnNodes,omitempty" json:"numSupportedWwnNodes,omitempty"`
 	// Default value and value range for `ResourceConfigOption`
-	ResourceConfigOption *ResourceConfigOption `xml:"resourceConfigOption,omitempty" json:"resourceConfigOption,omitempty"`
+	ResourceConfigOption ResourceConfigOption `xml:"resourceConfigOption" json:"resourceConfigOption"`
 	// The minimum, maximum and default number of virtual NVDIMM controllers
 	// for this virtual machine configuration.
 	NumNVDIMMControllers *IntOption `xml:"numNVDIMMControllers,omitempty" json:"numNVDIMMControllers,omitempty"`
@@ -88343,9 +88822,9 @@ type VirtualMachineCapability struct {
 	// Supports assigning NPIV WWN to virtual machines that don't have RDM disks.
 	NpivWwnOnNonRdmVmSupported bool `xml:"npivWwnOnNonRdmVmSupported" json:"npivWwnOnNonRdmVmSupported"`
 	// Indicates whether the NPIV disabling operation is supported the virtual machine.
-	VmNpivWwnDisableSupported *bool `xml:"vmNpivWwnDisableSupported" json:"vmNpivWwnDisableSupported,omitempty"`
+	VmNpivWwnDisableSupported bool `xml:"vmNpivWwnDisableSupported" json:"vmNpivWwnDisableSupported"`
 	// Indicates whether the update of NPIV WWNs are supported on the virtual machine.
-	VmNpivWwnUpdateSupported *bool `xml:"vmNpivWwnUpdateSupported" json:"vmNpivWwnUpdateSupported,omitempty"`
+	VmNpivWwnUpdateSupported bool `xml:"vmNpivWwnUpdateSupported" json:"vmNpivWwnUpdateSupported"`
 	// Flag indicating whether the virtual machine has a configurable
 	// *swapfile placement policy*.
 	SwapPlacementSupported bool `xml:"swapPlacementSupported" json:"swapPlacementSupported"`
@@ -88362,7 +88841,7 @@ type VirtualMachineCapability struct {
 	BootOptionsSupported bool `xml:"bootOptionsSupported" json:"bootOptionsSupported"`
 	// Indicates whether automatic boot retry can be
 	// configured for this virtual machine.
-	BootRetryOptionsSupported *bool `xml:"bootRetryOptionsSupported" json:"bootRetryOptionsSupported,omitempty"`
+	BootRetryOptionsSupported bool `xml:"bootRetryOptionsSupported" json:"bootRetryOptionsSupported"`
 	// Flag indicating whether the video ram size of this virtual machine
 	// can be configured.
 	SettingVideoRamSizeSupported bool `xml:"settingVideoRamSizeSupported" json:"settingVideoRamSizeSupported"`
@@ -88371,12 +88850,12 @@ type VirtualMachineCapability struct {
 	//
 	// This capability depends on the guest operating system
 	// configured for this virtual machine.
-	SettingDisplayTopologySupported *bool `xml:"settingDisplayTopologySupported" json:"settingDisplayTopologySupported,omitempty"`
+	SettingDisplayTopologySupported bool `xml:"settingDisplayTopologySupported" json:"settingDisplayTopologySupported"`
 	// Deprecated as of vSphere API 6.0.
 	//
 	// Indicates whether record and replay functionality is supported on this
 	// virtual machine.
-	RecordReplaySupported *bool `xml:"recordReplaySupported" json:"recordReplaySupported,omitempty"`
+	RecordReplaySupported bool `xml:"recordReplaySupported" json:"recordReplaySupported"`
 	// Indicates that change tracking is supported for virtual disks of this
 	// virtual machine.
 	//
@@ -88384,37 +88863,37 @@ type VirtualMachineCapability struct {
 	// not be available for all disks of the virtual machine. For example,
 	// passthru raw disk mappings or disks backed by any Ver1BackingInfo cannot
 	// be tracked.
-	ChangeTrackingSupported *bool `xml:"changeTrackingSupported" json:"changeTrackingSupported,omitempty"`
+	ChangeTrackingSupported bool `xml:"changeTrackingSupported" json:"changeTrackingSupported"`
 	// Indicates whether multiple virtual cores per socket is supported on this VM.
-	MultipleCoresPerSocketSupported *bool `xml:"multipleCoresPerSocketSupported" json:"multipleCoresPerSocketSupported,omitempty"`
+	MultipleCoresPerSocketSupported bool `xml:"multipleCoresPerSocketSupported" json:"multipleCoresPerSocketSupported"`
 	// Indicates that host based replication is supported on this virtual
 	// machine.
 	//
 	// However, even if host based replication is supported,
 	// it might not be available for all disk types. For example, passthru
 	// raw disk mappings can not be replicated.
-	HostBasedReplicationSupported *bool `xml:"hostBasedReplicationSupported" json:"hostBasedReplicationSupported,omitempty"`
+	HostBasedReplicationSupported bool `xml:"hostBasedReplicationSupported" json:"hostBasedReplicationSupported"`
 	// Indicates whether features like guest OS auto-lock and MKS connection
 	// controls are supported for this virtual machine.
-	GuestAutoLockSupported *bool `xml:"guestAutoLockSupported" json:"guestAutoLockSupported,omitempty"`
+	GuestAutoLockSupported bool `xml:"guestAutoLockSupported" json:"guestAutoLockSupported"`
 	// Indicates whether
 	// `memoryReservationLockedToMax`
 	// may be set to true for this virtual machine.
-	MemoryReservationLockSupported *bool `xml:"memoryReservationLockSupported" json:"memoryReservationLockSupported,omitempty"`
+	MemoryReservationLockSupported bool `xml:"memoryReservationLockSupported" json:"memoryReservationLockSupported"`
 	// Indicates whether featureRequirement feature is supported.
-	FeatureRequirementSupported *bool `xml:"featureRequirementSupported" json:"featureRequirementSupported,omitempty"`
+	FeatureRequirementSupported bool `xml:"featureRequirementSupported" json:"featureRequirementSupported"`
 	// Indicates whether a monitor type change is supported while this virtual
 	// machine is in the poweredOn state.
-	PoweredOnMonitorTypeChangeSupported *bool `xml:"poweredOnMonitorTypeChangeSupported" json:"poweredOnMonitorTypeChangeSupported,omitempty"`
+	PoweredOnMonitorTypeChangeSupported bool `xml:"poweredOnMonitorTypeChangeSupported" json:"poweredOnMonitorTypeChangeSupported"`
 	// Indicates whether this virtual machine supports the Flex-SE
 	// (space-efficient, sparse) format for virtual disks.
-	SeSparseDiskSupported *bool `xml:"seSparseDiskSupported" json:"seSparseDiskSupported,omitempty"`
+	SeSparseDiskSupported bool `xml:"seSparseDiskSupported" json:"seSparseDiskSupported"`
 	// Indicates whether this virtual machine supports nested hardware-assisted
 	// virtualization.
-	NestedHVSupported *bool `xml:"nestedHVSupported" json:"nestedHVSupported,omitempty"`
+	NestedHVSupported bool `xml:"nestedHVSupported" json:"nestedHVSupported"`
 	// Indicates whether this virtual machine supports virtualized CPU performance
 	// counters.
-	VPMCSupported *bool `xml:"vPMCSupported" json:"vPMCSupported,omitempty"`
+	VPMCSupported bool `xml:"vPMCSupported" json:"vPMCSupported"`
 	// Indicates whether secureBoot is supported for this virtual machine.
 	SecureBootSupported *bool `xml:"secureBootSupported" json:"secureBootSupported,omitempty"`
 	// Indicates whether this virtual machine supports Per-VM EVC mode.
@@ -88441,7 +88920,9 @@ type VirtualMachineCapability struct {
 	// SEV is
 	// supported when set to true, and unsupported otherwise.
 	SevSupported *bool `xml:"sevSupported" json:"sevSupported,omitempty" vim:"7.0.1.0"`
-	// Indicates support for failover to a dfferent host on VM's with pmem.
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
+	// Indicates support for failover to a different host on VM's with pmem.
 	//
 	// Failover is supported when set to true, and unsupported otherwise.
 	PmemFailoverSupported *bool `xml:"pmemFailoverSupported" json:"pmemFailoverSupported,omitempty" vim:"7.0.2.0"`
@@ -88635,7 +89116,7 @@ type VirtualMachineConfigInfo struct {
 	// Time the virtual machine's configuration was created.
 	CreateDate *time.Time `xml:"createDate" json:"createDate,omitempty"`
 	// VirtualCenter-specific 128-bit UUID of a virtual machine, represented
-	// as a hexademical string.
+	// as a hexadecimal string.
 	//
 	// This identifier is used by VirtualCenter to
 	// uniquely identify all virtual machine instances, including those that
@@ -88663,14 +89144,14 @@ type VirtualMachineConfigInfo struct {
 	//
 	// See also `VirtualMachineConfigInfoNpivWwnType_enum`.
 	NpivWorldWideNameType string `xml:"npivWorldWideNameType,omitempty" json:"npivWorldWideNameType,omitempty"`
-	// The NPIV node WWNs to be extended from the original list of WWN nummbers.
+	// The NPIV node WWNs to be extended from the original list of WWN numbers.
 	//
 	// This
 	// property should be set to desired number which is an aggregate of existing
 	// plus new numbers. Desired Node WWNs should always be greater than the existing
 	// number of node WWNs
 	NpivDesiredNodeWwns int16 `xml:"npivDesiredNodeWwns,omitempty" json:"npivDesiredNodeWwns,omitempty"`
-	// The NPIV port WWNs to be extended from the original list of WWN nummbers.
+	// The NPIV port WWNs to be extended from the original list of WWN numbers.
 	//
 	// This
 	// property should be set to desired number which is an aggregate of existing
@@ -88927,6 +89408,8 @@ type VirtualMachineConfigInfo struct {
 	SevEnabled *bool `xml:"sevEnabled" json:"sevEnabled,omitempty" vim:"7.0.1.0"`
 	// vNUMA info.
 	NumaInfo *VirtualMachineVirtualNumaInfo `xml:"numaInfo,omitempty" json:"numaInfo,omitempty" vim:"8.0.0.1"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Property to indicate PMem HA failover configuration.
 	//
 	// \- When set to TRUE, VMs configured to use PMem
@@ -88963,6 +89446,8 @@ type VirtualMachineConfigInfo struct {
 	VmOpNotificationTimeout int64 `xml:"vmOpNotificationTimeout,omitempty" json:"vmOpNotificationTimeout,omitempty" vim:"8.0.0.1"`
 	// Status of the device swap operation.
 	DeviceSwap *VirtualMachineVirtualDeviceSwap `xml:"deviceSwap,omitempty" json:"deviceSwap,omitempty" vim:"8.0.0.1"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Virtual persistent memory info.
 	Pmem *VirtualMachineVirtualPMem `xml:"pmem,omitempty" json:"pmem,omitempty" vim:"7.0.3.0"`
 	// Assignable hardware device groups.
@@ -89130,7 +89615,7 @@ type VirtualMachineConfigOptionDescriptor struct {
 	// Indicates whether the associated set of configuration options
 	// can be used for virtual machine creation on a given host or
 	// cluster.
-	CreateSupported *bool `xml:"createSupported" json:"createSupported,omitempty"`
+	CreateSupported bool `xml:"createSupported" json:"createSupported"`
 	// Indicates whether the associated set of virtual machine
 	// configuration options is the default one for a given host or
 	// cluster.
@@ -89142,14 +89627,14 @@ type VirtualMachineConfigOptionDescriptor struct {
 	// If this setting is TRUE, virtual machine creates will use the
 	// associated set of configuration options, unless a config version is
 	// explicitly specified in the `ConfigSpec`.
-	DefaultConfigOption *bool `xml:"defaultConfigOption" json:"defaultConfigOption,omitempty"`
+	DefaultConfigOption bool `xml:"defaultConfigOption" json:"defaultConfigOption"`
 	// Indicates whether the associated set of configuration options
 	// can be used to power on a virtual machine on a given host or
 	// cluster.
-	RunSupported *bool `xml:"runSupported" json:"runSupported,omitempty"`
+	RunSupported bool `xml:"runSupported" json:"runSupported"`
 	// Indicates whether the associated set of configuration options
 	// can be used as a virtual hardware upgrade target.
-	UpgradeSupported *bool `xml:"upgradeSupported" json:"upgradeSupported,omitempty"`
+	UpgradeSupported bool `xml:"upgradeSupported" json:"upgradeSupported"`
 }
 
 func init() {
@@ -89217,7 +89702,7 @@ type VirtualMachineConfigSpec struct {
 	// VirtualCenter-specific 128-bit UUID of a virtual machine, represented
 	// as a hexadecimal string.
 	//
-	// This identifier is used by VirtalCenter
+	// This identifier is used by VirtualCenter
 	// to uniquely identify all virtual machine instances in the Virtual
 	// Infrastructure environment, including those that may share the same
 	// SMBIOS UUID.
@@ -89228,7 +89713,7 @@ type VirtualMachineConfigSpec struct {
 	// machines. This identifier can be modified even when a virtual
 	// machine is powered on. Clients can specify that vCenter Server
 	// reassign a new identifier by a providing an empty string. Reassigning
-	// the identifer is not allowed for Fault Tolerance virtual machines.
+	// the identifier is not allowed for Fault Tolerance virtual machines.
 	//
 	// Reconfigure privilege: VirtualMachine.Config.Settings
 	InstanceUuid string `xml:"instanceUuid,omitempty" json:"instanceUuid,omitempty"`
@@ -89271,14 +89756,14 @@ type VirtualMachineConfigSpec struct {
 	//
 	// Reconfigure privilege: VirtualMachine.Config.Settings.
 	NpivWorldWideNameType string `xml:"npivWorldWideNameType,omitempty" json:"npivWorldWideNameType,omitempty"`
-	// The NPIV node WWNs to be extended from the original list of WWN nummbers.
+	// The NPIV node WWNs to be extended from the original list of WWN numbers.
 	//
 	// This
 	// property should be set to desired number which is an aggregate of existing
 	// plus new numbers. Desired Node WWNs should always be greater than the existing
 	// number of node WWNs
 	NpivDesiredNodeWwns int16 `xml:"npivDesiredNodeWwns,omitempty" json:"npivDesiredNodeWwns,omitempty"`
-	// The NPIV port WWNs to be extended from the original list of WWN nummbers.
+	// The NPIV port WWNs to be extended from the original list of WWN numbers.
 	//
 	// This
 	// property should be set to desired number which is an aggregate of existing
@@ -89660,6 +90145,8 @@ type VirtualMachineConfigSpec struct {
 	// Default is i440bxHostBridge. See
 	// `VirtualHardware.motherboardLayout`
 	MotherboardLayout string `xml:"motherboardLayout,omitempty" json:"motherboardLayout,omitempty" vim:"8.0.0.1"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Property to enable/disable PMem HA failover.
 	//
 	// \- When set to TRUE, VMs configured to use PMem
@@ -89700,6 +90187,8 @@ type VirtualMachineConfigSpec struct {
 	// \- Set "simultaneousThreads" with a non-zero value to configure threads.
 	// \- If unset, then use system defaults.
 	SimultaneousThreads int32 `xml:"simultaneousThreads,omitempty" json:"simultaneousThreads,omitempty" vim:"8.0.0.1"`
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Configuration for virtual persistent memory.
 	Pmem *VirtualMachineVirtualPMem `xml:"pmem,omitempty" json:"pmem,omitempty" vim:"7.0.3.0"`
 	// Assignable hardware device groups.
@@ -89767,7 +90256,7 @@ type VirtualMachineConfigSpec struct {
 	// field is left unset. For example, if this VM is already part of any
 	// existing vSphere compute-policies or affinity rules, then they will still
 	// be considered during this VM's placement.
-	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.0.0.0"`
+	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -89849,7 +90338,7 @@ type VirtualMachineConnection struct {
 	// The label is a UTF-8 string which specifies a unique identifier for
 	// a connection.
 	Label string `xml:"label" json:"label"`
-	// The client identifer.
+	// The client identifier.
 	//
 	// This identifier is a UTF-8 string which is semantically meaningful
 	// for the connection. Examples of the client identifier are an IP
@@ -90244,7 +90733,7 @@ type VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeState struct {
 	// corresponding attachment port is missing in the kernel.
 	//
 	// `green` indicates that the network
-	// adapater is successfully attached to opaque network.
+	// adapter is successfully attached to opaque network.
 	AttachmentStatus string `xml:"attachmentStatus,omitempty" json:"attachmentStatus,omitempty"`
 	// These network adapter requirements must have equivalent capabilities
 	// on the virtual switch in order to power on or migrate to the host.
@@ -90336,7 +90825,7 @@ func init() {
 // The EmptyIndependentFilterSpec data object is used to specify empty independent
 // filter spec.
 //
-// This obejct is passed during provisioning workflows to remove all
+// This object is passed during provisioning workflows to remove all
 // attached independent filters.
 type VirtualMachineEmptyIndependentFilterSpec struct {
 	VirtualMachineBaseIndependentFilterSpec
@@ -90647,7 +91136,7 @@ type VirtualMachineFileLayoutExSnapshotLayout struct {
 	// Powered off snapshots do not have a memory component and in some cases
 	// the memory component is combined with the data component. When a memory
 	// component does not exist, the value is initialized to -1.
-	MemoryKey int32 `xml:"memoryKey,omitempty" json:"memoryKey,omitempty"`
+	MemoryKey int32 `xml:"memoryKey" json:"memoryKey"`
 	// Layout of each virtual disk of the virtual machine when the
 	// snapshot was taken.
 	Disk []VirtualMachineFileLayoutExDiskLayout `xml:"disk,omitempty" json:"disk,omitempty"`
@@ -90808,7 +91297,7 @@ type VirtualMachineFlagInfo struct {
 	// virtual machine.
 	//
 	// The common CBRC cache is shared between the hot added disks in the VM.
-	// If this flag is set to 'true' the VM will allocate a commont digest
+	// If this flag is set to 'true' the VM will allocate a common digest
 	// cache on power on.
 	CbrcCacheEnabled *bool `xml:"cbrcCacheEnabled" json:"cbrcCacheEnabled,omitempty"`
 	// Flag to specify if Intel Virtualization Technology for Directed I/O
@@ -91393,7 +91882,7 @@ func init() {
 type VirtualMachinePrecisionClockInfo struct {
 	VirtualMachineTargetInfo
 
-	// The currrent host system clock synchronization protocol.
+	// The current host system clock synchronization protocol.
 	//
 	// Used for specifying protocol in
 	// `VirtualPrecisionClockSystemClockBackingInfo`.
@@ -91412,7 +91901,7 @@ type VirtualMachineProfileDetails struct {
 	// Storage profile associated with Virtual Machine's home directory.
 	Profile []BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile,omitempty"`
 	// An optional list that allows specifying details of the policy associated
-	// with virutual disks.
+	// with virtual disks.
 	DiskProfileDetails []VirtualMachineProfileDetailsDiskProfileDetails `xml:"diskProfileDetails,omitempty" json:"diskProfileDetails,omitempty"`
 }
 
@@ -91809,7 +92298,7 @@ type VirtualMachineRelocateSpec struct {
 	// by Supervisor. They will be automatically populated by Supervisor based
 	// on the placement constraints defined in Supervisor. This field will be
 	// ignored except when set by Supervisor.
-	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.0.0.0"`
+	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -91872,7 +92361,7 @@ func init() {
 }
 
 // <code>`VirtualMachineRelocateSpecDiskLocatorBackingSpec`</code> is a data
-// object type for crytographic information about the backing of a
+// object type for cryptographic information about the backing of a
 // device.
 //
 // The member `VirtualMachineRelocateSpecDiskLocatorBackingSpec.parent` refers the parent in the chain of
@@ -91923,7 +92412,7 @@ type VirtualMachineRuntimeInfo struct {
 	// Represents if the vm is currently being failed over by FDM
 	VmFailoverInProgress *bool `xml:"vmFailoverInProgress" json:"vmFailoverInProgress,omitempty" vim:"7.0.2.0"`
 	// The fault tolerance state of the virtual machine.
-	FaultToleranceState VirtualMachineFaultToleranceState `xml:"faultToleranceState,omitempty" json:"faultToleranceState,omitempty"`
+	FaultToleranceState VirtualMachineFaultToleranceState `xml:"faultToleranceState" json:"faultToleranceState"`
 	// The vSphere HA protection state for a virtual machine.
 	//
 	// Property
@@ -92010,7 +92499,7 @@ type VirtualMachineRuntimeInfo struct {
 	// Deprecated as of vSphere API 6.0.
 	//
 	// Record / replay state of this virtual machine.
-	RecordReplayState VirtualMachineRecordReplayState `xml:"recordReplayState,omitempty" json:"recordReplayState,omitempty"`
+	RecordReplayState VirtualMachineRecordReplayState `xml:"recordReplayState" json:"recordReplayState"`
 	// For a powered off virtual machine, indicates whether the virtual
 	// machine's last shutdown was an orderly power off or not.
 	//
@@ -92021,7 +92510,7 @@ type VirtualMachineRuntimeInfo struct {
 	NeedSecondaryReason string `xml:"needSecondaryReason,omitempty" json:"needSecondaryReason,omitempty"`
 	// This property indicates whether the guest has gone into one of the
 	// s1, s2 or s3 standby modes, false indicates the guest is awake.
-	OnlineStandby *bool `xml:"onlineStandby" json:"onlineStandby,omitempty"`
+	OnlineStandby bool `xml:"onlineStandby" json:"onlineStandby"`
 	// For a powered-on or suspended virtual machine in a cluster with Enhanced
 	// VMotion Compatibility (EVC) enabled, this identifies the least-featured
 	// EVC mode (among those for the appropriate CPU vendor) that could admit
@@ -92047,7 +92536,7 @@ type VirtualMachineRuntimeInfo struct {
 	// associated disk is not committed back to the base disk.
 	// Use `VirtualMachine.ConsolidateVMDisks_Task` to consolidate if
 	// needed.
-	ConsolidationNeeded *bool `xml:"consolidationNeeded" json:"consolidationNeeded,omitempty"`
+	ConsolidationNeeded bool `xml:"consolidationNeeded" json:"consolidationNeeded"`
 	// These requirements must have equivalent host capabilities
 	// `HostConfigInfo.featureCapability` in order to power on.
 	OfflineFeatureRequirement []VirtualMachineFeatureRequirement `xml:"offlineFeatureRequirement,omitempty" json:"offlineFeatureRequirement,omitempty"`
@@ -92271,7 +92760,7 @@ type VirtualMachineSnapshotTree struct {
 	Description string `xml:"description" json:"description"`
 	// The unique identifier that distinguishes this snapshot from
 	// other snapshots of the virtual machine.
-	Id int32 `xml:"id,omitempty" json:"id,omitempty"`
+	Id int32 `xml:"id" json:"id"`
 	// The date and time the snapshot was taken.
 	CreateTime time.Time `xml:"createTime" json:"createTime"`
 	// The power state of the virtual machine when this snapshot was taken.
@@ -92852,7 +93341,7 @@ type VirtualMachineVcpuConfig struct {
 	// but not setting the vcpu's LatencySensitivity would apply the VM's
 	// latency sensitivity level to all the vcpus of the VM.
 	// The latency sensitivity of the vcpu should not exceed the
-	// latency sensivity level of the VM.
+	// latency sensitivity level of the VM.
 	// The only allowed levels for vcpu Latency sensitivity
 	// are `high` or
 	// `normal`
@@ -93178,6 +93667,8 @@ func init() {
 	minAPIVersionForType["VirtualMachineVirtualNumaInfo"] = "8.0.0.1"
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // Virtual Persistent Memory configuration for the VM.
 type VirtualMachineVirtualPMem struct {
 	DynamicData
@@ -93197,240 +93688,6 @@ type VirtualMachineVirtualPMem struct {
 func init() {
 	t["VirtualMachineVirtualPMem"] = reflect.TypeOf((*VirtualMachineVirtualPMem)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineVirtualPMem"] = "7.0.3.0"
-}
-
-// Specification of a placement policy that anti-affines this VM (for which
-// this placement policy is being specified) with multiple groups of VMs.
-//
-// This policy allows specifying multiple groups of VMs such that this VM is
-// anti-affined with every VM of the other VM groups. Each of these other
-// groups is identified by a unique vSphere tag. Effectively, this VM will
-// be anti-affined with any VM that has any of those other tags.
-//
-// However, note that while the policy will anti-affine a given VM with
-// multiple "other" groups of VMs, there is no implied affinity or
-// anti-affinity:
-// 1\) Within the VMs of any one of those "other" groups.
-// 2\) Between the VMs of any two of those "other" groups.
-// Below example will explain this in more detail.
-//
-// Consider a VM that needs to be anti-affined with a VM that has either
-// tag-2 or tag-3 attached to it. This can be expressed by specifying
-// `VmToVmGroupsAntiAffinity` policy in this VM's
-// `VirtualMachineConfigSpec.vmPlacementPolicies` or
-// `VirtualMachineRelocateSpec.vmPlacementPolicies` and it would imply:
-// \- This VM will be anti-affined with every VM that has tag-2.
-// \- This VM will be anti-affined with every VM that has tag-3.
-// \- Any VM that has either tag-2 or tag-3 will be anti-affined with
-// this VM.
-// \- To enforce the above anti-affinity while placing this VM, or any VM
-// with tag-2 or tag-3, a compute-policy will be automatically created
-// in this vCenter.
-// \- To associate the compute-policy representing this VmToVmGroupsAntiAffinity
-// VmPlacementPolicy with this VM, one of the tags associated with this
-// VM will be used.
-// \- In this example, one of this VM's tags, let's say tag-1, could be
-// used to link this VM with such a compute-policy. Then this compute-
-// policy would mean that any VM with "tag-1" will be anti-affined with
-// any VM with "tag-2" or "tag-3".
-// \- VMs that have "tag-2" will not have any affinity/anti-affinity among
-// themselves.
-// \- VMs that have "tag-3" will not have any affinity/anti-affinity among
-// themselves.
-// \- VMs that have "tag-2" will not have any affinity/anti-affinity with
-// VMs that have "tag-3". Likewise for VMs with "tag-3".
-//
-// Note:
-// \- This placement policy is different than `VmVmAntiAffinity`
-// because `VmVmAntiAffinity` allows specifying only 1 VM group
-// and all the VMs within that group become anti-affined with each other,
-// whereas, this placement policy allows anti-affining a given VM (with
-// a given tag) with multiple groups VMs (represented via different tags).
-type VmToVmGroupsAntiAffinity struct {
-	VmPlacementPolicy
-
-	// Tag identifying this VM to associate this `VmToVmGroupsAntiAffinity`
-	// placement policy with this VM.
-	//
-	// When a `VmToVmGroupsAntiAffinity` placement policy is specified for a
-	// VM, then one of the tags attached to this VM needs to link this VM with
-	// the corresponding compute-policy representing this
-	// `VmToVmGroupsAntiAffinity` placement policy. This is needed because
-	// when a VM is placed by vSphere DRS or HA, the compute-policies to be
-	// enforced are derived from the tag(s) attached to that VM.
-	// For example, consider a VM with tag-1 needs to be anti-affined with VMs
-	// of tag-2 and tag-3. When this placement policy needs to be specified for
-	// this VM, then tag-1 can be used as this VM's tag and the placement
-	// policy would say: \[tag-1\] ANTI-AFFINE \[tag-2, tag-3\].
-	//
-	// If left unset, system will automatically generate a new vSphere tag
-	// and attach to this VM.
-	SelfTag string `xml:"selfTag,omitempty" json:"selfTag,omitempty"`
-	// Tags identifying the "other" VM groups that need to be anti-affined with
-	// this VM.
-	//
-	// A VM with any tag from the list of tags in `VmToVmGroupsAntiAffinity.antiAffinedVmGroupTags`
-	// will be anti-affined with the VM that has `VmToVmGroupsAntiAffinity.selfTag` tag.
-	// any VM that has any of the other tags in
-	//
-	// This field must have at least one value that must be different from the
-	// value of `VmToVmGroupsAntiAffinity.selfTag`. If this field is left unset or empty, then
-	// this `VmToVmGroupsAntiAffinity` placement policy will be ignored while
-	// placing this VM.
-	AntiAffinedVmGroupTags []string `xml:"antiAffinedVmGroupTags,omitempty" json:"antiAffinedVmGroupTags,omitempty"`
-	// Specifies the strictness of this `VmToVmGroupsAntiAffinity` placement
-	// policy while placing a VM for which this policy has been specified.
-	//
-	// For details, see
-	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
-	//
-	// If this field is left unset, then the default value of
-	// `PreferredDuringPlacementIgnoredDuringExecution`
-	// will be assumed.
-	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
-	// Specifies the topology for enforcing this `VmToVmGroupsAntiAffinity`
-	// placement policy while placing a VM for which this policy is specified.
-	//
-	// For possible values, see
-	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
-	//
-	// For example:
-	// \- If this is set to
-	// `VSphereZone`
-	// for a `VmToVmGroupsAntiAffinity` placement, then the groups of VMs
-	// anti-affined by this policy should be placed in different vSphere Zones.
-	// \- If this is set to
-	// `Host`,
-	// for a `VmToVmGroupsAntiAffinity` placement, then the groups of VMs
-	// anti-affined by this policy should be placed on different ESXi hosts.
-	//
-	// If this field is left unset, then the default value of
-	// `Host` will be assumed.
-	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
-}
-
-func init() {
-	t["VmToVmGroupsAntiAffinity"] = reflect.TypeOf((*VmToVmGroupsAntiAffinity)(nil)).Elem()
-	minAPIVersionForType["VmToVmGroupsAntiAffinity"] = "9.0.0.0"
-}
-
-// Specification of a VM placement policy that affines a group of
-// VMs among themselves.
-type VmVmAffinity struct {
-	VmPlacementPolicy
-
-	// Name of the vSphere tag identifying the VMs that need to be affined
-	// with each other.
-	//
-	// When this type of placement policy is specified for a VM
-	// (via `VirtualMachineConfigSpec.vmPlacementPolicies` or
-	// `VirtualMachineRelocateSpec.vmPlacementPolicies`), then that VM is affined with
-	// all the other VMs that have `VmVmAffinity.affinedVmsTagName` a vSphere tag.
-	// This means that DRS will attempt to place all the VMs with
-	// `VmVmAffinity.affinedVmsTagName` on the same target host/cluster/vSphereZone
-	// (where the topology of the target is specified by
-	// `VmVmAffinity.policyTopology`).
-	//
-	// Example: VmVmAffinity placement policy with `VmVmAffinity.affinedVmsTagName`
-	// equal to "test-workloads" would mean that all the VMs that have a
-	// vSphere tag with the name "test-workloads" should be placed on the
-	// same target host/cluster/vSphereZone (as indicated by
-	// `VmVmAffinity.policyTopology`).
-	AffinedVmsTagName string `xml:"affinedVmsTagName" json:"affinedVmsTagName"`
-	// Specifies the strictness of this VmVmAffinity placement
-	// policy while placing a VM for which this policy is specified.
-	//
-	// For details, see
-	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
-	//
-	// If this field is left unset, then the default value of
-	// `PreferredDuringPlacementIgnoredDuringExecution`
-	// will be assumed.
-	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
-	// Specifies the topology for enforcing this VmVmAffinity placement
-	// policy while placing a VM for which this policy is specified.
-	//
-	// For possible values, see
-	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
-	//
-	// For example:
-	// \- If this is set to
-	// `VSphereZone`,
-	// the VMs that have `VmVmAffinity.affinedVmsTagName`
-	// tag attached to them should be placed in the same vSphere Zone.
-	// \- If this is set to
-	// `Host`,
-	// the VMs that have `VmVmAffinity.affinedVmsTagName`
-	// tag attached to them should be placed on the same ESXi host.
-	//
-	// If this field is left unset, then the default value of
-	// `Host` will be assumed.
-	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
-}
-
-func init() {
-	t["VmVmAffinity"] = reflect.TypeOf((*VmVmAffinity)(nil)).Elem()
-	minAPIVersionForType["VmVmAffinity"] = "9.0.0.0"
-}
-
-// Specification of a VM placement policy that anti-affines a group of
-// VMs among themselves.
-type VmVmAntiAffinity struct {
-	VmPlacementPolicy
-
-	// Name of the vSphere tag identifying the VMs that need to be anti-affined
-	// with each other.
-	//
-	// When this type of placement policy is specified for a VM,
-	// (via `VirtualMachineConfigSpec.vmPlacementPolicies` or
-	// `VirtualMachineRelocateSpec.vmPlacementPolicies`), then that VM is anti-affined
-	// to all the other VMs that have `VmVmAntiAffinity.antiAffinedVmsTagName`. This means
-	// that DRS will attempt to place all the VMs with
-	// `VmVmAntiAffinity.antiAffinedVmsTagName` tag on different target hosts/clusters/
-	// vSphereZones (where the topology of the target is specified by
-	// `VmVmAntiAffinity.policyTopology`).
-	//
-	// For example - VmVmAntiAffinity placement policy with
-	// `VmVmAntiAffinity.antiAffinedVmsTagName` equal to "prod-workloads" would mean that
-	// all the VMs that have a vSphere tag with the name "prod-workloads" should
-	// be placed on different target hosts/clusters/vSphereZones (as indicated by
-	// `VmVmAntiAffinity.policyTopology`).
-	AntiAffinedVmsTagName string `xml:"antiAffinedVmsTagName" json:"antiAffinedVmsTagName"`
-	// Specifies the strictness of this VmVmAntiAffinity placement
-	// policy while placing a VM for which this policy is specified.
-	//
-	// For
-	// details, see
-	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
-	//
-	// If this field is left unset, then the default value of
-	// `PreferredDuringPlacementIgnoredDuringExecution`
-	// will be assumed.
-	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
-	// Specifies the topology for enforcing this VmVmAntiAffinity placement
-	// policy while placing a VM for which this policy is specified.
-	//
-	// For possible values, see
-	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
-	//
-	// For example:
-	// \- If this is set to
-	// `VSphereZone`, the VMs
-	// that have `VmVmAntiAffinity.antiAffinedVmsTagName` tag attached to them should be
-	// placed in different vSphere Zones.
-	// \- If this is set to
-	// `Host`, the VMs that
-	// have `VmVmAntiAffinity.antiAffinedVmsTagName` tag attached to them should be placed
-	// on different ESXi hosts (but they may be placed in the same vSphere Zone).
-	//
-	// If this field is left unset, then the default value of
-	// `Host` will be assumed.
-	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
-}
-
-func init() {
-	t["VmVmAntiAffinity"] = reflect.TypeOf((*VmVmAntiAffinity)(nil)).Elem()
-	minAPIVersionForType["VmVmAntiAffinity"] = "9.0.0.0"
 }
 
 // This data object type encapsulates configuration settings
@@ -93478,6 +93735,8 @@ func init() {
 	t["VirtualMachineWipeResult"] = reflect.TypeOf((*VirtualMachineWipeResult)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // The Virtual NVDIMM device.
 type VirtualNVDIMM struct {
 	VirtualDevice
@@ -93516,6 +93775,8 @@ func init() {
 	t["VirtualNVDIMMBackingInfo"] = reflect.TypeOf((*VirtualNVDIMMBackingInfo)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // The Virtual NVDIMM controller.
 type VirtualNVDIMMController struct {
 	VirtualController
@@ -93525,6 +93786,8 @@ func init() {
 	t["VirtualNVDIMMController"] = reflect.TypeOf((*VirtualNVDIMMController)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // VirtualNVDIMMControllerOption is the data object that contains
 // the options for a virtual NVDIMM controller.
 type VirtualNVDIMMControllerOption struct {
@@ -93538,6 +93801,8 @@ func init() {
 	t["VirtualNVDIMMControllerOption"] = reflect.TypeOf((*VirtualNVDIMMControllerOption)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 APIs with no replacement.
+//
 // The VirtualNVDIMMOption contains information about
 // a virtual NVDIMM capacity limits and rules for
 // capacity growth operations.
@@ -93683,14 +93948,14 @@ type VirtualPCIControllerOption struct {
 	//
 	// This is also limited
 	// by the number of available slots in the PCI controller.
-	NumVmciDevices *IntOption `xml:"numVmciDevices,omitempty" json:"numVmciDevices,omitempty"`
+	NumVmciDevices IntOption `xml:"numVmciDevices" json:"numVmciDevices"`
 	// Defines the minimum, maximum, and default
 	// number of VirtualPCIPassthrough instances available,
 	// at any given time, in the PCI controller.
 	//
 	// This is also limited
 	// by the number of available PCI Express slots in the PCI controller.
-	NumPCIPassthroughDevices *IntOption `xml:"numPCIPassthroughDevices,omitempty" json:"numPCIPassthroughDevices,omitempty"`
+	NumPCIPassthroughDevices IntOption `xml:"numPCIPassthroughDevices" json:"numPCIPassthroughDevices"`
 	// Defines the minimum, maximum, and default
 	// number of VirtualLsiLogicSASController instances available,
 	// at any given time, in the PCI controller.
@@ -93698,7 +93963,7 @@ type VirtualPCIControllerOption struct {
 	// This is also limited
 	// by the number of available PCI Express slots in the PCI controller
 	// as well as the total number of supported SCSI controllers.
-	NumSasSCSIControllers *IntOption `xml:"numSasSCSIControllers,omitempty" json:"numSasSCSIControllers,omitempty"`
+	NumSasSCSIControllers IntOption `xml:"numSasSCSIControllers" json:"numSasSCSIControllers"`
 	// Defines the minimum, maximum, and default
 	// number of VirtualVmxnet3 ethernet card instances available,
 	// at any given time, in the PCI controller.
@@ -93706,7 +93971,7 @@ type VirtualPCIControllerOption struct {
 	// This is also limited
 	// by the number of available PCI Express slots in the PCI controller
 	// as well as the total number of supported ethernet cards.
-	NumVmxnet3EthernetCards *IntOption `xml:"numVmxnet3EthernetCards,omitempty" json:"numVmxnet3EthernetCards,omitempty"`
+	NumVmxnet3EthernetCards IntOption `xml:"numVmxnet3EthernetCards" json:"numVmxnet3EthernetCards"`
 	// Defines the minimum, maximum, and default
 	// number of ParaVirtualScsiController instances available,
 	// at any given time, in the PCI controller.
@@ -93714,7 +93979,7 @@ type VirtualPCIControllerOption struct {
 	// This is also limited
 	// by the number of available PCI Express slots in the PCI controller
 	// as well as the total number of supported SCSI controllers.
-	NumParaVirtualSCSIControllers *IntOption `xml:"numParaVirtualSCSIControllers,omitempty" json:"numParaVirtualSCSIControllers,omitempty"`
+	NumParaVirtualSCSIControllers IntOption `xml:"numParaVirtualSCSIControllers" json:"numParaVirtualSCSIControllers"`
 	// Defines the minimum, maximum, and default
 	// number of VirtualSATAController instances available,
 	// at any given time, in the PCI controller.
@@ -93722,7 +93987,7 @@ type VirtualPCIControllerOption struct {
 	// This is also limited
 	// by the number of available PCI Express slots in the PCI controller
 	// as well as the total number of supported SATA controllers.
-	NumSATAControllers *IntOption `xml:"numSATAControllers,omitempty" json:"numSATAControllers,omitempty"`
+	NumSATAControllers IntOption `xml:"numSATAControllers" json:"numSATAControllers"`
 	// Defines the minimum, maximum, and default
 	// number of VirtualNVMEController instances available,
 	// at any given time, in the PCI controller.
@@ -95239,7 +95504,7 @@ type VirtualUSBControllerOption struct {
 	// Range of USB device speeds supported by this USB controller type.
 	//
 	// Acceptable values are specified at `VirtualMachineUsbInfoSpeed_enum`.
-	SupportedSpeeds []string `xml:"supportedSpeeds,omitempty" json:"supportedSpeeds,omitempty"`
+	SupportedSpeeds []string `xml:"supportedSpeeds" json:"supportedSpeeds"`
 }
 
 func init() {
@@ -95339,7 +95604,7 @@ func init() {
 //   - The name and value are separated by a colon (:).
 //   - Name:value pairs are separated by spaces.
 //   - The escape character is a backslash (\\). Use a single backslash to embed
-//     a space in a value. Use a double blackslash to embed a single backslash
+//     a space in a value. Use a double backslash to embed a single backslash
 //     in the value.
 type VirtualUSBRemoteHostBackingInfo struct {
 	VirtualDeviceDeviceBackingInfo
@@ -95401,7 +95666,7 @@ func init() {
 //   - The name and value are separated by a colon (:).
 //   - Name:value pairs are separated by spaces.
 //   - The escape character is a backslash (\\). Use a single backslash to embed
-//     a space in a value. Use a double blackslash to embed a single backslash
+//     a space in a value. Use a double backslash to embed a single backslash
 //     in the value.
 type VirtualUSBUSBBackingInfo struct {
 	VirtualDeviceDeviceBackingInfo
@@ -95428,7 +95693,7 @@ func init() {
 // The `VirtualUSBXHCIController` data object describes a virtual
 // USB Extensible Host Controller Interface (USB 3.0).
 //
-// For more informatino see `VirtualUSBController`.
+// For more information see `VirtualUSBController`.
 type VirtualUSBXHCIController struct {
 	VirtualController
 
@@ -97402,7 +97667,7 @@ type VmPlacementPolicy struct {
 
 func init() {
 	t["VmPlacementPolicy"] = reflect.TypeOf((*VmPlacementPolicy)(nil)).Elem()
-	minAPIVersionForType["VmPlacementPolicy"] = "9.0.0.0"
+	minAPIVersionForType["VmPlacementPolicy"] = "9.1.0.0"
 }
 
 // Initial VM configuration for the specified pod.
@@ -97966,6 +98231,121 @@ func init() {
 	t["VmTimedoutStartingSecondaryEvent"] = reflect.TypeOf((*VmTimedoutStartingSecondaryEvent)(nil)).Elem()
 }
 
+// Specification of a placement policy that anti-affines this VM (for which
+// this placement policy is being specified) with multiple groups of VMs.
+//
+// This policy allows specifying multiple groups of VMs such that this VM is
+// anti-affined with every VM of the other VM groups. Each of these other
+// groups is identified by a unique vSphere tag. Effectively, this VM will
+// be anti-affined with any VM that has any of those other tags.
+//
+// However, note that while the policy will anti-affine a given VM with
+// multiple "other" groups of VMs, there is no implied affinity or
+// anti-affinity:
+// 1\) Within the VMs of any one of those "other" groups.
+// 2\) Between the VMs of any two of those "other" groups.
+// Below example will explain this in more detail.
+//
+// Consider a VM that needs to be anti-affined with a VM that has either
+// tag-2 or tag-3 attached to it. This can be expressed by specifying
+// `VmToVmGroupsAntiAffinity` policy in this VM's
+// `VirtualMachineConfigSpec.vmPlacementPolicies` or
+// `VirtualMachineRelocateSpec.vmPlacementPolicies` and it would imply:
+// \- This VM will be anti-affined with every VM that has tag-2.
+// \- This VM will be anti-affined with every VM that has tag-3.
+// \- Any VM that has either tag-2 or tag-3 will be anti-affined with
+// this VM.
+// \- To enforce the above anti-affinity while placing this VM, or any VM
+// with tag-2 or tag-3, a compute-policy will be automatically created
+// in this vCenter.
+// \- To associate the compute-policy representing this VmToVmGroupsAntiAffinity
+// VmPlacementPolicy with this VM, one of the tags associated with this
+// VM will be used.
+// \- In this example, one of this VM's tags, let's say tag-1, could be
+// used to link this VM with such a compute-policy. Then this compute-
+// policy would mean that any VM with "tag-1" will be anti-affined with
+// any VM with "tag-2" or "tag-3".
+// \- VMs that have "tag-2" will not have any affinity/anti-affinity among
+// themselves.
+// \- VMs that have "tag-3" will not have any affinity/anti-affinity among
+// themselves.
+// \- VMs that have "tag-2" will not have any affinity/anti-affinity with
+// VMs that have "tag-3". Likewise for VMs with "tag-3".
+//
+// Note:
+// \- This placement policy is different than `VmVmAntiAffinity`
+// because `VmVmAntiAffinity` allows specifying only 1 VM group
+// and all the VMs within that group become anti-affined with each other,
+// whereas, this placement policy allows anti-affining a given VM (with
+// a given tag) with multiple groups VMs (represented via different tags).
+type VmToVmGroupsAntiAffinity struct {
+	VmPlacementPolicy
+
+	// Tag identifying this VM to associate this `VmToVmGroupsAntiAffinity`
+	// placement policy with this VM.
+	//
+	// When a `VmToVmGroupsAntiAffinity` placement policy is specified for a
+	// VM, then one of the tags attached to this VM needs to link this VM with
+	// the corresponding compute-policy representing this
+	// `VmToVmGroupsAntiAffinity` placement policy. This is needed because
+	// when a VM is placed by vSphere DRS or HA, the compute-policies to be
+	// enforced are derived from the tag(s) attached to that VM.
+	// For example, consider a VM with tag-1 needs to be anti-affined with VMs
+	// of tag-2 and tag-3. When this placement policy needs to be specified for
+	// this VM, then tag-1 can be used as this VM's tag and the placement
+	// policy would say: \[tag-1\] ANTI-AFFINE \[tag-2, tag-3\].
+	//
+	// If left unset, system will automatically generate a new vSphere tag
+	// and attach to this VM.
+	SelfTag string `xml:"selfTag,omitempty" json:"selfTag,omitempty"`
+	// Tags identifying the "other" VM groups that need to be anti-affined with
+	// this VM.
+	//
+	// A VM with any tag from the list of tags in `VmToVmGroupsAntiAffinity.antiAffinedVmGroupTags`
+	// will be anti-affined with the VM that has `VmToVmGroupsAntiAffinity.selfTag` tag.
+	// any VM that has any of the other tags in
+	//
+	// This field must have at least one value that must be different from the
+	// value of `VmToVmGroupsAntiAffinity.selfTag`. If this field is left unset or empty, then
+	// this `VmToVmGroupsAntiAffinity` placement policy will be ignored while
+	// placing this VM.
+	AntiAffinedVmGroupTags []string `xml:"antiAffinedVmGroupTags,omitempty" json:"antiAffinedVmGroupTags,omitempty"`
+	// Specifies the strictness of this `VmToVmGroupsAntiAffinity` placement
+	// policy while placing a VM for which this policy has been specified.
+	//
+	// For details, see
+	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
+	//
+	// If this field is left unset, then the default value of
+	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// will be assumed.
+	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
+	// Specifies the topology for enforcing this `VmToVmGroupsAntiAffinity`
+	// placement policy while placing a VM for which this policy is specified.
+	//
+	// For possible values, see
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
+	//
+	// For example:
+	// \- If this is set to
+	// `VSphereZone`
+	// for a `VmToVmGroupsAntiAffinity` placement, then the groups of VMs
+	// anti-affined by this policy should be placed in different vSphere Zones.
+	// \- If this is set to
+	// `Host`,
+	// for a `VmToVmGroupsAntiAffinity` placement, then the groups of VMs
+	// anti-affined by this policy should be placed on different ESXi hosts.
+	//
+	// If this field is left unset, then the default value of
+	// `Host` will be assumed.
+	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
+}
+
+func init() {
+	t["VmToVmGroupsAntiAffinity"] = reflect.TypeOf((*VmToVmGroupsAntiAffinity)(nil)).Elem()
+	minAPIVersionForType["VmToVmGroupsAntiAffinity"] = "9.1.0.0"
+}
+
 // A base fault to indicate that something went wrong when upgrading tools.
 type VmToolsUpgradeFault struct {
 	VimFault
@@ -98087,6 +98467,125 @@ type VmValidateMaxDeviceFault VmValidateMaxDevice
 
 func init() {
 	t["VmValidateMaxDeviceFault"] = reflect.TypeOf((*VmValidateMaxDeviceFault)(nil)).Elem()
+}
+
+// Specification of a VM placement policy that affines a group of
+// VMs among themselves.
+type VmVmAffinity struct {
+	VmPlacementPolicy
+
+	// Name of the vSphere tag identifying the VMs that need to be affined
+	// with each other.
+	//
+	// When this type of placement policy is specified for a VM
+	// (via `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies`), then that VM is affined with
+	// all the other VMs that have `VmVmAffinity.affinedVmsTagName` a vSphere tag.
+	// This means that DRS will attempt to place all the VMs with
+	// `VmVmAffinity.affinedVmsTagName` on the same target host/cluster/vSphereZone
+	// (where the topology of the target is specified by
+	// `VmVmAffinity.policyTopology`).
+	//
+	// Example: VmVmAffinity placement policy with `VmVmAffinity.affinedVmsTagName`
+	// equal to "test-workloads" would mean that all the VMs that have a
+	// vSphere tag with the name "test-workloads" should be placed on the
+	// same target host/cluster/vSphereZone (as indicated by
+	// `VmVmAffinity.policyTopology`).
+	AffinedVmsTagName string `xml:"affinedVmsTagName" json:"affinedVmsTagName"`
+	// Specifies the strictness of this VmVmAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For details, see
+	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
+	//
+	// If this field is left unset, then the default value of
+	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// will be assumed.
+	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
+	// Specifies the topology for enforcing this VmVmAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For possible values, see
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
+	//
+	// For example:
+	// \- If this is set to
+	// `VSphereZone`,
+	// the VMs that have `VmVmAffinity.affinedVmsTagName`
+	// tag attached to them should be placed in the same vSphere Zone.
+	// \- If this is set to
+	// `Host`,
+	// the VMs that have `VmVmAffinity.affinedVmsTagName`
+	// tag attached to them should be placed on the same ESXi host.
+	//
+	// If this field is left unset, then the default value of
+	// `Host` will be assumed.
+	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
+}
+
+func init() {
+	t["VmVmAffinity"] = reflect.TypeOf((*VmVmAffinity)(nil)).Elem()
+	minAPIVersionForType["VmVmAffinity"] = "9.1.0.0"
+}
+
+// Specification of a VM placement policy that anti-affines a group of
+// VMs among themselves.
+type VmVmAntiAffinity struct {
+	VmPlacementPolicy
+
+	// Name of the vSphere tag identifying the VMs that need to be anti-affined
+	// with each other.
+	//
+	// When this type of placement policy is specified for a VM,
+	// (via `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies`), then that VM is anti-affined
+	// to all the other VMs that have `VmVmAntiAffinity.antiAffinedVmsTagName`. This means
+	// that DRS will attempt to place all the VMs with
+	// `VmVmAntiAffinity.antiAffinedVmsTagName` tag on different target hosts/clusters/
+	// vSphereZones (where the topology of the target is specified by
+	// `VmVmAntiAffinity.policyTopology`).
+	//
+	// For example - VmVmAntiAffinity placement policy with
+	// `VmVmAntiAffinity.antiAffinedVmsTagName` equal to "prod-workloads" would mean that
+	// all the VMs that have a vSphere tag with the name "prod-workloads" should
+	// be placed on different target hosts/clusters/vSphereZones (as indicated by
+	// `VmVmAntiAffinity.policyTopology`).
+	AntiAffinedVmsTagName string `xml:"antiAffinedVmsTagName" json:"antiAffinedVmsTagName"`
+	// Specifies the strictness of this VmVmAntiAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For
+	// details, see
+	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
+	//
+	// If this field is left unset, then the default value of
+	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// will be assumed.
+	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
+	// Specifies the topology for enforcing this VmVmAntiAffinity placement
+	// policy while placing a VM for which this policy is specified.
+	//
+	// For possible values, see
+	// `VmPlacementPolicyVmPlacementPolicyTopology_enum`.
+	//
+	// For example:
+	// \- If this is set to
+	// `VSphereZone`, the VMs
+	// that have `VmVmAntiAffinity.antiAffinedVmsTagName` tag attached to them should be
+	// placed in different vSphere Zones.
+	// \- If this is set to
+	// `Host`, the VMs that
+	// have `VmVmAntiAffinity.antiAffinedVmsTagName` tag attached to them should be placed
+	// on different ESXi hosts (but they may be placed in the same vSphere Zone).
+	//
+	// If this field is left unset, then the default value of
+	// `Host` will be assumed.
+	PolicyTopology string `xml:"policyTopology,omitempty" json:"policyTopology,omitempty"`
+}
+
+func init() {
+	t["VmVmAntiAffinity"] = reflect.TypeOf((*VmVmAntiAffinity)(nil)).Elem()
+	minAPIVersionForType["VmVmAntiAffinity"] = "9.1.0.0"
 }
 
 // This event is generated when the reservations used by all
@@ -98364,9 +98863,9 @@ type VmfsDatastoreInfo struct {
 	DatastoreInfo
 
 	// Maximum raw device mapping size (physical compatibility)
-	MaxPhysicalRDMFileSize int64 `xml:"maxPhysicalRDMFileSize,omitempty" json:"maxPhysicalRDMFileSize,omitempty"`
+	MaxPhysicalRDMFileSize int64 `xml:"maxPhysicalRDMFileSize" json:"maxPhysicalRDMFileSize"`
 	// Maximum raw device mapping size (virtual compatibility)
-	MaxVirtualRDMFileSize int64 `xml:"maxVirtualRDMFileSize,omitempty" json:"maxVirtualRDMFileSize,omitempty"`
+	MaxVirtualRDMFileSize int64 `xml:"maxVirtualRDMFileSize" json:"maxVirtualRDMFileSize"`
 	// The VMFS volume information for the datastore.
 	//
 	// May not be
@@ -98407,7 +98906,7 @@ func init() {
 // from a disk.
 // There are often multiple ways in which extents can be allocated on a disk.
 // Each instance of this structure represents one of the possible options
-// that can be applied to provisiong VMFS datastore storage. Only options
+// that can be applied to provisioning VMFS datastore storage. Only options
 // that follow ESX Server best practice guidelines will be presented.
 type VmfsDatastoreOption struct {
 	DynamicData
@@ -98656,7 +99155,7 @@ func init() {
 	t["VmwareDistributedVirtualSwitchVlanIdSpec"] = reflect.TypeOf((*VmwareDistributedVirtualSwitchVlanIdSpec)(nil)).Elem()
 }
 
-// Base class for Vlan Specifiation for ports.
+// Base class for Vlan Specification for ports.
 type VmwareDistributedVirtualSwitchVlanSpec struct {
 	InheritablePolicy
 }
@@ -99874,7 +100373,7 @@ type VslmCreateSpecBackingSpec struct {
 	// Relative location in the specified datastore where disk needs to be
 	// created.
 	//
-	// If not specified disk gets created at the defualt
+	// If not specified disk gets created at the default
 	// VStorageObject location on the specified datastore.
 	Path string `xml:"path,omitempty" json:"path,omitempty"`
 }
@@ -99935,15 +100434,14 @@ type VslmMigrateSpec struct {
 	// the default behavior will apply.
 	Profile []BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile,omitempty"`
 	// Flag indicates any delta disk backings will be consolidated
-	// during migration.
+	// during clone/migration.
 	//
-	// If unset, delta disk backings will not be
-	// consolidated.
+	// Cloning of linked clone disks always require consolidation.
 	Consolidate *bool `xml:"consolidate" json:"consolidate,omitempty"`
 	// Disk chain crypto information.
 	//
 	// If unset and if `VslmMigrateSpec.profile` contains an encryption iofilter and if
-	// source VStorageObject is unencrypted, then disksCyrpto will be of type
+	// source VStorageObject is unencrypted, then disksCrypto will be of type
 	// CryptoSpecEncrypt, and filled with keyId that is automatically generated
 	// and keyProviderId that is the default kms cluster. During the migration,
 	// the object will be encrypted.
@@ -99951,10 +100449,10 @@ type VslmMigrateSpec struct {
 	// VStorageObject is unenrypted, then disksCrypto is treated as
 	// CryptoSpecNoOp. During migration, no cryptographic change.
 	// If unset and if `VslmMigrateSpec.profile` contains an encryption iofilter and if
-	// source VStorageObject is encrypted, then disksCyrpto is treated as
+	// source VStorageObject is encrypted, then disksCrypto is treated as
 	// CryptoSpecNoOp. During migration, no cryptographic change.
 	// If unset and if `VslmMigrateSpec.profile` is a default policy and if
-	// source VStorageObject is encrypted, then disksCyrpto is treated as
+	// source VStorageObject is encrypted, then disksCrypto is treated as
 	// CryptoSpecDecrypt, during migration, the object will be decrypted.
 	// To recrypt the disk during migration, disksCrypto has to be present.
 	DisksCrypto *DiskCryptoSpec `xml:"disksCrypto,omitempty" json:"disksCrypto,omitempty"`
@@ -100084,8 +100582,8 @@ func init() {
 	t["VspanPortPromiscChangeFaultFault"] = reflect.TypeOf((*VspanPortPromiscChangeFaultFault)(nil)).Elem()
 }
 
-// Thrown when changing a non-promiscous portgroup to promiscuous mode if any port
-// in this portgroup is used as tranmistted source or dest ports in vspan
+// Thrown when changing a non-promiscuous portgroup to promiscuous mode if any port
+// in this portgroup is used as transmitted source or dest ports in vspan
 // session.
 type VspanPortgroupPromiscChangeFault struct {
 	DvsFault

@@ -27,8 +27,8 @@ var defaultDatastoreCapability = types.DatastoreCapability{
 	DirectoryHierarchySupported:      true,
 	RawDiskMappingsSupported:         false,
 	PerFileThinProvisioningSupported: true,
-	StorageIORMSupported:             types.NewBool(false),
-	NativeSnapshotSupported:          types.NewBool(false),
+	StorageIORMSupported:             false,
+	NativeSnapshotSupported:          false,
 	SeSparseSupported:                types.NewBool(false),
 	TopLevelDirectoryCreateSupported: types.NewBool(true),
 }

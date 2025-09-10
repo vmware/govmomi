@@ -1708,7 +1708,7 @@ var HostSystem = mo.HostSystem{
 			SslThumbprint:         "",
 			Product:               &HostConfigInfo.Product,
 			VmotionEnabled:        false,
-			FaultToleranceEnabled: types.NewBool(true),
+			FaultToleranceEnabled: true,
 			FeatureVersion:        nil,
 			AgentVmDatastore:      (*types.ManagedObjectReference)(nil),
 			AgentVmNetwork:        (*types.ManagedObjectReference)(nil),

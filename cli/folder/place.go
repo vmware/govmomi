@@ -297,7 +297,7 @@ func (res *placementResult) initialPlacementAction(w io.Writer, pinfo types.Plac
 	}
 
 	// Display the available network references from the placement recommendation.
-	if act, ok := any(action).(*types.ClusterClusterInitialPlacementActionEx); ok {
+	if act, ok := any(action).(*types.ClusterClusterInitialPlacementAction); ok {
 		if len(act.AvailableNetworks) > 0 {
 			fmt.Fprintf(w, "  AvailableNetworks:\n")
 			for _, net := range act.AvailableNetworks {

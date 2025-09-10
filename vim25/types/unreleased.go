@@ -156,16 +156,6 @@ func init() {
 }
 
 func init() {
-	Add("PodVMOverheadInfo", reflect.TypeOf((*PodVMOverheadInfo)(nil)).Elem())
-}
-
-type PodVMOverheadInfo struct {
-	CrxPageSharingSupported         bool  `xml:"crxPageSharingSupported"`
-	PodVMOverheadWithoutPageSharing int32 `xml:"podVMOverheadWithoutPageSharing"`
-	PodVMOverheadWithPageSharing    int32 `xml:"podVMOverheadWithPageSharing"`
-}
-
-func init() {
 	minAPIVersionForType["HostRuntimeInfoPodVMInfo"] = "9.1.0.0"
 	Add("HostRuntimeInfoPodVMInfo", reflect.TypeOf((*HostRuntimeInfoPodVMInfo)(nil)).Elem())
 }
@@ -199,19 +189,6 @@ func init() {
 type UpdatePodVMPropertyResponse struct {
 }
 
-// Describes an action for the initial placement of a virtual machine in a cluster.
-//
-// This action is used by the cross cluster placement API when a virtual machine
-// needs to be placed across a set of given clusters. See `Folder.PlaceVmsXCluster`.
-// This action encapsulates details about the chosen cluster (via the resource pool
-// inside that cluster), the chosen host and the chosen datastores for the disks of
-// the virtual machine.
-type ClusterClusterInitialPlacementActionEx struct {
-	ClusterClusterInitialPlacementAction
-
-	AvailableNetworks []ManagedObjectReference `xml:"availableNetworks,omitempty" json:"availableNetworks,omitempty"`
-}
-
 type BaseClusterClusterInitialPlacementAction interface {
 	GetClusterClusterInitialPlacementAction() *ClusterClusterInitialPlacementAction
 }
@@ -220,13 +197,8 @@ func (a ClusterClusterInitialPlacementAction) GetClusterClusterInitialPlacementA
 	return &a
 }
 
-func (a ClusterClusterInitialPlacementActionEx) GetClusterClusterInitialPlacementAction() *ClusterClusterInitialPlacementAction {
-	return &a.ClusterClusterInitialPlacementAction
-}
-
 func init() {
 	minAPIVersionForType["ClusterClusterInitialPlacementActionEx"] = "9.1.0.0"
-	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
-	t["ClusterClusterInitialPlacementActionEx"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
-	t["BaseClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementActionEx)(nil)).Elem()
+	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
+	t["BaseClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
 }

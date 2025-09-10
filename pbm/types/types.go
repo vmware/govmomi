@@ -722,7 +722,7 @@ type PbmCapabilityProfile struct {
 	// These names shouldn't be used as a K8s `StorageClass`'s name associated with any other
 	// profiles.
 	// Note that, it doesn't indicate that `StorageClass` with following names actually exists,
-	// i.e. it's not a profile-K8s `StorageClass` association data. These are used to keep
+	// i.e. it's not a profile->K8s `StorageClass` association data. These are used to keep
 	// track of all the reserved K8s compliant names which can't be used for any other profile and
 	// used to avoid any K8s compliant name collision when a profile is being created.
 	// It can include the following:
@@ -2197,6 +2197,8 @@ type PbmPlacementCompatibilityResult struct {
 	// The <code>Datastore</code> or <code>StoragePod</code> under consideration
 	// as a location for virtual machine files.
 	Hub PbmPlacementHub `xml:"hub" json:"hub"`
+	// Additional information about `PbmPlacementCompatibilityResult.hub`
+	HubInfo *PbmPlacementHubInfo `xml:"hubInfo,omitempty" json:"hubInfo,omitempty"`
 	// Resources that match the policy.
 	//
 	// If populated, signifies that there are
@@ -2243,6 +2245,23 @@ type PbmPlacementHub struct {
 
 func init() {
 	types.Add("pbm:PbmPlacementHub", reflect.TypeOf((*PbmPlacementHub)(nil)).Elem())
+}
+
+// Data object to specify additional information related to a `PbmPlacementHub`.
+//
+// This structure may be used only with operations rendered under `/pbm`.
+type PbmPlacementHubInfo struct {
+	types.DynamicData
+
+	// Indicates `PbmServerObjectRef` of cluster(s) on which a compatible datastore is mounted
+	// fully on, when compatibility check is invoked with `PbmPlacementZoneTopologyRequirement` as input.
+	//
+	// Only those clusters which are part of vSphere `AvailabilityZone` are populated here.
+	ZoneClusters []PbmServerObjectRef `xml:"zoneClusters,omitempty" json:"zoneClusters,omitempty"`
+}
+
+func init() {
+	types.Add("pbm:PbmPlacementHubInfo", reflect.TypeOf((*PbmPlacementHubInfo)(nil)).Elem())
 }
 
 // Describes the collection of replication related resources that satisfy a
@@ -2313,6 +2332,32 @@ type PbmPlacementResourceUtilization struct {
 
 func init() {
 	types.Add("pbm:PbmPlacementResourceUtilization", reflect.TypeOf((*PbmPlacementResourceUtilization)(nil)).Elem())
+}
+
+// Defines a zone topology requirement for placing objects onto `PbmPlacementHub`s.
+//
+// It is invalid
+// to specify this requirement along with other conflicting requirements and also, it's invalid to
+// specify duplicate requirements.
+//
+// This structure may be used only with operations rendered under `/pbm`.
+type PbmPlacementZoneTopologyRequirement struct {
+	PbmPlacementCapabilityProfileRequirement
+
+	// References of Cluster server objects belonging to a `AvailabilityZone`.
+	//
+	// i.e. each
+	// referenced cluster must be tagged with a zone as this constraint is intended for scenarios
+	// where zone-specific behavior is required.
+	// Cluster which is not associated with any zone is not allowed in the input when using this
+	// constraint. Other type of server objects such as VirtualMachine are not allowed either.
+	// This field must be set to a non-empty array of cluster references, otherwise compatibility
+	// check fails.
+	Clusters []PbmServerObjectRef `xml:"clusters,omitempty" json:"clusters,omitempty"`
+}
+
+func init() {
+	types.Add("pbm:PbmPlacementZoneTopologyRequirement", reflect.TypeOf((*PbmPlacementZoneTopologyRequirement)(nil)).Elem())
 }
 
 // The `PbmProfile` data object is the base object
@@ -3019,13 +3064,13 @@ type PbmServerObjectRef struct {
 	// The value of <code>key</code> depends
 	// on the <code>objectType</code>.
 	//
-	// <table border="1"cellpadding="5">
+	// <table border="1" cellpadding="5">
 	// <tr><td>`*PbmObjectType**</td><td>*`key value**</td></tr>
 	// <tr><td>virtualMachine</td><td>_virtual-machine-MOR_</td></tr>
 	// <tr><td>virtualDiskId</td>
 	// <td>_virtual-disk-MOR_:_VirtualDisk.key_</td></tr>
 	// <tr><td>datastore</td><td>_datastore-MOR_</td></tr>
-	// <tr><td colspan="2"align="right">MOR = ManagedObjectReference</td></tr>
+	// <tr><td colspan="2" align="right">MOR = ManagedObjectReference</td></tr>
 	// </table>
 	Key string `xml:"key" json:"key"`
 	// vCenter Server UUID; the <code>ServiceContent.about.instanceUuid</code>

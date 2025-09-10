@@ -278,7 +278,7 @@ const (
 	//
 	// May treat this as a warning.
 	ApplyHostProfileConfigurationResultStatusCheck_compliance_failed = ApplyHostProfileConfigurationResultStatus("check_compliance_failed")
-	// The required state is not satisfied so host profiel apply cannot
+	// The required state is not satisfied so host profile apply cannot
 	// be done.
 	ApplyHostProfileConfigurationResultStatusState_not_satisfied = ApplyHostProfileConfigurationResultStatus("state_not_satisfied")
 	// Exit maintenance mode failed.
@@ -510,7 +510,7 @@ func init() {
 type CannotMoveFaultToleranceVmMoveType string
 
 const (
-	// Move out of the resouce pool
+	// Move out of the resource pool
 	CannotMoveFaultToleranceVmMoveTypeResourcePool = CannotMoveFaultToleranceVmMoveType("resourcePool")
 	// Move out of the cluster
 	CannotMoveFaultToleranceVmMoveTypeCluster = CannotMoveFaultToleranceVmMoveType("cluster")
@@ -657,7 +657,7 @@ func init() {
 	t["CheckTestType"] = reflect.TypeOf((*CheckTestType)(nil)).Elem()
 }
 
-// HCIWorkflowState identifies the state of the cluser from the perspective of HCI
+// HCIWorkflowState identifies the state of the cluster from the perspective of HCI
 // workflow.
 //
 // The workflow begins with in\_progress mode and can transition
@@ -690,6 +690,9 @@ func init() {
 	t["ClusterComputeResourceHCIWorkflowState"] = reflect.TypeOf((*ClusterComputeResourceHCIWorkflowState)(nil)).Elem()
 }
 
+// Deprecated as of vSphere 9.0 with no replacement. In a future release
+// of vSphere, the vCLS functionality will be disabled, vCLS
+// system VMs will be deleted, and vCLS APIs will be removed.
 type ClusterComputeResourceVcsHealthStatus string
 
 const (
@@ -1985,7 +1988,7 @@ const (
 	DasConfigFaultDasConfigFaultReasonHostNetworkMisconfiguration = DasConfigFaultDasConfigFaultReason("HostNetworkMisconfiguration")
 	// There is a problem with the host configuration.
 	DasConfigFaultDasConfigFaultReasonHostMisconfiguration = DasConfigFaultDasConfigFaultReason("HostMisconfiguration")
-	// The privileges were insuffient for the operation.
+	// The privileges were insufficient for the operation.
 	DasConfigFaultDasConfigFaultReasonInsufficientPrivileges = DasConfigFaultDasConfigFaultReason("InsufficientPrivileges")
 	// There was no running primary agent available to contact.
 	//
@@ -2402,7 +2405,7 @@ const (
 	// For NSX backing type, We only support ephemeral portgroup type.
 	// If `DistributedVirtualPortgroupPortgroupType_enum` is
 	// ephemeral, A `DistributedVirtualPort` will be
-	// dynamicly created by NSX when the virtual machine is reconfigured
+	// dynamically created by NSX when the virtual machine is reconfigured
 	// to connect to the portgroup.
 	DistributedVirtualPortgroupBackingTypeNsx = DistributedVirtualPortgroupBackingType("nsx")
 )
@@ -2595,6 +2598,30 @@ func (e DistributedVirtualSwitchHostMemberHostComponentState) Strings() []string
 
 func init() {
 	t["DistributedVirtualSwitchHostMemberHostComponentState"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberHostComponentState)(nil)).Elem()
+}
+
+type DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus string
+
+const (
+	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusSUCCEEDED   = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("SUCCEEDED")
+	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusIN_PROGRESS = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("IN_PROGRESS")
+	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusFAILED      = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("FAILED")
+)
+
+func (e DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus) Values() []DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus {
+	return []DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus{
+		DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusSUCCEEDED,
+		DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusIN_PROGRESS,
+		DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusFAILED,
+	}
+}
+
+func (e DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus)(nil)).Elem()
 }
 
 // Describe the runtime state of the uplink.
@@ -3917,7 +3944,7 @@ const (
 	// the unmap bandwidth can be set as a fixed value
 	HostCapabilityUnmapMethodSupportedFixed = HostCapabilityUnmapMethodSupported("fixed")
 	// the unmap bandwidth can be set as a range, where the actual
-	// bandwidth will be dynamically throttled by the backened
+	// bandwidth will be dynamically throttled by the backend
 	HostCapabilityUnmapMethodSupportedDynamic = HostCapabilityUnmapMethodSupported("dynamic")
 )
 
@@ -4650,6 +4677,8 @@ const (
 	HostFileSystemVolumeFileSystemTypeVFFS = HostFileSystemVolumeFileSystemType("VFFS")
 	// vvol File System (ESX Server only).
 	HostFileSystemVolumeFileSystemTypeVVOL = HostFileSystemVolumeFileSystemType("VVOL")
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Persistent Memory File System (ESX Server only).
 	HostFileSystemVolumeFileSystemTypePMEM = HostFileSystemVolumeFileSystemType("PMEM")
 	// VSAN direct file system.
@@ -5566,6 +5595,8 @@ const (
 	// Flag indicating that the tier is the primary memory tier visible from the
 	// host.
 	HostMemoryTierFlagsMemoryTier = HostMemoryTierFlags("memoryTier")
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Flag indicating that the tier is used as non-volatile storage, e.g.
 	//
 	// PMem in
@@ -5603,6 +5634,8 @@ type HostMemoryTierType string
 const (
 	// Dynamic random-access memory.
 	HostMemoryTierTypeDRAM = HostMemoryTierType("DRAM")
+	// Deprecated as of vSphere 9.0 APIs with no replacement.
+	//
 	// Persistent memory.
 	HostMemoryTierTypePMem = HostMemoryTierType("PMem")
 	// NVMe memory.
@@ -7081,7 +7114,7 @@ const (
 	HostStandbyModeExiting = HostStandbyMode("exiting")
 	// The host is in standby mode.
 	HostStandbyModeIn = HostStandbyMode("in")
-	// The host is not in standy mode, and it is not
+	// The host is not in standby mode, and it is not
 	// in the process of entering/exiting standby mode.
 	HostStandbyModeNone = HostStandbyMode("none")
 )
@@ -7211,7 +7244,7 @@ const (
 	// The host was specifically powered off by the user through
 	// VirtualCenter.
 	//
-	// This state is not a cetain state, because
+	// This state is not a certain state, because
 	// after VirtualCenter issues the command to power off the host,
 	// the host might crash, or kill all the processes but fail to
 	// power off.
@@ -7220,7 +7253,7 @@ const (
 	// explicitly by the user, or automatically by DPM.
 	//
 	// This state
-	// is not a cetain state, because after VirtualCenter issues the
+	// is not a certain state, because after VirtualCenter issues the
 	// command to put the host in standby state, the host might
 	// crash, or kill all the processes but fail to power off. A host
 	// that is exiting standby mode `exiting`
@@ -8418,300 +8451,300 @@ func init() {
 	t["ManagedEntityStatus"] = reflect.TypeOf((*ManagedEntityStatus)(nil)).Elem()
 }
 
-type ManagedObjectTypes string
+type ManagedObjectType string
 
 const (
-	ManagedObjectTypesPropertyCollector                       = ManagedObjectTypes("PropertyCollector")
-	ManagedObjectTypesPropertyFilter                          = ManagedObjectTypes("PropertyFilter")
-	ManagedObjectTypesAuthorizationManager                    = ManagedObjectTypes("AuthorizationManager")
-	ManagedObjectTypesCertificateManager                      = ManagedObjectTypes("CertificateManager")
-	ManagedObjectTypesClusterComputeResource                  = ManagedObjectTypes("ClusterComputeResource")
-	ManagedObjectTypesComputeResource                         = ManagedObjectTypes("ComputeResource")
-	ManagedObjectTypesCustomFieldsManager                     = ManagedObjectTypes("CustomFieldsManager")
-	ManagedObjectTypesCustomizationSpecManager                = ManagedObjectTypes("CustomizationSpecManager")
-	ManagedObjectTypesDatacenter                              = ManagedObjectTypes("Datacenter")
-	ManagedObjectTypesDatastore                               = ManagedObjectTypes("Datastore")
-	ManagedObjectTypesDatastoreNamespaceManager               = ManagedObjectTypes("DatastoreNamespaceManager")
-	ManagedObjectTypesDiagnosticManager                       = ManagedObjectTypes("DiagnosticManager")
-	ManagedObjectTypesDirectPathProfileManager                = ManagedObjectTypes("DirectPathProfileManager")
-	ManagedObjectTypesDistributedVirtualSwitch                = ManagedObjectTypes("DistributedVirtualSwitch")
-	ManagedObjectTypesEnvironmentBrowser                      = ManagedObjectTypes("EnvironmentBrowser")
-	ManagedObjectTypesExtensibleManagedObject                 = ManagedObjectTypes("ExtensibleManagedObject")
-	ManagedObjectTypesExtensionManager                        = ManagedObjectTypes("ExtensionManager")
-	ManagedObjectTypesFileManager                             = ManagedObjectTypes("FileManager")
-	ManagedObjectTypesFolder                                  = ManagedObjectTypes("Folder")
-	ManagedObjectTypesHealthUpdateManager                     = ManagedObjectTypes("HealthUpdateManager")
-	ManagedObjectTypesHistoryCollector                        = ManagedObjectTypes("HistoryCollector")
-	ManagedObjectTypesHostSystem                              = ManagedObjectTypes("HostSystem")
-	ManagedObjectTypesHttpNfcLease                            = ManagedObjectTypes("HttpNfcLease")
-	ManagedObjectTypesIoFilterManager                         = ManagedObjectTypes("IoFilterManager")
-	ManagedObjectTypesIpPoolManager                           = ManagedObjectTypes("IpPoolManager")
-	ManagedObjectTypesLicenseAssignmentManager                = ManagedObjectTypes("LicenseAssignmentManager")
-	ManagedObjectTypesLicenseManager                          = ManagedObjectTypes("LicenseManager")
-	ManagedObjectTypesLocalizationManager                     = ManagedObjectTypes("LocalizationManager")
-	ManagedObjectTypesManagedEntity                           = ManagedObjectTypes("ManagedEntity")
-	ManagedObjectTypesNetwork                                 = ManagedObjectTypes("Network")
-	ManagedObjectTypesOpaqueNetwork                           = ManagedObjectTypes("OpaqueNetwork")
-	ManagedObjectTypesOverheadMemoryManager                   = ManagedObjectTypes("OverheadMemoryManager")
-	ManagedObjectTypesOvfManager                              = ManagedObjectTypes("OvfManager")
-	ManagedObjectTypesPerformanceManager                      = ManagedObjectTypes("PerformanceManager")
-	ManagedObjectTypesResourcePlanningManager                 = ManagedObjectTypes("ResourcePlanningManager")
-	ManagedObjectTypesResourcePool                            = ManagedObjectTypes("ResourcePool")
-	ManagedObjectTypesSearchIndex                             = ManagedObjectTypes("SearchIndex")
-	ManagedObjectTypesServiceInstance                         = ManagedObjectTypes("ServiceInstance")
-	ManagedObjectTypesServiceManager                          = ManagedObjectTypes("ServiceManager")
-	ManagedObjectTypesSessionManager                          = ManagedObjectTypes("SessionManager")
-	ManagedObjectTypesSimpleCommand                           = ManagedObjectTypes("SimpleCommand")
-	ManagedObjectTypesSiteInfoManager                         = ManagedObjectTypes("SiteInfoManager")
-	ManagedObjectTypesStoragePod                              = ManagedObjectTypes("StoragePod")
-	ManagedObjectTypesStorageQueryManager                     = ManagedObjectTypes("StorageQueryManager")
-	ManagedObjectTypesStorageResourceManager                  = ManagedObjectTypes("StorageResourceManager")
-	ManagedObjectTypesTask                                    = ManagedObjectTypes("Task")
-	ManagedObjectTypesTaskHistoryCollector                    = ManagedObjectTypes("TaskHistoryCollector")
-	ManagedObjectTypesTaskManager                             = ManagedObjectTypes("TaskManager")
-	ManagedObjectTypesUserDirectory                           = ManagedObjectTypes("UserDirectory")
-	ManagedObjectTypesVirtualApp                              = ManagedObjectTypes("VirtualApp")
-	ManagedObjectTypesVirtualDiskManager                      = ManagedObjectTypes("VirtualDiskManager")
-	ManagedObjectTypesVirtualMachine                          = ManagedObjectTypes("VirtualMachine")
-	ManagedObjectTypesVirtualizationManager                   = ManagedObjectTypes("VirtualizationManager")
-	ManagedObjectTypesVsanUpgradeSystem                       = ManagedObjectTypes("VsanUpgradeSystem")
-	ManagedObjectTypesAlarm                                   = ManagedObjectTypes("Alarm")
-	ManagedObjectTypesAlarmManager                            = ManagedObjectTypes("AlarmManager")
-	ManagedObjectTypesClusterEVCManager                       = ManagedObjectTypes("ClusterEVCManager")
-	ManagedObjectTypesDistributedVirtualPortgroup             = ManagedObjectTypes("DistributedVirtualPortgroup")
-	ManagedObjectTypesDistributedVirtualSwitchManager         = ManagedObjectTypes("DistributedVirtualSwitchManager")
-	ManagedObjectTypesVmwareDistributedVirtualSwitch          = ManagedObjectTypes("VmwareDistributedVirtualSwitch")
-	ManagedObjectTypesCryptoManager                           = ManagedObjectTypes("CryptoManager")
-	ManagedObjectTypesCryptoManagerHost                       = ManagedObjectTypes("CryptoManagerHost")
-	ManagedObjectTypesCryptoManagerHostKMS                    = ManagedObjectTypes("CryptoManagerHostKMS")
-	ManagedObjectTypesCryptoManagerKmip                       = ManagedObjectTypes("CryptoManagerKmip")
-	ManagedObjectTypesEventHistoryCollector                   = ManagedObjectTypes("EventHistoryCollector")
-	ManagedObjectTypesEventManager                            = ManagedObjectTypes("EventManager")
-	ManagedObjectTypesHostActiveDirectoryAuthentication       = ManagedObjectTypes("HostActiveDirectoryAuthentication")
-	ManagedObjectTypesHostAssignableHardwareManager           = ManagedObjectTypes("HostAssignableHardwareManager")
-	ManagedObjectTypesHostAuthenticationManager               = ManagedObjectTypes("HostAuthenticationManager")
-	ManagedObjectTypesHostAuthenticationStore                 = ManagedObjectTypes("HostAuthenticationStore")
-	ManagedObjectTypesHostAutoStartManager                    = ManagedObjectTypes("HostAutoStartManager")
-	ManagedObjectTypesHostBootDeviceSystem                    = ManagedObjectTypes("HostBootDeviceSystem")
-	ManagedObjectTypesHostCacheConfigurationManager           = ManagedObjectTypes("HostCacheConfigurationManager")
-	ManagedObjectTypesHostCertificateManager                  = ManagedObjectTypes("HostCertificateManager")
-	ManagedObjectTypesHostCpuSchedulerSystem                  = ManagedObjectTypes("HostCpuSchedulerSystem")
-	ManagedObjectTypesHostDatastoreBrowser                    = ManagedObjectTypes("HostDatastoreBrowser")
-	ManagedObjectTypesHostDatastoreSystem                     = ManagedObjectTypes("HostDatastoreSystem")
-	ManagedObjectTypesHostDateTimeSystem                      = ManagedObjectTypes("HostDateTimeSystem")
-	ManagedObjectTypesHostDiagnosticSystem                    = ManagedObjectTypes("HostDiagnosticSystem")
-	ManagedObjectTypesHostDirectoryStore                      = ManagedObjectTypes("HostDirectoryStore")
-	ManagedObjectTypesHostEsxAgentHostManager                 = ManagedObjectTypes("HostEsxAgentHostManager")
-	ManagedObjectTypesHostFirewallSystem                      = ManagedObjectTypes("HostFirewallSystem")
-	ManagedObjectTypesHostFirmwareSystem                      = ManagedObjectTypes("HostFirmwareSystem")
-	ManagedObjectTypesHostGraphicsManager                     = ManagedObjectTypes("HostGraphicsManager")
-	ManagedObjectTypesHostHealthStatusSystem                  = ManagedObjectTypes("HostHealthStatusSystem")
-	ManagedObjectTypesHostAccessManager                       = ManagedObjectTypes("HostAccessManager")
-	ManagedObjectTypesHostImageConfigManager                  = ManagedObjectTypes("HostImageConfigManager")
-	ManagedObjectTypesIscsiManager                            = ManagedObjectTypes("IscsiManager")
-	ManagedObjectTypesHostKernelModuleSystem                  = ManagedObjectTypes("HostKernelModuleSystem")
-	ManagedObjectTypesHostLocalAccountManager                 = ManagedObjectTypes("HostLocalAccountManager")
-	ManagedObjectTypesHostLocalAuthentication                 = ManagedObjectTypes("HostLocalAuthentication")
-	ManagedObjectTypesHostMemorySystem                        = ManagedObjectTypes("HostMemorySystem")
-	ManagedObjectTypesMessageBusProxy                         = ManagedObjectTypes("MessageBusProxy")
-	ManagedObjectTypesHostNetworkSystem                       = ManagedObjectTypes("HostNetworkSystem")
-	ManagedObjectTypesHostNvdimmSystem                        = ManagedObjectTypes("HostNvdimmSystem")
-	ManagedObjectTypesHostPatchManager                        = ManagedObjectTypes("HostPatchManager")
-	ManagedObjectTypesHostPciPassthruSystem                   = ManagedObjectTypes("HostPciPassthruSystem")
-	ManagedObjectTypesHostPowerSystem                         = ManagedObjectTypes("HostPowerSystem")
-	ManagedObjectTypesHostServiceSystem                       = ManagedObjectTypes("HostServiceSystem")
-	ManagedObjectTypesHostSnmpSystem                          = ManagedObjectTypes("HostSnmpSystem")
-	ManagedObjectTypesHostStorageSystem                       = ManagedObjectTypes("HostStorageSystem")
-	ManagedObjectTypesHostVFlashManager                       = ManagedObjectTypes("HostVFlashManager")
-	ManagedObjectTypesHostVMotionSystem                       = ManagedObjectTypes("HostVMotionSystem")
-	ManagedObjectTypesHostVirtualNicManager                   = ManagedObjectTypes("HostVirtualNicManager")
-	ManagedObjectTypesHostVsanInternalSystem                  = ManagedObjectTypes("HostVsanInternalSystem")
-	ManagedObjectTypesHostVsanSystem                          = ManagedObjectTypes("HostVsanSystem")
-	ManagedObjectTypesOptionManager                           = ManagedObjectTypes("OptionManager")
-	ManagedObjectTypesProfileComplianceManager                = ManagedObjectTypes("ProfileComplianceManager")
-	ManagedObjectTypesProfile                                 = ManagedObjectTypes("Profile")
-	ManagedObjectTypesProfileManager                          = ManagedObjectTypes("ProfileManager")
-	ManagedObjectTypesClusterProfile                          = ManagedObjectTypes("ClusterProfile")
-	ManagedObjectTypesClusterProfileManager                   = ManagedObjectTypes("ClusterProfileManager")
-	ManagedObjectTypesHostProfile                             = ManagedObjectTypes("HostProfile")
-	ManagedObjectTypesHostSpecificationManager                = ManagedObjectTypes("HostSpecificationManager")
-	ManagedObjectTypesHostProfileManager                      = ManagedObjectTypes("HostProfileManager")
-	ManagedObjectTypesScheduledTask                           = ManagedObjectTypes("ScheduledTask")
-	ManagedObjectTypesScheduledTaskManager                    = ManagedObjectTypes("ScheduledTaskManager")
-	ManagedObjectTypesTenantTenantManager                     = ManagedObjectTypes("TenantTenantManager")
-	ManagedObjectTypesFailoverClusterConfigurator             = ManagedObjectTypes("FailoverClusterConfigurator")
-	ManagedObjectTypesFailoverClusterManager                  = ManagedObjectTypes("FailoverClusterManager")
-	ManagedObjectTypesContainerView                           = ManagedObjectTypes("ContainerView")
-	ManagedObjectTypesInventoryView                           = ManagedObjectTypes("InventoryView")
-	ManagedObjectTypesListView                                = ManagedObjectTypes("ListView")
-	ManagedObjectTypesManagedObjectView                       = ManagedObjectTypes("ManagedObjectView")
-	ManagedObjectTypesView                                    = ManagedObjectTypes("View")
-	ManagedObjectTypesViewManager                             = ManagedObjectTypes("ViewManager")
-	ManagedObjectTypesVirtualMachineGuestCustomizationManager = ManagedObjectTypes("VirtualMachineGuestCustomizationManager")
-	ManagedObjectTypesVirtualMachineSnapshot                  = ManagedObjectTypes("VirtualMachineSnapshot")
-	ManagedObjectTypesVirtualMachineCompatibilityChecker      = ManagedObjectTypes("VirtualMachineCompatibilityChecker")
-	ManagedObjectTypesVirtualMachineProvisioningChecker       = ManagedObjectTypes("VirtualMachineProvisioningChecker")
-	ManagedObjectTypesGuestAliasManager                       = ManagedObjectTypes("GuestAliasManager")
-	ManagedObjectTypesGuestAuthManager                        = ManagedObjectTypes("GuestAuthManager")
-	ManagedObjectTypesGuestFileManager                        = ManagedObjectTypes("GuestFileManager")
-	ManagedObjectTypesGuestOperationsManager                  = ManagedObjectTypes("GuestOperationsManager")
-	ManagedObjectTypesGuestProcessManager                     = ManagedObjectTypes("GuestProcessManager")
-	ManagedObjectTypesGuestWindowsRegistryManager             = ManagedObjectTypes("GuestWindowsRegistryManager")
-	ManagedObjectTypesVStorageObjectManagerBase               = ManagedObjectTypes("VStorageObjectManagerBase")
-	ManagedObjectTypesHostVStorageObjectManager               = ManagedObjectTypes("HostVStorageObjectManager")
-	ManagedObjectTypesVcenterVStorageObjectManager            = ManagedObjectTypes("VcenterVStorageObjectManager")
+	ManagedObjectTypePropertyCollector                       = ManagedObjectType("PropertyCollector")
+	ManagedObjectTypePropertyFilter                          = ManagedObjectType("PropertyFilter")
+	ManagedObjectTypeAuthorizationManager                    = ManagedObjectType("AuthorizationManager")
+	ManagedObjectTypeCertificateManager                      = ManagedObjectType("CertificateManager")
+	ManagedObjectTypeClusterComputeResource                  = ManagedObjectType("ClusterComputeResource")
+	ManagedObjectTypeComputeResource                         = ManagedObjectType("ComputeResource")
+	ManagedObjectTypeCustomFieldsManager                     = ManagedObjectType("CustomFieldsManager")
+	ManagedObjectTypeCustomizationSpecManager                = ManagedObjectType("CustomizationSpecManager")
+	ManagedObjectTypeDatacenter                              = ManagedObjectType("Datacenter")
+	ManagedObjectTypeDatastore                               = ManagedObjectType("Datastore")
+	ManagedObjectTypeDatastoreNamespaceManager               = ManagedObjectType("DatastoreNamespaceManager")
+	ManagedObjectTypeDiagnosticManager                       = ManagedObjectType("DiagnosticManager")
+	ManagedObjectTypeDirectPathProfileManager                = ManagedObjectType("DirectPathProfileManager")
+	ManagedObjectTypeDistributedVirtualSwitch                = ManagedObjectType("DistributedVirtualSwitch")
+	ManagedObjectTypeEnvironmentBrowser                      = ManagedObjectType("EnvironmentBrowser")
+	ManagedObjectTypeExtensibleManagedObject                 = ManagedObjectType("ExtensibleManagedObject")
+	ManagedObjectTypeExtensionManager                        = ManagedObjectType("ExtensionManager")
+	ManagedObjectTypeFileManager                             = ManagedObjectType("FileManager")
+	ManagedObjectTypeFolder                                  = ManagedObjectType("Folder")
+	ManagedObjectTypeHealthUpdateManager                     = ManagedObjectType("HealthUpdateManager")
+	ManagedObjectTypeHistoryCollector                        = ManagedObjectType("HistoryCollector")
+	ManagedObjectTypeHostSystem                              = ManagedObjectType("HostSystem")
+	ManagedObjectTypeHttpNfcLease                            = ManagedObjectType("HttpNfcLease")
+	ManagedObjectTypeIoFilterManager                         = ManagedObjectType("IoFilterManager")
+	ManagedObjectTypeIpPoolManager                           = ManagedObjectType("IpPoolManager")
+	ManagedObjectTypeLicenseAssignmentManager                = ManagedObjectType("LicenseAssignmentManager")
+	ManagedObjectTypeLicenseManager                          = ManagedObjectType("LicenseManager")
+	ManagedObjectTypeLocalizationManager                     = ManagedObjectType("LocalizationManager")
+	ManagedObjectTypeManagedEntity                           = ManagedObjectType("ManagedEntity")
+	ManagedObjectTypeNetwork                                 = ManagedObjectType("Network")
+	ManagedObjectTypeOpaqueNetwork                           = ManagedObjectType("OpaqueNetwork")
+	ManagedObjectTypeOverheadMemoryManager                   = ManagedObjectType("OverheadMemoryManager")
+	ManagedObjectTypeOvfManager                              = ManagedObjectType("OvfManager")
+	ManagedObjectTypePerformanceManager                      = ManagedObjectType("PerformanceManager")
+	ManagedObjectTypeResourcePlanningManager                 = ManagedObjectType("ResourcePlanningManager")
+	ManagedObjectTypeResourcePool                            = ManagedObjectType("ResourcePool")
+	ManagedObjectTypeSearchIndex                             = ManagedObjectType("SearchIndex")
+	ManagedObjectTypeServiceInstance                         = ManagedObjectType("ServiceInstance")
+	ManagedObjectTypeServiceManager                          = ManagedObjectType("ServiceManager")
+	ManagedObjectTypeSessionManager                          = ManagedObjectType("SessionManager")
+	ManagedObjectTypeSimpleCommand                           = ManagedObjectType("SimpleCommand")
+	ManagedObjectTypeSiteInfoManager                         = ManagedObjectType("SiteInfoManager")
+	ManagedObjectTypeStoragePod                              = ManagedObjectType("StoragePod")
+	ManagedObjectTypeStorageQueryManager                     = ManagedObjectType("StorageQueryManager")
+	ManagedObjectTypeStorageResourceManager                  = ManagedObjectType("StorageResourceManager")
+	ManagedObjectTypeTask                                    = ManagedObjectType("Task")
+	ManagedObjectTypeTaskHistoryCollector                    = ManagedObjectType("TaskHistoryCollector")
+	ManagedObjectTypeTaskManager                             = ManagedObjectType("TaskManager")
+	ManagedObjectTypeUserDirectory                           = ManagedObjectType("UserDirectory")
+	ManagedObjectTypeVirtualApp                              = ManagedObjectType("VirtualApp")
+	ManagedObjectTypeVirtualDiskManager                      = ManagedObjectType("VirtualDiskManager")
+	ManagedObjectTypeVirtualMachine                          = ManagedObjectType("VirtualMachine")
+	ManagedObjectTypeVirtualizationManager                   = ManagedObjectType("VirtualizationManager")
+	ManagedObjectTypeVsanUpgradeSystem                       = ManagedObjectType("VsanUpgradeSystem")
+	ManagedObjectTypeAlarm                                   = ManagedObjectType("Alarm")
+	ManagedObjectTypeAlarmManager                            = ManagedObjectType("AlarmManager")
+	ManagedObjectTypeClusterEVCManager                       = ManagedObjectType("ClusterEVCManager")
+	ManagedObjectTypeDistributedVirtualPortgroup             = ManagedObjectType("DistributedVirtualPortgroup")
+	ManagedObjectTypeDistributedVirtualSwitchManager         = ManagedObjectType("DistributedVirtualSwitchManager")
+	ManagedObjectTypeVmwareDistributedVirtualSwitch          = ManagedObjectType("VmwareDistributedVirtualSwitch")
+	ManagedObjectTypeCryptoManager                           = ManagedObjectType("CryptoManager")
+	ManagedObjectTypeCryptoManagerHost                       = ManagedObjectType("CryptoManagerHost")
+	ManagedObjectTypeCryptoManagerHostKMS                    = ManagedObjectType("CryptoManagerHostKMS")
+	ManagedObjectTypeCryptoManagerKmip                       = ManagedObjectType("CryptoManagerKmip")
+	ManagedObjectTypeEventHistoryCollector                   = ManagedObjectType("EventHistoryCollector")
+	ManagedObjectTypeEventManager                            = ManagedObjectType("EventManager")
+	ManagedObjectTypeHostActiveDirectoryAuthentication       = ManagedObjectType("HostActiveDirectoryAuthentication")
+	ManagedObjectTypeHostAssignableHardwareManager           = ManagedObjectType("HostAssignableHardwareManager")
+	ManagedObjectTypeHostAuthenticationManager               = ManagedObjectType("HostAuthenticationManager")
+	ManagedObjectTypeHostAuthenticationStore                 = ManagedObjectType("HostAuthenticationStore")
+	ManagedObjectTypeHostAutoStartManager                    = ManagedObjectType("HostAutoStartManager")
+	ManagedObjectTypeHostBootDeviceSystem                    = ManagedObjectType("HostBootDeviceSystem")
+	ManagedObjectTypeHostCacheConfigurationManager           = ManagedObjectType("HostCacheConfigurationManager")
+	ManagedObjectTypeHostCertificateManager                  = ManagedObjectType("HostCertificateManager")
+	ManagedObjectTypeHostCpuSchedulerSystem                  = ManagedObjectType("HostCpuSchedulerSystem")
+	ManagedObjectTypeHostDatastoreBrowser                    = ManagedObjectType("HostDatastoreBrowser")
+	ManagedObjectTypeHostDatastoreSystem                     = ManagedObjectType("HostDatastoreSystem")
+	ManagedObjectTypeHostDateTimeSystem                      = ManagedObjectType("HostDateTimeSystem")
+	ManagedObjectTypeHostDiagnosticSystem                    = ManagedObjectType("HostDiagnosticSystem")
+	ManagedObjectTypeHostDirectoryStore                      = ManagedObjectType("HostDirectoryStore")
+	ManagedObjectTypeHostEsxAgentHostManager                 = ManagedObjectType("HostEsxAgentHostManager")
+	ManagedObjectTypeHostFirewallSystem                      = ManagedObjectType("HostFirewallSystem")
+	ManagedObjectTypeHostFirmwareSystem                      = ManagedObjectType("HostFirmwareSystem")
+	ManagedObjectTypeHostGraphicsManager                     = ManagedObjectType("HostGraphicsManager")
+	ManagedObjectTypeHostHealthStatusSystem                  = ManagedObjectType("HostHealthStatusSystem")
+	ManagedObjectTypeHostAccessManager                       = ManagedObjectType("HostAccessManager")
+	ManagedObjectTypeHostImageConfigManager                  = ManagedObjectType("HostImageConfigManager")
+	ManagedObjectTypeIscsiManager                            = ManagedObjectType("IscsiManager")
+	ManagedObjectTypeHostKernelModuleSystem                  = ManagedObjectType("HostKernelModuleSystem")
+	ManagedObjectTypeHostLocalAccountManager                 = ManagedObjectType("HostLocalAccountManager")
+	ManagedObjectTypeHostLocalAuthentication                 = ManagedObjectType("HostLocalAuthentication")
+	ManagedObjectTypeHostMemorySystem                        = ManagedObjectType("HostMemorySystem")
+	ManagedObjectTypeMessageBusProxy                         = ManagedObjectType("MessageBusProxy")
+	ManagedObjectTypeHostNetworkSystem                       = ManagedObjectType("HostNetworkSystem")
+	ManagedObjectTypeHostNvdimmSystem                        = ManagedObjectType("HostNvdimmSystem")
+	ManagedObjectTypeHostPatchManager                        = ManagedObjectType("HostPatchManager")
+	ManagedObjectTypeHostPciPassthruSystem                   = ManagedObjectType("HostPciPassthruSystem")
+	ManagedObjectTypeHostPowerSystem                         = ManagedObjectType("HostPowerSystem")
+	ManagedObjectTypeHostServiceSystem                       = ManagedObjectType("HostServiceSystem")
+	ManagedObjectTypeHostSnmpSystem                          = ManagedObjectType("HostSnmpSystem")
+	ManagedObjectTypeHostStorageSystem                       = ManagedObjectType("HostStorageSystem")
+	ManagedObjectTypeHostVFlashManager                       = ManagedObjectType("HostVFlashManager")
+	ManagedObjectTypeHostVMotionSystem                       = ManagedObjectType("HostVMotionSystem")
+	ManagedObjectTypeHostVirtualNicManager                   = ManagedObjectType("HostVirtualNicManager")
+	ManagedObjectTypeHostVsanInternalSystem                  = ManagedObjectType("HostVsanInternalSystem")
+	ManagedObjectTypeHostVsanSystem                          = ManagedObjectType("HostVsanSystem")
+	ManagedObjectTypeOptionManager                           = ManagedObjectType("OptionManager")
+	ManagedObjectTypeProfileComplianceManager                = ManagedObjectType("ProfileComplianceManager")
+	ManagedObjectTypeProfile                                 = ManagedObjectType("Profile")
+	ManagedObjectTypeProfileManager                          = ManagedObjectType("ProfileManager")
+	ManagedObjectTypeClusterProfile                          = ManagedObjectType("ClusterProfile")
+	ManagedObjectTypeClusterProfileManager                   = ManagedObjectType("ClusterProfileManager")
+	ManagedObjectTypeHostProfile                             = ManagedObjectType("HostProfile")
+	ManagedObjectTypeHostSpecificationManager                = ManagedObjectType("HostSpecificationManager")
+	ManagedObjectTypeHostProfileManager                      = ManagedObjectType("HostProfileManager")
+	ManagedObjectTypeScheduledTask                           = ManagedObjectType("ScheduledTask")
+	ManagedObjectTypeScheduledTaskManager                    = ManagedObjectType("ScheduledTaskManager")
+	ManagedObjectTypeTenantTenantManager                     = ManagedObjectType("TenantTenantManager")
+	ManagedObjectTypeFailoverClusterConfigurator             = ManagedObjectType("FailoverClusterConfigurator")
+	ManagedObjectTypeFailoverClusterManager                  = ManagedObjectType("FailoverClusterManager")
+	ManagedObjectTypeContainerView                           = ManagedObjectType("ContainerView")
+	ManagedObjectTypeInventoryView                           = ManagedObjectType("InventoryView")
+	ManagedObjectTypeListView                                = ManagedObjectType("ListView")
+	ManagedObjectTypeManagedObjectView                       = ManagedObjectType("ManagedObjectView")
+	ManagedObjectTypeView                                    = ManagedObjectType("View")
+	ManagedObjectTypeViewManager                             = ManagedObjectType("ViewManager")
+	ManagedObjectTypeVirtualMachineGuestCustomizationManager = ManagedObjectType("VirtualMachineGuestCustomizationManager")
+	ManagedObjectTypeVirtualMachineSnapshot                  = ManagedObjectType("VirtualMachineSnapshot")
+	ManagedObjectTypeVirtualMachineCompatibilityChecker      = ManagedObjectType("VirtualMachineCompatibilityChecker")
+	ManagedObjectTypeVirtualMachineProvisioningChecker       = ManagedObjectType("VirtualMachineProvisioningChecker")
+	ManagedObjectTypeGuestAliasManager                       = ManagedObjectType("GuestAliasManager")
+	ManagedObjectTypeGuestAuthManager                        = ManagedObjectType("GuestAuthManager")
+	ManagedObjectTypeGuestFileManager                        = ManagedObjectType("GuestFileManager")
+	ManagedObjectTypeGuestOperationsManager                  = ManagedObjectType("GuestOperationsManager")
+	ManagedObjectTypeGuestProcessManager                     = ManagedObjectType("GuestProcessManager")
+	ManagedObjectTypeGuestWindowsRegistryManager             = ManagedObjectType("GuestWindowsRegistryManager")
+	ManagedObjectTypeVStorageObjectManagerBase               = ManagedObjectType("VStorageObjectManagerBase")
+	ManagedObjectTypeHostVStorageObjectManager               = ManagedObjectType("HostVStorageObjectManager")
+	ManagedObjectTypeVcenterVStorageObjectManager            = ManagedObjectType("VcenterVStorageObjectManager")
 )
 
-func (e ManagedObjectTypes) Values() []ManagedObjectTypes {
-	return []ManagedObjectTypes{
-		ManagedObjectTypesPropertyCollector,
-		ManagedObjectTypesPropertyFilter,
-		ManagedObjectTypesAuthorizationManager,
-		ManagedObjectTypesCertificateManager,
-		ManagedObjectTypesClusterComputeResource,
-		ManagedObjectTypesComputeResource,
-		ManagedObjectTypesCustomFieldsManager,
-		ManagedObjectTypesCustomizationSpecManager,
-		ManagedObjectTypesDatacenter,
-		ManagedObjectTypesDatastore,
-		ManagedObjectTypesDatastoreNamespaceManager,
-		ManagedObjectTypesDiagnosticManager,
-		ManagedObjectTypesDirectPathProfileManager,
-		ManagedObjectTypesDistributedVirtualSwitch,
-		ManagedObjectTypesEnvironmentBrowser,
-		ManagedObjectTypesExtensibleManagedObject,
-		ManagedObjectTypesExtensionManager,
-		ManagedObjectTypesFileManager,
-		ManagedObjectTypesFolder,
-		ManagedObjectTypesHealthUpdateManager,
-		ManagedObjectTypesHistoryCollector,
-		ManagedObjectTypesHostSystem,
-		ManagedObjectTypesHttpNfcLease,
-		ManagedObjectTypesIoFilterManager,
-		ManagedObjectTypesIpPoolManager,
-		ManagedObjectTypesLicenseAssignmentManager,
-		ManagedObjectTypesLicenseManager,
-		ManagedObjectTypesLocalizationManager,
-		ManagedObjectTypesManagedEntity,
-		ManagedObjectTypesNetwork,
-		ManagedObjectTypesOpaqueNetwork,
-		ManagedObjectTypesOverheadMemoryManager,
-		ManagedObjectTypesOvfManager,
-		ManagedObjectTypesPerformanceManager,
-		ManagedObjectTypesResourcePlanningManager,
-		ManagedObjectTypesResourcePool,
-		ManagedObjectTypesSearchIndex,
-		ManagedObjectTypesServiceInstance,
-		ManagedObjectTypesServiceManager,
-		ManagedObjectTypesSessionManager,
-		ManagedObjectTypesSimpleCommand,
-		ManagedObjectTypesSiteInfoManager,
-		ManagedObjectTypesStoragePod,
-		ManagedObjectTypesStorageQueryManager,
-		ManagedObjectTypesStorageResourceManager,
-		ManagedObjectTypesTask,
-		ManagedObjectTypesTaskHistoryCollector,
-		ManagedObjectTypesTaskManager,
-		ManagedObjectTypesUserDirectory,
-		ManagedObjectTypesVirtualApp,
-		ManagedObjectTypesVirtualDiskManager,
-		ManagedObjectTypesVirtualMachine,
-		ManagedObjectTypesVirtualizationManager,
-		ManagedObjectTypesVsanUpgradeSystem,
-		ManagedObjectTypesAlarm,
-		ManagedObjectTypesAlarmManager,
-		ManagedObjectTypesClusterEVCManager,
-		ManagedObjectTypesDistributedVirtualPortgroup,
-		ManagedObjectTypesDistributedVirtualSwitchManager,
-		ManagedObjectTypesVmwareDistributedVirtualSwitch,
-		ManagedObjectTypesCryptoManager,
-		ManagedObjectTypesCryptoManagerHost,
-		ManagedObjectTypesCryptoManagerHostKMS,
-		ManagedObjectTypesCryptoManagerKmip,
-		ManagedObjectTypesEventHistoryCollector,
-		ManagedObjectTypesEventManager,
-		ManagedObjectTypesHostActiveDirectoryAuthentication,
-		ManagedObjectTypesHostAssignableHardwareManager,
-		ManagedObjectTypesHostAuthenticationManager,
-		ManagedObjectTypesHostAuthenticationStore,
-		ManagedObjectTypesHostAutoStartManager,
-		ManagedObjectTypesHostBootDeviceSystem,
-		ManagedObjectTypesHostCacheConfigurationManager,
-		ManagedObjectTypesHostCertificateManager,
-		ManagedObjectTypesHostCpuSchedulerSystem,
-		ManagedObjectTypesHostDatastoreBrowser,
-		ManagedObjectTypesHostDatastoreSystem,
-		ManagedObjectTypesHostDateTimeSystem,
-		ManagedObjectTypesHostDiagnosticSystem,
-		ManagedObjectTypesHostDirectoryStore,
-		ManagedObjectTypesHostEsxAgentHostManager,
-		ManagedObjectTypesHostFirewallSystem,
-		ManagedObjectTypesHostFirmwareSystem,
-		ManagedObjectTypesHostGraphicsManager,
-		ManagedObjectTypesHostHealthStatusSystem,
-		ManagedObjectTypesHostAccessManager,
-		ManagedObjectTypesHostImageConfigManager,
-		ManagedObjectTypesIscsiManager,
-		ManagedObjectTypesHostKernelModuleSystem,
-		ManagedObjectTypesHostLocalAccountManager,
-		ManagedObjectTypesHostLocalAuthentication,
-		ManagedObjectTypesHostMemorySystem,
-		ManagedObjectTypesMessageBusProxy,
-		ManagedObjectTypesHostNetworkSystem,
-		ManagedObjectTypesHostNvdimmSystem,
-		ManagedObjectTypesHostPatchManager,
-		ManagedObjectTypesHostPciPassthruSystem,
-		ManagedObjectTypesHostPowerSystem,
-		ManagedObjectTypesHostServiceSystem,
-		ManagedObjectTypesHostSnmpSystem,
-		ManagedObjectTypesHostStorageSystem,
-		ManagedObjectTypesHostVFlashManager,
-		ManagedObjectTypesHostVMotionSystem,
-		ManagedObjectTypesHostVirtualNicManager,
-		ManagedObjectTypesHostVsanInternalSystem,
-		ManagedObjectTypesHostVsanSystem,
-		ManagedObjectTypesOptionManager,
-		ManagedObjectTypesProfileComplianceManager,
-		ManagedObjectTypesProfile,
-		ManagedObjectTypesProfileManager,
-		ManagedObjectTypesClusterProfile,
-		ManagedObjectTypesClusterProfileManager,
-		ManagedObjectTypesHostProfile,
-		ManagedObjectTypesHostSpecificationManager,
-		ManagedObjectTypesHostProfileManager,
-		ManagedObjectTypesScheduledTask,
-		ManagedObjectTypesScheduledTaskManager,
-		ManagedObjectTypesTenantTenantManager,
-		ManagedObjectTypesFailoverClusterConfigurator,
-		ManagedObjectTypesFailoverClusterManager,
-		ManagedObjectTypesContainerView,
-		ManagedObjectTypesInventoryView,
-		ManagedObjectTypesListView,
-		ManagedObjectTypesManagedObjectView,
-		ManagedObjectTypesView,
-		ManagedObjectTypesViewManager,
-		ManagedObjectTypesVirtualMachineGuestCustomizationManager,
-		ManagedObjectTypesVirtualMachineSnapshot,
-		ManagedObjectTypesVirtualMachineCompatibilityChecker,
-		ManagedObjectTypesVirtualMachineProvisioningChecker,
-		ManagedObjectTypesGuestAliasManager,
-		ManagedObjectTypesGuestAuthManager,
-		ManagedObjectTypesGuestFileManager,
-		ManagedObjectTypesGuestOperationsManager,
-		ManagedObjectTypesGuestProcessManager,
-		ManagedObjectTypesGuestWindowsRegistryManager,
-		ManagedObjectTypesVStorageObjectManagerBase,
-		ManagedObjectTypesHostVStorageObjectManager,
-		ManagedObjectTypesVcenterVStorageObjectManager,
+func (e ManagedObjectType) Values() []ManagedObjectType {
+	return []ManagedObjectType{
+		ManagedObjectTypePropertyCollector,
+		ManagedObjectTypePropertyFilter,
+		ManagedObjectTypeAuthorizationManager,
+		ManagedObjectTypeCertificateManager,
+		ManagedObjectTypeClusterComputeResource,
+		ManagedObjectTypeComputeResource,
+		ManagedObjectTypeCustomFieldsManager,
+		ManagedObjectTypeCustomizationSpecManager,
+		ManagedObjectTypeDatacenter,
+		ManagedObjectTypeDatastore,
+		ManagedObjectTypeDatastoreNamespaceManager,
+		ManagedObjectTypeDiagnosticManager,
+		ManagedObjectTypeDirectPathProfileManager,
+		ManagedObjectTypeDistributedVirtualSwitch,
+		ManagedObjectTypeEnvironmentBrowser,
+		ManagedObjectTypeExtensibleManagedObject,
+		ManagedObjectTypeExtensionManager,
+		ManagedObjectTypeFileManager,
+		ManagedObjectTypeFolder,
+		ManagedObjectTypeHealthUpdateManager,
+		ManagedObjectTypeHistoryCollector,
+		ManagedObjectTypeHostSystem,
+		ManagedObjectTypeHttpNfcLease,
+		ManagedObjectTypeIoFilterManager,
+		ManagedObjectTypeIpPoolManager,
+		ManagedObjectTypeLicenseAssignmentManager,
+		ManagedObjectTypeLicenseManager,
+		ManagedObjectTypeLocalizationManager,
+		ManagedObjectTypeManagedEntity,
+		ManagedObjectTypeNetwork,
+		ManagedObjectTypeOpaqueNetwork,
+		ManagedObjectTypeOverheadMemoryManager,
+		ManagedObjectTypeOvfManager,
+		ManagedObjectTypePerformanceManager,
+		ManagedObjectTypeResourcePlanningManager,
+		ManagedObjectTypeResourcePool,
+		ManagedObjectTypeSearchIndex,
+		ManagedObjectTypeServiceInstance,
+		ManagedObjectTypeServiceManager,
+		ManagedObjectTypeSessionManager,
+		ManagedObjectTypeSimpleCommand,
+		ManagedObjectTypeSiteInfoManager,
+		ManagedObjectTypeStoragePod,
+		ManagedObjectTypeStorageQueryManager,
+		ManagedObjectTypeStorageResourceManager,
+		ManagedObjectTypeTask,
+		ManagedObjectTypeTaskHistoryCollector,
+		ManagedObjectTypeTaskManager,
+		ManagedObjectTypeUserDirectory,
+		ManagedObjectTypeVirtualApp,
+		ManagedObjectTypeVirtualDiskManager,
+		ManagedObjectTypeVirtualMachine,
+		ManagedObjectTypeVirtualizationManager,
+		ManagedObjectTypeVsanUpgradeSystem,
+		ManagedObjectTypeAlarm,
+		ManagedObjectTypeAlarmManager,
+		ManagedObjectTypeClusterEVCManager,
+		ManagedObjectTypeDistributedVirtualPortgroup,
+		ManagedObjectTypeDistributedVirtualSwitchManager,
+		ManagedObjectTypeVmwareDistributedVirtualSwitch,
+		ManagedObjectTypeCryptoManager,
+		ManagedObjectTypeCryptoManagerHost,
+		ManagedObjectTypeCryptoManagerHostKMS,
+		ManagedObjectTypeCryptoManagerKmip,
+		ManagedObjectTypeEventHistoryCollector,
+		ManagedObjectTypeEventManager,
+		ManagedObjectTypeHostActiveDirectoryAuthentication,
+		ManagedObjectTypeHostAssignableHardwareManager,
+		ManagedObjectTypeHostAuthenticationManager,
+		ManagedObjectTypeHostAuthenticationStore,
+		ManagedObjectTypeHostAutoStartManager,
+		ManagedObjectTypeHostBootDeviceSystem,
+		ManagedObjectTypeHostCacheConfigurationManager,
+		ManagedObjectTypeHostCertificateManager,
+		ManagedObjectTypeHostCpuSchedulerSystem,
+		ManagedObjectTypeHostDatastoreBrowser,
+		ManagedObjectTypeHostDatastoreSystem,
+		ManagedObjectTypeHostDateTimeSystem,
+		ManagedObjectTypeHostDiagnosticSystem,
+		ManagedObjectTypeHostDirectoryStore,
+		ManagedObjectTypeHostEsxAgentHostManager,
+		ManagedObjectTypeHostFirewallSystem,
+		ManagedObjectTypeHostFirmwareSystem,
+		ManagedObjectTypeHostGraphicsManager,
+		ManagedObjectTypeHostHealthStatusSystem,
+		ManagedObjectTypeHostAccessManager,
+		ManagedObjectTypeHostImageConfigManager,
+		ManagedObjectTypeIscsiManager,
+		ManagedObjectTypeHostKernelModuleSystem,
+		ManagedObjectTypeHostLocalAccountManager,
+		ManagedObjectTypeHostLocalAuthentication,
+		ManagedObjectTypeHostMemorySystem,
+		ManagedObjectTypeMessageBusProxy,
+		ManagedObjectTypeHostNetworkSystem,
+		ManagedObjectTypeHostNvdimmSystem,
+		ManagedObjectTypeHostPatchManager,
+		ManagedObjectTypeHostPciPassthruSystem,
+		ManagedObjectTypeHostPowerSystem,
+		ManagedObjectTypeHostServiceSystem,
+		ManagedObjectTypeHostSnmpSystem,
+		ManagedObjectTypeHostStorageSystem,
+		ManagedObjectTypeHostVFlashManager,
+		ManagedObjectTypeHostVMotionSystem,
+		ManagedObjectTypeHostVirtualNicManager,
+		ManagedObjectTypeHostVsanInternalSystem,
+		ManagedObjectTypeHostVsanSystem,
+		ManagedObjectTypeOptionManager,
+		ManagedObjectTypeProfileComplianceManager,
+		ManagedObjectTypeProfile,
+		ManagedObjectTypeProfileManager,
+		ManagedObjectTypeClusterProfile,
+		ManagedObjectTypeClusterProfileManager,
+		ManagedObjectTypeHostProfile,
+		ManagedObjectTypeHostSpecificationManager,
+		ManagedObjectTypeHostProfileManager,
+		ManagedObjectTypeScheduledTask,
+		ManagedObjectTypeScheduledTaskManager,
+		ManagedObjectTypeTenantTenantManager,
+		ManagedObjectTypeFailoverClusterConfigurator,
+		ManagedObjectTypeFailoverClusterManager,
+		ManagedObjectTypeContainerView,
+		ManagedObjectTypeInventoryView,
+		ManagedObjectTypeListView,
+		ManagedObjectTypeManagedObjectView,
+		ManagedObjectTypeView,
+		ManagedObjectTypeViewManager,
+		ManagedObjectTypeVirtualMachineGuestCustomizationManager,
+		ManagedObjectTypeVirtualMachineSnapshot,
+		ManagedObjectTypeVirtualMachineCompatibilityChecker,
+		ManagedObjectTypeVirtualMachineProvisioningChecker,
+		ManagedObjectTypeGuestAliasManager,
+		ManagedObjectTypeGuestAuthManager,
+		ManagedObjectTypeGuestFileManager,
+		ManagedObjectTypeGuestOperationsManager,
+		ManagedObjectTypeGuestProcessManager,
+		ManagedObjectTypeGuestWindowsRegistryManager,
+		ManagedObjectTypeVStorageObjectManagerBase,
+		ManagedObjectTypeHostVStorageObjectManager,
+		ManagedObjectTypeVcenterVStorageObjectManager,
 	}
 }
 
-func (e ManagedObjectTypes) Strings() []string {
+func (e ManagedObjectType) Strings() []string {
 	return EnumValuesAsStrings(e.Values())
 }
 
 func init() {
-	t["ManagedObjectTypes"] = reflect.TypeOf((*ManagedObjectTypes)(nil)).Elem()
+	t["ManagedObjectType"] = reflect.TypeOf((*ManagedObjectType)(nil)).Elem()
 }
 
 // The operation on the target metric item.
@@ -9666,7 +9699,7 @@ const (
 	PlacementAffinityRuleRuleScopeCluster = PlacementAffinityRuleRuleScope("cluster")
 	// individual hosts are the scope
 	PlacementAffinityRuleRuleScopeHost = PlacementAffinityRuleRuleScope("host")
-	// datastore cluster is teh scope
+	// datastore cluster is the scope
 	PlacementAffinityRuleRuleScopeStoragePod = PlacementAffinityRuleRuleScope("storagePod")
 	// individual datastores are the scope
 	PlacementAffinityRuleRuleScopeDatastore = PlacementAffinityRuleRuleScope("datastore")
@@ -10214,7 +10247,7 @@ const (
 	ReplicationVmConfigFaultReasonForFaultInvalidDestinationPort = ReplicationVmConfigFaultReasonForFault("invalidDestinationPort")
 	// Malformed extra options list
 	ReplicationVmConfigFaultReasonForFaultInvalidExtraVmOptions = ReplicationVmConfigFaultReasonForFault("invalidExtraVmOptions")
-	// Mis-matching generation number (stale)
+	// Mismatching generation number (stale)
 	ReplicationVmConfigFaultReasonForFaultStaleGenerationNumber = ReplicationVmConfigFaultReasonForFault("staleGenerationNumber")
 	// Attempting to re-configure the VM replication ID
 	ReplicationVmConfigFaultReasonForFaultReconfigureVmReplicationIdNotAllowed = ReplicationVmConfigFaultReasonForFault("reconfigureVmReplicationIdNotAllowed")
@@ -10709,6 +10742,116 @@ func (e ScsiLunVStorageSupportStatus) Strings() []string {
 
 func init() {
 	t["ScsiLunVStorageSupportStatus"] = reflect.TypeOf((*ScsiLunVStorageSupportStatus)(nil)).Elem()
+}
+
+type SearchIndexPredicateArrayOperator string
+
+const (
+	SearchIndexPredicateArrayOperatorAllElements = SearchIndexPredicateArrayOperator("AllElements")
+	SearchIndexPredicateArrayOperatorAnyElement  = SearchIndexPredicateArrayOperator("AnyElement")
+)
+
+func (e SearchIndexPredicateArrayOperator) Values() []SearchIndexPredicateArrayOperator {
+	return []SearchIndexPredicateArrayOperator{
+		SearchIndexPredicateArrayOperatorAllElements,
+		SearchIndexPredicateArrayOperatorAnyElement,
+	}
+}
+
+func (e SearchIndexPredicateArrayOperator) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["SearchIndexPredicateArrayOperator"] = reflect.TypeOf((*SearchIndexPredicateArrayOperator)(nil)).Elem()
+}
+
+type SearchIndexPredicateComparisonOperator string
+
+const (
+	SearchIndexPredicateComparisonOperatorEqual          = SearchIndexPredicateComparisonOperator("Equal")
+	SearchIndexPredicateComparisonOperatorNotEqual       = SearchIndexPredicateComparisonOperator("NotEqual")
+	SearchIndexPredicateComparisonOperatorGreater        = SearchIndexPredicateComparisonOperator("Greater")
+	SearchIndexPredicateComparisonOperatorGreaterOrEqual = SearchIndexPredicateComparisonOperator("GreaterOrEqual")
+	SearchIndexPredicateComparisonOperatorLess           = SearchIndexPredicateComparisonOperator("Less")
+	SearchIndexPredicateComparisonOperatorLessOrEqual    = SearchIndexPredicateComparisonOperator("LessOrEqual")
+	SearchIndexPredicateComparisonOperatorIn             = SearchIndexPredicateComparisonOperator("In")
+	SearchIndexPredicateComparisonOperatorNotIn          = SearchIndexPredicateComparisonOperator("NotIn")
+	SearchIndexPredicateComparisonOperatorLike           = SearchIndexPredicateComparisonOperator("Like")
+	SearchIndexPredicateComparisonOperatorNotLike        = SearchIndexPredicateComparisonOperator("NotLike")
+)
+
+func (e SearchIndexPredicateComparisonOperator) Values() []SearchIndexPredicateComparisonOperator {
+	return []SearchIndexPredicateComparisonOperator{
+		SearchIndexPredicateComparisonOperatorEqual,
+		SearchIndexPredicateComparisonOperatorNotEqual,
+		SearchIndexPredicateComparisonOperatorGreater,
+		SearchIndexPredicateComparisonOperatorGreaterOrEqual,
+		SearchIndexPredicateComparisonOperatorLess,
+		SearchIndexPredicateComparisonOperatorLessOrEqual,
+		SearchIndexPredicateComparisonOperatorIn,
+		SearchIndexPredicateComparisonOperatorNotIn,
+		SearchIndexPredicateComparisonOperatorLike,
+		SearchIndexPredicateComparisonOperatorNotLike,
+	}
+}
+
+func (e SearchIndexPredicateComparisonOperator) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["SearchIndexPredicateComparisonOperator"] = reflect.TypeOf((*SearchIndexPredicateComparisonOperator)(nil)).Elem()
+}
+
+type SearchIndexQuerySpecResourceType string
+
+const (
+	SearchIndexQuerySpecResourceTypeClusterComputeResource         = SearchIndexQuerySpecResourceType("ClusterComputeResource")
+	SearchIndexQuerySpecResourceTypeComputeResource                = SearchIndexQuerySpecResourceType("ComputeResource")
+	SearchIndexQuerySpecResourceTypeDatacenter                     = SearchIndexQuerySpecResourceType("Datacenter")
+	SearchIndexQuerySpecResourceTypeDatastore                      = SearchIndexQuerySpecResourceType("Datastore")
+	SearchIndexQuerySpecResourceTypeDistributedVirtualPortgroup    = SearchIndexQuerySpecResourceType("DistributedVirtualPortgroup")
+	SearchIndexQuerySpecResourceTypeDistributedVirtualSwitch       = SearchIndexQuerySpecResourceType("DistributedVirtualSwitch")
+	SearchIndexQuerySpecResourceTypeFolder                         = SearchIndexQuerySpecResourceType("Folder")
+	SearchIndexQuerySpecResourceTypeHostSystem                     = SearchIndexQuerySpecResourceType("HostSystem")
+	SearchIndexQuerySpecResourceTypeNetwork                        = SearchIndexQuerySpecResourceType("Network")
+	SearchIndexQuerySpecResourceTypeOpaqueNetwork                  = SearchIndexQuerySpecResourceType("OpaqueNetwork")
+	SearchIndexQuerySpecResourceTypeResourcePool                   = SearchIndexQuerySpecResourceType("ResourcePool")
+	SearchIndexQuerySpecResourceTypeServiceInstance                = SearchIndexQuerySpecResourceType("ServiceInstance")
+	SearchIndexQuerySpecResourceTypeStoragePod                     = SearchIndexQuerySpecResourceType("StoragePod")
+	SearchIndexQuerySpecResourceTypeVirtualApp                     = SearchIndexQuerySpecResourceType("VirtualApp")
+	SearchIndexQuerySpecResourceTypeVirtualMachine                 = SearchIndexQuerySpecResourceType("VirtualMachine")
+	SearchIndexQuerySpecResourceTypeVmwareDistributedVirtualSwitch = SearchIndexQuerySpecResourceType("VmwareDistributedVirtualSwitch")
+)
+
+func (e SearchIndexQuerySpecResourceType) Values() []SearchIndexQuerySpecResourceType {
+	return []SearchIndexQuerySpecResourceType{
+		SearchIndexQuerySpecResourceTypeClusterComputeResource,
+		SearchIndexQuerySpecResourceTypeComputeResource,
+		SearchIndexQuerySpecResourceTypeDatacenter,
+		SearchIndexQuerySpecResourceTypeDatastore,
+		SearchIndexQuerySpecResourceTypeDistributedVirtualPortgroup,
+		SearchIndexQuerySpecResourceTypeDistributedVirtualSwitch,
+		SearchIndexQuerySpecResourceTypeFolder,
+		SearchIndexQuerySpecResourceTypeHostSystem,
+		SearchIndexQuerySpecResourceTypeNetwork,
+		SearchIndexQuerySpecResourceTypeOpaqueNetwork,
+		SearchIndexQuerySpecResourceTypeResourcePool,
+		SearchIndexQuerySpecResourceTypeServiceInstance,
+		SearchIndexQuerySpecResourceTypeStoragePod,
+		SearchIndexQuerySpecResourceTypeVirtualApp,
+		SearchIndexQuerySpecResourceTypeVirtualMachine,
+		SearchIndexQuerySpecResourceTypeVmwareDistributedVirtualSwitch,
+	}
+}
+
+func (e SearchIndexQuerySpecResourceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["SearchIndexQuerySpecResourceType"] = reflect.TypeOf((*SearchIndexQuerySpecResourceType)(nil)).Elem()
 }
 
 type SessionManagerGenericServiceTicketTicketType string
@@ -11941,7 +12084,7 @@ const (
 	VchaNodeRolePassive = VchaNodeRole("passive")
 	// Node is having a role of Witness.
 	//
-	// In this role, node acts as a quorom
+	// In this role, node acts as a quorum
 	// node for avoiding the classic split-brain problem.
 	VchaNodeRoleWitness = VchaNodeRole("witness")
 )
@@ -14743,7 +14886,7 @@ func init() {
 
 // Deprecated as of vSphere API 5.0.
 //
-// The set of tranformations that can be performed on the virtual disks
+// The set of transformations that can be performed on the virtual disks
 // as part of the copy.
 type VirtualMachineRelocateTransformation string
 
@@ -15141,7 +15284,7 @@ const (
 	// Wireless device related to the Wireless USB standard,
 	// this is a subset of wireless controllers,
 	VirtualMachineUsbInfoFamilyWusb = VirtualMachineUsbInfoFamily("wusb")
-	// Palm PDA, and Micorsoft ActiveSync PDA.
+	// Palm PDA, and Microsoft ActiveSync PDA.
 	VirtualMachineUsbInfoFamilyPda = VirtualMachineUsbInfoFamily("pda")
 	// Device that has an interface using a vendor-specific protocol.
 	VirtualMachineUsbInfoFamilyVendor_specific = VirtualMachineUsbInfoFamily("vendor_specific")
@@ -16130,7 +16273,7 @@ func (e VmPlacementPolicyVmPlacementPolicyStrictness) Strings() []string {
 
 func init() {
 	t["VmPlacementPolicyVmPlacementPolicyStrictness"] = reflect.TypeOf((*VmPlacementPolicyVmPlacementPolicyStrictness)(nil)).Elem()
-	minAPIVersionForType["VmPlacementPolicyVmPlacementPolicyStrictness"] = "9.0.0.0"
+	minAPIVersionForType["VmPlacementPolicyVmPlacementPolicyStrictness"] = "9.1.0.0"
 }
 
 // Defines the infrastructure topology for which a VM placement policy
@@ -16185,7 +16328,7 @@ func (e VmPlacementPolicyVmPlacementPolicyTopology) Strings() []string {
 
 func init() {
 	t["VmPlacementPolicyVmPlacementPolicyTopology"] = reflect.TypeOf((*VmPlacementPolicyVmPlacementPolicyTopology)(nil)).Elem()
-	minAPIVersionForType["VmPlacementPolicyVmPlacementPolicyTopology"] = "9.0.0.0"
+	minAPIVersionForType["VmPlacementPolicyVmPlacementPolicyTopology"] = "9.1.0.0"
 }
 
 type VmShutdownOnIsolationEventOperation string
@@ -16538,6 +16681,8 @@ const (
 	VslmDiskInfoFlagNativeSnapshotSupported = VslmDiskInfoFlag("nativeSnapshotSupported")
 	VslmDiskInfoFlagCbtEnabled              = VslmDiskInfoFlag("cbtEnabled")
 	VslmDiskInfoFlagVirtualDiskFormat       = VslmDiskInfoFlag("virtualDiskFormat")
+	VslmDiskInfoFlagSharedFileBacking       = VslmDiskInfoFlag("sharedFileBacking")
+	VslmDiskInfoFlagLinkedCloneDetails      = VslmDiskInfoFlag("linkedCloneDetails")
 )
 
 func (e VslmDiskInfoFlag) Values() []VslmDiskInfoFlag {
@@ -16564,6 +16709,8 @@ func (e VslmDiskInfoFlag) Values() []VslmDiskInfoFlag {
 		VslmDiskInfoFlagNativeSnapshotSupported,
 		VslmDiskInfoFlagCbtEnabled,
 		VslmDiskInfoFlagVirtualDiskFormat,
+		VslmDiskInfoFlagSharedFileBacking,
+		VslmDiskInfoFlagLinkedCloneDetails,
 	}
 }
 

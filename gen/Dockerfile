@@ -57,7 +57,7 @@ RUN apt-get install -y rbenv && \
     rbenv rehash && \
     rbenv global 3.1.0
 
-RUN gem install bundler -v 2.4.22
+RUN gem install bundler -v 2.6.6
 
 
 ## --------------------------------------
@@ -72,7 +72,7 @@ WORKDIR /govmomi/gen
 ## --------------------------------------
 
 COPY Gemfile Gemfile.lock .
-RUN bundle update --bundler && bundle install
+RUN bundle install
 
 
 ## --------------------------------------

@@ -1197,7 +1197,7 @@ func init() {
 type NameValuePair struct {
 	types.DynamicData
 
-	// Name of the paramter
+	// Name of the parameter
 	ParameterName string `xml:"parameterName" json:"parameterName"`
 	// Value of the parameter
 	ParameterValue string `xml:"parameterValue" json:"parameterValue"`
@@ -2892,6 +2892,23 @@ func init() {
 	types.Add("sms:SmsAboutInfo", reflect.TypeOf((*SmsAboutInfo)(nil)).Elem())
 }
 
+// The common base type for all SMS faults.
+//
+// This structure may be used only with operations rendered under `/sms`.
+type SmsFault struct {
+	types.MethodFault
+}
+
+func init() {
+	types.Add("sms:SmsFault", reflect.TypeOf((*SmsFault)(nil)).Elem())
+}
+
+type SmsFaultFault SmsFault
+
+func init() {
+	types.Add("sms:SmsFaultFault", reflect.TypeOf((*SmsFaultFault)(nil)).Elem())
+}
+
 // Thrown when login fails due to token not provided or token could not be
 // validated.
 //
@@ -3122,7 +3139,7 @@ type StorageAlarm struct {
 	//
 	// Must be one of the string values from
 	// `AlarmType_enum`
-	// Note that for VMODL VP implemenation this field must be populated with one
+	// Note that for VMODL VP implementation this field must be populated with one
 	// of the values from `vasa.data.notification.AlarmType`
 	AlarmType string `xml:"alarmType" json:"alarmType"`
 	// Container identifier
@@ -3138,7 +3155,7 @@ type StorageAlarm struct {
 	//
 	// Must be one of the string values
 	// from `SmsEntityType_enum`
-	// Note that for VMODL VP implemenation this field must be populated with one
+	// Note that for VMODL VP implementation this field must be populated with one
 	// of the values from `vasa.data.notification.EntityType`
 	ObjectType string `xml:"objectType" json:"objectType"`
 	// Current status of the object.
@@ -3331,7 +3348,7 @@ type StorageLun struct {
 
 	// Unique Indentfier
 	Uuid string `xml:"uuid" json:"uuid"`
-	// Identifer reported by vSphere(ESX) for this LUN
+	// Identifier reported by vSphere(ESX) for this LUN
 	VSphereLunIdentifier string `xml:"vSphereLunIdentifier" json:"vSphereLunIdentifier"`
 	// Display Name which appears in storage array management
 	// console
@@ -3712,6 +3729,48 @@ func init() {
 
 type UnregisterProvider_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
+}
+
+// The parameters of `SmsStorageManager.UpgradeVASAProvider_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
+type UpgradeVASAProviderRequestType struct {
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	// `VASAProviderUpgradeSpec` containing parameter to upgrade the
+	// VASA Provider. If spec is for non VVOL VASA Provider, then exception is thrown.
+	UpgradeSpec VASAProviderUpgradeSpec `xml:"upgradeSpec" json:"upgradeSpec"`
+}
+
+func init() {
+	types.Add("sms:UpgradeVASAProviderRequestType", reflect.TypeOf((*UpgradeVASAProviderRequestType)(nil)).Elem())
+}
+
+type UpgradeVASAProvider_Task UpgradeVASAProviderRequestType
+
+func init() {
+	types.Add("sms:UpgradeVASAProvider_Task", reflect.TypeOf((*UpgradeVASAProvider_Task)(nil)).Elem())
+}
+
+type UpgradeVASAProvider_TaskResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
+}
+
+// VASA Provider Specification for upgrade.
+//
+// This structure may be used only with operations rendered under `/sms`.
+type VASAProviderUpgradeSpec struct {
+	types.DynamicData
+
+	// `SmsProviderInfo.uid` for the provider
+	ProviderUid string `xml:"providerUid" json:"providerUid"`
+	// VASA Provider username
+	Username string `xml:"username" json:"username"`
+	// VASA Provider password
+	Password string `xml:"password" json:"password"`
+}
+
+func init() {
+	types.Add("sms:VASAProviderUpgradeSpec", reflect.TypeOf((*VASAProviderUpgradeSpec)(nil)).Elem())
 }
 
 // Identity of a virtual volume for policy API purposes.
