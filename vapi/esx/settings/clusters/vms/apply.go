@@ -14,228 +14,144 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-//	The {@name HostSolutionsApplyFilterSpec} {@term structure} contains {@term
-//
-// fields} that describe a filter that to be used for applying the desired
-// specification of solutions with deployment type {@link
-// DeploymentType#EVERY_HOST_PINNED} to a given cluster.
+// HostSolutionsApplyFilterSpec contains fields that describe a filter that to be used for applying the desired
+// specification of solutions with deployment type DeploymentType.EVERY_HOST_PINNED to a given cluster.
 type HostSolutionsApplyFilterSpec struct {
 
-	/**
-	 * Specific solutions within the cluster to be considered during the
-	 * execution of the apply {@term operation}.
-	 *
-	 * @field.optional if {@term unset} or empty, all solutions are applied.
-	 */
+	// Solutions are specific solutions within the cluster to be considered during the
+	// execution of the apply operation.
+	//
+	// If unset or empty, all solutions are applied.
 	Solutions []string `json:"solutions"`
 
-	/**
-	 * Hosts on which solutions that are specified by this structure need
-	 * to be applied.
-	 *
-	 * @field.optional if {@term unset} or empty, the solutions are applied on
-	 *                 all of the hosts in the cluster.
-	 */
+	// Hosts on which solutions that are specified by this structure need
+	// to be applied.
+	//
+	// If unset or empty, the solutions are applied on all of the hosts in the cluster.
 	Hosts []string `json:"hosts"`
 }
 
-/**
- * The {@name ClusterSolutionsApplyFilterSpec} {@term structure} contains
- * {@term fields} that describe a filter that to be used for applying the
- * desired specification of solutions with deployment type
- * {@link DeploymentType#CLUSTER_VM_SET} to a given cluster.
- */
+// ClusterSolutionsApplyFilterSpec contains fields that describe a filter that to be used for applying the
+// desired specification of solutions with deployment type DeploymentType.CLUSTER_VM_SET to a given cluster.
 type ClusterSolutionsApplyFilterSpec struct {
 
-	/**
-	 * Specific solutions within the cluster to be considered during the
-	 * execution of the apply {@term operation}.
-	 *
-	 * @field.optional if {@term unset} or empty, all solutions are applied.
-	 */
+	// Solutions are specific solutions within the cluster to be considered during the
+	// execution of the apply operation.
+	//
+	// If unset or empty, all solutions are applied.
 	Solutions []string `json:"solutions,omitempty"`
 
-	/**
-	 * Hosts on which solutions that are specified by this structure need
-	 * to be applied.
-	 *
-	 * @field.optional if {@term unset} or empty, the solutions are applied on
-	 *                 all of the hosts in the cluster.
-	 */
+	// Hosts on which solutions that are specified by this structure need
+	// to be applied.
+	//
+	// If unset or empty, the solutions are applied on all of the hosts in the cluster.
 	Hosts []string `json:"hosts,omitempty"`
 }
 
-// The {@name ApplySpec} {@term structure} contains {@term fields} that
-// describe a specification to be used for applying the desired solution
+// ApplySpec contains fields that describe a specification to be used for applying the desired solution
 // specification to a given cluster.
 type ApplySpec struct {
 
-	/**
-	 * Apply filter for solutions with deployment type
-	 * {@link DeploymentType#EVERY_HOST_PINNED}.
-	 *
-	 * @field.optional if {@term unset} or empty and
-	 *                 {#member clusterSolutions} is {@term unset} or empty,
-	 *                 all solutions are applied on the cluster.
-	 */
+	// HostSolutions is the apply filter for solutions with deployment type
+	// DeploymentType.EVERY_HOST_PINNED.
+	//
+	// If unset or empty and ClusterSolutions is unset or empty,
+	// all solutions are applied on the cluster.
 	HostSolutions *HostSolutionsApplyFilterSpec `json:"host_solutions,omitempty"`
 
-	/**
-	 * Apply filter for solutions with deployment type
-	 * {@link DeploymentType#CLUSTER_VM_SET}.
-	 *
-	 * @field.optional if {@term unset} or empty and {#member  hostSolutions}
-	 *                 is {@term unset} or empty, all solutions are applied on
-	 *                 the cluster.
-	 */
+	// ClusterSolutions is the apply filter for solutions with deployment type
+	// DeploymentType.CLUSTER_VM_SET.
+	//
+	// If unset or empty and HostSolutions is unset or empty, all solutions are applied on
+	// the cluster.
 	ClusterSolutions *ClusterSolutionsApplyFilterSpec `json:"cluster_solutions,omitempty"`
 }
 
 const (
-	/**
-	 * The {@name Status} {@term enumerated type} contains the status codes of
-	 * an {@link Solutions#apply} {@term operation}.
-	 */
-
-	/**
-	 * The apply {@term operation} completed successfully.
-	 */
+	// Success indicates the apply operation completed successfully.
 	Success Status = "SUCCESS"
 
-	/**
-	 * The apply {@term operation} encountered an error.
-	 */
+	// Error indicates the apply operation encountered an error.
 	Error Status = "ERROR"
 )
 
-/**
- * The {@name ApplyStatus} {@term structure} contains {@term fields} that
- * describe the status of an {@link #apply} {@term operation}.
- */
+// ApplyStatus contains fields that describe the status of an apply operation.
 type ApplyStatus struct {
 	Status Status `json:"status"`
 
-	/**
-	 * The vLCM system time when the {@term operation} started.
-	 */
+	// StartTime is the vLCM system time when the operation started.
 	StartTime time.Time `json:"start_time"`
 
-	/**
-	 * The vLCM system time when the {@term operation} completed.
-	 */
+	// EndTime is the vLCM system time when the operation completed.
 	EndTime time.Time `json:"end_time"`
 }
 
-/**
- * The {@name HostApplyStatus} {@term structure} contains {@term fields} that
- * describe the apply status for a specific host.
- */
+// HostApplyStatus contains fields that describe the apply status for a specific host.
 type HostApplyStatus struct {
 
-	/**
-	 * Aggregated apply status of the solutions on the host.
-	 *
-	 * @field.optional {@term unset} if the apply {@term operation} is not
-	 *                 completed for the specified host.
-	 */
+	// Status is the aggregated apply status of the solutions on the host.
+	//
+	// Unset if the apply operation is not completed for the specified host.
 	Status ApplyStatus `json:"status"`
 
-	/**
-	 * The apply status of the different solutions on the host.
-	 */
+	// SolutionStatus is the apply status of the different solutions on the host.
 	SolutionStatus map[string]ApplyStatus `json:"solution_statuses"`
 }
 
-/**
- * The {@name HostSolutionsApplyStatus} {@term structure} contains
- * {@term fields} that describe the apply status of solutions with deployment
- * type {@link DeploymentType#EVERY_HOST_PINNED}.
- */
+// HostSolutionsApplyStatus contains fields that describe the apply status of solutions with deployment
+// type DeploymentType.EVERY_HOST_PINNED.
 type HostSolutionsApplyStatus struct {
 
-	/**
-	 * Aggregated apply status of the solutions.
-	 *
-	 * @field.optional {@term unset} if the apply {@term operation} is not
-	 *                 completed for solutions with deployment type
-	 *                 {@link DeploymentType#EVERY_HOST_PINNED}.
-	 */
+	// Status is the aggregated apply status of the solutions.
+	//
+	// Unset if the apply operation is not completed for solutions with deployment type
+	// DeploymentType.EVERY_HOST_PINNED.
 	Status ApplyStatus `json:"status"`
 
-	/**
-	 * The apply status of the hosts that were part of the apply
-	 * {@term operation}.
-	 */
+	// HostStatuses is the apply status of the hosts that were part of the apply operation.
 	HostStatuses map[string]HostApplyStatus `json:"hostStatuses"`
 }
 
-/**
- * The {@name ClusterSolutionApplyStatus} {@term structure} contains
- * {@term fields} that describe the apply status for a specific solution.
- */
+// ClusterSolutionApplyStatus contains fields that describe the apply status for a specific solution.
 type ClusterSolutionApplyStatus struct {
 
-	/**
-	 * Aggregated apply status for the deployment units of the solution.
-	 *
-	 * @field.optional {@term unset} if the apply {@term operation} is not
-	 *                 completed for the specified deployment unit.
-	 */
+	// Status is the aggregated apply status for the deployment units of the solution.
+	//
+	// Unset if the apply operation is not completed for the specified deployment unit.
 	Status ApplyStatus `json:"status"`
 
-	/**
-	 * The apply status for the different deployment units of the solution.
-	 */
+	// DeploymentUnitStatuses is the apply status for the different deployment units of the solution.
 	DeploymentUnitStatuses map[string]ApplyStatus `json:"deployment_unit_statuses"`
 }
 
-/**
- * The {@name ClusterSolutionsApplyStatus} {@term structure} contains
- * {@term fields} that describe the apply status of solutions with deployment
- * type {@link DeploymentType#CLUSTER_VM_SET}.
- */
+// ClusterSolutionsApplyStatus contains fields that describe the apply status of solutions with deployment
+// type DeploymentType.CLUSTER_VM_SET.
 type ClusterSolutionsApplyStatus struct {
 
-	/**
-	 * Aggregated apply status of the solutions.
-	 *
-	 * @field.optional {@term unset} if the apply {@term operation} is not
-	 *                 completed for solutions with deployment type
-	 *                 {@link DeploymentType#CLUSTER_VM_SET}.
-	 */
+	// Status is the aggregated apply status of the solutions.
+	//
+	// Unset if the apply operation is not completed for solutions with deployment type
+	// DeploymentType.CLUSTER_VM_SET.
 	Status ApplyStatus `json:"status"`
 
-	/**
-	 * The apply status of the solutions that were part of the apply
-	 * {@term operation}.
-	 */
+	// SolutionStatuses is the apply status of the solutions that were part of the apply operation.
 	SolutionStatuses map[string]ClusterSolutionApplyStatus `json:"solution_statuses"`
 }
 
-// The {@name ApplyResult} {@term structure} contains {@term fields} that
-// describe the result of an {@link #apply} {@term operation}.
+// ApplyResult contains fields that describe the result of an apply operation.
 type ApplyResult struct {
 
-	/**
-	 * Aggregated status of an apply {@term operation}.
-	 *
-	 * @field.optional {@term unset} if the apply {@term operation} is in
-	 *                 progress.
-	 */
+	// ApplyStatus is the aggregated status of an apply operation.
+	//
+	// Unset if the apply operation is in progress.
 	ApplyStatus ApplyStatus `json:"status"`
 
-	/**
-	 * The apply status of all solutions with deployment type
-	 * {@link DeploymentType#EVERY_HOST_PINNED} that were part of the apply
-	 * {@term operation}.
-	 */
+	// HostSolutionStatus is the apply status of all solutions with deployment type
+	// DeploymentType.EVERY_HOST_PINNED that were part of the apply operation.
 	HostSolutionStatus HostSolutionsApplyStatus `json:"host_solutions_status"`
 
-	/**
-	 * The apply status of all solutions with deployment type
-	 * {@link DeploymentType#CLUSTER_VM_SET} that were part of the apply
-	 * {@term operation}.
-	 */
+	// ClusterSolutionStatus is the apply status of all solutions with deployment type
+	// DeploymentType.CLUSTER_VM_SET that were part of the apply operation.
 	ClusterSolutionStatus ClusterSolutionsApplyStatus `json:"cluster_solutions_status"`
 }
 

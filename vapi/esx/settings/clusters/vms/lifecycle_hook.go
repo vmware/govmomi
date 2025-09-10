@@ -22,7 +22,7 @@ const (
 
 func (c clusterHooksPath) String() string {
 	cid := types.ManagedObjectReference(c).Value
-	return fmt.Sprintf(SolutionsPath, cid)
+	return fmt.Sprintf(HooksPath, cid)
 }
 
 // LifecycleState contains the different VM lifecycle states a solution can
@@ -68,8 +68,8 @@ type LifecycleHookConfig struct {
 
 	// Timeout is the maximum time in seconds for vLCM to wait for a hook to
 	// be processed by the solution. An issue is raised if the time elapsed and
-	// the hook is still not processed. See {@link Solutions.IssueInfo}. The
-	// issue is attached to the {@link Solutions.DeploymentInfo} structure that
+	// the hook is still not processed. See Solutions.IssueInfo. The
+	// issue is attached to the Solutions.DeploymentInfo structure that
 	// holds the VM for which the hook was activated.
 	//
 	// If unset, defaults to 10 hours.

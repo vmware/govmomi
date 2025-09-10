@@ -22,134 +22,96 @@ const (
 	defaultPollingInterval = 10
 )
 
-// The {@name Status} {@term enumerated type} defines the status values that can be reported for an operation.
+// Status defines the status values that can be reported for an operation.
 type Status string
 
 const (
 
-	// The operation is in pending state.
+	// Pending indicates the operation is in pending state.
 	Pending Status = "PENDING"
 
-	// The operation is in progress.
+	// Running indicates the operation is in progress.
 	Running Status = "RUNNING"
 
-	// The operation is blocked.
+	// Blocked indicates the operation is blocked.
 	Blocked Status = "BLOCKED"
 
-	// The operation completed successfully.
+	// Succeeded indicates the operation completed successfully.
 	Succeeded Status = "SUCCEEDED"
 
-	// The operation failed.
+	// Failed indicates the operation failed.
 	Failed Status = "FAILED"
 )
 
-// The {@name Progress} {@term structure} contains information describe the progress of an operation.
+// Progress contains information describing the progress of an operation.
 type Progress struct {
-	/**
-	 * Total amount of the work for the operation.
-	 */
+	// Total is the total amount of work for the operation.
 	Total uint64 `json:"total"`
 
-	/**
-	 * The amount of work completed for the operation. The value can only be
-	 * incremented.
-	 */
+	// Completed is the amount of work completed for the operation. The value can only be incremented.
 	Completed uint64 `json:"completed"`
 
-	/**
-	 * Message about the work progress.
-	 */
+	// Message about the work progress.
 	Message rest.LocalizableMessage `json:"message"`
 }
 
+// Info contains information about a task.
 type Info struct {
-	/**
-	 * Description of the operation associated with the task.
-	 */
+	// Description of the operation associated with the task.
 	Description rest.LocalizableMessage `json:"description"`
 
-	/**
-	 * Identifier of the service containing the operation.
-	 */
+	// Service is the identifier of the service containing the operation.
 	Service string `json:"service"`
 
-	/**
-	 * Identifier of the operation associated with the task.
-	 */
+	// Operation is the identifier of the operation associated with the task.
 	Operation string `json:"operation"`
 
-	/**
-	 * Parent of the current task.
-	 *
-	 * @field.optional This {@term field} will be {@term unset} if the
-	 * task has no parent.
-	 */
+	// Parent of the current task.
+	//
+	// This field will be unset if the task has no parent.
 	Parent string `json:"parent"`
 
-	/**
-	 * Identifier of the target created by the operation or an existing one
-	 * the operation performed on.
-	 *
-	 * @field.optional This {@term field} will be {@term unset} if the
-	 * operation has no target or multiple targets.
-	 */
+	// Target is the identifier of the target created by the operation or an existing one
+	// the operation performed on.
+	//
+	// This field will be unset if the operation has no target or multiple targets.
 	Target map[string]string `json:"target"`
 
-	/**
-	 * Status of the operation associated with the task.
-	 */
+	// Status of the operation associated with the task.
 	Status Status `json:"status"`
 
-	/**
-	 * Flag to indicate whether or not the operation can be cancelled.
-	 * The value may change as the operation progresses.
-	 */
+	// Cancelable is a flag to indicate whether or not the operation can be cancelled.
+	// The value may change as the operation progresses.
 	Cancelable bool `json:"cancelable"`
 
-	/**
-	 * Description of the error if the operation status is "FAILED".
-	 *
-	 * @field.optional If {@term unset} the description of why the operation
-	 * failed will be included in the result of the operation
-	 * (see {@link Info#result}).
-	 */
+	// Error is the description of the error if the operation status is "FAILED".
+	//
+	// If unset the description of why the operation failed will be included in the result of the operation
+	// (see Info.Result).
 	Error rest.Error `json:"error"`
 
-	/**
-	 * Time when the operation is started.
-	 */
+	// Start is the time when the operation is started.
 	Start time.Time `json:"start_time"`
 
-	/**
-	 * Time when the operation is completed.
-	 */
+	// End is the time when the operation is completed.
 	End time.Time `json:"end_time"`
 
-	/**
-	 * Name of the user who performed the operation.
-	 *
-	 * @field.optional This {@term field} will be {@term unset} if the
-	 * operation is performed by the system.
-	 */
+	// User is the name of the user who performed the operation.
+	//
+	// This field will be unset if the operation is performed by the system.
 	User string `json:"user"`
 
-	/**
-	 * Progress of the operation.
-	 */
+	// Progress of the operation.
 	Progress Progress `json:"progress"`
 
-	/**
-	 * Result of the operation.
-	 * <p>
-	 * If an operation reports partial results before it completes, this
-	 * {@term field} could be {@term set} before the {@link CommonInfo#status}
-	 * has the value {@link Status#SUCCEEDED}. The value could change as the
-	 * operation progresses.
-	 *
-	 * @field.optional This {@term field} will be {@term unset} if the
-	 * operation does not return a result or if the result is not available
-	 * at the current step of the operation.
-	 */
+	// Result of the operation.
+	//
+	// If an operation reports partial results before it completes, this
+	// field could be set before the Status has the value SUCCEEDED. The value could change as the
+	// operation progresses.
+	//
+	// This field will be unset if the operation does not return a result or if the result is not available
+	// at the current step of the operation.
 	Result json.RawMessage `json:"result"`
 }
 

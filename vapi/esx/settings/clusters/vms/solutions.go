@@ -39,10 +39,10 @@ const (
 type RemediationPolicy string
 
 const (
-	//Parallel is the  default remediation policy. Entities are remediated in parallel.
+	// Parallel is the default remediation policy. Entities are remediated in parallel.
 	Parallel RemediationPolicy = "PARALLEL"
 
-	// Sequential policy is where  entities are remediated sequentially, one at a time.
+	// Sequential policy is where entities are remediated sequentially, one at a time.
 	Sequential RemediationPolicy = "SEQUENTIAL"
 )
 
@@ -258,53 +258,22 @@ type Manager struct {
 	*rest.Client
 }
 
-// Sets and overrides the current desired specification for a given solution
+// Set sets and overrides the current desired specification for a given solution
 // and cluster. The provided desired specification is validated before that.
 //
-// @param cluster
+// Parameters:
+//   - cluster: Identifier of the cluster.
+//   - solution: Identifier of the solution.
+//   - spec: Solution specification.
 //
-//	Identifier of the cluster.
-//
-// @param solution
-//
-//	Identifier of the solution.
-//
-// @param spec
-//
-//	Solution specification.
-//
-// @throws Error
-//
-//	If there is an unknown internal error. The accompanying error
-//	message will give more details about the failure.
-//
-// @throws InvalidArgument
-//
-//	If the validation of the solution specification fails. The
-//	value of the data {@term field} of {@link Error} contains more
-//	information. It is a {@term structure} that contains all the
-//	{@term fields} defined in {@link ValidateResult}.
-//
-// @throws Unsupported
-//
-//	If the cluster associated with {@param.name cluster} is not
-//	managed by vLCM.
-//
-// @throws NotFound
-//
-//	If there is no cluster associated with {@param.name cluster}.
-//
-// @throws ServiceUnavailable
-//
-//	If the service is not available.
-//
-// @throws Unauthenticated
-//
-//	if the caller is not authenticated.
-//
-// @throws Unauthorized
-//
-//	If the user doesn't have the required privileges.
+// Returns an error if:
+//   - There is an unknown internal error. The accompanying error message will give more details about the failure.
+//   - The validation of the solution specification fails.
+//   - The cluster is not managed by vLCM.
+//   - There is no cluster associated with the given identifier.
+//   - The service is not available.
+//   - The caller is not authenticated.
+//   - The user doesn't have the required privileges.
 func (m *Manager) Set(ctx context.Context, cluster types.ManagedObjectReference, solution string, spec *SolutionSpec) error {
 	p := clusterSolutionPath(cluster).String()
 	url := m.Resource(p).WithSubpath(solution).WithParam("vmw-task", "true")
