@@ -610,6 +610,8 @@ const (
 	PbmObjectTypeVsanObjectId = PbmObjectType("vsanObjectId")
 	// Indicates a file service
 	PbmObjectTypeFileShareId = PbmObjectType("fileShareId")
+	// Indicates a cluster.
+	PbmObjectTypeCluster = PbmObjectType("cluster")
 	// Unknown object type.
 	PbmObjectTypeUnknown = PbmObjectType("unknown")
 )
@@ -623,6 +625,7 @@ func (e PbmObjectType) Values() []PbmObjectType {
 		PbmObjectTypeDatastore,
 		PbmObjectTypeVsanObjectId,
 		PbmObjectTypeFileShareId,
+		PbmObjectTypeCluster,
 		PbmObjectTypeUnknown,
 	}
 }

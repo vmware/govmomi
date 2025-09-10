@@ -90,7 +90,7 @@ func HostTrustedPlatformModule(ctx context.Context, c *vim25.Client, root types.
 			Attestation: host.Summary.TpmAttestation,
 		}
 		if host.Capability != nil {
-			m.Supported = b(host.Capability.TpmSupported)
+			m.Supported = host.Capability.TpmSupported
 			m.Version = host.Capability.TpmVersion
 			m.TxtEnabled = b(host.Capability.TxtEnabled)
 		}

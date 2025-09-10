@@ -102,7 +102,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			spec.Details = &types.FileQueryFlags{
 				FileType:     true,
 				FileSize:     true,
-				FileOwner:    types.NewBool(true), // TODO: omitempty is generated, but seems to be required
+				FileOwner:    true, // TODO: omitempty is generated, but seems to be required
 				Modification: true,
 			}
 		}

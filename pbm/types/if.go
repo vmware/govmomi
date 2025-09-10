@@ -84,6 +84,18 @@ func init() {
 	types.Add("BasePbmLineOfServiceInfo", reflect.TypeOf((*PbmLineOfServiceInfo)(nil)).Elem())
 }
 
+func (b *PbmPlacementCapabilityProfileRequirement) GetPbmPlacementCapabilityProfileRequirement() *PbmPlacementCapabilityProfileRequirement {
+	return b
+}
+
+type BasePbmPlacementCapabilityProfileRequirement interface {
+	GetPbmPlacementCapabilityProfileRequirement() *PbmPlacementCapabilityProfileRequirement
+}
+
+func init() {
+	types.Add("BasePbmPlacementCapabilityProfileRequirement", reflect.TypeOf((*PbmPlacementCapabilityProfileRequirement)(nil)).Elem())
+}
+
 func (b *PbmPlacementMatchingResources) GetPbmPlacementMatchingResources() *PbmPlacementMatchingResources {
 	return b
 }

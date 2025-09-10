@@ -1026,10 +1026,8 @@ func fillConfigSpecWithDatastore(ctx *Context, inputConfigSpec, configSpec *type
 func generateInitialPlacementAction(ctx *Context, vmSpec *types.PlaceVmsXClusterSpecVmPlacementSpec, pool *ResourcePool,
 	cluster *ClusterComputeResource, hostRequired, datastoreRequired bool) types.BaseClusterAction {
 
-	placementAction := &types.ClusterClusterInitialPlacementActionEx{
-		ClusterClusterInitialPlacementAction: types.ClusterClusterInitialPlacementAction{
-			Pool: pool.Self,
-		},
+	placementAction := &types.ClusterClusterInitialPlacementAction{
+		Pool: pool.Self,
 	}
 
 	if hostRequired {

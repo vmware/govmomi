@@ -55,7 +55,7 @@ func (s *searchDatastore) addFile(fname string, file os.FileInfo, res *types.Hos
 		info.Modification = &mtime
 	}
 
-	if isTrue(details.FileOwner) {
+	if details.FileOwner {
 		// Assume for now this process created all files in the datastore
 		user := os.Getenv("USER")
 

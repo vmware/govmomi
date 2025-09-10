@@ -788,13 +788,13 @@ var HostConfigInfo = types.HostConfigInfo{
 		IpRouteConfigSupported:     true,
 		DnsConfigSupported:         true,
 		DhcpOnVnicSupported:        true,
-		IpV6Supported:              types.NewBool(true),
+		IpV6Supported:              true,
 	},
 	DatastoreCapabilities: &types.HostDatastoreSystemCapabilities{
 		NfsMountCreationRequired:     true,
 		NfsMountCreationSupported:    true,
 		LocalDatastoreSupported:      false,
-		VmfsExtentExpansionSupported: types.NewBool(true),
+		VmfsExtentExpansionSupported: true,
 	},
 	OffloadCapabilities: &types.HostNetOffloadCapabilities{
 		CsumOffload:     types.NewBool(true),

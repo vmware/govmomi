@@ -452,7 +452,7 @@ func (d Datastore) Stat(ctx context.Context, file string) (types.BaseFileInfo, e
 			FileType:     true,
 			FileSize:     true,
 			Modification: true,
-			FileOwner:    types.NewBool(true),
+			FileOwner:    true,
 		},
 		MatchPattern: []string{path.Base(file)},
 	}

@@ -76,10 +76,13 @@ func init() {
 	types.Add("eam:AgencyVMPlacementPolicyVMDataAffinity", reflect.TypeOf((*AgencyVMPlacementPolicyVMDataAffinity)(nil)).Elem())
 }
 
+// Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
 type AgentConfigInfoAuthenticationScheme string
 
 const (
-	AgentConfigInfoAuthenticationSchemeNONE              = AgentConfigInfoAuthenticationScheme("NONE")
+	// Accessing the OVF URL doesn't require authentication.
+	AgentConfigInfoAuthenticationSchemeNONE = AgentConfigInfoAuthenticationScheme("NONE")
+	// Accessing the OVF URL requires Vmware client sessionID.
 	AgentConfigInfoAuthenticationSchemeVMWARE_SESSION_ID = AgentConfigInfoAuthenticationScheme("VMWARE_SESSION_ID")
 )
 
@@ -96,6 +99,7 @@ func (e AgentConfigInfoAuthenticationScheme) Strings() []string {
 
 func init() {
 	types.Add("eam:AgentConfigInfoAuthenticationScheme", reflect.TypeOf((*AgentConfigInfoAuthenticationScheme)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:AgentConfigInfoAuthenticationScheme", "9.0")
 }
 
 // Deprecated as of vSphere 9.0. Please refer to vLCM APIs.
@@ -303,32 +307,54 @@ func init() {
 	types.Add("eam:HooksHookType", reflect.TypeOf((*HooksHookType)(nil)).Elem())
 }
 
-type ManagedObjectTypes string
+type ManagedObjectType string
 
 const (
-	ManagedObjectTypesAgency          = ManagedObjectTypes("Agency")
-	ManagedObjectTypesAgent           = ManagedObjectTypes("Agent")
-	ManagedObjectTypesEamObject       = ManagedObjectTypes("EamObject")
-	ManagedObjectTypesEsxAgentManager = ManagedObjectTypes("EsxAgentManager")
-	ManagedObjectTypesEamTask         = ManagedObjectTypes("EamTask")
+	ManagedObjectTypeAgency          = ManagedObjectType("Agency")
+	ManagedObjectTypeAgent           = ManagedObjectType("Agent")
+	ManagedObjectTypeEamObject       = ManagedObjectType("EamObject")
+	ManagedObjectTypeEsxAgentManager = ManagedObjectType("EsxAgentManager")
+	ManagedObjectTypeEamTask         = ManagedObjectType("EamTask")
 )
 
-func (e ManagedObjectTypes) Values() []ManagedObjectTypes {
-	return []ManagedObjectTypes{
-		ManagedObjectTypesAgency,
-		ManagedObjectTypesAgent,
-		ManagedObjectTypesEamObject,
-		ManagedObjectTypesEsxAgentManager,
-		ManagedObjectTypesEamTask,
+func (e ManagedObjectType) Values() []ManagedObjectType {
+	return []ManagedObjectType{
+		ManagedObjectTypeAgency,
+		ManagedObjectTypeAgent,
+		ManagedObjectTypeEamObject,
+		ManagedObjectTypeEsxAgentManager,
+		ManagedObjectTypeEamTask,
 	}
 }
 
-func (e ManagedObjectTypes) Strings() []string {
+func (e ManagedObjectType) Strings() []string {
 	return types.EnumValuesAsStrings(e.Values())
 }
 
 func init() {
-	types.Add("eam:ManagedObjectTypes", reflect.TypeOf((*ManagedObjectTypes)(nil)).Elem())
+	types.Add("eam:ManagedObjectType", reflect.TypeOf((*ManagedObjectType)(nil)).Elem())
+}
+
+type SolutionsAuthenticationScheme string
+
+const (
+	SolutionsAuthenticationSchemeNONE              = SolutionsAuthenticationScheme("NONE")
+	SolutionsAuthenticationSchemeVMWARE_SESSION_ID = SolutionsAuthenticationScheme("VMWARE_SESSION_ID")
+)
+
+func (e SolutionsAuthenticationScheme) Values() []SolutionsAuthenticationScheme {
+	return []SolutionsAuthenticationScheme{
+		SolutionsAuthenticationSchemeNONE,
+		SolutionsAuthenticationSchemeVMWARE_SESSION_ID,
+	}
+}
+
+func (e SolutionsAuthenticationScheme) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("eam:SolutionsAuthenticationScheme", reflect.TypeOf((*SolutionsAuthenticationScheme)(nil)).Elem())
 }
 
 // Reasons solution is not valid for application.
@@ -352,8 +378,12 @@ const (
 	// user configurable properties in the VM described in the vmSource.
 	SolutionsInvalidReasonINVALID_PROPERTIES = SolutionsInvalidReason("INVALID_PROPERTIES")
 	// The legacy agency requested for transition is not valid/cannot be
-	// mapped to systm Virtual Machines solution.
+	// mapped to system Virtual Machines solution.
 	SolutionsInvalidReasonINVALID_TRANSITION = SolutionsInvalidReason("INVALID_TRANSITION")
+	// The LCCM agency requested for cluster transition is invalid because it
+	// cannot be mapped to the desired state specification or has a different
+	// scope than the cluster for transition.
+	SolutionsInvalidReasonINVALID_CLUSTER_TRANSITION = SolutionsInvalidReason("INVALID_CLUSTER_TRANSITION")
 )
 
 func (e SolutionsInvalidReason) Values() []SolutionsInvalidReason {
@@ -366,6 +396,7 @@ func (e SolutionsInvalidReason) Values() []SolutionsInvalidReason {
 		SolutionsInvalidReasonINVALID_FOLDER,
 		SolutionsInvalidReasonINVALID_PROPERTIES,
 		SolutionsInvalidReasonINVALID_TRANSITION,
+		SolutionsInvalidReasonINVALID_CLUSTER_TRANSITION,
 	}
 }
 
@@ -381,22 +412,29 @@ func init() {
 type SolutionsNonComplianceReason string
 
 const (
-	// There is ongoing work to acheive the desired state.
+	// There is ongoing work to achieve the desired state.
 	SolutionsNonComplianceReasonWORKING = SolutionsNonComplianceReason("WORKING")
-	// ESX Agent Manager has ecnountered am issue attempting to acheive the
+	// ESX Agent Manager has encountered am issue attempting to achieve the
 	// desired state.
 	SolutionsNonComplianceReasonISSUE = SolutionsNonComplianceReason("ISSUE")
 	// ESX Agent Manager is awaiting user input to continue attempting to
-	// acheive the desired state.
+	// achieve the desired state.
 	SolutionsNonComplianceReasonIN_HOOK = SolutionsNonComplianceReason("IN_HOOK")
+	// ESX Agent Manager is blocked from reaching the desired state.
+	//
+	// For
+	// example, this can occur if `SolutionsSequentialRemediationPolicy` is
+	// set and another deployment is in #ISSUE state.
+	SolutionsNonComplianceReasonBLOCKED = SolutionsNonComplianceReason("BLOCKED")
 	// An obsoleted spec is currently in application for this solution.
 	//
 	// This state should take precedence over:
 	//   - `WORKING`
 	//   - `ISSUE`
 	//   - `IN_HOOK`
+	//   - `BLOCKED`
 	SolutionsNonComplianceReasonOBSOLETE_SPEC = SolutionsNonComplianceReason("OBSOLETE_SPEC")
-	// Application for this solutiona has never been requested with
+	// Application for this solution has never been requested with
 	// `Solutions.Apply`.
 	SolutionsNonComplianceReasonNO_SPEC = SolutionsNonComplianceReason("NO_SPEC")
 )
@@ -406,6 +444,7 @@ func (e SolutionsNonComplianceReason) Values() []SolutionsNonComplianceReason {
 		SolutionsNonComplianceReasonWORKING,
 		SolutionsNonComplianceReasonISSUE,
 		SolutionsNonComplianceReasonIN_HOOK,
+		SolutionsNonComplianceReasonBLOCKED,
 		SolutionsNonComplianceReasonOBSOLETE_SPEC,
 		SolutionsNonComplianceReasonNO_SPEC,
 	}
@@ -419,6 +458,28 @@ func init() {
 	types.Add("eam:SolutionsNonComplianceReason", reflect.TypeOf((*SolutionsNonComplianceReason)(nil)).Elem())
 }
 
+type SolutionsRedeploymentPolicy string
+
+const (
+	SolutionsRedeploymentPolicyRECREATE   = SolutionsRedeploymentPolicy("RECREATE")
+	SolutionsRedeploymentPolicyBLUE_GREEN = SolutionsRedeploymentPolicy("BLUE_GREEN")
+)
+
+func (e SolutionsRedeploymentPolicy) Values() []SolutionsRedeploymentPolicy {
+	return []SolutionsRedeploymentPolicy{
+		SolutionsRedeploymentPolicyRECREATE,
+		SolutionsRedeploymentPolicyBLUE_GREEN,
+	}
+}
+
+func (e SolutionsRedeploymentPolicy) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("eam:SolutionsRedeploymentPolicy", reflect.TypeOf((*SolutionsRedeploymentPolicy)(nil)).Elem())
+}
+
 // Virtual Machine deployment optimization strategies.
 type SolutionsVMDeploymentOptimization string
 
@@ -426,10 +487,10 @@ const (
 	// Utilizes all cloning methods available, will create initial snapshots
 	// on the Virtual Machines.
 	SolutionsVMDeploymentOptimizationALL_CLONES = SolutionsVMDeploymentOptimization("ALL_CLONES")
-	// Utilize only full copy cloning menthods, will create initial snapshots
+	// Utilize only full copy cloning methods, will create initial snapshots
 	// on the Virtual Machines.
 	SolutionsVMDeploymentOptimizationFULL_CLONES_ONLY = SolutionsVMDeploymentOptimization("FULL_CLONES_ONLY")
-	// Virtual Machiness will not be cloned from pre-existing deployment.
+	// Virtual Machines will not be cloned from pre-existing deployment.
 	SolutionsVMDeploymentOptimizationNO_CLONES = SolutionsVMDeploymentOptimization("NO_CLONES")
 )
 
@@ -494,4 +555,24 @@ func (e SolutionsVmPlacementPolicy) Strings() []string {
 
 func init() {
 	types.Add("eam:SolutionsVmPlacementPolicy", reflect.TypeOf((*SolutionsVmPlacementPolicy)(nil)).Elem())
+}
+
+type SolutionsVmSelectionType string
+
+const (
+	SolutionsVmSelectionTypeVM_EXTRA_CONFIG = SolutionsVmSelectionType("VM_EXTRA_CONFIG")
+)
+
+func (e SolutionsVmSelectionType) Values() []SolutionsVmSelectionType {
+	return []SolutionsVmSelectionType{
+		SolutionsVmSelectionTypeVM_EXTRA_CONFIG,
+	}
+}
+
+func (e SolutionsVmSelectionType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("eam:SolutionsVmSelectionType", reflect.TypeOf((*SolutionsVmSelectionType)(nil)).Elem())
 }

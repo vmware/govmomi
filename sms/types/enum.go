@@ -184,34 +184,34 @@ func init() {
 	types.Add("sms:FileSystemInterfaceVersion", reflect.TypeOf((*FileSystemInterfaceVersion)(nil)).Elem())
 }
 
-type ManagedObjectTypes string
+type ManagedObjectType string
 
 const (
-	ManagedObjectTypesSmsServiceInstance = ManagedObjectTypes("SmsServiceInstance")
-	ManagedObjectTypesSmsStorageManager  = ManagedObjectTypes("SmsStorageManager")
-	ManagedObjectTypesSmsTask            = ManagedObjectTypes("SmsTask")
-	ManagedObjectTypesSmsSessionManager  = ManagedObjectTypes("SmsSessionManager")
-	ManagedObjectTypesSmsProvider        = ManagedObjectTypes("SmsProvider")
-	ManagedObjectTypesVasaProvider       = ManagedObjectTypes("VasaProvider")
+	ManagedObjectTypeSmsServiceInstance = ManagedObjectType("SmsServiceInstance")
+	ManagedObjectTypeSmsStorageManager  = ManagedObjectType("SmsStorageManager")
+	ManagedObjectTypeSmsTask            = ManagedObjectType("SmsTask")
+	ManagedObjectTypeSmsSessionManager  = ManagedObjectType("SmsSessionManager")
+	ManagedObjectTypeSmsProvider        = ManagedObjectType("SmsProvider")
+	ManagedObjectTypeVasaProvider       = ManagedObjectType("VasaProvider")
 )
 
-func (e ManagedObjectTypes) Values() []ManagedObjectTypes {
-	return []ManagedObjectTypes{
-		ManagedObjectTypesSmsServiceInstance,
-		ManagedObjectTypesSmsStorageManager,
-		ManagedObjectTypesSmsTask,
-		ManagedObjectTypesSmsSessionManager,
-		ManagedObjectTypesSmsProvider,
-		ManagedObjectTypesVasaProvider,
+func (e ManagedObjectType) Values() []ManagedObjectType {
+	return []ManagedObjectType{
+		ManagedObjectTypeSmsServiceInstance,
+		ManagedObjectTypeSmsStorageManager,
+		ManagedObjectTypeSmsTask,
+		ManagedObjectTypeSmsSessionManager,
+		ManagedObjectTypeSmsProvider,
+		ManagedObjectTypeVasaProvider,
 	}
 }
 
-func (e ManagedObjectTypes) Strings() []string {
+func (e ManagedObjectType) Strings() []string {
 	return types.EnumValuesAsStrings(e.Values())
 }
 
 func init() {
-	types.Add("sms:ManagedObjectTypes", reflect.TypeOf((*ManagedObjectTypes)(nil)).Elem())
+	types.Add("sms:ManagedObjectType", reflect.TypeOf((*ManagedObjectType)(nil)).Elem())
 }
 
 // Profiles supported by VASA Provider.

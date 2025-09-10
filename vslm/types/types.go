@@ -280,7 +280,7 @@ type VslmCreateDiskFromSnapshotRequestType struct {
 	Crypto *types.CryptoSpec `xml:"crypto,omitempty" json:"crypto,omitempty"`
 	// Relative location in the specified datastore where disk needs
 	// to be created. If not specified disk gets created at the
-	// defualt VStorageObject location on the specified datastore.
+	// default VStorageObject location on the specified datastore.
 	Path string `xml:"path,omitempty" json:"path,omitempty"`
 }
 
@@ -362,7 +362,7 @@ type VslmDatastoreSyncStatus struct {
 	DatastoreURL string `xml:"datastoreURL" json:"datastoreURL"`
 	ObjectVClock int64  `xml:"objectVClock" json:"objectVClock"`
 	SyncVClock   int64  `xml:"syncVClock" json:"syncVClock"`
-	// The time representing the last successfull sync of the datastore.
+	// The time representing the last successful sync of the datastore.
 	SyncTime *time.Time `xml:"syncTime" json:"syncTime,omitempty"`
 	// The number of retries for the Datastore synchronization in failure
 	// cases.
@@ -1057,7 +1057,7 @@ type VslmRetrieveVStorageObjectMetadataValueRequestType struct {
 	Id types.ID `xml:"id" json:"id"`
 	// The ID of the snapshot of virtual storage object.
 	SnapshotId *types.ID `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
-	// The key for the the virtual storage object
+	// The key for the virtual storage object
 	Key string `xml:"key" json:"key"`
 }
 
@@ -1257,7 +1257,7 @@ type VslmSyncDatastoreRequestType struct {
 	// will be discarded from the catalog and reloaded from the
 	// datastore's catalog
 	FullSync bool `xml:"fullSync" json:"fullSync"`
-	// If set, this call blocks until fcdId is persisited into db
+	// If set, this call blocks until fcdId is persisted into db
 	// if this fcdId is not found in queue, assume persisted and return
 	FcdId *types.ID `xml:"fcdId,omitempty" json:"fcdId,omitempty"`
 }
@@ -1604,7 +1604,7 @@ func init() {
 	types.Add("vslm:VslmVsoVStorageObjectAssociations", reflect.TypeOf((*VslmVsoVStorageObjectAssociations)(nil)).Elem())
 }
 
-// This data object contains infomation of a VM Disk association.
+// This data object contains information of a VM Disk association.
 //
 // This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectAssociationsVmDiskAssociation struct {

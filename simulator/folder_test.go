@@ -726,7 +726,7 @@ func TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks(t *testing.T) {
 		for _, pinfo := range res.PlacementInfos {
 			for i, action := range pinfo.Recommendation.Action {
 				// Ensure the action is of expected extended type.
-				initPlaceAction, ok := action.(*types.ClusterClusterInitialPlacementActionEx)
+				initPlaceAction, ok := action.(*types.ClusterClusterInitialPlacementAction)
 				if !ok {
 					t.Errorf("Action[%d] is not ClusterClusterInitialPlacementActionEx, got %T", i, action)
 					continue
