@@ -393,7 +393,7 @@ type DeploymentInfo struct {
 	//                 that prevents the VM to be deployed.</li>
 	//                 </ul>
 	///
-	Vm string `json:"vm"`
+	Vm *string `json:"vm,omitempty"`
 
 	//
 	// Identifier of the VM that is going to replace the current deployed VM.
@@ -403,7 +403,7 @@ type DeploymentInfo struct {
 	// @field.optional This field is {@term unset} if there is no ongoing VM
 	//                 upgrade for the current VM deployment.
 	///
-	ReplacementVm string `json:"replacement_vm"`
+	ReplacementVm *string `json:"replacement_vm,omitempty"`
 
 	//
 	// List of {@link IssueInfo} which do not allow the deployment to reach
@@ -421,7 +421,7 @@ type DeploymentInfo struct {
 	// @field.optional This field is {@term unset} if there is no activated
 	//                 hook for the VM.
 	///
-	LifecycleHook LifecycleHookInfo `json:"lifecycle_hook"`
+	LifecycleHook *LifecycleHookInfo `json:"lifecycle_hook,omitempty"`
 
 	//
 	// Describes the current desired solution specification of the deployment.

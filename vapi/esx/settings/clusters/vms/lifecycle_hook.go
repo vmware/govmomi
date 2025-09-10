@@ -4,6 +4,27 @@
 
 package vms
 
+import (
+	"context"
+	"fmt"
+	"net/http"
+
+	"github.com/vmware/govmomi/vapi/esx/settings/clusters"
+	"github.com/vmware/govmomi/vapi/rest"
+	"github.com/vmware/govmomi/vim25/types"
+)
+
+type clusterHooksPath types.ManagedObjectReference
+
+const (
+	HooksPath = clusters.BasePath + "/%s/vms/lifecycle-hooks"
+)
+
+func (c clusterHooksPath) String() string {
+	cid := types.ManagedObjectReference(c).Value
+	return fmt.Sprintf(SolutionsPath, cid)
+}
+
 // LifecycleState contains the different VM lifecycle states a solution can
 // hook into. See LifecycleHooks and SolutionSpec.
 type LifecycleState string
@@ -20,10 +41,10 @@ const (
 type LifecycleHookInfo struct {
 
 	// Vm is the identifier of the VM for which the hook is activated.
-	Vm string
+	Vm string `json:"vm"`
 
 	// LifecycleState is the state of the VM specified by Vm.
-	LifecycleState LifecycleState
+	LifecycleState LifecycleState `json:"lifecycle_state"`
 
 	// Configuration of the hook.
 	// LifecycleHookConfig Configuration
@@ -39,7 +60,7 @@ type LifecycleHookInfo struct {
 	//
 	// See LifecycleHooks#processDynamicUpdate about how to process the
 	// dynamic update for a given LifecycleState.
-	DynamicUpdateProcessed bool
+	DynamicUpdateProcessed bool `json:"dynamic_update_processed"`
 }
 
 // LifecycleHookConfig contains fields that describe a VM lifecycle hook configuration.
@@ -53,4 +74,43 @@ type LifecycleHookConfig struct {
 	//
 	// If unset, defaults to 10 hours.
 	Timeout int `json:"timeout"`
+}
+
+type HookListResult struct {
+	Hooks []LifecycleHookInfo `json:"hooks"`
+}
+
+type ProcessedHookSpec struct {
+	LifecycleState LifecycleState `json:"lifecycle_state"`
+
+	ProcessedSuccessfully bool `json:"processed_successfully"`
+
+	Vm string `json:"vm"`
+}
+
+func (m *Manager) ListHooks(ctx context.Context, cluster types.ManagedObjectReference, solution string) (*HookListResult, error) {
+	p := clusterHooksPath(cluster).String()
+	url := m.Resource(p).WithSubpath(solution)
+	var res HookListResult
+
+	if err := m.Do(ctx, url.Request(http.MethodGet), &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (m *Manager) MarkAsProcessed(ctx context.Context, cluster types.ManagedObjectReference, spec *ProcessedHookSpec) (*HookListResult, error) {
+	p := clusterHooksPath(cluster).String()
+	url := m.Resource(p).WithParam("action", "mark-as-processed")
+
+	var errMsg rest.Error
+	if err := m.Do(ctx, url.Request(http.MethodPost, spec), &errMsg); err != nil {
+		if len(errMsg.Messages) > 0 {
+			return nil, &errMsg.Messages[0]
+		}
+		return nil, err
+	}
+
+	return nil, nil
 }
