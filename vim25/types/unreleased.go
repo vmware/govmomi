@@ -165,6 +165,40 @@ type PodVMOverheadInfo struct {
 	PodVMOverheadWithPageSharing    int32 `xml:"podVMOverheadWithPageSharing"`
 }
 
+func init() {
+	minAPIVersionForType["HostRuntimeInfoPodVMInfo"] = "9.1.0.0"
+	Add("HostRuntimeInfoPodVMInfo", reflect.TypeOf((*HostRuntimeInfoPodVMInfo)(nil)).Elem())
+}
+
+type HostRuntimeInfoPodVMInfo struct {
+	DynamicData
+
+	HasPodVM          bool              `xml:"hasPodVM"`
+	PodVMOverheadInfo PodVMOverheadInfo `xml:"podVMOverheadInfo"`
+}
+
+type UpdatePodVMPropertyRequestType struct {
+	This ManagedObjectReference `xml:"_this" json:"-"`
+	// Indicates the property within PodVMInfo to update
+	PropertyPath string `xml:"propertyPath" json:"propertyPath"`
+	// Value of propertyPath requested to be updated
+	Property AnyType `xml:"property,omitempty,typeattr" json:"property,omitempty"`
+}
+
+func init() {
+	t["UpdatePodVMPropertyRequestType"] = reflect.TypeOf((*UpdatePodVMPropertyRequestType)(nil)).Elem()
+}
+
+type UpdatePodVMProperty UpdatePodVMPropertyRequestType
+
+func init() {
+	minAPIVersionForType["UpdatePodVMProperty"] = "9.1.0.0"
+	t["UpdatePodVMProperty"] = reflect.TypeOf((*UpdatePodVMProperty)(nil)).Elem()
+}
+
+type UpdatePodVMPropertyResponse struct {
+}
+
 // Describes an action for the initial placement of a virtual machine in a cluster.
 //
 // This action is used by the cross cluster placement API when a virtual machine

@@ -81,3 +81,28 @@ func TestTypeClusterClusterInitialPlacementActionEx(t *testing.T) {
 		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
 	}
 }
+
+func TestPodVMInfo(t *testing.T) {
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		host := simulator.Map(ctx).Any("HostSystem").(*simulator.HostSystem)
+
+		host.Runtime.PodVMInfo = &types.HostRuntimeInfoPodVMInfo{
+			HasPodVM: true,
+			PodVMOverheadInfo: types.PodVMOverheadInfo{
+				PodVMOverheadWithoutPageSharing: int32(50),
+				PodVMOverheadWithPageSharing:    int32(25),
+			},
+		}
+
+		var props mo.HostSystem
+		pc := property.DefaultCollector(c)
+		err := pc.RetrieveOne(ctx, host.Self, []string{"runtime"}, &props)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if *props.Runtime.PodVMInfo != *host.Runtime.PodVMInfo {
+			t.Errorf("%#v", props.Runtime.PodVMInfo)
+		}
+	})
+}

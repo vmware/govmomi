@@ -140,3 +140,25 @@ func (h HostSystem) ExitMaintenanceMode(ctx context.Context, timeout int32) (*Ta
 
 	return NewTask(h.c, res.Returnval), nil
 }
+
+func (h HostSystem) UpdatePodVMProperty(ctx context.Context, propertyPath string,
+	podVMInfo types.HostRuntimeInfoPodVMInfo) error {
+	req := types.UpdatePodVMProperty{
+		This:         h.Reference(),
+		PropertyPath: propertyPath,
+	}
+
+	switch propertyPath {
+	case "podVMOverheadInfo":
+		req.Property = podVMInfo.PodVMOverheadInfo
+	case "hasPodVM":
+		req.Property = podVMInfo.HasPodVM
+	case "podVMInfo":
+		req.Property = podVMInfo
+	default:
+		return fmt.Errorf("unsupported propertyPath: %s", propertyPath)
+	}
+
+	_, err := methods.UpdatePodVMProperty(ctx, h.c, &req)
+	return err
+}
