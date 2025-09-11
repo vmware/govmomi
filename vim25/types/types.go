@@ -6600,6 +6600,16 @@ func init() {
 	t["ArrayOfTag"] = reflect.TypeOf((*ArrayOfTag)(nil)).Elem()
 }
 
+// A boxed array of `TagSpec`. To be used in `Any` placeholders.
+type ArrayOfTagSpec struct {
+	TagSpec []TagSpec `xml:"TagSpec,omitempty" json:"_value"`
+}
+
+func init() {
+	t["ArrayOfTagSpec"] = reflect.TypeOf((*ArrayOfTagSpec)(nil)).Elem()
+	minAPIVersionForType["ArrayOfTagSpec"] = "9.1.0.0"
+}
+
 // A boxed array of `TaskInfo`. To be used in `Any` placeholders.
 type ArrayOfTaskInfo struct {
 	TaskInfo []TaskInfo `xml:"TaskInfo,omitempty" json:"_value"`
@@ -77934,6 +77944,76 @@ func init() {
 	t["Tag"] = reflect.TypeOf((*Tag)(nil)).Elem()
 }
 
+// Describes information required to uniquely identify a vSphere tag.
+//
+// A vSphere tag can be either identified using its UUID or the combination
+// of its name and its parent category's name.
+type TagId struct {
+	DynamicData
+
+	// Information about the name of the tag represented by this TagId.
+	//
+	// If
+	// this field is specified in addition to `TagId.uuid`, then both
+	// `TagId.uuid` and nameId must belong to the same vSphere tag. If this
+	// field is left unset, then `TagId.uuid` must be specified.
+	NameId *TagIdNameId `xml:"nameId,omitempty" json:"nameId,omitempty"`
+	// The UUID of the vSphere tag represented by this TagId.
+	//
+	// If this field
+	// is specified in addition to `TagId.nameId`, then both uuid and
+	// `TagId.nameId` must belong to the same vSphere tag. If this field is left
+	// unset, then `TagId.nameId` must be specified.
+	Uuid string `xml:"uuid,omitempty" json:"uuid,omitempty"`
+}
+
+func init() {
+	t["TagId"] = reflect.TypeOf((*TagId)(nil)).Elem()
+	minAPIVersionForType["TagId"] = "9.1.0.0"
+}
+
+// Specifies information required to uniquely identify a vSphere tag by its
+// name.
+//
+// Names of tags within the scope of a given category are unique, but
+// the names of tags belonging to two different categories can be same.
+// Hence, to uniquely identify a tag by its name in a given vSphere, both
+// tag name and its parent category's name are required.
+type TagIdNameId struct {
+	DynamicData
+
+	// Name of the vSphere tag represented by this TagId.
+	Tag string `xml:"tag" json:"tag"`
+	// Name of the vSphere category that this tag belongs to.
+	Category string `xml:"category" json:"category"`
+}
+
+func init() {
+	t["TagIdNameId"] = reflect.TypeOf((*TagIdNameId)(nil)).Elem()
+}
+
+// Specification for doing an incremental update to the association
+// between a vSphere tag and an inventory object.
+//
+// This allows specifying the tag to which an incremental update needs to be
+// applied and the operation for that update. Supported operations are:
+//   - add: Attach a new tag to a given object.
+//   - remove: Detach a tag already attached from a given object.
+//
+// See `ArrayUpdateSpec` for more information about possible operations.
+// Note that editing a tag using this is not supported.
+type TagSpec struct {
+	ArrayUpdateSpec
+
+	// Information to identify the tag that needs to be attached or detached.
+	Id TagId `xml:"id" json:"id"`
+}
+
+func init() {
+	t["TagSpec"] = reflect.TypeOf((*TagSpec)(nil)).Elem()
+	minAPIVersionForType["TagSpec"] = "9.1.0.0"
+}
+
 // Static strings for task objects.
 //
 // These strings are locale-specific.
@@ -90231,6 +90311,25 @@ type VirtualMachineConfigSpec struct {
 	//
 	// SEV-SNP is enabled when set to true, and disabled otherwise.
 	SevSnpEnabled *bool `xml:"sevSnpEnabled" json:"sevSnpEnabled,omitempty" vim:"9.0.0.0"`
+	// Specification of the vSphere tags that need to be modified for this
+	// virtual machine.
+	//
+	// Each TagSpec refers to:
+	// \- Operation to be performed, i.e., attach a new tag to a VM with this
+	// ConfigSpec, or detach an existing tag of a VM with this ConfigSpec.
+	// \- Information required to uniquely identify the vSphere tag that needs
+	// to be attached or detached.
+	//
+	// When this field is specified in the ConfigSpec during VM creation or
+	// VM reconfigure, then each tag specified in tagSpecs is automatically
+	// attached or detached (based on the operation type) when VM with
+	// that ConfigSpec is created or reconfigured.
+	//
+	// Note: Specifying a tag in tagSpecs using `TagId.nameId`
+	// only takes effect when the VM is managed by Supervisor. If an entry
+	// in tagSpecs is specified using `TagId.nameId`, it will be
+	// ignored except when set by Supervisor.
+	TagSpecs []TagSpec `xml:"tagSpecs,omitempty" json:"tagSpecs,omitempty" vim:"9.1.0.0"`
 	// An optional list of `VmPlacementPolicy` for this VM.
 	//
 	// Each policy
@@ -92280,6 +92379,26 @@ type VirtualMachineRelocateSpec struct {
 	// Encryption requirement for the virtual machine's metadata
 	// files (non-disk files).
 	CryptoSpec BaseCryptoSpec `xml:"cryptoSpec,omitempty,typeattr" json:"cryptoSpec,omitempty"`
+	// Specification of the vSphere tags that need to be modified for this
+	// virtual machine.
+	//
+	// Each TagSpec refers to:
+	// \- Operation to be performed, i.e., attach a new tag to a VM with this
+	// RelocateSpec or detach an existing tag from a VM with this
+	// RelocateSpec.
+	// \- Information required to uniquely identify the vSphere tag that needs
+	// to be attached or detached.
+	//
+	// When this field is specified in the RelocateSpec during VM relocate,
+	// then each tag specified in tagSpecs is automatically attached or
+	// detached (based on the operation type) when VM with that RelocateSpec
+	// is relocated.
+	//
+	// Note: Specifying a tag in tagSpecs using `TagId.nameId`
+	// only takes effect when the VM is managed by Supervisor. If an entry in tagSpecs is specified using
+	// `TagId.nameId`, it will be ignored except when set by
+	// Supervisor.
+	TagSpecs []TagSpec `xml:"tagSpecs,omitempty" json:"tagSpecs,omitempty" vim:"9.1.0.0"`
 	// An optional list of `VmPlacementPolicy` for this VM.
 	//
 	// Each policy
