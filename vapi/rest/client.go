@@ -197,6 +197,8 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody any) error {
 		case http.StatusCreated:
 		case http.StatusAccepted:
 		case http.StatusNoContent:
+			// NoContent means there is no body to read.
+			return nil
 		case http.StatusBadRequest:
 			// TODO: structured error types
 			detail, err := io.ReadAll(res.Body)
