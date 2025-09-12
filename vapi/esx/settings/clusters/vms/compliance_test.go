@@ -180,5 +180,5 @@ func TestClusterCompliance(t *testing.T) {
 	_, ok := c.ClusterSolutionsStatus.Compliances["solution2"]
 	require.True(t, ok)
 
-	require.Equal(t, c.ClusterSolutionsStatus.Compliances["solution2"].Compliances["5f1df158-d6e6-4c4a-98e2-f60adfe8c47f"].Deployment.Vm, "vm-1049")
+	require.Equal(t, *c.ClusterSolutionsStatus.Compliances["solution2"].Compliances["5f1df158-d6e6-4c4a-98e2-f60adfe8c47f"].Deployment.Vm, "vm-1049")
 }
