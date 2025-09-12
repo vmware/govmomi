@@ -166,8 +166,8 @@ func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 		{internal.LibraryItemFileData + "/", s.libraryItemFileData},
 		{internal.LibraryItemFilePath, s.libraryItemFile},
 		{internal.LibraryItemFilePath + "/", s.libraryItemFileID},
-		{internal.LibraryUsages, s.usages},
-		{internal.LibraryUsages + "/", s.usagesID},
+		{fmt.Sprintf("%s/{library}/%s", internal.APILibraryPath, internal.LibraryUsages), s.libraryUsages},
+		{fmt.Sprintf("%s/{library}/%s/{usage}", internal.APILibraryPath, internal.LibraryUsages), s.libraryUsageID},
 		{internal.VCenterOVFLibraryItem, s.libraryItemOVF},
 		{internal.VCenterOVFLibraryItem + "/", s.libraryItemOVFID},
 		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
@@ -1665,6 +1665,98 @@ func (s *handler) usages(w http.ResponseWriter, r *http.Request) {
 		res.LibraryUsageList = append(res.LibraryUsageList, library.UsageSummary{ID: val.ID, ResourceUrn: val.ResourceUrn})
 	}
 	OK(w, res)
+}
+
+type LibUsagePathSegs struct {
+	LibraryID string
+	UsageID   string
+}
+
+func (s *handler) getLibUsagePathSegs(url *url.URL) LibUsagePathSegs {
+	var pathSegs LibUsagePathSegs
+
+	pathAfterTrim := strings.TrimPrefix(url.Path, internal.APILibraryPath)
+	pathSegments := strings.Split(pathAfterTrim, "/")
+	var filteredData []string
+	for _, s := range pathSegments {
+		// Check if the string is not empty after trimming whitespace
+		if strings.TrimSpace(s) != "" {
+			filteredData = append(filteredData, s)
+		}
+	}
+	log.Printf("filteredData: %+v", filteredData)
+	pathSegs.LibraryID = filteredData[0]
+	if len(filteredData) == 3 {
+		pathSegs.UsageID = filteredData[2]
+	}
+	return pathSegs
+
+}
+
+// libraryUsages handles the incoming post requests on the url path
+// /api/content/library/{librryID}/usages.
+func (s *handler) libraryUsages(w http.ResponseWriter, r *http.Request) {
+	parsedURL, err := url.Parse(r.URL.Path)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	pathSegs := s.getLibUsagePathSegs(parsedURL)
+
+	switch r.Method {
+	case http.MethodPost:
+		// add library usage requested through
+		// - /api/content/library/{librryID}/usages with AddUsage body
+		var spec library.AddUsage
+		if !s.decode(r, w, &spec) {
+			return
+		}
+		usageID := uuid.New().String()
+		s.addUsage(pathSegs.LibraryID, usageID, spec)
+		OK(w, usageID)
+	case http.MethodGet:
+		// List usages on a library requested through
+		// - /api/content/library/{librryID}/usages
+		var res library.UsageList
+		for _, val := range s.LibraryUsage[pathSegs.LibraryID] {
+			res.LibraryUsageList = append(res.LibraryUsageList, library.UsageSummary{ID: val.ID, ResourceUrn: val.ResourceUrn})
+		}
+		log.Printf("list usage: res = %+v", res)
+		StatusOK(w, res)
+	}
+	log.Printf("usagesEx: %+v", r)
+}
+
+func (s *handler) libraryUsageID(w http.ResponseWriter, r *http.Request) {
+	parsedURL, err := url.Parse(r.URL.Path)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	pathSegs := s.getLibUsagePathSegs(parsedURL)
+
+	switch r.Method {
+	case http.MethodGet:
+		// Get specific usage information requested through
+		// - /api/content/library/{librryID}/usages/{usageID}
+		if len(pathSegs.UsageID) > 0 {
+			usage := s.findUsage(pathSegs.LibraryID, pathSegs.UsageID)
+			if usage == nil {
+				http.NotFound(w, r)
+				return
+			}
+			StatusOK(w, *usage)
+		}
+
+	case http.MethodDelete:
+		if len(pathSegs.UsageID) == 0 {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		s.removeUsage(pathSegs.LibraryID, pathSegs.UsageID)
+		OK(w)
+	}
 }
 
 func (s *handler) usagesID(w http.ResponseWriter, r *http.Request) {

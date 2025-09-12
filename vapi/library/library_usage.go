@@ -32,25 +32,29 @@ type UsageList struct {
 
 // GetLibraryUsage retrieves the library usage information for a given usage identifier.
 func (c *Manager) GetLibraryUsage(ctx context.Context, libraryID, usageID string) (Usage, error) {
-	id := internal.LibraryUsageDestination{ID: usageID}
-	url := c.Resource(internal.LibraryUsages).WithID(libraryID).WithAction("get")
+	url := c.Resource(internal.APILibraryPath).
+		WithSubpath(libraryID).
+		WithSubpath(internal.LibraryUsages).
+		WithSubpath(usageID)
 	var res Usage
-	return res, c.Do(ctx, url.Request(http.MethodPost, &id), &res)
+	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
 // ListLibraryUsage retrieves the list of resources currently using a content library.
 // A content library can be safely deleted if no usage is present for that library.
 func (c *Manager) ListLibraryUsage(ctx context.Context, libraryID string) (UsageList, error) {
-	url := c.Resource(internal.LibraryUsages).WithParam("library", libraryID)
+	url := c.Resource(internal.APILibraryPath).WithSubpath(libraryID).WithSubpath(internal.LibraryUsages)
 	var res UsageList
 	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
 // RemoveLibraryUsage removes a resource usage on a content library.
 func (c *Manager) RemoveLibraryUsage(ctx context.Context, libraryID string, usageID string) error {
-	id := internal.LibraryUsageDestination{ID: usageID}
-	url := c.Resource(internal.LibraryUsages).WithID(libraryID).WithAction("remove")
-	return c.Do(ctx, url.Request(http.MethodPost, &id), nil)
+	url := c.Resource(internal.APILibraryPath).
+		WithSubpath(libraryID).
+		WithSubpath(internal.LibraryUsages).
+		WithSubpath(usageID)
+	return c.Do(ctx, url.Request(http.MethodDelete), nil)
 }
 
 // AddUsage defines the information required to add a resource usage on a content library.
@@ -60,9 +64,12 @@ type AddUsage struct {
 
 // AddLibraryUsage adds a resource usage on a content library.
 func (c *Manager) AddLibraryUsage(ctx context.Context, libraryID string, addUsage AddUsage) (string, error) {
-	url := c.Resource(internal.LibraryUsages).
-		WithID(libraryID).
-		WithAction(internal.LibraryUsageAddAction)
-	var res string
-	return res, c.Do(ctx, url.Request(http.MethodPost, addUsage), &res)
+	url := c.Resource(internal.APILibraryPath).
+		WithSubpath(libraryID).
+		WithSubpath(internal.LibraryUsages)
+
+	var res struct {
+		Value string `json:"value,omitempty"`
+	}
+	return res.Value, c.Do(ctx, url.Request(http.MethodPost, addUsage), &res)
 }
