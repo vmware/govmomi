@@ -338,14 +338,14 @@ type CheckComplianceFilterSpec struct {
 	// Solutions are identifiers of the solutions that to be checked for compliance.
 	//
 	// If unset, the compliance is checked for all solutions in the cluster.
-	Solutions []string `json:"solutions,omitempty"`
+	Solutions *[]string `json:"solutions,omitempty"`
 
 	// Hosts are identifiers of the hosts that to be checked for compliance of all
 	// solutions with deployment type DeploymentType.EVERY_HOST_PINNED.
 	//
 	// If unset or empty and DeploymentUnits is unset or empty, the compliance is checked
 	// for all hosts in the cluster.
-	Hosts []string `json:"hosts,omitempty"`
+	Hosts *[]string `json:"hosts,omitempty"`
 
 	// DeploymentUnits are identifiers of the deployment units that to be checked for compliance
 	// of all solutions with deployment type DeploymentType.CLUSTER_VM_SET.
@@ -354,7 +354,7 @@ type CheckComplianceFilterSpec struct {
 	//
 	// If unset or empty and Hosts is unset or empty, the compliance is checked for
 	// all deployment units in the cluster.
-	DeploymentUnits []string `json:"deployment_units,omitempty"`
+	DeploymentUnits *[]string `json:"deployment_units,omitempty"`
 }
 
 func (m *Manager) CheckCompliance(ctx context.Context, cluster types.ManagedObjectReference, filterSpec *CheckComplianceFilterSpec) (*ClusterCompliance, error) {

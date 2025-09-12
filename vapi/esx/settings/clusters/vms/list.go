@@ -36,7 +36,7 @@ type ClusterSolutionInfo struct {
 	// specification (the provided VM storage policies and VM devices) and
 	// the runtime state of the datastores in the cluster. It is required
 	// DRS to be enabled on the cluster.
-	VmDatastores []string `json:"vm_datastores"`
+	VmDatastores *[]string `json:"vm_datastores,omitempty"`
 
 	// Devices of the VMs not defined in the OVF descriptor. If VmDatastores is
 	// not set, the devices of the VMs not defined in the OVF descriptor should
@@ -121,7 +121,7 @@ type SolutionInfo struct {
 	//
 	// If unset the default resource configuration specified in the OVF
 	// descriptor is used.
-	VmResourceSpec VmResourceSpec `json:"vm_resource_spec"`
+	VmResourceSpec *VmResourceSpec `json:"vm_resource_spec,omitempty"`
 
 	// Specifies System VMs redeployment policy.
 	RedeploymentPolicy RedeploymentPolicy `json:"redeployment_policy"`

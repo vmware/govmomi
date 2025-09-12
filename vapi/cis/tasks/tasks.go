@@ -52,7 +52,7 @@ type Progress struct {
 	Completed uint64 `json:"completed"`
 
 	// Message about the work progress.
-	Message rest.LocalizableMessage `json:"message"`
+	Message *rest.LocalizableMessage `json:"message,omitempty"`
 }
 
 // Info contains information about a task.
@@ -69,13 +69,13 @@ type Info struct {
 	// Parent of the current task.
 	//
 	// This field will be unset if the task has no parent.
-	Parent string `json:"parent"`
+	Parent *string `json:"parent,omitempty"`
 
 	// Target is the identifier of the target created by the operation or an existing one
 	// the operation performed on.
 	//
 	// This field will be unset if the operation has no target or multiple targets.
-	Target map[string]string `json:"target"`
+	Target map[string]string `json:"target,omitempty"`
 
 	// Status of the operation associated with the task.
 	Status Status `json:"status"`
@@ -88,18 +88,18 @@ type Info struct {
 	//
 	// If unset the description of why the operation failed will be included in the result of the operation
 	// (see Info.Result).
-	Error rest.Error `json:"error"`
+	Error rest.Error `json:"error,omitempty"`
 
 	// Start is the time when the operation is started.
-	Start time.Time `json:"start_time"`
+	Start *time.Time `json:"start_time,omitempty"`
 
 	// End is the time when the operation is completed.
-	End time.Time `json:"end_time"`
+	End *time.Time `json:"end_time,omitempty"`
 
 	// User is the name of the user who performed the operation.
 	//
 	// This field will be unset if the operation is performed by the system.
-	User string `json:"user"`
+	User *string `json:"user,omitempty"`
 
 	// Progress of the operation.
 	Progress Progress `json:"progress"`
@@ -112,7 +112,7 @@ type Info struct {
 	//
 	// This field will be unset if the operation does not return a result or if the result is not available
 	// at the current step of the operation.
-	Result json.RawMessage `json:"result"`
+	Result json.RawMessage `json:"result,omitempty"`
 }
 
 func (t *Info) IsDone() bool {

@@ -22,13 +22,13 @@ type HostSolutionsApplyFilterSpec struct {
 	// execution of the apply operation.
 	//
 	// If unset or empty, all solutions are applied.
-	Solutions []string `json:"solutions"`
+	Solutions *[]string `json:"solutions,omitempty"`
 
 	// Hosts on which solutions that are specified by this structure need
 	// to be applied.
 	//
 	// If unset or empty, the solutions are applied on all of the hosts in the cluster.
-	Hosts []string `json:"hosts"`
+	Hosts *[]string `json:"hosts,omitempty"`
 }
 
 // ClusterSolutionsApplyFilterSpec contains fields that describe a filter that to be used for applying the

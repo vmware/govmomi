@@ -73,7 +73,7 @@ type LifecycleHookConfig struct {
 	// holds the VM for which the hook was activated.
 	//
 	// If unset, defaults to 10 hours.
-	Timeout int `json:"timeout"`
+	Timeout *int `json:"timeout,omitempty"`
 }
 
 type HookListResult struct {
