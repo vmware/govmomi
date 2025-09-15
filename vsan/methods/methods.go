@@ -4330,3 +4330,65 @@ func VsanRetrieveProperties(ctx context.Context, r soap.RoundTripper, req *types
 
 	return resBody.Res, nil
 }
+
+// vBOSS System Management Methods
+
+type VsanVbossSystemCreateObjectStoreShards_TaskBody struct {
+	Req    *types.VsanVbossSystemCreateObjectStoreShards_Task         `xml:"urn:vsan VsanVbossSystemCreateObjectStoreShards_Task,omitempty"`
+	Res    *types.VsanVbossSystemCreateObjectStoreShards_TaskResponse `xml:"urn:vsan VsanVbossSystemCreateObjectStoreShards_TaskResponse,omitempty"`
+	Fault_ *soap.Fault                                                `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *VsanVbossSystemCreateObjectStoreShards_TaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func VsanVbossSystemCreateObjectStoreShards_Task(ctx context.Context, r soap.RoundTripper, req *types.VsanVbossSystemCreateObjectStoreShards_Task) (*types.VsanVbossSystemCreateObjectStoreShards_TaskResponse, error) {
+	var reqBody, resBody VsanVbossSystemCreateObjectStoreShards_TaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type VsanVbossSystemDestroyObjectStoreShards_TaskBody struct {
+	Req    *types.VsanVbossSystemDestroyObjectStoreShards_Task         `xml:"urn:vsan VsanVbossSystemDestroyObjectStoreShards_Task,omitempty"`
+	Res    *types.VsanVbossSystemDestroyObjectStoreShards_TaskResponse `xml:"urn:vsan VsanVbossSystemDestroyObjectStoreShards_TaskResponse,omitempty"`
+	Fault_ *soap.Fault                                                 `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *VsanVbossSystemDestroyObjectStoreShards_TaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func VsanVbossSystemDestroyObjectStoreShards_Task(ctx context.Context, r soap.RoundTripper, req *types.VsanVbossSystemDestroyObjectStoreShards_Task) (*types.VsanVbossSystemDestroyObjectStoreShards_TaskResponse, error) {
+	var reqBody, resBody VsanVbossSystemDestroyObjectStoreShards_TaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type VsanQueryVsanObjectByShardBody struct {
+	Req    *types.VsanQueryVsanObjectByShard         `xml:"urn:vsan VsanQueryVsanObjectByShard,omitempty"`
+	Res    *types.VsanQueryVsanObjectByShardResponse `xml:"urn:vsan VsanQueryVsanObjectByShardResponse,omitempty"`
+	Fault_ *soap.Fault                               `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *VsanQueryVsanObjectByShardBody) Fault() *soap.Fault { return b.Fault_ }
+
+func VsanQueryVsanObjectByShard(ctx context.Context, r soap.RoundTripper, req *types.VsanQueryVsanObjectByShard) (*types.VsanQueryVsanObjectByShardResponse, error) {
+	var reqBody, resBody VsanQueryVsanObjectByShardBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}

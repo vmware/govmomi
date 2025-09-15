@@ -44,6 +44,10 @@ var (
 		Type:  "VimClusterVsanVcStretchedClusterSystem",
 		Value: "vsan-stretched-cluster-system",
 	}
+	VsanVbossSystemInstance = vimtypes.ManagedObjectReference{
+		Type:  "VsanVbossSystem",
+		Value: "vsan-vboss-system",
+	}
 )
 
 // Client used for accessing vsan health APIs.
@@ -163,4 +167,46 @@ func (c *Client) VsanHostGetConfig(ctx context.Context, vsanSystem vimtypes.Mana
 	default:
 		return nil, errors.New("host vSAN config not found")
 	}
+}
+
+// vBOSS System Management Methods
+
+// VsanVbossSystemCreateObjectStoreShards creates object store shards for vBOSS
+func (c *Client) VsanVbossSystemCreateObjectStoreShards(ctx context.Context, objectStoreId string, cluster *vimtypes.ManagedObjectReference) error {
+	req := vsantypes.VsanVbossSystemCreateObjectStoreShards_Task{
+		This:          VsanVbossSystemInstance,
+		ObjectStoreId: objectStoreId,
+		Cluster:       cluster,
+	}
+
+	_, err := methods.VsanVbossSystemCreateObjectStoreShards_Task(ctx, c, &req)
+	return err
+}
+
+// VsanVbossSystemDestroyObjectStoreShards destroys object store shards for vBOSS
+func (c *Client) VsanVbossSystemDestroyObjectStoreShards(ctx context.Context, objectStoreId string, cluster *vimtypes.ManagedObjectReference) error {
+	req := vsantypes.VsanVbossSystemDestroyObjectStoreShards_Task{
+		This:          VsanVbossSystemInstance,
+		ObjectStoreId: objectStoreId,
+		Cluster:       cluster,
+	}
+
+	_, err := methods.VsanVbossSystemDestroyObjectStoreShards_Task(ctx, c, &req)
+	return err
+}
+
+// VsanQueryVsanObjectByShard queries vSAN objects by shard mapping
+func (c *Client) VsanQueryVsanObjectByShard(ctx context.Context, cluster *vimtypes.ManagedObjectReference, spec *vsantypes.VsanVbossShardMappingQuerySpec) (*vsantypes.VsanVbossShardMappingResult, error) {
+	req := vsantypes.VsanQueryVsanObjectByShard{
+		This:    VsanVbossSystemInstance,
+		Cluster: cluster,
+		Spec:    spec,
+	}
+
+	res, err := methods.VsanQueryVsanObjectByShard(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
 }
