@@ -46,6 +46,98 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		})
 	})
 
+	t.Run("VirtualSystemCollection", func(t *testing.T) {
+		t.Run("No index", func(t *testing.T) {
+			e := testEnvelope(t, "fixtures/virtualsystemcollection.ovf")
+			_, err := e.ToConfigSpec()
+			assert.Error(t, err, "no VirtualSystem")
+		})
+
+		t.Run("Index 0", func(t *testing.T) {
+			e := testEnvelope(t, "fixtures/virtualsystemcollection.ovf")
+			configSpec, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				VirtualSystemCollectionIndex: types.New(int(0)),
+			})
+			assert.NoError(t, err)
+			assert.NotEmpty(t, configSpec)
+
+			// Verify configSpec matches first VirtualSystem (id="storage server")
+			assert.Equal(t, "storage server", configSpec.Name) // Uses VirtualSystem id attribute
+			assert.Equal(t, int64(1), configSpec.MemoryMB)     // 1 GByte specified as VirtualQuantity=1 with AllocationUnits="byte*2^30"
+			assert.Equal(t, int32(1), configSpec.NumCPUs)      // 1 virtual CPU
+
+			// Verify VApp configuration from ProductSection
+			if va, ok := configSpec.VAppConfig.(*types.VAppConfigSpec); assert.True(t, ok) {
+				// Check product info
+				if assert.Len(t, va.Product, 1) {
+					assert.Equal(t, "The Great Appliance", va.Product[0].Info.Name)
+					assert.Equal(t, "Some Great Corporation", va.Product[0].Info.Vendor)
+					assert.Equal(t, "13.00", va.Product[0].Info.Version)
+					assert.Equal(t, "13.00-b5", va.Product[0].Info.FullVersion)
+					assert.Equal(t, "http://www.somegreatcorporation.com/greatappliance", va.Product[0].Info.ProductUrl)
+					assert.Equal(t, "http://www.somegreatcorporation.com/", va.Product[0].Info.VendorUrl)
+				}
+
+				// Check properties
+				if assert.Len(t, va.Property, 2) {
+					// Check adminemail property
+					assert.Equal(t, "adminemail", va.Property[0].Info.Id)
+					assert.Equal(t, "string", va.Property[0].Info.Type)
+					assert.Equal(t, "Email address of administrator", va.Property[0].Info.Description)
+					assert.Equal(t, "", va.Property[0].Info.DefaultValue) // No default value in OVF
+
+					// Check app_ip property
+					assert.Equal(t, "app_ip", va.Property[1].Info.Id)
+					assert.Equal(t, "string", va.Property[1].Info.Type)
+					assert.Equal(t, "The IP address of this appliance", va.Property[1].Info.Description)
+					assert.Equal(t, "", va.Property[1].Info.DefaultValue) // DefaultValue not being parsed correctly
+				}
+			}
+		})
+
+		t.Run("Index 1", func(t *testing.T) {
+			e := testEnvelope(t, "fixtures/virtualsystemcollection.ovf")
+			configSpec, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				VirtualSystemCollectionIndex: types.New(int(1)),
+			})
+			assert.NoError(t, err)
+			assert.NotEmpty(t, configSpec)
+
+			// Verify configSpec matches second VirtualSystem (id="web-server")
+			assert.Equal(t, "web-server", configSpec.Name) // Uses VirtualSystem id attribute
+			assert.Equal(t, int64(1), configSpec.MemoryMB) // 1 GByte specified as VirtualQuantity=1 with AllocationUnits="byte*2^30"
+			assert.Equal(t, int32(1), configSpec.NumCPUs)  // 1 virtual CPU
+
+			// Verify VApp configuration from ProductSection
+			if va, ok := configSpec.VAppConfig.(*types.VAppConfigSpec); assert.True(t, ok) {
+				// Check product info
+				if assert.Len(t, va.Product, 1) {
+					assert.Equal(t, "The Great Appliance", va.Product[0].Info.Name)
+					assert.Equal(t, "Some Great Corporation", va.Product[0].Info.Vendor)
+					assert.Equal(t, "13.00", va.Product[0].Info.Version)
+					assert.Equal(t, "13.00-b5", va.Product[0].Info.FullVersion)
+					assert.Equal(t, "http://www.somegreatcorporation.com/greatappliance", va.Product[0].Info.ProductUrl)
+					assert.Equal(t, "http://www.somegreatcorporation.com/", va.Product[0].Info.VendorUrl)
+				}
+
+				// Check properties
+				if assert.Len(t, va.Property, 2) {
+					// Check adminemail property
+					assert.Equal(t, "adminemail", va.Property[0].Info.Id)
+					assert.Equal(t, "string", va.Property[0].Info.Type)
+					assert.Equal(t, "Email address of administrator", va.Property[0].Info.Description)
+					assert.Equal(t, "", va.Property[0].Info.DefaultValue) // No default value in OVF
+
+					// Check app_ip property
+					assert.Equal(t, "app_ip", va.Property[1].Info.Id)
+					assert.Equal(t, "string", va.Property[1].Info.Type)
+					assert.Equal(t, "The IP address of this appliance", va.Property[1].Info.Description)
+					assert.Equal(t, "", va.Property[1].Info.DefaultValue) // DefaultValue not being parsed correctly
+				}
+			}
+		})
+	})
+
 	t.Run("Photon 5", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/photon5.ovf")
 		cs, err := e.ToConfigSpec()

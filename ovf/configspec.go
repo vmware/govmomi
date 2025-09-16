@@ -142,6 +142,10 @@ type ToConfigSpecOptions struct {
 	// a VirtualHardware section that have an unknown ResourceType, i.e. a value
 	// that falls outside the range of the enum CIMResourceType.
 	Strict bool
+
+	// VirtualSystemCollectionIndex specifies the index of the VirtualSystem in
+	// the OVF's VirtualSystemCollection to transform into the ConfigSpec.
+	VirtualSystemCollectionIndex *int
 }
 
 // ToConfigSpec calls ToConfigSpecWithOptions with an empty ToConfigSpecOptions
@@ -165,7 +169,16 @@ func (e Envelope) ToConfigSpecWithOptions(
 
 	vs := e.VirtualSystem
 	if vs == nil {
-		return configSpec{}, errors.New("no VirtualSystem")
+		if i := opts.VirtualSystemCollectionIndex; i != nil {
+			if vsc := e.VirtualSystemCollection; vsc != nil {
+				if len(vsc.VirtualSystem) > *i {
+					vs = &vsc.VirtualSystem[*i]
+				}
+			}
+		}
+		if vs == nil {
+			return configSpec{}, errors.New("no VirtualSystem")
+		}
 	}
 
 	// Determine if there is a default configuration.
@@ -215,8 +228,10 @@ func (e Envelope) toHardware(
 	hw = vs.VirtualHardware[0]
 
 	// Set the hardware version.
-	if vmx := hw.System.VirtualSystemType; vmx != nil {
-		dst.Version = *vmx
+	if hw.System != nil {
+		if vmx := hw.System.VirtualSystemType; vmx != nil {
+			dst.Version = *vmx
+		}
 	}
 
 	// Parse the config
