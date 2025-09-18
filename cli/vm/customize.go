@@ -8,6 +8,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -35,6 +36,10 @@ type customize struct {
 	kind      string
 	username  string
 	org       string
+	pwd       string
+	expirePwd bool
+	script    string
+	sig       string
 }
 
 func init() {
@@ -67,6 +72,10 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.kind, "type", "Linux", "Customization type if spec NAME is not specified (Linux|Windows)")
 	f.StringVar(&cmd.username, "username", "", "Windows only : full name of the end user in firstname lastname format")
 	f.StringVar(&cmd.org, "org", "", "Windows only : name of the org that owns the VM")
+	f.StringVar(&cmd.pwd, "pwd", "", "The new administrator (for Windows) or root (for Linux) password")
+	f.BoolVar(&cmd.expirePwd, "expire-pwd", false, "Expire administrator (for Windows) or root (for Linux) password after customization")
+	f.StringVar(&cmd.script, "script-file", "", "Path to a script to run before and after customization")
+	f.StringVar(&cmd.sig, "vcfa-sig", "", "The VCF Automation signature to identify customization request source")
 }
 
 func (cmd *customize) Usage() string {
@@ -101,7 +110,9 @@ Examples:
   govc vm.customize -vm VM -ip6 2001:db8::1/64 -ip6 2001:db8::2/64 -ip6 2001:db8::3/64,2001:db8::4/64 NAME
   govc vm.customize -vm VM -auto-login 3 NAME
   govc vm.customize -vm VM -prefix demo NAME
-  govc vm.customize -vm VM -tz America/New_York NAME`
+  govc vm.customize -vm VM -tz America/New_York NAME
+  # Change password, expire password, run customization script, and specify the VCF Automation signature
+  govc vm.customize -vm VM -name my-hostname -ip dhcp -pwd '<your password>' -expire-pwd -script-file './test.bat' -vcfa-sig '<your hash>'`
 }
 
 // Parse a string of multiple IPv6 addresses with optional netmask; separated by comma
@@ -238,9 +249,60 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
+	if cmd.sig != "" {
+		opt := &types.OptionValue{
+			Key:   "vcfaVmHashKey",
+			Value: cmd.sig,
+		}
+
+		if isWindows {
+			sysprep.ExtraConfig = append(sysprep.ExtraConfig, opt)
+		} else {
+			linprep.ExtraConfig = append(linprep.ExtraConfig, opt)
+		}
+	}
+
+	if cmd.script != "" {
+		data, err := os.ReadFile(cmd.script)
+		if err != nil {
+			return fmt.Errorf("failed to read script file '%s': %v", cmd.script, err)
+		}
+
+		if isWindows {
+			sysprep.ScriptText = string(data)
+		} else {
+			linprep.ScriptText = string(data)
+		}
+	}
+
+	if cmd.pwd != "" {
+		password := &types.CustomizationPassword{
+			Value:     cmd.pwd,
+			PlainText: true,
+		}
+
+		if isWindows {
+			sysprep.GuiUnattended.Password = password
+		} else {
+			linprep.Password = password
+		}
+	}
+
+	if cmd.expirePwd {
+		b := true
+		if isWindows {
+			sysprep.ResetPassword = &b
+		} else {
+			linprep.ResetPassword = &b
+		}
+	}
+
 	if cmd.alc != 0 {
 		if !isWindows {
 			return fmt.Errorf("option '-auto-login' is Windows only")
+		}
+		if cmd.pwd == "" {
+			return fmt.Errorf("option '-auto-login' requires '-pwd' to be set")
 		}
 		sysprep.GuiUnattended.AutoLogon = true
 		sysprep.GuiUnattended.AutoLogonCount = int32(cmd.alc)
