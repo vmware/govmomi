@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -27,6 +28,7 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vmdk"
 )
 
 func TestCreateVm(t *testing.T) {
@@ -3906,4 +3908,312 @@ func TestCreateVmWithGeneratedKey(t *testing.T) {
 		assert.Equal(t, providerID, moVM.Config.KeyId.ProviderId.Id)
 		assert.NotEmpty(t, moVM.Config.KeyId.KeyId)
 	})
+}
+
+func TestCreateVmWithExistingEncryptedDisk(t *testing.T) {
+	ctx := context.Background()
+
+	testCases := []struct {
+		name               string
+		cryptoSpec         types.BaseCryptoSpec
+		expectedKeyID      string
+		expectedProviderID string
+	}{
+		{
+			name: "original encryption",
+			cryptoSpec: &types.CryptoSpecEncrypt{
+				CryptoKeyId: types.CryptoKeyId{
+					KeyId: "vm-disk-key-123",
+					ProviderId: &types.KeyProviderId{
+						Id: "test-provider",
+					},
+				},
+			},
+			expectedKeyID:      "vm-disk-key-123",
+			expectedProviderID: "test-provider",
+		},
+		{
+			name: "shallow recrypt on copy",
+			cryptoSpec: &types.CryptoSpecShallowRecrypt{
+				NewKeyId: types.CryptoKeyId{
+					KeyId: "shallow-recrypt-key",
+					ProviderId: &types.KeyProviderId{
+						Id: "shallow-provider",
+					},
+				},
+			},
+			expectedKeyID:      "shallow-recrypt-key",
+			expectedProviderID: "shallow-provider",
+		},
+		{
+			name: "deep recrypt on copy",
+			cryptoSpec: &types.CryptoSpecDeepRecrypt{
+				NewKeyId: types.CryptoKeyId{
+					KeyId: "deep-recrypt-key",
+					ProviderId: &types.KeyProviderId{
+						Id: "deep-provider",
+					},
+				},
+			},
+			expectedKeyID:      "deep-recrypt-key",
+			expectedProviderID: "deep-provider",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			model := ESX()
+			defer model.Remove()
+			err := model.Create()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			s := model.Service.NewServer()
+			defer s.Close()
+
+			c, err := govmomi.NewClient(ctx, s.URL, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			finder := find.NewFinder(c.Client, false)
+			dc, err := finder.DefaultDatacenter(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			finder.SetDatacenter(dc)
+
+			folders, err := dc.Folders(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			ds, err := finder.DefaultDatastore(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			hosts, err := finder.HostSystemList(ctx, "*/*")
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			host := hosts[0]
+			pool, err := host.ResourcePool(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			dm := object.NewVirtualDiskManager(c.Client)
+			fm := object.NewFileManager(c.Client)
+
+			// Create the directory
+			err = fm.MakeDirectory(ctx, "[LocalDS_0] encrypted-disks", nil, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			var diskPath string
+
+			if _, ok := tc.cryptoSpec.(*types.CryptoSpecEncrypt); ok {
+				// Step 1a: For original encryption, create the encrypted disk directly
+				diskPath = "[LocalDS_0] encrypted-disks/test-encrypted.vmdk"
+
+				diskSpec := &types.FileBackedVirtualDiskSpec{
+					VirtualDiskSpec: types.VirtualDiskSpec{
+						AdapterType: string(types.VirtualDiskAdapterTypeLsiLogic),
+						DiskType:    string(types.VirtualDiskTypeThin),
+					},
+					CapacityKb: 10 * 1024 * 1024, // 10GB
+					Crypto:     tc.cryptoSpec,
+				}
+
+				task, err := dm.CreateVirtualDisk(ctx, diskPath, nil, diskSpec)
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = task.Wait(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				// Step 1b: For recrypt scenarios, first create an encrypted disk, then copy with recrypt
+				sourcePath := "[LocalDS_0] encrypted-disks/source-encrypted.vmdk"
+
+				// Create initial encrypted disk
+				initialSpec := &types.FileBackedVirtualDiskSpec{
+					VirtualDiskSpec: types.VirtualDiskSpec{
+						AdapterType: string(types.VirtualDiskAdapterTypeLsiLogic),
+						DiskType:    string(types.VirtualDiskTypeThin),
+					},
+					CapacityKb: 10 * 1024 * 1024, // 10GB
+					Crypto: &types.CryptoSpecEncrypt{
+						CryptoKeyId: types.CryptoKeyId{
+							KeyId: "initial-key",
+							ProviderId: &types.KeyProviderId{
+								Id: "initial-provider",
+							},
+						},
+					},
+				}
+
+				task, err := dm.CreateVirtualDisk(ctx, sourcePath, nil, initialSpec)
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = task.Wait(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// Copy with recrypt
+				diskPath = fmt.Sprintf("[LocalDS_0] encrypted-disks/test-%s.vmdk", strings.ReplaceAll(tc.name, " ", "-"))
+				copySpec := &types.FileBackedVirtualDiskSpec{
+					VirtualDiskSpec: types.VirtualDiskSpec{
+						AdapterType: string(types.VirtualDiskAdapterTypeLsiLogic),
+						DiskType:    string(types.VirtualDiskTypeThin),
+					},
+					CapacityKb: 10 * 1024 * 1024,
+					Crypto:     tc.cryptoSpec,
+				}
+
+				task, err = dm.CopyVirtualDisk(ctx, sourcePath, nil, diskPath, nil, copySpec, false)
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = task.Wait(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// Clean up source disk
+				deleteTask, _ := dm.DeleteVirtualDisk(ctx, sourcePath, nil)
+				if deleteTask != nil {
+					_ = deleteTask.Wait(ctx)
+				}
+			}
+
+			// Step 2: Create a VM that uses the existing encrypted disk
+			var devices object.VirtualDeviceList
+			scsi, _ := devices.CreateSCSIController("lsilogic")
+			devices = append(devices, scsi)
+
+			// Create a disk device that references the existing encrypted VMDK
+			disk := &types.VirtualDisk{
+				VirtualDevice: types.VirtualDevice{
+					Key: devices.NewKey(),
+					Backing: &types.VirtualDiskFlatVer2BackingInfo{
+						VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+							FileName: diskPath,
+						},
+						DiskMode:        string(types.VirtualDiskModePersistent),
+						ThinProvisioned: types.NewBool(true),
+					},
+				},
+			}
+			devices.AssignController(disk, scsi.(types.BaseVirtualController))
+			devices = append(devices, disk)
+
+			vmSpec := types.VirtualMachineConfigSpec{
+				Name:     fmt.Sprintf("test-vm-encrypted-disk-%s", tc.name),
+				GuestId:  string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+				Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", ds.Name())},
+				NumCPUs:  1,
+				MemoryMB: 128,
+				DeviceChange: []types.BaseVirtualDeviceConfigSpec{
+					&types.VirtualDeviceConfigSpec{
+						Operation: types.VirtualDeviceConfigSpecOperationAdd,
+						Device:    scsi,
+					},
+					&types.VirtualDeviceConfigSpec{
+						Operation: types.VirtualDeviceConfigSpecOperationAdd,
+						Device:    disk,
+						// Don't specify FileOperation since we're using an existing disk
+					},
+				},
+			}
+
+			vmTask, err := folders.VmFolder.CreateVM(ctx, vmSpec, pool, host)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			info, err := vmTask.WaitForResult(ctx, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			vm := object.NewVirtualMachine(c.Client, info.Result.(types.ManagedObjectReference))
+
+			// Step 3: Verify the VM's disk is encrypted
+			var moVM mo.VirtualMachine
+			err = vm.Properties(ctx, vm.Reference(), []string{"config.hardware.device"}, &moVM)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Find the disk in the VM's devices
+			var vmDisk *types.VirtualDisk
+			for _, device := range moVM.Config.Hardware.Device {
+				if d, ok := device.(*types.VirtualDisk); ok {
+					vmDisk = d
+					break
+				}
+			}
+
+			if vmDisk == nil {
+				t.Fatal("Expected to find a virtual disk in the VM")
+			}
+
+			// Verify the disk is using the encrypted VMDK
+			backing := vmDisk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			if backing.FileName != diskPath {
+				t.Errorf("Expected disk backing file to be %s, got %s", diskPath, backing.FileName)
+			}
+
+			// Verify the disk has encryption info by checking if we can read its descriptor
+			// and it contains the expected crypto properties
+			dsPath := diskPath
+			dsPath = strings.TrimPrefix(dsPath, "[LocalDS_0] ")
+			fullPath := fmt.Sprintf("%s/ha-datacenter-LocalDS_0/%s", model.dir, dsPath)
+
+			f, err := os.Open(fullPath)
+			if err != nil {
+				t.Fatalf("Failed to open VMDK descriptor: %v", err)
+			}
+			defer f.Close()
+
+			desc, err := vmdk.ParseDescriptor(f)
+			if err != nil {
+				t.Fatalf("Failed to parse VMDK descriptor: %v", err)
+			}
+
+			// Check that crypto keys were set in the descriptor
+			assert.NotNil(t, desc.EncryptionKeys)
+			assert.Equal(t, crypto.KeyLocatorTypeList, desc.EncryptionKeys.Type)
+			assert.Len(t, desc.EncryptionKeys.List, 1)
+			assert.Equal(t, crypto.KeyLocatorTypePair, desc.EncryptionKeys.List[0].Type)
+			assert.NotNil(t, desc.EncryptionKeys.List[0].Pair)
+			assert.NotNil(t, desc.EncryptionKeys.List[0].Pair.Locker)
+			assert.Equal(t, crypto.KeyLocatorTypeFQID, desc.EncryptionKeys.List[0].Pair.Locker.Type)
+			assert.NotNil(t, desc.EncryptionKeys.List[0].Pair.Locker.Indirect)
+			assert.Equal(t, crypto.KeyLocatorTypeFQID, desc.EncryptionKeys.List[0].Pair.Locker.Indirect.Type)
+			assert.Equal(t, tc.expectedKeyID, desc.EncryptionKeys.List[0].Pair.Locker.Indirect.FQID.KeyID)
+			assert.Equal(t, tc.expectedProviderID, desc.EncryptionKeys.List[0].Pair.Locker.Indirect.FQID.KeyServerID)
+
+			// Clean up
+			destroyTask, err := vm.Destroy(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = destroyTask.Wait(ctx)
+
+			deleteTask, err := dm.DeleteVirtualDisk(ctx, diskPath, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_ = deleteTask.Wait(ctx)
+		})
+	}
 }

@@ -30,6 +30,7 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vmdk"
 )
 
 type VirtualMachine struct {
@@ -762,13 +763,17 @@ func (vm *VirtualMachine) updateDiskLayouts(ctx *Context) types.BaseMethodFault 
 	disks := object.VirtualDeviceList(vm.Config.Hardware.Device).SelectByType((*types.VirtualDisk)(nil))
 	for _, disk := range disks {
 		disk := disk.(*types.VirtualDisk)
-		diskBacking := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		diskBacking, ok := disk.Backing.(types.BaseVirtualDeviceFileBackingInfo)
+		if !ok {
+			continue
+		}
 
 		diskLayout := &types.VirtualMachineFileLayoutDiskLayout{Key: disk.Key}
 		diskLayoutEx := &types.VirtualMachineFileLayoutExDiskLayout{Key: disk.Key}
 
 		// Iterate through disk and its parents
-		for {
+		for diskBacking != nil {
+
 			dFileName := diskBacking.GetVirtualDeviceFileBackingInfo().FileName
 
 			var fileKeys []int32
@@ -799,10 +804,39 @@ func (vm *VirtualMachine) updateDiskLayouts(ctx *Context) types.BaseMethodFault 
 				FileKey: fileKeys,
 			})
 
-			if parent := diskBacking.Parent; parent != nil {
-				diskBacking = parent
-			} else {
-				break
+			switch tBack := diskBacking.(type) {
+			case *types.VirtualDiskFlatVer1BackingInfo:
+				if tBack.Parent == nil {
+					diskBacking = nil
+				} else {
+					diskBacking = tBack.Parent
+				}
+			case *types.VirtualDiskFlatVer2BackingInfo:
+				if tBack.Parent == nil {
+					diskBacking = nil
+				} else {
+					diskBacking = tBack.Parent
+				}
+			case *types.VirtualDiskSeSparseBackingInfo:
+				if tBack.Parent == nil {
+					diskBacking = nil
+				} else {
+					diskBacking = tBack.Parent
+				}
+			case *types.VirtualDiskSparseVer1BackingInfo:
+				if tBack.Parent == nil {
+					diskBacking = nil
+				} else {
+					diskBacking = tBack.Parent
+				}
+			case *types.VirtualDiskSparseVer2BackingInfo:
+				if tBack.Parent == nil {
+					diskBacking = nil
+				} else {
+					diskBacking = tBack.Parent
+				}
+			default:
+				diskBacking = nil
 			}
 		}
 
@@ -1403,6 +1437,45 @@ func (vm *VirtualMachine) configureDevice(
 			}
 		}
 
+		getCryptoKeyID := func(desc *vmdk.Descriptor) *types.CryptoKeyId {
+			if desc == nil {
+				return nil
+			}
+			if ek := desc.EncryptionKeys; ek != nil {
+				if l := ek.List; len(l) > 0 {
+					if p := l[0].Pair; p != nil {
+						if l := p.Locker; l != nil {
+							if i := l.Indirect; i != nil {
+								var (
+									keyID      = i.FQID.KeyID
+									providerID = i.FQID.KeyServerID
+								)
+
+								if keyID == "" && providerID == "" {
+									return nil
+								}
+
+								cki := &types.CryptoKeyId{
+									KeyId: i.FQID.KeyID,
+								}
+
+								if providerID != "" {
+									cki.ProviderId = &types.KeyProviderId{
+										Id: providerID,
+									}
+								}
+
+								return cki
+							}
+						}
+					}
+				}
+			}
+			return nil
+		}
+
+		var setCryptoKeyID func(desc *vmdk.Descriptor)
+
 		switch b := d.Backing.(type) {
 		case *types.VirtualDiskSparseVer2BackingInfo:
 			// Sparse disk creation not supported in ESX
@@ -1412,20 +1485,71 @@ func (vm *VirtualMachine) configureDevice(
 				},
 			}
 		case types.BaseVirtualDeviceFileBackingInfo:
-			parent := ""
+			var (
+				parent string
+				crypto types.BaseCryptoSpec
+			)
 
 			switch backing := d.Backing.(type) {
 			case *types.VirtualDiskFlatVer2BackingInfo:
 				if backing.Parent != nil {
 					parent = backing.Parent.FileName
 				}
+				if spec.Backing != nil {
+					crypto = spec.Backing.Crypto
+					switch tCrypto := crypto.(type) {
+					case *types.CryptoSpecEncrypt:
+						backing.KeyId = &tCrypto.CryptoKeyId
+					case *types.CryptoSpecShallowRecrypt:
+						backing.KeyId = &tCrypto.NewKeyId
+					case *types.CryptoSpecDeepRecrypt:
+						backing.KeyId = &tCrypto.NewKeyId
+					case *types.CryptoSpecDecrypt:
+						backing.KeyId = nil
+					}
+				}
+				setCryptoKeyID = func(desc *vmdk.Descriptor) {
+					backing.KeyId = getCryptoKeyID(desc)
+				}
 			case *types.VirtualDiskSeSparseBackingInfo:
 				if backing.Parent != nil {
 					parent = backing.Parent.FileName
 				}
+				if spec.Backing != nil {
+					crypto = spec.Backing.Crypto
+					switch tCrypto := crypto.(type) {
+					case *types.CryptoSpecEncrypt:
+						backing.KeyId = &tCrypto.CryptoKeyId
+					case *types.CryptoSpecShallowRecrypt:
+						backing.KeyId = &tCrypto.NewKeyId
+					case *types.CryptoSpecDeepRecrypt:
+						backing.KeyId = &tCrypto.NewKeyId
+					case *types.CryptoSpecDecrypt:
+						backing.KeyId = nil
+					}
+				}
+				setCryptoKeyID = func(desc *vmdk.Descriptor) {
+					backing.KeyId = getCryptoKeyID(desc)
+				}
 			case *types.VirtualDiskSparseVer2BackingInfo:
 				if backing.Parent != nil {
 					parent = backing.Parent.FileName
+				}
+				if spec.Backing != nil {
+					crypto = spec.Backing.Crypto
+					switch tCrypto := crypto.(type) {
+					case *types.CryptoSpecEncrypt:
+						backing.KeyId = &tCrypto.CryptoKeyId
+					case *types.CryptoSpecShallowRecrypt:
+						backing.KeyId = &tCrypto.NewKeyId
+					case *types.CryptoSpecDeepRecrypt:
+						backing.KeyId = &tCrypto.NewKeyId
+					case *types.CryptoSpecDecrypt:
+						backing.KeyId = nil
+					}
+				}
+				setCryptoKeyID = func(desc *vmdk.Descriptor) {
+					backing.KeyId = getCryptoKeyID(desc)
 				}
 			}
 
@@ -1459,13 +1583,20 @@ func (vm *VirtualMachine) configureDevice(
 				info.FileName = filename
 			}
 
-			err := vdmCreateVirtualDisk(ctx, spec.FileOperation, &types.CreateVirtualDisk_Task{
+			desc, err := vdmCreateVirtualDisk(ctx, spec.FileOperation, &types.CreateVirtualDisk_Task{
 				Datacenter: &dc.Self,
 				Name:       info.FileName,
-				Spec:       &types.FileBackedVirtualDiskSpec{CapacityKb: x.CapacityInKB},
+				Spec: &types.FileBackedVirtualDiskSpec{
+					CapacityKb: x.CapacityInKB,
+					Crypto:     crypto,
+				},
 			})
 			if err != nil {
 				return err
+			}
+
+			if desc != nil && setCryptoKeyID != nil {
+				setCryptoKeyID(desc)
 			}
 
 			ctx.Update(vm, []types.PropertyChange{

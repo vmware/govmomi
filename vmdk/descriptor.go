@@ -14,17 +14,19 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/vmware/govmomi/crypto"
 	"github.com/vmware/govmomi/units"
 )
 
 type Descriptor struct {
-	Encoding  string            `json:"encoding"`
-	Version   int               `json:"version"`
-	CID       DiskContentID     `json:"cid"`
-	ParentCID DiskContentID     `json:"parentCID"`
-	Type      string            `json:"type"`
-	Extent    []Extent          `json:"extent"`
-	DDB       map[string]string `json:"ddb"`
+	Encoding       string             `json:"encoding"`
+	Version        int                `json:"version"`
+	CID            DiskContentID      `json:"cid"`
+	ParentCID      DiskContentID      `json:"parentCID"`
+	Type           string             `json:"type"`
+	Extent         []Extent           `json:"extent"`
+	DDB            map[string]string  `json:"ddb"`
+	EncryptionKeys *crypto.KeyLocator `json:"encryptionKeys,omitempty"`
 }
 
 type DiskContentID uint32
@@ -97,8 +99,16 @@ func ParseDescriptor(r io.Reader) (*Descriptor, error) {
 			_, _ = fmt.Sscanf(val, "%x", &d.CID)
 		case "parentcid":
 			_, _ = fmt.Sscanf(val, "%x", &d.ParentCID)
-		case "createType":
+		case "createtype":
 			d.Type = val
+		case "encryptionkeys":
+			if val != "" {
+				kl, err := crypto.ImportKeyLocator(val)
+				if err != nil {
+					return nil, err
+				}
+				d.EncryptionKeys = kl
+			}
 		}
 	}
 
@@ -147,6 +157,7 @@ encoding="{{ .Encoding }}"
 CID={{ .CID }}
 parentCID={{ .ParentCID }}
 createType="{{ .Type }}"
+{{ if .EncryptionKeys }}encryptionKeys="{{ .EncryptionKeys }}"{{ end }}
 
 # Extent description ({{ cap }} capacity){{range .Extent }}
 {{ .Permission }} {{ .Size }} {{ .Type }} "{{ .Info }}"{{end}}
