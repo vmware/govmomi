@@ -231,7 +231,7 @@ func (m *VcenterVStorageObjectManager) createObject(ctx *Context, req *types.Cre
 	}
 
 	if !register {
-		err := vdmCreateVirtualDisk(ctx, types.VirtualDeviceConfigSpecFileOperationCreate, &types.CreateVirtualDisk_Task{
+		_, err := vdmCreateVirtualDisk(ctx, types.VirtualDeviceConfigSpecFileOperationCreate, &types.CreateVirtualDisk_Task{
 			Datacenter: &dc.Self,
 			Name:       path.String(),
 			Spec:       &types.FileBackedVirtualDiskSpec{CapacityKb: req.Spec.CapacityInMB * 1024},
