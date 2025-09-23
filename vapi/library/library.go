@@ -123,6 +123,9 @@ func (l *Library) Patch(src *Library) {
 	if src.Version != "" {
 		l.Version = src.Version
 	}
+	if src.Configuration != nil {
+		l.Configuration = src.Configuration
+	}
 }
 
 // Manager extends rest.Client, adding content library related methods.
@@ -217,8 +220,9 @@ func (c *Manager) UpdateLibrary(ctx context.Context, l *Library) error {
 		Library `json:"update_spec"`
 	}{
 		Library{
-			Name:        l.Name,
-			Description: l.Description,
+			Name:          l.Name,
+			Description:   l.Description,
+			Configuration: l.Configuration,
 		},
 	}
 	url := c.Resource(internal.LibraryPath).WithID(l.ID)
