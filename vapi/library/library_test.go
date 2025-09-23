@@ -155,6 +155,40 @@ func TestManagerLibraryUsage(t *testing.T) {
 			t.Fatalf("Library %s in use should not allowed for delete", id)
 		}
 
+		// Apply library usage to items.
+		trueValue := true
+		updateSpec := library.Library{ID: id, Name: libName, Configuration: &library.Configuration{ApplyLibraryUsageToItems: &trueValue}}
+		err = m.UpdateLibrary(ctx, &updateSpec)
+		if err != nil {
+			t.Fatalf("updating library %s with new configuration should not fail. err: %v", id, err)
+		}
+		// Add library item and deletion of the item should not be allowed.
+		itemDesc := "test item description"
+		itemID, err := m.CreateLibraryItem(ctx, library.Item{Name: "test-item", Description: &itemDesc, LibraryID: id})
+		if err != nil {
+			t.Fatalf("library item creation should not fail. err: %v", err)
+		}
+		err = m.DeleteLibraryItem(ctx, &library.Item{ID: itemID})
+		if err == nil {
+			t.Fatalf("library item %s deletion should fail. err: %v", itemID, err)
+
+		}
+
+		// Relax library usage to items.
+		falseValue := false
+		updateSpec = library.Library{ID: id, Name: libName, Configuration: &library.Configuration{ApplyLibraryUsageToItems: &falseValue}}
+		err = m.UpdateLibrary(ctx, &updateSpec)
+		if err != nil {
+			t.Fatalf("updating library %s with new configuration should not fail. err: %v", id, err)
+		}
+
+		// Remove library item should be allowed.
+		err = m.DeleteLibraryItem(ctx, &library.Item{ID: itemID})
+		if err != nil {
+			t.Fatalf("library item %s deletion should not fail. err: %v", itemID, err)
+
+		}
+
 		// Remove library usage
 		err = m.RemoveLibraryUsage(ctx, id, usageID)
 		if err != nil {

@@ -1875,6 +1875,15 @@ func (s *handler) addUsage(libraryID, usageID string, addUsage library.AddUsage)
 
 }
 
+func isApplyUsageOnItemsConfigured(libraryObj *library.Library) bool {
+	if libraryObj == nil {
+		return false
+	}
+	return libraryObj.Configuration != nil &&
+		libraryObj.Configuration.ApplyLibraryUsageToItems != nil &&
+		*libraryObj.Configuration.ApplyLibraryUsageToItems
+}
+
 func (s *handler) libraryItem(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
@@ -1996,6 +2005,11 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodDelete:
+		// library usage exists and applied on items.
+		if _, usageExists := s.LibraryUsage[lid]; usageExists && isApplyUsageOnItemsConfigured(l.Library) {
+			s.error(w, fmt.Errorf("library is in use"))
+			return
+		}
 		p := s.libraryPath(l.Library, id)
 		if err := os.RemoveAll(p); err != nil {
 			s.error(w, err)

@@ -6,5 +6,5 @@ package library
 
 // Configuration represents the configuration at individual Content Library level and applies to all types of libraries.
 type Configuration struct {
-	ApplyLibraryUsageToItems bool `json:"apply_library_uage_to_items,omitempty"`
+	ApplyLibraryUsageToItems *bool `json:"apply_library_usage_to_items,omitempty"`
 }
