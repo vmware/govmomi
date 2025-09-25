@@ -6,6 +6,7 @@ package vms
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 
 	"github.com/vmware/govmomi/vim25/types"
@@ -67,6 +68,13 @@ type ClusterSolutionInfo struct {
 	//
 	// If unset no AlternativeVmSpecs applied to the System VMs.
 	//Optional<List<AlternativeVmSpec>> alternativeVmSpecs;
+
+	// Devices of the VMs not defined in the OVF descriptor. If VmDatastores is
+	// not set, the devices of the VMs not defined in the OVF descriptor should
+	// be provided and not as part of a VM lifecycle hook (VM reconfiguration).
+	// Otherwise, the compatibility of the devices with the selected host and
+	// datastore where the VM is deployed needs to be ensured by the client.
+	Devices json.RawMessage `json:"devices,omitempty"`
 }
 
 type SolutionInfo struct {
