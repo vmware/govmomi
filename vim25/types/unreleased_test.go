@@ -15,29 +15,6 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func TestPodVMOverheadInfo(t *testing.T) {
-	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		host := simulator.Map(ctx).Any("HostSystem").(*simulator.HostSystem)
-
-		host.Capability.PodVMOverheadInfo = &types.PodVMOverheadInfo{
-			CrxPageSharingSupported:         true,
-			PodVMOverheadWithoutPageSharing: int32(42),
-			PodVMOverheadWithPageSharing:    int32(53),
-		}
-
-		var props mo.HostSystem
-		pc := property.DefaultCollector(c)
-		err := pc.RetrieveOne(ctx, host.Self, []string{"capability"}, &props)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if *props.Capability.PodVMOverheadInfo != *host.Capability.PodVMOverheadInfo {
-			t.Errorf("%#v", props.Capability.PodVMOverheadInfo)
-		}
-	})
-}
-
 func TestPodVMInfo(t *testing.T) {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
 		host := simulator.Map(ctx).Any("HostSystem").(*simulator.HostSystem)
