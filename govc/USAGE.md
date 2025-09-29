@@ -6970,12 +6970,15 @@ Examples:
   govc vm.customize -vm VM -auto-login 3 NAME
   govc vm.customize -vm VM -prefix demo NAME
   govc vm.customize -vm VM -tz America/New_York NAME
+  # Change password, expire password, run customization script, specify the vcfa signature
+  govc vm.customize -vm VM -name my-hostname -ip dhcp -pwd 'NewPwd123@' -expire-pwd -script-file './test.bat' -vcfa-sig '<your hash>'
 
 Options:
   -auto-login=0          Number of times the VM should automatically login as an administrator
   -dns-server=[]         DNS server list
   -dns-suffix=[]         DNS suffix list
   -domain=               Domain name
+  -expire-pwd=false      Expire administator (for Windows) or root (for Linux) password after customization
   -gateway=[]            Gateway
   -ip=[]                 IPv4 address
   -ip6=[]                IPv6 addresses with optional netmask (defaults to /64), separated by comma
@@ -6984,9 +6987,12 @@ Options:
   -netmask=[]            Netmask
   -org=                  Windows only : name of the org that owns the VM
   -prefix=               Host name generator prefix
+  -pwd=                  The new administator (for Windows) or root (for Linux) password
+  -script-file=          Path to a script to run before and after customization
   -type=Linux            Customization type if spec NAME is not specified (Linux|Windows)
   -tz=                   Time zone
   -username=             Windows only : full name of the end user in firstname lastname format
+  -vcfa-sig=             The VCFA signanture to identify customization request source
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
