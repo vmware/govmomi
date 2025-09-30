@@ -60,7 +60,7 @@ type VmSelectionSpec struct {
 // TransitionSpec contains fields that describe the specification for transitioning a System VM Solution.
 type TransitionSpec struct {
 	// SourceCluster is the cluster to transition from.
-	SourceCluster types.ManagedObjectReference `json:"source_cluster"`
+	SourceCluster string `json:"source_cluster"`
 
 	// Solution is the target desired solution specification in vLCM.
 	Solution *SolutionSpec `json:"solution"`
@@ -125,8 +125,7 @@ func (m *Manager) EnableAsync(ctx context.Context, cluster types.ManagedObjectRe
 		return "", err
 	}
 
-	_, err := tasks.NewManager(m.Client).WaitForRunningOrError(ctx, taskId)
-	return taskId, err
+	return taskId, nil
 }
 
 // Enable enables an EAM managed solution in vLCM.
@@ -136,7 +135,7 @@ func (m *Manager) Enable(ctx context.Context, cluster types.ManagedObjectReferen
 		return err
 	}
 
-	_, err = tasks.NewManager(m.Client).WaitForRunningOrError(ctx, taskId)
+	_, err = tasks.NewManager(m.Client).WaitForCompletion(ctx, taskId)
 	return err
 }
 
@@ -164,8 +163,7 @@ func (m *Manager) MultiSourceEnableAsync(ctx context.Context, cluster types.Mana
 		return "", err
 	}
 
-	_, err := tasks.NewManager(m.Client).WaitForRunningOrError(ctx, taskId)
-	return taskId, err
+	return taskId, nil
 }
 
 // MultiSourceEnable enables multiple EAM managed solutions in vLCM as a single solution.
@@ -175,7 +173,7 @@ func (m *Manager) MultiSourceEnable(ctx context.Context, cluster types.ManagedOb
 		return err
 	}
 
-	_, err = tasks.NewManager(m.Client).WaitForRunningOrError(ctx, taskId)
+	_, err = tasks.NewManager(m.Client).WaitForCompletion(ctx, taskId)
 	return err
 }
 
@@ -198,8 +196,7 @@ func (m *Manager) TransitionAsync(ctx context.Context, cluster types.ManagedObje
 		return "", err
 	}
 
-	_, err := tasks.NewManager(m.Client).WaitForRunningOrError(ctx, taskId)
-	return taskId, err
+	return taskId, nil
 }
 
 // Transition transitions a System VM Solution desired state to a target cluster.
@@ -209,6 +206,6 @@ func (m *Manager) Transition(ctx context.Context, cluster types.ManagedObjectRef
 		return err
 	}
 
-	_, err = tasks.NewManager(m.Client).WaitForRunningOrError(ctx, taskId)
+	_, err = tasks.NewManager(m.Client).WaitForCompletion(ctx, taskId)
 	return err
 }
