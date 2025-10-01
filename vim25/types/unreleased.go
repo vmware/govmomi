@@ -163,8 +163,8 @@ func init() {
 type HostRuntimeInfoPodVMInfo struct {
 	DynamicData
 
-	HasPodVM          bool              `xml:"hasPodVM"`
-	PodVMOverheadInfo PodVMOverheadInfo `xml:"podVMOverheadInfo"`
+	HasPageSharingPodVM bool              `xml:"hasPageSharingPodVM"`
+	PodVMOverheadInfo   PodVMOverheadInfo `xml:"podVMOverheadInfo"`
 }
 
 type UpdatePodVMPropertyRequestType struct {

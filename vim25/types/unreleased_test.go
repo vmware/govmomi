@@ -20,7 +20,7 @@ func TestPodVMInfo(t *testing.T) {
 		host := simulator.Map(ctx).Any("HostSystem").(*simulator.HostSystem)
 
 		host.Runtime.PodVMInfo = &types.PodVMInfo{
-			HasPodVM: true,
+			HasPageSharingPodVM: true,
 			PodVMOverheadInfo: types.PodVMOverheadInfo{
 				PodVMOverheadWithoutPageSharing: int32(50),
 				PodVMOverheadWithPageSharing:    int32(25),
