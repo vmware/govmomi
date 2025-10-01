@@ -46,6 +46,39 @@ const (
 	Sequential RemediationPolicy = "SEQUENTIAL"
 )
 
+// AlternativeVmSpec contains to describe alternative VM configuration to be applied on
+// VMs that matches a given selection criteria defined as VmSelectionSpec.
+type AlternativeVmSpec struct {
+	// SelectionCriteria is the criteria to match System VMs for which to apply this alternative VM spec.
+	SelectionCriteria VmSelectionSpec `json:"selection_criteria"`
+
+	// Devices of the VMs not defined in the OVF descriptor. This
+	// takes precedence over ClusterSolutionSpec#Devices.
+	//
+	// If ClusterSolutionSpec#VmDatastores is not set, the devices of
+	// the VMs not defined in the OVF descriptor should be provided to
+	// Devices and not as part of a VM lifecycle hook
+	// (VM reconfiguration). Otherwise, the compatibility of the devices with the
+	// selected host and datastore where the VM is deployed needs to be ensured
+	// by the client.
+	//
+	// 1. For VM initial placement the devices are added to the VM configuration.
+	// 2. For the reconfiguration it is checked what devices need to be added,
+	// removed, and edited on the existing VMs. NOTE: No VM relocation is
+	// executed before the VM reconfiguration.
+	//
+	// The supported property of vim.vm.ConfigSpec is
+	// vim.vm.ConfigSpec.deviceChange. The supported
+	// vim.vm.device.VirtualDeviceSpec.operation is Operation#add. For
+	// vim.vm.device.VirtualEthernetCard the unique identifier is
+	// vim.vm.device.VirtualDevice#unitNumber.
+	// ClusterSolutionSpec#vmNetworks and devices are mutually
+	// exclusive.
+	//
+	// If unset, ClusterSolutionSpec#Devices is used.
+	Devices json.RawMessage `json:"devices,omitempty"`
+}
+
 // ClusterSolutionSpec contains fields that describe solution configuration
 // only applicable for solutions with deployment type DeploymentType#CLUSTER_VM_SET}.
 type ClusterSolutionSpec struct {
@@ -100,9 +133,8 @@ type ClusterSolutionSpec struct {
 	RemediationPolicy RemediationPolicy `json:"remediation_policy"`
 
 	// AlternativeVmSpecs to be applied on the System VMs.
-	//
 	// If unset no AlternativeVmSpecs applied to the System VMs.
-	//Optional<List<AlternativeVmSpec>> alternativeVmSpecs;
+	AlternativeVmSpecs []AlternativeVmSpec `json:"alternative_vm_specs,omitempty"`
 }
 
 type DeploymentType string
