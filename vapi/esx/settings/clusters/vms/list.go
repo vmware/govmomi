@@ -67,7 +67,7 @@ type ClusterSolutionInfo struct {
 	// AlternativeVmSpecs to be applied on the System VMs.
 	//
 	// If unset no AlternativeVmSpecs applied to the System VMs.
-	//Optional<List<AlternativeVmSpec>> alternativeVmSpecs;
+	AlternativeVmSpecs []AlternativeVmSpec `json:"alternative_vm_specs,omitempty"`
 
 	// Devices of the VMs not defined in the OVF descriptor. If VmDatastores is
 	// not set, the devices of the VMs not defined in the OVF descriptor should
