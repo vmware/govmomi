@@ -43,7 +43,7 @@ type OvfResource struct {
 
 	// Certificate that is to be trusted by vLCM when downloading the OVF
 	// package from a file server.
-	Certificate string `json:"cerficate"`
+	Certificate string `json:"certificate"`
 
 	// AuthenticationScheme is the authentication scheme needed to access the OVF URL.
 	AuthenticationScheme AuthenticationScheme `json:"authentication_scheme"`
