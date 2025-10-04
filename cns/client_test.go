@@ -1223,6 +1223,8 @@ func TestClient(t *testing.T) {
 	t.Logf("Volume detached successfully")
 
 	if run_shared_disk_tests_tests == "true" && isvSphereVersion91orAbove {
+		t.Logf("Running shared disk tests")
+
 		// Test AttachVolume API with multiwriter parameters
 		var cnsVolumeAttachSpecList []cnstypes.CnsVolumeAttachDetachSpec
 		cnsVolumeAttachSpec := cnstypes.CnsVolumeAttachDetachSpec{
@@ -1232,8 +1234,8 @@ func TestClient(t *testing.T) {
 			Vm:            nodeVM.Reference(),
 			DiskMode:      "independent_persistent",
 			Sharing:       "sharingMultiWriter",
-			UnitNumber:    23,
-			ControllerKey: 1000,
+			UnitNumber:    vim25types.NewInt32(23),
+			ControllerKey: vim25types.NewInt32(1002),
 		}
 
 		cnsVolumeAttachSpecList = append(cnsVolumeAttachSpecList, cnsVolumeAttachSpec)
