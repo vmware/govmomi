@@ -35595,8 +35595,6 @@ type HostCapability struct {
 	NpivSupported *bool `xml:"npivSupported" json:"npivSupported,omitempty" vim:"9.0.0.0"`
 	// Indicates whether this host supports license entitlements
 	EntitlementSupported *bool `xml:"entitlementSupported" json:"entitlementSupported,omitempty" vim:"9.0.0.0"`
-	// Contains the memory overhead info for PodVMs for this host.
-	PodVMOverheadInfo *PodVMOverheadInfo `xml:"podVMOverheadInfo,omitempty" json:"podVMOverheadInfo,omitempty" vim:"9.1.0.0"`
 	// Indicates whether "FCD Linked Clone feature" supported on this host.
 	FcdLinkedCloneSupported *bool `xml:"fcdLinkedCloneSupported" json:"fcdLinkedCloneSupported,omitempty" vim:"9.1.0.0"`
 }
