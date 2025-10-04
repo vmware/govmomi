@@ -98434,7 +98434,7 @@ type VmToVmGroupsAntiAffinity struct {
 	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
 	//
 	// If this field is left unset, then the default value of
-	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// `PreferredDuringPlacementPreferredDuringExecution`
 	// will be assumed.
 	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
 	// Specifies the topology for enforcing this `VmToVmGroupsAntiAffinity`
@@ -98616,7 +98616,7 @@ type VmVmAffinity struct {
 	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
 	//
 	// If this field is left unset, then the default value of
-	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// `PreferredDuringPlacementPreferredDuringExecution`
 	// will be assumed.
 	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
 	// Specifies the topology for enforcing this VmVmAffinity placement
@@ -98676,7 +98676,7 @@ type VmVmAntiAffinity struct {
 	// `VmPlacementPolicyVmPlacementPolicyStrictness_enum`
 	//
 	// If this field is left unset, then the default value of
-	// `PreferredDuringPlacementIgnoredDuringExecution`
+	// `PreferredDuringPlacementPreferredDuringExecution`
 	// will be assumed.
 	PolicyStrictness string `xml:"policyStrictness,omitempty" json:"policyStrictness,omitempty"`
 	// Specifies the topology for enforcing this VmVmAntiAffinity placement
