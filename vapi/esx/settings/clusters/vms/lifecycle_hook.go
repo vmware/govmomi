@@ -125,8 +125,6 @@ func (m *Manager) MarkAsProcessed(ctx context.Context, cluster types.ManagedObje
 	return nil, nil
 }
 
-// ProcessDynamicUpdate updates dynamically the desired state specification and applies it for the
-// solution. 
 func (m *Manager) ProcessDynamicUpdate(ctx context.Context, cluster types.ManagedObjectReference, spec *DynamicUpdateSpec) error {
 	p := clusterHooksPath(cluster).String()
 	url := m.Resource(p).WithParam("action", "process-dynamic-update")
