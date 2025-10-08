@@ -88,6 +88,16 @@ type ProcessedHookSpec struct {
 	Vm string `json:"vm"`
 }
 
+type DynamicUpdateSpec struct {
+	Vm string `json:"vm"`
+
+	Solution string `json:"solution"`
+
+	LifecycleState LifecycleState `json:"lifecycle_state"`
+
+	AlternativeVmSpec *AlternativeVmSpec `json:"alternative_vm_spec,omitempty"`
+}
+
 func (m *Manager) ListHooks(ctx context.Context, cluster types.ManagedObjectReference, solution string) (*HookListResult, error) {
 	p := clusterHooksPath(cluster).String()
 	url := m.Resource(p).WithSubpath(solution)
@@ -113,4 +123,19 @@ func (m *Manager) MarkAsProcessed(ctx context.Context, cluster types.ManagedObje
 	}
 
 	return nil, nil
+}
+
+func (m *Manager) ProcessDynamicUpdate(ctx context.Context, cluster types.ManagedObjectReference, spec *DynamicUpdateSpec) error {
+	p := clusterHooksPath(cluster).String()
+	url := m.Resource(p).WithParam("action", "process-dynamic-update")
+
+	var errMsg rest.Error
+	if err := m.Do(ctx, url.Request(http.MethodPost, spec), &errMsg); err != nil {
+		if len(errMsg.Messages) > 0 {
+			return &errMsg.Messages[0]
+		}
+		return err
+	}
+
+	return nil
 }

@@ -33,3 +33,44 @@ func TestHookList(t *testing.T) {
 	require.Equal(t, out.Hooks[0].Vm, "vm-1048")
 	require.False(t, out.Hooks[0].DynamicUpdateProcessed)
 }
+
+func TestDynamicUpdateSpec(t *testing.T) {
+	// Test with AlternativeVmSpec
+	in := []byte(`{
+        "vm": "vm-123",
+        "solution": "solution-456",
+        "lifecycle_state": "POST_PROVISIONING",
+        "alternative_vm_spec": {
+            "selection_criteria": {
+                "selection_type": "VM_EXTRA_CONFIG",
+                "extra_config_value": "test-uuid"
+            },
+            "devices": "{\"deviceChange\":[]}"
+        }
+    }`)
+
+	var out DynamicUpdateSpec
+	require.NoError(t, json.Unmarshal(in, &out))
+	require.Equal(t, out.Vm, "vm-123")
+	require.Equal(t, out.Solution, "solution-456")
+	require.Equal(t, out.LifecycleState, PostProvisioning)
+	require.NotNil(t, out.AlternativeVmSpec)
+	require.Equal(t, out.AlternativeVmSpec.SelectionCriteria.SelectionType, VmSelectionTypeVmExtraConfig)
+	require.Equal(t, out.AlternativeVmSpec.SelectionCriteria.ExtraConfigValue, "test-uuid")
+}
+
+func TestDynamicUpdateSpecWithoutAlternativeVmSpec(t *testing.T) {
+	// Test without AlternativeVmSpec
+	in := []byte(`{
+        "vm": "vm-789",
+        "solution": "solution-101",
+        "lifecycle_state": "POST_POWER_ON"
+    }`)
+
+	var out DynamicUpdateSpec
+	require.NoError(t, json.Unmarshal(in, &out))
+	require.Equal(t, out.Vm, "vm-789")
+	require.Equal(t, out.Solution, "solution-101")
+	require.Equal(t, out.LifecycleState, PostPowerOn)
+	require.Nil(t, out.AlternativeVmSpec)
+}
