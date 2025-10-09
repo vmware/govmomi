@@ -6992,7 +6992,7 @@ Options:
   -type=Linux            Customization type if spec NAME is not specified (Linux|Windows)
   -tz=                   Time zone
   -username=             Windows only : full name of the end user in firstname lastname format
-  -vcfa-sig=             The VCFA signanture to identify customization request source
+  -vcfa-sig=             The VCF Automation signature to identify customization request source
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
