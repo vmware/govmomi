@@ -6970,7 +6970,7 @@ Examples:
   govc vm.customize -vm VM -auto-login 3 NAME
   govc vm.customize -vm VM -prefix demo NAME
   govc vm.customize -vm VM -tz America/New_York NAME
-  # Change password, expire password, run customization script, specify the vcfa signature
+  # Change password, expire password, run customization script, specify the VCF Automation signature
   govc vm.customize -vm VM -name my-hostname -ip dhcp -pwd '<your password>' -expire-pwd -script-file './test.bat' -vcfa-sig '<your hash>'
 
 Options:
