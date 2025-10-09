@@ -75,7 +75,7 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.pwd, "pwd", "", "The new administator (for Windows) or root (for Linux) password")
 	f.BoolVar(&cmd.expirePwd, "expire-pwd", false, "Expire administator (for Windows) or root (for Linux) password after customization")
 	f.StringVar(&cmd.script, "script-file", "", "Path to a script to run before and after customization")
-	f.StringVar(&cmd.sig, "vcfa-sig", "", "The VCFA signanture to identify customization request source")
+	f.StringVar(&cmd.sig, "vcfa-sig", "", "The VCF Automation signature to identify customization request source")
 }
 
 func (cmd *customize) Usage() string {
