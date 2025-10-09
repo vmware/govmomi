@@ -112,7 +112,7 @@ Examples:
   govc vm.customize -vm VM -prefix demo NAME
   govc vm.customize -vm VM -tz America/New_York NAME
   # Change password, expire password, run customization script, specify the vcfa signature
-  govc vm.customize -vm VM -name my-hostname -ip dhcp -pwd 'NewPwd123@' -expire-pwd -script-file './test.bat' -vcfa-sig '<your hash>'`
+  govc vm.customize -vm VM -name my-hostname -ip dhcp -pwd '<your password>' -expire-pwd -script-file './test.bat' -vcfa-sig '<your hash>'`
 }
 
 // Parse a string of multiple IPv6 addresses with optional netmask; separated by comma
