@@ -130,6 +130,18 @@ func init() {
 	types.Add("vsan:VsanObjectSystem", reflect.TypeOf((*VsanObjectSystem)(nil)).Elem())
 }
 
+type VsanVbossSystem struct {
+	Self types.ManagedObjectReference
+}
+
+func (m VsanVbossSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	types.Add("vsan:VsanVbossSystem", reflect.TypeOf((*VsanVbossSystem)(nil)).Elem())
+}
+
 type VsanVcClusterConfigSystem struct {
 	Self types.ManagedObjectReference
 }
