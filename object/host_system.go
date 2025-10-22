@@ -151,8 +151,8 @@ func (h HostSystem) UpdatePodVMProperty(ctx context.Context, propertyPath string
 	switch propertyPath {
 	case "podVMOverheadInfo":
 		req.Property = podVMInfo.PodVMOverheadInfo
-	case "hasPodVM":
-		req.Property = podVMInfo.HasPodVM
+	case "hasPageSharingPodVM":
+		req.Property = podVMInfo.HasPageSharingPodVM
 	case "podVMInfo":
 		req.Property = podVMInfo
 	default:

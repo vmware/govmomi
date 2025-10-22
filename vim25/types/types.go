@@ -63377,8 +63377,8 @@ func init() {
 type PodVMInfo struct {
 	DynamicData
 
-	// Indicates if the host has a powered on PodVM.
-	HasPodVM bool `xml:"hasPodVM" json:"hasPodVM"`
+	// Indicates if the host has a powered on page sharing PodVM.
+	HasPageSharingPodVM bool `xml:"hasPageSharingPodVM" json:"hasPageSharingPodVM"`
 	// Contains the memory overhead info for PodVMs on the host.
 	PodVMOverheadInfo PodVMOverheadInfo `xml:"podVMOverheadInfo" json:"podVMOverheadInfo"`
 }
