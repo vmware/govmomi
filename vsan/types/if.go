@@ -91,3 +91,9 @@ func (b *VsanIscsiTargetServiceConfig) GetVsanIscsiTargetServiceConfig() *VsanIs
 type BaseVsanIscsiTargetServiceConfig interface {
 	GetVsanIscsiTargetServiceConfig() *VsanIscsiTargetServiceConfig
 }
+
+func (b *VsanVbossConfig) GetVsanVbossConfig() *VsanVbossConfig { return b }
+
+type BaseVsanVbossConfig interface {
+	GetVsanVbossConfig() *VsanVbossConfig
+}
