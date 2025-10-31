@@ -153,7 +153,7 @@ func vdmCreateVirtualDisk(
 	}
 	_ = b.Close()
 
-	return nil, nil
+	return desc, nil
 }
 
 func vdmExtendVirtualDisk(ctx *Context, req *types.ExtendVirtualDisk_Task) types.BaseMethodFault {

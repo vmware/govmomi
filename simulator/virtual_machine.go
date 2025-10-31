@@ -1640,7 +1640,10 @@ func (vm *VirtualMachine) configureDevice(
 						*prop = types.NewBool(false)
 					}
 				}
-				disk.Uuid = virtualDiskUUID(&dc.Self, info.FileName)
+
+				if disk.Uuid == "" {
+					disk.Uuid = virtualDiskUUID(&dc.Self, info.FileName)
+				}
 			}
 		}
 	case *types.VirtualCdrom:
@@ -2618,6 +2621,8 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 				// Leave FileName empty so CreateVM will just create a new one under VmPathName
 				disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo).FileName = ""
 				disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo).Parent = nil
+				// Clear UUID so a new unique UUID is generated for the cloned disk
+				disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo).Uuid = ""
 			}
 
 			config.DeviceChange = append(config.DeviceChange, &types.VirtualDeviceConfigSpec{

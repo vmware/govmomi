@@ -4217,3 +4217,223 @@ func TestCreateVmWithExistingEncryptedDisk(t *testing.T) {
 		})
 	}
 }
+
+func TestVirtualDiskUUIDAssignment(t *testing.T) {
+	m := ESX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	ctx := context.Background()
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer c.Logout(ctx)
+
+	finder := find.NewFinder(c.Client, false)
+	dc, err := finder.DefaultDatacenter(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc)
+
+	ds, err := finder.DefaultDatastore(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	folders, err := dc.Folders(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hosts, err := finder.HostSystemList(ctx, "*/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	host := hosts[0]
+	pool, err := host.ResourcePool(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Test 1: Add a disk with an empty UUID - it should be assigned one
+	t.Run("empty UUID", func(t *testing.T) {
+		testVM, err := createTestVM(ctx, c, folders, pool, host, ds, "empty-uuid-vm")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer testVM.Destroy(ctx)
+
+		devices, err := testVM.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		controller, err := devices.FindDiskController("")
+		if err != nil {
+			t.Fatal(err)
+		}
+		disk := devices.CreateDisk(controller, ds.Reference(), "test-disk-empty-uuid")
+		expectedCapacity := int64(10 * 1024 * 1024) // 10MB
+		disk.CapacityInBytes = expectedCapacity
+
+		err = testVM.AddDevice(ctx, disk)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		updatedDevices, err := testVM.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		allDisks := updatedDevices.SelectByType((*types.VirtualDisk)(nil))
+		assert.Equal(t, 1, len(allDisks), "exactly one disk should be present")
+
+		foundDisk := allDisks[0].(*types.VirtualDisk)
+		assert.Equal(t, expectedCapacity, foundDisk.CapacityInBytes, "disk capacity should match added disk")
+
+		backing, ok := foundDisk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		assert.True(t, ok, "disk backing should be VirtualDiskFlatVer2BackingInfo")
+		assert.NotEmpty(t, backing.Uuid, "disk UUID should not be empty")
+		_, err = uuid.Parse(backing.Uuid)
+		assert.NoError(t, err, "disk UUID should be a valid UUID")
+	})
+
+	// Test 2: Add a disk - a UUID should be generated/assigned
+	t.Run("generated UUID", func(t *testing.T) {
+		testVM, err := createTestVM(ctx, c, folders, pool, host, ds, "generated-uuid-vm")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer testVM.Destroy(ctx)
+
+		devices, err := testVM.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		controller, err := devices.FindDiskController("")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		disk := devices.CreateDisk(controller, ds.Reference(), "test-disk-generated-uuid")
+		expectedCapacity := int64(20 * 1024 * 1024) // 20MB
+		disk.CapacityInBytes = expectedCapacity
+
+		err = testVM.AddDevice(ctx, disk)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		updatedDevices, err := testVM.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		allDisks := updatedDevices.SelectByType((*types.VirtualDisk)(nil))
+		assert.Equal(t, 1, len(allDisks), "exactly one disk should be present")
+
+		foundDisk := allDisks[0].(*types.VirtualDisk)
+		assert.Equal(t, expectedCapacity, foundDisk.CapacityInBytes, "disk capacity should match added disk")
+
+		foundDiskBacking, ok := foundDisk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		assert.True(t, ok, "found disk backing should be VirtualDiskFlatVer2BackingInfo")
+		assert.NotEmpty(t, foundDiskBacking.Uuid, "disk UUID should be assigned")
+		_, err = uuid.Parse(foundDiskBacking.Uuid)
+		assert.NoError(t, err, "assigned disk UUID should be a valid UUID")
+	})
+
+	// Test 3: Add a disk with an explicit UUID - it should be preserved
+	t.Run("explicit UUID", func(t *testing.T) {
+		testVM, err := createTestVM(ctx, c, folders, pool, host, ds, "explicit-uuid-vm")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer testVM.Destroy(ctx)
+
+		devices, err := testVM.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		controller, err := devices.FindDiskController("")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		disk := devices.CreateDisk(controller, ds.Reference(), "test-disk-explicit-uuid")
+		expectedCapacity := int64(30 * 1024 * 1024) // 30MB
+		disk.CapacityInBytes = expectedCapacity
+
+		explicitUUID := uuid.New().String()
+		diskBacking := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		diskBacking.Uuid = explicitUUID
+
+		err = testVM.AddDevice(ctx, disk)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		updatedDevices, err := testVM.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		allDisks := updatedDevices.SelectByType((*types.VirtualDisk)(nil))
+		assert.Equal(t, 1, len(allDisks), "exactly one disk should be present")
+
+		foundDisk := allDisks[0].(*types.VirtualDisk)
+		assert.Equal(t, expectedCapacity, foundDisk.CapacityInBytes, "disk capacity should match added disk")
+
+		foundDiskBacking, ok := foundDisk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		assert.True(t, ok, "found disk backing should be VirtualDiskFlatVer2BackingInfo")
+		assert.Equal(t, explicitUUID, foundDiskBacking.Uuid, "disk UUID should match the explicitly set UUID")
+	})
+}
+
+func createTestVM(
+	ctx context.Context,
+	c *govmomi.Client,
+	folders *object.DatacenterFolders,
+	pool *object.ResourcePool,
+	host *object.HostSystem,
+	ds *object.Datastore,
+	vmName string,
+) (*object.VirtualMachine, error) {
+	var devices object.VirtualDeviceList
+
+	scsi, _ := devices.CreateSCSIController("pvscsi")
+	ide, _ := devices.CreateIDEController()
+	cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
+
+	devices = append(devices, scsi, cdrom)
+
+	spec := types.VirtualMachineConfigSpec{
+		Name:    vmName,
+		GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+		Files: &types.VirtualMachineFileInfo{
+			VmPathName: "[" + ds.Name() + "]",
+		},
+	}
+
+	spec.DeviceChange, _ = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+
+	task, err := folders.VmFolder.CreateVM(ctx, spec, pool, host)
+	if err != nil {
+		return nil, err
+	}
+
+	taskInfo, err := task.WaitForResult(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return object.NewVirtualMachine(
+		c.Client,
+		taskInfo.Result.(types.ManagedObjectReference),
+	), nil
+}
