@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -86,6 +87,7 @@ func main() {
 	trace := flag.String("trace-file", "", "Trace output file (defaults to stderr)")
 	stdinExit := flag.Bool("stdinexit", false, "Press any key to exit")
 	dir := flag.String("load", "", "Load model from directory")
+	saveDir := flag.String("save", "", "Save model into directory")
 
 	flag.IntVar(&model.DelayConfig.Delay, "delay", model.DelayConfig.Delay, "Method response delay across all methods")
 	methodDelayP := flag.String("method-delay", "", "Delay per method on the form 'method1:delay1,method2:delay2...'")
@@ -238,6 +240,38 @@ func main() {
 			sig <- syscall.SIGTERM
 		}()
 	}
+
+	// Auto-save only when model state changes
+
+go func() {
+
+    ticker := time.NewTicker(3 * time.Hour)
+
+    defer ticker.Stop()
+ 
+    for range ticker.C {
+
+        if model != nil && model.Dirty() {
+
+            log.Println("[vcsim] Detected in-memory change, saving model...")
+
+            if err := model.Save(*saveDir); err != nil {
+
+                log.Printf("[vcsim] Auto-save failed: %v", err)
+
+            } else {
+
+                model.ClearDirty()
+
+                log.Println("[vcsim] Auto-save completed successfully.")
+
+            }
+
+        }
+
+    }
+
+}()
 
 	<-sig
 
