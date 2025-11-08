@@ -2,7 +2,7 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
-package ls
+package object
 
 import (
 	"context"
@@ -22,7 +22,7 @@ type ls struct {
 	*flags.DatacenterFlag
 
 	Long  bool
-	Type  string
+	kind  kinds
 	ToRef bool
 	ToID  bool
 	DeRef bool
@@ -40,16 +40,18 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.ToRef, "i", false, "Print the managed object reference")
 	f.BoolVar(&cmd.ToID, "I", false, "Print the managed object ID")
 	f.BoolVar(&cmd.DeRef, "L", false, "Follow managed object references")
-	f.StringVar(&cmd.Type, "t", "", "Object type")
+	f.Var(&cmd.kind, "t", "Object type")
 }
 
 func (cmd *ls) Description() string {
-	return `List inventory items.
+	return fmt.Sprintf(`List inventory items.
 
+The '-t' flag value can be a managed entity type or one of the following aliases:
+%s
 Examples:
   govc ls -l '*'
   govc ls -t ClusterComputeResource host
-  govc ls -t Datastore host/ClusterA/* | grep -v local | xargs -n1 basename | sort | uniq`
+  govc ls -t Datastore host/ClusterA/* | grep -v local | xargs -n1 basename | sort | uniq`, aliasHelp())
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -64,11 +66,17 @@ func (cmd *ls) Usage() string {
 }
 
 func (cmd *ls) typeMatch(ref types.ManagedObjectReference) bool {
-	if cmd.Type == "" {
+	if len(cmd.kind) == 0 {
 		return true
 	}
 
-	return strings.EqualFold(cmd.Type, ref.Type)
+	for _, kind := range cmd.kind {
+		if strings.EqualFold(kind, ref.Type) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -89,12 +97,6 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	var ref = new(types.ManagedObjectReference)
 
-	var types []string
-	if cmd.Type != "" {
-		// TODO: support multiple -t flags
-		types = []string{cmd.Type}
-	}
-
 	for _, arg := range args {
 		if cmd.DeRef && ref.FromString(arg) {
 			e, err := finder.Element(ctx, *ref)
@@ -111,7 +113,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 		}
 
-		es, err := finder.ManagedObjectListChildren(ctx, arg, types...)
+		es, err := finder.ManagedObjectListChildren(ctx, arg, cmd.kind...)
 		if err != nil {
 			return err
 		}

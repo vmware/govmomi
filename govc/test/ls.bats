@@ -52,6 +52,14 @@ load test_helper
   assert_success
   [ ${#lines[@]} -eq 1 ]
 
+  run govc ls -t h ./...
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
+
+  run govc ls -t h -t p ./...
+  assert_success
+  [ ${#lines[@]} -eq 2 ]
+
   run govc ls -t Datacenter /...
   assert_success
   [ ${#lines[@]} -eq 1 ]
@@ -132,6 +140,10 @@ load test_helper
   run govc ls
   assert_success
   # /DC[0,1]
+  [ ${#lines[@]} -eq 2 ]
+
+  run govc ls -t d
+  assert_success
   [ ${#lines[@]} -eq 2 ]
 
   run govc ls -dc enoent
