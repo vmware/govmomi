@@ -4585,6 +4585,21 @@ Usage: govc ls [OPTIONS] [PATH]...
 
 List inventory items.
 
+The '-t' flag value can be a managed entity type or one of the following aliases:
+  a    VirtualApp
+  c    ClusterComputeResource
+  d    Datacenter
+  f    Folder
+  g    DistributedVirtualPortgroup
+  h    HostSystem
+  m    VirtualMachine
+  n    Network
+  o    OpaqueNetwork
+  p    ResourcePool
+  r    ComputeResource
+  s    Datastore
+  w    DistributedVirtualSwitch
+
 Examples:
   govc ls -l '*'
   govc ls -t ClusterComputeResource host
@@ -4595,7 +4610,7 @@ Options:
   -L=false               Follow managed object references
   -i=false               Print the managed object reference
   -l=false               Long listing format
-  -t=                    Object type
+  -t=[]                  Object type
 ```
 
 ## metric.change

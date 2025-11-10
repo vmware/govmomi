@@ -71,7 +71,6 @@ import (
 	_ "github.com/vmware/govmomi/cli/library/trust"
 	_ "github.com/vmware/govmomi/cli/license"
 	_ "github.com/vmware/govmomi/cli/logs"
-	_ "github.com/vmware/govmomi/cli/ls"
 	_ "github.com/vmware/govmomi/cli/metric"
 	_ "github.com/vmware/govmomi/cli/metric/interval"
 	_ "github.com/vmware/govmomi/cli/namespace"
