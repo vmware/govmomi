@@ -81,7 +81,9 @@ func folderPutChild(ctx *Context, f *mo.Folder, o mo.Entity) {
 			// Need to update ChildEntity before Map.Put for ContainerView updates to work properly
 			f.ChildEntity = append(f.ChildEntity, ctx.Map.reference(o))
 			ctx.Map.PutEntity(f, o)
-
+            if ActiveModel != nil {
+                  ActiveModel.MarkDirty()
+            }
 			folderUpdate(ctx, f, o, ctx.Map.AddReference)
 
 			switch e := o.(type) {
@@ -98,6 +100,9 @@ func folderPutChild(ctx *Context, f *mo.Folder, o mo.Entity) {
 
 func folderRemoveChild(ctx *Context, f *mo.Folder, o mo.Reference) {
 	ctx.Map.Remove(ctx, o.Reference())
+	        if ActiveModel != nil {
+                ActiveModel.MarkDirty()
+            }
 	folderRemoveReference(ctx, f, o)
 }
 
