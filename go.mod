@@ -1,6 +1,6 @@
 module github.com/vmware/govmomi
 
-go 1.23.0 // required for slices/maps package and built-in clear function
+go 1.24.0 // required for slices/maps package and built-in clear function
 
 require (
 	github.com/a8m/tree v0.0.0-20240104212747-2c8764a5f17e
@@ -11,7 +11,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/vmware/vmw-guestinfo v0.0.0-20220317130741-510905f0efa3
 	github.com/xlab/treeprint v1.2.0
-	golang.org/x/text v0.28.0
+	golang.org/x/text v0.31.0
 )
 
 require (
