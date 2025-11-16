@@ -7,9 +7,12 @@ package simulator
 import (
 	"fmt"
 	"math/rand"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -29,6 +32,32 @@ type FaultInjectionRule struct {
 	// ObjectName is the name of the specific object to inject faults into
 	// Use "*" to match all object names
 	ObjectName string
+
+	// InclusionPropertyFilter is an array of property filters to match the object.
+	// ObjectName above is a convenience as it's such a common filter, but
+	// could be expressed here. All filters in the array must match (AND).
+	// Supported operators:
+	//   - "==" for equality: "Config.Name == 'DC0_C0_RP0_VM0'"
+	//   - "!=" for inequality: "Config.Name != 'other'"
+	//   - "~=" for regexp match: "Config.Name ~= '^DC0.*'"
+	// Examples:
+	//   - []string{"Config.Name == 'DC0_C0_RP0_VM0'"}
+	//   - []string{"Config.Name ~= '^DC0.*'", "Runtime.PowerState == 'poweredOn'"}
+	// The order of evaluation is:
+	// 1. ObjectName
+	// 2. InclusionPropertyFilter (all must match)
+	// 3. ExclusionPropertyFilter (none must match)
+	InclusionPropertyFilter []string
+
+	// ExclusionPropertyFilter is an array of property filters to exclude the object.
+	// This is evaluated after the name and inclusion filters.
+	// If any filter in the array matches, the object is excluded (OR).
+	// Supports the same operators as InclusionPropertyFilter:
+	//   - "==" for equality
+	//   - "!=" for inequality
+	//   - "~=" for regexp match
+	// Example: []string{"Config.Name ~= '^test-.*'"} to exclude all objects with names starting with "test-"
+	ExclusionPropertyFilter []string
 
 	// Probability is the probability (0.0 to 1.0) that a fault will be
 	// injected.
@@ -51,12 +80,16 @@ type FaultInjectionRule struct {
 	// (0 = unlimited)
 	MaxCount int
 
+	// SkipCount is the number of times to skip this rule before it is triggered
+	SkipCount int
+
 	// Enabled controls whether this rule is active
 	Enabled bool
 
 	// Internal fields
-	count int64
-	rng   *rand.Rand
+	count     int64
+	skipCount int64
+	rng       *rand.Rand
 }
 
 // FaultType represents the type of fault to inject
@@ -148,7 +181,7 @@ func (f *FaultInjector) GetRules() []*FaultInjectionRule {
 }
 
 // ShouldInjectFault determines if a fault should be injected for the given method call
-func (f *FaultInjector) ShouldInjectFault(method *Method, objectName string) *FaultInjectionRule {
+func (f *FaultInjector) ShouldInjectFault(method *Method, objectName string, handler mo.Reference) *FaultInjectionRule {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -172,13 +205,47 @@ func (f *FaultInjector) ShouldInjectFault(method *Method, objectName string) *Fa
 			continue
 		}
 
-		// Check object name match
+		// Check object name match (order 1)
 		if rule.ObjectName != "*" && rule.ObjectName != objectName {
 			continue
 		}
 
+		// Check inclusion property filter (order 2) - all must match (AND logic)
+		if len(rule.InclusionPropertyFilter) > 0 {
+			allMatch := true
+			for _, filter := range rule.InclusionPropertyFilter {
+				if !evaluatePropertyFilter(handler, filter) {
+					allMatch = false
+					break
+				}
+			}
+			if !allMatch {
+				continue
+			}
+		}
+
+		// Check exclusion property filter (order 3) - any match excludes (OR logic)
+		if len(rule.ExclusionPropertyFilter) > 0 {
+			anyMatch := false
+			for _, filter := range rule.ExclusionPropertyFilter {
+				if evaluatePropertyFilter(handler, filter) {
+					anyMatch = true
+					break
+				}
+			}
+			if anyMatch {
+				continue
+			}
+		}
+
 		// Check probability
 		if rule.rng.Float64() > rule.Probability {
+			continue
+		}
+
+		// At this point, the rule matches. Check if we need to skip this match
+		if rule.SkipCount > 0 && rule.skipCount < int64(rule.SkipCount) {
+			rule.skipCount++
 			continue
 		}
 
@@ -320,5 +387,96 @@ func (f *FaultInjector) ResetStats() {
 
 	for _, rule := range f.rules {
 		rule.count = 0
+		rule.skipCount = 0
 	}
+}
+
+// evaluatePropertyFilter evaluates a property filter expression against a managed object.
+// See struct for filter expression examples.
+func evaluatePropertyFilter(obj mo.Reference, filter string) bool {
+	if obj == nil || filter == "" {
+		return false
+	}
+
+	// Parse the filter expression: "property.path == 'value'", "property.path != 'value'", or "property.path ~= 'regexp'"
+	filter = strings.TrimSpace(filter)
+	parts := strings.Fields(filter)
+	if len(parts) != 3 {
+		// If it doesn't match the expected format, try to treat it as a simple property path
+		// and check if it exists and is truthy
+		return evaluateSimplePropertyFilter(obj, filter)
+	}
+
+	propertyPath := parts[0]
+	operator := parts[1]
+	expectedValue := strings.Trim(parts[2], "'\"")
+
+	// Get the managed object's reflect value
+	rval := getManagedObject(obj)
+
+	// Get the property value using fieldValue
+	propValue, err := fieldValue(rval, propertyPath)
+	if err != nil {
+		return false
+	}
+
+	// Convert property value to string for comparison
+	var propValueStr string
+	switch v := propValue.(type) {
+	case string:
+		propValueStr = v
+	case fmt.Stringer:
+		propValueStr = v.String()
+	default:
+		// Try to get string representation
+		propValueStr = fmt.Sprintf("%v", v)
+	}
+
+	// Evaluate the operator
+	switch operator {
+	case "==":
+		return propValueStr == expectedValue
+	case "!=":
+		return propValueStr != expectedValue
+	case "~=":
+		re, err := regexp.Compile(expectedValue)
+		if err != nil {
+			return false
+		}
+		return re.MatchString(propValueStr)
+	default:
+		return false
+	}
+}
+
+// evaluateSimplePropertyFilter evaluates a simple property path without an operator.
+// Returns true if the property exists and has a truthy value.
+func evaluateSimplePropertyFilter(obj mo.Reference, propertyPath string) bool {
+	if obj == nil || propertyPath == "" {
+		return false
+	}
+
+	rval := getManagedObject(obj)
+	propValue, err := fieldValue(rval, propertyPath)
+	if err != nil {
+		return false
+	}
+
+	// Check if the value is truthy
+	if propValue == nil {
+		return false
+	}
+
+	// For boolean values, return the boolean value
+	if b, ok := propValue.(bool); ok {
+		return b
+	}
+
+	// For strings, return true if non-empty
+	if s, ok := propValue.(string); ok {
+		return s != ""
+	}
+
+	// For other types, return true if not nil
+	return true
 }

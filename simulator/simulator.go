@@ -256,7 +256,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	}
 
 	if s.faultInjector != nil {
-		if rule := s.faultInjector.ShouldInjectFault(method, objectName); rule != nil {
+		if rule := s.faultInjector.ShouldInjectFault(method, objectName, handler); rule != nil {
 			return s.faultInjector.CreateFault(rule, method)
 		}
 	}
