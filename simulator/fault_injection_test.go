@@ -6,12 +6,15 @@ package simulator
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestFaultInjection(t *testing.T) {
@@ -33,15 +36,11 @@ func TestFaultInjection(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		// This should fail with NotAuthenticated
 		_, err = vm.PowerOn(ctx)
-		if err == nil {
-			t.Fatal("expected authentication error")
-		}
+		require.Error(t, err, "expected authentication error")
 
 		// Check that we got an error (fault injection worked)
 		t.Logf("Fault injection worked, got error: %v", err)
@@ -63,9 +62,7 @@ func TestFaultInjection(t *testing.T) {
 
 		// This should fail with InvalidArgument
 		_, err = vm.PowerOn(ctx)
-		if err == nil {
-			t.Fatal("expected invalid argument error")
-		}
+		require.Error(t, err, "expected invalid argument error")
 
 		// Check that we got an error (fault injection worked)
 		t.Logf("InvalidArgument fault injection worked, got error: %v", err)
@@ -129,9 +126,7 @@ func TestFaultInjection(t *testing.T) {
 		service.AddFaultRule(rule4)
 
 		_, err = vm.PowerOn(ctx)
-		if err == nil {
-			t.Fatal("expected resource in use error")
-		}
+		require.Error(t, err, "expected resource in use error")
 
 		// Check that we got an error (fault injection worked)
 		t.Logf("Custom fault injection worked, got error: %v", err)
@@ -165,15 +160,11 @@ func TestFaultInjectionWithDelay(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		// This should fail after a delay
 		_, err = vm.PowerOn(ctx)
-		if err == nil {
-			t.Fatal("expected error with delay")
-		}
+		require.Error(t, err, "expected error with delay")
 
 		service.ClearFaultRules()
 	})
@@ -198,25 +189,19 @@ func TestFaultInjectionMaxCount(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		// First two attempts should fail
 		for i := 0; i < 2; i++ {
 			vm.PowerOff(ctx)
 			_, err := vm.PowerOn(ctx)
-			if err == nil {
-				t.Fatalf("expected error on attempt %d", i+1)
-			}
+			require.Error(t, err, "expected error on attempt %d", i+1)
 		}
 
 		// Third attempt should succeed (no more faults)
 		vm.PowerOff(ctx)
 		taskResult, err := vm.PowerOn(ctx)
-		if err != nil {
-			t.Fatalf("expected success on third attempt, got: %v", err)
-		}
+		require.NoError(t, err, "expected success on third attempt")
 		if taskResult != nil {
 			taskResult.Wait(ctx)
 		}
@@ -255,15 +240,11 @@ func TestMultipleFaultRules(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		// Should match the first rule (more specific)
 		_, err = vm.PowerOn(ctx)
-		if err == nil {
-			t.Fatal("expected error")
-		}
+		require.Error(t, err, "expected error")
 
 		// Check that we got an error (fault injection worked)
 		t.Logf("Multiple rules fault injection worked, got error: %v", err)
@@ -291,17 +272,13 @@ func TestFaultInjectionSkipCount(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		// First two attempts should succeed (skipped)
 		for i := 0; i < 2; i++ {
 			vm.PowerOff(ctx)
 			taskResult, err := vm.PowerOn(ctx)
-			if err != nil {
-				t.Fatalf("expected success on attempt %d (should be skipped), got: %v", i+1, err)
-			}
+			require.NoError(t, err, "expected success on attempt %d (should be skipped)", i+1)
 			if taskResult != nil {
 				taskResult.Wait(ctx)
 			}
@@ -310,16 +287,12 @@ func TestFaultInjectionSkipCount(t *testing.T) {
 		// Third attempt should fail (after skipping 2)
 		vm.PowerOff(ctx)
 		_, err = vm.PowerOn(ctx)
-		if err == nil {
-			t.Fatal("expected error on third attempt (after skipping 2)")
-		}
+		require.Error(t, err, "expected error on third attempt (after skipping 2)")
 
 		// Fourth attempt should also fail (skip count already met)
 		vm.PowerOff(ctx)
 		_, err = vm.PowerOn(ctx)
-		if err == nil {
-			t.Fatal("expected error on fourth attempt")
-		}
+		require.Error(t, err, "expected error on fourth attempt")
 
 		service.ClearFaultRules()
 	})
@@ -345,15 +318,11 @@ func TestFaultInjectionSkipCountWithMaxCount(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		// First attempt should succeed (skipped)
 		taskResult, err := vm.PowerOn(ctx)
-		if err != nil {
-			t.Fatalf("expected success on first attempt (skipped), got: %v", err)
-		}
+		require.NoError(t, err, "expected success on first attempt (skipped)")
 		if taskResult != nil {
 			taskResult.Wait(ctx)
 		}
@@ -362,17 +331,13 @@ func TestFaultInjectionSkipCountWithMaxCount(t *testing.T) {
 		for i := 0; i < 2; i++ {
 			vm.PowerOff(ctx)
 			_, err = vm.PowerOn(ctx)
-			if err == nil {
-				t.Fatalf("expected error on attempt %d", i+2)
-			}
+			require.Error(t, err, "expected error on attempt %d", i+2)
 		}
 
 		// Fourth attempt should succeed (max count reached)
 		vm.PowerOff(ctx)
 		taskResult, err = vm.PowerOn(ctx)
-		if err != nil {
-			t.Fatalf("expected success on fourth attempt (max count reached), got: %v", err)
-		}
+		require.NoError(t, err, "expected success on fourth attempt (max count reached)")
 		if taskResult != nil {
 			taskResult.Wait(ctx)
 		}
@@ -396,7 +361,7 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 				MethodName:              "PowerOnVM_Task",
 				ObjectType:              "*",
 				ObjectName:              "*",
-				InclusionPropertyFilter: []string{"Config.Name == 'DC0_C0_RP0_VM0'"},
+				InclusionPropertyFilter: FaultFilterAll("Config.Name == DC0_C0_RP0_VM0"),
 				Probability:             1.0,
 				FaultType:               FaultTypeGeneric,
 				Message:                 "Should trigger for DC0_C0_RP0_VM0",
@@ -406,34 +371,19 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 			expectedLogMessage: "Inclusion filter (==) worked",
 		},
 		{
-			name: "Inclusion filter with inequality operator (should not match)",
+			name: "Inclusion filter with wildcard pattern",
 			rule: &FaultInjectionRule{
 				MethodName:              "PowerOnVM_Task",
 				ObjectType:              "*",
 				ObjectName:              "*",
-				InclusionPropertyFilter: []string{"Config.Name != 'DC0_C0_RP0_VM0'"},
-				Probability:             1.0,
-				FaultType:               FaultTypeGeneric,
-				Message:                 "Should not trigger for DC0_C0_RP0_VM0",
-				Enabled:                 true,
-			},
-			expectError:        false,
-			expectedLogMessage: "Inclusion filter (!=) correctly excluded the VM",
-		},
-		{
-			name: "Inclusion filter with regexp operator",
-			rule: &FaultInjectionRule{
-				MethodName:              "PowerOnVM_Task",
-				ObjectType:              "*",
-				ObjectName:              "*",
-				InclusionPropertyFilter: []string{"Config.Name ~= '^DC0_C0.*VM0$'"},
+				InclusionPropertyFilter: FaultFilterAll("Config.Name == DC0_C0*VM0"),
 				Probability:             1.0,
 				FaultType:               FaultTypeGeneric,
 				Message:                 "Should trigger for DC0_C0_RP0_VM0",
 				Enabled:                 true,
 			},
 			expectError:        true,
-			expectedLogMessage: "Inclusion filter (~=) worked",
+			expectedLogMessage: "Inclusion filter (wildcard) worked",
 		},
 		{
 			name: "Multiple inclusion filters (AND - all must match)",
@@ -441,7 +391,7 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 				MethodName:              "PowerOnVM_Task",
 				ObjectType:              "*",
 				ObjectName:              "*",
-				InclusionPropertyFilter: []string{"Config.Name ~= '^DC0.*'", "Config.Name ~= '.*VM0$'"},
+				InclusionPropertyFilter: FaultFilterAll("Config.Name == DC0*", "Runtime.PowerState == poweredOff"),
 				Probability:             1.0,
 				FaultType:               FaultTypeGeneric,
 				Message:                 "Should trigger when both filters match",
@@ -456,7 +406,7 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 				MethodName:              "PowerOnVM_Task",
 				ObjectType:              "*",
 				ObjectName:              "*",
-				InclusionPropertyFilter: []string{"Config.Name ~= '^DC0.*'", "Config.Name == 'nonexistent'"},
+				InclusionPropertyFilter: FaultFilterAll("Config.Name == DC0*", "Runtime.PowerState == poweredOn"),
 				Probability:             1.0,
 				FaultType:               FaultTypeGeneric,
 				Message:                 "Should not trigger when one filter doesn't match",
@@ -465,6 +415,21 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 			expectError:        false,
 			expectedLogMessage: "Multiple inclusion filters (AND) correctly failed when one doesn't match",
 		},
+		{
+			name: "Property is present (wildcard match)",
+			rule: &FaultInjectionRule{
+				MethodName:              "PowerOnVM_Task",
+				ObjectType:              "*",
+				ObjectName:              "*",
+				InclusionPropertyFilter: FaultFilterAll("Config.Name == *"),
+				Probability:             1.0,
+				FaultType:               FaultTypeGeneric,
+				Message:                 "Should trigger when property is present",
+				Enabled:                 true,
+			},
+			expectError:        true,
+			expectedLogMessage: "Property is present (wildcard) worked",
+		},
 	}
 
 	Test(func(ctx context.Context, c *vim25.Client) {
@@ -472,9 +437,7 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
@@ -483,20 +446,15 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 
 				// Always power off before test, ignoring "already powered off" errors
 				_, err := vm.PowerOff(ctx)
-				if err != nil && !fault.IsAlreadyPoweredOffError(err) {
-					t.Fatalf("unexpected error powering off VM: %v", err)
-				}
+				require.True(t, err == nil || fault.IsAlreadyPoweredOffError(err), "unexpected error powering off VM: %v", err)
 
 				taskResult, err := vm.PowerOn(ctx)
+
 				if tc.expectError {
-					if err == nil {
-						t.Fatalf("expected error for test case: %s", tc.name)
-					}
+					require.Error(t, err, "expected error for test case: %s", tc.name)
 					t.Logf("%s, got error: %v", tc.expectedLogMessage, err)
 				} else {
-					if err != nil {
-						t.Fatalf("expected success for test case: %s, got: %v", tc.name, err)
-					}
+					require.NoError(t, err, "expected success for test case: %s", tc.name)
 					if taskResult != nil {
 						taskResult.Wait(ctx)
 					}
@@ -505,6 +463,74 @@ func TestFaultInjectionInclusionPropertyFilter(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestFaultInjectionIncorrectFilterSpecifications(t *testing.T) {
+	testCases := []struct {
+		name     string
+		filters  []string
+		panicMsg string
+	}{
+		{
+			name:     "empty filter string",
+			filters:  []string{""},
+			panicMsg: "empty filter string",
+		},
+		{
+			name:     "whitespace only filter string",
+			filters:  []string{"   "},
+			panicMsg: "empty filter string",
+		},
+		{
+			name:     "missing separator",
+			filters:  []string{"Config.Name DC0_C0_RP0_VM0"},
+			panicMsg: "invalid property filter format",
+		},
+		{
+			name:     "missing value",
+			filters:  []string{"Config.Name == "},
+			panicMsg: "invalid property filter format",
+		},
+		{
+			name:     "empty property path",
+			filters:  []string{" == value"},
+			panicMsg: "invalid property filter format",
+		},
+		{
+			name:     "whitespace property path",
+			filters:  []string{"   == value"},
+			panicMsg: "invalid property filter format",
+		},
+		{
+			name:     "duplicate property path",
+			filters:  []string{"Config.Name == DC0*", "Config.Name == *VM0"},
+			panicMsg: "multiple inclusion filters specified for property",
+		},
+		{
+			name:     "duplicate property path case insensitive",
+			filters:  []string{"Config.Name == DC0*", "config.name == *VM0"},
+			panicMsg: "multiple inclusion filters specified for property",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			var panicValue interface{}
+			func() {
+				defer func() {
+					panicValue = recover()
+				}()
+				_ = FaultFilterAll(tc.filters...)
+			}()
+
+			require.NotNil(t, panicValue, "expected panic for test case: %s", tc.name)
+			if tc.panicMsg != "" {
+				panicStr := fmt.Sprintf("%v", panicValue)
+				require.Contains(t, panicStr, tc.panicMsg, "panic message should contain: %s", tc.panicMsg)
+			}
+			t.Logf("Got expected panic: %v", panicValue)
+		})
+	}
 }
 
 func TestFaultInjectionExclusionPropertyFilter(t *testing.T) {
@@ -522,7 +548,7 @@ func TestFaultInjectionExclusionPropertyFilter(t *testing.T) {
 				MethodName:              "PowerOnVM_Task",
 				ObjectType:              "*",
 				ObjectName:              "*",
-				ExclusionPropertyFilter: []string{"Config.Name == 'DC0_C0_RP0_VM0'"},
+				ExclusionPropertyFilter: FaultFilterAny("Config.Name == DC0_C0_RP0_VM0"),
 				Probability:             1.0,
 				FaultType:               FaultTypeGeneric,
 				Message:                 "Should not trigger for DC0_C0_RP0_VM0",
@@ -532,34 +558,19 @@ func TestFaultInjectionExclusionPropertyFilter(t *testing.T) {
 			expectedLogMessage: "Exclusion filter (==) correctly excluded the VM",
 		},
 		{
-			name: "Exclusion filter with inequality operator (should not exclude)",
+			name: "Exclusion filter with wildcard pattern",
 			rule: &FaultInjectionRule{
 				MethodName:              "PowerOnVM_Task",
 				ObjectType:              "*",
 				ObjectName:              "*",
-				ExclusionPropertyFilter: []string{"Config.Name != 'DC0_C0_RP0_VM0'"},
-				Probability:             1.0,
-				FaultType:               FaultTypeGeneric,
-				Message:                 "Should trigger for DC0_C0_RP0_VM0",
-				Enabled:                 true,
-			},
-			expectError:        true,
-			expectedLogMessage: "Exclusion filter (!=) correctly did not exclude the VM",
-		},
-		{
-			name: "Exclusion filter with regexp operator",
-			rule: &FaultInjectionRule{
-				MethodName:              "PowerOnVM_Task",
-				ObjectType:              "*",
-				ObjectName:              "*",
-				ExclusionPropertyFilter: []string{"Config.Name ~= '^DC0_C0.*VM0$'"},
+				ExclusionPropertyFilter: FaultFilterAny("Config.Name == DC0_C0*VM0"),
 				Probability:             1.0,
 				FaultType:               FaultTypeGeneric,
 				Message:                 "Should not trigger for DC0_C0_RP0_VM0",
 				Enabled:                 true,
 			},
 			expectError:        false,
-			expectedLogMessage: "Exclusion filter (~=) correctly excluded the VM",
+			expectedLogMessage: "Exclusion filter (wildcard) correctly excluded the VM",
 		},
 		{
 			name: "Multiple exclusion filters (OR - any match excludes)",
@@ -567,7 +578,7 @@ func TestFaultInjectionExclusionPropertyFilter(t *testing.T) {
 				MethodName:              "PowerOnVM_Task",
 				ObjectType:              "*",
 				ObjectName:              "*",
-				ExclusionPropertyFilter: []string{"Config.Name == 'DC0_C0_RP0_VM0'", "Config.Name == 'other'"},
+				ExclusionPropertyFilter: FaultFilterAny("Config.Name == DC0_C0_RP0_VM0", "Config.Name == other"),
 				Probability:             1.0,
 				FaultType:               FaultTypeGeneric,
 				Message:                 "Should not trigger when any exclusion filter matches",
@@ -583,9 +594,7 @@ func TestFaultInjectionExclusionPropertyFilter(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err)
 
 		for _, tc := range testCases {
 			t.Run(tc.name, func(t *testing.T) {
@@ -594,20 +603,14 @@ func TestFaultInjectionExclusionPropertyFilter(t *testing.T) {
 
 				// Always power off before test, ignoring "already powered off" errors
 				_, err := vm.PowerOff(ctx)
-				if err != nil && !fault.IsAlreadyPoweredOffError(err) {
-					t.Fatalf("unexpected error powering off VM: %v", err)
-				}
+				require.True(t, err == nil || fault.IsAlreadyPoweredOffError(err), "unexpected error powering off VM: %v", err)
 
 				taskResult, err := vm.PowerOn(ctx)
 				if tc.expectError {
-					if err == nil {
-						t.Fatalf("expected error for test case: %s", tc.name)
-					}
+					require.Error(t, err, "expected error for test case: %s", tc.name)
 					t.Logf("%s, got error: %v", tc.expectedLogMessage, err)
 				} else {
-					if err != nil {
-						t.Fatalf("expected success for test case: %s, got: %v", tc.name, err)
-					}
+					require.NoError(t, err, "expected success for test case: %s", tc.name)
 					if taskResult != nil {
 						taskResult.Wait(ctx)
 					}
@@ -624,9 +627,18 @@ func TestFaultInjectionPropertyFilterCombined(t *testing.T) {
 
 		finder := find.NewFinder(c)
 		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
-		if err != nil {
-			t.Fatal(err)
-		}
+		require.NoError(t, err, "failed to find exclusion VM")
+
+		vm2, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM1")
+		require.NoError(t, err, "failed to find inclusion VM")
+
+		// Always power off before test, ignoring "already powered off" errors
+		_, err = vm.PowerOff(ctx)
+		require.True(t, err == nil || fault.IsAlreadyPoweredOffError(err), "unexpected error powering off VM: %v", err)
+
+		// Always power off before test, ignoring "already powered off" errors
+		_, err = vm2.PowerOff(ctx)
+		require.True(t, err == nil || fault.IsAlreadyPoweredOffError(err), "unexpected error powering off VM2: %v", err)
 
 		// Test combined inclusion and exclusion filters
 		// Include VMs starting with "DC0", but exclude "DC0_C0_RP0_VM0"
@@ -634,8 +646,8 @@ func TestFaultInjectionPropertyFilterCombined(t *testing.T) {
 			MethodName:              "PowerOnVM_Task",
 			ObjectType:              "*",
 			ObjectName:              "*",
-			InclusionPropertyFilter: []string{"Config.Name ~= '^DC0.*'"},
-			ExclusionPropertyFilter: []string{"Config.Name == 'DC0_C0_RP0_VM0'"},
+			InclusionPropertyFilter: FaultFilterAll("Config.Name == DC0*"),
+			ExclusionPropertyFilter: FaultFilterAny("Config.Name == DC0_C0_RP0_VM0"),
 			Probability:             1.0,
 			FaultType:               FaultTypeGeneric,
 			Message:                 "Combined filter test",
@@ -644,14 +656,12 @@ func TestFaultInjectionPropertyFilterCombined(t *testing.T) {
 		service.AddFaultRule(rule)
 
 		// This should succeed (included by first filter but excluded by second)
-		taskResult, err := vm.PowerOn(ctx)
-		if err != nil {
-			t.Fatalf("expected success (excluded by exclusion filter), got: %v", err)
-		}
-		if taskResult != nil {
-			taskResult.Wait(ctx)
-		}
-		t.Logf("Combined filters worked correctly")
+		_, err = vm.PowerOn(ctx)
+		require.NoError(t, err, "expected success (excluded by exclusion filter)")
+
+		// This should fail (included by first filter and NOT excluded by second)
+		_, err = vm2.PowerOn(ctx)
+		require.Error(t, err, "expected error (included by inclusion filter and not excluded)")
 
 		service.ClearFaultRules()
 	})
