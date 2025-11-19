@@ -587,7 +587,7 @@ EVALUATION LICENSE.  If You are licensing the Software for evaluation purposes, 
         <Label>3.1. Load Balancer IP Ranges, comma-separated in CIDR format (Eg 1.2.3.4/28,5.6.7.8/28)</Label>
         <Description>The IP ranges the load balancer will use for Kubernetes Services and Control Planes. The Appliance will currently respond to ALL the IPs in these ranges whether they're assigned or not. As such, these ranges must not overlap with the IPs assigned for the appliance or any other VMs on the network.</Description>
       </Property>
-      <Property ovf:key="dataplane_port" ovf:qualifiers="MinValue(1),MaxValue(65535)" ovf:type="int" ovf:userConfigurable="true" ovf:value="5556">
+      <Property ovf:key="dataplane_port" ovf:qualifiers="MinValue(1),MaxValue(65535)" ovf:type="int" ovf:userConfigurable="true" ovf:defaultValue="5556">
         <Label>3.2. Dataplane API Management Port</Label>
         <Description>Specifies the port on which the Dataplane API will be advertized on the Management Network.</Description>
       </Property>
