@@ -213,7 +213,7 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 
 		assert.Equal(t, "haproxy", cs.Name)
 		assert.Equal(t, int32(2), cs.NumCPUs)
-		assert.Equal(t, int32(2), cs.NumCoresPerSocket)
+		assert.Equal(t, int32(2), *cs.NumCoresPerSocket)
 		assert.Equal(t, int64(4096), cs.MemoryMB)
 		assert.Equal(t, "vmx-13", cs.Version)
 

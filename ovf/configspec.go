@@ -286,7 +286,7 @@ func (e Envelope) toHardware(
 			}
 			dst.NumCPUs = int32(*item.VirtualQuantity)
 			if cps := item.CoresPerSocket; cps != nil {
-				dst.NumCoresPerSocket = cps.Value
+				dst.NumCoresPerSocket = &cps.Value
 			}
 
 		case Memory: // 4

@@ -427,7 +427,7 @@ var vmInfoObjForTests = VirtualMachineConfigInfo{
 	RebootPowerOff: NewBool(false),
 	Hardware: VirtualHardware{
 		NumCPU:              1,
-		NumCoresPerSocket:   1,
+		NumCoresPerSocket:   NewInt32(1),
 		AutoCoresPerSocket:  NewBool(true),
 		MemoryMB:            2048,
 		VirtualICH7MPresent: NewBool(false),
