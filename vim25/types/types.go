@@ -89949,7 +89949,7 @@ type VirtualMachineConfigSpec struct {
 	// if present, and use default coresPerSocket behavior.
 	// Leave "numCoresPerSocket" unset to continue with existing
 	// configuration (either manual or default).
-	NumCoresPerSocket int32 `xml:"numCoresPerSocket,omitempty" json:"numCoresPerSocket,omitempty"`
+	NumCoresPerSocket *int32 `xml:"numCoresPerSocket,omitempty" json:"numCoresPerSocket,omitempty"`
 	// Size of a virtual machine's memory, in MB.
 	//
 	// Reconfigure privilege: VirtualMachine.Config.Memory
