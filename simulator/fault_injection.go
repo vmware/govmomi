@@ -25,9 +25,9 @@ type FaultFilterCallback func(obj mo.Reference) bool
 // FaultFilterAll (AND) takes a set of strings expressing propertyPath:value pairs using the property.Match format.
 // Only equality matches are currently supported: "property.path == value"
 // Examples:
-//   - FaultFilterAll("Config.Name == DC0_C0_RP0_VM0")
-//   - FaultFilterAll("Config.Name == DC0_C0*", "Runtime.PowerState == poweredOn")
-//   - FaultFilterAll("Config.Name == *") // match all objects where the property exists
+//   - FaultFilterAll("config.name == DC0_C0_RP0_VM0")
+//   - FaultFilterAll("config.name == DC0_C0*", "runtime.powerState == poweredOn")
+//   - FaultFilterAll("config.name == *") // match all objects where the property exists
 //
 // Panics on code-level usage errors:
 //   - Empty filter strings
@@ -116,9 +116,9 @@ type FaultInjectionRule struct {
 	// ObjectName above is a convenience as it's such a common filter, but can be expressed here.
 	// Use FaultFilterAll (AND) or FaultFilterAny (OR) helper functions to create from string expressions for common cases.
 	// Examples:
-	//   - InclusionPropertyFilter: FaultFilterAll("Config.Name == DC0_C0_RP0_VM0")
-	//   - InclusionPropertyFilter: FaultFilterAll("Config.Name == DC0_C0*", "Runtime.PowerState == poweredOn")
-	//   - InclusionPropertyFilter: FaultFilterAll("Config.Name == *") // match all objects where the property exists
+	//   - InclusionPropertyFilter: FaultFilterAll("config.name == DC0_C0_RP0_VM0")
+	//   - InclusionPropertyFilter: FaultFilterAll("config.name == DC0_C0*", "runtime.powerState == poweredOn")
+	//   - InclusionPropertyFilter: FaultFilterAll("config.name == *") // match all objects where the property exists
 	//   - InclusionPropertyFilter: func(obj mo.Reference) bool { ... } // custom filter logic
 	// Note: To express "property != value", use an exclusion filter: FaultFilterAny("property == value")
 	// The order of evaluation is:
@@ -132,8 +132,8 @@ type FaultInjectionRule struct {
 	// If the function returns true, the object is excluded.
 	// Use FaultFilterAll (AND) or FaultFilterAny (OR) helper functions to create from string expressions for common cases.
 	// Examples:
-	//   - ExclusionPropertyFilter: FaultFilterAny("Config.Name == test-vm") to exclude objects with name "test-vm"
-	//   - ExclusionPropertyFilter: FaultFilterAny("Config.Name == ", "Runtime.PowerState == ") to exclude objects where Name or PowerState are empty
+	//   - ExclusionPropertyFilter: FaultFilterAny("config.name == test-vm") to exclude objects with name "test-vm"
+	//   - ExclusionPropertyFilter: FaultFilterAny("config.name == ", "runtime.powerState == ") to exclude objects where Name or PowerState are empty
 	//   - ExclusionPropertyFilter: func(obj mo.Reference) bool { ... } // custom exclusion logic
 	ExclusionPropertyFilter FaultFilterCallback
 
@@ -457,6 +457,7 @@ func (f *FaultInjector) ResetStats() {
 
 // parsePropertyFilters parses an array of string filter expressions and consolidates them
 // into a single property.Match map. Only equality matches are supported: "property.path == value"
+// Property paths should be in camelCase format (e.g., "config.name", "runtime.powerState").
 // Panics on code-level usage errors:
 //   - Empty filter strings
 //   - Invalid filter format (missing " == " separator)
@@ -483,13 +484,6 @@ func parsePropertyFilters(filterStrs []string) property.Match {
 		}
 		// nil expected values are ok - that's how we expect to match empty properties
 
-		// Convert property path to camelCase (property collector format)
-		// e.g., "Config.Name" -> "config.name"
-		pathParts := strings.Split(propertyPath, ".")
-		for i, part := range pathParts {
-			pathParts[i] = lcFirst(part)
-		}
-		propertyPath = strings.Join(pathParts, ".")
 
 		// Panic if this property path already exists (multiple filters for same property)
 		if _, exists := match[propertyPath]; exists {
