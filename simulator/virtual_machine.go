@@ -126,10 +126,9 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	dsPath := path.Dir(spec.Files.VmPathName)
 	vm.uid = internal.OID(spec.Files.VmPathName)
 
-	var coresPerSocket int32 = 1
 	defaults := types.VirtualMachineConfigSpec{
 		NumCPUs:           1,
-		NumCoresPerSocket: &coresPerSocket,
+		NumCoresPerSocket: types.NewInt32(1),
 		MemoryMB:          32,
 		Uuid:              vm.uid.String(),
 		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
@@ -326,8 +325,8 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Summary.Config.NumCpu = vm.Config.Hardware.NumCPU
 	}
 
-	if spec.NumCoresPerSocket != nil && *spec.NumCoresPerSocket != 0 {
-		vm.Config.Hardware.NumCoresPerSocket = *spec.NumCoresPerSocket
+	if spec.NumCoresPerSocket != nil {
+		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
 	}
 
 	if spec.GuestId != "" {
@@ -2599,7 +2598,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		// Copying hardware properties
 		config.NumCPUs = vm.Config.Hardware.NumCPU
 		config.MemoryMB = int64(vm.Config.Hardware.MemoryMB)
-		config.NumCoresPerSocket = &vm.Config.Hardware.NumCoresPerSocket
+		config.NumCoresPerSocket = vm.Config.Hardware.NumCoresPerSocket
 		config.VirtualICH7MPresent = vm.Config.Hardware.VirtualICH7MPresent
 		config.VirtualSMCPresent = vm.Config.Hardware.VirtualSMCPresent
 

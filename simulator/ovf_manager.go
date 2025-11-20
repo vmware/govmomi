@@ -104,7 +104,6 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 	ds := ctx.Map.Get(req.Datastore).(*Datastore)
 	path := object.DatastorePath{Datastore: ds.Name}
 	vapp := &types.VAppConfigSpec{}
-	var coresPerSocket int32 = 1
 	spec := &types.VirtualMachineImportSpec{
 		ConfigSpec: types.VirtualMachineConfigSpec{
 			Name:    cisp.EntityName,
@@ -114,7 +113,7 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 				VmPathName: path.String(),
 			},
 			NumCPUs:           1,
-			NumCoresPerSocket: &coresPerSocket,
+			NumCoresPerSocket: types.NewInt32(1),
 			MemoryMB:          32,
 			VAppConfig:        vapp,
 		},

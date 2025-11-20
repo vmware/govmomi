@@ -126,7 +126,7 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 		RebootPowerOff:               ci.RebootPowerOff,
 		NumCPUs:                      ci.Hardware.NumCPU,
 		VcpuConfig:                   ci.VcpuConfig,
-		NumCoresPerSocket:            &ci.Hardware.NumCoresPerSocket,
+		NumCoresPerSocket:            ci.Hardware.NumCoresPerSocket,
 		MemoryMB:                     int64(ci.Hardware.MemoryMB),
 		MemoryHotAddEnabled:          ci.MemoryHotAddEnabled,
 		CpuHotAddEnabled:             ci.CpuHotAddEnabled,

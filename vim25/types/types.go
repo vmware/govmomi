@@ -88398,7 +88398,7 @@ type VirtualHardware struct {
 	// implies numCoresPerSocket is 1.
 	// In other cases, this field represents the actual virtual socket
 	// size seen by the virtual machine.
-	NumCoresPerSocket int32 `xml:"numCoresPerSocket,omitempty" json:"numCoresPerSocket,omitempty"`
+	NumCoresPerSocket *int32 `xml:"numCoresPerSocket,omitempty" json:"numCoresPerSocket,omitempty"`
 	// Cores per socket is automatically determined.
 	AutoCoresPerSocket *bool `xml:"autoCoresPerSocket" json:"autoCoresPerSocket,omitempty" vim:"8.0.0.1"`
 	// Memory size, in MB.
