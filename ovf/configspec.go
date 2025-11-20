@@ -1057,21 +1057,7 @@ func (e Envelope) toVAppConfig(
 				// configuration.
 				continue
 			}
-
-			// Get the value for the current configuration from the list of
-			// values that are per-config.
-			var value string
-			if p.Value != nil {
-				value = *p.Value
-			}
-			for _, v := range p.Values {
-				if v.Configuration == nil || *v.Configuration == configName {
-					value = v.Value
-					break
-				}
-			}
-
-			np := types.VAppPropertySpec{
+			vapp.Property = append(vapp.Property, types.VAppPropertySpec{
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: types.ArrayUpdateOperationAdd,
 				},
@@ -1085,13 +1071,10 @@ func (e Envelope) toVAppConfig(
 					Type:             p.Type,
 					UserConfigurable: p.UserConfigurable,
 					DefaultValue:     deref(p.Default),
-					Value:            value,
+					Value:            "",
 					Description:      deref(p.Description),
 				},
-			}
-
-			vapp.Property = append(vapp.Property, np)
-
+			})
 			index++
 		}
 	}
