@@ -49,7 +49,7 @@ Example 3 from https://www.dmtf.org/sites/default/files/standards/documents/DSP0
                 <Property ovf:key="adminemail" ovf:type="string">
                     <Description>Email address of administrator</Description>
                 </Property>
-                <Property ovf:key="app_ip" ovf:type="string" ovf:defaultValue="192.168.0.10" ovf:userConfigurable="false">
+                <Property ovf:key="app_ip" ovf:type="string" ovf:defaultValue="192.168.0.10">
                     <Description>The IP address of this appliance</Description>
                 </Property>
             </ProductSection>
@@ -124,7 +124,7 @@ Example 3 from https://www.dmtf.org/sites/default/files/standards/documents/DSP0
                 <Property ovf:key="adminemail" ovf:type="string">
                     <Description>Email address of administrator</Description>
                 </Property>
-                <Property ovf:key="app_ip" ovf:type="string" ovf:defaultValue="192.168.0.10" ovf:userConfigurable="false">
+                <Property ovf:key="app_ip" ovf:type="string" ovf:defaultValue="192.168.0.10">
                     <Description>The IP address of this appliance</Description>
                 </Property>
             </ProductSection>
