@@ -111,14 +111,15 @@ type Property struct {
 	Type             string  `xml:"type,attr" json:"type,omitempty"`
 	Qualifiers       *string `xml:"qualifiers,attr" json:"qualifiers,omitempty"`
 	UserConfigurable *bool   `xml:"userConfigurable,attr" json:"userConfigurable,omitempty"`
-	Default          *string `xml:"value,attr" json:"default,omitempty"`
+	Default          *string `xml:"defaultValue,attr" json:"defaultValue,omitempty"`
 	Password         *bool   `xml:"password,attr" json:"password,omitempty"`
 	Configuration    *string `xml:"configuration,attr" json:"configuration,omitempty"`
+	Value            *string `xml:"value,attr" json:"value,omitempty"`
 
 	Label       *string `xml:"Label" json:"label,omitempty"`
 	Description *string `xml:"Description" json:"description,omitempty"`
 
-	Values []PropertyConfigurationValue `xml:"Value" json:"value,omitempty"`
+	Values []PropertyConfigurationValue `xml:"Value" json:"values,omitempty"`
 }
 
 type PropertyConfigurationValue struct {

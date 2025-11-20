@@ -146,7 +146,7 @@
         <Label>Enable SSH root login</Label>
         <Description>Check here to enable SSH login for root user.  SSH login for root is disabled by default.</Description>
       </Property>
-      <Property ovf:key="nfs_mount" ovf:type="string" ovf:userConfigurable="false" ovf:value="/transfer" ovf:qualifiers="MinLen(0),MaxLen(65535)">
+      <Property ovf:key="nfs_mount" ovf:type="string" ovf:userConfigurable="false" ovf:defaultValue="/transfer" ovf:qualifiers="MinLen(0),MaxLen(65535)">
         <Label>NFS mount for transfer file location</Label>
         <Description>Ex: 10.0.0.1:/transfer</Description>
       </Property>
