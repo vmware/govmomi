@@ -1057,7 +1057,21 @@ func (e Envelope) toVAppConfig(
 				// configuration.
 				continue
 			}
-			vapp.Property = append(vapp.Property, types.VAppPropertySpec{
+
+			// Get the default values for the current configuration from the
+			// list of default values that are per-config.
+			var value string
+			if p.Default != nil {
+				value = *p.Default
+			}
+			for _, v := range p.Values {
+				if v.Configuration == nil || *v.Configuration == configName {
+					value = v.Value
+					break
+				}
+			}
+
+			np := types.VAppPropertySpec{
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: types.ArrayUpdateOperationAdd,
 				},
@@ -1070,11 +1084,23 @@ func (e Envelope) toVAppConfig(
 					Label:            deref(p.Label),
 					Type:             p.Type,
 					UserConfigurable: p.UserConfigurable,
-					DefaultValue:     deref(p.Default),
+					DefaultValue:     value,
 					Value:            "",
 					Description:      deref(p.Description),
 				},
-			})
+			}
+
+			// Per the OVF spec, if userConfigurable is omitted or false, then
+			// ovf:value represents the the value to be used during system
+			// installation.
+			//
+			// If userConfigurable is true, then ovf:value is just the default
+			// value.
+			if p.UserConfigurable == nil || !*p.UserConfigurable {
+				np.Info.Value = value
+			}
+
+			vapp.Property = append(vapp.Property, np)
 			index++
 		}
 	}

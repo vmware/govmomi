@@ -90,7 +90,10 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 					assert.Equal(t, "app_ip", va.Property[1].Info.Id)
 					assert.Equal(t, "string", va.Property[1].Info.Type)
 					assert.Equal(t, "The IP address of this appliance", va.Property[1].Info.Description)
-					assert.Equal(t, "", va.Property[1].Info.DefaultValue) // DefaultValue not being parsed correctly
+					assert.Equal(t, "192.168.0.10", va.Property[1].Info.DefaultValue)
+					assert.NotNil(t, va.Property[1].Info.UserConfigurable)
+					assert.True(t, *va.Property[1].Info.UserConfigurable)
+					assert.Empty(t, va.Property[1].Info.Value)
 				}
 			}
 		})
@@ -132,7 +135,10 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 					assert.Equal(t, "app_ip", va.Property[1].Info.Id)
 					assert.Equal(t, "string", va.Property[1].Info.Type)
 					assert.Equal(t, "The IP address of this appliance", va.Property[1].Info.Description)
-					assert.Equal(t, "", va.Property[1].Info.DefaultValue) // DefaultValue not being parsed correctly
+					assert.Equal(t, "192.168.0.10", va.Property[1].Info.DefaultValue)
+					assert.Nil(t, va.Property[1].Info.UserConfigurable)
+					assert.Equal(t, "192.168.0.10", va.Property[1].Info.Value)
+
 				}
 			}
 		})
@@ -544,6 +550,7 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 								Type:             "string",
 								UserConfigurable: types.NewBool(false),
 								DefaultValue:     "1615488399",
+								Value:            "1615488399",
 							},
 						},
 						{
@@ -557,6 +564,7 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 								Type:             "string",
 								UserConfigurable: types.NewBool(false),
 								DefaultValue:     "2021-03-11T18:46:39Z",
+								Value:            "2021-03-11T18:46:39Z",
 							},
 						},
 
