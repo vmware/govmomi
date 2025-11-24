@@ -134,11 +134,11 @@ type Proxy struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Workloads
 // Since 8.0.0.1
 type Workloads struct {
-	Network              WorkloadNetwork        `json:"network"`
-	Edge                 Edge                   `json:"edge"`
-	KubeAPIServerOptions KubeAPIServerOptions   `json:"kube_api_server_options"`
-	Images               Images                 `json:"images"`
-	Storage              WorkloadsStorageConfig `json:"storage"`
+	Network              WorkloadNetwork         `json:"network"`
+	Edge                 Edge                    `json:"edge"`
+	KubeAPIServerOptions KubeAPIServerOptions    `json:"kube_api_server_options"`
+	Images               *Images                 `json:"images,omitempty"`
+	Storage              *WorkloadsStorageConfig `json:"storage,omitempty"`
 }
 
 // WorkloadNetwork
