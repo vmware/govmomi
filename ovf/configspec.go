@@ -1071,6 +1071,9 @@ func (e Envelope) toVAppConfig(
 				}
 			}
 
+			if p.UserConfigurable == nil {
+				p.UserConfigurable = types.NewBool(false)
+			}
 			np := types.VAppPropertySpec{
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: types.ArrayUpdateOperationAdd,
