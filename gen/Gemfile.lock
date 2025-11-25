@@ -5,9 +5,9 @@ GEM
     nokogiri (1.18.10)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
-    power_assert (3.0.0)
+    power_assert (3.0.1)
     racc (1.8.1)
-    test-unit (3.7.1)
+    test-unit (3.7.2)
       power_assert
     yaml (0.4.0)
 
