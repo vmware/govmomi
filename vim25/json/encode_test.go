@@ -7,6 +7,7 @@ package json
 import (
 	"bytes"
 	"encoding"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -1185,11 +1186,11 @@ func TestMarshalerError(t *testing.T) {
 		want string
 	}{
 		{
-			&MarshalerError{st, fmt.Errorf(errText), ""},
+			&MarshalerError{st, errors.New(errText), ""},
 			"json: error calling MarshalJSON for type " + st.String() + ": " + errText,
 		},
 		{
-			&MarshalerError{st, fmt.Errorf(errText), "TestMarshalerError"},
+			&MarshalerError{st, errors.New(errText), "TestMarshalerError"},
 			"json: error calling TestMarshalerError for type " + st.String() + ": " + errText,
 		},
 	}

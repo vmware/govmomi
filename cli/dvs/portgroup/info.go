@@ -138,7 +138,7 @@ func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 	tabWidthInt := 22
 	tabWidth := fmt.Sprintf("%d", tabWidthInt)
 	headLen := 9*(tabWidthInt+2) - 1
-	fmt.Printf("+" + strings.Repeat("-", headLen) + "+\n")
+	fmt.Print("+" + strings.Repeat("-", headLen) + "+\n")
 	format := "| %-" + tabWidth +
 		"s| %-" + tabWidth +
 		"s| %-" + tabWidth +
@@ -159,7 +159,7 @@ func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 		"SourceIpPort",
 		"DestinationAddress",
 		"DestinationIpPort")
-	fmt.Printf("+" + strings.Repeat("-", headLen) + "+\n")
+	fmt.Print("+" + strings.Repeat("-", headLen) + "+\n")
 	for _, id := range keys {
 		fmt.Printf(format,
 			fmt.Sprintf("%d", id),
@@ -172,7 +172,7 @@ func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 			trafficRuleSet[portID][id].DestinationAddress,
 			trafficRuleSet[portID][id].DestinationIpPort)
 	}
-	fmt.Printf("+" + strings.Repeat("-", headLen) + "+\n")
+	fmt.Print("+" + strings.Repeat("-", headLen) + "+\n")
 }
 
 func (r *infoResult) Write(w io.Writer) error {

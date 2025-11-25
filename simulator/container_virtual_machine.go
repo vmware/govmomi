@@ -8,7 +8,6 @@ import (
 	"archive/tar"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -318,10 +317,9 @@ func (svm *simVM) start(ctx *Context) error {
 			// Wait for the task to complete and see if there is an error.
 			task.Wait()
 			if task.Info.Error != nil {
-				msg := fmt.Sprintf("failed to destroy vm: err=%v", *task.Info.Error)
-				svm.vm.logPrintf(msg)
-
-				return errors.New(msg)
+				err := fmt.Errorf("failed to destroy vm: %v", task.Info.Error)
+				svm.vm.logPrintf("%s", err.Error())
+				return err
 			}
 		}
 
