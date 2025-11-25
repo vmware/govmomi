@@ -414,7 +414,7 @@ type CloudNativeFileVolume struct {
 func (c *Manager) EnableOnZones(ctx context.Context, spec *EnableOnZonesSpec) (string, error) {
 	var response string
 	url := c.Resource(path.Join(internal.SupervisorsPath)).WithParam("action", "enable_on_zones")
-	err := c.Do(ctx, url.Request(http.MethodPost, spec), response)
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &response)
 	return response, err
 }
 
@@ -423,7 +423,7 @@ func (c *Manager) EnableOnZones(ctx context.Context, spec *EnableOnZonesSpec) (s
 func (c *Manager) EnableOnComputeCluster(ctx context.Context, id string, spec *EnableOnComputeClusterSpec) (string, error) {
 	var response string
 	url := c.Resource(path.Join(internal.SupervisorsPath, id)).WithParam("action", "enable_on_compute_cluster")
-	err := c.Do(ctx, url.Request(http.MethodPost, spec), response)
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &response)
 	return response, err
 }
 
