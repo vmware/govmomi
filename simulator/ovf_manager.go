@@ -113,7 +113,7 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 				VmPathName: path.String(),
 			},
 			NumCPUs:           1,
-			NumCoresPerSocket: 1,
+			NumCoresPerSocket: types.NewInt32(1),
 			MemoryMB:          32,
 			VAppConfig:        vapp,
 		},

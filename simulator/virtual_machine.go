@@ -128,7 +128,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 
 	defaults := types.VirtualMachineConfigSpec{
 		NumCPUs:           1,
-		NumCoresPerSocket: 1,
+		NumCoresPerSocket: types.NewInt32(1),
 		MemoryMB:          32,
 		Uuid:              vm.uid.String(),
 		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
@@ -325,7 +325,7 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Summary.Config.NumCpu = vm.Config.Hardware.NumCPU
 	}
 
-	if spec.NumCoresPerSocket != 0 {
+	if spec.NumCoresPerSocket != nil {
 		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
 	}
 
