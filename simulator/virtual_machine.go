@@ -3408,33 +3408,24 @@ func (vm *VirtualMachine) updateTagSpec(
 	vmRef := vm.Reference()
 
 	for _, spec := range specs {
-		tagEntry := types.VslmTagEntry{}
-
-		// TagId can be specified by UUID or by NameId (tag name + category name).
-		// The tagManager uses VslmTagEntry which requires tag and category names.
+		tagID := spec.Id.Uuid
 		if spec.Id.NameId != nil {
-			tagEntry.TagName = spec.Id.NameId.Tag
-			tagEntry.ParentCategoryName = spec.Id.NameId.Category
-		} else if spec.Id.Uuid != "" {
-			// UUID-based lookup is not supported by the tagManager interface.
-			// Return an error indicating this limitation.
-			return &types.InvalidArgument{
-				InvalidProperty: "tagSpecs.id.uuid",
+			t, err := ctx.Map.tagManager.GetTagByCategoryAndName(
+				spec.Id.NameId.Category,
+				spec.Id.NameId.Tag)
+			if err != nil {
+				return err
 			}
-		} else {
-			// Neither NameId nor UUID specified
-			return &types.InvalidArgument{
-				InvalidProperty: "tagSpecs.id",
-			}
+			tagID = t
 		}
 
 		switch spec.Operation {
 		case types.ArrayUpdateOperationAdd:
-			if err := ctx.Map.tagManager.AttachTag(vmRef, tagEntry); err != nil {
+			if err := ctx.Map.tagManager.AttachTag(vmRef, tagID); err != nil {
 				return err
 			}
 		case types.ArrayUpdateOperationRemove:
-			if err := ctx.Map.tagManager.DetachTag(vmRef, tagEntry); err != nil {
+			if err := ctx.Map.tagManager.DetachTag(vmRef, tagID); err != nil {
 				return err
 			}
 		default:
