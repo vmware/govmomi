@@ -322,9 +322,18 @@ func (s *handler) findTag(e vim.VslmTagEntry) *tags.Tag {
 	return nil
 }
 
+func (s *handler) findTagByID(tagID string) *tags.Tag {
+	for _, t := range s.Tag {
+		if t.ID == tagID {
+			return t
+		}
+	}
+	return nil
+}
+
 // AttachedObjects is meant for internal use via simulator.Registry.tagManager
-func (s *handler) AttachedObjects(tag vim.VslmTagEntry) ([]vim.ManagedObjectReference, vim.BaseMethodFault) {
-	t := s.findTag(tag)
+func (s *handler) AttachedObjects(tagID string) ([]vim.ManagedObjectReference, vim.BaseMethodFault) {
+	t := s.findTagByID(tagID)
 	if t == nil {
 		return nil, new(vim.NotFound)
 	}
@@ -341,28 +350,23 @@ func (s *handler) AttachedObjects(tag vim.VslmTagEntry) ([]vim.ManagedObjectRefe
 }
 
 // AttachedTags is meant for internal use via simulator.Registry.tagManager
-func (s *handler) AttachedTags(ref vim.ManagedObjectReference) ([]vim.VslmTagEntry, vim.BaseMethodFault) {
+func (s *handler) AttachedTags(ref vim.ManagedObjectReference) ([]string, vim.BaseMethodFault) {
 	oid := internal.AssociatedObject{
 		Type:  ref.Type,
 		Value: ref.Value,
 	}
-	var tags []vim.VslmTagEntry
+	var tags []string
 	for id, objs := range s.Association {
 		if objs[oid] {
-			tag := s.Tag[id]
-			cat := s.Category[tag.CategoryID]
-			tags = append(tags, vim.VslmTagEntry{
-				TagName:            tag.Name,
-				ParentCategoryName: cat.Name,
-			})
+			tags = append(tags, id)
 		}
 	}
 	return tags, nil
 }
 
 // AttachTag is meant for internal use via simulator.Registry.tagManager
-func (s *handler) AttachTag(ref vim.ManagedObjectReference, tag vim.VslmTagEntry) vim.BaseMethodFault {
-	t := s.findTag(tag)
+func (s *handler) AttachTag(ref vim.ManagedObjectReference, tagID string) vim.BaseMethodFault {
+	t := s.findTagByID(tagID)
 	if t == nil {
 		return new(vim.NotFound)
 	}
@@ -374,8 +378,8 @@ func (s *handler) AttachTag(ref vim.ManagedObjectReference, tag vim.VslmTagEntry
 }
 
 // DetachTag is meant for internal use via simulator.Registry.tagManager
-func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry) vim.BaseMethodFault {
-	t := s.findTag(tag)
+func (s *handler) DetachTag(id vim.ManagedObjectReference, tagID string) vim.BaseMethodFault {
+	t := s.findTagByID(tagID)
 	if t == nil {
 		return new(vim.NotFound)
 	}
@@ -384,6 +388,27 @@ func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry)
 		Value: id.Value,
 	})
 	return nil
+}
+
+// GetTagByCategoryAndName is meant for internal use via simulator.Registry.tagManager
+func (s *handler) GetTagByCategoryAndName(category, name string) (string, vim.BaseMethodFault) {
+	t := s.findTag(vim.VslmTagEntry{
+		ParentCategoryName: category,
+		TagName:            name,
+	})
+	if t == nil {
+		return "", new(vim.NotFound)
+	}
+	return t.ID, nil
+}
+
+// GetTagCategoryAndName is meant for internal use via simulator.Registry.tagManager
+func (s *handler) GetTagCategoryAndName(tagID string) (string, string, vim.BaseMethodFault) {
+	t := s.findTagByID(tagID)
+	if t == nil {
+		return "", "", new(vim.NotFound)
+	}
+	return t.CategoryID, t.Name, nil
 }
 
 // StatusOK responds with http.StatusOK and encodes val, if specified, to JSON
