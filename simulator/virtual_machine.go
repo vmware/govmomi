@@ -599,6 +599,10 @@ func (vm *VirtualMachine) configure(ctx *Context, spec *types.VirtualMachineConf
 		}
 	}
 
+	if err := vm.updateTagSpec(ctx, spec.TagSpecs); err != nil {
+		return err
+	}
+
 	return vm.configureDevices(ctx, spec)
 }
 
@@ -3386,4 +3390,59 @@ func (vm *VirtualMachine) updateLastModifiedAndChangeVersion(ctx *Context) {
 			Op:   types.PropertyChangeOpAssign,
 		},
 	})
+}
+
+func (vm *VirtualMachine) updateTagSpec(
+	ctx *Context,
+	specs []types.TagSpec) types.BaseMethodFault {
+
+	if len(specs) == 0 {
+		return nil
+	}
+
+	// If the VAPI simulator is not loaded, the tagManager will be nil.
+	if ctx.Map.tagManager == nil {
+		return nil
+	}
+
+	vmRef := vm.Reference()
+
+	for _, spec := range specs {
+		tagEntry := types.VslmTagEntry{}
+
+		// TagId can be specified by UUID or by NameId (tag name + category name).
+		// The tagManager uses VslmTagEntry which requires tag and category names.
+		if spec.Id.NameId != nil {
+			tagEntry.TagName = spec.Id.NameId.Tag
+			tagEntry.ParentCategoryName = spec.Id.NameId.Category
+		} else if spec.Id.Uuid != "" {
+			// UUID-based lookup is not supported by the tagManager interface.
+			// Return an error indicating this limitation.
+			return &types.InvalidArgument{
+				InvalidProperty: "tagSpecs.id.uuid",
+			}
+		} else {
+			// Neither NameId nor UUID specified
+			return &types.InvalidArgument{
+				InvalidProperty: "tagSpecs.id",
+			}
+		}
+
+		switch spec.Operation {
+		case types.ArrayUpdateOperationAdd:
+			if err := ctx.Map.tagManager.AttachTag(vmRef, tagEntry); err != nil {
+				return err
+			}
+		case types.ArrayUpdateOperationRemove:
+			if err := ctx.Map.tagManager.DetachTag(vmRef, tagEntry); err != nil {
+				return err
+			}
+		default:
+			return &types.InvalidArgument{
+				InvalidProperty: "tagSpecs.operation",
+			}
+		}
+	}
+
+	return nil
 }
