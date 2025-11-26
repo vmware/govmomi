@@ -60,6 +60,373 @@ type EnableClusterSpec struct {
 	LoadBalancerConfigSpec                 *LoadBalancerConfigSpec `json:"load_balancer_config_spec,omitempty"`
 }
 
+// EnableOnZonesSpec a specification for enabling Supervisor on multiple vSphere Zones
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20EnableOnZonesSpec/
+// Since 8.0.0.1
+type EnableOnZonesSpec struct {
+	Zones        []string     `json:"zones"`
+	Name         string       `json:"name"`
+	ControlPlane ControlPlane `json:"control_plane"`
+	Workloads    Workloads    `json:"workloads"`
+}
+
+// EnableOnComputeClusterSpec a specification for enabling Supervisor on a single vSphere Zone
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20EnableOnComputeClusterSpec
+// Since 8.0.0.1
+type EnableOnComputeClusterSpec struct {
+	Zone         *string      `json:"zone,omitempty"`
+	Name         string       `json:"name"`
+	ControlPlane ControlPlane `json:"control_plane"`
+	Workloads    Workloads    `json:"workloads"`
+}
+
+// ControlPlane
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20ControlPlane
+// Since 8.0.0.1
+type ControlPlane struct {
+	Network       ControlPlaneNetwork `json:"network"`
+	LoginBanner   *string             `json:"login_banner,omitempty"`
+	Size          *string             `json:"size,omitempty"`
+	StoragePolicy *string             `json:"storage_policy,omitempty"`
+	Count         *int                `json:"count,omitempty"`
+}
+
+// ControlPlaneNetwork
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Management%20Network
+// Since 8.0.0.1
+type ControlPlaneNetwork struct {
+	Network           *string       `json:"network,omitempty"`
+	Backing           Backing       `json:"backing"`
+	Services          *Services     `json:"services,omitempty"`
+	IPManagement      *IPManagement `json:"ip_management,omitempty"`
+	FloatingIPAddress *string       `json:"floating_ip_address,omitempty"`
+	Proxy             *Proxy        `json:"proxy,omitempty"`
+}
+
+// Backing
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Management%20NetworkBacking
+// Since 8.0.0.1
+type Backing struct {
+	Backing        string          `json:"backing"`
+	Network        *string         `json:"network,omitempty"`
+	NetworkSegment *NetworkSegment `json:"network_segment,omitempty"`
+}
+
+// NetworkSegment
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20NetworkSegment
+// Since 8.0.0.1
+type NetworkSegment struct {
+	Networks []string `json:"networks"`
+}
+
+// Proxy
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20ProxyConfiguration
+// Since 8.0.0.1
+type Proxy struct {
+	ProxySettingsSource string    `json:"proxy_settings_source"`
+	HTTPSProxyConfig    *string   `json:"https_proxy_config,omitempty"`
+	HTTPProxyConfig     *string   `json:"http_proxy_config,omitempty"`
+	NoProxyConfig       *[]string `json:"no_proxy_config,omitempty"`
+	TLSRootCABundle     *string   `json:"tls_root_ca_bundle,omitempty"`
+}
+
+// Workloads
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Workloads
+// Since 8.0.0.1
+type Workloads struct {
+	Network              WorkloadNetwork         `json:"network"`
+	Edge                 Edge                    `json:"edge"`
+	KubeAPIServerOptions KubeAPIServerOptions    `json:"kube_api_server_options"`
+	Images               *Images                 `json:"images,omitempty"`
+	Storage              *WorkloadsStorageConfig `json:"storage,omitempty"`
+}
+
+// WorkloadNetwork
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Workload%20Network
+// Since 8.0.0.1
+type WorkloadNetwork struct {
+	Network      *string         `json:"network,omitempty"`
+	NetworkType  string          `json:"network_type"`
+	NSX          *NetworkNSX     `json:"nsx,omitempty"`
+	VSphere      *NetworkVSphere `json:"vsphere,omitempty"`
+	NSXVPC       *NetworkVPC     `json:"nsx_vpc,omitempty"`
+	Services     *Services       `json:"services,omitempty"`
+	IPManagement *IPManagement   `json:"ip_management,omitempty"`
+}
+
+// NetworkNSX
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Workload%20NsxNetwork
+// Since 8.0.0.1
+type NetworkNSX struct {
+	DVS                   string `json:"dvs"`
+	NamespaceSubnetPrefix *int   `json:"namespace_subnet_prefix,omitempty"`
+}
+
+// NetworkVSphere
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Workload%20VSphereNetwork
+// Since 8.0.0.1
+type NetworkVSphere struct {
+	DVPG string `json:"dvpg"`
+}
+
+// NetworkVPC
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Workload%20VpcNetwork
+// Since 8.0.0.1
+type NetworkVPC struct {
+	NSXProject             *string    `json:"nsx_project,omitempty"`
+	VPCConnectivityProfile *string    `json:"vpc_connectivity_profile,omitempty"`
+	DefaultPrivateCIDRs    []Ipv4Cidr `json:"default_private_cidrs"`
+}
+
+// Ipv4Cidr
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Ipv4Cidr
+// Since 8.0.0.1
+type Ipv4Cidr struct {
+	Address string `json:"address"`
+	Prefix  int    `json:"prefix"`
+}
+
+// Edge
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Edge
+// Since 8.0.0.1
+type Edge struct {
+	ID                        *string                  `json:"id,omitempty"`
+	LoadBalancerAddressRanges *[]IPRange               `json:"load_balancer_address_ranges,omitempty"`
+	HAProxy                   *HAProxy                 `json:"haproxy,omitempty"`
+	NSX                       *EdgeNSX                 `json:"nsx,omitempty"`
+	NSXAdvanced               *NSXAdvancedLBConfig     `json:"nsx_advanced,omitempty"`
+	Foundation                *VSphereFoundationConfig `json:"foundation,omitempty"`
+	Provider                  *string                  `json:"provider,omitempty"`
+}
+
+// HAProxy
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20HAProxyConfig
+// Since 8.0.0.1
+type HAProxy struct {
+	Servers                   []EdgeServer `json:"servers"`
+	Username                  string       `json:"username"`
+	Password                  string       `json:"password"`
+	CertificateAuthorityChain string       `json:"certificate_authority_chain"`
+}
+
+// EdgeNSX
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20NSXConfig
+// Since 8.0.0.1
+type EdgeNSX struct {
+	EdgeClusterID                *string    `json:"edge_cluster_id,omitempty"`
+	DefaultIngressTLSCertificate *string    `json:"default_ingress_tls_certificate,omitempty"`
+	RoutingMode                  *string    `json:"routing_mode,omitempty"`
+	EgressIPRanges               *[]IPRange `json:"egress_ip_ranges,omitempty"`
+	T0Gateway                    *string    `json:"t0_gateway,omitempty"`
+	LoadBalancerSize             *string    `json:"load_balancer_size,omitempty"`
+}
+
+// NSXAdvancedLBConfig
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20NSXAdvancedLBConfig
+// Since 8.0.0.1
+type NSXAdvancedLBConfig struct {
+	Server                    EdgeServer `json:"server"`
+	Username                  string     `json:"username"`
+	Password                  string     `json:"password"`
+	CertificateAuthorityChain string     `json:"certificate_authority_chain"`
+	CloudName                 *string    `json:"cloud_name,omitempty"`
+}
+
+// VSphereFoundationConfig
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20VsphereFoundationConfig
+// Since 8.0.0.1
+type VSphereFoundationConfig struct {
+	DeploymentTarget *DeploymentTarget    `json:"deployment_target,omitempty"`
+	Interfaces       *[]NetworkInterface  `json:"interfaces,omitempty"`
+	NetworkServices  *EdgeNetworkServices `json:"network_services,omitempty"`
+}
+
+// DeploymentTarget
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Foundation%20DeploymentTarget
+// Since 8.0.0.1
+type DeploymentTarget struct {
+	Zones          *[]string `json:"zones,omitempty"`
+	StoragePolicy  *string   `json:"storage_policy,omitempty"`
+	DeploymentSize *string   `json:"deployment_size,omitempty"`
+	Availability   *string   `json:"availability,omitempty"`
+}
+
+// NetworkInterface
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Foundation%20NetworkInterface
+// Since 9.0.0.0
+type NetworkInterface struct {
+	Personas []string                `json:"personas"`
+	Network  NetworkInterfaceNetwork `json:"network"`
+}
+
+// NetworkInterfaceNetwork
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Foundation%20Network
+// Since 9.0.0.0
+type NetworkInterfaceNetwork struct {
+	NetworkType string       `json:"network_type"`
+	DVPGNetwork *DVPGNetwork `json:"dvpg_network,omitempty"`
+}
+
+// DVPGNetwork
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Foundation%20DistributedPortGroupNetwork
+// Since 9.0.0.0
+type DVPGNetwork struct {
+	Name     string    `json:"name"`
+	Network  string    `json:"network"`
+	IPAM     string    `json:"ipam"`
+	IPConfig *IPConfig `json:"ip_config,omitempty"`
+}
+
+// IPConfig
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Foundation%20IPConfig
+// Since 9.0.0.0
+type IPConfig struct {
+	IPRanges []IPRange `json:"ip_ranges"`
+	Gateway  string    `json:"gateway"`
+}
+
+// EdgeNetworkServices
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Foundation%20NetworkServices
+// Since 8.0.0.1
+type EdgeNetworkServices struct {
+	DNS    *DNS    `json:"dns,omitempty"`
+	NTP    *NTP    `json:"ntp,omitempty"`
+	Syslog *Syslog `json:"syslog,omitempty"`
+}
+
+// Syslog
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Foundation%20Syslog
+// Since 9.0.0.0
+type Syslog struct {
+	Endpoint                *string `json:"endpoint,omitempty"`
+	CertificateAuthorityPEM *string `json:"certificate_authority_pem,omitempty"`
+}
+
+// Services
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Services
+// Since 8.0.0.1
+type Services struct {
+	DNS *DNS `json:"dns,omitempty"`
+	NTP *NTP `json:"ntp,omitempty"`
+}
+
+// DNS
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Service%20DNS
+// Since 8.0.0.1
+type DNS struct {
+	Servers       []string `json:"servers"`
+	SearchDomains []string `json:"search_domains"`
+}
+
+// NTP
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Service%20NTP
+// Since 8.0.0.1
+type NTP struct {
+	Servers []string `json:"servers"`
+}
+
+// IPManagement
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20IPManagement
+// Since 8.0.0.1
+type IPManagement struct {
+	DHCPEnabled    *bool           `json:"dhcp_enabled,omitempty"`
+	GatewayAddress *string         `json:"gateway_address,omitempty"`
+	IPAssignments  *[]IPAssignment `json:"ip_assignments,omitempty"`
+}
+
+// IPAssignment
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20IPAssignment
+// Since 8.0.0.1
+type IPAssignment struct {
+	Assignee *string   `json:"assignee,omitempty"`
+	Ranges   []IPRange `json:"ranges"`
+}
+
+// IPRange
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20IPRange
+// Since 8.0.0.1
+type IPRange struct {
+	Address string `json:"address"`
+	Count   int    `json:"count"`
+}
+
+// EdgeServer
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20Server
+// Since 8.0.0.1
+type EdgeServer struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
+}
+
+// KubeAPIServerOptions
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20KubeAPIServerOptions
+// Since 8.0.0.1
+type KubeAPIServerOptions struct {
+	Security *KubeAPIServerSecurity `json:"security,omitempty"`
+}
+
+// KubeAPIServerSecurity
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20KubeAPIServerSecurity
+// Since 8.0.0.1
+type KubeAPIServerSecurity struct {
+	CertificateDNSNames []string `json:"certificate_dns_names"`
+}
+
+type Images struct {
+	Registry                 Registry         `json:"registry"`
+	Repository               string           `json:"repository"`
+	KubernetesContentLibrary string           `json:"kubernetes_content_library"`
+	ContentLibraries         []ContentLibrary `json:"content_libraries"`
+}
+
+type Registry struct {
+	Hostname         string `json:"hostname"`
+	Port             int    `json:"port"`
+	Username         string `json:"username"`
+	Password         string `json:"password"`
+	CertificateChain string `json:"certificate_chain"`
+}
+
+// ContentLibrary
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Clusters%20ContentLibrarySpec
+// Since 8.0.2.0
+type ContentLibrary struct {
+	ContentLibrary         string    `json:"content_library"`
+	SupervisorServices     *[]string `json:"supervisor_services,omitempty"`
+	ResourceNamingStrategy *string   `json:"resource_naming_strategy,omitempty"`
+}
+
+// WorkloadsStorageConfig
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20WorkloadsStorageConfig
+// Since 8.0.0.1
+type WorkloadsStorageConfig struct {
+	CloudNativeFileVolume  *CloudNativeFileVolume `json:"cloud_native_file_volume,omitempty"`
+	EphemeralStoragePolicy *string                `json:"ephemeral_storage_policy,omitempty"`
+	ImageStoragePolicy     *string                `json:"image_storage_policy,omitempty"`
+}
+
+type CloudNativeFileVolume struct {
+	VSANClusters []string `json:"vsan_clusters"`
+}
+
+// EnableOnZones enables a Supervisor on a set of vSphere Zones
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors__action=enable_on_zones/post
+func (c *Manager) EnableOnZones(ctx context.Context, spec *EnableOnZonesSpec) (string, error) {
+	var response string
+	url := c.Resource(path.Join(internal.SupervisorsPath)).WithParam("action", "enable_on_zones")
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &response)
+	return response, err
+}
+
+// EnableOnComputeCluster enables a Supervisor on a single vSphere cluster
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/cluster__action=enable_on_compute_cluster/post
+func (c *Manager) EnableOnComputeCluster(ctx context.Context, id string, spec *EnableOnComputeClusterSpec) (string, error) {
+	var response string
+	url := c.Resource(path.Join(internal.SupervisorsPath, id)).WithParam("action", "enable_on_compute_cluster")
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &response)
+	return response, err
+}
+
 // SizingHint determines the size of the Tanzu Kubernetes Grid
 // Supervisor cluster's kubeapi instances.
 // Note: Only use TinySizingHint in non-production environments.

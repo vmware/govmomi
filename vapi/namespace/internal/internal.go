@@ -11,6 +11,7 @@ const (
 	NamespaceEdgeClusterCompatibility       = "/api/vcenter/namespace-management/edge-cluster-compatibility"
 	SupervisorServicesPath                  = "/api/vcenter/namespace-management/supervisor-services"
 	SupervisorServicesVersionsPath          = "/versions"
+	SupervisorsPath                         = "/api/vcenter/namespace-management/supervisors"
 
 	NamespacesPath = "/api/vcenter/namespaces/instances"
 	VmClassesPath  = "/api/vcenter/namespace-management/virtual-machine-classes"
