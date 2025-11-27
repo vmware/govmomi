@@ -2942,7 +2942,7 @@ func TestEncryptDecryptVM(t *testing.T) {
 	newTaskErrWithInvalidState := func(msg string) error {
 		return task.Error{
 			LocalizedMethodFault: &types.LocalizedMethodFault{
-				Fault:            newInvalidStateFault(msg),
+				Fault:            newInvalidStateFault("%s", msg),
 				LocalizedMessage: "*types.InvalidState",
 			},
 		}

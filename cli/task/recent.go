@@ -300,7 +300,7 @@ type taskResult struct {
 }
 
 func (t *taskResult) WriteHeader(w io.Writer) {
-	fmt.Fprintf(w, t.format("Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result"))
+	fmt.Fprint(w, t.format("Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result"))
 }
 
 func (t *taskResult) Write(w io.Writer) error {

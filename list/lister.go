@@ -152,7 +152,7 @@ func (l Lister) List(ctx context.Context) ([]Element, error) {
 	case "VmwareDistributedVirtualSwitch", "DistributedVirtualSwitch":
 		return l.ListDistributedVirtualSwitch(ctx)
 	default:
-		return nil, fmt.Errorf("cannot traverse type " + l.Reference.Type)
+		return nil, fmt.Errorf("cannot traverse type %s", l.Reference.Type)
 	}
 }
 
