@@ -106,3 +106,21 @@ const (
 func init() {
 	types.Add("vsan:CnsUnregisterTargetVolumeType", reflect.TypeOf((*CnsUnregisterTargetVolumeType)(nil)).Elem())
 }
+
+// CnsVolumeBackingType enumerates types of backing for batch attach operations.
+// These values correspond to VirtualDevice.FileBackingInfo subclasses.
+type CnsVolumeBackingType string
+
+const (
+	CnsVolumeBackingTypeFlatVer1BackingInfo           = CnsVolumeBackingType("FlatVer1BackingInfo")
+	CnsVolumeBackingTypeFlatVer2BackingInfo           = CnsVolumeBackingType("FlatVer2BackingInfo")
+	CnsVolumeBackingTypeSparseVer1BackingInfo         = CnsVolumeBackingType("SparseVer1BackingInfo")
+	CnsVolumeBackingTypeSparseVer2BackingInfo         = CnsVolumeBackingType("SparseVer2BackingInfo")
+	CnsVolumeBackingTypeRawDiskMappingVer1BackingInfo = CnsVolumeBackingType("RawDiskMappingVer1BackingInfo")
+	CnsVolumeBackingTypeSeSparseBackingInfo           = CnsVolumeBackingType("SeSparseBackingInfo")
+	CnsVolumeBackingTypeLocalPMemBackingInfo          = CnsVolumeBackingType("LocalPMemBackingInfo")
+)
+
+func init() {
+	types.Add("vsan:CnsVolumeBackingType", reflect.TypeOf((*CnsVolumeBackingType)(nil)).Elem())
+}
