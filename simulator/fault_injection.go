@@ -484,7 +484,6 @@ func parsePropertyFilters(filterStrs []string) property.Match {
 		}
 		// nil expected values are ok - that's how we expect to match empty properties
 
-
 		// Panic if this property path already exists (multiple filters for same property)
 		if _, exists := match[propertyPath]; exists {
 			panic(fmt.Sprintf("multiple inclusion filters specified for property %q - combine them into a single pattern", propertyPath))

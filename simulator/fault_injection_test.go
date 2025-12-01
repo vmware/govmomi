@@ -351,11 +351,11 @@ func TestFaultInjectionInclusionExclusionFilter(t *testing.T) {
 	// Simplified test: Test boolean combinations of inclusion/exclusion filters
 	// Property matching logic is tested separately in property/match_test.go
 	type testCase struct {
-		name                string
-		inclusionFilter     FaultFilterCallback
-		exclusionFilter     FaultFilterCallback
-		expectError         bool
-		expectedLogMessage  string
+		name               string
+		inclusionFilter    FaultFilterCallback
+		exclusionFilter    FaultFilterCallback
+		expectError        bool
+		expectedLogMessage string
 	}
 
 	testCases := []testCase{
@@ -442,7 +442,7 @@ func TestFaultInjectionInclusionExclusionFilter(t *testing.T) {
 					if taskResult != nil {
 						taskResult.Wait(ctx)
 					}
-					t.Logf(tc.expectedLogMessage)
+					t.Log(tc.expectedLogMessage)
 				}
 			})
 		}
@@ -511,5 +511,3 @@ func TestFaultInjectionIncorrectFilterSpecifications(t *testing.T) {
 		})
 	}
 }
-
-
