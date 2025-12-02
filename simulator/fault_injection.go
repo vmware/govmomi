@@ -259,7 +259,7 @@ func (f *FaultInjector) GetRules() []*FaultInjectionRule {
 }
 
 // ShouldInjectFault determines if a fault should be injected for the given method call
-func (f *FaultInjector) ShouldInjectFault(method *Method, objectName string, handler mo.Reference) *FaultInjectionRule {
+func (f *FaultInjector) ShouldInjectFault(method *Method, handler mo.Reference) *FaultInjectionRule {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -284,8 +284,15 @@ func (f *FaultInjector) ShouldInjectFault(method *Method, objectName string, han
 		}
 
 		// Check object name match (order 1)
-		if rule.ObjectName != "*" && rule.ObjectName != objectName {
-			continue
+		if rule.ObjectName != "*" {
+			var objectName string
+			if entity, ok := handler.(mo.Entity); ok {
+				objectName = entityName(entity)
+			}
+
+			if rule.ObjectName != objectName {
+				continue
+			}
 		}
 
 		// Check inclusion property filter (order 2)

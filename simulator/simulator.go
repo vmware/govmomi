@@ -250,13 +250,8 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	}
 
 	// We have a valid call. Check for fault injection first
-	var objectName string
-	if entity, ok := handler.(mo.Entity); ok {
-		objectName = entityName(entity)
-	}
-
 	if s.faultInjector != nil {
-		if rule := s.faultInjector.ShouldInjectFault(method, objectName, handler); rule != nil {
+		if rule := s.faultInjector.ShouldInjectFault(method, handler); rule != nil {
 			return s.faultInjector.CreateFault(rule, method)
 		}
 	}
