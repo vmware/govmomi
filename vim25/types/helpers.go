@@ -294,10 +294,6 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 
 		for i := range civa.Property {
 			p := civa.Property[i]
-
-			if p.UserConfigurable == nil {
-				p.UserConfigurable = NewBool(false)
-			}
 			csva.Property = append(
 				csva.Property,
 				VAppPropertySpec{
