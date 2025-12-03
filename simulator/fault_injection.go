@@ -7,12 +7,94 @@ package simulator
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+// FaultFilterCallback evaluates whether a managed object is a "match", allowing arbitrarily complex
+// filters by implementing this function directly.
+// For convenience, use FaultFilterAll() or FaultFilterAny() to create filters from string expressions.
+type FaultFilterCallback func(obj mo.Reference) bool
+
+// FaultFilterAll (AND) takes a set of strings expressing propertyPath:value pairs using the property.Match format.
+// Only equality matches are currently supported: "property.path == value"
+// Examples:
+//   - FaultFilterAll("config.name == DC0_C0_RP0_VM0")
+//   - FaultFilterAll("config.name == DC0_C0*", "runtime.powerState == poweredOn")
+//   - FaultFilterAll("config.name == *") // match all objects where the property exists
+//
+// Panics on code-level usage errors:
+//   - Empty filter strings
+//   - Invalid filter format (missing " == " separator)
+//   - Empty property path
+//   - Multiple filters targeting the same property path ( combine them into a single pattern)
+func FaultFilterAll(filterStrs ...string) FaultFilterCallback {
+	match := parsePropertyFilters(filterStrs)
+
+	propertyPaths := make([]string, 0, len(match))
+	for path := range match {
+		propertyPaths = append(propertyPaths, path)
+	}
+
+	// Return a closure that captures the match and paths
+	return func(obj mo.Reference) bool {
+		if obj == nil {
+			return false
+		}
+
+		props := getProperties(obj, propertyPaths)
+		// AND match
+		return match.List(props)
+	}
+}
+
+// FaultFilterAny (OR) takes a set of strings expressing propertyPath:value pairs using the property.Match format.
+// See FaultFilterAll for details.
+func FaultFilterAny(filterStrs ...string) FaultFilterCallback {
+	// For exclusion matches, we need to handle each filter separately
+	// since multiple matches can target the same property path with different values
+	matches := make([]property.Match, 0, len(filterStrs))
+	allPaths := make(map[string]bool)
+	for _, filterStr := range filterStrs {
+		match := parsePropertyFilters([]string{filterStr})
+		if len(match) > 0 {
+			matches = append(matches, match)
+
+			for path := range match {
+				// deduplicate paths for collection
+				allPaths[path] = true
+			}
+		}
+	}
+
+	paths := make([]string, 0, len(allPaths))
+	for path := range allPaths {
+		paths = append(paths, path)
+	}
+
+	// Return a closure that captures the matches and paths
+	return func(obj mo.Reference) bool {
+		if obj == nil {
+			return false
+		}
+
+		props := getProperties(obj, paths)
+
+		// OR match
+		for _, match := range matches {
+			if match.AnyList(props) {
+				return true
+			}
+		}
+		return false
+	}
+}
 
 // FaultInjectionRule defines a rule for injecting faults into method responses.
 type FaultInjectionRule struct {
@@ -29,6 +111,31 @@ type FaultInjectionRule struct {
 	// ObjectName is the name of the specific object to inject faults into
 	// Use "*" to match all object names
 	ObjectName string
+
+	// InclusionPropertyFilter is a callback function that evaluates whether the managed object matches the filter.
+	// ObjectName above is a convenience as it's such a common filter, but can be expressed here.
+	// Use FaultFilterAll (AND) or FaultFilterAny (OR) helper functions to create from string expressions for common cases.
+	// Examples:
+	//   - InclusionPropertyFilter: FaultFilterAll("config.name == DC0_C0_RP0_VM0")
+	//   - InclusionPropertyFilter: FaultFilterAll("config.name == DC0_C0*", "runtime.powerState == poweredOn")
+	//   - InclusionPropertyFilter: FaultFilterAll("config.name == *") // match all objects where the property exists
+	//   - InclusionPropertyFilter: func(obj mo.Reference) bool { ... } // custom filter logic
+	// Note: To express "property != value", use an exclusion filter: FaultFilterAny("property == value")
+	// The order of evaluation is:
+	// 1. ObjectName
+	// 2. InclusionPropertyFilter (all must match)
+	// 3. ExclusionPropertyFilter (none must match)
+	InclusionPropertyFilter FaultFilterCallback
+
+	// ExclusionPropertyFilter is a callback function that evaluates whether the managed object should be excluded.
+	// This is evaluated after the name and inclusion filters.
+	// If the function returns true, the object is excluded.
+	// Use FaultFilterAll (AND) or FaultFilterAny (OR) helper functions to create from string expressions for common cases.
+	// Examples:
+	//   - ExclusionPropertyFilter: FaultFilterAny("config.name == test-vm") to exclude objects with name "test-vm"
+	//   - ExclusionPropertyFilter: FaultFilterAny("config.name == ", "runtime.powerState == ") to exclude objects where Name or PowerState are empty
+	//   - ExclusionPropertyFilter: func(obj mo.Reference) bool { ... } // custom exclusion logic
+	ExclusionPropertyFilter FaultFilterCallback
 
 	// Probability is the probability (0.0 to 1.0) that a fault will be
 	// injected.
@@ -51,12 +158,16 @@ type FaultInjectionRule struct {
 	// (0 = unlimited)
 	MaxCount int
 
+	// SkipCount is the number of times to skip this rule before it is triggered
+	SkipCount int
+
 	// Enabled controls whether this rule is active
 	Enabled bool
 
 	// Internal fields
-	count int64
-	rng   *rand.Rand
+	count     int64
+	skipCount int64
+	rng       *rand.Rand
 }
 
 // FaultType represents the type of fault to inject
@@ -148,7 +259,7 @@ func (f *FaultInjector) GetRules() []*FaultInjectionRule {
 }
 
 // ShouldInjectFault determines if a fault should be injected for the given method call
-func (f *FaultInjector) ShouldInjectFault(method *Method, objectName string) *FaultInjectionRule {
+func (f *FaultInjector) ShouldInjectFault(method *Method, handler mo.Reference) *FaultInjectionRule {
 	f.mu.RLock()
 	defer f.mu.RUnlock()
 
@@ -172,13 +283,40 @@ func (f *FaultInjector) ShouldInjectFault(method *Method, objectName string) *Fa
 			continue
 		}
 
-		// Check object name match
-		if rule.ObjectName != "*" && rule.ObjectName != objectName {
-			continue
+		// Check object name match (order 1)
+		if rule.ObjectName != "*" {
+			var objectName string
+			if entity, ok := handler.(mo.Entity); ok {
+				objectName = entityName(entity)
+			}
+
+			if rule.ObjectName != objectName {
+				continue
+			}
+		}
+
+		// Check inclusion property filter (order 2)
+		if rule.InclusionPropertyFilter != nil {
+			if !rule.InclusionPropertyFilter(handler) {
+				continue
+			}
+		}
+
+		// Check exclusion property filter (order 3)
+		if rule.ExclusionPropertyFilter != nil {
+			if rule.ExclusionPropertyFilter(handler) {
+				continue
+			}
 		}
 
 		// Check probability
 		if rule.rng.Float64() > rule.Probability {
+			continue
+		}
+
+		// At this point, the rule matches. Check if we need to skip this match
+		if rule.SkipCount > 0 && rule.skipCount < int64(rule.SkipCount) {
+			rule.skipCount++
 			continue
 		}
 
@@ -320,5 +458,73 @@ func (f *FaultInjector) ResetStats() {
 
 	for _, rule := range f.rules {
 		rule.count = 0
+		rule.skipCount = 0
 	}
+}
+
+// parsePropertyFilters parses an array of string filter expressions and consolidates them
+// into a single property.Match map. Only equality matches are supported: "property.path == value"
+// Property paths should be in camelCase format (e.g., "config.name", "runtime.powerState").
+// Panics on code-level usage errors:
+//   - Empty filter strings
+//   - Invalid filter format (missing " == " separator)
+//   - Empty property path or expected value
+//   - Multiple filters targeting the same property path (user should combine them into a single pattern)
+func parsePropertyFilters(filterStrs []string) property.Match {
+	match := make(property.Match)
+
+	for _, filterStr := range filterStrs {
+		filterStr = strings.TrimSpace(filterStr)
+		if filterStr == "" {
+			panic("empty filter string in property filter - remove empty entries from filter array")
+		}
+
+		parts := strings.SplitN(filterStr, " == ", 2)
+		if len(parts) != 2 {
+			panic(fmt.Sprintf("invalid property filter format %q - expected format: \"property.path == value\"", filterStr))
+		}
+
+		propertyPath := strings.TrimSpace(parts[0])
+		expectedValue := strings.TrimSpace(parts[1])
+		if propertyPath == "" {
+			panic(fmt.Sprintf("empty property path in filter %q - expected format: \"property.path == value\"", filterStr))
+		}
+		// nil expected values are ok - that's how we expect to match empty properties
+
+		// Panic if this property path already exists (multiple filters for same property)
+		if _, exists := match[propertyPath]; exists {
+			panic(fmt.Sprintf("multiple inclusion filters specified for property %q - combine them into a single pattern", propertyPath))
+		}
+
+		match[propertyPath] = expectedValue
+	}
+
+	return match
+}
+
+// getProperties collects the specified properties from a managed object.
+func getProperties(obj mo.Reference, paths []string) []types.DynamicProperty {
+	if obj == nil || len(paths) == 0 {
+		return nil
+	}
+
+	rval := getManagedObject(obj)
+	props := make([]types.DynamicProperty, 0, len(paths))
+
+	for _, propPath := range paths {
+		propValue, err := fieldValue(rval, propPath)
+		var val types.AnyType
+		if err == nil {
+			val = propValue
+		}
+		// Note: If property doesn't exist or is empty, val will be nil.
+		// property.Match.Property() will return false for nil values.
+
+		props = append(props, types.DynamicProperty{
+			Name: propPath,
+			Val:  val,
+		})
+	}
+
+	return props
 }
