@@ -221,7 +221,7 @@ type CnsVolumeAttachDetachSpec struct {
 	ControllerKey   *int32                       `xml:"controllerKey,omitempty" json:"controllerKey"`
 	UnitNumber      *int32                       `xml:"unitNumber,omitempty" json:"unitNumber"`
 	BackingTypeName CnsVolumeBackingType         `xml:"backingTypeName,omitempty" json:"backingTypeName"`
-	VolumeEncrypted bool                         `xml:"volumeEncrypted,omitempty" json:"volumeEncrypted"`
+	VolumeEncrypted *bool                        `xml:"volumeEncrypted,omitempty" json:"volumeEncrypted"`
 }
 
 func init() {
