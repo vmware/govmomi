@@ -1071,6 +1071,9 @@ func (e Envelope) toVAppConfig(
 				}
 			}
 
+			if p.UserConfigurable == nil {
+				p.UserConfigurable = types.NewBool(false)
+			}
 			np := types.VAppPropertySpec{
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: types.ArrayUpdateOperationAdd,
@@ -1088,16 +1091,6 @@ func (e Envelope) toVAppConfig(
 					Value:            "",
 					Description:      deref(p.Description),
 				},
-			}
-
-			// Per the OVF spec, if userConfigurable is omitted or false, then
-			// ovf:value represents the the value to be used during system
-			// installation.
-			//
-			// If userConfigurable is true, then ovf:value is just the default
-			// value.
-			if p.UserConfigurable == nil || !*p.UserConfigurable {
-				np.Info.Value = value
 			}
 
 			vapp.Property = append(vapp.Property, np)
