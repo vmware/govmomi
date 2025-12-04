@@ -409,6 +409,45 @@ type CloudNativeFileVolume struct {
 	VSANClusters []string `json:"vsan_clusters"`
 }
 
+// SupervisorsSummaryResult
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Summary%20ListResult/
+// Since 8.0.0.1
+type SupervisorsSummaryResult struct {
+	Items []SupervisorsSummaryResultItem `json:"items"`
+}
+
+// SupervisorsSummaryResultItem
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Summary%20ListItem/
+// Since 8.0.0.1
+type SupervisorsSummaryResultItem struct {
+	Supervisor string                `json:"supervisor"`
+	Info       SupervisorSummaryInfo `json:"info"`
+}
+
+type SupervisorSummaryInfo struct {
+	Name             string                     `json:"name"`
+	Stats            SupervisorSummaryInfoStats `json:"stats"`
+	ConfigStatus     ConfigStatus               `json:"config_status"`
+	KubernetesStatus KubernetesStatus           `json:"kubernetes_status"`
+}
+
+type SupervisorSummaryInfoStats struct {
+	CpuUsed         int `json:"cpus_used"`
+	CpuCapacity     int `json:"cpus_capacity"`
+	MemoryUsed      int `json:"memory_used"`
+	MemoryCapacity  int `json:"memory_capacity"`
+	StorageUsed     int `json:"storage_used"`
+	StorageCapacity int `json:"storage_capacity"`
+}
+
+// SupervisorTopologyInfo
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Topology%20Info/
+// Since 8.0.0.1
+type SupervisorTopologyInfo struct {
+	Zone     string   `json:"zone"`
+	Clusters []string `json:"clusters"`
+}
+
 // EnableOnZones enables a Supervisor on a set of vSphere Zones
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors__action=enable_on_zones/post
 func (c *Manager) EnableOnZones(ctx context.Context, spec *EnableOnZonesSpec) (string, error) {
@@ -424,6 +463,33 @@ func (c *Manager) EnableOnComputeCluster(ctx context.Context, id string, spec *E
 	var response string
 	url := c.Resource(path.Join(internal.SupervisorsPath, id)).WithParam("action", "enable_on_compute_cluster")
 	err := c.Do(ctx, url.Request(http.MethodPost, spec), &response)
+	return response, err
+}
+
+// GetSupervisorSummaries retrieves the list of Supervisor summaries
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/summaries/get/
+func (c *Manager) GetSupervisorSummaries(ctx context.Context) (SupervisorsSummaryResult, error) {
+	var response SupervisorsSummaryResult
+	url := c.Resource(internal.SupervisorsSummariesPath)
+	err := c.Do(ctx, url.Request(http.MethodGet), &response)
+	return response, err
+}
+
+// GetSupervisorSummary retrieves the summary of the specified Supervisor
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/supervisor/summary/get/
+func (c *Manager) GetSupervisorSummary(ctx context.Context, id string) (SupervisorSummaryInfo, error) {
+	var response SupervisorSummaryInfo
+	url := c.Resource(fmt.Sprintf(internal.SupervisorSummaryPath, id))
+	err := c.Do(ctx, url.Request(http.MethodGet), &response)
+	return response, err
+}
+
+// GetSupervisorTopology retrieves the topology of the specified Supervisor
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/supervisor/topology/get/
+func (c *Manager) GetSupervisorTopology(ctx context.Context, id string) ([]SupervisorTopologyInfo, error) {
+	var response []SupervisorTopologyInfo
+	url := c.Resource(fmt.Sprintf(internal.SupervisorTopologyPath, id))
+	err := c.Do(ctx, url.Request(http.MethodGet), &response)
 	return response, err
 }
 
