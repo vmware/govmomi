@@ -12,6 +12,9 @@ const (
 	SupervisorServicesPath                  = "/api/vcenter/namespace-management/supervisor-services"
 	SupervisorServicesVersionsPath          = "/versions"
 	SupervisorsPath                         = "/api/vcenter/namespace-management/supervisors"
+	SupervisorsSummariesPath                = SupervisorsPath + "/summaries"
+	SupervisorSummaryPath                   = SupervisorsPath + "/%s/summary"
+	SupervisorTopologyPath                  = SupervisorsPath + "/%s/topology"
 
 	NamespacesPath = "/api/vcenter/namespaces/instances"
 	VmClassesPath  = "/api/vcenter/namespace-management/virtual-machine-classes"
