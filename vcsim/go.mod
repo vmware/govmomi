@@ -9,4 +9,4 @@ require (
 	github.com/vmware/govmomi v0.0.0-00010101000000-000000000000
 )
 
-require golang.org/x/text v0.31.0 // indirect
+require golang.org/x/text v0.32.0 // indirect
