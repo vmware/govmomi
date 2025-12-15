@@ -118,6 +118,7 @@ but appear via `govc $cmd -h`:
  - [device.pci.ls](#devicepcils)
  - [device.pci.remove](#devicepciremove)
  - [device.remove](#deviceremove)
+ - [device.sata.add](#devicesataadd)
  - [device.scsi.add](#devicescsiadd)
  - [device.serial.add](#deviceserialadd)
  - [device.serial.connect](#deviceserialconnect)
@@ -2001,6 +2002,21 @@ Examples:
 
 Options:
   -keep=false            Keep files in datastore
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## device.sata.add
+
+```
+Usage: govc device.sata.add [OPTIONS]
+
+Add SATA controller to VM.
+
+Examples:
+  govc device.sata.add -vm $vm
+  govc device.info -vm $vm sata-*
+
+Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
