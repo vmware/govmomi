@@ -31,6 +31,7 @@ import (
 	_ "github.com/vmware/govmomi/cli/device/floppy"
 	_ "github.com/vmware/govmomi/cli/device/model"
 	_ "github.com/vmware/govmomi/cli/device/pci"
+	_ "github.com/vmware/govmomi/cli/device/sata"
 	_ "github.com/vmware/govmomi/cli/device/scsi"
 	_ "github.com/vmware/govmomi/cli/device/serial"
 	_ "github.com/vmware/govmomi/cli/device/usb"

@@ -227,6 +227,19 @@ load test_helper
   assert_failure "govc: device '$id' not found"
 }
 
+@test "device.sata" {
+  vcsim_env
+
+  vm=$(new_empty_vm)
+
+  run govc device.sata.add -vm $vm
+  assert_success
+  id=$output
+
+  result=$(govc device.ls -vm $vm | grep $id | wc -l)
+  [ $result -eq 1 ]
+}
+
 @test "device.scsi" {
   vcsim_env
 
