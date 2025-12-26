@@ -1331,6 +1331,9 @@ func TestCreateVmWithDevices(t *testing.T) {
 	vm := m.Map().Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
 
 	expect := len(esx.VirtualDevice) + len(devices)
+
+	expect-- // Do not double-count the IDE controller as it's a default device.
+
 	ndevice := len(vm.Config.Hardware.Device)
 
 	if expect != ndevice {

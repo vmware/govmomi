@@ -142,8 +142,8 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		},
 	}
 
-	// Add the default devices
-	defaults.DeviceChange, _ = object.VirtualDeviceList(esx.VirtualDevice).ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	// Add the default devices.
+	vm.addDefaultDevices(&defaults, spec)
 
 	err := vm.configure(ctx, &defaults)
 	if err != nil {
@@ -166,6 +166,98 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	folderPutChild(ctx, f, vm)
 
 	return vm, nil
+}
+
+func (o VirtualMachine) addDefaultDevices(
+	dst, src *types.VirtualMachineConfigSpec) {
+
+	var (
+		oldControllerKeysToNew   = map[int32]int32{}
+		existingDefaultDeviceMap = map[int32]struct{}{}
+	)
+
+	for i := range src.DeviceChange {
+		var (
+			dc     = src.DeviceChange[i]
+			vd     = dc.GetVirtualDeviceConfigSpec()
+			de     = vd.Device.GetVirtualDevice()
+			oldKey = de.Key
+		)
+
+		fn := func(bvd types.BaseVirtualDevice) {
+			d := bvd.GetVirtualDevice()
+			vd.Device = bvd
+			existingDefaultDeviceMap[d.Key] = struct{}{}
+			dst.DeviceChange = append(dst.DeviceChange, dc)
+			if _, ok := bvd.(types.BaseVirtualController); ok {
+				oldControllerKeysToNew[oldKey] = d.Key
+			}
+		}
+
+		switch td := vd.Device.(type) {
+		case *types.VirtualIDEController:
+			switch td.BusNumber {
+			case 0:
+				fn(esx.VirtualMachineDefaultDeviceIDEControllerBus0)
+			case 1:
+				fn(esx.VirtualMachineDefaultDeviceIDEControllerBus1)
+			}
+		case *types.VirtualPS2Controller:
+			fn(esx.VirtualMachineDefaultDevicePS2Controller)
+		case *types.VirtualPCIController:
+			fn(esx.VirtualMachineDefaultDevicePCIController)
+		case *types.VirtualSIOController:
+			fn(esx.VirtualMachineDefaultDeviceSIOController)
+		case *types.VirtualKeyboard:
+			fn(esx.VirtualMachineDefaultDeviceVirtualKeyboard)
+		case *types.VirtualPointingDevice:
+			fn(esx.VirtualMachineDefaultDeviceVirtualPointingDevice)
+		case *types.VirtualMachineVideoCard:
+			fn(esx.VirtualMachineDefaultDeviceVideoCard)
+		case *types.VirtualMachineVMCIDevice:
+			fn(esx.VirtualMachineDefaultDeviceVMCIDevice)
+		}
+	}
+
+	// Add any of the missing default devices.
+	for i := range esx.VirtualDevice {
+		vd := esx.VirtualDevice[i].GetVirtualDevice()
+		if _, ok := existingDefaultDeviceMap[vd.Key]; !ok {
+			dst.DeviceChange = append(
+				dst.DeviceChange,
+				&types.VirtualDeviceConfigSpec{
+					Operation: types.VirtualDeviceConfigSpecOperationAdd,
+					Device:    esx.VirtualDevice[i],
+				})
+		}
+	}
+
+	// Remove the default devices from the source config spec so they are not
+	// added twice.
+	src.DeviceChange = slices.DeleteFunc(
+		src.DeviceChange,
+		func(bdc types.BaseVirtualDeviceConfigSpec) bool {
+			var (
+				vd = bdc.GetVirtualDeviceConfigSpec()
+				de = vd.Device.GetVirtualDevice()
+			)
+			_, ok := existingDefaultDeviceMap[de.Key]
+			return ok
+		})
+
+	// Update the source config spec so any children point to any updated
+	// controller keys.
+	for i := range src.DeviceChange {
+		var (
+			dc = src.DeviceChange[i]
+			vd = dc.GetVirtualDeviceConfigSpec()
+			de = vd.Device.GetVirtualDevice()
+			ck = de.ControllerKey
+		)
+		if nk, ok := oldControllerKeysToNew[ck]; ok {
+			de.ControllerKey = nk
+		}
+	}
 }
 
 func (o *VirtualMachine) RenameTask(ctx *Context, r *types.Rename_Task) soap.HasFault {
