@@ -86215,7 +86215,7 @@ type VirtualDeviceFileBackingInfo struct {
 	// Backing object's durable and unmutable identifier.
 	//
 	// Each backing object has a unique identifier which is not settable.
-	BackingObjectId string `xml:"backingObjectId,omitempty" json:"backingObjectId,omitempty"`
+	BackingObjectId *string `xml:"backingObjectId,omitempty" json:"backingObjectId,omitempty"`
 }
 
 func init() {

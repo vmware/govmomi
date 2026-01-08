@@ -611,7 +611,7 @@ var vmInfoObjForTests = VirtualMachineConfigInfo{
 					},
 					Backing: &VirtualDiskFlatVer2BackingInfo{
 						VirtualDeviceFileBackingInfo: VirtualDeviceFileBackingInfo{
-							BackingObjectId: "1",
+							BackingObjectId: New("1"),
 							FileName:        "[datastore1] test/test.vmdk",
 							Datastore: &ManagedObjectReference{
 								Type:  "Datastore",
