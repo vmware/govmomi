@@ -50,6 +50,7 @@ func EthernetCardTypes() VirtualDeviceList {
 	return VirtualDeviceList([]types.BaseVirtualDevice{
 		&types.VirtualE1000{},
 		&types.VirtualE1000e{},
+		&types.VirtualVmxnet{},
 		&types.VirtualVmxnet2{},
 		&types.VirtualVmxnet3{},
 		&types.VirtualVmxnet3Vrdma{},
