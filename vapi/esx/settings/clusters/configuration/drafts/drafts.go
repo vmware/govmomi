@@ -42,8 +42,8 @@ type Draft struct {
 // CreateSpec a specification for creating configuration drafts
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Esx%20Settings%20Clusters%20Configuration%20Drafts%20CreateSpec/
 type CreateSpec struct {
-	Config        string `json:"config"`
-	ReferenceHost string `json:"reference_host"`
+	Config        string `json:"config,omitempty"`
+	ReferenceHost string `json:"image_reference_host,omitempty"`
 }
 
 // ApplySpec a specification for committing a pending configuration draft
