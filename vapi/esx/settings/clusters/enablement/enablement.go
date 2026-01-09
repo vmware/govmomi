@@ -34,6 +34,12 @@ type DraftImportResult struct {
 	Draft  string `json:"draft"`
 }
 
+// ConfigurationInfo contains details about the current configuration status of a cluster
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Esx%20Settings%20Clusters%20Enablement%20Configuration%20Transition%20Info/
+type ConfigurationInfo struct {
+	Status string `json:"status"`
+}
+
 // Manager extends rest.Client, adding cluster configuration enablement related methods.
 type Manager struct {
 	*rest.Client
@@ -119,10 +125,10 @@ func (c *Manager) Cancel(clusterId string) (string, error) {
 // GetClusterConfigurationStatus returns the status of the current pending cluster configuration
 // Returns the config status and an error
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/esx/settings/clusters/cluster/enablement/configuration/transition/get/
-func (c *Manager) GetClusterConfigurationStatus(clusterId string) (string, error) {
+func (c *Manager) GetClusterConfigurationStatus(clusterId string) (ConfigurationInfo, error) {
 	path := c.Resource(fmt.Sprintf(TransitionPath, clusterId))
 	req := path.Request(http.MethodGet)
-	var res string
+	var res ConfigurationInfo
 	return res, c.Do(context.Background(), req, &res)
 }
 
