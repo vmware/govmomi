@@ -2086,7 +2086,8 @@ func (vm *VirtualMachine) updateCrypto(
 func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	var changes []types.PropertyChange
 	field := mo.Field{Path: "config.hardware.device"}
-	devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
+	// copy devices to prevent data race with PropertyCollector's deepCopy
+	devices := object.VirtualDeviceList(vm.cloneDevice())
 
 	var err types.BaseMethodFault
 	for i, change := range spec.DeviceChange {
