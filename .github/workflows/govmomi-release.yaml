@@ -161,7 +161,7 @@ jobs:
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' -t .chglog/CHANGELOG.tpl.md
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@98357b18bf14b5342f975ff684046ec3b2a07725 # v8.0.0
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           commit-message: "Update CHANGELOG for ${{ inputs.tag }}"
           delete-branch: true
