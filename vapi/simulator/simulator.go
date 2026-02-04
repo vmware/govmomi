@@ -1739,7 +1739,7 @@ func (s *handler) libraryUsages(w http.ResponseWriter, r *http.Request) {
 		}
 		usageID := uuid.New().String()
 		s.addUsage(pathSegs.LibraryID, usageID, spec)
-		OK(w, usageID)
+		StatusOK(w, usageID)
 	case http.MethodGet:
 		// List usages on a library requested through
 		// - /api/content/library/{librryID}/usages
