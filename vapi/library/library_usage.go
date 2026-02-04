@@ -68,8 +68,6 @@ func (c *Manager) AddLibraryUsage(ctx context.Context, libraryID string, addUsag
 		WithSubpath(libraryID).
 		WithSubpath(internal.LibraryUsages)
 
-	var res struct {
-		Value string `json:"value,omitempty"`
-	}
-	return res.Value, c.Do(ctx, url.Request(http.MethodPost, addUsage), &res)
+	var res string
+	return res, c.Do(ctx, url.Request(http.MethodPost, addUsage), &res)
 }
