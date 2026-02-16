@@ -301,7 +301,7 @@ EOF
   assert_success
   hostname="$output"
 
-  run docker inspect -f '{{.NetworkSettings.Gateway}}' "$name"
+  run docker inspect -f '{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}' "$name"
   assert_success
   gateway="$output"
 
