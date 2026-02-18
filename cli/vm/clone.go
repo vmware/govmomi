@@ -116,7 +116,7 @@ Examples:
   govc vm.clone -vm template-vm -datastore-cluster dscluster new-vm # use datastore cluster placement
   govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm
   govc vm.clone -vm template-vm -template new-template # clone a VM template
-  govc vm.clone -vm=/ClusterName/vm/FolderName/VM_templateName -on=true -host=myesxi01 -ds=datastore01 myVM_name`
+  govc vm.clone -vm=/DatacenterName/vm/FolderName/VM_templateName -on=true -host=myesxi01 -ds=datastore01 myVM_name`
 }
 
 func (cmd *clone) Process(ctx context.Context) error {
