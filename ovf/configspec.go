@@ -1074,6 +1074,17 @@ func (e Envelope) toVAppConfig(
 			if p.UserConfigurable == nil {
 				p.UserConfigurable = types.NewBool(false)
 			}
+			// Parse the value using the vApp config parser.
+			// Empty default values (including whitespace-only) are allowed.
+			value = strings.TrimSpace(value)
+			parsedValue := value
+			if value != "" {
+				var err error
+				parsedValue, err = parseVAppConfigValue(p, value)
+				if err != nil {
+					return err
+				}
+			}
 			np := types.VAppPropertySpec{
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: types.ArrayUpdateOperationAdd,
@@ -1087,7 +1098,7 @@ func (e Envelope) toVAppConfig(
 					Label:            deref(p.Label),
 					Type:             p.Type,
 					UserConfigurable: p.UserConfigurable,
-					DefaultValue:     value,
+					DefaultValue:     parsedValue,
 					Value:            "",
 					Description:      deref(p.Description),
 				},
