@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -151,6 +152,45 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 					assert.Equal(t, false, *va.Property[1].Info.UserConfigurable)
 				}
 			}
+		})
+	})
+
+	t.Run("vApp property type parsing", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/properties.ovf")
+		cs, err := e.ToConfigSpec()
+		require.NoError(t, err)
+
+		va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+		require.True(t, ok)
+
+		findProp := func(id string) *types.VAppPropertyInfo {
+			for i := range va.Property {
+				if va.Property[i].Info.Id == id {
+					return va.Property[i].Info
+				}
+			}
+			return nil
+		}
+
+		t.Run("boolean default value is normalised to canonical form", func(t *testing.T) {
+			p := findProp("enable_ssh")
+			require.NotNil(t, p, "enable_ssh property not found in VAppConfigSpec")
+			// OVF envelope has ovf:value="false" (lowercase); vSphere API requires "False".
+			assert.Equal(t, "False", p.DefaultValue)
+		})
+
+		t.Run("empty default value is preserved as empty string", func(t *testing.T) {
+			p := findProp("ntp-server")
+			require.NotNil(t, p, "ntp-server property not found in VAppConfigSpec")
+			// OVF envelope has no ovf:value; empty default must pass through without error.
+			assert.Equal(t, "", p.DefaultValue)
+		})
+
+		t.Run("whitespace-padded default value is trimmed", func(t *testing.T) {
+			p := findProp("whitespace_int")
+			require.NotNil(t, p, "whitespace_int property not found in VAppConfigSpec")
+			// OVF envelope has ovf:value="  42  "; trimmed value must be stored.
+			assert.Equal(t, "42", p.DefaultValue)
 		})
 	})
 
