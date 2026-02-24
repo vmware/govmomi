@@ -150,6 +150,9 @@
         <Label>NFS mount for transfer file location</Label>
         <Description>Ex: 10.0.0.1:/transfer</Description>
       </Property>
+      <Property ovf:key="whitespace_int" ovf:type="int" ovf:userConfigurable="false" ovf:value="  42  ">
+        <Label>Whitespace-padded int</Label>
+      </Property>
     </ProductSection>
     <ProductSection ovf:class="vm" ovf:required="false">
       <Info>VM specific properties</Info>
