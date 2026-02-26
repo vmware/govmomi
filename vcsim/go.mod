@@ -1,6 +1,6 @@
 module github.com/vmware/govmomi/vcsim
 
-go 1.24.13
+go 1.24.0
 
 replace github.com/vmware/govmomi => ../
 
