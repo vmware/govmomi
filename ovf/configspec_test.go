@@ -224,6 +224,35 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		}
 	})
 
+	t.Run("Mixed file-backed and empty disks", func(t *testing.T) {
+		// Per DMTF OVF 2.1.1 (DSP0243): disks with ovf:fileRef in DiskSection are file-backed;
+		// disks without fileRef are empty (created with capacity only). ConfigSpec indicates
+		// file-backed disks via non-empty DiskBackingInfo.FileName (see commit 3c3ed53).
+		e := testEnvelope(t, "fixtures/mixed-disks.ovf")
+		cs, err := e.ToConfigSpec()
+		require.NoError(t, err)
+		require.NotEmpty(t, cs.DeviceChange)
+
+		var disks []*types.VirtualDisk
+		for _, dc := range cs.DeviceChange {
+			if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+				disks = append(disks, d)
+			}
+		}
+		require.Len(t, disks, 2, "fixture has one file-backed and one empty disk")
+
+		db1, ok := disks[0].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		require.True(t, ok)
+		assert.NotEmpty(t, db1.FileName, "first disk (vmdisk1) is file-backed: FileName must be non-empty")
+		assert.Equal(t, "os.vmdk", db1.FileName, "fileRef from OVF becomes backing FileName (CreateDisk appends .vmdk)")
+		assert.Equal(t, int64(20*1024*1024*1024), disks[0].CapacityInBytes)
+
+		db2, ok := disks[1].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		require.True(t, ok)
+		assert.Empty(t, db2.FileName, "second disk (vmdisk2) has no fileRef: FileName must be empty (empty disk)")
+		assert.Equal(t, int64(10*1024*1024*1024), disks[1].CapacityInBytes)
+	})
+
 	t.Run("Large", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/configspec.ovf")
 		cs, err := e.ToConfigSpec()
@@ -269,6 +298,8 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 					assert.True(t, *db.ThinProvisioned)
 				}
 				assert.Equal(t, int64(20*1024*1024*1024), d.CapacityInBytes)
+				// Disk is file-backed (vmdisk1 has ovf:fileRef in configspec.ovf); backing must have non-empty FileName.
+				assert.NotEmpty(t, db.FileName, "file-backed disk should have non-empty FileName")
 			}
 
 			if bd, ok := cs.DeviceChange[2].GetVirtualDeviceConfigSpec().Device.(types.BaseVirtualEthernetCard); assert.True(t, ok) {
@@ -378,6 +409,8 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 					assert.True(t, *db.ThinProvisioned)
 				}
 				assert.Equal(t, int64(10*1024*1024*1024), d.CapacityInBytes)
+				// Disk has no HostResource (capacity-only item); created as empty disk, so FileName is empty.
+				assert.Empty(t, db.FileName, "empty disk should have empty FileName")
 			}
 
 			var sataController1Key int32

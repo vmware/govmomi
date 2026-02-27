@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"path"
 	"strconv"
 	"strings"
 
@@ -167,6 +168,11 @@ func (e Envelope) ToConfigSpec() (types.VirtualMachineConfigSpec, error) {
 func (e Envelope) ToConfigSpecWithOptions(
 	opts ToConfigSpecOptions) (types.VirtualMachineConfigSpec, error) {
 
+	fileRefs := make(map[string]File, len(e.References))
+	for _, ref := range e.References {
+		fileRefs[ref.ID] = ref
+	}
+
 	vs := e.VirtualSystem
 	if vs == nil {
 		if i := opts.VirtualSystemCollectionIndex; i != nil {
@@ -203,7 +209,9 @@ func (e Envelope) ToConfigSpecWithOptions(
 	}
 
 	// Parse the hardware.
-	if err := e.toHardware(&dst, defaultConfigName, vs, opts); err != nil {
+	if err := e.toHardware(
+		&dst, defaultConfigName, vs, fileRefs, opts); err != nil {
+
 		return configSpec{}, err
 	}
 
@@ -219,6 +227,7 @@ func (e Envelope) toHardware(
 	dst *configSpec,
 	configName string,
 	vs *VirtualSystem,
+	fileRefs map[string]File,
 	opts ToConfigSpecOptions) error {
 
 	var hw VirtualHardwareSection
@@ -335,7 +344,7 @@ func (e Envelope) toHardware(
 			d, err = e.toCDOrDVDDrive(item, devices, resources)
 
 		case DiskDrive: // 17
-			d, err = e.toVirtualDisk(item, devices, resources)
+			d, err = e.toVirtualDisk(item, devices, resources, fileRefs)
 
 		case TapeDrive: // 18
 			// TODO(akutz)
@@ -507,7 +516,8 @@ func (e Envelope) ovfDisk(diskID string) *VirtualDiskDesc {
 func (e Envelope) toVirtualDisk(
 	item itemElement,
 	devices object.VirtualDeviceList,
-	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
+	resources map[string]types.BaseVirtualDevice,
+	fileRefs map[string]File) (types.BaseVirtualDevice, error) {
 
 	if item.Parent == nil {
 		return nil, fmt.Errorf("missing Parent")
@@ -524,11 +534,11 @@ func (e Envelope) toVirtualDisk(
 			"types.BaseVirtualController", r)
 	}
 
-	d := devices.CreateDisk(c, types.ManagedObjectReference{}, "")
-
-	d.VirtualDevice.DeviceInfo = &types.Description{
-		Label: item.ElementName,
-	}
+	// The diskName variable is used to store the name of the disk from
+	// disk from the OVF that are backed by a file.
+	// This is used to set the disk name in the ConfigSpec to distinguish
+	// between empty disks and disks that are backed by a file.
+	diskName := ""
 
 	// Find the disk's capacity.
 	var capacityInBytes uint64
@@ -549,6 +559,12 @@ func (e Envelope) toVirtualDisk(
 		dd := e.ovfDisk(diskID)
 		if dd == nil {
 			return nil, fmt.Errorf("missing diskID %q", diskID)
+		}
+
+		if dd.FileRef != nil && *dd.FileRef != "" {
+			if f, ok := fileRefs[*dd.FileRef]; ok {
+				diskName = path.Base(f.Href)
+			}
 		}
 
 		var allocUnitsSz string
@@ -572,6 +588,12 @@ func (e Envelope) toVirtualDisk(
 	if capacityInBytes > math.MaxInt64 {
 		return nil, fmt.Errorf(
 			"capacityInBytes=%d exceeds math.MaxInt64", capacityInBytes)
+	}
+
+	d := devices.CreateDisk(c, types.ManagedObjectReference{}, diskName)
+
+	d.VirtualDevice.DeviceInfo = &types.Description{
+		Label: item.ElementName,
 	}
 
 	d.CapacityInBytes = int64(capacityInBytes)
