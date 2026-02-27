@@ -613,7 +613,7 @@ func TestPropertyDiff_SummaryGuest(t *testing.T) {
 }
 
 // TestContainerVMNetworkPropertyChanges tests that a container-backed VM produces
-// the expected network property changes when powered on.
+// the expected network property changes when powered on, including detailed Guest.Net info.
 func TestContainerVMNetworkPropertyChanges(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
 		if !test.HasDocker() {
@@ -692,6 +692,11 @@ func TestContainerVMNetworkPropertyChanges(t *testing.T) {
 			t.Errorf("expected initial power state PoweredOff, got %v", initialVM.Runtime.PowerState)
 		}
 
+		// Verify Guest.Net is empty before power on
+		if initialVM.Guest != nil && len(initialVM.Guest.Net) != 0 {
+			t.Errorf("expected Guest.Net to be empty before power on, got %d entries", len(initialVM.Guest.Net))
+		}
+
 		// Power on the VM
 		task, err = vm.PowerOn(ctx)
 		if err != nil {
@@ -710,9 +715,17 @@ func TestContainerVMNetworkPropertyChanges(t *testing.T) {
 			t.Logf("WaitForIP error (may be expected with rootless podman): %v", err)
 		}
 
-		// Retrieve the updated VM state
+		// Retrieve the updated VM state with all guest properties
 		var updatedVM mo.VirtualMachine
-		err = pc.RetrieveOne(ctx, vmRef, []string{"runtime.powerState", "guest", "summary.guest"}, &updatedVM)
+		err = pc.RetrieveOne(ctx, vmRef, []string{
+			"runtime.powerState",
+			"guest.ipAddress",
+			"guest.hostName",
+			"guest.net",
+			"guest.ipStack",
+			"summary.guest.ipAddress",
+			"summary.guest.hostName",
+		}, &updatedVM)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -722,31 +735,99 @@ func TestContainerVMNetworkPropertyChanges(t *testing.T) {
 			t.Errorf("expected power state PoweredOn, got %v", updatedVM.Runtime.PowerState)
 		}
 
-		// If we got an IP, verify it's reflected in guest properties
+		// If we got an IP, verify detailed guest properties
 		if ip != "" {
 			t.Logf("Container IP: %s", ip)
 
 			if updatedVM.Guest == nil {
-				t.Error("expected Guest to be populated")
-			} else {
-				if updatedVM.Guest.IpAddress == "" {
-					t.Error("expected Guest.IpAddress to be set")
-				} else {
-					t.Logf("Guest.IpAddress: %s", updatedVM.Guest.IpAddress)
-				}
+				t.Fatal("expected Guest to be populated")
+			}
 
-				if len(updatedVM.Guest.Net) == 0 {
-					t.Logf("Guest.Net is empty (may be expected depending on container runtime)")
-				} else {
-					t.Logf("Guest.Net has %d entries", len(updatedVM.Guest.Net))
-					for i, nic := range updatedVM.Guest.Net {
-						t.Logf("  NIC %d: Network=%s, MAC=%s, IPs=%v", i, nic.Network, nic.MacAddress, nic.IpAddress)
+			// Verify Guest.IpAddress
+			if updatedVM.Guest.IpAddress == "" {
+				t.Error("expected Guest.IpAddress to be set")
+			} else {
+				t.Logf("Guest.IpAddress: %s", updatedVM.Guest.IpAddress)
+			}
+
+			// Verify Guest.HostName
+			if updatedVM.Guest.HostName != "" {
+				t.Logf("Guest.HostName: %s", updatedVM.Guest.HostName)
+			}
+
+			// Verify Guest.Net is now populated with detailed NIC info
+			if len(updatedVM.Guest.Net) == 0 {
+				t.Error("expected Guest.Net to be populated after power on")
+			} else {
+				t.Logf("Guest.Net has %d entries", len(updatedVM.Guest.Net))
+				for i, nic := range updatedVM.Guest.Net {
+					t.Logf("  NIC %d:", i)
+					t.Logf("    Network: %s", nic.Network)
+					t.Logf("    MacAddress: %s", nic.MacAddress)
+					t.Logf("    IpAddress: %v", nic.IpAddress)
+					t.Logf("    Connected: %v", nic.Connected)
+
+					// Verify NIC has expected fields populated
+					if nic.Network == "" {
+						t.Errorf("NIC %d: expected Network to be set", i)
+					}
+					if len(nic.IpAddress) == 0 {
+						t.Errorf("NIC %d: expected IpAddress to be set", i)
+					}
+					if nic.MacAddress == "" {
+						t.Errorf("NIC %d: expected MacAddress to be set", i)
+					}
+					if !nic.Connected {
+						t.Errorf("NIC %d: expected Connected to be true", i)
+					}
+
+					// Verify IpConfig is populated
+					if nic.IpConfig != nil {
+						t.Logf("    IpConfig.IpAddress: %+v", nic.IpConfig.IpAddress)
+						if len(nic.IpConfig.IpAddress) == 0 {
+							t.Errorf("NIC %d: expected IpConfig.IpAddress to be set", i)
+						} else {
+							ipAddr := nic.IpConfig.IpAddress[0]
+							if ipAddr.IpAddress == "" {
+								t.Errorf("NIC %d: expected IpConfig.IpAddress[0].IpAddress to be set", i)
+							}
+							if ipAddr.PrefixLength == 0 {
+								t.Logf("NIC %d: PrefixLength is 0 (may be expected)", i)
+							}
+						}
+					} else {
+						t.Errorf("NIC %d: expected IpConfig to be set", i)
 					}
 				}
 			}
 
-			if updatedVM.Summary.Guest != nil && updatedVM.Summary.Guest.IpAddress != "" {
-				t.Logf("Summary.Guest.IpAddress: %s", updatedVM.Summary.Guest.IpAddress)
+			// Verify Guest.IpStack is populated
+			if len(updatedVM.Guest.IpStack) == 0 {
+				t.Error("expected Guest.IpStack to be populated")
+			} else {
+				t.Logf("Guest.IpStack has %d entries", len(updatedVM.Guest.IpStack))
+				for i, stack := range updatedVM.Guest.IpStack {
+					if stack.DnsConfig != nil {
+						t.Logf("  Stack %d DnsConfig: HostName=%s, DomainName=%s, DNS=%v",
+							i, stack.DnsConfig.HostName, stack.DnsConfig.DomainName, stack.DnsConfig.IpAddress)
+					}
+					if stack.IpRouteConfig != nil && len(stack.IpRouteConfig.IpRoute) > 0 {
+						route := stack.IpRouteConfig.IpRoute[0]
+						t.Logf("  Stack %d DefaultRoute: Gateway=%s", i, route.Gateway.IpAddress)
+					}
+				}
+			}
+
+			// Verify Summary.Guest
+			if updatedVM.Summary.Guest != nil {
+				if updatedVM.Summary.Guest.IpAddress != "" {
+					t.Logf("Summary.Guest.IpAddress: %s", updatedVM.Summary.Guest.IpAddress)
+				} else {
+					t.Error("expected Summary.Guest.IpAddress to be set")
+				}
+				if updatedVM.Summary.Guest.HostName != "" {
+					t.Logf("Summary.Guest.HostName: %s", updatedVM.Summary.Guest.HostName)
+				}
 			}
 		} else {
 			t.Log("No IP assigned (rootless podman without bridge network)")
