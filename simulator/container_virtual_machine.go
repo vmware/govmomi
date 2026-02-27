@@ -63,6 +63,7 @@ func createSimulationVM(vm *VirtualMachine) *simVM {
 
 // applies container network settings to vm.Guest properties.
 // If ctx is provided, property change notifications will be triggered for all modified properties.
+// Uses PropertyDiff to generate granular property changes.
 func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context) error {
 	if svm == nil {
 		return nil
@@ -76,19 +77,10 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context) error {
 	svm.vm.Config.Annotation = "inspect"
 	svm.vm.logPrintf("%s: %s", svm.vm.Config.Annotation, string(out))
 
-	netS := detail.NetworkSettings.networkSettings
-
-	// ? Why is this valid - we're taking the first entry while iterating over a MAP
-	for _, n := range detail.NetworkSettings.Networks {
-		netS = n
-		break
-	}
-
-	// Collect property changes as we modify the VM state
-	var changes []types.PropertyChange
+	// Create a checkpoint of the current VM state before modifications
+	checkpoint := Checkpoint(&svm.vm.VirtualMachine)
 
 	// Update power state based on container state
-	var oldPowerState types.VirtualMachinePowerState
 	if detail.State.Paused {
 		svm.vm.Runtime.PowerState = types.VirtualMachinePowerStateSuspended
 	} else if detail.State.Running {
@@ -96,56 +88,73 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context) error {
 	} else {
 		svm.vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
 	}
-	if svm.vm.Runtime.PowerState != oldPowerState {
-		changes = append(changes, types.PropertyChange{
-			Name: "runtime.powerState",
-			Val:  svm.vm.Runtime.PowerState,
-			Op:   types.PropertyChangeOpAssign,
-		})
+
+	// Get the primary network settings (first network or default)
+	primaryNet := detail.NetworkSettings.networkSettings
+	for _, n := range detail.NetworkSettings.Networks {
+		primaryNet = n
+		break
 	}
 
-	// Update IP address
-	newIP := netS.IPAddress
-	if svm.vm.Guest.IpAddress != newIP {
-		svm.vm.Guest.IpAddress = newIP
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.ipAddress",
-			Val:  newIP,
-			Op:   types.PropertyChangeOpAssign,
-		})
-	}
-	if svm.vm.Summary.Guest.IpAddress != newIP {
-		svm.vm.Summary.Guest.IpAddress = newIP
-		changes = append(changes, types.PropertyChange{
-			Name: "summary.guest.ipAddress",
-			Val:  newIP,
-			Op:   types.PropertyChangeOpAssign,
-		})
-	}
+	// Update primary IP address
+	svm.vm.Guest.IpAddress = primaryNet.IPAddress
+	svm.vm.Summary.Guest.IpAddress = primaryNet.IPAddress
 
 	// Update hostname
-	if svm.vm.Guest.HostName == "" && detail.Config.Hostname != "" {
+	if detail.Config.Hostname != "" {
 		svm.vm.Guest.HostName = detail.Config.Hostname
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.hostName",
-			Val:  detail.Config.Hostname,
-			Op:   types.PropertyChangeOpAssign,
-		})
+		svm.vm.Summary.Guest.HostName = detail.Config.Hostname
 	}
 
-	// Update network info if we have a NIC configured
-	if len(svm.vm.Guest.Net) != 0 {
-		net := &svm.vm.Guest.Net[0]
-		net.IpAddress = []string{newIP}
-		net.MacAddress = netS.MacAddress
-		net.IpConfig = &types.NetIpConfigInfo{
-			IpAddress: []types.NetIpConfigInfoIpAddress{{
-				IpAddress:    newIP,
-				PrefixLength: int32(netS.IPPrefixLen),
-				State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
-			}},
+	// Build Guest.Net from all container networks
+	var guestNics []types.GuestNicInfo
+	nicIndex := int32(0)
+	for networkName, netSettings := range detail.NetworkSettings.Networks {
+		if netSettings.IPAddress == "" {
+			continue
 		}
 
+		nic := types.GuestNicInfo{
+			Network:      networkName,
+			IpAddress:    []string{netSettings.IPAddress},
+			MacAddress:   netSettings.MacAddress,
+			Connected:    true,
+			DeviceConfigId: nicIndex,
+			IpConfig: &types.NetIpConfigInfo{
+				IpAddress: []types.NetIpConfigInfoIpAddress{{
+					IpAddress:    netSettings.IPAddress,
+					PrefixLength: int32(netSettings.IPPrefixLen),
+					State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
+				}},
+			},
+		}
+		guestNics = append(guestNics, nic)
+		nicIndex++
+	}
+
+	// If no networks found in the Networks map, use the default network settings
+	if len(guestNics) == 0 && primaryNet.IPAddress != "" {
+		nic := types.GuestNicInfo{
+			Network:      "default",
+			IpAddress:    []string{primaryNet.IPAddress},
+			MacAddress:   primaryNet.MacAddress,
+			Connected:    true,
+			DeviceConfigId: 0,
+			IpConfig: &types.NetIpConfigInfo{
+				IpAddress: []types.NetIpConfigInfoIpAddress{{
+					IpAddress:    primaryNet.IPAddress,
+					PrefixLength: int32(primaryNet.IPPrefixLen),
+					State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
+				}},
+			},
+		}
+		guestNics = append(guestNics, nic)
+	}
+
+	svm.vm.Guest.Net = guestNics
+
+	// Build IP stack info with DNS and routing
+	if primaryNet.IPAddress != "" {
 		gsi := types.GuestStackInfo{
 			DnsConfig: &types.NetDnsConfigInfo{
 				Dhcp:         false,
@@ -159,38 +168,29 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context) error {
 					Network:      "0.0.0.0",
 					PrefixLength: 0,
 					Gateway: types.NetIpRouteConfigInfoGateway{
-						IpAddress: netS.Gateway,
+						IpAddress: primaryNet.Gateway,
 						Device:    "0",
 					},
 				}},
 			},
 		}
 		svm.vm.Guest.IpStack = []types.GuestStackInfo{gsi}
-
-		// guest.net is a complex structure, trigger update for the whole thing
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.net",
-			Val:  svm.vm.Guest.Net,
-			Op:   types.PropertyChangeOpAssign,
-		})
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.ipStack",
-			Val:  svm.vm.Guest.IpStack,
-			Op:   types.PropertyChangeOpAssign,
-		})
 	}
 
-	// Update MAC address on virtual ethernet card
+	// Update MAC address on virtual ethernet card to match primary network
 	for _, d := range svm.vm.Config.Hardware.Device {
 		if eth, ok := d.(types.BaseVirtualEthernetCard); ok {
-			eth.GetVirtualEthernetCard().MacAddress = netS.MacAddress
+			eth.GetVirtualEthernetCard().MacAddress = primaryNet.MacAddress
 			break
 		}
 	}
 
-	// Trigger property change notifications if we have changes and context is available
-	if ctx != nil && len(changes) > 0 {
-		ctx.Update(svm.vm, changes)
+	// Use PropertyDiff to generate granular property changes
+	if ctx != nil {
+		changes := PropertyDiff(checkpoint, &svm.vm.VirtualMachine)
+		if len(changes) > 0 {
+			ctx.Update(svm.vm, changes)
+		}
 	}
 
 	return nil
