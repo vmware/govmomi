@@ -4159,6 +4159,7 @@ Examples:
 Options:
   -a=SHA256              Algorithm used to calculate the checksum. Possible values are: SHA1, MD5, SHA256 (default), SHA512
   -c=                    Checksum value to verify the pulled library item
+  -d=true                Upload disks
   -m=false               Require ova manifest
   -n=                    Library item name
   -pull=false            Pull library item from http endpoint
