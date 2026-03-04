@@ -30,6 +30,7 @@ type item struct {
 
 	manifest bool
 	pull     bool
+	disks    bool
 }
 
 func init() {
@@ -47,6 +48,7 @@ func (cmd *item) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.Type, "t", "", "Library item type")
 	f.BoolVar(&cmd.manifest, "m", false, "Require ova manifest")
 	f.BoolVar(&cmd.pull, "pull", false, "Pull library item from http endpoint")
+	f.BoolVar(&cmd.disks, "d", true, "Upload disks")
 	f.StringVar(&cmd.Checksum.Checksum, "c", "", "Checksum value to verify the pulled library item")
 	f.StringVar(&cmd.Checksum.Algorithm, "a", "SHA256", "Algorithm used to calculate the checksum. Possible values are: SHA1, MD5, SHA256 (default), SHA512")
 }
@@ -229,7 +231,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.Type == library.ItemTypeOVF {
+	if cmd.Type == library.ItemTypeOVF && cmd.disks {
 		o, err := importer.ReadOvf(base, archive)
 		if err != nil {
 			return err
