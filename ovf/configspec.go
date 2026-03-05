@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"math"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -1050,6 +1051,191 @@ func szToInt32(s string) int32 {
 	return int32(v)
 }
 
+// vApp PropertyInfo base type constants (values repeated in ovfToVAppBaseType).
+const vAppBaseTypeInt = "int"
+
+// OVF property type to vApp PropertyInfo.Type (base type) per DSP0243 Table 6
+// and vSphere API vim.vApp.PropertyInfo. Integer OVF types map to "int",
+// real32/real64 to "real".
+var ovfToVAppBaseType = map[string]string{
+	"uint8":   vAppBaseTypeInt,
+	"sint8":   vAppBaseTypeInt,
+	"uint16":  vAppBaseTypeInt,
+	"sint16":  vAppBaseTypeInt,
+	"uint32":  vAppBaseTypeInt,
+	"sint32":  vAppBaseTypeInt,
+	"uint64":  vAppBaseTypeInt,
+	"sint64":  vAppBaseTypeInt,
+	"string":  "string",
+	"boolean": "boolean",
+	"real32":  "real",
+	"real64":  "real",
+	"int":     vAppBaseTypeInt, // common in OVF although not in DSP0243 Table 6
+}
+
+// Regexes for OVF qualifiers per DSP0243 section 9.5.1 Table 7.
+var (
+	ovfMinLenRx   = regexp.MustCompile(`MinLen\((\d+)\)`)
+	ovfMaxLenRx   = regexp.MustCompile(`MaxLen\((\d+)\)`)
+	ovfValueMapRx = regexp.MustCompile(`ValueMap\{(.*)\}`)
+)
+
+// ovfTypeToVAppBaseType returns the vApp PropertyInfo base type for an OVF
+// property type.
+func ovfTypeToVAppBaseType(ovfType string) string {
+	key := strings.TrimSpace(strings.ToLower(ovfType))
+	if t, ok := ovfToVAppBaseType[key]; ok {
+		return t
+	}
+	return ovfType
+}
+
+// ovfQualifiers holds parsed OVF qualifiers (DSP0243 9.5.1 Table 7).
+type ovfQualifiers struct {
+	minLen int // MinLen(min) for string
+	maxLen int // MaxLen(max) for string; -1 means not set
+	// ValueMap{...} (parsed as strings for string and int)
+	valueMap []string
+}
+
+func parseOVFQualifiers(qualifiers string) (q ovfQualifiers) {
+	q.maxLen = -1
+	qualifiers = strings.TrimSpace(qualifiers)
+	if qualifiers == "" {
+		return q
+	}
+	if m := ovfMinLenRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.minLen, _ = strconv.Atoi(m[1])
+	}
+	if m := ovfMaxLenRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.maxLen, _ = strconv.Atoi(m[1])
+	}
+	if m := ovfValueMapRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.valueMap = parseValueMapContent(m[1])
+	}
+	return q
+}
+
+// parseValueMapContent parses the content inside ValueMap{...}:
+// comma-separated values, each a quoted string or number (per CIM/DSP0004).
+func parseValueMapContent(content string) []string {
+	content = strings.TrimSpace(content)
+	if content == "" {
+		return nil
+	}
+	var values []string
+	i := 0
+	for i < len(content) {
+		for i < len(content) && (content[i] == ',' || content[i] == ' ') {
+			i++
+		}
+		if i >= len(content) {
+			break
+		}
+		if content[i] == '"' {
+			// Quoted string: find closing " (handle escaped \" and \')
+			i++
+			start := i
+			for i < len(content) {
+				if content[i] == '\\' && i+1 < len(content) {
+					i += 2
+					continue
+				}
+				if content[i] == '"' {
+					values = append(values, content[start:i])
+					i++
+					break
+				}
+				i++
+			}
+			continue
+		}
+		// Number or unquoted token
+		start := i
+		for i < len(content) && content[i] != ',' {
+			i++
+		}
+		values = append(values, strings.TrimSpace(content[start:i]))
+	}
+	return values
+}
+
+// toVAppPropertyType returns the vApp PropertyInfo.Type string for an OVF
+// Property, applying the OVF-to-vApp type mapping and embedding qualifiers
+// per DSP0243 9.5.1 and vim.vApp.PropertyInfo (e.g. MinLen(1)=>string(1..)).
+func toVAppPropertyType(p Property) string {
+	baseType := ovfTypeToVAppBaseType(p.Type)
+	if p.Password != nil && *p.Password && baseType == "string" {
+		baseType = "password"
+	}
+	qualStr := ""
+	if p.Qualifiers != nil {
+		qualStr = strings.TrimSpace(*p.Qualifiers)
+	}
+	if qualStr == "" {
+		return baseType
+	}
+	q := parseOVFQualifiers(qualStr)
+
+	switch baseType {
+	case "string", "password":
+		if len(q.valueMap) > 0 {
+			// string["choice1", "choice2", ...] — escape " and \ in choices
+			parts := make([]string, 0, len(q.valueMap))
+			for _, v := range q.valueMap {
+				esc := strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), `"`, `\"`)
+				parts = append(parts, `"`+esc+`"`)
+			}
+			return baseType + "[" + strings.Join(parts, ", ") + "]"
+		}
+		// When both MinLen and MaxLen are set (including MinLen(0)), use
+		// (min..max) so the parser's strWithMinMaxLenRx applies correctly.
+		if q.maxLen >= 0 && q.minLen >= 0 {
+			return fmt.Sprintf("%s(%d..%d)", baseType, q.minLen, q.maxLen)
+		}
+		if q.maxLen >= 0 {
+			return fmt.Sprintf("%s(..%d)", baseType, q.maxLen)
+		}
+		if q.minLen > 0 {
+			return fmt.Sprintf("%s(%d..)", baseType, q.minLen)
+		}
+	case "int":
+		if len(q.valueMap) > 0 {
+			minVal, maxVal, ok := valueMapIntRange(q.valueMap)
+			if ok {
+				return fmt.Sprintf("int(%d..%d)", minVal, maxVal)
+			}
+		}
+	}
+	return baseType
+}
+
+// valueMapIntRange parses valueMap as integers and returns min, max and true;
+// otherwise 0, 0, false.
+func valueMapIntRange(valueMap []string) (minVal, maxVal int64, ok bool) {
+	if len(valueMap) == 0 {
+		return 0, 0, false
+	}
+	first, err := strconv.ParseInt(strings.TrimSpace(valueMap[0]), 10, 64)
+	if err != nil {
+		return 0, 0, false
+	}
+	minVal, maxVal = first, first
+	for i := 1; i < len(valueMap); i++ {
+		v, err := strconv.ParseInt(strings.TrimSpace(valueMap[i]), 10, 64)
+		if err != nil {
+			return 0, 0, false
+		}
+		if v < minVal {
+			minVal = v
+		}
+		if v > maxVal {
+			maxVal = v
+		}
+	}
+	return minVal, maxVal, true
+}
+
 func deref[T any](pT *T) T {
 	var t T
 	if pT != nil {
@@ -1112,13 +1298,16 @@ func (e Envelope) toVAppConfig(
 			if p.UserConfigurable == nil {
 				p.UserConfigurable = types.NewBool(false)
 			}
-			// Parse the value using the vApp config parser.
-			// Empty default values (including whitespace-only) are allowed.
+			vAppType := toVAppPropertyType(p)
+			// Parse the value using the vApp config parser with the computed
+			// type so that qualifier-derived constraints (e.g. string(1..65535))
+			// are applied.
 			value = strings.TrimSpace(value)
 			parsedValue := value
 			if value != "" {
+				pForParse := Property{Key: p.Key, Type: vAppType}
 				var err error
-				parsedValue, err = parseVAppConfigValue(p, value)
+				parsedValue, err = parseVAppConfigValue(pForParse, value)
 				if err != nil {
 					return err
 				}
@@ -1134,7 +1323,7 @@ func (e Envelope) toVAppConfig(
 					Id:               p.Key,
 					Category:         product.Category,
 					Label:            deref(p.Label),
-					Type:             p.Type,
+					Type:             vAppType,
 					UserConfigurable: p.UserConfigurable,
 					DefaultValue:     parsedValue,
 					Value:            "",

@@ -192,6 +192,29 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			// OVF envelope has ovf:value="  42  "; trimmed value must be stored.
 			assert.Equal(t, "42", p.DefaultValue)
 		})
+
+		t.Run("OVF qualifiers in VAppPropertyInfo.Type per DSP0243 9.5.1",
+			func(t *testing.T) {
+				// ntp-server: MinLen(1),MaxLen(65535) => string(1..65535)
+				p := findProp("ntp-server")
+				require.NotNil(t, p)
+				assert.Equal(t, "string(1..65535)", p.Type)
+
+				// nfs_mount: MinLen(0),MaxLen(65535) => string(0..65535)
+				p = findProp("nfs_mount")
+				require.NotNil(t, p)
+				assert.Equal(t, "string(0..65535)", p.Type)
+
+				// vmname has no qualifiers => plain "string"
+				p = findProp("vmname")
+				require.NotNil(t, p)
+				assert.Equal(t, "string", p.Type)
+
+				// whitespace_int: ovf:type="int" (no qualifiers) => "int"
+				p = findProp("whitespace_int")
+				require.NotNil(t, p)
+				assert.Equal(t, "int", p.Type)
+			})
 	})
 
 	t.Run("Photon 5", func(t *testing.T) {
@@ -687,7 +710,7 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 							},
 						},
 
-						// appliance
+						// appliance (ovf:password="true" => Type "password")
 						{
 							ArrayUpdateSpec: types.ArrayUpdateSpec{
 								Operation: types.ArrayUpdateOperationAdd,
@@ -698,7 +721,7 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 								ClassId:          "appliance",
 								Id:               "root_pwd",
 								Label:            "1.1. Root Password",
-								Type:             "string",
+								Type:             "password",
 								UserConfigurable: types.NewBool(true),
 								Description:      "The initial password of the root user. Subsequent changes of password should be performed in operating system. (6-128 characters)",
 							},
