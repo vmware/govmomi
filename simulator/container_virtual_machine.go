@@ -2,6 +2,65 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
+// Container Backing for Virtual Machines
+//
+// This file implements container-backed VMs for vcsim. When a VM is created with
+// the ExtraConfig key "RUN.container" set to a container image, vcsim will create
+// a real container to back the simulated VM.
+//
+// # ExtraConfig Options
+//
+// The following ExtraConfig keys control container backing behavior:
+//
+//   - RUN.container: Container image to use (e.g., "nginx:latest", "alpine:3.20")
+//     Can be a simple image name or JSON array with command args.
+//
+//   - RUN.mountdmi: Boolean (default: true). Mount /sys/class/dmi/id for DMI info.
+//     Set to "false" for rootless containers that can't mount system paths.
+//
+//   - RUN.network: Container network to use (e.g., "podman", "bridge").
+//     Important for rootless podman which needs explicit network for IP assignment.
+//
+//   - RUN.nestedContainers: Boolean (default: false). Enable nested container mode
+//     for running Kubernetes or other container workloads inside the container.
+//     When true, adds kind-style flags:
+//     --cgroupns=private, --security-opt seccomp=unconfined,
+//     --security-opt apparmor=unconfined, --tmpfs /tmp, --tmpfs /run,
+//     --volume /var, --volume /lib/modules:/lib/modules:ro, --device /dev/fuse.
+//     Reference: https://github.com/kubernetes-sigs/kind/blob/main/pkg/cluster/internal/providers/docker/provision.go
+//
+//   - RUN.port.<containerPort>: Map container port to host port.
+//     Example: RUN.port.80 = "8080" maps container port 80 to host port 8080.
+//
+//   - RUN.env.<name>: Set environment variable in the container.
+//     Example: RUN.env.DEBUG = "true" sets DEBUG=true in the container.
+//
+//   - guestinfo.*: Passed as VMX_GUESTINFO_* environment variables.
+//     Used by cloud-init VMware datasource with EnvVar transport.
+//
+// # Example: Basic Container
+//
+//	spec := types.VirtualMachineConfigSpec{
+//		Name: "web-server",
+//		ExtraConfig: []types.BaseOptionValue{
+//			&types.OptionValue{Key: "RUN.container", Value: "nginx:latest"},
+//			&types.OptionValue{Key: "RUN.port.80", Value: "8080"},
+//		},
+//	}
+//
+// # Example: Kubernetes Node (Nested Containers)
+//
+//	spec := types.VirtualMachineConfigSpec{
+//		Name: "k8s-node",
+//		ExtraConfig: []types.BaseOptionValue{
+//			&types.OptionValue{Key: "RUN.container", Value: "my-k8s-image:latest"},
+//			&types.OptionValue{Key: "RUN.mountdmi", Value: "false"},
+//			&types.OptionValue{Key: "RUN.nestedContainers", Value: "true"},
+//			&types.OptionValue{Key: "guestinfo.metadata", Value: metadataEncoded},
+//			&types.OptionValue{Key: "guestinfo.userdata", Value: userdataEncoded},
+//		},
+//	}
+
 package simulator
 
 import (
@@ -270,6 +329,7 @@ func (svm *simVM) start(ctx *Context) error {
 	var ports []string
 	var networks []string
 	mountDMI := true
+	nestedContainers := false
 
 	for _, opt := range svm.vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
@@ -288,6 +348,20 @@ func (svm *simVM) start(ctx *Context) error {
 			err := json.Unmarshal([]byte(val.Value.(string)), &mount)
 			if err == nil {
 				mountDMI = mount
+			}
+
+			continue
+		}
+
+		if val.Key == "RUN.nestedContainers" {
+			// Enable nested container mode for running Kubernetes or other container
+			// workloads inside the container. This adds flags adapted from kind's
+			// provision.go including --cgroupns=private, security-opt unconfined,
+			// tmpfs mounts, and /dev/fuse device.
+			var nested bool
+			err := json.Unmarshal([]byte(val.Value.(string)), &nested)
+			if err == nil {
+				nestedContainers = nested
 			}
 
 			continue
@@ -340,7 +414,7 @@ func (svm *simVM) start(ctx *Context) error {
 	}
 
 	var err error
-	svm.c, err = create(ctx, svm.vm.Name, svm.vm.uid.String(), networks, volumes, ports, env, args[0], args[1:])
+	svm.c, err = create(ctx, svm.vm.Name, svm.vm.uid.String(), networks, volumes, ports, env, nestedContainers, args[0], args[1:])
 	if err != nil {
 		return err
 	}
