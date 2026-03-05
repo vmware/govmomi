@@ -366,9 +366,10 @@ func createBridge(bridgeName string, labels ...string) (string, error) {
 //   - networks - set of bridges to connect the container to
 //   - volumes - colon separated tuple of volume name to mount path. Passed directly to docker via -v so mount options can be postfixed.
 //   - env - array of environment vairables in name=value form
+//   - nestedContainers - if true, adds flags required for running containers inside the container (e.g., Kubernetes)
 //   - optsAndImage - pass-though options and must include at least the container image to use, including tag if necessary
 //   - args - the command+args to pass to the container
-func create(ctx *Context, name string, id string, networks []string, volumes []string, ports []string, env []string, image string, args []string) (*container, error) {
+func create(ctx *Context, name string, id string, networks []string, volumes []string, ports []string, env []string, nestedContainers bool, image string, args []string) (*container, error) {
 	if len(image) == 0 {
 		return nil, errors.New("cannot create container backing without an image")
 	}
@@ -406,6 +407,39 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 	}
 
 	run := []string{"docker", "create", "--name", c.name}
+	// Add privileged mode for systemd compatibility
+	run = append(run, "--privileged")
+
+	if nestedContainers {
+		// Nested container mode: flags adapted from kind's provision.go for running
+		// Kubernetes inside the container. These enable proper cgroup isolation and
+		// allow containerd/kubelet to create nested containers.
+		// Reference: https://github.com/kubernetes-sigs/kind/blob/main/pkg/cluster/internal/providers/docker/provision.go
+		//
+		// --cgroupns=private: Gives container its own cgroup namespace, required for
+		//   proper cgroup v2 delegation to nested containers
+		// --security-opt seccomp=unconfined: Allows syscalls needed by systemd/containerd
+		// --security-opt apparmor=unconfined: Disables AppArmor restrictions
+		// --tmpfs /tmp,/run: Required for systemd to function properly
+		// --volume /var: Persistent storage for containerd/kubelet data
+		// --volume /lib/modules: Kernel modules for iptables/networking
+		// --device /dev/fuse: Required for fuse-overlayfs snapshotter
+		run = append(run,
+			"--cgroupns=private",
+			"--security-opt", "seccomp=unconfined",
+			"--security-opt", "apparmor=unconfined",
+			"--tmpfs", "/tmp",
+			"--tmpfs", "/run",
+			"--volume", "/var",
+			"--volume", "/lib/modules:/lib/modules:ro",
+			"--device", "/dev/fuse",
+		)
+	} else {
+		// Standard mode: use host cgroup namespace for access to all controllers
+		// --cgroupns=host: gives access to all cgroup controllers (cpuset, etc.)
+		run = append(run, "--cgroupns=host")
+	}
+
 	run = append(run, dockerNet...)
 	run = append(run, dockerVol...)
 	run = append(run, dockerPort...)
