@@ -147,7 +147,7 @@ type ToConfigSpecOptions struct {
 
 	// VirtualSystemCollectionIndex specifies the index of the VirtualSystem in
 	// the OVF's VirtualSystemCollection to transform into the ConfigSpec.
-	VirtualSystemCollectionIndex *int
+	VirtualSystemCollectionIndex int
 
 	// DeploymentConfiguration specifies the deployment configuration name (see
 	// DeploymentOptionSection in DSP0243). If empty, the default configuration
@@ -215,16 +215,23 @@ func (e Envelope) ToConfigSpecWithOptions(
 
 	vs := e.VirtualSystem
 	if vs == nil {
-		if i := opts.VirtualSystemCollectionIndex; i != nil {
-			if vsc := e.VirtualSystemCollection; vsc != nil {
-				if len(vsc.VirtualSystem) > *i {
-					vs = &vsc.VirtualSystem[*i]
+		if vsc := e.VirtualSystemCollection; vsc != nil {
+			i := opts.VirtualSystemCollectionIndex
+			if len(vsc.VirtualSystem) > i {
+				vs = &vsc.VirtualSystem[i]
+
+				// If the VirtualSystem from the VirtualSystemCollection
+				// has no Product, use the Product from the
+				// VirtualSystemCollection.
+				if vs.Product == nil {
+					vs.Product = vsc.Product
 				}
 			}
 		}
-		if vs == nil {
-			return configSpec{}, errors.New("no VirtualSystem")
-		}
+	}
+
+	if vs == nil {
+		return configSpec{}, nil
 	}
 
 	configName, err := e.resolveDeploymentConfiguration(opts)
@@ -326,21 +333,27 @@ func (e Envelope) toHardware(
 			// TODO(akutz)
 
 		case Processor: // 3
-			if item.VirtualQuantity == nil {
+			if item.VirtualQuantity != nil {
+				dst.NumCPUs = int32(*item.VirtualQuantity)
+			} else if item.Reservation != nil {
+				dst.NumCPUs = int32(*item.Reservation)
+			} else {
 				return errUnsupportedItem(
-					index, item, nil, "nil VirtualQuantity")
+					index, item, nil, "nil VirtualQuantity and Reservation")
 			}
-			dst.NumCPUs = int32(*item.VirtualQuantity)
-			if cps := item.CoresPerSocket; cps != nil {
-				dst.NumCoresPerSocket = &cps.Value
+			if item.CoresPerSocket != nil {
+				dst.NumCoresPerSocket = &item.CoresPerSocket.Value
 			}
 
 		case Memory: // 4
-			if item.VirtualQuantity == nil {
+			if item.VirtualQuantity != nil {
+				dst.MemoryMB = int64(*item.VirtualQuantity)
+			} else if item.Reservation != nil {
+				dst.MemoryMB = int64(*item.Reservation)
+			} else {
 				return errUnsupportedItem(
-					index, item, nil, "nil VirtualQuantity")
+					index, item, nil, "nil VirtualQuantity and Reservation")
 			}
-			dst.MemoryMB = int64(*item.VirtualQuantity)
 
 		case IdeController: // 5
 			d, err = e.toIDEController(item, devices, resources)
@@ -566,9 +579,10 @@ func (e Envelope) ovfDisk(diskID string) *VirtualDiskDesc {
 	return nil
 }
 
-// propertyDefaultsForConfig returns a map of property key to default value for
-// the given deployment configuration, from all ProductSections of vs (DSP0243 9.5.1).
-// Used for resolving ovf:capacity="${key}" on Disk elements (DSP0243 9.1).
+// propertyDefaultsForConfig returns a map of property key to default
+// value for the given deployment configuration, from all
+// ProductSections of vs (DSP0243 9.5.1). Used for resolving
+// ovf:capacity="${key}" on Disk elements (DSP0243 9.1).
 func (e Envelope) propertyDefaultsForConfig(vs *VirtualSystem, configName string) map[string]string {
 	out := make(map[string]string)
 	for _, product := range vs.Product {
@@ -600,19 +614,13 @@ func (e Envelope) toVirtualDisk(
 	fileRefs map[string]File,
 	propertyValues map[string]string) (types.BaseVirtualDevice, error) {
 
-	if item.Parent == nil {
-		return nil, fmt.Errorf("missing Parent")
-	}
-
-	r, ok := resources[*item.Parent]
-	if !ok {
-		return nil, nil
-	}
-
-	c, ok := r.(types.BaseVirtualController)
-	if !ok {
-		return nil, fmt.Errorf("expectedType=%s, actualType=%T",
-			"types.BaseVirtualController", r)
+	var c types.BaseVirtualController
+	if item.Parent != nil {
+		if r, ok := resources[*item.Parent]; ok {
+			if c1, ok := r.(types.BaseVirtualController); ok {
+				c = c1
+			}
+		}
 	}
 
 	// The diskName variable is used to store the name of the disk from
@@ -730,12 +738,41 @@ func (e Envelope) toCDOrDVDDrive(
 	return d, nil
 }
 
+var validSCSIControllerTypes = map[string]struct{}{
+	"buslogic":     {},
+	"lsilogic":     {},
+	"lsilogic-sas": {},
+	"pvscsi":       {},
+	"scsi":         {},
+	"virtualscsi":  {},
+}
+
+// resolveSCSIControllerType parses resourceSubType by splitting on
+// comma or space, trims whitespace from each element, and returns the
+// first element that matches a key in validSCSIControllerTypes (match
+// is case-insensitive). If no match, returns the original string.
+func resolveSCSIControllerType(resourceSubType string) string {
+	trimmed := strings.TrimSpace(resourceSubType)
+	// Split on comma or space (one or more of either)
+	tokens := strings.Fields(strings.ReplaceAll(trimmed, ",", " "))
+	for _, tok := range tokens {
+		t := strings.TrimSpace(tok)
+		lower := strings.ToLower(t)
+		if _, ok := validSCSIControllerTypes[lower]; ok {
+			return lower
+		}
+	}
+	return resourceSubType
+}
+
 func (e Envelope) toSCSIController(
 	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
-	d, err := devices.CreateSCSIController(item.resourceSubType)
+	controllerType := resolveSCSIControllerType(item.resourceSubType)
+
+	d, err := devices.CreateSCSIController(controllerType)
 	if err != nil {
 		return nil, err
 	}
