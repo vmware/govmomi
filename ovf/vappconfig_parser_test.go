@@ -152,16 +152,16 @@ func TestParseVAppConfigValue(t *testing.T) {
 
 	t.Run("string with minimum length constraint", func(t *testing.T) {
 		t.Run("valid - meets minimum", func(t *testing.T) {
-			got, err := parseVAppConfigValue(Property{Key: "str-min-prop", Type: "string(..3)"}, "abc")
+			got, err := parseVAppConfigValue(Property{Key: "str-min-prop", Type: "string(3..)"}, "abc")
 			require.NoError(t, err)
 			assert.Equal(t, "abc", got)
 		})
 		t.Run("invalid - below minimum", func(t *testing.T) {
-			_, err := parseVAppConfigValue(Property{Key: "str-min-prop", Type: "string(..3)"}, "ab")
-			assert.EqualError(t, err, fmt.Sprintf("failed to parse prop=%q, type=%s due to length: len=%d, min=%d, max=%d", "str-min-prop", "string(..3)", 2, 3, 65535))
+			_, err := parseVAppConfigValue(Property{Key: "str-min-prop", Type: "string(3..)"}, "ab")
+			assert.EqualError(t, err, fmt.Sprintf("failed to parse prop=%q, type=%s due to length: len=%d, min=%d, max=%d", "str-min-prop", "string(3..)", 2, 3, 65535))
 		})
 		t.Run("valid - exact minimum", func(t *testing.T) {
-			got, err := parseVAppConfigValue(Property{Key: "str-min-prop", Type: "string(..3)"}, "abc")
+			got, err := parseVAppConfigValue(Property{Key: "str-min-prop", Type: "string(3..)"}, "abc")
 			require.NoError(t, err)
 			assert.Equal(t, "abc", got)
 		})
@@ -169,13 +169,13 @@ func TestParseVAppConfigValue(t *testing.T) {
 
 	t.Run("string with maximum length constraint", func(t *testing.T) {
 		t.Run("valid - within maximum", func(t *testing.T) {
-			got, err := parseVAppConfigValue(Property{Key: "str-max-prop", Type: "string(3..)"}, "abc")
+			got, err := parseVAppConfigValue(Property{Key: "str-max-prop", Type: "string(..3)"}, "abc")
 			require.NoError(t, err)
 			assert.Equal(t, "abc", got)
 		})
 		t.Run("invalid - exceeds maximum", func(t *testing.T) {
-			_, err := parseVAppConfigValue(Property{Key: "str-max-prop", Type: "string(3..)"}, "abcd")
-			assert.EqualError(t, err, fmt.Sprintf("failed to parse prop=%q, type=%s due to length: len=%d, min=%d, max=%d", "str-max-prop", "string(3..)", 4, 0, 3))
+			_, err := parseVAppConfigValue(Property{Key: "str-max-prop", Type: "string(..3)"}, "abcd")
+			assert.EqualError(t, err, fmt.Sprintf("failed to parse prop=%q, type=%s due to length: len=%d, min=%d, max=%d", "str-max-prop", "string(..3)", 4, 0, 3))
 		})
 	})
 
@@ -206,18 +206,18 @@ func TestParseVAppConfigValue(t *testing.T) {
 
 	t.Run("password with length constraints", func(t *testing.T) {
 		t.Run("valid - minimum length", func(t *testing.T) {
-			got, err := parseVAppConfigValue(Property{Key: "pass-min-prop", Type: "password(..3)"}, "abc")
+			got, err := parseVAppConfigValue(Property{Key: "pass-min-prop", Type: "password(3..)"}, "abc")
 			require.NoError(t, err)
 			assert.Equal(t, "abc", got)
 		})
 		t.Run("invalid - below minimum does not leak password in error", func(t *testing.T) {
 			secret := "ab"
-			_, err := parseVAppConfigValue(Property{Key: "pass-min-prop", Type: "password(..3)"}, secret)
+			_, err := parseVAppConfigValue(Property{Key: "pass-min-prop", Type: "password(3..)"}, secret)
 			require.Error(t, err)
 			assert.NotContains(t, err.Error(), secret, "error must not contain the password value")
 		})
 		t.Run("valid - maximum length", func(t *testing.T) {
-			got, err := parseVAppConfigValue(Property{Key: "pass-max-prop", Type: "password(3..)"}, "abc")
+			got, err := parseVAppConfigValue(Property{Key: "pass-max-prop", Type: "password(..3)"}, "abc")
 			require.NoError(t, err)
 			assert.Equal(t, "abc", got)
 		})
@@ -346,12 +346,12 @@ func TestParseVAppConfigValueWhitespaceTrimming(t *testing.T) {
 		{"expression", "expression", "  expr  ", "expr"},
 		{"unknown type", "unknown-type", "  val  ", "val"},
 		// Constrained string types
-		{"string min length", "string(..5)", "  hello  ", "hello"},
-		{"string max length", "string(3..)", "  abc  ", "abc"},
+		{"string min length", "string(5..)", "  hello  ", "hello"},
+		{"string max length", "string(..3)", "  abc  ", "abc"},
 		{"string min/max length", "string(2..6)", "  abc  ", "abc"},
 		// Constrained password types
-		{"password min length", "password(..5)", "  hello  ", "hello"},
-		{"password max length", "password(3..)", "  abc  ", "abc"},
+		{"password min length", "password(5..)", "  hello  ", "hello"},
+		{"password max length", "password(..3)", "  abc  ", "abc"},
 		{"password min/max length", "password(2..6)", "  abc  ", "abc"},
 		// Constrained int and real types
 		{"int range", "int(0..255)", "  42  ", "42"},

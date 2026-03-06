@@ -1223,6 +1223,7 @@ func toVAppPropertyType(p Property) string {
 		}
 		// When both MinLen and MaxLen are set (including MinLen(0)), use
 		// (min..max) so the parser's strWithMinMaxLenRx applies correctly.
+		// (min..) and (..max) are parsed by strWithMinLenRx and strWithMaxLenRx.
 		if q.maxLen >= 0 && q.minLen >= 0 {
 			return fmt.Sprintf("%s(%d..%d)", baseType, q.minLen, q.maxLen)
 		}

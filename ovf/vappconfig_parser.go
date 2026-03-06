@@ -15,8 +15,8 @@ import (
 const maxVAppPropStringLen = 65535
 
 var (
-	strWithMinLenRx      = regexp.MustCompile(`^(?:string|password)\(\.\.(\d+)\)$`)
-	strWithMaxLenRx      = regexp.MustCompile(`^(?:string|password)\((\d+)\.\.\)$`)
+	strWithMinLenRx      = regexp.MustCompile(`^(?:string|password)\((\d+)\.\.\)$`)
+	strWithMaxLenRx      = regexp.MustCompile(`^(?:string|password)\(\.\.(\d+)\)$`)
 	strWithMinMaxLenRx   = regexp.MustCompile(`^(?:string|password)\((\d+)\.\.(\d+)\)$`)
 	intWithMinMaxSizeRx  = regexp.MustCompile(`^int\(([+-]?\d+)\.\.([+-]?\d+)\)$`)
 	realWithMinMaxSizeRx = regexp.MustCompile(`^real\(([+-]?(?:\d+(?:\.\d*)?|\.\d+))\.\.([+-]?(?:\d+(?:\.\d*)?|\.\d+))\)$`)
