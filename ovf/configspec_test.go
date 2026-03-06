@@ -463,6 +463,165 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		assert.Contains(t, err.Error(), "invalid.key")
 	})
 
+	t.Run("uber.ovf: comprehensive OVF parsing and ConfigSpec", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/uber.ovf")
+
+		findProp := func(va *types.VAppConfigSpec, id string) *types.VAppPropertyInfo {
+			if va == nil {
+				return nil
+			}
+			for i := range va.Property {
+				if va.Property[i].Info.Id == id {
+					return va.Property[i].Info
+				}
+			}
+			return nil
+		}
+
+		t.Run("envelope parsing", func(t *testing.T) {
+			require.NotNil(t, e.VirtualSystem)
+			require.Nil(t, e.VirtualSystemCollection)
+			require.NotEmpty(t, e.References, "References with File for file-backed disk")
+			require.NotNil(t, e.Disk)
+			require.Len(t, e.Disk.Disks, 2, "vmdisk1 file-backed, vmdisk2 property capacity")
+			require.NotNil(t, e.Network)
+			require.Len(t, e.Network.Networks, 2)
+			require.NotNil(t, e.DeploymentOption)
+			require.Len(t, e.DeploymentOption.Configuration, 2)
+			require.NotEmpty(t, e.VirtualSystem.Product)
+			ps := e.VirtualSystem.Product[0]
+			require.NotEmpty(t, ps.Items, "category grouping: Items preserved")
+			require.NotEmpty(t, ps.Property)
+			require.NotNil(t, e.VirtualSystem.Annotation)
+			require.NotNil(t, e.VirtualSystem.OperatingSystem)
+			require.Len(t, e.VirtualSystem.VirtualHardware, 1)
+			hw := e.VirtualSystem.VirtualHardware[0]
+			require.NotEmpty(t, hw.Item)
+			require.Equal(t, "uber-vm", e.VirtualSystem.ID)
+		})
+
+		t.Run("default config: ConfigSpec and VAppConfig", func(t *testing.T) {
+			cs, err := e.ToConfigSpec()
+			require.NoError(t, err)
+			assert.Equal(t, "uber-vm", cs.Name)
+			assert.NotEmpty(t, cs.GuestId)
+			assert.Equal(t, int32(1), cs.NumCPUs)
+			assert.Equal(t, int64(512), cs.MemoryMB)
+			require.NotEmpty(t, cs.DeviceChange)
+
+			var disks []*types.VirtualDisk
+			for _, dc := range cs.DeviceChange {
+				if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+					disks = append(disks, d)
+				}
+			}
+			require.Len(t, disks, 1, "default config: only vmdisk1 (second disk is extended-only)")
+			db, ok := disks[0].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			require.True(t, ok)
+			assert.Equal(t, "uber-os.vmdk", db.FileName)
+			assert.Equal(t, int64(20*1024*1024*1024), disks[0].CapacityInBytes)
+
+			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.True(t, ok)
+			// default: net_common, hostname, storage_common, disksize, auth_mode, enable_ssh (no extended-only)
+			require.Len(t, va.Property, 6)
+			assert.Equal(t, "Net", findProp(va, "net_common").Category)
+			assert.Equal(t, "Net", findProp(va, "hostname").Category)
+			assert.Equal(t, "Storage", findProp(va, "storage_common").Category)
+			assert.Equal(t, "Storage", findProp(va, "disksize").Category)
+			assert.Equal(t, "Security", findProp(va, "auth_mode").Category)
+			assert.Equal(t, "Security", findProp(va, "enable_ssh").Category)
+			assert.Nil(t, findProp(va, "net_extended"))
+			assert.Nil(t, findProp(va, "storage_extended"))
+			assert.Nil(t, findProp(va, "extended_secret"))
+		})
+
+		t.Run("extended config: all properties, categories, and two disks", func(t *testing.T) {
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "extended",
+			})
+			require.NoError(t, err)
+			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.True(t, ok)
+			require.Len(t, va.Property, 9)
+			assert.Equal(t, "Net", findProp(va, "net_extended").Category)
+			assert.Equal(t, "Storage", findProp(va, "storage_extended").Category)
+			assert.Equal(t, "Security", findProp(va, "extended_secret").Category)
+
+			var disks []*types.VirtualDisk
+			for _, dc := range cs.DeviceChange {
+				if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+					disks = append(disks, d)
+				}
+			}
+			require.Len(t, disks, 2, "extended config: vmdisk1 + vmdisk2 (second disk is extended-only)")
+		})
+
+		t.Run("disks default config: one file-backed disk", func(t *testing.T) {
+			cs, err := e.ToConfigSpec()
+			require.NoError(t, err)
+			var disks []*types.VirtualDisk
+			for _, dc := range cs.DeviceChange {
+				if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+					disks = append(disks, d)
+				}
+			}
+			require.Len(t, disks, 1)
+			db, ok := disks[0].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			require.True(t, ok)
+			assert.NotEmpty(t, db.FileName, "vmdisk1 is file-backed")
+			assert.Equal(t, "uber-os.vmdk", db.FileName)
+			assert.Equal(t, int64(20*1024*1024*1024), disks[0].CapacityInBytes)
+		})
+
+		t.Run("disks extended config: two disks (file-backed + property-backed capacity)", func(t *testing.T) {
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "extended",
+			})
+			require.NoError(t, err)
+			var disks []*types.VirtualDisk
+			for _, dc := range cs.DeviceChange {
+				if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+					disks = append(disks, d)
+				}
+			}
+			require.Len(t, disks, 2)
+
+			db1, ok := disks[0].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			require.True(t, ok)
+			assert.NotEmpty(t, db1.FileName, "vmdisk1 is file-backed")
+			assert.Equal(t, "uber-os.vmdk", db1.FileName)
+			assert.Equal(t, int64(20*1024*1024*1024), disks[0].CapacityInBytes)
+
+			db2, ok := disks[1].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			require.True(t, ok)
+			assert.Empty(t, db2.FileName, "vmdisk2 is empty disk with property capacity")
+			assert.Equal(t, int64(5*1024*1024*1024), disks[1].CapacityInBytes,
+				"capacity from property disksize=5 GiB (DSP0243 9.1)")
+		})
+
+		t.Run("property types and qualifiers", func(t *testing.T) {
+			cs, err := e.ToConfigSpec()
+			require.NoError(t, err)
+			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.True(t, ok)
+			p := findProp(va, "enable_ssh")
+			require.NotNil(t, p)
+			assert.Equal(t, "False", p.DefaultValue, "boolean normalised to canonical form")
+			p = findProp(va, "hostname")
+			require.NotNil(t, p)
+			assert.Equal(t, "string(1..253)", p.Type, "MinLen(1),MaxLen(253) -> string(1..253)")
+		})
+
+		t.Run("invalid deployment config returns error", func(t *testing.T) {
+			_, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "nonexistent",
+			})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "not found in DeploymentOptionSection")
+		})
+	})
+
 	t.Run("DeploymentConfiguration", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/configspec.ovf")
 
