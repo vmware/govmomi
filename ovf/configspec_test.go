@@ -217,6 +217,72 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			})
 	})
 
+	t.Run("category grouping (DSP0243 9.5.1)", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/category-grouping.ovf")
+		findProp := func(va *types.VAppConfigSpec, id string) *types.VAppPropertyInfo {
+			for i := range va.Property {
+				if va.Property[i].Info.Id == id {
+					return va.Property[i].Info
+				}
+			}
+			return nil
+		}
+		// Fixture has DeploymentOptionSection (default, extended), ProductSection with categories
+		// Net, Storage, Security and properties with/without ovf:configuration.
+
+		t.Run("default config: categories and config filtering", func(t *testing.T) {
+			cs, err := e.ToConfigSpec()
+			require.NoError(t, err)
+			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.True(t, ok)
+			// Only common properties (no ovf:configuration or configuration matches default).
+			require.Len(t, va.Property, 3, "default config should have 3 vApp properties")
+			p := findProp(va, "net_common")
+			require.NotNil(t, p)
+			assert.Equal(t, "Net", p.Category)
+			p = findProp(va, "storage_common")
+			require.NotNil(t, p)
+			assert.Equal(t, "Storage", p.Category)
+			p = findProp(va, "auth_mode")
+			require.NotNil(t, p)
+			assert.Equal(t, "Security", p.Category)
+			assert.Nil(t, findProp(va, "net_extended"), "extended-only property should be absent in default config")
+			assert.Nil(t, findProp(va, "storage_extended"), "extended-only property should be absent in default config")
+			assert.Nil(t, findProp(va, "extended_secret"), "extended-only property should be absent in default config")
+		})
+
+		t.Run("extended config: all categories and config-specific properties", func(t *testing.T) {
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "extended",
+			})
+			require.NoError(t, err)
+			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.True(t, ok)
+			require.Len(t, va.Property, 6, "extended config should have 6 vApp properties")
+			// Net category: net_common, net_extended
+			p := findProp(va, "net_common")
+			require.NotNil(t, p)
+			assert.Equal(t, "Net", p.Category)
+			p = findProp(va, "net_extended")
+			require.NotNil(t, p)
+			assert.Equal(t, "Net", p.Category)
+			// Storage category: storage_common, storage_extended
+			p = findProp(va, "storage_common")
+			require.NotNil(t, p)
+			assert.Equal(t, "Storage", p.Category)
+			p = findProp(va, "storage_extended")
+			require.NotNil(t, p)
+			assert.Equal(t, "Storage", p.Category)
+			// Security category: auth_mode, extended_secret
+			p = findProp(va, "auth_mode")
+			require.NotNil(t, p)
+			assert.Equal(t, "Security", p.Category)
+			p = findProp(va, "extended_secret")
+			require.NotNil(t, p)
+			assert.Equal(t, "Security", p.Category)
+		})
+	})
+
 	t.Run("OVF property types and qualifiers to vAppPropertyInfo.Type", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/property-types.ovf")
 		cs, err := e.ToConfigSpec()

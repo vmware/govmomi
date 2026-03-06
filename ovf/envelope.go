@@ -6,6 +6,9 @@ package ovf
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 // Envelope is defined according to
@@ -67,13 +70,21 @@ type Content struct {
 type Section struct {
 	Required *bool  `xml:"required,attr" json:"required,omitempty"`
 	Info     string `xml:"Info" json:"info,omitempty"`
-	Category string `xml:"Category" json:"category,omitempty"`
+	Category string `xml:"Category,omitempty" json:"category,omitempty"`
 }
 
 type AnnotationSection struct {
 	Section
 
 	Annotation string `xml:"Annotation" json:"annotation,omitempty"`
+}
+
+// ProductSectionItem represents one element in the Category|Property sequence
+// per DSP0243 9.5.1: "The set of Property elements grouped by a Category element
+// is the sequence of Property elements following the Category element."
+type ProductSectionItem struct {
+	Category *string   `xml:"Category,omitempty" json:"category,omitempty"`
+	Property *Property `xml:"Property,omitempty" json:"property,omitempty"`
 }
 
 type ProductSection struct {
@@ -89,7 +100,131 @@ type ProductSection struct {
 	ProductURL  string     `xml:"ProductUrl" json:"productUrl,omitempty"`
 	VendorURL   string     `xml:"VendorUrl" json:"vendorUrl,omitempty"`
 	AppURL      string     `xml:"AppUrl" json:"appUrl,omitempty"`
-	Property    []Property `xml:"Property" json:"property,omitempty"`
+	Property    []Property `xml:"Property" json:"property,omitempty"` // populated from Items for backward compat
+
+	// Items preserves the order of Category and Property elements (DSP0243 9.5.1).
+	// When unmarshaling, both Items and Property are populated.
+	Items []ProductSectionItem `xml:"-" json:"items,omitempty"`
+}
+
+// UnmarshalXML decodes ProductSection and preserves the order of Category and
+// Property elements per DSP0243 9.5.1 (category grouping).
+func (p *ProductSection) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	for _, a := range start.Attr {
+		switch a.Name.Local {
+		case "class":
+			p.Class = &a.Value
+		case "instance":
+			p.Instance = &a.Value
+		case "required":
+			v := strings.EqualFold(a.Value, "true")
+			p.Required = &v
+		}
+	}
+	var items []ProductSectionItem
+	var properties []Property
+	for {
+		tok, err := d.Token()
+		if err != nil {
+			return err
+		}
+		switch t := tok.(type) {
+		case xml.EndElement:
+			p.Items = items
+			p.Property = properties
+			if p.Section.Category == "" && len(items) > 0 {
+				for i := len(items) - 1; i >= 0; i-- {
+					if items[i].Category != nil {
+						p.Section.Category = *items[i].Category
+						break
+					}
+				}
+			}
+			return nil
+		case xml.StartElement:
+			switch t.Name.Local {
+			case "Info":
+				var s string
+				if err := d.DecodeElement(&s, &t); err != nil {
+					return err
+				}
+				p.Section.Info = s
+			case "Category":
+				var s string
+				if err := d.DecodeElement(&s, &t); err != nil {
+					return err
+				}
+				s = strings.TrimSpace(s)
+				p.Section.Category = s
+				items = append(items, ProductSectionItem{Category: &s})
+			case "Property":
+				var prop Property
+				if err := d.DecodeElement(&prop, &t); err != nil {
+					return err
+				}
+				properties = append(properties, prop)
+				items = append(items, ProductSectionItem{Property: &prop})
+			case "Product":
+				if err := d.DecodeElement(&p.Product, &t); err != nil {
+					return err
+				}
+			case "Vendor":
+				if err := d.DecodeElement(&p.Vendor, &t); err != nil {
+					return err
+				}
+			case "Version":
+				if err := d.DecodeElement(&p.Version, &t); err != nil {
+					return err
+				}
+			case "FullVersion":
+				if err := d.DecodeElement(&p.FullVersion, &t); err != nil {
+					return err
+				}
+			case "ProductUrl":
+				if err := d.DecodeElement(&p.ProductURL, &t); err != nil {
+					return err
+				}
+			case "VendorUrl":
+				if err := d.DecodeElement(&p.VendorURL, &t); err != nil {
+					return err
+				}
+			case "AppUrl":
+				if err := d.DecodeElement(&p.AppURL, &t); err != nil {
+					return err
+				}
+			default:
+				if err := d.Skip(); err != nil {
+					return err
+				}
+			}
+		}
+	}
+}
+
+// PropertiesWithCategory returns properties in document order with the
+// Category that groups each one (DSP0243 9.5.1: the Category element
+// preceding the property in the sequence).
+func (p ProductSection) PropertiesWithCategory() []struct {
+	Category string
+	Property Property
+} {
+	var out []struct {
+		Category string
+		Property Property
+	}
+	var curCategory string
+	for _, item := range p.Items {
+		if item.Category != nil {
+			curCategory = *item.Category
+		}
+		if item.Property != nil {
+			out = append(out, struct {
+				Category string
+				Property Property
+			}{curCategory, *item.Property})
+		}
+	}
+	return out
 }
 
 func (p ProductSection) Key(prop Property) string {

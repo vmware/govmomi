@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Category grouping (DSP0243 9.5.1) with deployment configurations.
+  - Multiple categories: Net, Storage, Security.
+  - Properties with and without ovf:configuration to test intersection.
+  - default config: net_common, storage_common, auth_mode.
+  - extended config: adds net_extended, storage_extended, extended_secret.
+-->
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+  <References></References>
+  <DiskSection><Info>Virtual disk information</Info></DiskSection>
+  <NetworkSection><Info>Networks</Info><Network ovf:name="VM Network"><Description>VM Network</Description></Network></NetworkSection>
+  <DeploymentOptionSection>
+    <Info>Deployment configurations for category + config intersection tests</Info>
+    <Configuration ovf:id="default" ovf:default="true">
+      <Label>Default</Label>
+      <Description>Base set of properties only</Description>
+    </Configuration>
+    <Configuration ovf:id="extended">
+      <Label>Extended</Label>
+      <Description>Includes config-specific properties in each category</Description>
+    </Configuration>
+  </DeploymentOptionSection>
+  <VirtualSystem ovf:id="category-vm">
+    <Info>Category grouping and deployment config intersection (DSP0243 9.5.1)</Info>
+    <Name>category-vm</Name>
+    <OperatingSystemSection ovf:id="94" vmw:osType="ubuntu64Guest"><Info>Guest OS</Info><Description>Ubuntu Linux (64-bit)</Description></OperatingSystemSection>
+    <VirtualHardwareSection>
+      <Info>Virtual hardware requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemIdentifier>category-vm</vssd:VirtualSystemIdentifier>
+        <vssd:VirtualSystemType>vmx-19</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:ElementName>1024MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>1024</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>SCSI Controller</rasd:Description>
+        <rasd:ElementName>SCSI controller 0</rasd:ElementName>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceSubType>VirtualSCSI</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard disk 1</rasd:ElementName>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+    <ProductSection ovf:class="test" ovf:required="false">
+      <Info>DSP0243 9.5.1: Category groups and deployment configuration intersection</Info>
+      <Product>Category grouping test</Product>
+      <Vendor>Test</Vendor>
+      <Version>1.0</Version>
+      <Category>Net</Category>
+      <Property ovf:key="net_common" ovf:type="string" ovf:userConfigurable="true" ovf:value="">
+        <Label>Network (common)</Label>
+      </Property>
+      <Property ovf:key="net_extended" ovf:type="string" ovf:configuration="extended" ovf:userConfigurable="true" ovf:value="">
+        <Label>Network (extended only)</Label>
+      </Property>
+      <Category>Storage</Category>
+      <Property ovf:key="storage_common" ovf:type="string" ovf:userConfigurable="true" ovf:value="">
+        <Label>Storage (common)</Label>
+      </Property>
+      <Property ovf:key="storage_extended" ovf:type="string" ovf:configuration="extended" ovf:userConfigurable="true" ovf:value="">
+        <Label>Storage (extended only)</Label>
+      </Property>
+      <Category>Security</Category>
+      <Property ovf:key="auth_mode" ovf:type="string" ovf:userConfigurable="true" ovf:value="password">
+        <Label>Authentication mode</Label>
+      </Property>
+      <Property ovf:key="extended_secret" ovf:type="string" ovf:configuration="extended" ovf:userConfigurable="true" ovf:value="">
+        <Label>Secret (extended only)</Label>
+      </Property>
+    </ProductSection>
+  </VirtualSystem>
+</Envelope>

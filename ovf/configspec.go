@@ -572,7 +572,8 @@ func (e Envelope) ovfDisk(diskID string) *VirtualDiskDesc {
 func (e Envelope) propertyDefaultsForConfig(vs *VirtualSystem, configName string) map[string]string {
 	out := make(map[string]string)
 	for _, product := range vs.Product {
-		for _, p := range product.Property {
+		for _, pair := range product.PropertiesWithCategory() {
+			p := pair.Property
 			if p.Configuration != nil && *p.Configuration != configName {
 				continue
 			}
@@ -1359,7 +1360,8 @@ func (e Envelope) toVAppConfig(
 			},
 		})
 
-		for _, p := range product.Property {
+		for _, pair := range product.PropertiesWithCategory() {
+			p := pair.Property
 			if p.Configuration != nil && *p.Configuration != configName {
 				// Skip properties that are not part of the provided
 				// configuration.
@@ -1402,6 +1404,8 @@ func (e Envelope) toVAppConfig(
 					return err
 				}
 			}
+			// Use per-property category from DSP0243 9.5.1 grouping.
+			category := pair.Category
 			np := types.VAppPropertySpec{
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: types.ArrayUpdateOperationAdd,
@@ -1411,7 +1415,7 @@ func (e Envelope) toVAppConfig(
 					ClassId:          deref(product.Class),
 					InstanceId:       deref(product.Instance),
 					Id:               p.Key,
-					Category:         product.Category,
+					Category:         category,
 					Label:            deref(p.Label),
 					Type:             vAppType,
 					UserConfigurable: p.UserConfigurable,
