@@ -283,6 +283,9 @@ func (e Envelope) toHardware(
 	// Parse the extra config.
 	e.toExtraConfig(dst, hw)
 
+	// Property defaults for the selected config (used e.g. for disk capacity "${key}").
+	propertyValues := e.propertyDefaultsForConfig(vs, configName)
+
 	var (
 		devices   object.VirtualDeviceList
 		resources = map[string]types.BaseVirtualDevice{}
@@ -378,7 +381,7 @@ func (e Envelope) toHardware(
 			d, err = e.toCDOrDVDDrive(item, devices, resources)
 
 		case DiskDrive: // 17
-			d, err = e.toVirtualDisk(item, devices, resources, fileRefs)
+			d, err = e.toVirtualDisk(item, devices, resources, fileRefs, propertyValues)
 
 		case TapeDrive: // 18
 			// TODO(akutz)
@@ -563,11 +566,38 @@ func (e Envelope) ovfDisk(diskID string) *VirtualDiskDesc {
 	return nil
 }
 
+// propertyDefaultsForConfig returns a map of property key to default value for
+// the given deployment configuration, from all ProductSections of vs (DSP0243 9.5.1).
+// Used for resolving ovf:capacity="${key}" on Disk elements (DSP0243 9.1).
+func (e Envelope) propertyDefaultsForConfig(vs *VirtualSystem, configName string) map[string]string {
+	out := make(map[string]string)
+	for _, product := range vs.Product {
+		for _, p := range product.Property {
+			if p.Configuration != nil && *p.Configuration != configName {
+				continue
+			}
+			var value string
+			if p.Default != nil {
+				value = *p.Default
+			}
+			for _, v := range p.Values {
+				if v.Configuration != nil && *v.Configuration == configName {
+					value = v.Value
+					break
+				}
+			}
+			out[p.Key] = strings.TrimSpace(value)
+		}
+	}
+	return out
+}
+
 func (e Envelope) toVirtualDisk(
 	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice,
-	fileRefs map[string]File) (types.BaseVirtualDevice, error) {
+	fileRefs map[string]File,
+	propertyValues map[string]string) (types.BaseVirtualDevice, error) {
 
 	if item.Parent == nil {
 		return nil, fmt.Errorf("missing Parent")
@@ -623,12 +653,32 @@ func (e Envelope) toVirtualDisk(
 		}
 		capacityInBytes = uint64(ParseCapacityAllocationUnits(allocUnitsSz))
 		if capSz := dd.Capacity; capSz != "" {
-			cap, err := strconv.ParseUint(dd.Capacity, 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("disk=%s has invalid capacity=%q",
-					diskID, capSz)
+			var capVal uint64
+			if strings.HasPrefix(capSz, "${") && strings.HasSuffix(capSz, "}") {
+				// DSP0243 9.1: capacity may reference a Property, e.g. ovf:capacity="${disk.size}"
+				key := strings.TrimSpace(capSz[2 : len(capSz)-1])
+				if key == "" {
+					return nil, fmt.Errorf("disk=%s has empty property reference in capacity=%q", diskID, capSz)
+				}
+				val, ok := propertyValues[key]
+				if !ok || val == "" {
+					return nil, fmt.Errorf("disk=%s capacity references property %q which is not defined or has no value for this configuration", diskID, key)
+				}
+				var err error
+				capVal, err = strconv.ParseUint(val, 10, 64)
+				if err != nil {
+					return nil, fmt.Errorf("disk=%s capacity property %q value %q is not a valid integer: %w", diskID, key, val, err)
+				}
+				capacityInBytes *= capVal
+			} else {
+				var err error
+				capVal, err = strconv.ParseUint(dd.Capacity, 10, 64)
+				if err != nil {
+					return nil, fmt.Errorf("disk=%s has invalid capacity=%q",
+						diskID, capSz)
+				}
+				capacityInBytes *= capVal
 			}
-			capacityInBytes *= cap
 		}
 
 	default:
@@ -1314,6 +1364,12 @@ func (e Envelope) toVAppConfig(
 				// Skip properties that are not part of the provided
 				// configuration.
 				continue
+			}
+			// DSP0243 9.5.1: ovf:key shall not contain period or colon.
+			if strings.ContainsAny(p.Key, ".:") {
+				return fmt.Errorf(
+					"property key %q contains invalid character "+
+						"(period or colon) per DSP0243 9.5.1", p.Key)
 			}
 
 			// Get the default values for the current configuration from the

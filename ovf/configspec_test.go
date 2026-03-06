@@ -371,6 +371,32 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			"backing FileName must be path.Base(File.Href), i.e. data.vmdk from subdir/data.vmdk")
 	})
 
+	t.Run("Disk capacity from property reference (DSP0243 9.1)", func(t *testing.T) {
+		// Empty disk with ovf:capacity="${disksize}"; property disksize=5, units byte*2^30 → 5 GiB.
+		e := testEnvelope(t, "fixtures/disk-capacity-property.ovf")
+		cs, err := e.ToConfigSpec()
+		require.NoError(t, err)
+		require.NotEmpty(t, cs.DeviceChange)
+		var disks []*types.VirtualDisk
+		for _, dc := range cs.DeviceChange {
+			if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+				disks = append(disks, d)
+			}
+		}
+		require.Len(t, disks, 1)
+		assert.Equal(t, int64(5*1024*1024*1024), disks[0].CapacityInBytes,
+			"capacity from property disksize=5 with byte*2^30 units must be 5 GiB")
+	})
+
+	t.Run("Property key invalid character (DSP0243 9.5.1)", func(t *testing.T) {
+		// ovf:key shall not contain period or colon.
+		e := testEnvelope(t, "fixtures/invalid-property-key.ovf")
+		_, err := e.ToConfigSpec()
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid character")
+		assert.Contains(t, err.Error(), "invalid.key")
+	})
+
 	t.Run("DeploymentConfiguration", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/configspec.ovf")
 
