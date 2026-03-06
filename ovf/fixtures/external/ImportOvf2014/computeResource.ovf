@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References/>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <Item>
+                <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                <rasd:Limit>345</rasd:Limit>
+                <rasd:Reservation>234</rasd:Reservation>
+                <rasd:Weight>123</rasd:Weight>
+            </Item>
+            <Item>
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:Description>Memory Size</rasd:Description>
+                <rasd:ElementName>64MB of memory</rasd:ElementName>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:ResourceType>4</rasd:ResourceType>
+                <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+                <rasd:Limit>128</rasd:Limit>
+                <rasd:Reservation>32</rasd:Reservation>
+                <rasd:Weight>123</rasd:Weight>
+            </Item>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>

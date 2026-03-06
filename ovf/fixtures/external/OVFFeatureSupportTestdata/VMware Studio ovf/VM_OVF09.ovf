@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns="http://www.vmware.com/schema/ovf/1/envelope" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vmw="http://www.vmware.com/schema/ovf" ovf:version="0.9">
+  <References>
+    <File ovf:href="system.vmdk" ovf:id="system.vmdk_id" ovf:size="334270976"/>
+    <File ovf:href="data1.vmdk" ovf:id="data1.vmdk_id" ovf:size="367616"/>
+  </References>
+  <Section xsi:type="ovf:EulaSection_Type" xml:lang="en">
+    <Info>End User License Agreement</Info>
+    <License>Edit EULA text here</License>
+  </Section>
+  <Section xsi:type="ovf:NetworkSection_Type">
+    <Info>List of logical networks used in the package</Info>
+    <Network ovf:name="Network 1">
+      <Description>The "Network 1" network</Description>
+    </Network>
+  </Section>
+  <Section xsi:type="ovf:DiskSection_Type">
+    <Info>List of the virtual disks and partitions needed</Info>
+    <Disk ovf:diskId="system" ovf:fileRef="system.vmdk_id" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse" ovf:capacity="2147483648"/>
+    <Disk ovf:diskId="data1" ovf:fileRef="data1.vmdk_id" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse" ovf:capacity="2147483648"/>
+  </Section>
+  <Content ovf:id="ubuntu-name" xsi:type="ovf:VirtualSystem_Type">
+    <Info>A virtual machine</Info>
+    <Section xsi:type="ovf:AnnotationSection_Type">
+      <Info/>
+      <Annotation/>
+    </Section>
+    <Section xsi:type="ovf:ProductSection_Type" ovf:required="false">
+      <Info>VM ISV branding information</Info>
+      <Product>ubuntu-name</Product>
+      <Vendor>Independent Software Vendor, Inc.</Vendor>
+      <Version>1.0.0.0</Version>
+      <Full-version>1.0.0.0 alpha</Full-version>
+      <VendorUrl/>
+      <AppUrl>http://${app.ip}/</AppUrl>
+    </Section>
+    <Section ovf:id="101" xsi:type="ovf:OperatingSystemSection_Type">
+      <Info>Guest Operating System</Info>
+      <Description>Ubuntu Linux 8.04.1</Description>
+    </Section>
+    <Section xsi:type="ovf:VirtualHardwareSection_Type">
+      <Info>Virtual Hardware Requirements</Info>
+      <System>
+        <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:Caption>1 virtual CPU</rasd:Caption>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:InstanceId>1</rasd:InstanceId>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>256 MB of memory</rasd:Caption>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:InstanceId>2</rasd:InstanceId>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+        <rasd:VirtualQuantity>256</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>SCSI Controller 0 - LSI Logic</rasd:Caption>
+        <rasd:InstanceId>3</rasd:InstanceId>
+        <rasd:ResourceType>6</rasd:ResourceType>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:BusNumber>0</rasd:BusNumber>
+      </Item>
+      <Item>
+        <rasd:Caption>Harddisk 1</rasd:Caption>
+        <rasd:InstanceId>4</rasd:InstanceId>
+        <rasd:ResourceType>17</rasd:ResourceType>
+        <rasd:HostResource>/disk/system</rasd:HostResource>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>Harddisk 2</rasd:Caption>
+        <rasd:InstanceId>5</rasd:InstanceId>
+        <rasd:ResourceType>17</rasd:ResourceType>
+        <rasd:HostResource>/disk/data1</rasd:HostResource>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>Ethernet adapter on "Network 1"</rasd:Caption>
+        <rasd:InstanceId>6</rasd:InstanceId>
+        <rasd:ResourceType>10</rasd:ResourceType>
+        <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Network 1</rasd:Connection>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+      </Item>
+    </Section>
+  </Content>
+</ovf:Envelope>

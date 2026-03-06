@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vmw="http://www.vmware.com/schema/ovf">
+  <References>
+    <File ovf:href="system.vmdk" ovf:id="system.vmdk_id" ovf:size="1470013440"/>
+    <File ovf:href="data.vmdk" ovf:id="data.vmdk_id" ovf:size="604282368"/>
+  </References>
+  <NetworkSection>
+    <Info>List of logical networks used in the package</Info>
+    <Network ovf:name="Network 1">
+      <Description>The "Network 1" network</Description>
+    </Network>
+  </NetworkSection>
+  <vmw:IpAssignmentSection ovf:required="false" vmw:protocols="IPv4" vmw:schemes="ovfenv,dhcp">
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <DiskSection>
+    <Info>List of the virtual disks and partitions needed</Info>
+    <Disk ovf:diskId="system" ovf:capacity="6144" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:fileRef="system.vmdk_id"/>
+    <Disk ovf:diskId="data" ovf:capacity="12288" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:fileRef="data.vmdk_id"/>
+  </DiskSection>
+  <VirtualSystem ovf:id="Zimbra_Appliance_6.0.6">
+    <Info>A virtual machine</Info>
+    <EulaSection>
+      <Info>End User License Agreement</Info>
+      <License>PLEASE READ THIS AGREEMENT CAREFULLY BEFORE USING THE SOFTWARE.
+ZIMBRA, INC. ("ZIMBRA") WILL ONLY LICENSE THIS SOFTWARE TO YOU IF YOU
+FIRST ACCEPT THE TERMS OF THIS AGREEMENT. BY DOWNLOADING OR INSTALLING
+THE SOFTWARE, OR USING THE PRODUCT, YOU ARE CONSENTING TO BE BOUND BY
+THIS AGREEMENT. IF YOU DO NOT AGREE TO ALL OF THE TERMS OF THIS
+AGREEMENT, THEN DO NOT DOWNLOAD, INSTALL OR USE THE PRODUCT.
+
+License Terms for this Zimbra Collaboration Suite Software:
+http://www.zimbra.com/license/zimbra_public_eula_2.1.html</License>
+    </EulaSection>
+    <ProductSection ovf:required="false">
+      <Info>VM ISV branding information</Info>
+      <Product>Zimbra Collaboration Suite Trial</Product>
+      <Vendor>Zimbra, a Division of VMware</Vendor>
+      <!--
+            Version is the actual product version in the
+            form X.X.X.X where X is an unsigned 16-bit integer.
+
+            FullVersion is a descriptive version string
+            including, for example, alpha or beta designations
+            and other release criteria.
+        -->
+      <Version>6.0.6.101</Version>
+      <FullVersion>Zimbra_606_Ubuntu_8041_i386</FullVersion>
+      <ProductUrl>http://www.zimbra.com/products/</ProductUrl>
+      <VendorUrl>http://www.zimbra.com/</VendorUrl>
+      <AppUrl>https://${vami.ip0.Zimbra_Appliance_6.0.6}:5480/</AppUrl>
+    </ProductSection>
+    <ProductSection ovf:class="vami" ovf:instance="Zimbra_Appliance_6.0.6" ovf:required="false">
+      <Info>VAMI Properties</Info>
+      <Category>Networking Properties</Category>
+      <Property ovf:key="DNS0" ovf:userConfigurable="true" ovf:type="string" vmw:qualifiers="Dns('Network 1')">
+        <Label>Network 1 DNS</Label>
+      </Property>
+      <Property ovf:key="gateway0" ovf:userConfigurable="true" ovf:type="string" vmw:qualifiers="Gateway('Network 1')">
+        <Label>Network 1 Gateway</Label>
+      </Property>
+      <Property ovf:key="netmask0" ovf:userConfigurable="true" ovf:type="string" vmw:qualifiers="Netmask('Network 1')">
+        <Label>Network 1 Netmask</Label>
+      </Property>
+      <Property ovf:key="ip0" ovf:userConfigurable="true" ovf:type="string" vmw:qualifiers="Ip('Network 1')">
+        <Label>Network 1 IP Address</Label>
+      </Property>
+    </ProductSection>
+    <ProductSection ovf:class="vm" ovf:required="false">
+      <Info>VM specific properties</Info>
+      <Property ovf:key="vmname" ovf:type="string" ovf:value="Zimbra_Appliance_6.0.6"/>
+    </ProductSection>
+    <AnnotationSection>
+      <Info/>
+      <Annotation/>
+    </AnnotationSection>
+    <OperatingSystemSection ovf:id="93" vmw:osType="ubuntuGuest">
+      <Info>Guest Operating System</Info>
+      <Description>Ubuntu Linux 8.04.1</Description>
+    </OperatingSystemSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo" ovf:required="false">
+      <Info>Virtual Hardware Requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">1 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">2048 MB of memory</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>2048</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">0</rasd:Address>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">SCSI Controller 0 - LSI Logic</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">3</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Harddisk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/system</rasd:HostResource>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">4</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Harddisk 2</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/data</rasd:HostResource>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">5</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Network 1</rasd:Connection>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Ethernet adapter on "Network 1"</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">6</rasd:InstanceID>
+        <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</ovf:Envelope>

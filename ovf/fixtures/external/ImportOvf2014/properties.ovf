@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References/>
+
+    <NetworkSection>
+        <Info>The list of logical networks</Info>
+        <Network ovf:name="VM Network">
+            <Description>The VM Network network</Description>
+        </Network>
+    </NetworkSection>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+        </VirtualHardwareSection>
+
+        <ProductSection ovf:class="com.vmware.test" ovf:instance="117">
+            <Info>Information about the installed software</Info>
+            <!-- A property without category (and no label or description)-->
+            <Property ovf:key="username" ovf:type="string" ovf:userConfigurable="true">
+            </Property>
+
+            <Category>All kinds of properties</Category>
+
+            <!-- String -->
+            <Property ovf:key="simplestring" ovf:type="string" ovf:password="false"
+                      ovf:userConfigurable="true">
+               <Label>Simple string</Label>
+               <Description>A string</Description>
+            </Property>
+
+            <!-- String range min and max -->
+            <Property ovf:key="stringrange" ovf:type="string" ovf:password="false"
+                      ovf:qualifiers="MinLen(1),MaxLen(6)" ovf:userConfigurable="true">
+               <Label>String (1..6)</Label>
+               <Description>A mandatory string</Description>
+            </Property>
+
+            <!-- String range only min -->
+            <Property ovf:key="stringrangeonlymin" ovf:type="string" ovf:password="false"
+                      ovf:qualifiers="MinLen(1)" ovf:userConfigurable="true">
+               <Label>String (1..)</Label>
+               <Description>A mandatory string</Description>
+            </Property>
+
+            <!-- String range only max -->
+            <Property ovf:key="stringrangeonlymax" ovf:type="string" ovf:password="false"
+                      ovf:qualifiers="MaxLen(6)" ovf:userConfigurable="true">
+               <Label>String (..6)</Label>
+               <Description>A limited string</Description>
+            </Property>
+
+            <!-- String choice -->
+            <Property ovf:key="theme" ovf:type="string" ovf:userConfigurable="true"
+                      ovf:qualifiers='ValueMap{"Sugar", "", "E\"scape", "Com,ma", "Sla\\sh"}'>
+               <Label>Theme</Label>
+               <Description>Select the default color/graphic scheme</Description>
+            </Property>
+
+            <!-- Password -->
+            <Property ovf:key="secret1" ovf:type="string" ovf:password="true"
+                      ovf:userConfigurable="true">
+               <Label>Secret password, no qualifiers</Label>
+               <Description>A secret password</Description>
+            </Property>
+
+            <!-- Password range -->
+            <Property ovf:key="secret" ovf:type="string" ovf:password="true"
+                      ovf:qualifiers="MinLen(1)" ovf:userConfigurable="true">
+               <Label>Secret password</Label>
+               <Description>A secret, mandatory password</Description>
+            </Property>
+
+            <!-- Password choice - this becomes a string choice rather than a password. -->
+            <Property ovf:key="passwordchoice" ovf:type="string" ovf:userConfigurable="true"
+                      ovf:qualifiers='ValueMap{"Sugar", "RipCurl", "Retro", "Love", "Sunset"}'
+                      ovf:password="true">
+               <Label>Password choice</Label>
+               <Description>Select the default password</Description>
+            </Property>
+
+            <!-- Int -->
+            <Property ovf:key="someint" ovf:type="uint64" ovf:userConfigurable="true"
+                      ovf:value="5">
+               <Label>Some integer</Label>
+               <Description>The maximum allowed froohbaz.</Description>
+            </Property>
+
+            <!-- Int range -->
+            <Property ovf:key="concurrentSessions" ovf:type="uint32" ovf:userConfigurable="true"
+                      ovf:qualifiers="MinValue(10) MaxValue(1000)"
+                      ovf:value="10">
+               <Label>Concurrent Sessions</Label>
+               <Description>The maximum allowed concurrent sessions.</Description>
+            </Property>
+
+            <!-- Int choice - this becomes a string choice. Note: Not supported in the VIM API. -->
+            <Property ovf:key="someintchoice" ovf:type="uint32" ovf:userConfigurable="true"
+                      ovf:qualifiers="ValueMap{0,2}">
+               <Label>Concurrent Sessions</Label>
+               <Description>The maximum allowed concurrent sessions.</Description>
+            </Property>
+
+            <!-- Real 64 -->
+            <Property ovf:key="somereal" ovf:type="real64" ovf:userConfigurable="true"
+                      ovf:value="1.2">
+               <Label>Some real</Label>
+               <Description>The maximum allowed foobar.</Description>
+            </Property>
+
+            <!-- Real 32 range -->
+            <Property ovf:key="somerealrange" ovf:type="real32" ovf:userConfigurable="true"
+                      ovf:qualifiers="MinValue(1.0) MaxValue(10.67)"
+                      ovf:value="10.54">
+               <Label>Real range</Label>
+               <Description>The number of something.</Description>
+            </Property>
+
+            <!-- Boolean -->
+            <Property ovf:key="somebool" ovf:type="boolean" ovf:userConfigurable="true">
+               <Label>Some boolean</Label>
+               <Description>To be or not to be.</Description>
+            </Property>
+
+            <!-- External IP -->
+            <Property ovf:value="" ovf:userConfigurable="true" ovf:type="string"
+               ovf:key="extIp" vmw:qualifiers="Ip">
+                <Label>External IP Address</Label>
+                <Description>External IP address.</Description>
+                <Value ovf:value="192.168.6.119"/>
+            </Property>
+
+            <!-- IP - VM Network -->
+            <Property ovf:value="" ovf:userConfigurable="true" ovf:type="string"
+               ovf:key="otherIp" vmw:qualifiers="Ip('VM Network')">
+                <Label>Other IP Address</Label>
+                <Description>IP address on the VM Network.</Description>
+                <!-- This is allowed in the VIM API -->
+                <Value ovf:value="192.168.6.120"/>
+            </Property>
+
+            <!-- Subnet - VM Network - Dynamic property -->
+            <Property ovf:key="subnet0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='Subnet("VM Network")' ovf:userConfigurable="true">
+               <Label>Subnet</Label>
+               <Description>VM Network subnet setting.</Description>
+            </Property>
+
+            <!-- Netmask - VM Network - Dynamic property -->
+            <Property ovf:key="netmask0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='Netmask("VM Network")' ovf:userConfigurable="true">
+               <Label>Netmask</Label>
+               <Description>VM Network netmask setting.</Description>
+            </Property>
+
+            <!-- Gateway - VM Network - Dynamic property -->
+            <Property ovf:key="gateway0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='Gateway("VM Network")' ovf:userConfigurable="true">
+               <Label>Gateway</Label>
+               <Description>VM Network gateway setting.</Description>
+            </Property>
+
+            <!-- Auto IP - VM Network -->
+            <Property ovf:key="dyn-autoIp" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='AutoIp("VM Network")' ovf:userConfigurable="true">
+               <Label>Auto IP - dynamic</Label>
+               <Description>The property will get allocated an IP from the IP pool associated with the given network</Description>
+            </Property>
+
+            <!-- Net - VM Network -->
+            <Property ovf:key="dyn-net" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='Net("VM Network")' ovf:userConfigurable="true">
+               <Label>Net - dynamic</Label>
+               <Description>The property will get assigned the name of the network</Description>
+            </Property>
+
+            <!-- Domain name - VM Network - Dynamic property -->
+            <Property ovf:key="domainName0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='DomainName("VM Network")' ovf:userConfigurable="true">
+               <Label>Domain name</Label>
+               <Description>VM Network domain name setting.</Description>
+            </Property>
+
+            <!-- DNS search path - VM Network - Dynamic property -->
+            <Property ovf:key="searchpath0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='SearchPath("VM Network")' ovf:userConfigurable="true">
+               <Label>DNS search path</Label>
+               <Description>VM Network search path setting.</Description>
+            </Property>
+
+            <!-- Host prefix - VM Network - Dynamic property -->
+            <Property ovf:key="hostprefix0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='HostPrefix("VM Network")' ovf:userConfigurable="true">
+               <Label>Host prefix</Label>
+               <Description>VM Network host prefix setting.</Description>
+            </Property>
+
+            <!-- DNS - VM Network - Dynamic property -->
+            <Property ovf:key="dns0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='Dns("VM Network")' ovf:userConfigurable="true">
+               <Label>DNS</Label>
+               <Description>VM Network DNS setting.</Description>
+            </Property>
+
+            <!-- HTTP proxy - VM Network - Dynamic property -->
+            <Property ovf:key="httpproxy0" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers='HttpProxy("VM Network")' ovf:userConfigurable="true">
+               <Label>HTTP proxy</Label>
+               <Description>VM Network HTTP proxy setting.</Description>
+            </Property>
+
+            <!-- VIM IP -->
+            <Property ovf:key="dyn-vimIp" ovf:type="string" ovf:qualifiers="MinLen(1)"
+               vmw:qualifiers="VimIp" ovf:userConfigurable="true">
+               <Label>VIM IP - dynamic</Label>
+               <Description>The property will automatically be assigned the IP address of the vCenter server</Description>
+            </Property>
+
+
+            <!-- UI optional properties -->
+            <Category vmw:uioptional="true">UI optional properties</Category>
+            <Property ovf:key="optional0" ovf:type="string" ovf:userConfigurable="true"
+                    ovf:value="This is the default value">
+                <Label>Optional</Label>
+                <Description>An optional property</Description>
+            </Property>
+        </ProductSection>
+
+    </VirtualSystem>
+
+</Envelope>

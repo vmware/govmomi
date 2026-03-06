@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<Envelope ovf:version="0.9" xml:lang="en-US" xmlns="http://www.vmware.com/schema/ovf/1/envelope" xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <References/>
+  <Section xsi:type="ovf:DiskSection_Type">
+    <Info>List of the virtual disks used in the package</Info>
+  </Section>
+  <Section xsi:type="ovf:NetworkSection_Type">
+    <Info>Logical networks used in the package</Info>
+    <Network ovf:name="NAT">
+      <Description>Logical network used by this appliance.</Description>
+    </Network>
+  </Section>
+  <Content xsi:type="ovf:VirtualSystem_Type" ovf:id="vbox7">
+    <Info>A virtual machine</Info>
+    <Section xsi:type="ovf:OperatingSystemSection_Type" ovf:id="67">
+      <Info>The kind of installed guest operating system</Info>
+      <Description>WindowsXP</Description>
+    </Section>
+    <Section xsi:type="ovf:VirtualHardwareSection_Type">
+      <Info>Virtual hardware requirements for a virtual machine</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceId>0</vssd:InstanceId>
+        <vssd:VirtualSystemIdentifier>vbox7</vssd:VirtualSystemIdentifier>
+        <vssd:VirtualSystemType>vmx-6</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:Caption>1 virtual CPU</rasd:Caption>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:InstanceId>1</rasd:InstanceId>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>192 MB of memory</rasd:Caption>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:InstanceId>2</rasd:InstanceId>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+        <rasd:VirtualQuantity>192</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>Ethernet adapter on 'NAT'</rasd:Caption>
+        <rasd:InstanceId>3</rasd:InstanceId>
+        <rasd:ResourceType>10</rasd:ResourceType>
+        <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>NAT</rasd:Connection>
+      </Item>
+      <Item>
+        <rasd:Caption>usb</rasd:Caption>
+        <rasd:Description>USB Controller</rasd:Description>
+        <rasd:InstanceId>4</rasd:InstanceId>
+        <rasd:ResourceType>23</rasd:ResourceType>
+        <rasd:Address>0</rasd:Address>
+        <rasd:BusNumber>0</rasd:BusNumber>
+      </Item>
+      <Item>
+        <rasd:Caption>sound</rasd:Caption>
+        <rasd:Description>Sound Card</rasd:Description>
+        <rasd:InstanceId>5</rasd:InstanceId>
+        <rasd:ResourceType>35</rasd:ResourceType>
+        <rasd:ResourceSubType>ensoniq1371</rasd:ResourceSubType>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+      </Item>
+    </Section>
+  </Content>
+</Envelope>
