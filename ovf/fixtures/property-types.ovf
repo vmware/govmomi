@@ -1,0 +1,114 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  OVF fixture for full coverage of OVF property types and qualifiers (DSP0243 9.5.1)
+  and their transformation to vAppPropertyInfo.Type. Used by TestEnvelopeToConfigSpec
+  "OVF property types and qualifiers to vAppPropertyInfo.Type".
+-->
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:vmw="http://www.vmware.com/schema/ovf"
+          xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+          xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+  <References>
+    <File ovf:id="file1" ovf:href="os.vmdk" ovf:size="655360000"/>
+  </References>
+  <DiskSection>
+    <Info>Single disk for fixture</Info>
+    <Disk ovf:capacity="1" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk1" ovf:fileRef="file1"/>
+  </DiskSection>
+  <NetworkSection/>
+  <DeploymentOptionSection/>
+  <VirtualSystem ovf:id="property-types-vm">
+    <Info>VM for property type and qualifier coverage</Info>
+    <Name>property-types-vm</Name>
+    <AnnotationSection/>
+    <OperatingSystemSection ovf:id="101" vmw:osType="other3xLinux64Guest">
+      <Info>Guest OS</Info>
+      <Description>Other 3.x or later Linux (64-bit)</Description>
+    </OperatingSystemSection>
+    <ProductSection>
+      <Info>All OVF property type and qualifier combinations</Info>
+      <Product>PropertyTypesFixture</Product>
+      <Vendor>Test</Vendor>
+      <Version>1.0</Version>
+      <Category>Types</Category>
+      <!-- string: no qualifiers -->
+      <Property ovf:key="p_string_plain" ovf:type="string" ovf:value=""/>
+      <!-- string: MinLen only -->
+      <Property ovf:key="p_string_min_only" ovf:type="string" ovf:value="hello" ovf:qualifiers="MinLen(5)"/>
+      <!-- string: MaxLen only -->
+      <Property ovf:key="p_string_max_only" ovf:type="string" ovf:value="" ovf:qualifiers="MaxLen(100)"/>
+      <!-- string: MinLen + MaxLen -->
+      <Property ovf:key="p_string_min_max" ovf:type="string" ovf:value="x" ovf:qualifiers="MinLen(1),MaxLen(253)"/>
+      <!-- string: ValueMap (multiple choices) -->
+      <Property ovf:key="p_string_valuemap" ovf:type="string" ovf:value="a" ovf:qualifiers="ValueMap{&quot;a&quot;, &quot;b&quot;, &quot;c&quot;}"/>
+      <!-- string: ValueMap (single choice) -->
+      <Property ovf:key="p_string_valuemap_single" ovf:type="string" ovf:value="only" ovf:qualifiers="ValueMap{&quot;only&quot;}"/>
+      <!-- password: no qualifiers -->
+      <Property ovf:key="p_password_plain" ovf:type="string" ovf:password="true" ovf:value=""/>
+      <!-- password: MinLen only -->
+      <Property ovf:key="p_password_min_only" ovf:type="string" ovf:password="true" ovf:value="secret12" ovf:qualifiers="MinLen(8)"/>
+      <!-- boolean -->
+      <Property ovf:key="p_boolean" ovf:type="boolean" ovf:value="true"/>
+      <!-- int: no qualifiers -->
+      <Property ovf:key="p_int_plain" ovf:type="int" ovf:value="42"/>
+      <!-- int: ValueMap numeric → int(min..max) -->
+      <Property ovf:key="p_int_valuemap" ovf:type="int" ovf:value="2" ovf:qualifiers="ValueMap{1, 2, 3, 5}"/>
+      <!-- OVF integer types → int -->
+      <Property ovf:key="p_uint8" ovf:type="uint8" ovf:value="0"/>
+      <Property ovf:key="p_sint8" ovf:type="sint8" ovf:value="0"/>
+      <Property ovf:key="p_uint16" ovf:type="uint16" ovf:value="0"/>
+      <Property ovf:key="p_sint16" ovf:type="sint16" ovf:value="0"/>
+      <Property ovf:key="p_uint32" ovf:type="uint32" ovf:value="0"/>
+      <Property ovf:key="p_sint32" ovf:type="sint32" ovf:value="0"/>
+      <Property ovf:key="p_uint64" ovf:type="uint64" ovf:value="0"/>
+      <Property ovf:key="p_sint64" ovf:type="sint64" ovf:value="0"/>
+      <!-- real32, real64 → real -->
+      <Property ovf:key="p_real32" ovf:type="real32" ovf:value="1.5"/>
+      <Property ovf:key="p_real64" ovf:type="real64" ovf:value="2.5"/>
+      <!-- Case insensitivity: String, Boolean (DSP0243 Table 6 uses capitals) -->
+      <Property ovf:key="p_String_capital" ovf:type="String" ovf:value=""/>
+      <Property ovf:key="p_Boolean_capital" ovf:type="Boolean" ovf:value="false"/>
+    </ProductSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo">
+      <Info>Virtual hardware</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-13</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>512MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>SCSI Controller</rasd:Description>
+        <rasd:ElementName>SCSI Controller 1</rasd:ElementName>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>
