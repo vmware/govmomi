@@ -1,0 +1,209 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  OVF fixture: three deployment configurations (small, medium, large) per DSP0243.
+  - small: 2 CPU, 2 GiB RAM, 1 disk 1 GiB (file-backed system-and-model-small.vmdk)
+  - medium: 4 CPU, 4 GiB RAM, 2 disks 2 GiB (first file-backed, second empty)
+  - large: 8 CPU, 8 GiB RAM, 3 disks 4 GiB (first two file-backed, third empty)
+  vApp properties use qualifiers (MinLen, MaxLen, ValueMap) and config bindings.
+-->
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:vmw="http://www.vmware.com/schema/ovf"
+          xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+          xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+  <References>
+    <File ovf:id="file_small" ovf:href="system-and-model-small.vmdk" ovf:size="1073741824"/>
+    <File ovf:id="file_med" ovf:href="system-and-model-medium.vmdk" ovf:size="2147483648"/>
+    <File ovf:id="file_large_1" ovf:href="system-large.vmdk" ovf:size="4294967296"/>
+    <File ovf:id="file_large_2" ovf:href="model-large.vmdk" ovf:size="4294967296"/>
+  </References>
+  <DiskSection>
+    <Info>Disks for small, medium, large configurations</Info>
+    <Disk ovf:capacity="1" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk_small_1" ovf:fileRef="file_small"/>
+    <Disk ovf:capacity="2" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk_med_1" ovf:fileRef="file_med"/>
+    <Disk ovf:capacity="2" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk_med_2"/>
+    <Disk ovf:capacity="4" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk_large_1" ovf:fileRef="file_large_1"/>
+    <Disk ovf:capacity="4" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk_large_2" ovf:fileRef="file_large_2"/>
+    <Disk ovf:capacity="4" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk_large_3"/>
+  </DiskSection>
+  <NetworkSection>
+    <Info>Logical networks</Info>
+    <Network ovf:name="Management">
+      <Description>Management network</Description>
+    </Network>
+  </NetworkSection>
+  <DeploymentOptionSection>
+    <Info>Deployment configurations: small, medium (default), large</Info>
+    <Configuration ovf:id="small">
+      <Label>Small</Label>
+      <Description>2 CPU, 2 GiB RAM, 1 disk 1 GiB</Description>
+    </Configuration>
+    <Configuration ovf:id="medium" ovf:default="true">
+      <Label>Medium</Label>
+      <Description>4 CPU, 4 GiB RAM, 2 disks 2 GiB each</Description>
+    </Configuration>
+    <Configuration ovf:id="large">
+      <Label>Large</Label>
+      <Description>8 CPU, 8 GiB RAM, 3 disks 4 GiB each</Description>
+    </Configuration>
+  </DeploymentOptionSection>
+  <VirtualSystem ovf:id="deployment-configs-vm">
+    <Info>VM with small/medium/large deployment options</Info>
+    <Name>deployment-configs-vm</Name>
+    <AnnotationSection>
+      <Annotation>Fixture for deployment config and property qualifier tests</Annotation>
+    </AnnotationSection>
+    <OperatingSystemSection ovf:id="101" vmw:osType="other3xLinux64Guest">
+      <Info>Guest OS</Info>
+      <Description>Other 3.x or later Linux (64-bit)</Description>
+    </OperatingSystemSection>
+    <ProductSection>
+      <Info>Product and properties</Info>
+      <Product>DeploymentConfigFixture</Product>
+      <Vendor>Test</Vendor>
+      <Version>1.0</Version>
+      <Category>Deployment</Category>
+      <Property ovf:key="hostname" ovf:type="string" ovf:userConfigurable="true"
+                ovf:qualifiers="MinLen(1),MaxLen(253)">
+        <Label>Hostname</Label>
+        <Description>VM hostname (1-253 chars)</Description>
+      </Property>
+      <Property ovf:key="tier_small" ovf:type="string" ovf:configuration="small"
+                ovf:userConfigurable="false" ovf:value="small"
+                ovf:qualifiers="ValueMap{&quot;small&quot;}"/>
+      <Property ovf:key="tier_medium" ovf:type="string" ovf:configuration="medium"
+                ovf:userConfigurable="false" ovf:value="medium"
+                ovf:qualifiers="MinLen(1),MaxLen(64)"/>
+      <Property ovf:key="tier_large" ovf:type="string" ovf:configuration="large"
+                ovf:userConfigurable="false" ovf:value="large"
+                ovf:qualifiers="MinLen(4),MaxLen(64)"/>
+      <Property ovf:key="size_preset" ovf:type="string" ovf:userConfigurable="true"
+                ovf:value="medium"
+                ovf:qualifiers="ValueMap{&quot;small&quot;, &quot;medium&quot;, &quot;large&quot;}">
+        <Label>Size preset</Label>
+        <Description>One of: small, medium, large</Description>
+      </Property>
+    </ProductSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo">
+      <Info>Virtual hardware</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-13</vssd:VirtualSystemType>
+      </System>
+      <Item ovf:configuration="small">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:ElementName>2 virtual CPU(s)</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>2</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="small">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>2048MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>2048</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="medium">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:ElementName>4 virtual CPU(s)</rasd:ElementName>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>4</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="medium">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>4096MB of memory</rasd:ElementName>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>4096</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="large">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:ElementName>8 virtual CPU(s)</rasd:ElementName>
+        <rasd:InstanceID>5</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>8</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="large">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>8192MB of memory</rasd:ElementName>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>8192</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>SCSI Controller</rasd:Description>
+        <rasd:ElementName>SCSI Controller 1</rasd:ElementName>
+        <rasd:InstanceID>7</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="small">
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk_small_1</rasd:HostResource>
+        <rasd:InstanceID>8</rasd:InstanceID>
+        <rasd:Parent>7</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="medium">
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk_med_1</rasd:HostResource>
+        <rasd:InstanceID>9</rasd:InstanceID>
+        <rasd:Parent>7</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="medium">
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 2</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk_med_2</rasd:HostResource>
+        <rasd:InstanceID>10</rasd:InstanceID>
+        <rasd:Parent>7</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="large">
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk_large_1</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>7</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="large">
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 2</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk_large_2</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>7</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="large">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk_large_3</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>7</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Management</rasd:Connection>
+        <rasd:ElementName>Management</rasd:ElementName>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:ResourceSubType>VmxNet3</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>
