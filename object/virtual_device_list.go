@@ -584,7 +584,10 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, ds types.Ma
 		},
 	}
 
-	l.AssignController(device, c)
+	if c != nil {
+		l.AssignController(device, c)
+	}
+
 	return device
 }
 

@@ -248,11 +248,10 @@ func runFixtureTest(t *testing.T, path string, negativeFixture bool) {
 			// ToConfigSpec may reject them. Pass either way.
 			return
 		}
-		if !hasMultipleVirtualSystems(e) {
-			_, err = e.ToConfigSpec()
-			if err != nil {
-				t.Fatalf("ToConfigSpec: %v", err)
-			}
+		// if !hasMultipleVirtualSystems(e) {
+		if _, err = e.ToConfigSpec(); err != nil {
+			t.Fatalf("ToConfigSpec: %v", err)
 		}
+		// }
 	})
 }
