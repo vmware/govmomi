@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<Envelope ovf:version="1.0" xml:lang="en-US" xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <References>
+    <File ovf:href="vbox3.vmdk" ovf:id="file1" ovf:size="2687488"/>
+  </References>
+  <DiskSection>
+    <Info>List of the virtual disks used in the package</Info>
+    <Disk ovf:capacity="21474836480" ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse"/>
+  </DiskSection>
+  <NetworkSection>
+    <Info>Logical networks used in the package</Info>
+    <Network ovf:name="NAT">
+      <Description>Logical network used by this appliance.</Description>
+    </Network>
+  </NetworkSection>
+  <VirtualSystem ovf:id="vbox3">
+    <Info>A virtual machine</Info>
+    <OperatingSystemSection ovf:id="76">
+      <Info>The kind of installed guest operating system</Info>
+      <Description>Windows2008</Description>
+    </OperatingSystemSection>
+    <VirtualHardwareSection>
+      <Info>Virtual hardware requirements for a virtual machine</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemIdentifier>vbox3</vssd:VirtualSystemIdentifier>
+        <vssd:VirtualSystemType>virtualbox-2.2</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:Caption>1 virtual CPU</rasd:Caption>
+        <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>512 MB of memory</rasd:Caption>
+        <rasd:ElementName>512 MB of memory</rasd:ElementName>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+        <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>ideController0</rasd:Caption>
+        <rasd:ElementName>ideController0</rasd:ElementName>
+        <rasd:Description>IDE Controller</rasd:Description>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceType>5</rasd:ResourceType>
+        <rasd:ResourceSubType>PIIX4</rasd:ResourceSubType>
+        <rasd:Address>1</rasd:Address>
+      </Item>
+      <Item>
+        <rasd:Caption>floppy0</rasd:Caption>
+        <rasd:ElementName>floppy0</rasd:ElementName>
+        <rasd:Description>Floppy Drive</rasd:Description>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:ResourceType>14</rasd:ResourceType>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>Ethernet adapter on 'NAT'</rasd:Caption>
+        <rasd:ElementName>Ethernet adapter on 'NAT'</rasd:ElementName>
+        <rasd:InstanceID>5</rasd:InstanceID>
+        <rasd:ResourceType>10</rasd:ResourceType>
+        <rasd:ResourceSubType>E1000</rasd:ResourceSubType>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>NAT</rasd:Connection>
+      </Item>
+      <Item>
+        <rasd:Caption>usb</rasd:Caption>
+        <rasd:ElementName>usb</rasd:ElementName>
+        <rasd:Description>USB Controller</rasd:Description>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:ResourceType>23</rasd:ResourceType>
+        <rasd:Address>0</rasd:Address>
+      </Item>
+      <Item>
+        <rasd:Caption>sound</rasd:Caption>
+        <rasd:ElementName>sound</rasd:ElementName>
+        <rasd:Description>Sound Card</rasd:Description>
+        <rasd:InstanceID>7</rasd:InstanceID>
+        <rasd:ResourceType>35</rasd:ResourceType>
+        <rasd:ResourceSubType>ensoniq1371</rasd:ResourceSubType>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>disk1</rasd:Caption>
+        <rasd:ElementName>disk1</rasd:ElementName>
+        <rasd:Description>Disk Image</rasd:Description>
+        <rasd:InstanceID>8</rasd:InstanceID>
+        <rasd:ResourceType>17</rasd:ResourceType>
+        <rasd:HostResource>/disk/vmdisk1</rasd:HostResource>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>cdrom1</rasd:Caption>
+        <rasd:ElementName>cdrom1</rasd:ElementName>
+        <rasd:Description>CD-ROM Drive</rasd:Description>
+        <rasd:InstanceID>9</rasd:InstanceID>
+        <rasd:ResourceType>15</rasd:ResourceType>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

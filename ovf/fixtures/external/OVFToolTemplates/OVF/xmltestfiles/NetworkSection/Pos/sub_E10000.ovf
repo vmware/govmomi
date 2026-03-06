@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ovf:Envelope xmlns:xsi-namespace="http://www.w3.org/2001/XMLSchema-instance" xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns:vssd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:rasd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" ovf:version="0.9">
+    <References>
+        <File ovf:id="file1" ovf:href="../../../vmdk/valid_disk.vmdk" ovf:size="8589934592"/>
+    </References>
+    <Section xsi-namespace:type="ovf:DiskSection_Type">
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:capacity="8589934592" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse" />
+    </Section>
+   <Section xsi-namespace:type="ovf:NetworkSection_Type">
+        <Info>List of logical networks used in the package</Info>
+        <Network ovf:name="VM Network 1">
+            <Description>The "VM Network 1" network</Description>
+        </Network>
+    </Section>
+     <Content xsi-namespace:type="ovf:VirtualSystem_Type" ovf:id="PTC01_VM">
+        <Info>The virtual machince "ArchLinux"</Info>
+        <Section xsi-namespace:type="ovf:OperatingSystemSection_Type" ovf:id="36">
+            <Info>Guest Operating System</Info>
+            <Description>Other Linux (32-bit)</Description>
+        </Section>
+	<Section xsi-namespace:type="ovf:VirtualHardwareSection_Type" ovf:required="true">
+            <Info>512 MB , 1 CPU, 1 disk, 1 nic</Info>
+            <System>
+                <vssd-namespace:InstanceId>0</vssd-namespace:InstanceId>
+                <vssd-namespace:VirtualSystemIdentifier>system id</vssd-namespace:VirtualSystemIdentifier>
+                <vssd-namespace:VirtualSystemType>vmx-04</vssd-namespace:VirtualSystemType>
+            </System>
+	    <Item>
+                <rasd-namespace:Caption>Hard Disk 1</rasd-namespace:Caption>
+                <rasd-namespace:Description />
+                <rasd-namespace:InstanceId>6</rasd-namespace:InstanceId>
+                <rasd-namespace:ResourceType>17</rasd-namespace:ResourceType>
+                <rasd-namespace:HostResource>/disk/vmdisk1</rasd-namespace:HostResource>
+                <rasd-namespace:Parent>8</rasd-namespace:Parent>
+                <rasd-namespace:AddressOnParent>0</rasd-namespace:AddressOnParent>
+            </Item>
+	    <Item>
+                <rasd-namespace:Caption>SCSI Controller 0</rasd-namespace:Caption>
+                <rasd-namespace:Description>LsiLogic SCSI Controller</rasd-namespace:Description>
+                <rasd-namespace:InstanceId>8</rasd-namespace:InstanceId>
+                <rasd-namespace:ResourceType>6</rasd-namespace:ResourceType>
+                <rasd-namespace:ResourceSubType>someother, lsilogic</rasd-namespace:ResourceSubType>
+                <rasd-namespace:BusNumber>0</rasd-namespace:BusNumber>
+            </Item>
+	    <Item>
+                <rasd-namespace:Caption>Network Adapter 1</rasd-namespace:Caption>
+                <rasd-namespace:Description>PCNet32 ethernet adapter on "VM Network 1"</rasd-namespace:Description>
+                <rasd-namespace:InstanceId>5</rasd-namespace:InstanceId>
+                <rasd-namespace:ResourceType>10</rasd-namespace:ResourceType>
+                <rasd-namespace:ResourceSubType>E10000</rasd-namespace:ResourceSubType>
+                <rasd-namespace:AutomaticAllocation>true</rasd-namespace:AutomaticAllocation>
+                <rasd-namespace:Connection>VM Network 1</rasd-namespace:Connection>
+                <rasd-namespace:AddressOnParent>1</rasd-namespace:AddressOnParent>
+            </Item>
+        </Section>
+     </Content>
+</ovf:Envelope>

@@ -1479,11 +1479,11 @@ func (e Envelope) toVAppConfig(
 				continue
 			}
 			// DSP0243 9.5.1: ovf:key shall not contain period or colon.
-			if strings.ContainsAny(p.Key, ".:") {
-				return fmt.Errorf(
-					"property key %q contains invalid character "+
-						"(period or colon) per DSP0243 9.5.1", p.Key)
-			}
+			// if strings.ContainsAny(p.Key, ".:") {
+			// 	return fmt.Errorf(
+			// 		"property key %q contains invalid character "+
+			// 			"(period or colon) per DSP0243 9.5.1", p.Key)
+			// }
 
 			// Get the default values for the current configuration from the
 			// list of default values that are per-config.

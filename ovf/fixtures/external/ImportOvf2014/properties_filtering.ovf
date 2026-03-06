@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References/>
+
+    <DeploymentOptionSection>
+      <Info>Deployment options</Info>
+      <Configuration ovf:id="Minimal">
+          <Label>Minimal</Label>
+          <Description>The minimal set of hardware will be deployed.</Description>
+      </Configuration>
+      <Configuration ovf:id="Typical" ovf:default="true">
+          <Label>Typical</Label>
+          <Description>The typical set of hardware will be deployed.</Description>
+      </Configuration>
+    </DeploymentOptionSection>
+
+    <VirtualSystemCollection ovf:id="vsc1">
+        <Info>A virtual machine collection</Info>
+        <Name>Test System Collection</Name>
+
+        <ProductSection ovf:instance="someinstanceid" ovf:class="someclassid">
+            <Info>Information about the installed software</Info>
+            <Category>Properties Category</Category>
+            <Property ovf:type="sint8" ovf:key="meh" ovf:value="1" ovf:userConfigurable="true" ovf:configuration="Typical">
+                <Label>Property Typical</Label>
+                <Description>Property description</Description>
+            </Property>
+            <Property ovf:type="sint8" ovf:key="meh2" ovf:value="2" ovf:userConfigurable="true" ovf:configuration="Typical">
+                <Label>Property Typical</Label>
+                <Description>Property description</Description>
+            </Property>
+            <Property ovf:type="sint8" ovf:key="meh3" ovf:value="3" ovf:userConfigurable="true" ovf:configuration="Minimal">
+                <Label>Property Minimal</Label>
+                <Description>Property description</Description>
+            </Property>
+        </ProductSection>
+    </VirtualSystemCollection>
+</Envelope>

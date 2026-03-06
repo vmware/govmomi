@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns="http://www.vmware.com/schema/ovf/1/envelope" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vmw="http://www.vmware.com/schema/ovf" ovf:version="0.9">
+  <References>
+    <File ovf:href="system.vmdk" ovf:size="53680128" ovf:id="system.vmdk_id"/>
+    <File ovf:href="custom.iso" ovf:id="isofile"/>
+  </References>
+  <Section xsi:type="ovf:NetworkSection_Type">
+    <Info>List of logical networks used in the package</Info>
+    <Network ovf:name="Network 1">
+      <Description>Network 1</Description>
+    </Network>
+  </Section>
+  <Section xsi:type="ovf:DiskSection_Type">
+    <Info>List of the virtual disks and partitions needed</Info>
+    <Disk ovf:diskId="system" ovf:fileRef="system.vmdk_id" ovf:populatedSize="65536" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse" ovf:capacity="2147483648"/>
+  </Section>
+  <Content ovf:id="CentOS 6 JeOS - Minimal" xsi:type="ovf:VirtualSystem_Type">
+    <Info>A virtual machine</Info>
+    <Section xsi:type="ovf:AnnotationSection_Type">
+      <Info/>
+      <Annotation/>
+    </Section>
+    <Section xsi:type="ovf:ProductSection_Type" ovf:required="false">
+      <Info>VM ISV branding information</Info>
+      <Product>CentOS 6 JeOS - Minimal</Product>
+      <Vendor>VMware R&amp;D, Denmark</Vendor>
+      <Version>1.0</Version>
+      <Full-version>1.0.0</Full-version>
+      <VendorUrl>http://wiki.eng.vmware.com/Aarhus</VendorUrl>
+      <AppUrl/>
+    </Section>
+    <Section ovf:id="36" ovf:version="6" vmw:osType="centosGuest" xsi:type="ovf:OperatingSystemSection_Type">
+      <Info>Guest Operating System</Info>
+      <Description>CentOS Linux 6.0</Description>
+    </Section>
+    <Section xsi:type="ovf:VirtualHardwareSection_Type">
+      <Info>Virtual Hardware Requirements</Info>
+      <System>
+        <vssd:VirtualSystemType>vmx-07</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:Caption>1 virtual CPU</rasd:Caption>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:InstanceId>1</rasd:InstanceId>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>512 MB of memory</rasd:Caption>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:InstanceId>2</rasd:InstanceId>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+        <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>Ethernet adapter on vmnet</rasd:Caption>
+        <rasd:InstanceId>3</rasd:InstanceId>
+        <rasd:ResourceType>10</rasd:ResourceType>
+        <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Network 1</rasd:Connection>
+      </Item>
+      <Item>
+        <rasd:Caption>SCSI Controller 0 - LSI Logic</rasd:Caption>
+        <rasd:InstanceId>4</rasd:InstanceId>
+        <rasd:ResourceType>6</rasd:ResourceType>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:BusNumber>0</rasd:BusNumber>
+      </Item>
+      <Item>
+        <rasd:Caption>Harddisk 0</rasd:Caption>
+        <rasd:InstanceId>5</rasd:InstanceId>
+        <rasd:ResourceType>17</rasd:ResourceType>
+        <rasd:HostResource>/disk/system</rasd:HostResource>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>IDE Controller 0</rasd:Caption>
+        <rasd:InstanceId>6</rasd:InstanceId>
+        <rasd:ResourceType>5</rasd:ResourceType>
+        <rasd:BusNumber>1</rasd:BusNumber>
+      </Item>
+      <Item>
+        <rasd:Caption>cdrom 0</rasd:Caption>
+        <rasd:InstanceId>7</rasd:InstanceId>
+        <rasd:ResourceType>15</rasd:ResourceType>
+        <rasd:Parent>6</rasd:Parent>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>cdrom 1</rasd:Caption>
+        <rasd:InstanceId>8</rasd:InstanceId>
+        <rasd:ResourceType>15</rasd:ResourceType>
+        <rasd:HostResource>ovf:/file/isofile</rasd:HostResource>
+        <rasd:Parent>6</rasd:Parent>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+      </Item>
+    </Section>
+  </Content>
+</ovf:Envelope>

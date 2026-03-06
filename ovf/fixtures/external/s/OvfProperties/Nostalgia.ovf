@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vcloud="http://www.vmware.com/vcloud/v1" 
+xmlns:vmw="http://www.vmware.com/schema/ovf"
+xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" 
+xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_VirtualSystemSettingData.xsd http://schemas.dmtf.org/ovf/envelope/1 http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.1.0.xsd http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd http://www.vmware.com/vcloud/v1 http://vcloud.eng.vmware.com/api/v1.0/schema/master.xsd">
+    <ovf:References>
+        <ovf:File ovf:size="6872576" ovf:id="file-662155315-2000" ovf:href="vm-662155315-disk-0.vmdk"/>
+    </ovf:References>
+    <ovf:DiskSection>
+        <ovf:Info>Virtual disk information</ovf:Info>
+        <ovf:Disk ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:fileRef="file-662155315-2000" ovf:diskId="vmdisk-662155315-2000" ovf:capacityAllocationUnits="byte" ovf:capacity="107373568"/>
+    </ovf:DiskSection>
+    <ovf:NetworkSection>
+        <ovf:Info>The list of logical networks</ovf:Info>
+        <ovf:Network ovf:name="VM Network">
+            <ovf:Description>The VM Network network</ovf:Description>
+        </ovf:Network>
+    </ovf:NetworkSection>
+    <ovf:VirtualSystem ovf:id="Nostalgia">
+        <ovf:Info>A virtual machine: A virtual machine</ovf:Info>
+        <ovf:Name>Nostalgia</ovf:Name>
+        <ovf:OperatingSystemSection xmlns:vmw="http://www.vmware.com/schema/ovf" ovf:id="1" vmw:osType="otherGuest">
+            <ovf:Info>Specifies the operating system installed</ovf:Info>
+            <ovf:Description>Other (32-bit)</ovf:Description>
+        </ovf:OperatingSystemSection>
+        <ovf:VirtualHardwareSection>
+            <ovf:Info>Virtual hardware requirements</ovf:Info>
+            <ovf:System>
+                <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                <vssd:InstanceID>0</vssd:InstanceID>
+                <vssd:VirtualSystemIdentifier>Nostalgia</vssd:VirtualSystemIdentifier>
+                <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+            </ovf:System>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                <rasd:Connection vcloud:primaryNetworkConnection="true" vcloud:ipAddressingMode="DHCP">VM Network</rasd:Connection>
+                <rasd:Description>PCNet32 ethernet adapter</rasd:Description>
+                <rasd:ElementName>Network adapter 0</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+                <rasd:ResourceType>10</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:Description>Hard disk</rasd:Description>
+                <rasd:ElementName>Hard disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk-662155315-2000</rasd:HostResource>
+                <rasd:InstanceID>2000</rasd:InstanceID>
+                <rasd:Parent>2</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>IDE Controller</rasd:Description>
+                <rasd:ElementName>IDE Controller 0</rasd:ElementName>
+                <rasd:InstanceID>3</rasd:InstanceID>
+                <rasd:ResourceType>5</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+                <rasd:Description>CD/DVD Drive</rasd:Description>
+                <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+                <rasd:HostResource/>
+                <rasd:InstanceID>3000</rasd:InstanceID>
+                <rasd:Parent>3</rasd:Parent>
+                <rasd:ResourceType>15</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                <rasd:InstanceID>4</rasd:InstanceID>
+                <rasd:Reservation>0</rasd:Reservation>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                <rasd:Weight>1000</rasd:Weight>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:Description>Memory Size</rasd:Description>
+                <rasd:ElementName>64 MB of memory</rasd:ElementName>
+                <rasd:InstanceID>5</rasd:InstanceID>
+                <rasd:Reservation>0</rasd:Reservation>
+                <rasd:ResourceType>4</rasd:ResourceType>
+                <rasd:VirtualQuantity>64</rasd:VirtualQuantity>
+                <rasd:Weight>640</rasd:Weight>
+            </ovf:Item>
+        </ovf:VirtualHardwareSection>
+        <ovf:ProductSection ovf:class="classid" ovf:required="true">
+            <ovf:Info>Information about the installed software</ovf:Info>
+            <ovf:Product>CentOS</ovf:Product>
+            <ovf:Vendor></ovf:Vendor>
+            <ovf:Version>1.0</ovf:Version>
+            <ovf:FullVersion>1.0.0</ovf:FullVersion>
+            <ovf:VendorUrl>http://wiki.eng.vmware.com/Aarhus</ovf:VendorUrl>
+            <ovf:Property ovf:value="" ovf:userConfigurable="true" ovf:type="string" ovf:password="false" 
+               ovf:key="otherIp" vmw:qualifiers="Ip('VM Network')">
+                <ovf:Label>Other IP Address</ovf:Label>
+                <ovf:Description>IP address on the VM Network.</ovf:Description>
+                <ovf:Value ovf:value="192.168.6.118"/>
+            </ovf:Property>
+        </ovf:ProductSection>
+    </ovf:VirtualSystem>
+</ovf:Envelope>

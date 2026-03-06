@@ -1,0 +1,2343 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vmw="http://www.vmware.com/schema/ovf">
+  <References>
+    <ovf:File ovf:href="layout.json" ovf:size="8791" ovf:id="layout.json_id"/>
+    <ovf:File ovf:href="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-upgrade-requirements.rpm" ovf:size="85280873" ovf:id="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-upgrade-requirements.rpm_id"/>
+    <File ovf:href="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-system.vmdk" ovf:size="657463296" ovf:id="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-system.vmdk_id"/>
+    <File ovf:href="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-cloud-components.vmdk" ovf:size="1753012736" ovf:id="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-cloud-components.vmdk_id"/>
+    <File ovf:href="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-swap.vmdk" ovf:size="2034176" ovf:id="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-swap.vmdk_id"/>
+  </References>
+  <vmw:MigrationUpgradeRequisitesSection ovf:required="false">
+    <Info>Files necessary for migration-based upgrade.</Info>
+    <vmw:Requisite vmw:purpose="requirements" ovf:fileRef="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-upgrade-requirements.rpm_id"/>
+  </vmw:MigrationUpgradeRequisitesSection>
+  <NetworkSection>
+    <Info>List of logical networks used in the package</Info>
+    <Network ovf:name="Network 1">
+      <Description>The "Network 1" network</Description>
+    </Network>
+  </NetworkSection>
+  <vmw:IpAssignmentSection ovf:required="false" vmw:protocols="IPv4,IPv6" vmw:schemes="">
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <DiskSection>
+    <Info>List of the virtual disks and partitions needed</Info>
+    <Disk ovf:diskId="system" ovf:capacity="12288" ovf:capacityAllocationUnits="byte * 2^20" ovf:fileRef="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-system.vmdk_id" ovf:populatedSize="2384199680" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <Disk ovf:diskId="cloudcomponents" ovf:capacity="1676" ovf:capacityAllocationUnits="byte * 2^20" ovf:fileRef="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-cloud-components.vmdk_id" ovf:populatedSize="1756510208" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <Disk ovf:diskId="swap" ovf:capacity="15360" ovf:capacityAllocationUnits="byte * 2^20" ovf:fileRef="VMware-vCenter-Server-Appliance-6.5.0.5100-3945287-swap.vmdk_id" ovf:populatedSize="1179648" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="core" ovf:capacity="20480" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="log" ovf:capacity="21504" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="db" ovf:capacity="8192" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="dblog" ovf:capacity="5120" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="seat" ovf:capacity="12288" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="netdump" ovf:capacity="10240" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="autodeploy" ovf:capacity="20480" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="imagebuilder" ovf:capacity="20480" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="vpxd-svcs" ovf:capacity="22528" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="updatemgr" ovf:capacity="102400" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk10MB" ovf:capacity="10" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk1GB" ovf:capacity="1024" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk5GB" ovf:capacity="5120" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk10GB" ovf:capacity="10240" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk25GB" ovf:capacity="25600" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk50GB" ovf:capacity="51200" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk100GB" ovf:capacity="102400" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk250GB" ovf:capacity="256000" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk500GB" ovf:capacity="512000" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk1TB" ovf:capacity="1048576" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+  </DiskSection>
+  <DeploymentOptionSection>
+    <Info>List of profiles</Info>
+    <Configuration ovf:default="true" ovf:id="tiny">
+      <Label>Tiny vCenter Server with Embedded PSC</Label>
+      <Description>This will deploy a Tiny VM configured with 2 vCPUs and 8 GB of memory and requires 220 GB of disk space. This option contains vCenter Server with an embedded Platform Services Controller for managing up to 10 hosts and 100 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="small">
+      <Label>Small vCenter Server with Embedded PSC</Label>
+      <Description>This will deploy a Small VM configured with 4 vCPUs and 16 GB of memory and requires 270 GB of disk space. This option contains vCenter Server with an embedded Platform Services Controller for managing up to 100 hosts and 1,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="medium">
+      <Label>Medium vCenter Server with Embedded PSC</Label>
+      <Description>This will deploy a Medium VM configured with 8 vCPUs and 24 GB of memory and requires 420 GB of disk space. This option contains vCenter Server with an embedded Platform Services Controller for managing up to 400 hosts and 4,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="large">
+      <Label>Large vCenter Server with Embedded PSC</Label>
+      <Description>This will deploy a Large VM configured with 16 vCPUs and 32 GB of memory and requires 600 GB of disk space. This option contains vCenter Server with an embedded Platform Services Controller for managing up to 1000 hosts and 10,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="xlarge">
+      <Label>X-Large vCenter Server with Embedded PSC</Label>
+      <Description>This will deploy a X-Large VM configured with 24 vCPUs and 48 GB of memory and requires 600 GB of disk space will be updated for xlarge later. This option contains vCenter Server with an embedded Platform Services Controller for managing up to 2000 hosts and 35,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="management-tiny">
+      <Label>Tiny vCenter Server</Label>
+      <Description>This will deploy a Tiny VM configured with 2 vCPUs and 8 GB of memory and requires 220 GB of disk space. These resources will be used by the vCenter Server services to manage up to 10 hosts and 100 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="management-small">
+      <Label>Small vCenter Server</Label>
+      <Description>This will deploy a Small VM configured with 4 vCPUs and 16 GB of memory and requires 270 GB of disk space. These resources will be used by the vCenter Server services to manage up to 100 hosts and 1,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="management-medium">
+      <Label>Medium vCenter Server</Label>
+      <Description>This will deploy a Medium VM configured with 8 vCPUs and 24 GB of memory and requires 420 GB of disk space. These resources will be used by the vCenter Server services to manage up to 400 hosts and 4,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="management-large">
+      <Label>Large vCenter Server</Label>
+      <Description>This will deploy a Large VM configured with 16 vCPUs and 32 GB of memory and requires 600 GB of disk space. These resources will be used by the vCenter Server services to manage up to 1000 hosts and 10,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="management-xlarge">
+      <Label>X-Large vCenter Server</Label>
+      <Description>This will deploy a X-Large VM configured with 24 vCPUs and 48 GB of memory and requires 600 GB of disk space, xlarge disk space will be updated later. These resources will be used by the vCenter Server services to manage up to 2000 hosts and 35,000 VMs.</Description>
+    </Configuration>
+    <Configuration ovf:id="infrastructure">
+      <Label>Platform Services Controller</Label>
+      <Description>This will deploy an external Platform Services Controller VM with 2 vCPU and 2GB of memory and requires 30 GB of disk space.</Description>
+    </Configuration>
+  </DeploymentOptionSection>
+  <VirtualSystem ovf:id="VMware_vCenter_Server_Appliance">
+    <Info>A virtual machine</Info>
+    <ProductSection ovf:required="false">
+      <Info>Appliance ISV branding information</Info>
+      <Product>VMware vCenter Server Appliance</Product>
+      <Vendor>VMware Inc.</Vendor>
+      <!--
+            Version is the actual product version in the
+            form X.X.X.X where X is an unsigned 16-bit integer.
+
+            FullVersion is a descriptive version string
+            including, for example, alpha or beta designations
+            and other release criteria.
+        -->
+      <Version>6.5.0.5100</Version>
+      <FullVersion>6.5.0.5100 build 3945287</FullVersion>
+      <ProductUrl/>
+      <VendorUrl>http://www.vmware.com</VendorUrl>
+      <AppUrl>https://${vami.ip0.VMware_vCenter_Server_Appliance}:5480/</AppUrl>
+      <Category>Application</Category>
+      <Category vmw:uioptional="false">Networking Configuration</Category>
+      <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.addr.family" ovf:value="">
+        <Label>Host Network IP Address Family</Label>
+        <Description>Network IP address family (i.e., 'ipv4' or 'ipv6').</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.mode" ovf:value="">
+        <Label>Host Network Mode</Label>
+        <Description>Network mode (i.e., 'static', 'dhcp', or 'autoconf' (IPv6 only).</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.addr" ovf:value="">
+        <Label>Host Network IP Address</Label>
+        <Description>Network IP address.  Only provide this when mode is 'static'.  Can be IPv4 or IPv6 based on specified address family.</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.prefix" ovf:value="">
+        <Label>Host Network Prefix</Label>
+        <Description>Network prefix length.  Only provide this when mode is 'static'.  0-32 for IPv4.  0-128 for IPv6.</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.gateway" ovf:value="">
+        <Label>Host Network Default Gateway</Label>
+        <Description>IP address of default gateway.  Can be 'default' when using IPv6.</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.dns.servers" ovf:value="">
+        <Label>Host Network DNS Servers</Label>
+        <Description>Comma separated list of IP addresses of DNS servers.</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.pnid" ovf:value="">
+        <Label>Host Network Identity</Label>
+        <Description>Network identity (IP address or fully-qualified domain name) services should use when advertising themselves.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.appliance.net.ports" ovf:value="{}">
+        <Label>Custom Network Ports</Label>
+        <Description>A string encoding a JSON object mapping port names to port numbers.</Description>
+      </Property>
+      <Category vmw:uioptional="false">SSO Configuration</Category>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.vmdir.username" ovf:value="administrator@vsphere.local">
+        <Label>Directory Username</Label>
+        <Description>For the first instance of the identity domain, this is the username with Administrator privileges. Otherwise, this is the username of the replication partner.</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:password="true" ovf:type="string" ovf:key="guestinfo.cis.vmdir.password">
+        <Label>Directory Password</Label>
+        <Description>For the first instance of the identity domain, this is the password given to the Administrator account.  Otherwise, this is the password of the Administrator account of the replication partner.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.vmdir.domain-name" ovf:value="vsphere.local">
+        <Label>Directory Domain Name</Label>
+        <Description>For the first instance of the identity domain, this is the name of the newly created domain.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.vmdir.site-name" ovf:value="Default-First-Site">
+        <Label>Site Name</Label>
+        <Description>Name of site.  Use 'Default-First-Site' to define a new site.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.vmdir.first-instance" ovf:value="True">
+        <Label>New Identity Domain</Label>
+        <Description>If this parameter is set to True, the VMware directory instance is setup as the first instance of a new identity domain. Otherwise, the instance is setup as a replication partner.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.vmdir.replication-partner-hostname" ovf:value="">
+        <Label>Directory Replication Partner</Label>
+        <Description>The hostname of the VMware directory replication partner.  This value is ignored for the first instance of the identity domain.</Description>
+      </Property>
+      <Category vmw:uioptional="false">Database Configuration</Category>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.db.type" ovf:value="embedded">
+        <Label>Database Type</Label>
+        <Description>String indicating whether the database is 'embedded' or 'external'.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.db.user" ovf:value="">
+        <Label>Database User</Label>
+        <Description>String naming the account to use when connecting to external database (ignored when db.type is 'embedded').</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.db.password" ovf:value="">
+        <Label>Database Password</Label>
+        <Description>String providing the password to use when connecting to external database (ignored when db.type is 'embedded').</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.db.servername" ovf:value="">
+        <Label>Database Server</Label>
+        <Description>String naming the the hostname of the server on which the external database is running (ignored when db.type is 'embedded').</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.db.serverport" ovf:value="">
+        <Label>Database Port</Label>
+        <Description>String describing the port on the host on which the external database is running (ignored when db.type is 'embedded').</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.db.provider" ovf:value="">
+        <Label>Database Provider</Label>
+        <Description>String describing the external database provider. The only supported value is 'oracle' (ignored when the db.type is 'embedded').</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.db.instance" ovf:value="">
+        <Label>Database Instance</Label>
+        <Description>String describing the external database instance. Values could be anything depending on what the database instance name the DBA creates in the external db. (ignored when the db.type is 'embedded').</Description>
+      </Property>
+      <Category vmw:uioptional="false">System Configuration</Category>
+      <Property ovf:userConfigurable="true" ovf:password="true" ovf:type="string" ovf:key="guestinfo.cis.appliance.root.passwd">
+        <Label>Root Password</Label>
+        <Description>Password to assign to root account.  If blank, password can be set on the console.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.appliance.root.shell" ovf:value="">
+        <Label>Root Shell</Label>
+        <Description>This property is not changeable.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.appliance.ssh.enabled" ovf:value="False">
+        <Label>SSH Enabled</Label>
+        <Description>Set whether SSH-based remote login is enabled.  This configuration can be changed after deployment.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.appliance.time.tools-sync" ovf:value="False">
+        <Label>Tools-based Time Synchronization Enabled</Label>
+        <Description>Set whether VMware tools based time synchronization should be used. This parameter is ignored if appliance.ntp.servers is not empty.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.appliance.ntp.servers" ovf:value="">
+        <Label>NTP Servers</Label>
+        <Description>A comma-seperated list of hostnames or IP addresses of NTP Servers</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.deployment.node.type" ovf:value="embedded">
+        <Label>Deployment Type</Label>
+        <Description>Type of appliance to deploy (i.e. 'embedded', 'infrastructure' or 'management').</Description>
+        <Value ovf:value="management" ovf:configuration="management-xlarge"/>
+        <Value ovf:value="management" ovf:configuration="management-large"/>
+        <Value ovf:value="management" ovf:configuration="management-medium"/>
+        <Value ovf:value="management" ovf:configuration="management-small"/>
+        <Value ovf:value="management" ovf:configuration="management-tiny"/>
+        <Value ovf:value="infrastructure" ovf:configuration="infrastructure"/>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.system.vm0.hostname" ovf:value="">
+        <Label>Platform Services Controller</Label>
+        <Description>When deploying a vCenter Server Node, please provide the FQDN or IP address of a Platform Services Controller (leave blank otherwise).  The choice of FQDN versus IP address is decided based on the Platform Services Controller's own notion of its network identity.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.system.vm0.port" ovf:value="443">
+        <Label>HTTPS Port on Platform Services Controller</Label>
+        <Description>When deploying a vCenter Server pointing to an external platform services controller, please provide the HTTPS port of the external platform services controller if a custom port number is being used. The default HTTPS port number is 443.</Description>
+      </Property>
+      <Category vmw:uioptional="true">Upgrade Configuration</Category>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.vpxd.ip" ovf:value="">
+        <Label>Upgrade Source Hostname</Label>
+        <Description>IP/hostname of the appliance to upgrade. Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.ma.port" ovf:value="9123">
+        <Label>Migration Assistant Port</Label>
+        <Description>Port used by Migration Assistant on source vCenter Server.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.vpxd.user" ovf:value="">
+        <Label>Upgrade Source vCenter Username</Label>
+        <Description>vCenter username for the appliance to upgrade. Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:isPassword="true" ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.vpxd.password" ovf:value="">
+        <Label>Upgrade Source vCenter Password</Label>
+        <Description>vCenter password for the appliance to upgrade. Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.guest.user" ovf:value="">
+        <Label>Upgrade Source OS Username</Label>
+        <Description>Username for the appliance operating system to upgrade.  Usually root. Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:isPassword="true" ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.guest.password" ovf:value="">
+        <Label>Upgrade Source OS Password</Label>
+        <Description>Password for the appliance operating system to upgrade. Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.guestops.host.addr" ovf:value="">
+        <Label>Upgrade Management Host Hostname</Label>
+        <Description>IP/hostname of the host that manages appliance to upgrade.  Can be  either vCenter or ESX host.  Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.guestops.host.user" ovf:value="">
+        <Label>Upgrade Management Host Username</Label>
+        <Description>Username for the host that manages appliance to upgrade.  Can be  either vCenter or ESX host.  Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:isPassword="true" ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.guestops.host.password" ovf:value="">
+        <Label>Upgrade Management Host Password</Label>
+        <Description>Password for the host that manages appliance to upgrade.  Can be  either vCenter or ESX host.  Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.ssl.thumbprint" ovf:value="">
+        <Label>Upgrade Management Host Thumbprint</Label>
+        <Description>Thumbprint for the SSL certificate of the host that manages the appliance to upgrade. Set only for upgrade.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.platform" ovf:value="linux">
+        <Label>Upgrade Source Platform</Label>
+        <Description>Source host platform. Optional. Set only for upgrade</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.source.export.directory" ovf:value="/var/tmp">
+        <Label>Upgrade Source Export Folder</Label>
+        <Description>Folder on the source appliance, where to store migrate data. Optional. Set only for upgrade</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.import.directory" ovf:value="/storage/seat/cis-export-folder">
+        <Label>Upgrade Destination Export Folder</Label>
+        <Description>Folder where exported source data will be stored in the appliance. Optional. Set only for upgrade</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.upgrade.silent" ovf:value="False">
+        <Label>Suppress questions</Label>
+        <Description>Suppress questions and use default answers</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.user.options" ovf:value="">
+        <Label>Upgrade Advanced Options</Label>
+        <Description>Advanced upgrade settings specified in json format. Optional. Set only for upgrade</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.upgrade.components" ovf:value="">
+        <Label>Components to be upgraded</Label>
+        <Description>A list of component names to be upgraded explicitly.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.ad.domain-name" ovf:value="">
+        <Label>Active Directory domain name</Label>
+        <Description>Active Directory domain to join.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.ad.domain.username" ovf:value="">
+        <Label>Active Directory domain admin user</Label>
+        <Description>Active Directory domain admin user. This username will be used to join the machine to the domain.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:password="true" ovf:type="string" ovf:key="guestinfo.cis.ad.domain.password" ovf:value="">
+        <Label>Active Directory domain admin user password</Label>
+        <Description>Active Directory domain admin user password. This password will be used to join the machine to the domain.</Description>
+      </Property>
+      <Category vmw:uioptional="true">Miscellaneous</Category>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.netdump.enabled" ovf:value="True">
+        <Label>ESXi Dump Collector Enabled</Label>
+        <Description>Set whether ESXi Dump Collector service is enabled.  This configuration can be changed after deployment.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.lookup.hidessltrust" ovf:value="False">
+        <Label>Make lookup service hide endpoints SSL trusts</Label>
+        <Description>If this parameter is set to True, then all lookup service will return endpoints without SSL trust.  Can be used for testing VECS integration.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.silentinstall" ovf:value="False">
+        <Label>Do Silent Install</Label>
+        <Description>If this parameter is set to True, no questions will be posted during install or upgrade. Otherwise, the install process will wait for a reply if there is a pending question.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.clientlocale" ovf:value="en">
+        <Label>The Client Locale</Label>
+        <Description>This parameter specifies the client locale. Supported locales are en, fr, ja, ko, zh_CN and zh_TW. English is assumed if locale is unknown.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.feature.states" ovf:value="">
+        <Label>Feature switch states</Label>
+        <Description>Specify feature switch states which need to be added or modified in feature switch state config file. Format: key1=value1, key2=value2</Description>
+      </Property>
+      <Property ovf:userConfigurable="true" ovf:type="boolean" ovf:key="guestinfo.cis.ceip_enabled" ovf:value="False">
+        <Label>CEIP enabled</Label>
+        <Description>VMware’s Customer Experience Improvement Program ("CEIP") provides VMware with information that enables VMware to improve its products and services, to fix problems, and to advise you on how best to deploy and use our products. As part of the CEIP, VMware collects technical information about your organization’s use of VMware products and services on a regular basis in association with your organization’s VMware license key(s). This information does not personally identify any individual. For more details about the Program and how VMware uses the information it collects through CEIP, please see the product documentation at http://www.vmware.com/info?id=1399. If you want to participate in VMware’s CEIP for this product, set this property to True. You may join or leave VMware’s CEIP for this product at any time.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="boolean" ovf:key="guestinfo.cis.deployment.autoconfig" ovf:value="False">
+        <Label>Auto Start Services</Label>
+        <Description>If this parameter is set to True, the appliance will be configured after deployment using the specified OVF configuration parameters. If set to False, the appliance should be configured post-deployment using the VMware Appliance Management Interface.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.vpxd.mac-allocation-scheme.prefix" ovf:value="">
+        <Label>MAC address allocation scheme prefix</Label>
+        <Description>If a valid MAC address prefix is provided, then all MAC addresses assigned by vCenter Server will begin with this prefix instead of the VMware OUI. This property cannot co-exist with mac-allocation-scheme.ranges</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="uint8" ovf:key="guestinfo.cis.vpxd.mac-allocation-scheme.prefix-length" ovf:value="0">
+        <Label>MAC address allocation scheme prefix length</Label>
+        <Description>This property is mandatory whenever a custom MAC prefix is provided.</Description>
+      </Property>
+      <Property ovf:userConfigurable="false" ovf:type="string" ovf:key="guestinfo.cis.vpxd.mac-allocation-scheme.ranges" ovf:value="">
+        <Label>MAC address allocation scheme ranges</Label>
+        <Description>If valid MAC address range is provided, then vCenter Server will assign MAC addresses from this range instead of allocating VMware OUI based MAC address. The address range must be provided in the format "BeginAddress1-EndAddress1,...,BeginAddressN-EndAddressN". This property cannot co-exist with mac-allocation-scheme.prefix.</Description>
+      </Property>
+    </ProductSection>
+    <ProductSection ovf:class="vami" ovf:instance="VMware_vCenter_Server_Appliance" ovf:required="false">
+      <Info>VAMI Properties</Info>
+      <Category>Networking Properties</Category>
+      <Property ovf:key="domain" ovf:userConfigurable="true" ovf:type="string">
+        <Label>Domain Name</Label>
+        <Description>The domain name of this VM. Leave blank if DHCP is desired.</Description>
+      </Property>
+      <Property ovf:key="searchpath" ovf:userConfigurable="true" ovf:type="string">
+        <Label>Domain Search Path</Label>
+        <Description>The domain search path (comma or space separated domain names) for this VM. Leave blank if DHCP is desired.</Description>
+      </Property>
+      </ProductSection>
+    <ProductSection ovf:class="vm" ovf:required="false">
+      <Info>VM specific properties</Info>
+      <Property ovf:key="vmname" ovf:type="string" ovf:value="VMware_vCenter_Server_Appliance"/>
+    </ProductSection>
+    <EulaSection>
+      <Info>End User License Agreement</Info>
+      <License msgid="eula">﻿VMWARE, INC.&#13;
+BETA LICENSE AGREEMENT&#13;
+&#13;
+Note: BY CLICKING "I AGREE," ACCESSING, DOWNLOADING,&#13;
+INSTALLING, UPLOADING, COPYING OR USING THE BETA SOFTWARE,&#13;
+YOU CONCLUDE AND AGREE TO THIS BETA LICENSE AGREEMENT&#13;
+("AGREEMENT") IN A LEGALLY BINDING MANNER WITH VMWARE, INC.,&#13;
+3401 HILLVIEW AVENUE, PALO ALTO, CA 94304, USA ("VMware"). IF YOU&#13;
+HAVE SPECIFIED IN CONNECTION WITH THE REGISTRATION&#13;
+PROCESS FOR THIS SOFTWARE BETA TEST PROGRAM THAT YOU&#13;
+ARE ACTING ON BEHALF OF A COMPANY OR OTHER ORGANIZATION,&#13;
+YOU REPRESENT THAT YOU ARE AUTHORIZED TO LEGALLY BIND&#13;
+SUCH ORGANIZATION AND THAT YOU CONCLUDE THE AGREEMENT&#13;
+ON BEHALF OF SUCH ORGANIZATION. IN THE FOLLOWING, THE&#13;
+TERMS "YOU" AND "LICENSEE" SHALL REFER, JOINTLY AND&#13;
+SEVERALLY, TO YOU INDIVIDUALLY AND ANY ORGANIZATION ON&#13;
+WHOSE BEHALF YOU ACT.&#13;
+If you do not agree to the terms of this beta license Agreement, then do *not*&#13;
+click "I AGREE," access, download, install, upload, copy or use the Beta&#13;
+Software.&#13;
+&#13;
+&#13;
+1.	DEFINITIONS.&#13;
+      (a)  "Beta Software" shall mean the beta version of VMware's software&#13;
+and the media and Documentation provided by VMware to Licensee and for&#13;
+which Licensee is granted a use license pursuant to this Agreement. The&#13;
+Beta Software will be provided in object form only.&#13;
+      (b)  "Documentation" shall mean the printed or online written reference&#13;
+material furnished to Licensee in conjunction with the Beta Software,&#13;
+including, without limitation, instructions, beta testing guidelines, and end user&#13;
+guides.&#13;
+      (c)  "Intellectual Property Rights" shall mean all intellectual property&#13;
+rights, including, without limitation, patent, copyright, trademark, and trade&#13;
+secret, recognized in any jurisdiction worldwide, whether perfected or not, and&#13;
+any similar and other proprietary rights.&#13;
+      (d)  "Open Source Software" means code that is provided with the&#13;
+Beta Software and identified as open source code or otherwise as being&#13;
+subject to open source license terms.&#13;
+      (e)  "Updates" shall mean a modification, error correction, bug fix, new&#13;
+release, or other update to or for the Beta Software.&#13;
+&#13;
+2.	LICENSE GRANT, USE AND OWNERSHIP&#13;
+	(a)  Limited License.  Subject to the terms and conditions of this&#13;
+Agreement, VMware grants to Licensee a non-exclusive, revocable (at any&#13;
+time and for any reason, at VMware's sole discretion), royalty-free,&#13;
+non-transferable, non-assignable license (without the right to sublicense):&#13;
+&#13;
+        (i) to use the Beta Software in accordance with the Documentation&#13;
+solely for purposes of (A) internal testing and evaluation to determine whether&#13;
+or not to license generally available commercial versions of the Beta Software&#13;
+if such versions ever become available, and (B) internal development to&#13;
+create interoperability between the Beta Software and Licensee products,&#13;
+       (ii) to use the Documentation provided with the Beta Software in&#13;
+support of Licensee's authorized use of the Beta Software, and&#13;
+       (iii) to copy Beta Software for Licensee's archival or backup purposes,&#13;
+provided that all titles and trademarks, copyright, and restricted rights notices&#13;
+are reproduced on such copies.&#13;
+&#13;
+      (b)  Evaluation Feedback.  The purpose of this limited license is the&#13;
+testing and evaluation of the Beta Software and Documentation and&#13;
+development by Licensee of Licensee products that interoperate with the Beta&#13;
+Software. In furtherance of this purpose, Licensee shall provide feedback to&#13;
+VMware concerning the functionality and performance of the Beta Software&#13;
+from time to time as reasonably requested by VMware, including, without&#13;
+limitation, identifying potential errors and improvements (collectively the&#13;
+"Feedback"). Licensee will provide Feedback in a manner that is mutually&#13;
+agreeable to the parties. VMware may use Feedback, without restriction in&#13;
+any manner now known or in the future conceived, to improve or enhance its&#13;
+products and, accordingly, and you hereby grant to VMware a non-exclusive,&#13;
+perpetual, irrevocable, royalty-free, transferable, worldwide right and license,&#13;
+with the right to sublicense (i) to use, reproduce, disclose, distribute, modify,&#13;
+prepare derivative works of and otherwise exploit the Feedback and other&#13;
+information you provide to VMware under this Agreement, and (ii) to make,&#13;
+use, sell, offer to sell, import and export any product or service that&#13;
+incorporates the Feedback and other information you provide to VMware&#13;
+under this Agreement.&#13;
+      (c)  Restrictions.  Licensee shall not disclose, provide, or disseminate&#13;
+in any manner the Beta Software (including the Documentation) or&#13;
+Confidential Information to any third party, including but not limited to its&#13;
+partners, affiliates or subsidiaries. Except to the extent contrary to any&#13;
+applicable laws, Licensee will not, and will not permit any third party to,&#13;
+sublicense, rent, copy, modify, create derivative works of, translate, reverse&#13;
+engineer, decompile, disassemble, or otherwise reduce to human perceivable&#13;
+form any portion of the Beta Software or accompanying Documentation.&#13;
+Without limiting the generality of the foregoing, Licensee shall not use the&#13;
+Beta Software for Licensee's product development or any other commercial&#13;
+purpose, including, but not limited to sales or marketing activities, except as&#13;
+expressly permitted in this Agreement. The Beta Software and all&#13;
+performance data and test results, including without limitation, benchmark test&#13;
+results (collectively "Performance Data"), relating  to the Beta Software are&#13;
+the Confidential Information of VMware, and will be treated in accordance&#13;
+with the terms of Section 4 of this Agreement. Accordingly, Licensee shall not&#13;
+publish or disclose to any third party any Performance Data relating to the&#13;
+Beta Software.&#13;
+&#13;
+      (d)  Ownership.  VMware shall own and retain all right, title and&#13;
+interest in and to the Intellectual Property Rights in the Beta Software and any&#13;
+derivative works thereof, subject only to the limited license expressly set forth&#13;
+in Section 2(a) hereof. Licensee does not acquire any other rights, express or&#13;
+implied, in the Beta Software. ALL RIGHTS NOT EXPRESSLY GRANTED&#13;
+HEREUNDER ARE RESERVED TO VMWARE.&#13;
+      (e)  No Support Services.  VMware is under no obligation to support&#13;
+the Beta Software in any manner or to provide any Updates to Licensee.  In&#13;
+the event VMware, in its sole discretion, supplies any Update to Licensee, the&#13;
+Update shall be deemed Beta Software under this Agreement and shall be&#13;
+subject to the terms and conditions of this Agreement.&#13;
+	(f)  Third-Party Software.  The Beta Software may enable a computer&#13;
+to run multiple instances of third-party guest operating systems and&#13;
+application programs. Licensee acknowledges that Licensee is responsible&#13;
+for obtaining any licenses necessary to operate any third-party software,&#13;
+including guest operating systems and application programs.&#13;
+      (g)  Open Source Software.  Except Sections 5, 6, and 7, the terms&#13;
+and conditions of this Agreement shall not apply to any Open Source&#13;
+Software accompanying the Beta Software.  Any such Open Source&#13;
+Software is provided under the terms of the applicable open source license&#13;
+agreement or copyright notice accompanying such Open Source Software or&#13;
+included in the open source licenses file accompanying the Beta Software.&#13;
+      (h) The Beta Software may be used to automatically download content&#13;
+directly from third parties. Licensee is solely responsible for complying with&#13;
+any third party license terms for the content that Licensee chooses to&#13;
+download. The terms of this Agreement will supersede and control over&#13;
+the license terms of any generally availability release VMware software&#13;
+that is downloaded by the Beta Software and applied as a patch to&#13;
+VMware software that has not been made available as a generally&#13;
+availability release.&#13;
+&#13;
+3.	TERM AND TERMINATION.  Unless otherwise terminated as&#13;
+specified under this Agreement, Licensee's rights with respect to the Beta&#13;
+Software will terminate upon the earlier of (a) the initial commercial release by&#13;
+VMware of a generally available version of the Beta Software or (b) automatic&#13;
+expiration of the Beta Software based on the system date.  Either party may&#13;
+terminate this Agreement at any time for any reason or no reason by&#13;
+providing the other party advance written notice thereof. Licensee agrees that&#13;
+this Agreement will automatically terminate without notice in the event&#13;
+Licensee discloses the Beta Software in breach of Section 4 (Confidentiality)&#13;
+below. Upon any expiration or termination of this Agreement, the rights and&#13;
+licenses granted to Licensee under this Agreement shall immediately&#13;
+terminate, and Licensee shall immediately cease using, and will destroy or&#13;
+render practically inaccessible the Beta Software, Documentation, and all&#13;
+other tangible items in Licensee's possession or control that contain&#13;
+Confidential Information. The rights and obligations of the parties set forth in&#13;
+Sections 2(b), 2(c), 2(d), 2(e), 2(f), 2(g), 3, 4, 5, 6, 7 and 8 survive termination&#13;
+or expiration of this Agreement for any reason.&#13;
+&#13;
+4.	CONFIDENTIALITY.&#13;
+      (a) "Confidential Information" shall mean the Beta Software, all&#13;
+information regarding the Beta Software (including any trade secrets,&#13;
+know-how, inventions, techniques, processes, and algorithms embodied in&#13;
+the Beta Software), Documentation, Performance Data, any Updates,&#13;
+VMware products, product roadmaps, and other technical, business, financial&#13;
+and product development plans, forecasts and strategies, and other&#13;
+information provided by VMware to Licensee under this Agreement, whether&#13;
+disclosed orally, in writing, or by examination or inspection, other than&#13;
+information that Licensee can demonstrate (i) was already known to&#13;
+Licensee, other than under an obligation of confidentiality, at the time of&#13;
+disclosure; (ii) was generally available in the public domain at the time of&#13;
+disclosure to Licensee; (iii) became generally available in the public domain&#13;
+after disclosure other than through any act or omission of Licensee; (iv) was&#13;
+subsequently lawfully disclosed to Licensee by a third party without any&#13;
+obligation of confidentiality; or (v) was independently developed by Licensee&#13;
+without use of or reference to any information or materials disclosed by&#13;
+VMware or its suppliers.  If Licensee wishes to disclose to VMware any&#13;
+information under this Agreement that Licensee considers proprietary or&#13;
+confidential to Licensee ("Licensee Information"), then Licensee agrees such&#13;
+disclose will be governed by a separate non-disclosure agreement ("NDA") by&#13;
+and between the parties.   If Licensee is required to disclose Confidential&#13;
+Information by applicable law or court order, Licensee shall notify VMware of&#13;
+the required disclosure promptly in writing and shall cooperate with VMware&#13;
+in any lawful action to contest or limit the scope of the required disclosure.&#13;
+Licensee shall not use any Confidential Information for any purpose other&#13;
+than as expressly authorized under this Agreement. In no event shall&#13;
+Licensee use the Beta Software or any Confidential Information to develop,&#13;
+manufacture, market, sell, or distribute any product or service, including any&#13;
+VMware products except as expressly set forth in this Agreement.  Licensee&#13;
+shall not disclose any Confidential Information to any third party. Without&#13;
+limiting the foregoing, Licensee shall use at least the same degree of care&#13;
+that it uses to prevent the disclosure of its own confidential information of like&#13;
+importance, but in no event less than reasonable care, to prevent the&#13;
+disclosure of such Confidential Information.&#13;
+      (b)  Additional Confidentiality Restrictions for Highly Confidential Beta&#13;
+Software. For certain Beta Software designated by VMware in writing as&#13;
+highly confidential ("Highly Confidential Beta Software"), Licensee agrees that&#13;
+the following, additional confidentiality obligations and restrictions will apply:&#13;
+      (i)  Licensee shall limit dissemination of Highly Confidential&#13;
+Beta Software and related information concerning product features,&#13;
+future technologies and roadmaps only to Information Technology&#13;
+teams and/or software/solutions development teams of Licensee&#13;
+approved in writing by VMware, and only to individuals on such teams&#13;
+on a need-to-know basis and solely for purposes expressly authorized&#13;
+under this Agreement. For clarity and without limiting the generality of&#13;
+the foregoing, Licensee shall not disseminate any Highly Confidential&#13;
+Beta Software to Licensee's sales and marketing field organizations.&#13;
+Licensee will assign an employee who will be primarily responsible for&#13;
+ensuring Licensee's full compliance with the terms described in this&#13;
+Section 4(b) herein.&#13;
+      (ii)  Improper Disclosure of Highly Confidential Beta Software.&#13;
+Licensee acknowledges that damages due to Licensee's improper&#13;
+disclosure of Highly Confidential Beta Software or related information&#13;
+concerning product features, future technologies and roadmaps may&#13;
+be irreparable and that monetary damages would be inadequate to&#13;
+compensate VMware for any breach of this Agreement. In the event&#13;
+that VMware reasonably believes that Licensee has disseminated&#13;
+Highly Confidential Beta Software or related information concerning&#13;
+product features, future technologies and roadmaps to an unauthorized&#13;
+party, Licensee will be immediately removed from VMware's Beta&#13;
+Software program and will not be permitted to participate in any&#13;
+VMware Beta Software program in the future. Additionally, all rights&#13;
+and licenses granted to Licensee under this Agreement shall&#13;
+immediately terminate in accordance with Section 3 herein (Term and&#13;
+Termination), and (b) in addition to all other remedies available in law&#13;
+or otherwise, VMware is entitled to seek equitable relief, including&#13;
+injunction and preliminary injunction against the threatened breach of&#13;
+this Agreement or the continuation of any such breach.&#13;
+&#13;
+5.	LIMITATION OF LIABILITY.  IT IS UNDERSTOOD THAT THE BETA&#13;
+SOFTWARE IS PROVIDED WITHOUT CHARGE FOR THE PURPOSES&#13;
+EXPRESSLY PERMITTED UNDER THIS AGREEMENT. ACCORDINGLY,&#13;
+TO THE FULLEST EXTENT PERMITTED BY LAW, BUT SUBJECT&#13;
+ALWAYS TO THIS SECTION 5, THE TOTAL LIABILITY OF VMWARE AND&#13;
+ITS LICENSORS ARISING OUT OF OR RELATED TO THIS AGREEMENT&#13;
+SHALL NOT EXCEED $1.00. TO THE FULLEST EXTENT PERMITTED BY&#13;
+LAW, IN NO EVENT SHALL VMWARE OR ITS LICENSORS HAVE&#13;
+LIABILITY FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR&#13;
+CONSEQUENTIAL DAMAGES OR DAMAGES FOR LOSS OF BUSINESS&#13;
+PROFITS, BUSINESS INTERRUPTION, OR LOSS OF BUSINESS&#13;
+INFORMATION, HOWEVER CAUSED AND ON ANY THEORY OF&#13;
+LIABILITY (INCLUDING WITHOUT LIMITATION, TORT, STATUTE,&#13;
+CONTRACT OR OTHER), EVEN IF VMWARE AND ITS LICENSORS HAVE&#13;
+BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THESE&#13;
+LIMITATIONS SHALL APPLY NOTWITHSTANDING ANY FAILURE OF&#13;
+ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. THE PARTIES&#13;
+ACKNOWLEDGE THAT THE VARIOUS CONSIDERATIONS DUE TO&#13;
+VMWARE IN ACCORDANCE WITH THE TERMS OF THIS AGREEMENT&#13;
+WERE TAKEN INTO ACCOUNT IN DETERMINING THE LIMITATION OF&#13;
+LIABILITY SET FORTH IN THIS SECTION 5. LICENSEE ACKNOWLEDGES&#13;
+AND AGREES THIS LIMITATION IS AN ESSENTIAL ELEMENT OF THIS&#13;
+AGREEMENT AND THAT VMWARE WOULD NOT ENTER INTO THIS&#13;
+AGREEMENT WITHOUT THESE LIMITATIONS ON ITS LIABILITY. You can&#13;
+recover from Microsoft and its suppliers only direct damages up to U.S. $5.00,&#13;
+and you cannot recover from Microsoft any other damages, including&#13;
+consequential, lost profits, special, indirect or incidental damages.&#13;
+&#13;
+6.	WARRANTY DISCLAIMER.  IT IS UNDERSTOOD THAT THE BETA&#13;
+SOFTWARE, OPEN SOURCE SOFTWARE, DOCUMENTATION, AND ANY&#13;
+UPDATES MAY CONTAIN ERRORS AND ARE PROVIDED FOR THE&#13;
+PURPOSES EXPRESSLY PERMITTED UNDER THIS AGREEMENT. TO&#13;
+THE FULLEST EXTENT PERMITTED BY LAW, AND SUBJECT TO&#13;
+SECTION 5, THE BETA SOFTWARE, THE OPEN SOURCE SOFTWARE,&#13;
+THE DOCUMENTATION, AND ANY UPDATES ARE PROVIDED "AS IS"&#13;
+WITHOUT WARRANTY OF ANY KIND, WHETHER EXPRESS, IMPLIED,&#13;
+STATUTORY, OR OTHERWISE. TO THE FULLEST EXTENT PERMITTED&#13;
+BY LAW, AND SUBJECT TO SECTION 5, VMWARE AND ITS LICENSORS&#13;
+SPECIFICALLY DISCLAIM ALL IMPLIED WARRANTIES OF&#13;
+MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A&#13;
+PARTICULAR PURPOSE. Licensee acknowledges that VMware has not&#13;
+publicly announced the availability of the Beta Software, that such Beta&#13;
+Software may contain features currently under development, that VMware&#13;
+has not promised or guaranteed to Licensee that such Beta Software will be&#13;
+announced or made available to anyone in the future, that VMware has no&#13;
+express or implied obligation to Licensee to announce or introduce the Beta&#13;
+Software, that VMware may not introduce a product similar to or compatible&#13;
+with the Beta Software, and that any version number (if any) referenced is&#13;
+subject to change and does not in any way represent VMware's commitment&#13;
+to release any product in the future. Accordingly, Licensee acknowledges that&#13;
+any research or development that it performs regarding the Beta Software or&#13;
+any product associated with the Beta Software is done entirely at Licensee's&#13;
+own risk.  Specifically, the Beta Software may contain features, functionality&#13;
+or modules that may not be included in the generally available commercial&#13;
+version of the Beta Software, if released, or that will be marketed separately&#13;
+for additional fees.&#13;
+&#13;
+7.	OTHER PROVISIONS&#13;
+      (a)  Governing Law, Injunctive Relief and Legal Costs.&#13;
+(aa) Choice of Law. This Agreement and any dispute arising out of&#13;
+or related to this Agreement or the Beta Software ("Dispute") will be&#13;
+governed by California law, without regard to its choice of law&#13;
+principles. The United Nations Convention for the International Sale&#13;
+of Goods shall not apply.&#13;
+(bb) Injunctive Relief. Either party may, at its sole discretion, seek&#13;
+preliminary judicial relief in any court of competent jurisdiction&#13;
+(including, but not limited to, preliminary injunctive relief). Also, the&#13;
+provisions of this Section 7 (a) may be enforced by any court of&#13;
+competent jurisdiction.&#13;
+       (b)  Export Regulations. The Beta Software is of United States origin&#13;
+and is provided subject to the U.S. Export Administration&#13;
+Regulations.  Diversion contrary to U.S. law is prohibited.  Without limiting&#13;
+the foregoing, you agree that (1) you are not, and are not acting on behalf of,&#13;
+any person who is a citizen, national, or resident of, or who is controlled by&#13;
+the government of, Cuba, Iran, North Korea, Sudan, or Syria, or any other&#13;
+country to which the United States has prohibited export transactions; (2) you&#13;
+are not, and are not acting on behalf of, any person or entity listed on the U.S.&#13;
+Treasury Department list of Specially Designated Nationals and Blocked&#13;
+Persons, or the U.S. Commerce Department Denied Persons List or Entity&#13;
+List; and (3) you will not use the Beta Software for, and will not permit the&#13;
+Beta Software to be used for, any purposes prohibited by law, including,&#13;
+without limitation, for any prohibited development, design, manufacture or&#13;
+production of missiles or nuclear, chemical or biological weapons.  U.S.&#13;
+Export Control Classification Numbers (ECCN's) may be found at VMware&#13;
+help page: http://www.vmware.com/help/export-control.&#13;
+      (c)  Modification.  This is the entire agreement between the parties&#13;
+relating to the subject matter hereof and to the fullest extent permitted by law,&#13;
+all other terms, representations, negotiations, arrangements or&#13;
+understandings are rejected.  This Agreement supersedes and replaces any&#13;
+other agreements, representations, negotiations, arrangements or&#13;
+understandings between the parties and Licensee hereby waives any form&#13;
+requirements that may be contained in previous agreements and agrees that&#13;
+this Agreement shall take precedent with respect to its subject matter. No&#13;
+party has entered into this Agreement relying on any representations made by&#13;
+or on behalf of the other, other than those expressly made in this Agreement.&#13;
+No waiver or modification of this Agreement shall be valid unless in writing&#13;
+signed by each party.&#13;
+      (d)  Language of Contract.  The parties have required that this&#13;
+Agreement and all documents relating thereto be drawn up in English.  Les&#13;
+parties ont demandé que cette convention ainsi que tous les documents que&#13;
+s'y attachent soient rédigés en anglais.&#13;
+      (e) Severability.  If any provision of this Agreement is held to be illegal,&#13;
+invalid or unenforceable, the provision will be enforced to the maximum extent&#13;
+permissible so as to effect the intent of the parties, and the remaining&#13;
+provisions of this Agreement will remain in full force and effect.&#13;
+&#13;
+      (f) Waivers.  Any waiver of these terms must be in writing and signed&#13;
+by the waiving party to be effective.&#13;
+&#13;
+      (g) Data Collection and Privacy.&#13;
+&#13;
+(i) Consent for Collection and Use of Technical Data.  You agree&#13;
+that VMware may periodically collect, process and store technical&#13;
+and related information about your device, system, application,&#13;
+peripherals and your use of the Beta Software, including without&#13;
+limitation: internet protocol address, hardware identification,&#13;
+operating system, application software, peripheral hardware,&#13;
+number of active plugins and software development kits, the&#13;
+successful installation and launch of Beta Software, and  Beta&#13;
+Software usage statistics (collectively, "Technical Data").  VMware&#13;
+will use Technical Data for internal statistical and analytical&#13;
+purposes to facilitate support, invoicing or online services, the&#13;
+provisioning of updates, and the development of VMware products&#13;
+and services. VMware may transfer Technical Data to other&#13;
+companies in the VMware worldwide group of companies from time&#13;
+to time.&#13;
+&#13;
+(ii) Log Files. You acknowledge that correspondence and log files&#13;
+generated in conjunction with a request for support services may&#13;
+contain sensitive, confidential or personal information. You are&#13;
+solely responsible for taking the steps necessary to protect such&#13;
+data, including obfuscating the logs or otherwise guarding such&#13;
+information prior to sending it to VMware.&#13;
+&#13;
+(h) Independent Parties.  The parties are independent.  Nothing in&#13;
+this Agreement shall be construed to create a partnership, joint&#13;
+venture, contractor, or agency relationship between the parties.&#13;
+&#13;
+&#13;
+8.	ASSIGNMENT.  Licensee shall not and cannot assign this Agreement&#13;
+or any rights or obligations hereunder, directly or indirectly, by operation of&#13;
+law, merger, acquisition of stock or assets, or otherwise without the prior&#13;
+written consent of VMware. Any attempted assignment or transfer in violation&#13;
+of the foregoing will be null and void. Subject to the foregoing, this Agreement&#13;
+shall inure to the benefit of and be binding upon the parties and their&#13;
+respective successors and permitted assigns.&#13;
+&#13;
+9. 	CONTACT INFORMATION.  If you have any questions about this&#13;
+Agreement, please direct all correspondence to: VMware, Inc., 3401 Hillview&#13;
+Avenue, Palo Alto, CA 94304, United States of America.  VMware is a&#13;
+trademark of VMware, Inc. and is registered in the U.S. and numerous other&#13;
+countries.&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+</License>
+    </EulaSection><EulaSection>
+      <Info>Copyright and Patent Statement</Info>
+      <License msgid="copyright">Copyright © 1998-2016 VMware, Inc. All rights reserved. This product is protected by copyright and intellectual property laws in the United States and other countries as well as by international treaties. VMware products are covered by one or more patents listed at http://www.vmware.com/go/patents.
+</License>
+    </EulaSection>
+    <AnnotationSection>
+      <Info/>
+      <Annotation>VMware vCenter Server Appliance</Annotation>
+    </AnnotationSection>
+    <OperatingSystemSection ovf:id="96" ovf:version="1" vmw:osType="otherLinux64Guest">
+      <Info>Guest Operating System</Info>
+      <Description>Photon OS </Description>
+    </OperatingSystemSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo" ovf:required="false">
+      <Info>Virtual Hardware Requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>
+      </System>
+      <Item configuration="tiny">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 2 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>2</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="small">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 4 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>22</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>4</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 8 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>24</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>8</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="large">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 16 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>26</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>16</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 24 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>28</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>24</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 2 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>30</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>2</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 4 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>32</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>4</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 8 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>34</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>8</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 16 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>36</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>16</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 24 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>38</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>24</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName> 2 virtual CPUs</rasd:ElementName>
+        <rasd:InstanceID>40</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>2</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 8192 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>8192</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="small">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 16384 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>21</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>16384</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 24576 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>23</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>24576</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="large">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 32768 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>25</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>32768</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 49152 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>27</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>49152</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 8192 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>29</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>8192</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 16384 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>31</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>16384</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 24576 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>33</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>24576</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 32768 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>35</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>32768</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 49152 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>37</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>49152</rasd:VirtualQuantity>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName> 2048 MB of memory</rasd:ElementName>
+        <rasd:InstanceID>39</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>2048</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Network 1</rasd:Connection>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Ethernet adapter on "Network 1"</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">3</rasd:InstanceID>
+        <rasd:ResourceSubType>E1000</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:Address xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">0</rasd:Address>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">SCSI Controller 0 - LSI Logic</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">4</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:Address>1</rasd:Address>
+        <rasd:ElementName>SCSI Controller 1 - LSI Logic</rasd:ElementName>
+        <rasd:InstanceID>10</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+        </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Harddisk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/system</rasd:HostResource>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">5</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Harddisk 2</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/cloudcomponents</rasd:HostResource>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">9</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk 3</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>3</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk core</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>11</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>4</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk log</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>12</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>5</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk db</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>13</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>6</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk dblog</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10MB</rasd:HostResource>
+        <rasd:InstanceID>14</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk50GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>8</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk seat</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10MB</rasd:HostResource>
+        <rasd:InstanceID>15</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk1GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk1GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk1GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk1GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>9</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk netdump</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10MB</rasd:HostResource>
+        <rasd:InstanceID>16</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>10</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk autodeploy</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10MB</rasd:HostResource>
+        <rasd:InstanceID>17</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>11</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk imagebuilder</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10MB</rasd:HostResource>
+        <rasd:InstanceID>18</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk5GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk25GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>12</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk vpxd-svcs</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10MB</rasd:HostResource>
+        <rasd:InstanceID>19</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="tiny">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="small">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="medium">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="large">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="xlarge">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-tiny">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-small">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-medium">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-large">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="management-xlarge">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item configuration="infrastructure">
+        <rasd:AddressOnParent>13</rasd:AddressOnParent>
+        <rasd:ElementName>Harddisk updatemgr</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk10MB</rasd:HostResource>
+        <rasd:InstanceID>20</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">IDE Controller 0</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">7</rasd:InstanceID>
+        <rasd:ResourceType>5</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">CD/DVD Drive 1</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">8</rasd:InstanceID>
+        <rasd:Parent>7</rasd:Parent>
+        <rasd:ResourceType>15</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+<Strings xml:lang="en-US">
+      <Msg ovf:msgid="eula">﻿VMWARE, INC.&#13;
+BETA LICENSE AGREEMENT&#13;
+&#13;
+Note: BY CLICKING "I AGREE," ACCESSING, DOWNLOADING,&#13;
+INSTALLING, UPLOADING, COPYING OR USING THE BETA SOFTWARE,&#13;
+YOU CONCLUDE AND AGREE TO THIS BETA LICENSE AGREEMENT&#13;
+("AGREEMENT") IN A LEGALLY BINDING MANNER WITH VMWARE, INC.,&#13;
+3401 HILLVIEW AVENUE, PALO ALTO, CA 94304, USA ("VMware"). IF YOU&#13;
+HAVE SPECIFIED IN CONNECTION WITH THE REGISTRATION&#13;
+PROCESS FOR THIS SOFTWARE BETA TEST PROGRAM THAT YOU&#13;
+ARE ACTING ON BEHALF OF A COMPANY OR OTHER ORGANIZATION,&#13;
+YOU REPRESENT THAT YOU ARE AUTHORIZED TO LEGALLY BIND&#13;
+SUCH ORGANIZATION AND THAT YOU CONCLUDE THE AGREEMENT&#13;
+ON BEHALF OF SUCH ORGANIZATION. IN THE FOLLOWING, THE&#13;
+TERMS "YOU" AND "LICENSEE" SHALL REFER, JOINTLY AND&#13;
+SEVERALLY, TO YOU INDIVIDUALLY AND ANY ORGANIZATION ON&#13;
+WHOSE BEHALF YOU ACT.&#13;
+If you do not agree to the terms of this beta license Agreement, then do *not*&#13;
+click "I AGREE," access, download, install, upload, copy or use the Beta&#13;
+Software.&#13;
+&#13;
+&#13;
+1.	DEFINITIONS.&#13;
+      (a)  "Beta Software" shall mean the beta version of VMware's software&#13;
+and the media and Documentation provided by VMware to Licensee and for&#13;
+which Licensee is granted a use license pursuant to this Agreement. The&#13;
+Beta Software will be provided in object form only.&#13;
+      (b)  "Documentation" shall mean the printed or online written reference&#13;
+material furnished to Licensee in conjunction with the Beta Software,&#13;
+including, without limitation, instructions, beta testing guidelines, and end user&#13;
+guides.&#13;
+      (c)  "Intellectual Property Rights" shall mean all intellectual property&#13;
+rights, including, without limitation, patent, copyright, trademark, and trade&#13;
+secret, recognized in any jurisdiction worldwide, whether perfected or not, and&#13;
+any similar and other proprietary rights.&#13;
+      (d)  "Open Source Software" means code that is provided with the&#13;
+Beta Software and identified as open source code or otherwise as being&#13;
+subject to open source license terms.&#13;
+      (e)  "Updates" shall mean a modification, error correction, bug fix, new&#13;
+release, or other update to or for the Beta Software.&#13;
+&#13;
+2.	LICENSE GRANT, USE AND OWNERSHIP&#13;
+	(a)  Limited License.  Subject to the terms and conditions of this&#13;
+Agreement, VMware grants to Licensee a non-exclusive, revocable (at any&#13;
+time and for any reason, at VMware's sole discretion), royalty-free,&#13;
+non-transferable, non-assignable license (without the right to sublicense):&#13;
+&#13;
+        (i) to use the Beta Software in accordance with the Documentation&#13;
+solely for purposes of (A) internal testing and evaluation to determine whether&#13;
+or not to license generally available commercial versions of the Beta Software&#13;
+if such versions ever become available, and (B) internal development to&#13;
+create interoperability between the Beta Software and Licensee products,&#13;
+       (ii) to use the Documentation provided with the Beta Software in&#13;
+support of Licensee's authorized use of the Beta Software, and&#13;
+       (iii) to copy Beta Software for Licensee's archival or backup purposes,&#13;
+provided that all titles and trademarks, copyright, and restricted rights notices&#13;
+are reproduced on such copies.&#13;
+&#13;
+      (b)  Evaluation Feedback.  The purpose of this limited license is the&#13;
+testing and evaluation of the Beta Software and Documentation and&#13;
+development by Licensee of Licensee products that interoperate with the Beta&#13;
+Software. In furtherance of this purpose, Licensee shall provide feedback to&#13;
+VMware concerning the functionality and performance of the Beta Software&#13;
+from time to time as reasonably requested by VMware, including, without&#13;
+limitation, identifying potential errors and improvements (collectively the&#13;
+"Feedback"). Licensee will provide Feedback in a manner that is mutually&#13;
+agreeable to the parties. VMware may use Feedback, without restriction in&#13;
+any manner now known or in the future conceived, to improve or enhance its&#13;
+products and, accordingly, and you hereby grant to VMware a non-exclusive,&#13;
+perpetual, irrevocable, royalty-free, transferable, worldwide right and license,&#13;
+with the right to sublicense (i) to use, reproduce, disclose, distribute, modify,&#13;
+prepare derivative works of and otherwise exploit the Feedback and other&#13;
+information you provide to VMware under this Agreement, and (ii) to make,&#13;
+use, sell, offer to sell, import and export any product or service that&#13;
+incorporates the Feedback and other information you provide to VMware&#13;
+under this Agreement.&#13;
+      (c)  Restrictions.  Licensee shall not disclose, provide, or disseminate&#13;
+in any manner the Beta Software (including the Documentation) or&#13;
+Confidential Information to any third party, including but not limited to its&#13;
+partners, affiliates or subsidiaries. Except to the extent contrary to any&#13;
+applicable laws, Licensee will not, and will not permit any third party to,&#13;
+sublicense, rent, copy, modify, create derivative works of, translate, reverse&#13;
+engineer, decompile, disassemble, or otherwise reduce to human perceivable&#13;
+form any portion of the Beta Software or accompanying Documentation.&#13;
+Without limiting the generality of the foregoing, Licensee shall not use the&#13;
+Beta Software for Licensee's product development or any other commercial&#13;
+purpose, including, but not limited to sales or marketing activities, except as&#13;
+expressly permitted in this Agreement. The Beta Software and all&#13;
+performance data and test results, including without limitation, benchmark test&#13;
+results (collectively "Performance Data"), relating  to the Beta Software are&#13;
+the Confidential Information of VMware, and will be treated in accordance&#13;
+with the terms of Section 4 of this Agreement. Accordingly, Licensee shall not&#13;
+publish or disclose to any third party any Performance Data relating to the&#13;
+Beta Software.&#13;
+&#13;
+      (d)  Ownership.  VMware shall own and retain all right, title and&#13;
+interest in and to the Intellectual Property Rights in the Beta Software and any&#13;
+derivative works thereof, subject only to the limited license expressly set forth&#13;
+in Section 2(a) hereof. Licensee does not acquire any other rights, express or&#13;
+implied, in the Beta Software. ALL RIGHTS NOT EXPRESSLY GRANTED&#13;
+HEREUNDER ARE RESERVED TO VMWARE.&#13;
+      (e)  No Support Services.  VMware is under no obligation to support&#13;
+the Beta Software in any manner or to provide any Updates to Licensee.  In&#13;
+the event VMware, in its sole discretion, supplies any Update to Licensee, the&#13;
+Update shall be deemed Beta Software under this Agreement and shall be&#13;
+subject to the terms and conditions of this Agreement.&#13;
+	(f)  Third-Party Software.  The Beta Software may enable a computer&#13;
+to run multiple instances of third-party guest operating systems and&#13;
+application programs. Licensee acknowledges that Licensee is responsible&#13;
+for obtaining any licenses necessary to operate any third-party software,&#13;
+including guest operating systems and application programs.&#13;
+      (g)  Open Source Software.  Except Sections 5, 6, and 7, the terms&#13;
+and conditions of this Agreement shall not apply to any Open Source&#13;
+Software accompanying the Beta Software.  Any such Open Source&#13;
+Software is provided under the terms of the applicable open source license&#13;
+agreement or copyright notice accompanying such Open Source Software or&#13;
+included in the open source licenses file accompanying the Beta Software.&#13;
+      (h) The Beta Software may be used to automatically download content&#13;
+directly from third parties. Licensee is solely responsible for complying with&#13;
+any third party license terms for the content that Licensee chooses to&#13;
+download. The terms of this Agreement will supersede and control over&#13;
+the license terms of any generally availability release VMware software&#13;
+that is downloaded by the Beta Software and applied as a patch to&#13;
+VMware software that has not been made available as a generally&#13;
+availability release.&#13;
+&#13;
+3.	TERM AND TERMINATION.  Unless otherwise terminated as&#13;
+specified under this Agreement, Licensee's rights with respect to the Beta&#13;
+Software will terminate upon the earlier of (a) the initial commercial release by&#13;
+VMware of a generally available version of the Beta Software or (b) automatic&#13;
+expiration of the Beta Software based on the system date.  Either party may&#13;
+terminate this Agreement at any time for any reason or no reason by&#13;
+providing the other party advance written notice thereof. Licensee agrees that&#13;
+this Agreement will automatically terminate without notice in the event&#13;
+Licensee discloses the Beta Software in breach of Section 4 (Confidentiality)&#13;
+below. Upon any expiration or termination of this Agreement, the rights and&#13;
+licenses granted to Licensee under this Agreement shall immediately&#13;
+terminate, and Licensee shall immediately cease using, and will destroy or&#13;
+render practically inaccessible the Beta Software, Documentation, and all&#13;
+other tangible items in Licensee's possession or control that contain&#13;
+Confidential Information. The rights and obligations of the parties set forth in&#13;
+Sections 2(b), 2(c), 2(d), 2(e), 2(f), 2(g), 3, 4, 5, 6, 7 and 8 survive termination&#13;
+or expiration of this Agreement for any reason.&#13;
+&#13;
+4.	CONFIDENTIALITY.&#13;
+      (a) "Confidential Information" shall mean the Beta Software, all&#13;
+information regarding the Beta Software (including any trade secrets,&#13;
+know-how, inventions, techniques, processes, and algorithms embodied in&#13;
+the Beta Software), Documentation, Performance Data, any Updates,&#13;
+VMware products, product roadmaps, and other technical, business, financial&#13;
+and product development plans, forecasts and strategies, and other&#13;
+information provided by VMware to Licensee under this Agreement, whether&#13;
+disclosed orally, in writing, or by examination or inspection, other than&#13;
+information that Licensee can demonstrate (i) was already known to&#13;
+Licensee, other than under an obligation of confidentiality, at the time of&#13;
+disclosure; (ii) was generally available in the public domain at the time of&#13;
+disclosure to Licensee; (iii) became generally available in the public domain&#13;
+after disclosure other than through any act or omission of Licensee; (iv) was&#13;
+subsequently lawfully disclosed to Licensee by a third party without any&#13;
+obligation of confidentiality; or (v) was independently developed by Licensee&#13;
+without use of or reference to any information or materials disclosed by&#13;
+VMware or its suppliers.  If Licensee wishes to disclose to VMware any&#13;
+information under this Agreement that Licensee considers proprietary or&#13;
+confidential to Licensee ("Licensee Information"), then Licensee agrees such&#13;
+disclose will be governed by a separate non-disclosure agreement ("NDA") by&#13;
+and between the parties.   If Licensee is required to disclose Confidential&#13;
+Information by applicable law or court order, Licensee shall notify VMware of&#13;
+the required disclosure promptly in writing and shall cooperate with VMware&#13;
+in any lawful action to contest or limit the scope of the required disclosure.&#13;
+Licensee shall not use any Confidential Information for any purpose other&#13;
+than as expressly authorized under this Agreement. In no event shall&#13;
+Licensee use the Beta Software or any Confidential Information to develop,&#13;
+manufacture, market, sell, or distribute any product or service, including any&#13;
+VMware products except as expressly set forth in this Agreement.  Licensee&#13;
+shall not disclose any Confidential Information to any third party. Without&#13;
+limiting the foregoing, Licensee shall use at least the same degree of care&#13;
+that it uses to prevent the disclosure of its own confidential information of like&#13;
+importance, but in no event less than reasonable care, to prevent the&#13;
+disclosure of such Confidential Information.&#13;
+      (b)  Additional Confidentiality Restrictions for Highly Confidential Beta&#13;
+Software. For certain Beta Software designated by VMware in writing as&#13;
+highly confidential ("Highly Confidential Beta Software"), Licensee agrees that&#13;
+the following, additional confidentiality obligations and restrictions will apply:&#13;
+      (i)  Licensee shall limit dissemination of Highly Confidential&#13;
+Beta Software and related information concerning product features,&#13;
+future technologies and roadmaps only to Information Technology&#13;
+teams and/or software/solutions development teams of Licensee&#13;
+approved in writing by VMware, and only to individuals on such teams&#13;
+on a need-to-know basis and solely for purposes expressly authorized&#13;
+under this Agreement. For clarity and without limiting the generality of&#13;
+the foregoing, Licensee shall not disseminate any Highly Confidential&#13;
+Beta Software to Licensee's sales and marketing field organizations.&#13;
+Licensee will assign an employee who will be primarily responsible for&#13;
+ensuring Licensee's full compliance with the terms described in this&#13;
+Section 4(b) herein.&#13;
+      (ii)  Improper Disclosure of Highly Confidential Beta Software.&#13;
+Licensee acknowledges that damages due to Licensee's improper&#13;
+disclosure of Highly Confidential Beta Software or related information&#13;
+concerning product features, future technologies and roadmaps may&#13;
+be irreparable and that monetary damages would be inadequate to&#13;
+compensate VMware for any breach of this Agreement. In the event&#13;
+that VMware reasonably believes that Licensee has disseminated&#13;
+Highly Confidential Beta Software or related information concerning&#13;
+product features, future technologies and roadmaps to an unauthorized&#13;
+party, Licensee will be immediately removed from VMware's Beta&#13;
+Software program and will not be permitted to participate in any&#13;
+VMware Beta Software program in the future. Additionally, all rights&#13;
+and licenses granted to Licensee under this Agreement shall&#13;
+immediately terminate in accordance with Section 3 herein (Term and&#13;
+Termination), and (b) in addition to all other remedies available in law&#13;
+or otherwise, VMware is entitled to seek equitable relief, including&#13;
+injunction and preliminary injunction against the threatened breach of&#13;
+this Agreement or the continuation of any such breach.&#13;
+&#13;
+5.	LIMITATION OF LIABILITY.  IT IS UNDERSTOOD THAT THE BETA&#13;
+SOFTWARE IS PROVIDED WITHOUT CHARGE FOR THE PURPOSES&#13;
+EXPRESSLY PERMITTED UNDER THIS AGREEMENT. ACCORDINGLY,&#13;
+TO THE FULLEST EXTENT PERMITTED BY LAW, BUT SUBJECT&#13;
+ALWAYS TO THIS SECTION 5, THE TOTAL LIABILITY OF VMWARE AND&#13;
+ITS LICENSORS ARISING OUT OF OR RELATED TO THIS AGREEMENT&#13;
+SHALL NOT EXCEED $1.00. TO THE FULLEST EXTENT PERMITTED BY&#13;
+LAW, IN NO EVENT SHALL VMWARE OR ITS LICENSORS HAVE&#13;
+LIABILITY FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR&#13;
+CONSEQUENTIAL DAMAGES OR DAMAGES FOR LOSS OF BUSINESS&#13;
+PROFITS, BUSINESS INTERRUPTION, OR LOSS OF BUSINESS&#13;
+INFORMATION, HOWEVER CAUSED AND ON ANY THEORY OF&#13;
+LIABILITY (INCLUDING WITHOUT LIMITATION, TORT, STATUTE,&#13;
+CONTRACT OR OTHER), EVEN IF VMWARE AND ITS LICENSORS HAVE&#13;
+BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THESE&#13;
+LIMITATIONS SHALL APPLY NOTWITHSTANDING ANY FAILURE OF&#13;
+ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. THE PARTIES&#13;
+ACKNOWLEDGE THAT THE VARIOUS CONSIDERATIONS DUE TO&#13;
+VMWARE IN ACCORDANCE WITH THE TERMS OF THIS AGREEMENT&#13;
+WERE TAKEN INTO ACCOUNT IN DETERMINING THE LIMITATION OF&#13;
+LIABILITY SET FORTH IN THIS SECTION 5. LICENSEE ACKNOWLEDGES&#13;
+AND AGREES THIS LIMITATION IS AN ESSENTIAL ELEMENT OF THIS&#13;
+AGREEMENT AND THAT VMWARE WOULD NOT ENTER INTO THIS&#13;
+AGREEMENT WITHOUT THESE LIMITATIONS ON ITS LIABILITY. You can&#13;
+recover from Microsoft and its suppliers only direct damages up to U.S. $5.00,&#13;
+and you cannot recover from Microsoft any other damages, including&#13;
+consequential, lost profits, special, indirect or incidental damages.&#13;
+&#13;
+6.	WARRANTY DISCLAIMER.  IT IS UNDERSTOOD THAT THE BETA&#13;
+SOFTWARE, OPEN SOURCE SOFTWARE, DOCUMENTATION, AND ANY&#13;
+UPDATES MAY CONTAIN ERRORS AND ARE PROVIDED FOR THE&#13;
+PURPOSES EXPRESSLY PERMITTED UNDER THIS AGREEMENT. TO&#13;
+THE FULLEST EXTENT PERMITTED BY LAW, AND SUBJECT TO&#13;
+SECTION 5, THE BETA SOFTWARE, THE OPEN SOURCE SOFTWARE,&#13;
+THE DOCUMENTATION, AND ANY UPDATES ARE PROVIDED "AS IS"&#13;
+WITHOUT WARRANTY OF ANY KIND, WHETHER EXPRESS, IMPLIED,&#13;
+STATUTORY, OR OTHERWISE. TO THE FULLEST EXTENT PERMITTED&#13;
+BY LAW, AND SUBJECT TO SECTION 5, VMWARE AND ITS LICENSORS&#13;
+SPECIFICALLY DISCLAIM ALL IMPLIED WARRANTIES OF&#13;
+MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A&#13;
+PARTICULAR PURPOSE. Licensee acknowledges that VMware has not&#13;
+publicly announced the availability of the Beta Software, that such Beta&#13;
+Software may contain features currently under development, that VMware&#13;
+has not promised or guaranteed to Licensee that such Beta Software will be&#13;
+announced or made available to anyone in the future, that VMware has no&#13;
+express or implied obligation to Licensee to announce or introduce the Beta&#13;
+Software, that VMware may not introduce a product similar to or compatible&#13;
+with the Beta Software, and that any version number (if any) referenced is&#13;
+subject to change and does not in any way represent VMware's commitment&#13;
+to release any product in the future. Accordingly, Licensee acknowledges that&#13;
+any research or development that it performs regarding the Beta Software or&#13;
+any product associated with the Beta Software is done entirely at Licensee's&#13;
+own risk.  Specifically, the Beta Software may contain features, functionality&#13;
+or modules that may not be included in the generally available commercial&#13;
+version of the Beta Software, if released, or that will be marketed separately&#13;
+for additional fees.&#13;
+&#13;
+7.	OTHER PROVISIONS&#13;
+      (a)  Governing Law, Injunctive Relief and Legal Costs.&#13;
+(aa) Choice of Law. This Agreement and any dispute arising out of&#13;
+or related to this Agreement or the Beta Software ("Dispute") will be&#13;
+governed by California law, without regard to its choice of law&#13;
+principles. The United Nations Convention for the International Sale&#13;
+of Goods shall not apply.&#13;
+(bb) Injunctive Relief. Either party may, at its sole discretion, seek&#13;
+preliminary judicial relief in any court of competent jurisdiction&#13;
+(including, but not limited to, preliminary injunctive relief). Also, the&#13;
+provisions of this Section 7 (a) may be enforced by any court of&#13;
+competent jurisdiction.&#13;
+       (b)  Export Regulations. The Beta Software is of United States origin&#13;
+and is provided subject to the U.S. Export Administration&#13;
+Regulations.  Diversion contrary to U.S. law is prohibited.  Without limiting&#13;
+the foregoing, you agree that (1) you are not, and are not acting on behalf of,&#13;
+any person who is a citizen, national, or resident of, or who is controlled by&#13;
+the government of, Cuba, Iran, North Korea, Sudan, or Syria, or any other&#13;
+country to which the United States has prohibited export transactions; (2) you&#13;
+are not, and are not acting on behalf of, any person or entity listed on the U.S.&#13;
+Treasury Department list of Specially Designated Nationals and Blocked&#13;
+Persons, or the U.S. Commerce Department Denied Persons List or Entity&#13;
+List; and (3) you will not use the Beta Software for, and will not permit the&#13;
+Beta Software to be used for, any purposes prohibited by law, including,&#13;
+without limitation, for any prohibited development, design, manufacture or&#13;
+production of missiles or nuclear, chemical or biological weapons.  U.S.&#13;
+Export Control Classification Numbers (ECCN's) may be found at VMware&#13;
+help page: http://www.vmware.com/help/export-control.&#13;
+      (c)  Modification.  This is the entire agreement between the parties&#13;
+relating to the subject matter hereof and to the fullest extent permitted by law,&#13;
+all other terms, representations, negotiations, arrangements or&#13;
+understandings are rejected.  This Agreement supersedes and replaces any&#13;
+other agreements, representations, negotiations, arrangements or&#13;
+understandings between the parties and Licensee hereby waives any form&#13;
+requirements that may be contained in previous agreements and agrees that&#13;
+this Agreement shall take precedent with respect to its subject matter. No&#13;
+party has entered into this Agreement relying on any representations made by&#13;
+or on behalf of the other, other than those expressly made in this Agreement.&#13;
+No waiver or modification of this Agreement shall be valid unless in writing&#13;
+signed by each party.&#13;
+      (d)  Language of Contract.  The parties have required that this&#13;
+Agreement and all documents relating thereto be drawn up in English.  Les&#13;
+parties ont demandé que cette convention ainsi que tous les documents que&#13;
+s'y attachent soient rédigés en anglais.&#13;
+      (e) Severability.  If any provision of this Agreement is held to be illegal,&#13;
+invalid or unenforceable, the provision will be enforced to the maximum extent&#13;
+permissible so as to effect the intent of the parties, and the remaining&#13;
+provisions of this Agreement will remain in full force and effect.&#13;
+&#13;
+      (f) Waivers.  Any waiver of these terms must be in writing and signed&#13;
+by the waiving party to be effective.&#13;
+&#13;
+      (g) Data Collection and Privacy.&#13;
+&#13;
+(i) Consent for Collection and Use of Technical Data.  You agree&#13;
+that VMware may periodically collect, process and store technical&#13;
+and related information about your device, system, application,&#13;
+peripherals and your use of the Beta Software, including without&#13;
+limitation: internet protocol address, hardware identification,&#13;
+operating system, application software, peripheral hardware,&#13;
+number of active plugins and software development kits, the&#13;
+successful installation and launch of Beta Software, and  Beta&#13;
+Software usage statistics (collectively, "Technical Data").  VMware&#13;
+will use Technical Data for internal statistical and analytical&#13;
+purposes to facilitate support, invoicing or online services, the&#13;
+provisioning of updates, and the development of VMware products&#13;
+and services. VMware may transfer Technical Data to other&#13;
+companies in the VMware worldwide group of companies from time&#13;
+to time.&#13;
+&#13;
+(ii) Log Files. You acknowledge that correspondence and log files&#13;
+generated in conjunction with a request for support services may&#13;
+contain sensitive, confidential or personal information. You are&#13;
+solely responsible for taking the steps necessary to protect such&#13;
+data, including obfuscating the logs or otherwise guarding such&#13;
+information prior to sending it to VMware.&#13;
+&#13;
+(h) Independent Parties.  The parties are independent.  Nothing in&#13;
+this Agreement shall be construed to create a partnership, joint&#13;
+venture, contractor, or agency relationship between the parties.&#13;
+&#13;
+&#13;
+8.	ASSIGNMENT.  Licensee shall not and cannot assign this Agreement&#13;
+or any rights or obligations hereunder, directly or indirectly, by operation of&#13;
+law, merger, acquisition of stock or assets, or otherwise without the prior&#13;
+written consent of VMware. Any attempted assignment or transfer in violation&#13;
+of the foregoing will be null and void. Subject to the foregoing, this Agreement&#13;
+shall inure to the benefit of and be binding upon the parties and their&#13;
+respective successors and permitted assigns.&#13;
+&#13;
+9. 	CONTACT INFORMATION.  If you have any questions about this&#13;
+Agreement, please direct all correspondence to: VMware, Inc., 3401 Hillview&#13;
+Avenue, Palo Alto, CA 94304, United States of America.  VMware is a&#13;
+trademark of VMware, Inc. and is registered in the U.S. and numerous other&#13;
+countries.&#13;
+&#13;
+&#13;
+&#13;
+&#13;
+</Msg>
+      <Msg ovf:msgid="copyright">Copyright © 1998-2016 VMware, Inc. All rights reserved. This product is protected by copyright and intellectual property laws in the United States and other countries as well as by international treaties. VMware products are covered by one or more patents listed at http://www.vmware.com/go/patents.
+</Msg>
+      </Strings>
+  </ovf:Envelope>

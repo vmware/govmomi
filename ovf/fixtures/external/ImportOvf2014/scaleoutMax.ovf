@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf2="http://schemas.dmtf.org/ovf/envelope/2"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References/>
+
+    <VirtualSystemCollection ovf:id="vsc">
+        <Info>A virtual machine collection</Info>
+        <Name>Test System Collection</Name>
+
+        <ovf2:ScaleOutSection ovf2:id="vs1">
+            <Info>VM1</Info>
+            <ovf2:Description>VM1</ovf2:Description>
+            <ovf2:InstanceCount ovf2:minimum="1" ovf2:default="2" ovf2:maximum="1000000" />
+        </ovf2:ScaleOutSection>
+
+        <VirtualSystem ovf:id="vs1">
+            <Info>A virtual machine</Info>
+            <Name>Test System</Name>
+
+            <VirtualHardwareSection>
+                <Info>Virtual hardware requirements</Info>
+            </VirtualHardwareSection>
+        </VirtualSystem>
+
+    </VirtualSystemCollection>
+</Envelope>

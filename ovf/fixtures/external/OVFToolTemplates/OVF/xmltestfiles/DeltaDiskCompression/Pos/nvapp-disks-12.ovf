@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common" 
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" 
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" 
+    xmlns:vmw="http://www.vmware.com/schema/ovf" 
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <References>
+    <File ovf:href="disks/disk1.vmdk" ovf:id="file1" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk2.vmdk" ovf:id="file2" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk3.vmdk" ovf:id="file3" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk4.vmdk" ovf:id="file4" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk5.vmdk" ovf:id="file5" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk6.vmdk" ovf:id="file6" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk7.vmdk" ovf:id="file7" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk8.vmdk" ovf:id="file8" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk9.vmdk" ovf:id="file9" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk10.vmdk" ovf:id="file10" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk11.vmdk" ovf:id="file11" ovf:size="4294967296"/>
+    <File ovf:href="disks/disk12.vmdk" ovf:id="file12" ovf:size="4294967296"/>
+  </References>
+
+  <DiskSection>
+    <Info>Meta-information about the virtual disks</Info>
+    <Disk ovf:capacity="4294967296" 
+          ovf:diskId="vmdisk1" 
+          ovf:fileRef="file1"           
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk2"
+          ovf:fileRef="file2"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk3"
+          ovf:fileRef="file3"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk4"
+          ovf:fileRef="file4"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk5"
+          ovf:fileRef="file5"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk6"
+          ovf:fileRef="file6"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk7"
+          ovf:fileRef="file7"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk8"
+          ovf:fileRef="file8"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk9"
+          ovf:fileRef="file9"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+   <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk10"
+          ovf:fileRef="file10"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+   <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk11"
+          ovf:fileRef="file11"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+    <Disk ovf:capacity="4294967296"
+          ovf:diskId="vmdisk12"
+          ovf:fileRef="file12"
+          ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#monolithicSparse" />
+  </DiskSection>
+
+    <VirtualSystem ovf:id="web">
+      <Info>A virtual machine</Info>
+      <Name>SugarmCRM Server</Name>
+
+      <OperatingSystemSection ovf:id="93">
+        <Info>The kind of installed guest operating system</Info>
+        <Description>Ubuntu</Description>
+      </OperatingSystemSection>
+
+      <ProductSection>
+      	<Info>Property configuration</Info>
+      </ProductSection>
+
+      <VirtualHardwareSection ovf:transport="iso">
+        <Info>Virtual hardware requirements</Info>
+        <System>
+          <vssd:ElementName>VMware Virtual Hardware Family 4</vssd:ElementName>
+          <vssd:InstanceID>0</vssd:InstanceID>
+          <vssd:VirtualSystemIdentifier>web</vssd:VirtualSystemIdentifier>
+          <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+        </System>
+        <Item>
+          <rasd:Description>Number of Virtual CPUs</rasd:Description>
+          <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+          <rasd:InstanceID>1</rasd:InstanceID>
+          <rasd:ResourceType>3</rasd:ResourceType>
+          <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+        </Item>
+
+        <Item>
+          <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+          <rasd:Description>Memory Size</rasd:Description>
+          <rasd:ElementName>256MB of memory</rasd:ElementName>
+          <rasd:InstanceID>2</rasd:InstanceID>
+          <rasd:ResourceType>4</rasd:ResourceType>
+          <rasd:VirtualQuantity>256</rasd:VirtualQuantity>
+        </Item>
+
+        <Item>
+          <rasd:Address>0</rasd:Address>
+          <rasd:Description>SCSI Controller</rasd:Description>
+          <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+          <rasd:InstanceID>3</rasd:InstanceID>
+          <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+          <rasd:ResourceType>6</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>0</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+          <rasd:InstanceID>8</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>1</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 2</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk2</rasd:HostResource>
+          <rasd:InstanceID>108</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>2</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 3</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk3</rasd:HostResource>
+          <rasd:InstanceID>208</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>3</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 4</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk4</rasd:HostResource>
+          <rasd:InstanceID>308</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>4</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 5</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk5</rasd:HostResource>
+          <rasd:InstanceID>309</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>5</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 6</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk6</rasd:HostResource>
+          <rasd:InstanceID>310</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>6</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 7</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk7</rasd:HostResource>
+          <rasd:InstanceID>311</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>12</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 8</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk8</rasd:HostResource>
+          <rasd:InstanceID>312</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>8</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 9</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk9</rasd:HostResource>
+          <rasd:InstanceID>313</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>9</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 10</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk10</rasd:HostResource>
+          <rasd:InstanceID>314</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+        <Item>
+          <rasd:AddressOnParent>10</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 11</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk11</rasd:HostResource>
+          <rasd:InstanceID>315</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+       <Item>
+          <rasd:AddressOnParent>11</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 12</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk12</rasd:HostResource>
+          <rasd:InstanceID>316</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+        <Item>
+          <rasd:Address>0</rasd:Address>
+          <rasd:Description>IDE Controller</rasd:Description>
+          <rasd:ElementName>IDE 0</rasd:ElementName>
+          <rasd:InstanceID>5</rasd:InstanceID>
+          <rasd:ResourceType>5</rasd:ResourceType>
+        </Item>
+        <Item>
+          <rasd:AddressOnParent>0</rasd:AddressOnParent>
+          <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+          <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+          <rasd:InstanceID>6</rasd:InstanceID>
+          <rasd:Parent>5</rasd:Parent>
+          <rasd:ResourceType>15</rasd:ResourceType>
+        </Item>
+      </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>

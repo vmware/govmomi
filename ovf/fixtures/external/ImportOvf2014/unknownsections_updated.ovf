@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Empty vApp with an unknown section at envelope level and one at vApp level.
+
+-->
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References/>
+
+    <!-- Unknown section at envelope level -->
+    <baz:BazSection ovf:required="false" xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+            xmlns:baz="http://www.vmware.com/baz">
+        <Info>The baz section</Info>
+        <baz:BazInfo>Awesome</baz:BazInfo>
+    </baz:BazSection>
+
+    <VirtualSystemCollection ovf:id="vsc1">
+        <Info>A vApp</Info>
+        <Name>Test vApp</Name>
+
+        <!-- Unknown section at vApp level -->
+        <foo:FooSection ovf:required="false" xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+                xmlns:foo="http://www.vmware.com/foo">
+            <Info>The foo section</Info>
+            <foo:Vex foo:name="Zebra">
+               <foo:Description>Confusing my monochromatic friend</foo:Description>
+            </foo:Vex>
+        </foo:FooSection>
+
+    </VirtualSystemCollection>
+
+</Envelope>
