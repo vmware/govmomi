@@ -1157,11 +1157,26 @@ var ovfToVAppBaseType = map[string]string{
 	"int":     vAppBaseTypeInt, // common in OVF although not in DSP0243 Table 6
 }
 
-// Regexes for OVF qualifiers per DSP0243 section 9.5.1 Table 7.
+// Regexes for OVF qualifiers per DSP0243 section 9.5.1 Table 7 and vSphere QualifierMap.
 var (
 	ovfMinLenRx   = regexp.MustCompile(`MinLen\((\d+)\)`)
 	ovfMaxLenRx   = regexp.MustCompile(`MaxLen\((\d+)\)`)
 	ovfValueMapRx = regexp.MustCompile(`ValueMap\{(.*)\}`)
+	ovfMinValueRx = regexp.MustCompile(`MinValue\(([-]?\d+(?:\.\d*)?(?:[eE][-+]?\d+)?)\)`)
+	ovfMaxValueRx = regexp.MustCompile(`MaxValue\(([-]?\d+(?:\.\d*)?(?:[eE][-+]?\d+)?)\)`)
+	// VMware qualifiers: Ip, Ip(), or Ip("network") / Ip(network) -> ip / ip:network
+	ovfIpNoArgRx = regexp.MustCompile(`Ip\s*\(\s*\)`)
+	ovfIpArgRx   = regexp.MustCompile(`Ip\s*\(\s*["']?([^"')]*)["']?\s*\)`) // arg may be quoted or unquoted
+	ovfIpBareRx  = regexp.MustCompile(`\bIp\b`)                             // bare "Ip" (no parens)
+)
+
+// vSphere expression qualifier pattern (VmwOvf) -> vApp type "expression".
+// With parens: VimIp(), Net("Management"). Without parens: bare "VimIp" etc.
+var (
+	ovfExpressionQualifierRx = regexp.MustCompile(
+		`(AutoIp|VimIp|Net|Netmask|Gateway|DomainName|HostPrefix|Dns|Subnet|SearchPath|HttpProxy)\s*\(\s*["']?([^"')]*)["']?\s*\)`)
+	ovfExpressionBareRx = regexp.MustCompile(
+		`\b(AutoIp|VimIp|Net|Netmask|Gateway|DomainName|HostPrefix|Dns|Subnet|SearchPath|HttpProxy)\b`)
 )
 
 // ovfTypeToVAppBaseType returns the vApp PropertyInfo base type for an OVF
@@ -1174,12 +1189,19 @@ func ovfTypeToVAppBaseType(ovfType string) string {
 	return ovfType
 }
 
-// ovfQualifiers holds parsed OVF qualifiers (DSP0243 9.5.1 Table 7).
+// ovfQualifiers holds parsed OVF qualifiers (DSP0243 9.5.1 Table 7 and vSphere QualifierMap).
 type ovfQualifiers struct {
 	minLen int // MinLen(min) for string
 	maxLen int // MaxLen(max) for string; -1 means not set
 	// ValueMap{...} (parsed as strings for string and int)
 	valueMap []string
+	// MinValue(n), MaxValue(n) for int/real
+	minValue, maxValue *float64
+	// VMware Ip() or Ip("network") -> ip or ip:network
+	ipArg *string // nil = not Ip, "" = Ip(), "x" = Ip("x")
+	// VMware expression qualifier (VimIp, Net, etc.) -> type "expression"
+	expressionName string // e.g. "VimIp"
+	expressionArg  string // e.g. "" or "Management"
 }
 
 func parseOVFQualifiers(qualifiers string) (q ovfQualifiers) {
@@ -1197,7 +1219,63 @@ func parseOVFQualifiers(qualifiers string) (q ovfQualifiers) {
 	if m := ovfValueMapRx.FindStringSubmatch(qualifiers); len(m) > 0 {
 		q.valueMap = parseValueMapContent(m[1])
 	}
+	if m := ovfMinValueRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		if v, err := strconv.ParseFloat(m[1], 64); err == nil {
+			q.minValue = &v
+		}
+	}
+	if m := ovfMaxValueRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		if v, err := strconv.ParseFloat(m[1], 64); err == nil {
+			q.maxValue = &v
+		}
+	}
+	if m := ovfIpArgRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		arg := strings.TrimSpace(m[1])
+		q.ipArg = &arg
+	} else if ovfIpNoArgRx.MatchString(qualifiers) {
+		s := ""
+		q.ipArg = &s
+	} else if ovfIpBareRx.MatchString(qualifiers) {
+		s := ""
+		q.ipArg = &s
+	}
+	if m := ovfExpressionQualifierRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.expressionName = m[1]
+		q.expressionArg = strings.TrimSpace(m[2])
+	} else if m := ovfExpressionBareRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.expressionName = m[1]
+		q.expressionArg = ""
+	}
 	return q
+}
+
+// expressionDefaultFromQualifiers returns the default value for an expression-typed
+// property (e.g. "${vimIp:}" or "${net:Management}") per vSphere QualifierMap.
+// Returns "" if qualifiers do not contain a vSphere expression qualifier.
+func expressionDefaultFromQualifiers(qualifiers string) string {
+	if qualifiers == "" {
+		return ""
+	}
+	qualifiers = strings.TrimSpace(qualifiers)
+	var name, arg string
+	if m := ovfExpressionQualifierRx.FindStringSubmatch(qualifiers); len(m) >= 3 {
+		name = m[1]
+		arg = strings.TrimSpace(m[2])
+	} else if m := ovfExpressionBareRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		name = m[1]
+		arg = ""
+	} else {
+		return ""
+	}
+	// Lowercase first letter to match vSphere (e.g. VimIp -> vimIp)
+	lcName := name
+	if len(name) > 0 {
+		lcName = strings.ToLower(name[:1]) + name[1:]
+	}
+	if arg != "" {
+		return "${" + lcName + ":" + arg + "}"
+	}
+	return "${" + lcName + ":}"
 }
 
 // parseValueMapContent parses the content inside ValueMap{...}:
@@ -1246,7 +1324,7 @@ func parseValueMapContent(content string) []string {
 
 // toVAppPropertyType returns the vApp PropertyInfo.Type string for an OVF
 // Property, applying the OVF-to-vApp type mapping and embedding qualifiers
-// per DSP0243 9.5.1 and vim.vApp.PropertyInfo (e.g. MinLen(1)=>string(1..)).
+// per DSP0243 9.5.1, vim.vApp.PropertyInfo, and vSphere QualifierMap.
 func toVAppPropertyType(p Property) string {
 	baseType := ovfTypeToVAppBaseType(p.Type)
 	if p.Password != nil && *p.Password && baseType == "string" {
@@ -1260,6 +1338,18 @@ func toVAppPropertyType(p Property) string {
 		return baseType
 	}
 	q := parseOVFQualifiers(qualStr)
+
+	// VMware expression qualifiers (VimIp, Net, etc.) -> "expression"
+	if q.expressionName != "" {
+		return "expression"
+	}
+	// VMware Ip() or Ip("network") -> "ip" or "ip:network" (string type only)
+	if q.ipArg != nil && (baseType == "string" || baseType == "password") {
+		if *q.ipArg == "" {
+			return "ip"
+		}
+		return "ip:" + *q.ipArg
+	}
 
 	switch baseType {
 	case "string", "password":
@@ -1290,6 +1380,27 @@ func toVAppPropertyType(p Property) string {
 			if ok {
 				return fmt.Sprintf("int(%d..%d)", minVal, maxVal)
 			}
+		}
+		if q.minValue != nil || q.maxValue != nil {
+			minV, maxV := int64(-2147483648), int64(2147483647)
+			if q.minValue != nil {
+				minV = int64(*q.minValue)
+			}
+			if q.maxValue != nil {
+				maxV = int64(*q.maxValue)
+			}
+			return fmt.Sprintf("int(%d..%d)", minV, maxV)
+		}
+	case "real":
+		if q.minValue != nil || q.maxValue != nil {
+			minV, maxV := -1e308, 1e308
+			if q.minValue != nil {
+				minV = *q.minValue
+			}
+			if q.maxValue != nil {
+				maxV = *q.maxValue
+			}
+			return fmt.Sprintf("real(%v..%v)", minV, maxV)
 		}
 	}
 	return baseType
@@ -1402,6 +1513,11 @@ func (e Envelope) toVAppConfig(
 				parsedValue, err = parseVAppConfigValue(pForParse, value)
 				if err != nil {
 					return err
+				}
+			} else if vAppType == "expression" && p.Qualifiers != nil {
+				// vSphere QualifierMap: expression qualifiers get default like "${vimIp:}".
+				if d := expressionDefaultFromQualifiers(*p.Qualifiers); d != "" {
+					parsedValue = d
 				}
 			}
 			// Use per-property category from DSP0243 9.5.1 grouping.

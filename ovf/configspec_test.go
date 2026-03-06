@@ -786,6 +786,62 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		})
 	})
 
+	t.Run("Qualifiers", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/qualifiers.ovf")
+		cs, err := e.ToConfigSpec()
+		require.NoError(t, err)
+		va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+		require.True(t, ok)
+
+		findProp := func(id string) *types.VAppPropertyInfo {
+			for i := range va.Property {
+				if va.Property[i].Info.Id == id {
+					return va.Property[i].Info
+				}
+			}
+			return nil
+		}
+
+		// Expected Type and DefaultValue for each property (DMTF + vSphere qualifiers).
+		expect := map[string]struct{ Type, Default string }{
+			// DMTF: MinValue/MaxValue
+			"port":  {"int(1..65535)", "8080"},
+			"ratio": {"real(0..1)", "0.5"},
+			// DMTF: MinLen/MaxLen
+			"hostname":  {"string(1..253)", "test.local"},
+			"short_id":  {"string(0..8)", "abc"},
+			"long_desc": {"string(10..)", "optional..."},
+			// DMTF: ValueMap
+			"mode":     {`string["low", "medium", "high"]`, "medium"},
+			"priority": {"int(1..3)", "2"},
+			// vSphere: Ip
+			"mgmt_ip":     {"ip", ""},
+			"any_ip":      {"ip", ""},
+			"net_ip":      {"ip:Management", ""},
+			"workload_ip": {"ip:Workload", ""},
+			// vSphere: expression qualifiers (default from qualifier)
+			"guest_ip":         {"expression", "${vimIp:}"},
+			"net_expr":         {"expression", "${net:Management}"},
+			"auto_ip_expr":     {"expression", "${autoIp:}"},
+			"netmask_expr":     {"expression", "${netmask:}"},
+			"gateway_expr":     {"expression", "${gateway:}"},
+			"domain_expr":      {"expression", "${domainName:}"},
+			"host_prefix_expr": {"expression", "${hostPrefix:}"},
+			"dns_expr":         {"expression", "${dns:}"},
+			"subnet_expr":      {"expression", "${subnet:}"},
+			"search_path_expr": {"expression", "${searchPath:}"},
+			"http_proxy_expr":  {"expression", "${httpProxy:}"},
+		}
+		require.Len(t, va.Property, len(expect), "qualifiers.ovf property count")
+
+		for id, want := range expect {
+			p := findProp(id)
+			require.NotNil(t, p, "property %q", id)
+			assert.Equal(t, want.Type, p.Type, "property %q Type", id)
+			assert.Equal(t, want.Default, p.DefaultValue, "property %q DefaultValue", id)
+		}
+	})
+
 	t.Run("Large", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/configspec.ovf")
 		cs, err := e.ToConfigSpec()
@@ -1243,7 +1299,7 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 								ClassId:          "loadbalance",
 								Id:               "dataplane_port",
 								Label:            "3.2. Dataplane API Management Port",
-								Type:             "int",
+								Type:             "int(1..65535)",
 								UserConfigurable: types.NewBool(true),
 								DefaultValue:     "5556",
 								Description:      "Specifies the port on which the Dataplane API will be advertized on the Management Network.",
