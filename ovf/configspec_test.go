@@ -217,6 +217,63 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			})
 	})
 
+	t.Run("OVF property types and qualifiers to vAppPropertyInfo.Type", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/property-types.ovf")
+		cs, err := e.ToConfigSpec()
+		require.NoError(t, err)
+		va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+		require.True(t, ok)
+
+		findProp := func(id string) *types.VAppPropertyInfo {
+			for i := range va.Property {
+				if va.Property[i].Info.Id == id {
+					return va.Property[i].Info
+				}
+			}
+			return nil
+		}
+
+		// All OVF property type and qualifier combinations and expected vApp Type.
+		expect := map[string]string{
+			// string: no qualifiers
+			"p_string_plain": "string",
+			// string: MinLen only => string(min..)
+			"p_string_min_only": "string(5..)",
+			// string: MaxLen only => string(0..max) (minLen defaults to 0)
+			"p_string_max_only": "string(0..100)",
+			// string: MinLen + MaxLen => string(min..max)
+			"p_string_min_max": "string(1..253)",
+			// string: ValueMap => string["choice1", "choice2", ...]
+			"p_string_valuemap":        `string["a", "b", "c"]`,
+			"p_string_valuemap_single": `string["only"]`,
+			// password: no qualifiers
+			"p_password_plain": "password",
+			// password: MinLen only => password(min..)
+			"p_password_min_only": "password(8..)",
+			// boolean
+			"p_boolean": "boolean",
+			// int: no qualifiers
+			"p_int_plain": "int",
+			// int: ValueMap numeric => int(min..max)
+			"p_int_valuemap": "int(1..5)",
+			// OVF integer types (DSP0243 Table 6) → int
+			"p_uint8": "int", "p_sint8": "int", "p_uint16": "int", "p_sint16": "int",
+			"p_uint32": "int", "p_sint32": "int", "p_uint64": "int", "p_sint64": "int",
+			// real32, real64 → real
+			"p_real32": "real", "p_real64": "real",
+			// Case insensitivity: String, Boolean (DSP0243 Table 6)
+			"p_String_capital": "string", "p_Boolean_capital": "boolean",
+		}
+
+		for id, wantType := range expect {
+			p := findProp(id)
+			require.NotNil(t, p, "property %q not found in VAppConfigSpec", id)
+			assert.Equal(t, wantType, p.Type,
+				"OVF property %q: expected vAppPropertyInfo.Type %q, got %q",
+				id, wantType, p.Type)
+		}
+	})
+
 	t.Run("Photon 5", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/photon5.ovf")
 		cs, err := e.ToConfigSpec()
@@ -312,6 +369,170 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		require.True(t, ok)
 		assert.Equal(t, "data.vmdk", db.FileName,
 			"backing FileName must be path.Base(File.Href), i.e. data.vmdk from subdir/data.vmdk")
+	})
+
+	t.Run("DeploymentConfiguration", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/configspec.ovf")
+
+		t.Run("explicit frontend includes frontend-only elements", func(t *testing.T) {
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "frontend",
+			})
+			require.NoError(t, err)
+			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.True(t, ok)
+			require.Len(t, va.Property, 8, "frontend config has 8 vApp properties")
+			ids := make([]string, len(va.Property))
+			for i := range va.Property {
+				ids[i] = va.Property[i].Info.Id
+			}
+			assert.Contains(t, ids, "frontend_ip")
+			assert.Contains(t, ids, "frontend_gateway")
+			assert.Len(t, cs.DeviceChange, 22, "frontend config has 22 devices (extra NIC)")
+		})
+
+		t.Run("invalid name returns error", func(t *testing.T) {
+			_, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "nonexistent",
+			})
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "not found in DeploymentOptionSection")
+		})
+	})
+
+	t.Run("DeploymentConfigs fixture (small/medium/large)", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/deployment-configs.ovf")
+
+		findProp := func(va *types.VAppConfigSpec, id string) *types.VAppPropertyInfo {
+			if va == nil {
+				return nil
+			}
+			for i := range va.Property {
+				if va.Property[i].Info.Id == id {
+					return va.Property[i].Info
+				}
+			}
+			return nil
+		}
+
+		t.Run("small config: 2 CPU, 2 GiB RAM, 1 disk 1 GiB file-backed", func(t *testing.T) {
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "small",
+			})
+			require.NoError(t, err)
+			assert.Equal(t, int32(2), cs.NumCPUs)
+			assert.Equal(t, int64(2048), cs.MemoryMB)
+			var disks []*types.VirtualDisk
+			for _, dc := range cs.DeviceChange {
+				if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+					disks = append(disks, d)
+				}
+			}
+			require.Len(t, disks, 1)
+			assert.Equal(t, int64(1*1024*1024*1024), disks[0].CapacityInBytes)
+			db, ok := disks[0].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			require.True(t, ok)
+			assert.Equal(t, "system-and-model-small.vmdk", db.FileName)
+
+			va, _ := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.NotNil(t, va)
+			assert.NotNil(t, findProp(va, "hostname"))
+			assert.NotNil(t, findProp(va, "tier_small"))
+			assert.NotNil(t, findProp(va, "size_preset"))
+			assert.Nil(t, findProp(va, "tier_medium"))
+			assert.Nil(t, findProp(va, "tier_large"))
+		})
+
+		t.Run("medium config (default): 4 CPU, 4 GiB RAM, 2 disks 2 GiB", func(t *testing.T) {
+			cs, err := e.ToConfigSpec()
+			require.NoError(t, err)
+			assert.Equal(t, int32(4), cs.NumCPUs)
+			assert.Equal(t, int64(4096), cs.MemoryMB)
+			var disks []*types.VirtualDisk
+			for _, dc := range cs.DeviceChange {
+				if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+					disks = append(disks, d)
+				}
+			}
+			require.Len(t, disks, 2)
+			assert.Equal(t, int64(2*1024*1024*1024), disks[0].CapacityInBytes)
+			assert.Equal(t, int64(2*1024*1024*1024), disks[1].CapacityInBytes)
+			db0, ok := disks[0].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			require.True(t, ok)
+			assert.Equal(t, "system-and-model-medium.vmdk", db0.FileName)
+			db1, ok := disks[1].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			require.True(t, ok)
+			assert.Empty(t, db1.FileName)
+
+			va, _ := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.NotNil(t, va)
+			assert.NotNil(t, findProp(va, "tier_medium"))
+			assert.Nil(t, findProp(va, "tier_small"))
+			assert.Nil(t, findProp(va, "tier_large"))
+		})
+
+		t.Run("large config: 8 CPU, 8 GiB RAM, 3 disks 4 GiB", func(t *testing.T) {
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "large",
+			})
+			require.NoError(t, err)
+			assert.Equal(t, int32(8), cs.NumCPUs)
+			assert.Equal(t, int64(8192), cs.MemoryMB)
+			var disks []*types.VirtualDisk
+			for _, dc := range cs.DeviceChange {
+				if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+					disks = append(disks, d)
+				}
+			}
+			require.Len(t, disks, 3)
+			for i := range disks {
+				assert.Equal(t, int64(4*1024*1024*1024), disks[i].CapacityInBytes)
+			}
+			db0, _ := disks[0].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			db1, _ := disks[1].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			db2, _ := disks[2].Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			assert.Equal(t, "system-large.vmdk", db0.FileName)
+			assert.Equal(t, "model-large.vmdk", db1.FileName)
+			assert.Empty(t, db2.FileName)
+
+			va, _ := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.NotNil(t, va)
+			assert.NotNil(t, findProp(va, "tier_large"))
+			assert.Nil(t, findProp(va, "tier_small"))
+			assert.Nil(t, findProp(va, "tier_medium"))
+		})
+
+		t.Run("property qualifiers embedded in VAppPropertyInfo.Type", func(t *testing.T) {
+			cs, err := e.ToConfigSpec()
+			require.NoError(t, err)
+			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.True(t, ok)
+
+			p := findProp(va, "hostname")
+			require.NotNil(t, p)
+			assert.Equal(t, "string(1..253)", p.Type,
+				"hostname has MinLen(1),MaxLen(253) => string(1..253)")
+
+			p = findProp(va, "size_preset")
+			require.NotNil(t, p)
+			assert.Contains(t, p.Type, "string[",
+				"size_preset has ValueMap => string[\"small\", ...]")
+			assert.Contains(t, p.Type, "small")
+			assert.Contains(t, p.Type, "medium")
+			assert.Contains(t, p.Type, "large")
+
+			p = findProp(va, "tier_medium")
+			require.NotNil(t, p)
+			assert.Equal(t, "string(1..64)", p.Type,
+				"tier_medium has MinLen(1),MaxLen(64) => string(1..64)")
+		})
+
+		t.Run("empty DeploymentConfiguration uses default (medium)", func(t *testing.T) {
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{})
+			require.NoError(t, err)
+			assert.Equal(t, int32(4), cs.NumCPUs)
+			assert.Equal(t, int64(4096), cs.MemoryMB)
+		})
 	})
 
 	t.Run("Large", func(t *testing.T) {

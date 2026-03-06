@@ -148,6 +148,13 @@ type ToConfigSpecOptions struct {
 	// VirtualSystemCollectionIndex specifies the index of the VirtualSystem in
 	// the OVF's VirtualSystemCollection to transform into the ConfigSpec.
 	VirtualSystemCollectionIndex *int
+
+	// DeploymentConfiguration specifies the deployment configuration name (see
+	// DeploymentOptionSection in DSP0243). If empty, the default configuration
+	// is used; if none is marked default, the first configuration is used.
+	// Only elements (e.g. VirtualHardware Item, ProductSection Property)
+	// that match this configuration or have no configuration are included.
+	DeploymentConfiguration string
 }
 
 // ToConfigSpec calls ToConfigSpecWithOptions with an empty ToConfigSpecOptions
@@ -156,14 +163,46 @@ func (e Envelope) ToConfigSpec() (types.VirtualMachineConfigSpec, error) {
 	return e.ToConfigSpecWithOptions(ToConfigSpecOptions{})
 }
 
+// resolveDeploymentConfiguration returns the deployment configuration name to
+// use per DSP0243: opts.DeploymentConfiguration if set (and valid), else the
+// default configuration, else the first configuration.
+func (e Envelope) resolveDeploymentConfiguration(
+	opts ToConfigSpecOptions) (string, error) {
+	if opts.DeploymentConfiguration != "" {
+		if do := e.DeploymentOption; do == nil || len(do.Configuration) == 0 {
+			return "", fmt.Errorf(
+				"deployment configuration %q specified but no DeploymentOptionSection",
+				opts.DeploymentConfiguration)
+		}
+		for _, c := range e.DeploymentOption.Configuration {
+			if c.ID == opts.DeploymentConfiguration {
+				return c.ID, nil
+			}
+		}
+		return "", fmt.Errorf(
+			"deployment configuration %q not found in DeploymentOptionSection",
+			opts.DeploymentConfiguration)
+	}
+	if do := e.DeploymentOption; do != nil && len(do.Configuration) > 0 {
+		for _, c := range do.Configuration {
+			if d := c.Default; d != nil && *d {
+				return c.ID, nil
+			}
+		}
+		return do.Configuration[0].ID, nil
+	}
+	return "", nil
+}
+
 // ToConfigSpecWithOptions transforms the envelope into a ConfigSpec that may be
 // used to create a new virtual machine.
 // Please note, at this time:
 //   - Only a single VirtualSystem is supported. The VirtualSystemCollection
 //     section is ignored.
 //   - Only the first VirtualHardware section is supported.
-//   - Only the default deployment option configuration is considered. Elements
-//     part of a non-default configuration are ignored.
+//   - Deployment configuration is selected via opts.DeploymentConfiguration
+//     (default or first if empty). Elements that are part of another
+//     configuration are excluded.
 //   - Disks must specify zero or one HostResource elements.
 //   - Many, many more constraints...
 func (e Envelope) ToConfigSpecWithOptions(
@@ -188,15 +227,9 @@ func (e Envelope) ToConfigSpecWithOptions(
 		}
 	}
 
-	// Determine if there is a default configuration.
-	var defaultConfigName string
-	if do := e.DeploymentOption; do != nil {
-		for _, c := range do.Configuration {
-			if d := c.Default; d != nil && *d {
-				defaultConfigName = c.ID
-				break
-			}
-		}
+	configName, err := e.resolveDeploymentConfiguration(opts)
+	if err != nil {
+		return configSpec{}, err
 	}
 
 	dst := configSpec{
@@ -211,13 +244,13 @@ func (e Envelope) ToConfigSpecWithOptions(
 
 	// Parse the hardware.
 	if err := e.toHardware(
-		&dst, defaultConfigName, vs, fileRefs, opts); err != nil {
+		&dst, configName, vs, fileRefs, opts); err != nil {
 
 		return configSpec{}, err
 	}
 
 	// Parse the vApp config.
-	if err := e.toVAppConfig(&dst, defaultConfigName, vs); err != nil {
+	if err := e.toVAppConfig(&dst, configName, vs); err != nil {
 		return configSpec{}, err
 	}
 
