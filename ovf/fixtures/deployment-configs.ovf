@@ -38,11 +38,11 @@
       <Label>Small</Label>
       <Description>2 CPU, 2 GiB RAM, 1 disk 1 GiB</Description>
     </Configuration>
-    <Configuration ovf:id="medium" ovf:default="true">
+    <Configuration ovf:id="medium">
       <Label>Medium</Label>
       <Description>4 CPU, 4 GiB RAM, 2 disks 2 GiB each</Description>
     </Configuration>
-    <Configuration ovf:id="large">
+    <Configuration ovf:id="large" ovf:default="true">
       <Label>Large</Label>
       <Description>8 CPU, 8 GiB RAM, 3 disks 4 GiB each</Description>
     </Configuration>
@@ -83,6 +83,16 @@
         <Label>Size preset</Label>
         <Description>One of: small, medium, large</Description>
       </Property>
+       <Property
+        ovf:configuration="small"
+        ovf:key="scratch_space_size_small"
+        ovf:type="int"
+        ovf:value="10" />
+      <Property
+        ovf:configuration="large"
+        ovf:key="scratch_space_size_large"
+        ovf:type="int"
+        ovf:value="20" />
     </ProductSection>
     <VirtualHardwareSection ovf:transport="com.vmware.guestInfo">
       <Info>Virtual hardware</Info>
