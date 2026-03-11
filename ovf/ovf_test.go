@@ -10,7 +10,9 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"text/tabwriter"
 
@@ -192,4 +194,70 @@ func TestJSONEncoder(t *testing.T) {
 			}
 		})
 	}
+}
+
+func hasMultipleVirtualSystems(e *Envelope) bool {
+	return e.VirtualSystem == nil
+}
+
+// isNegativeFixture reports whether the path is a negative fixture (designed to fail
+// unmarshaling or downstream validation). Paths containing "neg-", "negative-",
+// "negative_", "ovf_negative", "invalid", or the path segment "/Neg/" are treated as negative.
+func isNegativeFixture(path string) bool {
+	pathSlash := filepath.ToSlash(path)
+	pathLower := strings.ToLower(path)
+	return strings.Contains(path, "neg-") ||
+		strings.Contains(path, "negative-") ||
+		strings.Contains(path, "negative_") ||
+		strings.Contains(path, "ovf_negative") ||
+		strings.Contains(pathLower, "invalid") ||
+		strings.Contains(pathSlash, "/Neg/")
+}
+
+func runFixtureTest(t *testing.T, path string, negativeFixture bool) {
+	t.Run("Unmarshal", func(t *testing.T) {
+		if negativeFixture {
+			t.Skip("negative test")
+		}
+		f, err := os.Open(path)
+		if err != nil {
+			t.Fatalf("open: %v", err)
+		}
+		defer f.Close()
+
+		_, err = Unmarshal(f)
+		if negativeFixture {
+			// Negative fixtures are designed to fail (e.g.
+			// invalid OVF); either unmarshal or downstream
+			// ToConfigSpec may reject them. Pass either way.
+			return
+		}
+		if err != nil {
+			t.Fatalf("Unmarshal: %v", err)
+		}
+	})
+
+	t.Run("ToConfigSpec", func(t *testing.T) {
+		if negativeFixture {
+			t.Skip("negative test")
+		}
+		f, err := os.Open(path)
+		if err != nil {
+			t.Fatalf("open: %v", err)
+		}
+		defer f.Close()
+
+		e, err := Unmarshal(f)
+		if negativeFixture {
+			// Negative fixtures are designed to fail (e.g.
+			// invalid OVF); either unmarshal or downstream
+			// ToConfigSpec may reject them. Pass either way.
+			return
+		}
+		// if !hasMultipleVirtualSystems(e) {
+		if _, err = e.ToConfigSpec(); err != nil {
+			t.Fatalf("ToConfigSpec: %v", err)
+		}
+		// }
+	})
 }

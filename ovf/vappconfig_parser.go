@@ -15,8 +15,8 @@ import (
 const maxVAppPropStringLen = 65535
 
 var (
-	strWithMinLenRx      = regexp.MustCompile(`^(?:string|password)\(\.\.(\d+)\)$`)
-	strWithMaxLenRx      = regexp.MustCompile(`^(?:string|password)\((\d+)\.\.\)$`)
+	strWithMinLenRx      = regexp.MustCompile(`^(?:string|password)\((\d+)\.\.\)$`)
+	strWithMaxLenRx      = regexp.MustCompile(`^(?:string|password)\(\.\.(\d+)\)$`)
 	strWithMinMaxLenRx   = regexp.MustCompile(`^(?:string|password)\((\d+)\.\.(\d+)\)$`)
 	intWithMinMaxSizeRx  = regexp.MustCompile(`^int\(([+-]?\d+)\.\.([+-]?\d+)\)$`)
 	realWithMinMaxSizeRx = regexp.MustCompile(`^real\(([+-]?(?:\d+(?:\.\d*)?|\.\d+))\.\.([+-]?(?:\d+(?:\.\d*)?|\.\d+))\)$`)
@@ -81,21 +81,20 @@ func parseVAppConfigValue(p Property, val string) (string, error) {
 		// on a particular network. The behavior of this type depends on the
 		// ipAllocationPolicy.
 		//
-
-		// TODO(akutz) Figure out the correct parsing strategy.
 		parsedValue = val
 
 	case "expression":
 		//
 		// The default value specifies an expression that is calculated
-		// by the system.
+		// by the system (e.g. ${vimIp:}, ${net:Management}).
 		//
-
-		// TODO(akutz) Figure out the correct parsing strategy.
 		parsedValue = val
 
 	default:
-		if m := strWithMinLenRx.FindStringSubmatch(p.Type); len(m) > 0 {
+		if strings.HasPrefix(p.Type, "ip:") {
+			// ip:NetworkName (vSphere qualifier Ip("NetworkName")) — same as ip:network.
+			parsedValue = val
+		} else if m := strWithMinLenRx.FindStringSubmatch(p.Type); len(m) > 0 {
 			//
 			// A string with minimum character length x.
 			//

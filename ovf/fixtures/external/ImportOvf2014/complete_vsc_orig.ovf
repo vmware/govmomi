@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  VirtualSystemCollection with two VirtualSystems containing a 'complete' set of OVF sections.
+  Importing this OVF should generate all OVF parameter types.
+
+  The OVF has one disk shared by the child VMs.
+
+  vApp:
+  Two IP properties, dbIp and webIp.
+
+  VM 1:
+  HW version 7.
+  Two disk items.
+  Refers to parent property dbIp.
+
+  VM 2:
+  HW version 8.
+  One disk item.
+  Refers to parent property webIp.
+
+  -->
+
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf2="http://schemas.dmtf.org/ovf/envelope/2"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+
+    <References>
+        <File ovf:href="../../../content/nostalgia-disk1.vmdk" ovf:id="file1" ovf:size="6872576" />
+    </References>
+
+    <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="107373568" ovf:diskId="vmdisk1" ovf:fileRef="file1"
+            ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" />
+    </DiskSection>
+
+    <NetworkSection>
+        <Info>The list of logical networks</Info>
+        <Network ovf:name="VM Network">
+            <Description>The VM Network network</Description>
+        </Network>
+    </NetworkSection>
+
+    <DeploymentOptionSection>
+        <Info>The list of deployment options</Info>
+        <Configuration ovf:id="small">
+            <Label>Development</Label>
+            <Description>Small description</Description>
+        </Configuration>
+        <Configuration ovf:id="medium" ovf:default="true">
+            <Label>Production</Label>
+            <Description>Medium description</Description>
+        </Configuration>
+        <Configuration ovf:id="large">
+            <Label>Enterprise</Label>
+            <Description>Large description</Description>
+        </Configuration>
+    </DeploymentOptionSection>
+
+    <vmw:StorageGroupSection vmw:id="group1" vmw:name="Group1">
+        <Info>Storage policy for group of disks</Info>
+        <vmw:Description>Storage policy for group1 tier</vmw:Description>
+    </vmw:StorageGroupSection>
+
+    <vmw:IpAssignmentSection ovf:required="false"
+            vmw:protocols="IPv4,IPv6"
+            vmw:schemes="ovfenv,dhcp">
+        <Info>Supported IP assignment schemes</Info>
+    </vmw:IpAssignmentSection>
+
+    <vmw:TagBasedPlacementGroupSection vmw:id="group1" vmw:name="TagGroup1" vmw:priority="0" ovf:required="false">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="Security Service" vmw:id="1"/>
+        <vmw:TagValue vmw:name="TPM Enabled" vmw:id="1"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+    <!-- Unknown section at envelope level -->
+    <baz:BazSection ovf:required="false" xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+            xmlns:baz="http://www.vmware.com/baz">
+        <Info>The baz section</Info>
+        <baz:BazInfo>Awesome</baz:BazInfo>
+    </baz:BazSection>
+
+    <VirtualSystemCollection ovf:id="vsc1">
+        <Info>A vApp</Info>
+        <Name>Test vApp</Name>
+
+        <ovf2:ScaleOutSection ovf2:id="vs1">
+            <Info>Database tier</Info>
+            <ovf2:InstanceCount ovf2:minimum="1" ovf2:default="2" ovf2:maximum="4" />
+        </ovf2:ScaleOutSection>
+
+        <StartupSection>
+            <Info>Startup order</Info>
+            <Item ovf:id="vs1" ovf:order="1"
+                  ovf:startAction="powerOn" ovf:startDelay="120"
+                  ovf:stopAction="powerOff" ovf:stopDelay="120"/>
+            <Item ovf:id="vs2" ovf:order="2"
+                  ovf:startAction="powerOn" ovf:startDelay="119"
+                  ovf:stopAction="guestShutdown" ovf:stopDelay="121" ovf:waitingForGuest="true"/>
+        </StartupSection>
+
+        <AnnotationSection>
+            <Info>An annotation on this service. It can be ignored</Info>
+            <Annotation>Annotation on vApp</Annotation>
+        </AnnotationSection>
+
+        <EulaSection>
+            <Info>An end-user license agreement</Info>
+            <License>Contents of vApp license</License>
+        </EulaSection>
+
+        <!-- Unknown section at vApp level -->
+        <bar:BarSection ovf:required="false" xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+                xmlns:bar="http://www.vmware.com/bar">
+            <Info>The bar section</Info>
+        </bar:BarSection>
+
+        <ProductSection ovf:class="com.vmware.test" ovf:instance="vapp">
+            <Info>Information about the installed software</Info>
+            <Product>Complete test vApp with two VMs</Product>
+            <Vendor>VMware, Inc.</Vendor>
+            <VendorUrl>http://www.vmware.com</VendorUrl>
+            <Version>1.0</Version>
+            <FullVersion>1.0-1234</FullVersion>
+            <ProductUrl>http://www.vmware.com</ProductUrl>
+            <AppUrl>http://www.vmware.com</AppUrl>
+
+            <!-- A property without category (and no label or description)-->
+            <Property ovf:key="username" ovf:type="string" ovf:userConfigurable="true"/>
+
+            <Category>Network properties</Category>
+            <Property ovf:key="dbIp" ovf:type="string" ovf:userConfigurable="true"
+                    vmw:qualifiers='Ip("VM Network")'>
+                <Label>IP address</Label>
+                <Description>IP address for VM 1</Description>
+            </Property>
+            <Property ovf:key="webIp" ovf:type="string" ovf:userConfigurable="true"
+                    vmw:qualifiers='Ip("VM Network")'>
+                <Label>IP address</Label>
+                <Description>IP address for VM 2</Description>
+            </Property>
+
+            <!-- UI optional properties -->
+            <Category vmw:uioptional="true">UI optional properties</Category>
+            <Property ovf:key="optional0" ovf:type="string" ovf:userConfigurable="true"
+                    ovf:value="This is the default value">
+                <Label>Optional</Label>
+                <Description>An optional property</Description>
+            </Property>
+        </ProductSection>
+
+        <VirtualSystem ovf:id="vs1">
+            <Info>A virtual machine</Info>
+            <Name>Test System 1</Name>
+
+            <VirtualHardwareSection>
+                <Info>Virtual hardware requirements</Info>
+                <System>
+                    <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                    <vssd:InstanceID>0</vssd:InstanceID>
+                    <vssd:VirtualSystemIdentifier>vs1</vssd:VirtualSystemIdentifier>
+                    <vssd:VirtualSystemType>vmx-07</vssd:VirtualSystemType>
+                </System>
+                <Item>
+                    <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                    <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                    <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                    <rasd:InstanceID>1</rasd:InstanceID>
+                    <rasd:ResourceType>3</rasd:ResourceType>
+                    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                    <rasd:Description>Memory Size</rasd:Description>
+                    <rasd:ElementName>64MB of memory</rasd:ElementName>
+                    <rasd:InstanceID>2</rasd:InstanceID>
+                    <rasd:ResourceType>4</rasd:ResourceType>
+                    <rasd:VirtualQuantity>64</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:Address>0</rasd:Address>
+                    <rasd:Description>SCSI Controller</rasd:Description>
+                    <rasd:ElementName>SCSI controller 0</rasd:ElementName>
+                    <rasd:InstanceID>3</rasd:InstanceID>
+                    <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                    <rasd:ResourceType>6</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:Address>1</rasd:Address>
+                    <rasd:Description>IDE Controller</rasd:Description>
+                    <rasd:ElementName>IDE 1</rasd:ElementName>
+                    <rasd:InstanceID>4</rasd:InstanceID>
+                    <rasd:ResourceType>5</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:Address>0</rasd:Address>
+                    <rasd:Description>IDE Controller</rasd:Description>
+                    <rasd:ElementName>IDE 0</rasd:ElementName>
+                    <rasd:InstanceID>5</rasd:InstanceID>
+                    <rasd:ResourceType>5</rasd:ResourceType>
+                </Item>
+                <Item ovf:required="false">
+                    <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                    <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+                    <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+                    <rasd:InstanceID>6</rasd:InstanceID>
+                    <rasd:Parent>5</rasd:Parent>
+                    <rasd:ResourceType>15</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:AddressOnParent>7</rasd:AddressOnParent>
+                    <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                    <rasd:Connection>VM Network</rasd:Connection>
+                    <rasd:Description>PCNet32 ethernet adapter on "VM Network"</rasd:Description>
+                    <rasd:ElementName>Network adapter 1</rasd:ElementName>
+                    <rasd:InstanceID>7</rasd:InstanceID>
+                    <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+                    <rasd:ResourceType>10</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                    <rasd:ElementName>Hard disk 1</rasd:ElementName>
+                    <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                    <rasd:InstanceID>8</rasd:InstanceID>
+                    <rasd:Parent>3</rasd:Parent>
+                    <rasd:ResourceType>17</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:AddressOnParent>1</rasd:AddressOnParent>
+                    <rasd:ElementName>Hard disk 2</rasd:ElementName>
+                    <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                    <rasd:InstanceID>9</rasd:InstanceID>
+                    <rasd:Parent>3</rasd:Parent>
+                    <rasd:ResourceType>17</rasd:ResourceType>
+                </Item>
+            </VirtualHardwareSection>
+
+            <!-- Boot from the second disk -->
+            <vmw:BootOrderSection vmw:type="disk" vmw:instanceId="9">
+                <Info>Virtual hardware device boot order</Info>
+            </vmw:BootOrderSection>
+
+            <OperatingSystemSection ovf:id="79" ovf:version="5" vmw:osType="centosGuest">
+                <Info>Guest Operating System</Info>
+                <Description>CentOS Linux 5.5</Description>
+            </OperatingSystemSection>
+
+            <AnnotationSection>
+                <Info>An annotation on this service. It can be ignored</Info>
+                <Annotation>Annotation on VM</Annotation>
+            </AnnotationSection>
+
+            <EulaSection>
+                <Info>An end-user license agreement</Info>
+                <License>Contents of VM license</License>
+            </EulaSection>
+
+            <ProductSection ovf:class="com.vmware.test" ovf:instance="vm1">
+                <Info>Information about the installed software</Info>
+                <Property ovf:key="ip" ovf:type="string" ovf:value="${dbIp}"/>
+            </ProductSection>
+
+            <vmw:TagBasedPlacementSection vmw:group="group1">
+                <Info>Tag based placement policy group reference</Info>
+            </vmw:TagBasedPlacementSection>
+
+            <!-- Unrecognized section at VM level -->
+            <foo:FooSection ovf:required="false" xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+                    xmlns:foo="http://www.vmware.com/foo">
+                <Info>The foo section</Info>
+                <foo:Vex foo:name="Zebra">
+                   <foo:Description>Confusing my monochromatic friend</foo:Description>
+                </foo:Vex>
+            </foo:FooSection>
+
+            <vmw:vServiceDependencySection ovf:required="true" vmw:id="dependency_1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vmw="http://www.vmware.com/schema/ovf">
+                <ovf:Info>A vService dependency</ovf:Info>
+                <vmw:Type>com.vmware.vservice.extension</vmw:Type>
+                <vmw:Name>vCenter Extension Installation</vmw:Name>
+                <vmw:Description>This appliance requires a binding to the vCenter Extension vService, which allows it to automatically register as a vCenter Extension at runtime.</vmw:Description>
+                <vmw:Configuration />
+            </vmw:vServiceDependencySection>
+        </VirtualSystem>
+
+        <VirtualSystem ovf:id="vs2">
+            <Info>A virtual machine</Info>
+            <Name>Test System 2</Name>
+
+            <VirtualHardwareSection>
+                <Info>Virtual hardware requirements</Info>
+                <System>
+                    <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                    <vssd:InstanceID>0</vssd:InstanceID>
+                    <vssd:VirtualSystemIdentifier>vs2</vssd:VirtualSystemIdentifier>
+                    <vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>
+                </System>
+                <Item>
+                    <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                    <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                    <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                    <rasd:InstanceID>1</rasd:InstanceID>
+                    <rasd:ResourceType>3</rasd:ResourceType>
+                    <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                    <rasd:Description>Memory Size</rasd:Description>
+                    <rasd:ElementName>64MB of memory</rasd:ElementName>
+                    <rasd:InstanceID>2</rasd:InstanceID>
+                    <rasd:ResourceType>4</rasd:ResourceType>
+                    <rasd:VirtualQuantity>64</rasd:VirtualQuantity>
+                </Item>
+                <Item>
+                    <rasd:Address>0</rasd:Address>
+                    <rasd:Description>SCSI Controller</rasd:Description>
+                    <rasd:ElementName>SCSI controller 0</rasd:ElementName>
+                    <rasd:InstanceID>3</rasd:InstanceID>
+                    <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                    <rasd:ResourceType>6</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:Address>1</rasd:Address>
+                    <rasd:Description>IDE Controller</rasd:Description>
+                    <rasd:ElementName>IDE 1</rasd:ElementName>
+                    <rasd:InstanceID>4</rasd:InstanceID>
+                    <rasd:ResourceType>5</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:Address>0</rasd:Address>
+                    <rasd:Description>IDE Controller</rasd:Description>
+                    <rasd:ElementName>IDE 0</rasd:ElementName>
+                    <rasd:InstanceID>5</rasd:InstanceID>
+                    <rasd:ResourceType>5</rasd:ResourceType>
+                </Item>
+                <Item ovf:required="false">
+                    <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                    <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+                    <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+                    <rasd:InstanceID>6</rasd:InstanceID>
+                    <rasd:Parent>5</rasd:Parent>
+                    <rasd:ResourceType>15</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:AddressOnParent>7</rasd:AddressOnParent>
+                    <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                    <rasd:Connection>VM Network</rasd:Connection>
+                    <rasd:Description>PCNet32 ethernet adapter on "VM Network"</rasd:Description>
+                    <rasd:ElementName>Network adapter 1</rasd:ElementName>
+                    <rasd:InstanceID>7</rasd:InstanceID>
+                    <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+                    <rasd:ResourceType>10</rasd:ResourceType>
+                </Item>
+                <Item>
+                    <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                    <rasd:ElementName>Hard disk 1</rasd:ElementName>
+                    <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                    <rasd:InstanceID>8</rasd:InstanceID>
+                    <rasd:Parent>3</rasd:Parent>
+                    <rasd:ResourceType>17</rasd:ResourceType>
+                </Item>
+            </VirtualHardwareSection>
+
+            <ProductSection ovf:class="com.vmware.test" ovf:instance="vm2">
+                <Info>Information about the installed software</Info>
+                <Property ovf:key="ip" ovf:type="string" ovf:value="${webIp}"/>
+            </ProductSection>
+
+        </VirtualSystem>
+
+    </VirtualSystemCollection>
+
+</Envelope>

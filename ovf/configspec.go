@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -145,7 +147,14 @@ type ToConfigSpecOptions struct {
 
 	// VirtualSystemCollectionIndex specifies the index of the VirtualSystem in
 	// the OVF's VirtualSystemCollection to transform into the ConfigSpec.
-	VirtualSystemCollectionIndex *int
+	VirtualSystemCollectionIndex int
+
+	// DeploymentConfiguration specifies the deployment configuration name (see
+	// DeploymentOptionSection in DSP0243). If empty, the default configuration
+	// is used; if none is marked default, the first configuration is used.
+	// Only elements (e.g. VirtualHardware Item, ProductSection Property)
+	// that match this configuration or have no configuration are included.
+	DeploymentConfiguration string
 }
 
 // ToConfigSpec calls ToConfigSpecWithOptions with an empty ToConfigSpecOptions
@@ -154,42 +163,80 @@ func (e Envelope) ToConfigSpec() (types.VirtualMachineConfigSpec, error) {
 	return e.ToConfigSpecWithOptions(ToConfigSpecOptions{})
 }
 
+// resolveDeploymentConfiguration returns the deployment configuration name to
+// use per DSP0243: opts.DeploymentConfiguration if set (and valid), else the
+// default configuration, else the first configuration.
+func (e Envelope) resolveDeploymentConfiguration(
+	opts ToConfigSpecOptions) (string, error) {
+	if opts.DeploymentConfiguration != "" {
+		if do := e.DeploymentOption; do == nil || len(do.Configuration) == 0 {
+			return "", fmt.Errorf(
+				"deployment configuration %q specified but no DeploymentOptionSection",
+				opts.DeploymentConfiguration)
+		}
+		for _, c := range e.DeploymentOption.Configuration {
+			if c.ID == opts.DeploymentConfiguration {
+				return c.ID, nil
+			}
+		}
+		return "", fmt.Errorf(
+			"deployment configuration %q not found in DeploymentOptionSection",
+			opts.DeploymentConfiguration)
+	}
+	if do := e.DeploymentOption; do != nil && len(do.Configuration) > 0 {
+		for _, c := range do.Configuration {
+			if d := c.Default; d != nil && *d {
+				return c.ID, nil
+			}
+		}
+		return do.Configuration[0].ID, nil
+	}
+	return "", nil
+}
+
 // ToConfigSpecWithOptions transforms the envelope into a ConfigSpec that may be
 // used to create a new virtual machine.
 // Please note, at this time:
 //   - Only a single VirtualSystem is supported. The VirtualSystemCollection
 //     section is ignored.
 //   - Only the first VirtualHardware section is supported.
-//   - Only the default deployment option configuration is considered. Elements
-//     part of a non-default configuration are ignored.
+//   - Deployment configuration is selected via opts.DeploymentConfiguration
+//     (default or first if empty). Elements that are part of another
+//     configuration are excluded.
 //   - Disks must specify zero or one HostResource elements.
 //   - Many, many more constraints...
 func (e Envelope) ToConfigSpecWithOptions(
 	opts ToConfigSpecOptions) (types.VirtualMachineConfigSpec, error) {
 
+	fileRefs := make(map[string]File, len(e.References))
+	for _, ref := range e.References {
+		fileRefs[ref.ID] = ref
+	}
+
 	vs := e.VirtualSystem
 	if vs == nil {
-		if i := opts.VirtualSystemCollectionIndex; i != nil {
-			if vsc := e.VirtualSystemCollection; vsc != nil {
-				if len(vsc.VirtualSystem) > *i {
-					vs = &vsc.VirtualSystem[*i]
+		if vsc := e.VirtualSystemCollection; vsc != nil {
+			i := opts.VirtualSystemCollectionIndex
+			if len(vsc.VirtualSystem) > i {
+				vs = &vsc.VirtualSystem[i]
+
+				// If the VirtualSystem from the VirtualSystemCollection
+				// has no Product, use the Product from the
+				// VirtualSystemCollection.
+				if vs.Product == nil {
+					vs.Product = vsc.Product
 				}
 			}
 		}
-		if vs == nil {
-			return configSpec{}, errors.New("no VirtualSystem")
-		}
 	}
 
-	// Determine if there is a default configuration.
-	var defaultConfigName string
-	if do := e.DeploymentOption; do != nil {
-		for _, c := range do.Configuration {
-			if d := c.Default; d != nil && *d {
-				defaultConfigName = c.ID
-				break
-			}
-		}
+	if vs == nil {
+		return configSpec{}, nil
+	}
+
+	configName, err := e.resolveDeploymentConfiguration(opts)
+	if err != nil {
+		return configSpec{}, err
 	}
 
 	dst := configSpec{
@@ -203,12 +250,14 @@ func (e Envelope) ToConfigSpecWithOptions(
 	}
 
 	// Parse the hardware.
-	if err := e.toHardware(&dst, defaultConfigName, vs, opts); err != nil {
+	if err := e.toHardware(
+		&dst, configName, vs, fileRefs, opts); err != nil {
+
 		return configSpec{}, err
 	}
 
 	// Parse the vApp config.
-	if err := e.toVAppConfig(&dst, defaultConfigName, vs); err != nil {
+	if err := e.toVAppConfig(&dst, configName, vs); err != nil {
 		return configSpec{}, err
 	}
 
@@ -219,6 +268,7 @@ func (e Envelope) toHardware(
 	dst *configSpec,
 	configName string,
 	vs *VirtualSystem,
+	fileRefs map[string]File,
 	opts ToConfigSpecOptions) error {
 
 	var hw VirtualHardwareSection
@@ -239,6 +289,9 @@ func (e Envelope) toHardware(
 
 	// Parse the extra config.
 	e.toExtraConfig(dst, hw)
+
+	// Property defaults for the selected config (used e.g. for disk capacity "${key}").
+	propertyValues := e.propertyDefaultsForConfig(vs, configName)
 
 	var (
 		devices   object.VirtualDeviceList
@@ -280,21 +333,27 @@ func (e Envelope) toHardware(
 			// TODO(akutz)
 
 		case Processor: // 3
-			if item.VirtualQuantity == nil {
+			if item.VirtualQuantity != nil {
+				dst.NumCPUs = int32(*item.VirtualQuantity)
+			} else if item.Reservation != nil {
+				dst.NumCPUs = int32(*item.Reservation)
+			} else {
 				return errUnsupportedItem(
-					index, item, nil, "nil VirtualQuantity")
+					index, item, nil, "nil VirtualQuantity and Reservation")
 			}
-			dst.NumCPUs = int32(*item.VirtualQuantity)
-			if cps := item.CoresPerSocket; cps != nil {
-				dst.NumCoresPerSocket = &cps.Value
+			if item.CoresPerSocket != nil {
+				dst.NumCoresPerSocket = &item.CoresPerSocket.Value
 			}
 
 		case Memory: // 4
-			if item.VirtualQuantity == nil {
+			if item.VirtualQuantity != nil {
+				dst.MemoryMB = int64(*item.VirtualQuantity)
+			} else if item.Reservation != nil {
+				dst.MemoryMB = int64(*item.Reservation)
+			} else {
 				return errUnsupportedItem(
-					index, item, nil, "nil VirtualQuantity")
+					index, item, nil, "nil VirtualQuantity and Reservation")
 			}
-			dst.MemoryMB = int64(*item.VirtualQuantity)
 
 		case IdeController: // 5
 			d, err = e.toIDEController(item, devices, resources)
@@ -335,7 +394,7 @@ func (e Envelope) toHardware(
 			d, err = e.toCDOrDVDDrive(item, devices, resources)
 
 		case DiskDrive: // 17
-			d, err = e.toVirtualDisk(item, devices, resources)
+			d, err = e.toVirtualDisk(item, devices, resources, fileRefs, propertyValues)
 
 		case TapeDrive: // 18
 			// TODO(akutz)
@@ -414,7 +473,23 @@ func (e Envelope) toHardware(
 	}
 
 	// Add the devices to the ConfigSpec.
-	dst.DeviceChange, _ = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	dst.DeviceChange = make([]types.BaseVirtualDeviceConfigSpec, len(devices))
+	for i, d := range devices {
+		vdcs := &types.VirtualDeviceConfigSpec{
+			Device:    devices[i],
+			Operation: types.VirtualDeviceConfigSpecOperationAdd,
+		}
+		if disk, ok := d.(*types.VirtualDisk); ok {
+			vdcs.FileOperation = types.VirtualDeviceConfigSpecFileOperationCreate
+			if b, ok := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+				if b.FileName != "" {
+					// Set the file operation to empty for existing disks.
+					vdcs.FileOperation = ""
+				}
+			}
+		}
+		dst.DeviceChange[i] = vdcs
+	}
 
 	return nil
 }
@@ -504,31 +579,55 @@ func (e Envelope) ovfDisk(diskID string) *VirtualDiskDesc {
 	return nil
 }
 
+// propertyDefaultsForConfig returns a map of property key to default
+// value for the given deployment configuration, from all
+// ProductSections of vs (DSP0243 9.5.1). Used for resolving
+// ovf:capacity="${key}" on Disk elements (DSP0243 9.1).
+func (e Envelope) propertyDefaultsForConfig(vs *VirtualSystem, configName string) map[string]string {
+	out := make(map[string]string)
+	for _, product := range vs.Product {
+		for _, pair := range product.PropertiesWithCategory() {
+			p := pair.Property
+			if p.Configuration != nil && *p.Configuration != configName {
+				continue
+			}
+			var value string
+			if p.Default != nil {
+				value = *p.Default
+			}
+			for _, v := range p.Values {
+				if v.Configuration != nil && *v.Configuration == configName {
+					value = v.Value
+					break
+				}
+			}
+			out[p.Key] = strings.TrimSpace(value)
+		}
+	}
+	return out
+}
+
 func (e Envelope) toVirtualDisk(
 	item itemElement,
 	devices object.VirtualDeviceList,
-	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
+	resources map[string]types.BaseVirtualDevice,
+	fileRefs map[string]File,
+	propertyValues map[string]string) (types.BaseVirtualDevice, error) {
 
-	if item.Parent == nil {
-		return nil, fmt.Errorf("missing Parent")
+	var c types.BaseVirtualController
+	if item.Parent != nil {
+		if r, ok := resources[*item.Parent]; ok {
+			if c1, ok := r.(types.BaseVirtualController); ok {
+				c = c1
+			}
+		}
 	}
 
-	r, ok := resources[*item.Parent]
-	if !ok {
-		return nil, nil
-	}
-
-	c, ok := r.(types.BaseVirtualController)
-	if !ok {
-		return nil, fmt.Errorf("expectedType=%s, actualType=%T",
-			"types.BaseVirtualController", r)
-	}
-
-	d := devices.CreateDisk(c, types.ManagedObjectReference{}, "")
-
-	d.VirtualDevice.DeviceInfo = &types.Description{
-		Label: item.ElementName,
-	}
+	// The diskName variable is used to store the name of the disk from
+	// disk from the OVF that are backed by a file.
+	// This is used to set the disk name in the ConfigSpec to distinguish
+	// between empty disks and disks that are backed by a file.
+	diskName := ""
 
 	// Find the disk's capacity.
 	var capacityInBytes uint64
@@ -551,18 +650,44 @@ func (e Envelope) toVirtualDisk(
 			return nil, fmt.Errorf("missing diskID %q", diskID)
 		}
 
+		if dd.FileRef != nil && *dd.FileRef != "" {
+			if f, ok := fileRefs[*dd.FileRef]; ok {
+				diskName = path.Base(f.Href)
+			}
+		}
+
 		var allocUnitsSz string
 		if dd.CapacityAllocationUnits != nil {
 			allocUnitsSz = *dd.CapacityAllocationUnits
 		}
 		capacityInBytes = uint64(ParseCapacityAllocationUnits(allocUnitsSz))
 		if capSz := dd.Capacity; capSz != "" {
-			cap, err := strconv.ParseUint(dd.Capacity, 10, 64)
-			if err != nil {
-				return nil, fmt.Errorf("disk=%s has invalid capacity=%q",
-					diskID, capSz)
+			var capVal uint64
+			if strings.HasPrefix(capSz, "${") && strings.HasSuffix(capSz, "}") {
+				// DSP0243 9.1: capacity may reference a Property, e.g. ovf:capacity="${disk.size}"
+				key := strings.TrimSpace(capSz[2 : len(capSz)-1])
+				if key == "" {
+					return nil, fmt.Errorf("disk=%s has empty property reference in capacity=%q", diskID, capSz)
+				}
+				val, ok := propertyValues[key]
+				if !ok || val == "" {
+					return nil, fmt.Errorf("disk=%s capacity references property %q which is not defined or has no value for this configuration", diskID, key)
+				}
+				var err error
+				capVal, err = strconv.ParseUint(val, 10, 64)
+				if err != nil {
+					return nil, fmt.Errorf("disk=%s capacity property %q value %q is not a valid integer: %w", diskID, key, val, err)
+				}
+				capacityInBytes *= capVal
+			} else {
+				var err error
+				capVal, err = strconv.ParseUint(dd.Capacity, 10, 64)
+				if err != nil {
+					return nil, fmt.Errorf("disk=%s has invalid capacity=%q",
+						diskID, capSz)
+				}
+				capacityInBytes *= capVal
 			}
-			capacityInBytes *= cap
 		}
 
 	default:
@@ -572,6 +697,12 @@ func (e Envelope) toVirtualDisk(
 	if capacityInBytes > math.MaxInt64 {
 		return nil, fmt.Errorf(
 			"capacityInBytes=%d exceeds math.MaxInt64", capacityInBytes)
+	}
+
+	d := devices.CreateDisk(c, types.ManagedObjectReference{}, diskName)
+
+	d.VirtualDevice.DeviceInfo = &types.Description{
+		Label: item.ElementName,
 	}
 
 	d.CapacityInBytes = int64(capacityInBytes)
@@ -607,12 +738,41 @@ func (e Envelope) toCDOrDVDDrive(
 	return d, nil
 }
 
+var validSCSIControllerTypes = map[string]struct{}{
+	"buslogic":     {},
+	"lsilogic":     {},
+	"lsilogic-sas": {},
+	"pvscsi":       {},
+	"scsi":         {},
+	"virtualscsi":  {},
+}
+
+// resolveSCSIControllerType parses resourceSubType by splitting on
+// comma or space, trims whitespace from each element, and returns the
+// first element that matches a key in validSCSIControllerTypes (match
+// is case-insensitive). If no match, returns the original string.
+func resolveSCSIControllerType(resourceSubType string) string {
+	trimmed := strings.TrimSpace(resourceSubType)
+	// Split on comma or space (one or more of either)
+	tokens := strings.Fields(strings.ReplaceAll(trimmed, ",", " "))
+	for _, tok := range tokens {
+		t := strings.TrimSpace(tok)
+		lower := strings.ToLower(t)
+		if _, ok := validSCSIControllerTypes[lower]; ok {
+			return lower
+		}
+	}
+	return resourceSubType
+}
+
 func (e Envelope) toSCSIController(
 	item itemElement,
 	devices object.VirtualDeviceList,
 	resources map[string]types.BaseVirtualDevice) (types.BaseVirtualDevice, error) {
 
-	d, err := devices.CreateSCSIController(item.resourceSubType)
+	controllerType := resolveSCSIControllerType(item.resourceSubType)
+
+	d, err := devices.CreateSCSIController(controllerType)
 	if err != nil {
 		return nil, err
 	}
@@ -1012,6 +1172,303 @@ func szToInt32(s string) int32 {
 	return int32(v)
 }
 
+// vApp PropertyInfo base type constants (values repeated in ovfToVAppBaseType).
+const vAppBaseTypeInt = "int"
+
+// OVF property type to vApp PropertyInfo.Type (base type) per DSP0243 Table 6
+// and vSphere API vim.vApp.PropertyInfo. Integer OVF types map to "int",
+// real32/real64 to "real".
+var ovfToVAppBaseType = map[string]string{
+	"uint8":   vAppBaseTypeInt,
+	"sint8":   vAppBaseTypeInt,
+	"uint16":  vAppBaseTypeInt,
+	"sint16":  vAppBaseTypeInt,
+	"uint32":  vAppBaseTypeInt,
+	"sint32":  vAppBaseTypeInt,
+	"uint64":  vAppBaseTypeInt,
+	"sint64":  vAppBaseTypeInt,
+	"string":  "string",
+	"boolean": "boolean",
+	"real32":  "real",
+	"real64":  "real",
+	"int":     vAppBaseTypeInt, // common in OVF although not in DSP0243 Table 6
+}
+
+// Regexes for OVF qualifiers per DSP0243 section 9.5.1 Table 7 and vSphere QualifierMap.
+var (
+	ovfMinLenRx   = regexp.MustCompile(`MinLen\((\d+)\)`)
+	ovfMaxLenRx   = regexp.MustCompile(`MaxLen\((\d+)\)`)
+	ovfValueMapRx = regexp.MustCompile(`ValueMap\{(.*)\}`)
+	ovfMinValueRx = regexp.MustCompile(`MinValue\(([-]?\d+(?:\.\d*)?(?:[eE][-+]?\d+)?)\)`)
+	ovfMaxValueRx = regexp.MustCompile(`MaxValue\(([-]?\d+(?:\.\d*)?(?:[eE][-+]?\d+)?)\)`)
+	// VMware qualifiers: Ip, Ip(), or Ip("network") / Ip(network) -> ip / ip:network
+	ovfIpNoArgRx = regexp.MustCompile(`Ip\s*\(\s*\)`)
+	ovfIpArgRx   = regexp.MustCompile(`Ip\s*\(\s*["']?([^"')]*)["']?\s*\)`) // arg may be quoted or unquoted
+	ovfIpBareRx  = regexp.MustCompile(`\bIp\b`)                             // bare "Ip" (no parens)
+)
+
+// vSphere expression qualifier pattern (VmwOvf) -> vApp type "expression".
+// With parens: VimIp(), Net("Management"). Without parens: bare "VimIp" etc.
+var (
+	ovfExpressionQualifierRx = regexp.MustCompile(
+		`(AutoIp|VimIp|Net|Netmask|Gateway|DomainName|HostPrefix|Dns|Subnet|SearchPath|HttpProxy)\s*\(\s*["']?([^"')]*)["']?\s*\)`)
+	ovfExpressionBareRx = regexp.MustCompile(
+		`\b(AutoIp|VimIp|Net|Netmask|Gateway|DomainName|HostPrefix|Dns|Subnet|SearchPath|HttpProxy)\b`)
+)
+
+// ovfTypeToVAppBaseType returns the vApp PropertyInfo base type for an OVF
+// property type.
+func ovfTypeToVAppBaseType(ovfType string) string {
+	key := strings.TrimSpace(strings.ToLower(ovfType))
+	if t, ok := ovfToVAppBaseType[key]; ok {
+		return t
+	}
+	return ovfType
+}
+
+// ovfQualifiers holds parsed OVF qualifiers (DSP0243 9.5.1 Table 7 and vSphere QualifierMap).
+type ovfQualifiers struct {
+	minLen int // MinLen(min) for string
+	maxLen int // MaxLen(max) for string; -1 means not set
+	// ValueMap{...} (parsed as strings for string and int)
+	valueMap []string
+	// MinValue(n), MaxValue(n) for int/real
+	minValue, maxValue *float64
+	// VMware Ip() or Ip("network") -> ip or ip:network
+	ipArg *string // nil = not Ip, "" = Ip(), "x" = Ip("x")
+	// VMware expression qualifier (VimIp, Net, etc.) -> type "expression"
+	expressionName string // e.g. "VimIp"
+	expressionArg  string // e.g. "" or "Management"
+}
+
+func parseOVFQualifiers(qualifiers string) (q ovfQualifiers) {
+	q.maxLen = -1
+	qualifiers = strings.TrimSpace(qualifiers)
+	if qualifiers == "" {
+		return q
+	}
+	if m := ovfMinLenRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.minLen, _ = strconv.Atoi(m[1])
+	}
+	if m := ovfMaxLenRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.maxLen, _ = strconv.Atoi(m[1])
+	}
+	if m := ovfValueMapRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.valueMap = parseValueMapContent(m[1])
+	}
+	if m := ovfMinValueRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		if v, err := strconv.ParseFloat(m[1], 64); err == nil {
+			q.minValue = &v
+		}
+	}
+	if m := ovfMaxValueRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		if v, err := strconv.ParseFloat(m[1], 64); err == nil {
+			q.maxValue = &v
+		}
+	}
+	if m := ovfIpArgRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		arg := strings.TrimSpace(m[1])
+		q.ipArg = &arg
+	} else if ovfIpNoArgRx.MatchString(qualifiers) {
+		s := ""
+		q.ipArg = &s
+	} else if ovfIpBareRx.MatchString(qualifiers) {
+		s := ""
+		q.ipArg = &s
+	}
+	if m := ovfExpressionQualifierRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.expressionName = m[1]
+		q.expressionArg = strings.TrimSpace(m[2])
+	} else if m := ovfExpressionBareRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		q.expressionName = m[1]
+		q.expressionArg = ""
+	}
+	return q
+}
+
+// expressionDefaultFromQualifiers returns the default value for an expression-typed
+// property (e.g. "${vimIp:}" or "${net:Management}") per vSphere QualifierMap.
+// Returns "" if qualifiers do not contain a vSphere expression qualifier.
+func expressionDefaultFromQualifiers(qualifiers string) string {
+	if qualifiers == "" {
+		return ""
+	}
+	qualifiers = strings.TrimSpace(qualifiers)
+	var name, arg string
+	if m := ovfExpressionQualifierRx.FindStringSubmatch(qualifiers); len(m) >= 3 {
+		name = m[1]
+		arg = strings.TrimSpace(m[2])
+	} else if m := ovfExpressionBareRx.FindStringSubmatch(qualifiers); len(m) > 0 {
+		name = m[1]
+		arg = ""
+	} else {
+		return ""
+	}
+	// Lowercase first letter to match vSphere (e.g. VimIp -> vimIp)
+	lcName := name
+	if len(name) > 0 {
+		lcName = strings.ToLower(name[:1]) + name[1:]
+	}
+	if arg != "" {
+		return "${" + lcName + ":" + arg + "}"
+	}
+	return "${" + lcName + ":}"
+}
+
+// parseValueMapContent parses the content inside ValueMap{...}:
+// comma-separated values, each a quoted string or number (per CIM/DSP0004).
+func parseValueMapContent(content string) []string {
+	content = strings.TrimSpace(content)
+	if content == "" {
+		return nil
+	}
+	var values []string
+	i := 0
+	for i < len(content) {
+		for i < len(content) && (content[i] == ',' || content[i] == ' ') {
+			i++
+		}
+		if i >= len(content) {
+			break
+		}
+		if content[i] == '"' {
+			// Quoted string: find closing " (handle escaped \" and \')
+			i++
+			start := i
+			for i < len(content) {
+				if content[i] == '\\' && i+1 < len(content) {
+					i += 2
+					continue
+				}
+				if content[i] == '"' {
+					values = append(values, content[start:i])
+					i++
+					break
+				}
+				i++
+			}
+			continue
+		}
+		// Number or unquoted token
+		start := i
+		for i < len(content) && content[i] != ',' {
+			i++
+		}
+		values = append(values, strings.TrimSpace(content[start:i]))
+	}
+	return values
+}
+
+// toVAppPropertyType returns the vApp PropertyInfo.Type string for an OVF
+// Property, applying the OVF-to-vApp type mapping and embedding qualifiers
+// per DSP0243 9.5.1, vim.vApp.PropertyInfo, and vSphere QualifierMap.
+func toVAppPropertyType(p Property) string {
+	baseType := ovfTypeToVAppBaseType(p.Type)
+	if p.Password != nil && *p.Password && baseType == "string" {
+		baseType = "password"
+	}
+	qualStr := ""
+	if p.Qualifiers != nil {
+		qualStr = strings.TrimSpace(*p.Qualifiers)
+	}
+	if qualStr == "" {
+		return baseType
+	}
+	q := parseOVFQualifiers(qualStr)
+
+	// VMware expression qualifiers (VimIp, Net, etc.) -> "expression"
+	if q.expressionName != "" {
+		return "expression"
+	}
+	// VMware Ip() or Ip("network") -> "ip" or "ip:network" (string type only)
+	if q.ipArg != nil && (baseType == "string" || baseType == "password") {
+		if *q.ipArg == "" {
+			return "ip"
+		}
+		return "ip:" + *q.ipArg
+	}
+
+	switch baseType {
+	case "string", "password":
+		if len(q.valueMap) > 0 {
+			// string["choice1", "choice2", ...] — escape " and \ in choices
+			parts := make([]string, 0, len(q.valueMap))
+			for _, v := range q.valueMap {
+				esc := strings.ReplaceAll(strings.ReplaceAll(v, `\`, `\\`), `"`, `\"`)
+				parts = append(parts, `"`+esc+`"`)
+			}
+			return baseType + "[" + strings.Join(parts, ", ") + "]"
+		}
+		// When both MinLen and MaxLen are set (including MinLen(0)), use
+		// (min..max) so the parser's strWithMinMaxLenRx applies correctly.
+		// (min..) and (..max) are parsed by strWithMinLenRx and strWithMaxLenRx.
+		if q.maxLen >= 0 && q.minLen >= 0 {
+			return fmt.Sprintf("%s(%d..%d)", baseType, q.minLen, q.maxLen)
+		}
+		if q.maxLen >= 0 {
+			return fmt.Sprintf("%s(..%d)", baseType, q.maxLen)
+		}
+		if q.minLen > 0 {
+			return fmt.Sprintf("%s(%d..)", baseType, q.minLen)
+		}
+	case "int":
+		if len(q.valueMap) > 0 {
+			minVal, maxVal, ok := valueMapIntRange(q.valueMap)
+			if ok {
+				return fmt.Sprintf("int(%d..%d)", minVal, maxVal)
+			}
+		}
+		if q.minValue != nil || q.maxValue != nil {
+			minV, maxV := int64(-2147483648), int64(2147483647)
+			if q.minValue != nil {
+				minV = int64(*q.minValue)
+			}
+			if q.maxValue != nil {
+				maxV = int64(*q.maxValue)
+			}
+			return fmt.Sprintf("int(%d..%d)", minV, maxV)
+		}
+	case "real":
+		if q.minValue != nil || q.maxValue != nil {
+			minV, maxV := -1e308, 1e308
+			if q.minValue != nil {
+				minV = *q.minValue
+			}
+			if q.maxValue != nil {
+				maxV = *q.maxValue
+			}
+			return fmt.Sprintf("real(%v..%v)", minV, maxV)
+		}
+	}
+	return baseType
+}
+
+// valueMapIntRange parses valueMap as integers and returns min, max and true;
+// otherwise 0, 0, false.
+func valueMapIntRange(valueMap []string) (minVal, maxVal int64, ok bool) {
+	if len(valueMap) == 0 {
+		return 0, 0, false
+	}
+	first, err := strconv.ParseInt(strings.TrimSpace(valueMap[0]), 10, 64)
+	if err != nil {
+		return 0, 0, false
+	}
+	minVal, maxVal = first, first
+	for i := 1; i < len(valueMap); i++ {
+		v, err := strconv.ParseInt(strings.TrimSpace(valueMap[i]), 10, 64)
+		if err != nil {
+			return 0, 0, false
+		}
+		if v < minVal {
+			minVal = v
+		}
+		if v > maxVal {
+			maxVal = v
+		}
+	}
+	return minVal, maxVal, true
+}
+
 func deref[T any](pT *T) T {
 	var t T
 	if pT != nil {
@@ -1051,12 +1508,19 @@ func (e Envelope) toVAppConfig(
 			},
 		})
 
-		for _, p := range product.Property {
+		for _, pair := range product.PropertiesWithCategory() {
+			p := pair.Property
 			if p.Configuration != nil && *p.Configuration != configName {
 				// Skip properties that are not part of the provided
 				// configuration.
 				continue
 			}
+			// DSP0243 9.5.1: ovf:key shall not contain period or colon.
+			// if strings.ContainsAny(p.Key, ".:") {
+			// 	return fmt.Errorf(
+			// 		"property key %q contains invalid character "+
+			// 			"(period or colon) per DSP0243 9.5.1", p.Key)
+			// }
 
 			// Get the default values for the current configuration from the
 			// list of default values that are per-config.
@@ -1074,17 +1538,27 @@ func (e Envelope) toVAppConfig(
 			if p.UserConfigurable == nil {
 				p.UserConfigurable = types.NewBool(false)
 			}
-			// Parse the value using the vApp config parser.
-			// Empty default values (including whitespace-only) are allowed.
+			vAppType := toVAppPropertyType(p)
+			// Parse the value using the vApp config parser with the computed
+			// type so that qualifier-derived constraints (e.g. string(1..65535))
+			// are applied.
 			value = strings.TrimSpace(value)
 			parsedValue := value
 			if value != "" {
+				pForParse := Property{Key: p.Key, Type: vAppType}
 				var err error
-				parsedValue, err = parseVAppConfigValue(p, value)
+				parsedValue, err = parseVAppConfigValue(pForParse, value)
 				if err != nil {
 					return err
 				}
+			} else if vAppType == "expression" && p.Qualifiers != nil {
+				// vSphere QualifierMap: expression qualifiers get default like "${vimIp:}".
+				if d := expressionDefaultFromQualifiers(*p.Qualifiers); d != "" {
+					parsedValue = d
+				}
 			}
+			// Use per-property category from DSP0243 9.5.1 grouping.
+			category := pair.Category
 			np := types.VAppPropertySpec{
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: types.ArrayUpdateOperationAdd,
@@ -1094,9 +1568,9 @@ func (e Envelope) toVAppConfig(
 					ClassId:          deref(product.Class),
 					InstanceId:       deref(product.Instance),
 					Id:               p.Key,
-					Category:         product.Category,
+					Category:         category,
 					Label:            deref(p.Label),
-					Type:             p.Type,
+					Type:             vAppType,
 					UserConfigurable: p.UserConfigurable,
 					DefaultValue:     parsedValue,
 					Value:            "",

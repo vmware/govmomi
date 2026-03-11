@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <!--
+  uber.ovf: combines unique aspects of all OVF fixtures for comprehensive testing.
+  - References + file-backed disk (vmdisk1) and property-backed empty disk (vmdisk2, capacity=${disksize})
+  - DeploymentOptionSection (default, extended): disk combination varies by config
+    - default: one disk (vmdisk1 file-backed)
+    - extended: two disks (vmdisk1 file-backed + vmdisk2 property capacity, Item ovf:configuration="extended")
+  - ProductSection with category grouping (Net, Storage, Security), property types (string, int, boolean),
+    qualifiers (MinLen, MaxLen), and deployment config intersection
+  - VirtualHardwareSection with Config on controller, disks (second disk extended-only), one NIC
+  - AnnotationSection, OperatingSystemSection
+-->
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:vmw="http://www.vmware.com/schema/ovf"
+          xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+          xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+          xmlns:sasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_StorageAllocationSettingData">
+  <References>
+    <File ovf:id="file1" ovf:href="uber-os.vmdk" ovf:size="1073741824"/>
+  </References>
+  <DiskSection>
+    <Info>File-backed and property-backed disks</Info>
+    <Disk ovf:capacity="20" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk1" ovf:fileRef="file1"/>
+    <Disk ovf:capacity="${disksize}" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk2"/>
+  </DiskSection>
+  <NetworkSection>
+    <Info>Logical networks</Info>
+    <Network ovf:name="Management">
+      <Description>Management network</Description>
+    </Network>
+    <Network ovf:name="Workload">
+      <Description>Workload network</Description>
+    </Network>
+  </NetworkSection>
+  <DeploymentOptionSection>
+    <Info>Deployment configurations</Info>
+    <Configuration ovf:id="default" ovf:default="true">
+      <Label>Default</Label>
+      <Description>Base configuration</Description>
+    </Configuration>
+    <Configuration ovf:id="extended">
+      <Label>Extended</Label>
+      <Description>Includes config-specific properties</Description>
+    </Configuration>
+  </DeploymentOptionSection>
+  <VirtualSystem ovf:id="uber-vm">
+    <Info>Uber fixture: all OVF parsing and ConfigSpec aspects</Info>
+    <Name>uber-vm</Name>
+    <AnnotationSection>
+      <Info>Annotation</Info>
+      <Annotation>Uber OVF fixture for comprehensive tests</Annotation>
+    </AnnotationSection>
+    <OperatingSystemSection ovf:id="101" vmw:osType="other3xLinux64Guest">
+      <Info>Guest OS</Info>
+      <Description>Other 3.x or later Linux (64-bit)</Description>
+    </OperatingSystemSection>
+    <ProductSection ovf:class="uber" ovf:required="false">
+      <Info>Category grouping, property types, qualifiers, deployment config</Info>
+      <Product>UberFixture</Product>
+      <Vendor>Test</Vendor>
+      <Version>1.0</Version>
+      <Category>Net</Category>
+      <Property ovf:key="net_common" ovf:type="string" ovf:userConfigurable="true" ovf:value="">
+        <Label>Network (common)</Label>
+      </Property>
+      <Property ovf:key="net_extended" ovf:type="string" ovf:configuration="extended" ovf:userConfigurable="true" ovf:value="">
+        <Label>Network (extended only)</Label>
+      </Property>
+      <Property ovf:key="hostname" ovf:type="string" ovf:userConfigurable="true" ovf:value="uber.local" ovf:qualifiers="MinLen(1),MaxLen(253)">
+        <Label>Hostname</Label>
+        <Description>VM hostname (1-253 chars)</Description>
+      </Property>
+      <Category>Storage</Category>
+      <Property ovf:key="storage_common" ovf:type="string" ovf:userConfigurable="true" ovf:value="">
+        <Label>Storage (common)</Label>
+      </Property>
+      <Property ovf:key="disksize" ovf:type="int" ovf:value="5">
+        <Label>Data disk size (GiB)</Label>
+        <Description>Size of the second disk in gibibytes (DSP0243 9.1)</Description>
+      </Property>
+      <Property ovf:key="storage_extended" ovf:type="string" ovf:configuration="extended" ovf:userConfigurable="true" ovf:value="">
+        <Label>Storage (extended only)</Label>
+      </Property>
+      <Category>Security</Category>
+      <Property ovf:key="auth_mode" ovf:type="string" ovf:userConfigurable="true" ovf:value="password">
+        <Label>Authentication mode</Label>
+      </Property>
+      <Property ovf:key="enable_ssh" ovf:type="boolean" ovf:userConfigurable="true" ovf:value="false">
+        <Label>Enable SSH</Label>
+      </Property>
+      <Property ovf:key="extended_secret" ovf:type="string" ovf:configuration="extended" ovf:userConfigurable="true" ovf:value="">
+        <Label>Secret (extended only)</Label>
+      </Property>
+    </ProductSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo">
+      <Info>Virtual hardware</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemIdentifier>uber-vm</vssd:VirtualSystemIdentifier>
+        <vssd:VirtualSystemType>vmx-13</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>512MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>SCSI Controller</rasd:Description>
+        <rasd:ElementName>SCSI Controller 1</rasd:ElementName>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:key="slotInfo.pciSlotNumber" vmw:value="128"/>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 1 (file-backed)</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="extended">
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 2 (property capacity, extended only)</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk2</rasd:HostResource>
+        <rasd:InstanceID>5</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Management</rasd:Connection>
+        <rasd:ElementName>Network adapter 1</rasd:ElementName>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:ResourceSubType>VmxNet3</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

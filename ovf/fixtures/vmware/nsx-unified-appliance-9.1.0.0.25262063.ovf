@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:vmw="http://www.vmware.com/schema/ovf">
+  <References>
+    <File ovf:href="nsx-unified-appliance.vmdk" ovf:size="8072292352" ovf:id="nsx-unified-appliance.vmdk_id"/>
+  </References>
+  <DeploymentOptionSection>
+    <Info>The list of deployment options</Info>
+    <Configuration ovf:id="small">
+      <Label ovf:msgid="config.small.label">Small</Label>
+      <Description ovf:msgid="config.small.description">
+IMPORTANT: Small VM appliance size is suitable for lab and proof-of-concept deployment
+
+This configuration requires the following:
+* 4 vCPU
+* 16GB RAM
+* 300GB Storage
+* VM hardware version 10 or greater (vSphere 5.5 or greater)</Description>
+    </Configuration>
+    <Configuration ovf:id="medium" ovf:default="true">
+      <Label ovf:msgid="config.medium.label">Medium</Label>
+      <Description ovf:msgid="config.medium.description">
+IMPORTANT: This configuration is supported for Local Manager Production deployment ('NSX Manager' role)
+           This is supported for Global Manager Production deployment
+
+This configuration requires the following:
+* 6 vCPU
+* 24GB RAM
+* 300GB Storage
+* VM hardware version 10 or greater (vSphere 5.5 or greater)</Description>
+    </Configuration>
+    <Configuration ovf:id="large">
+      <Label ovf:msgid="config.large.label">Large</Label>
+      <Description ovf:msgid="config.large.description">
+IMPORTANT: This configuration is supported for Local Manager Production deployment ('NSX Manager' role)
+           This is supported for Global Manager Production deployment
+
+This configuration requires the following:
+* 12 vCPU
+* 48GB RAM
+* 300GB Storage
+* VM hardware version 10 or greater (vSphere 5.5 or greater)</Description>
+    </Configuration>
+    <Configuration ovf:id="xlarge">
+      <Label ovf:msgid="config.xlarge.label">ExtraLarge</Label>
+      <Description ovf:msgid="config.xlarge.description">
+IMPORTANT: This configuration is supported for Local Manager Production deployment ('NSX Manager' role)
+           This is supported for Global Manager Production deployment
+
+This configuration requires the following:
+* 24 vCPU
+* 96GB RAM
+* 400GB Storage
+* VM hardware version 10 or greater (vSphere 5.5 or greater)</Description>
+    </Configuration>
+  </DeploymentOptionSection>
+  <NetworkSection>
+    <Info>List of logical networks used in the package</Info>
+    <Network ovf:name="Network 1">
+      <Description>Network 1</Description>
+    </Network>
+  </NetworkSection>
+  <vmw:IpAssignmentSection ovf:required="false" vmw:protocols="IPv4,IPv6" vmw:schemes="">
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <DiskSection>
+    <Info>List of the virtual disks and partitions needed</Info>
+    <Disk ovf:diskId="system" ovf:capacity="200" ovf:capacityAllocationUnits="byte * 2^30" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:fileRef="nsx-unified-appliance.vmdk_id" ovf:populatedSize="4312137728"/>
+    <ovf:Disk ovf:diskId="secondary" ovf:capacity="102400" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <ovf:Disk ovf:diskId="disk100GB" ovf:capacity="102400" ovf:capacityAllocationUnits="byte * 2^20" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+  </DiskSection>
+  <VirtualSystem ovf:id="nsx-unified-appliance">
+    <Info>A virtual machine</Info>
+    <ProductSection ovf:required="false">
+      <Info>VM ISV branding information</Info>
+      <Product>nsx-unified-appliance</Product>
+      <Vendor>VMware, Inc</Vendor>
+      <!--
+            Version is the actual product version in the
+            form X.X.X.X where X is an unsigned 16-bit integer.
+
+            FullVersion is a descriptive version string
+            including, for example, alpha or beta designations
+            and other release criteria.
+        -->
+      <Version>9.1.0.0</Version>
+      <FullVersion>9.1.0.0.25262063</FullVersion>
+      <ProductUrl/>
+      <VendorUrl/>
+      <AppUrl>http://${vami.ip0.nsx-unified-appliance}/</AppUrl>
+      <Category>Application</Category>
+      <!-- BEGIN OVF PROPERTIES -->
+      <Property ovf:key="nsx_grub_passwd" ovf:type="string" ovf:userConfigurable="true" ovf:password="true">
+        <Label ovf:msgid="grub.password.label">System GRUB Root User Password</Label>
+        <Description ovf:msgid="grub.password.desc">The password for GRUB root user for this VM. </Description>
+      </Property>
+      <Property ovf:key="nsx_grub_menu_timeout" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="grub.menu.timeout.label">System GRUB menu timeout</Label>
+        <Description ovf:msgid="grub.menu.timeout.desc">The timeout to display GRUB menu for this VM. </Description>
+      </Property>
+      <Property ovf:key="nsx_passwd_0" ovf:type="string" ovf:userConfigurable="true" ovf:qualifiers="MinLen(8)" ovf:password="true">
+        <Label ovf:msgid="root.user.password.label">System Root User Password</Label>
+        <Description ovf:msgid="root.user.password.desc">The password for root user for this VM.
+Please follow the password complexity rule as below:
+    - minimum of 8 characters in length
+    - &gt;=1 uppercase character
+    - &gt;=1 lowercase character
+    - &gt;=1 numeric character
+    - &gt;=1 special character
+    - &gt;=5 unique characters
+    - default password complexity rules as enforced by the Linux PAM module
+    NOTE: Password strength validation will occur during VM boot.  If the password does not meet the above criteria then login as root user for the change password prompt to appear. </Description>
+      </Property>
+      <Property ovf:key="nsx_cli_passwd_0" ovf:type="string" ovf:userConfigurable="true" ovf:qualifiers="MinLen(8)" ovf:password="true">
+        <Label ovf:msgid="cli.user.password.label">CLI "admin" User Password</Label>
+        <Description ovf:msgid="cli.user.password.desc">The password for default CLI user for this VM.
+Please follow the password complexity rule as below:
+    - minimum of 8 characters in length
+    - &gt;=1 uppercase character
+    - &gt;=1 lowercase character
+    - &gt;=1 numeric character
+    - &gt;=1 special character
+    - &gt;=5 unique characters
+    - default password complexity rules as enforced by the Linux PAM module
+    NOTE: Password strength validation will occur during VM boot.  If the password does not meet the above criteria then login as admin user for the change password prompt to appear. </Description>
+      </Property>
+      <Property ovf:key="nsx_cli_audit_passwd_0" ovf:type="string" ovf:userConfigurable="true" ovf:password="true">
+        <Label ovf:msgid="cli.audit.user.password.label">CLI "audit" User Password</Label>
+        <Description ovf:msgid="cli.audit.user.password.desc">The password for audit CLI user for this VM.
+Please follow the password complexity rule as below:
+    - minimum of 8 characters in length
+    - &gt;=1 uppercase character
+    - &gt;=1 lowercase character
+    - &gt;=1 numeric character
+    - &gt;=1 special character
+    - &gt;=5 unique characters
+    - default password complexity rules as enforced by the Linux PAM module
+    NOTE: Password strength validation will occur during VM boot.  If the password does not meet the above criteria then login as admin user and use the NSX CLI command "set user audit" to change the audit user password. </Description>
+      </Property>
+      <Property ovf:key="nsx_cli_username" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="cli.user.adminusername.label">CLI "admin" username (default: admin)</Label>
+        <Description ovf:msgid="cli.user.adminusername.desc">Username of administrator user.</Description>
+      </Property>
+      <Property ovf:key="nsx_cli_audit_username" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="cli.user.auditusername.label">CLI "audit" username (default: audit)</Label>
+        <Description ovf:msgid="cli.user.auditusername.desc">Username of auditor user.</Description>
+      </Property>
+      <Property ovf:key="extraPara" ovf:type="string" ovf:userConfigurable="true" ovf:password="true">
+        <Label ovf:msgid="extraPara.label">Optional parameters</Label>
+        <Description ovf:msgid="extraPara.desc">For internal use only.</Description>
+      </Property>
+      <Category ovf:msgid="network.ipv4.category">Network properties</Category>
+      <Property ovf:key="nsx_hostname" ovf:type="string" ovf:userConfigurable="true" ovf:qualifiers="MinLen(1),MaxLen(253)">
+        <Label ovf:msgid="hostname.label">Hostname</Label>
+        <Description ovf:msgid="hostname.desc">The hostname for this VM.
+    Valid characters for hostname are A-Z, a-z, 0-9, dot (.) and hyphen (-). A hostname may not start with a hyphen. Each element of the hostname must be from 1 to 63 characters long and the entire hostname, including the dots, can be at most 253 characters long.
+    NOTE: If hostname contains invalid characters, then the appliance gets deployed with 'nsx-manager' as hostname. </Description>
+      </Property>
+      <Property
+        ovf:key="nsx_role"
+        ovf:type="string"
+        ovf:userConfigurable="true"
+        ovf:value="NSX Manager"
+        ovf:qualifiers="ValueMap{&quot;NSX Manager&quot;,&quot;NSX Global Manager&quot;}">
+        <Label ovf:msgid="nsx_role.label">Rolename</Label>
+        <Description ovf:msgid="nsx_role.desc">The role for this VM. Currently supports 'NSX Global Manager' OR 'NSX Manager' as rolename. </Description>
+      </Property>
+      <Property ovf:key="nsx_ip_0" ovf:type="string" ovf:userConfigurable="true" ovf:qualifiers="MinLen(1)">
+        <Label ovf:msgid="network.ipv4.address.label">Management Network IPv4 Address</Label>
+        <Description ovf:msgid="network.ipv4.address.desc">The IPv4 Address for the first interface. For IPv6-only deployments use the value: None</Description>
+      </Property>
+      <Property ovf:key="nsx_netmask_0" ovf:type="string" ovf:userConfigurable="true" ovf:qualifiers="MinLen(1)">
+        <Label ovf:msgid="network.ipv4.netmask.label">Management Network Netmask</Label>
+        <Description ovf:msgid="network.ipv4.netmask.desc">The netmask for the first interface. For IPv6-only deployments use the value: None</Description>
+      </Property>
+      <Property ovf:key="nsx_gateway_0" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="network.ipv4.gateway.label">Default IPv4 Gateway</Label>
+        <Description ovf:msgid="network.ipv4.gateway.desc">The default IPv4 gateway for this VM.</Description>
+      </Property>
+      <Property ovf:key="nsx_ip6_0" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="network.ipv6.address.label">Management Network IPv6 Address</Label>
+        <Description ovf:msgid="network.ipv6.address.desc">The IPv6 Address for the first interface.</Description>
+      </Property>
+      <Property ovf:key="nsx_netmask6_0" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="network.ipv6.netmask.label">Management IPv6 Network Netmask Prefix</Label>
+        <Description ovf:msgid="network.ipv6.netmask.desc">The IPv6 netmask prefix for the first interface. (ex.- 64)</Description>
+      </Property>
+      <Property ovf:key="nsx_gateway6_0" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="network.ipv6.gateway.label">Default IPv6 Gateway</Label>
+        <Description ovf:msgid="network.ipv6.gateway.desc">The default IPv6 gateway for this VM.</Description>
+      </Property>
+      <Category ovf:msgid="dns.category">DNS</Category>
+      <Property ovf:key="nsx_dns1_0" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="dns.primary.label">DNS Server list</Label>
+        <Description ovf:msgid="dns.primary.desc">The space separated DNS server list for this VM (valid only if an IPv4 address is specified for the first interface).
+    NOTE: At most three name servers can be configured (first 3 name servers passed in list will be used and all other will be ignored)</Description>
+      </Property>
+      <Property ovf:key="nsx_domain_0" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="dns.domain.label">Domain Search List</Label>
+        <Description ovf:msgid="dns.domain.desc">The space separated domain search list for this VM (valid only if an IPv4 address is specified for the first interface).</Description>
+      </Property>
+      <Category ovf:msgid="services.configuration.category">Services Configuration</Category>
+      <Property ovf:key="nsx_ntp_0" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="ntp.label">NTP Server List</Label>
+        <Description ovf:msgid="ntp.desc">The NTP server list(space separated) for this VM.</Description>
+      </Property>
+      <Property ovf:key="nsx_isSSHEnabled" ovf:value="false" ovf:type="boolean" ovf:userConfigurable="true">
+        <Label ovf:msgid="ssh.enable.label">Enable SSH</Label>
+        <Description ovf:msgid="ssh.enable.desc">Enabling SSH service is not recommended for security reasons.</Description>
+      </Property>
+      <Property ovf:key="nsx_allowSSHRootLogin" ovf:value="false" ovf:type="boolean" ovf:userConfigurable="true">
+        <Label ovf:msgid="ssh.allowrootlogin.label">Allow root SSH logins</Label>
+        <Description ovf:msgid="ssh.allowrootlogin.desc">Allowing root SSH logins is not recommended for security reasons.</Description>
+      </Property>
+      <Property ovf:key="nsx_swIntegrityCheck" ovf:value="false" ovf:type="boolean" ovf:userConfigurable="true">
+        <Label ovf:msgid="ssh.softwareintchecker.label">Software Integrity Checker</Label>
+        <Description ovf:msgid="ssh.softwareintchecker.desc">Software Integrity Checker is required only for NDcPP 2.2</Description>
+      </Property>
+      <Category ovf:msgid="internal.properties.category">Internal Properties - Do not set these parameters.</Category>
+      <Property ovf:key="mpIp" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="mpIp.label">Manager IP</Label>
+        <Description ovf:msgid="mpIp.desc">For internal use only. Do not set this parameter. </Description>
+      </Property>
+      <Property ovf:key="mpToken" ovf:type="string" ovf:userConfigurable="true" ovf:password="true">
+        <Label ovf:msgid="mpToken.label">Manager Token</Label>
+        <Description ovf:msgid="mpToken.desc">For internal use only. Do not set this parameter. </Description>
+      </Property>
+      <Property ovf:key="mpThumbprint" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="mpThumbprint.label">Manager Thumbprint</Label>
+        <Description ovf:msgid="mpThumbprint.desc">For internal use only. Do not set this parameter. </Description>
+      </Property>
+      <Property ovf:key="mpNodeId" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="mpNodeId.label">Manager Node ID</Label>
+        <Description ovf:msgid="mpNodeId.desc">For internal use only. Do not set this parameter. </Description>
+      </Property>
+      <Property ovf:key="mpClusterId" ovf:type="string" ovf:userConfigurable="true">
+        <Label ovf:msgid="mpClusterId.label">Cluster ID of First Manager Cluster</Label>
+        <Description ovf:msgid="mpClusterId.desc">For internal use only. Do not set this parameter. </Description>
+      </Property>
+      <!-- END OVF PROPERTIES -->
+    </ProductSection>
+    <ProductSection ovf:class="vami" ovf:instance="nsx-unified-appliance" ovf:required="false">
+      <Info>VAMI Properties</Info>
+    </ProductSection>
+    <ProductSection ovf:class="vm" ovf:required="false">
+      <Info>VM specific properties</Info>
+    </ProductSection>
+    <AnnotationSection>
+      <Info/>
+      <Annotation/>
+    </AnnotationSection>
+    <OperatingSystemSection ovf:id="94" ovf:version="" vmw:osType="ubuntu64Guest">
+      <Info>Guest Operating System</Info>
+      <Description>Ubuntu 16.04 64bit</Description>
+    </OperatingSystemSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo" ovf:required="false">
+      <Info>Virtual Hardware Requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-13 vmx-11 vmx-10</vssd:VirtualSystemType>
+      </System>
+      <Item ovf:configuration="small">
+        <rasd:AllocationUnits>hertz * 10^9</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">4 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">1</rasd:InstanceID>
+        <rasd:Reservation>4</rasd:Reservation>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>4</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="medium">
+        <rasd:AllocationUnits>hertz * 10^9</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">6 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">1</rasd:InstanceID>
+        <rasd:Reservation>6</rasd:Reservation>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>6</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="large">
+        <rasd:AllocationUnits>hertz * 10^9</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">12 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">1</rasd:InstanceID>
+        <rasd:Reservation>12</rasd:Reservation>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>12</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="xlarge">
+        <rasd:AllocationUnits>hertz * 10^9</rasd:AllocationUnits>
+        <rasd:Description>Number of virtual CPUs</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">24 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">1</rasd:InstanceID>
+        <rasd:Reservation>24</rasd:Reservation>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>24</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="small">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">16384 MB of memory</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">2</rasd:InstanceID>
+        <rasd:Reservation>16384</rasd:Reservation>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>16384</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="medium">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">24576 MB of memory</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">2</rasd:InstanceID>
+        <rasd:Reservation>24576</rasd:Reservation>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>24576</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="large">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">49152 MB of memory</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">2</rasd:InstanceID>
+        <rasd:Reservation>49152</rasd:Reservation>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>49152</rasd:VirtualQuantity>
+      </Item>
+      <Item ovf:configuration="xlarge">
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">98304 MB of memory</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">2</rasd:InstanceID>
+        <rasd:Reservation>98304</rasd:Reservation>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>98304</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>Network 1</rasd:Connection>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Ethernet adapter on vmnet</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">3</rasd:InstanceID>
+        <rasd:ResourceSubType>VmxNet3</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:Address xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">0</rasd:Address>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">SCSI Controller 0  - lsilogic</rasd:ElementName>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">4</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Harddisk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/system</rasd:HostResource>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">5</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>1</rasd:AddressOnParent>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Harddisk 2</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/secondary</rasd:HostResource>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item ovf:configuration="xlarge">
+        <rasd:AddressOnParent>2</rasd:AddressOnParent>
+        <rasd:ElementName xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">Harddisk xlarge</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/disk100GB</rasd:HostResource>
+        <rasd:InstanceID xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">7</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <vmw:Config ovf:required="false" vmw:key="tools.syncTimeWithHost" vmw:value="false"/>
+      <vmw:ExtraConfig vmw:key="time.synchronize.continue" vmw:value="false"/>
+      <vmw:ExtraConfig vmw:key="time.synchronize.restore" vmw:value="false"/>
+      <vmw:ExtraConfig vmw:key="time.synchronize.resume.disk" vmw:value="false"/>
+      <vmw:ExtraConfig vmw:key="time.synchronize.shrink" vmw:value="false"/>
+      <vmw:ExtraConfig vmw:key="time.synchronize.tools.startup" vmw:value="false"/>
+      <vmw:ExtraConfig vmw:key="ethernet0.rxDataRingEnabled" vmw:value="0"/>
+      <vmw:ExtraConfig vmw:key="ethernet1.rxDataRingEnabled" vmw:value="0"/>
+      <vmw:ExtraConfig vmw:key="ethernet2.rxDataRingEnabled" vmw:value="0"/>
+      <vmw:ExtraConfig vmw:key="ethernet3.rxDataRingEnabled" vmw:value="0"/>
+      <vmw:ExtraConfig vmw:key="isolation.tools.diskWiper.disable" vmw:value="true"/>
+      <vmw:ExtraConfig vmw:key="isolation.tools.memSchedFakeSampleStats.disable" vmw:value="true"/>
+      <vmw:ExtraConfig vmw:key="isolation.tools.diskShrink.disable" vmw:value="true"/>
+      <vmw:ExtraConfig vmw:key="isolation.tools.vmxDnDVersionGet.disable" vmw:value="true"/>
+      <vmw:ExtraConfig vmw:key="isolation.tools.unityActive.disable" vmw:value="true"/>
+      <vmw:ExtraConfig vmw:key="isolation.tools.guestDnDVersionSet.disable" vmw:value="true"/>
+      <vmw:ExtraConfig vmw:key="snapshot.maxSnapshots" vmw:value="0"/>
+      <vmw:ExtraConfig vmw:key="stealclock.enable" vmw:value="true"/>
+            <vmw:ExtraConfig vmw:key="RemoteDisplay.maxConnections" vmw:value="1"/>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+  <!-- BEGIN L10N Strings -->
+<Strings xml:lang="ja-JP">
+    <Msg ovf:msgid="config.small.label">Small</Msg>
+    <Msg ovf:msgid="config.small.description">
+重要: Small サイズの仮想マシン アプライアンスは、ラボ環境や概念実証環境に適しています。
+
+この構成では次のものが必要です。
+* 4 個の vCPU
+* 16 GB の RAM
+* 300 GB のストレージ
+* 仮想マシン ハードウェア バージョン 10 以降 (vSphere 5.5 以降)</Msg>
+    <Msg ovf:msgid="config.medium.label">Medium</Msg>
+    <Msg ovf:msgid="config.medium.description">
+重要: この構成は、ローカル マネージャの本番環境での展開 (NSX Manager ロール) でサポートされます。
+           これは、グローバル マネージャの本番環境での展開でサポートされます。
+
+この構成では次のものが必要です。
+* 6 個の vCPU
+* 24 GB の RAM
+* 300 GB のストレージ
+* 仮想マシン ハードウェア バージョン 10 以降 (vSphere 5.5 以降)</Msg>
+    <Msg ovf:msgid="config.large.label">Large</Msg>
+    <Msg ovf:msgid="config.large.description">
+重要: この構成は、ローカル マネージャの本番環境での展開 (NSX Manager ロール) でサポートされます。
+           これは、グローバル マネージャの本番環境での展開でサポートされます。
+
+この構成では次のものが必要です。
+* 12 個の vCPU
+* 48 GB の RAM
+* 300 GB のストレージ
+* 仮想マシン ハードウェア バージョン 10 以降 (vSphere 5.5 以降)</Msg>
+    <Msg ovf:msgid="config.xlarge.label">ExtraLarge</Msg>
+    <Msg ovf:msgid="config.xlarge.description">
+重要: この構成は、ローカル マネージャの本番環境での展開 (NSX Manager ロール) でサポートされます。
+           これは、グローバル マネージャの本番環境での展開でサポートされます。
+
+この構成では次のものが必要です。
+* 24 個の vCPU
+* 96 GB の RAM
+* 400 GB のストレージ
+* 仮想マシン ハードウェア バージョン 10 以降 (vSphere 5.5 以降)</Msg>
+    <Msg ovf:msgid="grub.password.label">システム GRUB root ユーザーのパスワード</Msg>
+    <Msg ovf:msgid="grub.password.desc">この仮想マシンの GRUB root ユーザーのパスワード。</Msg>
+    <Msg ovf:msgid="grub.menu.timeout.label">システム GRUB メニューのタイムアウト</Msg>
+    <Msg ovf:msgid="grub.menu.timeout.desc">この仮想マシンの GRUB メニューを表示するタイムアウト。</Msg>
+    <Msg ovf:msgid="root.user.password.label">システムの root ユーザーのパスワード</Msg>
+    <Msg ovf:msgid="root.user.password.desc">この仮想マシンの root ユーザーのパスワード。
+次のパスワード強度ルールに従ってください。
+    - 8 文字以上の長さ
+    - 1 つ以上の大文字
+    - 1 つ以上の小文字
+    - 1 つ以上の数字
+    - 1 つ以上の特殊文字
+    - 5 個以上の異なる文字
+    - Linux PAM モジュールによって適用されるデフォルトのパスワード強度ルール
+    注: パスワードの強度は、仮想マシンの起動時に検証されます。パスワードが上記の基準を満たしていない場合、root ユーザーとしてログインすると、パスワードの変更を求めるプロンプトが表示されます。 </Msg>
+    <Msg ovf:msgid="cli.user.password.label">CLI admin ユーザー パスワード</Msg>
+    <Msg ovf:msgid="cli.user.password.desc">この仮想マシンのデフォルトの CLI ユーザーのパスワード。
+次のパスワード強度ルールに従ってください。
+    - 8 文字以上の長さ
+    - 1 つ以上の大文字
+    - 1 つ以上の小文字
+    - 1 つ以上の数字
+    - 1 つ以上の特殊文字
+    - 5 個以上の異なる文字
+    - Linux PAM モジュールによって適用されるデフォルトのパスワード強度ルール
+    注: パスワードの強度は、仮想マシンの起動時に検証されます。パスワードが上記の基準を満たしていない場合、admin ユーザーとしてログインすると、パスワードの変更を求めるプロンプトが表示されます。 </Msg>
+    <Msg ovf:msgid="cli.audit.user.password.label">CLI audit ユーザー パスワード</Msg>
+    <Msg ovf:msgid="cli.audit.user.password.desc">この仮想マシンの audit CLI ユーザーのパスワード。
+次のパスワード強度ルールに従ってください。
+    - 8 文字以上の長さ
+    - 1 つ以上の大文字
+    - 1 つ以上の小文字
+    - 1 つ以上の数字
+    - 1 つ以上の特殊文字
+    - 5 個以上の異なる文字
+    - Linux PAM モジュールによって適用されるデフォルトのパスワード強度ルール
+    注: パスワードの強度は、仮想マシンの起動時に検証されます。パスワードが上記の基準を満たしていない場合は、admin ユーザーとしてログインし、NSX CLI コマンド set user audit を使用して audit ユーザーのパスワードを変更します。 </Msg>
+    <Msg ovf:msgid="cli.user.adminusername.label">CLI の「admin」ユーザー名 (デフォルト: admin)</Msg>
+    <Msg ovf:msgid="cli.user.adminusername.desc">管理者ユーザーのユーザー名。</Msg>
+    <Msg ovf:msgid="cli.user.auditusername.label">CLI の「audit」ユーザー名 (デフォルト: audit)</Msg>
+    <Msg ovf:msgid="cli.user.auditusername.desc">監査者ユーザーのユーザー名。</Msg>
+    <Msg ovf:msgid="extraPara.label">オプション パラメータ</Msg>
+    <Msg ovf:msgid="extraPara.desc">内部使用のみ。</Msg>
+    <Msg ovf:msgid="network.ipv4.category">ネットワーク プロパティ</Msg>
+    <Msg ovf:msgid="hostname.label">ホスト名</Msg>
+    <Msg ovf:msgid="hostname.desc">この仮想マシンのホスト名。
+    ホスト名に有効な文字は、A ～ Z、a ～ z、0 ～ 9、ドット (.)、ハイフン (-) です。ホスト名はハイフンで始めることはできません。ホスト名の各要素の長さは 1 ～ 63 文字にし、ホスト名全体 (ドットを含む) は 253 文字以下にする必要があります。
+    注: ホスト名に無効な文字が含まれている場合、アプライアンスは nsx-manager というホスト名で展開されます。</Msg>
+    <Msg ovf:msgid="nsx_role.label">ロール名</Msg>
+    <Msg ovf:msgid="nsx_role.desc">この仮想マシンのロール。現在、ロール名として NSX Global Manager または NSX Manager がサポートされています。</Msg>
+    <Msg ovf:msgid="network.ipv4.address.label">管理ネットワーク IPv4 アドレス</Msg>
+    <Msg ovf:msgid="network.ipv4.address.desc">最初のインターフェイスの IPv4 アドレス。IPv6 のみの展開の場合は、[なし] を使用します</Msg>
+    <Msg ovf:msgid="network.ipv4.netmask.label">管理ネットワークのネットマスク</Msg>
+    <Msg ovf:msgid="network.ipv4.netmask.desc">最初のインターフェイスのネットマスク。IPv6 のみの展開の場合は、[なし] を使用します</Msg>
+    <Msg ovf:msgid="network.ipv4.gateway.label">デフォルト IPv4 ゲートウェイ</Msg>
+    <Msg ovf:msgid="network.ipv4.gateway.desc">この仮想マシンのデフォルト IPv4 ゲートウェイ。</Msg>
+    <Msg ovf:msgid="network.ipv6.address.label">管理ネットワーク IPv6 アドレス</Msg>
+    <Msg ovf:msgid="network.ipv6.address.desc">最初のインターフェイスの IPv6 アドレス。</Msg>
+    <Msg ovf:msgid="network.ipv6.netmask.label">管理 IPv6 ネットワーク ネットマスク プレフィックス</Msg>
+    <Msg ovf:msgid="network.ipv6.netmask.desc">最初のインターフェイスの IPv6 ネットマスク プレフィックス。(例: - 64)</Msg>
+    <Msg ovf:msgid="network.ipv6.gateway.label">デフォルト IPv6 ゲートウェイ</Msg>
+    <Msg ovf:msgid="network.ipv6.gateway.desc">この仮想マシンのデフォルト IPv6 ゲートウェイ。</Msg>
+    <Msg ovf:msgid="dns.category">DNS</Msg>
+    <Msg ovf:msgid="dns.primary.label">DNS サーバ リスト</Msg>
+    <Msg ovf:msgid="dns.primary.desc">この仮想マシンのスペース区切りの DNS サーバ リスト (最初のインターフェイスに IPv4 アドレスが指定されている場合にのみ有効)。
+    注: ネーム サーバは 3 つまで構成できます (リストの最初の 3 つのネーム サーバが使用され、それ以外はすべて無視されます)</Msg>
+    <Msg ovf:msgid="dns.domain.label">ドメイン検索リスト</Msg>
+    <Msg ovf:msgid="dns.domain.desc">この仮想マシンのスペース区切りのドメイン検索リスト (最初のインターフェイスに IPv4 アドレスが指定されている場合にのみ有効)。</Msg>
+    <Msg ovf:msgid="services.configuration.category">サービス構成</Msg>
+    <Msg ovf:msgid="ntp.label">NTP サーバ リスト</Msg>
+    <Msg ovf:msgid="ntp.desc">この仮想マシンの NTP サーバ リスト (スペース区切り)。</Msg>
+    <Msg ovf:msgid="ssh.enable.label">SSH の有効化</Msg>
+    <Msg ovf:msgid="ssh.enable.desc">セキュリティ上の理由で SSH サービスの有効化は推奨されません。</Msg>
+    <Msg ovf:msgid="ssh.allowrootlogin.label">root SSH ログインを許可</Msg>
+    <Msg ovf:msgid="ssh.allowrootlogin.desc">セキュリティ上の理由で root SSH ログインの許可は推奨されません。</Msg>
+    <Msg ovf:msgid="ssh.softwareintchecker.label">ソフトウェア整合性チェッカー</Msg>
+    <Msg ovf:msgid="ssh.softwareintchecker.desc">ソフトウェア整合性チェッカーは NDcPP 2.2 でのみ必要です</Msg>
+    <Msg ovf:msgid="internal.properties.category">内部プロパティ - これらのパラメータは設定しないでください。</Msg>
+    <Msg ovf:msgid="mpIp.label">Manager の IP</Msg>
+    <Msg ovf:msgid="mpIp.desc">内部使用のみ。このパラメータは設定しない。</Msg>
+    <Msg ovf:msgid="mpToken.label">Manager トークン</Msg>
+    <Msg ovf:msgid="mpToken.desc">内部使用のみ。このパラメータは設定しない。</Msg>
+    <Msg ovf:msgid="mpThumbprint.label">Manager のサムプリント</Msg>
+    <Msg ovf:msgid="mpThumbprint.desc">内部使用のみ。このパラメータは設定しない。</Msg>
+    <Msg ovf:msgid="mpNodeId.label">マネージャ ノード ID</Msg>
+    <Msg ovf:msgid="mpNodeId.desc">内部使用のみ。このパラメータは設定しない。</Msg>
+    <Msg ovf:msgid="mpClusterId.label">最初のマネージャ クラスタのクラスタ ID</Msg>
+    <Msg ovf:msgid="mpClusterId.desc">内部使用のみ。このパラメータは設定しない。</Msg>
+</Strings>
+<Strings xml:lang="fr-FR">
+    <Msg ovf:msgid="config.small.label">Petite</Msg>
+    <Msg ovf:msgid="config.small.description">
+IMPORTANT : un dispositif de machines virtuelles de petite taille convient au déploiement de concept en laboratoire et technique
+
+Cette configuration requiert les éléments suivants :
+* 4 vCPU
+* 16 Go de RAM
+* Stockage de 300 Go
+* Matériel de VM version 10 ou supérieure (vSphere 5.5 ou version supérieure)</Msg>
+    <Msg ovf:msgid="config.medium.label">Moyenne</Msg>
+    <Msg ovf:msgid="config.medium.description">
+IMPORTANT : cette configuration est prise en charge pour le déploiement de Local Manager Production (rôle NSX Manager)
+           Ceci est pris en charge pour le déploiement de Global Manager Production
+
+Cette configuration requiert les éléments suivants :
+* 6 vCPU
+* 24 Go de RAM
+* Stockage de 300 Go
+* Matériel de VM version 10 ou supérieure (vSphere 5.5 ou version supérieure)</Msg>
+    <Msg ovf:msgid="config.large.label">Volumineuse</Msg>
+    <Msg ovf:msgid="config.large.description">
+IMPORTANT : cette configuration est prise en charge pour le déploiement de Local Manager Production (rôle NSX Manager)
+           Ceci est pris en charge pour le déploiement de Global Manager Production
+
+Cette configuration requiert les éléments suivants :
+* 12 vCPU
+* 48 Go de RAM
+* Stockage de 300 Go
+* Matériel de VM version 10 ou supérieure (vSphere 5.5 ou version supérieure)</Msg>
+    <Msg ovf:msgid="config.xlarge.label">Très grand</Msg>
+    <Msg ovf:msgid="config.xlarge.description">
+IMPORTANT : cette configuration est prise en charge pour le déploiement de Local Manager Production (rôle NSX Manager)
+           Ceci est pris en charge pour le déploiement de Global Manager Production
+
+Cette configuration requiert les éléments suivants :
+* 24 vCPU
+* 96 Go de RAM
+* Stockage de 400 Go
+* Matériel de VM version 10 ou supérieure (vSphere 5.5 ou version supérieure)</Msg>
+    <Msg ovf:msgid="grub.password.label">Mot de passe de l'utilisateur racine du système GRUB</Msg>
+    <Msg ovf:msgid="grub.password.desc">Mot de passe de l'utilisateur racine GRUB de cette VM. </Msg>
+    <Msg ovf:msgid="grub.menu.timeout.label">Délai d'expiration du menu système GRUB</Msg>
+    <Msg ovf:msgid="grub.menu.timeout.desc">Délai d'expiration de l'affichage du menu GRUB pour cette VM. </Msg>
+    <Msg ovf:msgid="root.user.password.label">Mot de passe de l'utilisateur racine du système</Msg>
+    <Msg ovf:msgid="root.user.password.desc">Mot de passe de l'utilisateur racine de cette VM.
+Veuillez suivre la règle de complexité du mot de passe ci-dessous :
+    - une longueur minimale de 8 caractères
+    - &gt;=1 caractère majuscule
+    - &gt;=1 caractère minuscule
+    - &gt;=1 caractère numérique
+    - &gt;=1 caractère spécial
+    - &gt;=5 caractères uniques
+    - règles de complexité de mot de passe par défaut appliquées par le module PAM Linux
+    REMARQUE : la validation de la force du mot de passe se produira lors du démarrage de la VM. Si le mot de passe ne répond pas aux critères ci-dessus, connectez-vous en tant qu'utilisateur racine pour que l'invite de modification du mot de passe s'affiche. </Msg>
+    <Msg ovf:msgid="cli.user.password.label">Mot de passe de l'utilisateur « Admin » de la CLI</Msg>
+    <Msg ovf:msgid="cli.user.password.desc">Mot de passe de l'utilisateur de CLI par défaut pour cette VM.
+Veuillez suivre la règle de complexité du mot de passe ci-dessous :
+    - une longueur minimale de 8 caractères
+    - &gt;=1 caractère majuscule
+    - &gt;=1 caractère minuscule
+    - &gt;=1 caractère numérique
+    - &gt;=1 caractère spécial
+    - &gt;=5 caractères uniques
+    - règles de complexité de mot de passe par défaut appliquées par le module PAM Linux
+    REMARQUE : la validation de la force du mot de passe se produira lors du démarrage de la VM. Si le mot de passe ne répond pas aux critères ci-dessus, connectez-vous en tant qu'utilisateur Admin pour que l'invite de modification du mot de passe s'affiche. </Msg>
+    <Msg ovf:msgid="cli.audit.user.password.label">Mot de passe de l'utilisateur « audit » de la CLI</Msg>
+    <Msg ovf:msgid="cli.audit.user.password.desc">Mot de passe de l'utilisateur d'audit de la CLI par défaut pour cette VM.
+Veuillez suivre la règle de complexité du mot de passe ci-dessous :
+    - une longueur minimale de 8 caractères
+    - &gt;=1 caractère majuscule
+    - &gt;=1 caractère minuscule
+    - &gt;=1 caractère numérique
+    - &gt;=1 caractère spécial
+    - &gt;=5 caractères uniques
+    - règles de complexité de mot de passe par défaut appliquées par le module PAM Linux
+    REMARQUE : la validation de la force du mot de passe se produira lors du démarrage de la VM. Si le mot de passe ne répond pas aux critères ci-dessus, connectez-vous en tant qu'utilisateur Admin et utilisez la commande CLI NSX « set user audit » pour modifier le mot de passe de l'utilisateur d'audit. </Msg>
+    <Msg ovf:msgid="cli.user.adminusername.label">Nom d'utilisateur « admin » de la CLI (par défaut : admin)</Msg>
+    <Msg ovf:msgid="cli.user.adminusername.desc">Nom d'utilisateur de l'utilisateur administrateur.</Msg>
+    <Msg ovf:msgid="cli.user.auditusername.label">Nom d'utilisateur « audit » de la CLI (par défaut : audit)</Msg>
+    <Msg ovf:msgid="cli.user.auditusername.desc">Nom d'utilisateur de l'auditeur.</Msg>
+    <Msg ovf:msgid="extraPara.label">Paramètres facultatifs</Msg>
+    <Msg ovf:msgid="extraPara.desc">Pour une utilisation interne uniquement.</Msg>
+    <Msg ovf:msgid="network.ipv4.category">Propriétés réseau</Msg>
+    <Msg ovf:msgid="hostname.label">Nom d'hôte</Msg>
+    <Msg ovf:msgid="hostname.desc">Nom d'hôte de cette VM.
+    Les caractères valides pour le nom d'hôte sont A-Z, a-z, 0-9, point (.) et trait d'union (-). Un nom d'hôte ne peut pas commencer par un trait d'union. Chaque élément du nom d'hôte doit comporter entre 1 et 63 caractères et l'intégralité du nom d'hôte, y compris les points, peut comporter au maximum 253 caractères.
+    REMARQUE : si le nom d'hôte contient des caractères non valides, le dispositif est alors déployé avec « nsx-manager » comme nom d'hôte.</Msg>
+    <Msg ovf:msgid="nsx_role.label">Nom du rôle</Msg>
+    <Msg ovf:msgid="nsx_role.desc">Le rôle de cette VM. Prend actuellement en charge « 'NSX Global Manager » OU « NSX Manager » comme nom de rôle.</Msg>
+    <Msg ovf:msgid="network.ipv4.address.label">Adresse IPv4 du réseau de gestion</Msg>
+    <Msg ovf:msgid="network.ipv4.address.desc">Adresse IPv4 de la première interface. Pour les déploiements IPv6 uniquement, utilisez la valeur : aucune</Msg>
+    <Msg ovf:msgid="network.ipv4.netmask.label">Masque du réseau de gestion</Msg>
+    <Msg ovf:msgid="network.ipv4.netmask.desc">Masque de réseau de la première interface. Pour les déploiements IPv6 uniquement, utilisez la valeur : aucune</Msg>
+    <Msg ovf:msgid="network.ipv4.gateway.label">Passerelle IPv4 par défaut</Msg>
+    <Msg ovf:msgid="network.ipv4.gateway.desc">Passerelle IPv4 par défaut de cette VM.</Msg>
+    <Msg ovf:msgid="network.ipv6.address.label">Adresse IPv6 du réseau de gestion</Msg>
+    <Msg ovf:msgid="network.ipv6.address.desc">Adresse IPv6 de la première interface.</Msg>
+    <Msg ovf:msgid="network.ipv6.netmask.label">Préfixe du masque de réseau du réseau IPv6 de gestion</Msg>
+    <Msg ovf:msgid="network.ipv6.netmask.desc">Préfixe du masque de réseau IPv6 de la première interface. (par exemple,- 64)</Msg>
+    <Msg ovf:msgid="network.ipv6.gateway.label">Passerelle IPv6 par défaut</Msg>
+    <Msg ovf:msgid="network.ipv6.gateway.desc">Passerelle IPv6 par défaut de cette VM.</Msg>
+    <Msg ovf:msgid="dns.category">DNS</Msg>
+    <Msg ovf:msgid="dns.primary.label">Liste des serveurs DNS</Msg>
+    <Msg ovf:msgid="dns.primary.desc">Liste de serveurs DNS séparés par des espaces pour cette VM (valide uniquement si une adresse IPv4 est spécifiée pour la première interface).
+    REMARQUE : trois serveurs de noms au maximum peuvent être configurés (les 3 premiers serveurs de noms transmis dans la liste seront utilisés et tous les autres seront ignorés)</Msg>
+    <Msg ovf:msgid="dns.domain.label">Liste de recherche de domaines</Msg>
+    <Msg ovf:msgid="dns.domain.desc">Liste de recherche de domaines séparés par des espaces pour cette VM (valide uniquement si une adresse IPv4 est spécifiée pour la première interface).</Msg>
+    <Msg ovf:msgid="services.configuration.category">Configuration des services</Msg>
+    <Msg ovf:msgid="ntp.label">Liste des serveurs NTP</Msg>
+    <Msg ovf:msgid="ntp.desc">Liste des serveurs NTP (séparés par des espaces) pour cette VM.</Msg>
+    <Msg ovf:msgid="ssh.enable.label">Activer SSH</Msg>
+    <Msg ovf:msgid="ssh.enable.desc">L'activation du service SSH n'est pas recommandée pour des raisons de sécurité.</Msg>
+    <Msg ovf:msgid="ssh.allowrootlogin.label">Autoriser les connexions SSH racines</Msg>
+    <Msg ovf:msgid="ssh.allowrootlogin.desc">L'activation des connexions SSH racines n'est pas recommandée pour des raisons de sécurité.</Msg>
+    <Msg ovf:msgid="ssh.softwareintchecker.label">Outil de vérification de l'intégrité du logiciel</Msg>
+    <Msg ovf:msgid="ssh.softwareintchecker.desc">L'outil de vérification de l'intégrité du logiciel n'est requis que pour NDcPP 2.2</Msg>
+    <Msg ovf:msgid="internal.properties.category">Propriétés internes : ne définissez pas ces paramètres.</Msg>
+    <Msg ovf:msgid="mpIp.label">Adresse IP du gestionnaire</Msg>
+    <Msg ovf:msgid="mpIp.desc">Pour une utilisation interne uniquement. Ne définissez pas ce paramètre.</Msg>
+    <Msg ovf:msgid="mpToken.label">Jeton du gestionnaire</Msg>
+    <Msg ovf:msgid="mpToken.desc">Pour une utilisation interne uniquement. Ne définissez pas ce paramètre.</Msg>
+    <Msg ovf:msgid="mpThumbprint.label">Empreinte numérique du gestionnaire</Msg>
+    <Msg ovf:msgid="mpThumbprint.desc">Pour une utilisation interne uniquement. Ne définissez pas ce paramètre.</Msg>
+    <Msg ovf:msgid="mpNodeId.label">ID du nœud de gestionnaire</Msg>
+    <Msg ovf:msgid="mpNodeId.desc">Pour une utilisation interne uniquement. Ne définissez pas ce paramètre.</Msg>
+    <Msg ovf:msgid="mpClusterId.label">ID du cluster du premier cluster de gestionnaire</Msg>
+    <Msg ovf:msgid="mpClusterId.desc">Pour une utilisation interne uniquement. Ne définissez pas ce paramètre.</Msg>
+</Strings>
+<Strings xml:lang="es-ES">
+    <Msg ovf:msgid="config.small.label">Pequeño</Msg>
+    <Msg ovf:msgid="config.small.description">
+IMPORTANTE: El tamaño de dispositivo de máquina virtual pequeño es adecuado para implementaciones de prueba de concepto y laboratorio
+
+Esta configuración requiere lo siguiente:
+* 4 vCPU
+* 16GB de RAM
+* 300GB de almacenamiento
+* Versión 10 o posterior del hardware de máquina virtual (vSphere 5.5 o posterior)</Msg>
+    <Msg ovf:msgid="config.medium.label">Mediano</Msg>
+    <Msg ovf:msgid="config.medium.description">
+IMPORTANTE: Esta configuración es compatible con la implementación de producción de Local Manager (función de 'NSX Manager').
+           Es compatible con la implementación de producción de Global Manager
+
+Esta configuración requiere lo siguiente:
+* 6 vCPU
+* 24GB de RAM
+* 300GB de almacenamiento
+* Versión 10 o posterior del hardware de máquina virtual (vSphere 5.5 o posterior)</Msg>
+    <Msg ovf:msgid="config.large.label">Grande</Msg>
+    <Msg ovf:msgid="config.large.description">
+IMPORTANTE: Esta configuración es compatible con la implementación de producción de Local Manager (función de 'NSX Manager').
+           Es compatible con la implementación de producción de Global Manager
+
+Esta configuración requiere lo siguiente:
+* 12 vCPU
+* 48GB de RAM
+* 300GB de almacenamiento
+* Versión 10 o posterior del hardware de máquina virtual (vSphere 5.5 o posterior)</Msg>
+    <Msg ovf:msgid="config.xlarge.label">Extragrande</Msg>
+    <Msg ovf:msgid="config.xlarge.description">
+IMPORTANTE: Esta configuración es compatible con la implementación de producción de Local Manager (función de 'NSX Manager').
+           Es compatible con la implementación de producción de Global Manager
+
+Esta configuración requiere lo siguiente:
+* 24 vCPU
+* 96GB de RAM
+* 400GB de almacenamiento
+* Versión 10 o posterior del hardware de máquina virtual (vSphere 5.5 o posterior)</Msg>
+    <Msg ovf:msgid="grub.password.label">Contraseña de usuario raíz de GRUB del sistema</Msg>
+    <Msg ovf:msgid="grub.password.desc">La contraseña del usuario raíz de GRUB para esta máquina virtual.</Msg>
+    <Msg ovf:msgid="grub.menu.timeout.label">Tiempo de espera del menú de GRUB del sistema</Msg>
+    <Msg ovf:msgid="grub.menu.timeout.desc">El tiempo de espera para mostrar el menú de GRUB de esta máquina virtual.</Msg>
+    <Msg ovf:msgid="root.user.password.label">Contraseña de usuario raíz del sistema</Msg>
+    <Msg ovf:msgid="root.user.password.desc">La contraseña del usuario raíz de esta máquina virtual.
+Siga la regla de complejidad de contraseña como se indica a continuación:
+    - longitud mínima de 8 caracteres
+    - &gt;=1 carácter en mayúscula
+    - &gt;=1 carácter en minúscula
+    - &gt;=1 carácter numérico
+    - &gt;=1 carácter especial
+    - &gt;=5 caracteres únicos
+    - reglas de complejidad de contraseña predeterminadas aplicadas por el módulo PAM de Linux
+    NOTA: La validación de la seguridad de la contraseña se producirá durante el arranque de la máquina virtual. Si la contraseña no cumple los criterios anteriores, inicie sesión como usuario raíz para que aparezca la solicitud de cambio de contraseña. </Msg>
+    <Msg ovf:msgid="cli.user.password.label">Contraseña de usuario "admin" de CLI</Msg>
+    <Msg ovf:msgid="cli.user.password.desc">La contraseña del usuario de la CLI predeterminado para esta máquina virtual.
+Siga la regla de complejidad de contraseña como se indica a continuación:
+    - longitud mínima de 8 caracteres
+    - &gt;=1 carácter en mayúscula
+    - &gt;=1 carácter en minúscula
+    - &gt;=1 carácter numérico
+    - &gt;=1 carácter especial
+    - &gt;=5 caracteres únicos
+    - reglas de complejidad de contraseña predeterminadas aplicadas por el módulo PAM de Linux
+    NOTA: La validación de la seguridad de la contraseña se producirá durante el arranque de la máquina virtual. Si la contraseña no cumple los criterios anteriores, inicie sesión como usuario admin para que aparezca la solicitud de cambio de contraseña. </Msg>
+    <Msg ovf:msgid="cli.audit.user.password.label">Contraseña de usuario "audit" de CLI</Msg>
+    <Msg ovf:msgid="cli.audit.user.password.desc">La contraseña del usuario audit de la CLI para esta máquina virtual.
+Siga la regla de complejidad de contraseña como se indica a continuación:
+    - longitud mínima de 8 caracteres
+    - &gt;=1 carácter en mayúscula
+    - &gt;=1 carácter en minúscula
+    - &gt;=1 carácter numérico
+    - &gt;=1 carácter especial
+    - &gt;=5 caracteres únicos
+    - reglas de complejidad de contraseña predeterminadas aplicadas por el módulo PAM de Linux
+    NOTA: La validación de la seguridad de la contraseña se producirá durante el arranque de la máquina virtual. Si la contraseña no cumple los criterios anteriores, inicie sesión como usuario admin y use el comando de la CLI de NSX "set user audit" para cambiar la contraseña del usuario audit. </Msg>
+    <Msg ovf:msgid="cli.user.adminusername.label">Nombre de usuario "admin" de la CLI (predeterminado: admin)</Msg>
+    <Msg ovf:msgid="cli.user.adminusername.desc">Nombre de usuario del usuario administrador.</Msg>
+    <Msg ovf:msgid="cli.user.auditusername.label">Nombre de usuario "audit" de la CLI (predeterminado: audit)</Msg>
+    <Msg ovf:msgid="cli.user.auditusername.desc">Nombre de usuario del auditor.</Msg>
+    <Msg ovf:msgid="extraPara.label">Parámetros opcionales</Msg>
+    <Msg ovf:msgid="extraPara.desc">Solo para uso interno.</Msg>
+    <Msg ovf:msgid="network.ipv4.category">Propiedades de red</Msg>
+    <Msg ovf:msgid="hostname.label">Nombre de host</Msg>
+    <Msg ovf:msgid="hostname.desc">El nombre de host de esta máquina virtual.
+    Los caracteres válidos para el nombre de host son A-Z, a-z, 0-9, punto (.) y guion (-). El nombre del host no puede comenzar con un guion. Cada elemento del nombre de host debe tener entre 1 y 63 caracteres, y el nombre de host completo, incluidos los puntos, puede tener una longitud máxima de 253 caracteres.
+    NOTA: Si el nombre de host contiene caracteres no válidos, el dispositivo se implementará con el nombre de host 'nsx-manager'.</Msg>
+    <Msg ovf:msgid="nsx_role.label">Nombre de función</Msg>
+    <Msg ovf:msgid="nsx_role.desc">La función de esta máquina virtual. Actualmente se admiten 'NSX Global Manager' o 'NSX Manager' como nombre de función.</Msg>
+    <Msg ovf:msgid="network.ipv4.address.label">Dirección IPv4 de la red de administración</Msg>
+    <Msg ovf:msgid="network.ipv4.address.desc">La dirección IPv4 de la primera interfaz. Para las implementaciones de solo IPv6, utilice el valor: Ninguno</Msg>
+    <Msg ovf:msgid="network.ipv4.netmask.label">Máscara de red de red de administración</Msg>
+    <Msg ovf:msgid="network.ipv4.netmask.desc">La máscara de red de la primera interfaz. Para las implementaciones de solo IPv6, utilice el valor: Ninguno</Msg>
+    <Msg ovf:msgid="network.ipv4.gateway.label">Puerta de enlace IPv4 predeterminada</Msg>
+    <Msg ovf:msgid="network.ipv4.gateway.desc">La puerta de enlace IPv4 predeterminada de esta máquina virtual.</Msg>
+    <Msg ovf:msgid="network.ipv6.address.label">Dirección IPv6 de la red de administración</Msg>
+    <Msg ovf:msgid="network.ipv6.address.desc">La dirección IPv6 para la primera interfaz.</Msg>
+    <Msg ovf:msgid="network.ipv6.netmask.label">Prefijo de máscara de red de red IPv6 de administración</Msg>
+    <Msg ovf:msgid="network.ipv6.netmask.desc">El prefijo de máscara de red IPv6 para la primera interfaz. (p. ej.- 64)</Msg>
+    <Msg ovf:msgid="network.ipv6.gateway.label">Puerta de enlace IPv6 predeterminada</Msg>
+    <Msg ovf:msgid="network.ipv6.gateway.desc">La puerta de enlace IPv6 predeterminada de esta máquina virtual.</Msg>
+    <Msg ovf:msgid="dns.category">DNS</Msg>
+    <Msg ovf:msgid="dns.primary.label">Lista de servidores DNS</Msg>
+    <Msg ovf:msgid="dns.primary.desc">La lista de servidores DNS separados por espacios para esta máquina virtual (válida solo si se especifica una dirección IPv4 para la primera interfaz).
+    NOTA: Se pueden configurar como máximo tres servidores de nombres (se utilizarán los primeros 3 servidores de nombres de la lista y los demás se ignorarán).</Msg>
+    <Msg ovf:msgid="dns.domain.label">Lista de búsqueda de dominios</Msg>
+    <Msg ovf:msgid="dns.domain.desc">La lista de búsqueda de dominios separados por espacios para esta máquina virtual (válida solo si se especifica una dirección IPv4 para la primera interfaz).</Msg>
+    <Msg ovf:msgid="services.configuration.category">Configuración de servicios</Msg>
+    <Msg ovf:msgid="ntp.label">Lista de servidores NTP</Msg>
+    <Msg ovf:msgid="ntp.desc">La lista de servidores NTP (separados por espacios) para esta máquina virtual.</Msg>
+    <Msg ovf:msgid="ssh.enable.label">Habilitar SSH</Msg>
+    <Msg ovf:msgid="ssh.enable.desc">No se recomienda habilitar el servicio SSH por motivos de seguridad.</Msg>
+    <Msg ovf:msgid="ssh.allowrootlogin.label">Permitir inicios de sesión SSH de raíz</Msg>
+    <Msg ovf:msgid="ssh.allowrootlogin.desc">No se recomienda permitir inicios de sesión SSH raíz por motivos de seguridad.</Msg>
+    <Msg ovf:msgid="ssh.softwareintchecker.label">Comprobación de integridad de software</Msg>
+    <Msg ovf:msgid="ssh.softwareintchecker.desc">La comprobación de integridad de software solo es necesaria para NDCPP 2.2</Msg>
+    <Msg ovf:msgid="internal.properties.category">Propiedades internas: no modifique estos parámetros.</Msg>
+    <Msg ovf:msgid="mpIp.label">IP de Manager</Msg>
+    <Msg ovf:msgid="mpIp.desc">Solo para uso interno. No establezca este parámetro.</Msg>
+    <Msg ovf:msgid="mpToken.label">Token de Manager</Msg>
+    <Msg ovf:msgid="mpToken.desc">Solo para uso interno. No establezca este parámetro.</Msg>
+    <Msg ovf:msgid="mpThumbprint.label">Huella digital del administrador</Msg>
+    <Msg ovf:msgid="mpThumbprint.desc">Solo para uso interno. No establezca este parámetro.</Msg>
+    <Msg ovf:msgid="mpNodeId.label">ID de nodo de Manager</Msg>
+    <Msg ovf:msgid="mpNodeId.desc">Solo para uso interno. No establezca este parámetro.</Msg>
+    <Msg ovf:msgid="mpClusterId.label">Identificador de clúster del primer clúster de Manager</Msg>
+    <Msg ovf:msgid="mpClusterId.desc">Solo para uso interno. No establezca este parámetro.</Msg>
+</Strings>
+  <!-- END L10N Strings -->
+</ovf:Envelope>

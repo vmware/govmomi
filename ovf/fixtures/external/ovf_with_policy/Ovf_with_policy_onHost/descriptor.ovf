@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?><Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">
+  <References>
+    <File ovf:id="file1" ovf:href="disk-vdcs-1.vmdk"/>
+    <File ovf:id="file2" ovf:href="disk-vdcs-2.vmdk"/>
+  </References>
+  <DiskSection>
+    <Info>List of the virtual disks</Info>
+    <Disk ovf:capacityAllocationUnits="byte" ovf:fileRef="file1" ovf:diskId="vmdisk1" ovf:capacity="4194304" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+    <Disk ovf:capacityAllocationUnits="byte" ovf:fileRef="file2" ovf:diskId="vmdisk2" ovf:capacity="4194304" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+  </DiskSection>
+  <vmw:IpAssignmentSection>
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <vmw:TagBasedPlacementGroupSection ovf:required="false" vmw:id="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:6211acf5-4bd9-44f8-9ee7-bbd6190e515d:GLOBAL_P0" vmw:name="policyBFU24B policyBFU24BTag2Mh5l Priority-0" vmw:priority="0">
+    <Info>Tag based placement policy for group of VMs</Info>
+    <vmw:Description>TagBased Placement Group: policyBFU24B policyBFU24BTag2Mh5l Priority-0</vmw:Description>
+    <vmw:TagCategory vmw:id="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceCategory:5f6d60eb-1f2a-475c-bd71-ddfb5a487874:GLOBAL" vmw:name="policyBFU24B"/>
+    <vmw:TagValue vmw:id="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:6211acf5-4bd9-44f8-9ee7-bbd6190e515d:GLOBAL" vmw:name="policyBFU24BTag2Mh5l"/>
+  </vmw:TagBasedPlacementGroupSection>
+  <vmw:TagBasedPlacementGroupSection ovf:required="false" vmw:id="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:b6044bd8-ba7b-427c-b866-af23e8ac6717:GLOBAL_P0" vmw:name="policyAOotZI policyAOotZITag98sXz Priority-0" vmw:priority="0">
+    <Info>Tag based placement policy for group of VMs</Info>
+    <vmw:Description>TagBased Placement Group: policyAOotZI policyAOotZITag98sXz Priority-0</vmw:Description>
+    <vmw:TagCategory vmw:id="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceCategory:f3082e2f-798f-4313-8524-ab3a9eab2196:GLOBAL" vmw:name="policyAOotZI"/>
+    <vmw:TagValue vmw:id="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:b6044bd8-ba7b-427c-b866-af23e8ac6717:GLOBAL" vmw:name="policyAOotZITag98sXz"/>
+  </vmw:TagBasedPlacementGroupSection>
+  <VirtualSystemCollection ovf:id="VApp-4lCrA">
+    <Info>A virtual system collection</Info>
+    <Name>VApp-4lCrA</Name>
+    <AnnotationSection>
+      <Info>A human-readable annotation</Info>
+      <Annotation>VApp Description-smpY0</Annotation>
+    </AnnotationSection>
+    <StartupSection>
+      <Info>Specifies the startup order of the application.</Info>
+      <Item ovf:order="1" ovf:stopDelay="120" ovf:startDelay="120" ovf:id="vm-1_with_policylY8Oy"/>
+      <Item ovf:order="2" ovf:stopDelay="120" ovf:startDelay="120" ovf:id="vm-2_with_policyjXKJt"/>
+    </StartupSection>
+    <ProductSection>
+      <Info>Information about the installed software</Info>
+    </ProductSection>
+    <VirtualSystem ovf:id="vm-1_with_policylY8Oy">
+      <Info>A Virtual system</Info>
+      <Name>vm-1_with_policylY8Oy</Name>
+      <AnnotationSection>
+        <Info>A human-readable annotation</Info>
+        <Annotation>VM Created on VDC.EumWV</Annotation>
+      </AnnotationSection>
+      <OperatingSystemSection ovf:id="67" vmw:osType="winXPProGuest">
+        <Info>The operating system installed</Info>
+        <Description>Microsoft Windows XP Professional (32-bit)</Description>
+      </OperatingSystemSection>
+      <VirtualHardwareSection>
+        <Info>Virtual hardware requirements</Info>
+        <System>
+          <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+          <vssd:InstanceID>0</vssd:InstanceID>
+          <vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>
+        </System>
+        <Item>
+          <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+          <rasd:Description>Number of Virtual CPUs</rasd:Description>
+          <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+          <rasd:InstanceID>1</rasd:InstanceID>
+          <rasd:Reservation>0</rasd:Reservation>
+          <rasd:ResourceType>3</rasd:ResourceType>
+          <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+          <rasd:Weight>500</rasd:Weight>
+          <vmw:CoresPerSocket ovf:required="false">1</vmw:CoresPerSocket>
+        </Item>
+        <Item>
+          <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+          <rasd:Description>Memory Size</rasd:Description>
+          <rasd:ElementName>4MB of memory</rasd:ElementName>
+          <rasd:InstanceID>2</rasd:InstanceID>
+          <rasd:Reservation>0</rasd:Reservation>
+          <rasd:ResourceType>4</rasd:ResourceType>
+          <rasd:VirtualQuantity>4</rasd:VirtualQuantity>
+          <rasd:Weight>20</rasd:Weight>
+        </Item>
+        <Item>
+          <rasd:Address>1</rasd:Address>
+          <rasd:Description>IDE Controller</rasd:Description>
+          <rasd:ElementName>IDE Controller 1</rasd:ElementName>
+          <rasd:InstanceID>3</rasd:InstanceID>
+          <rasd:ResourceType>5</rasd:ResourceType>
+        </Item>
+        <Item>
+          <rasd:AddressOnParent>0</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+          <rasd:InstanceID>4</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+        <Item ovf:required="false">
+          <rasd:ElementName>Video card</rasd:ElementName>
+          <rasd:InstanceID>5</rasd:InstanceID>
+          <rasd:ResourceType>24</rasd:ResourceType>
+          <vmw:Config ovf:required="false" vmw:value="false" vmw:key="useAutoDetect"/>
+        </Item>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge7.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge7.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge4.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="vdc.policy.enabled"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge5.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="vm-1_with_policylY8Oy.nvram" vmw:key="nvram"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="" vmw:key="migrate.hostLog"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge4.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge4.virtualDev"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge5.virtualDev"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="none" vmw:key="migrate.hostLogState"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="0" vmw:key="vmware.tools.internalversion"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="9440" vmw:key="vmware.tools.requiredversion"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge0.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="0" vmw:key="migrate.migrationId"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge6.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge6.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="hosted" vmw:key="virtualHW.productCompatibility"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="{&quot;@class&quot;:&quot;com.vmware.vcloud.pbm.extensions.uds.impl.TagBasedPolicyParams&quot;,&quot;priority&quot;:{&quot;priorityRank&quot;:0},&quot;provisioningPolicyId&quot;:&quot;vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceCategory:f3082e2f-798f-4313-8524-ab3a9eab2196:GLOBAL&quot;,&quot;policyValue&quot;:&quot;vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:b6044bd8-ba7b-427c-b866-af23e8ac6717:GLOBAL&quot;,&quot;namedPolicyValue&quot;:&quot;policyAOotZITag98sXz&quot;,&quot;tagCategoryName&quot;:&quot;policyAOotZI&quot;}" vmw:key="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceCategory:f3082e2f-798f-4313-8524-ab3a9eab2196:GLOBAL"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="hpet0.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge7.virtualDev"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="svga.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge5.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge6.virtualDev"/>
+      </VirtualHardwareSection>
+      <vmw:TagBasedPlacementSection ovf:required="false" vmw:group="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:b6044bd8-ba7b-427c-b866-af23e8ac6717:GLOBAL_P0">
+        <Info>Tag based placement policy group reference</Info>
+      </vmw:TagBasedPlacementSection>
+    </VirtualSystem>
+    <VirtualSystem ovf:id="vm-2_with_policyjXKJt">
+      <Info>A Virtual system</Info>
+      <Name>vm-2_with_policyjXKJt</Name>
+      <AnnotationSection>
+        <Info>A human-readable annotation</Info>
+        <Annotation>VM Created on VDC.tw1xc</Annotation>
+      </AnnotationSection>
+      <OperatingSystemSection ovf:id="67" vmw:osType="winXPProGuest">
+        <Info>The operating system installed</Info>
+        <Description>Microsoft Windows XP Professional (32-bit)</Description>
+      </OperatingSystemSection>
+      <VirtualHardwareSection>
+        <Info>Virtual hardware requirements</Info>
+        <System>
+          <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+          <vssd:InstanceID>0</vssd:InstanceID>
+          <vssd:VirtualSystemType>vmx-08</vssd:VirtualSystemType>
+        </System>
+        <Item>
+          <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+          <rasd:Description>Number of Virtual CPUs</rasd:Description>
+          <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+          <rasd:InstanceID>1</rasd:InstanceID>
+          <rasd:Reservation>0</rasd:Reservation>
+          <rasd:ResourceType>3</rasd:ResourceType>
+          <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+          <rasd:Weight>500</rasd:Weight>
+          <vmw:CoresPerSocket ovf:required="false">1</vmw:CoresPerSocket>
+        </Item>
+        <Item>
+          <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+          <rasd:Description>Memory Size</rasd:Description>
+          <rasd:ElementName>4MB of memory</rasd:ElementName>
+          <rasd:InstanceID>2</rasd:InstanceID>
+          <rasd:Reservation>0</rasd:Reservation>
+          <rasd:ResourceType>4</rasd:ResourceType>
+          <rasd:VirtualQuantity>4</rasd:VirtualQuantity>
+          <rasd:Weight>20</rasd:Weight>
+        </Item>
+        <Item>
+          <rasd:Address>1</rasd:Address>
+          <rasd:Description>IDE Controller</rasd:Description>
+          <rasd:ElementName>IDE Controller 1</rasd:ElementName>
+          <rasd:InstanceID>3</rasd:InstanceID>
+          <rasd:ResourceType>5</rasd:ResourceType>
+        </Item>
+        <Item>
+          <rasd:AddressOnParent>0</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk2</rasd:HostResource>
+          <rasd:InstanceID>4</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+        <Item ovf:required="false">
+          <rasd:ElementName>Video card</rasd:ElementName>
+          <rasd:InstanceID>5</rasd:InstanceID>
+          <rasd:ResourceType>24</rasd:ResourceType>
+          <vmw:Config ovf:required="false" vmw:value="262144" vmw:key="graphicsMemorySizeInKB"/>
+        </Item>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge7.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge7.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge4.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="vdc.policy.enabled"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge5.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="vm-2_with_policyjXKJt.nvram" vmw:key="nvram"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="" vmw:key="migrate.hostLog"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge4.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="{&quot;@class&quot;:&quot;com.vmware.vcloud.pbm.extensions.uds.impl.TagBasedPolicyParams&quot;,&quot;priority&quot;:{&quot;priorityRank&quot;:0},&quot;provisioningPolicyId&quot;:&quot;vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceCategory:5f6d60eb-1f2a-475c-bd71-ddfb5a487874:GLOBAL&quot;,&quot;policyValue&quot;:&quot;vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:6211acf5-4bd9-44f8-9ee7-bbd6190e515d:GLOBAL&quot;,&quot;namedPolicyValue&quot;:&quot;policyBFU24BTag2Mh5l&quot;,&quot;tagCategoryName&quot;:&quot;policyBFU24B&quot;}" vmw:key="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceCategory:5f6d60eb-1f2a-475c-bd71-ddfb5a487874:GLOBAL"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge4.virtualDev"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge5.virtualDev"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="none" vmw:key="migrate.hostLogState"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="0" vmw:key="vmware.tools.internalversion"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="9440" vmw:key="vmware.tools.requiredversion"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge0.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="0" vmw:key="migrate.migrationId"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge6.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge6.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="hosted" vmw:key="virtualHW.productCompatibility"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="hpet0.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge7.virtualDev"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="svga.present"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge5.functions"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge6.virtualDev"/>
+      </VirtualHardwareSection>
+      <vmw:TagBasedPlacementSection ovf:required="false" vmw:group="vmware.pbm://9f883659-1850-4e06-bf6b-a5a7220b15ab/urn:vmomi:InventoryServiceTag:6211acf5-4bd9-44f8-9ee7-bbd6190e515d:GLOBAL_P0">
+        <Info>Tag based placement policy group reference</Info>
+      </vmw:TagBasedPlacementSection>
+    </VirtualSystem>
+  </VirtualSystemCollection>
+</Envelope>

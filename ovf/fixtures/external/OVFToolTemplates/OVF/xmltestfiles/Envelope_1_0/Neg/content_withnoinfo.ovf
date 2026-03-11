@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <References>
+	    <File ovf:size="0"  ovf:href="../../../vmdk/dummy.vmdk"  ovf:id="file1" ></File>
+    </References>
+    <VirtualSystem ovf:id="PTCO1">
+	<OperatingSystemSection ovf:id="36" >
+		<Info></Info>
+	</OperatingSystemSection>
+	<VirtualHardwareSection ovf:required="true" >
+		<Info></Info>
+	</VirtualHardwareSection>
+    </VirtualSystem>
+</ovf:Envelope>

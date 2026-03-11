@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Single VirtualSystem OVF containing tag based placement sections.
+  This is for testing basic PBM OVF integration.
+  -->
+
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf2="http://schemas.dmtf.org/ovf/envelope/2"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References>
+        <File ovf:href="../../../content/nostalgia-disk1.vmdk" ovf:id="file1" ovf:size="6872576" />
+    </References>
+
+    <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="107373568" ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" />
+    </DiskSection>
+
+    <NetworkSection>
+        <Info>The list of logical networks</Info>
+        <Network ovf:name="VM Network">
+            <Description>The VM Network network</Description>
+        </Network>
+    </NetworkSection>
+
+    <vmw:TagBasedPlacementGroupSection vmw:id="group1" vmw:name="TagGroup1" vmw:priority="0">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="ovf-test-policy" vmw:id="##CAT_ID##"/>
+        <vmw:TagValue vmw:name="ovf-test-policy-tag-0" vmw:id="##TAG_ID##"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+        </VirtualHardwareSection>
+
+        <vmw:TagBasedPlacementSection vmw:group="group1">
+            <Info>Tag based placement policy group reference</Info>
+        </vmw:TagBasedPlacementSection>
+    </VirtualSystem>
+
+</Envelope>

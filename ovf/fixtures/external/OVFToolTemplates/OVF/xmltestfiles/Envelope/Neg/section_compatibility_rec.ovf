@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ovf:Envelope  xmlns:xsi-namespace="http://www.w3.org/2001/XMLSchema-instance" xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns:vssd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:rasd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" ovf:version="0.9">
+     <References>
+        <File ovf:id="file1" ovf:href="../../../vmdk/valid_disk.vmdk" ovf:size="329197568"/>
+    </References>
+    <Section xsi-namespace:type="ovf:DiskSection_Type">
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:capacity="329197568" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse" />
+	<UnknownSection>
+		<UnknownSection2 ovf:required="false"/>
+	</UnknownSection>
+    </Section>
+    <Content xsi-namespace:type="ovf:VirtualSystem_Type" ovf:id="PTC01_VM">
+	<Section xsi-namespace:type="ovf:OperatingSystemSection_Type" ovf:id="36">
+		<Info/>
+	</Section>
+	<Section xsi-namespace:type="ovf:VirtualHardwareSection_Type" ovf:required="true">
+		<Info/>
+	</Section>
+    </Content>
+</ovf:Envelope>

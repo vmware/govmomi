@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope  xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmwovf="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ovf:version="0.9">
+  <References>
+    <File ovf:href="smallxp-vapp.vmdk" ovf:id="file1" ovf:size="256508928"/>
+  </References>
+  <Section xsi:type="ovf:DiskSection_Type">
+    <Info>Meta-information about the virtual disks</Info>
+    <Disk ovf:capacity="1610612736" ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse"/>
+  </Section>
+  <Section xsi:type="ovf:NetworkSection_Type">
+    <Info>The list of logical networks</Info>
+    <Network ovf:name="VMNetwork">
+      <Description>This network provides connectivity to the virtual machine</Description>
+    </Network>
+  </Section>
+  <Content ovf:id="smallxp-vapp" xsi:type="ovf:VirtualSystem_Type">
+    <Info>A virtual machine</Info>
+    <Section ovf:id="75" xsi:type="ovf:OperatingSystemSection_Type">
+      <Info>The kind of installed guest operating system</Info>
+      <Description>OS Description</Description>
+    </Section>
+    <Section xsi:type="ovf:VirtualHardwareSection_Type">
+      <Info>Virtual hardware requirements for a virtual machine</Info>
+      <System>
+        <vssd:InstanceId>0</vssd:InstanceId>
+        <vssd:VirtualSystemIdentifier>smallxp-vapp</vssd:VirtualSystemIdentifier>
+        <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:Caption>2 virtual CPU(s)</rasd:Caption>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:InstanceId>1</rasd:InstanceId>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>2</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>512MB of memory</rasd:Caption>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:InstanceId>2</rasd:InstanceId>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+        <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Caption>unknown device</rasd:Caption>
+        <rasd:Description>IDE Controller</rasd:Description>
+        <rasd:InstanceId>3</rasd:InstanceId>
+        <rasd:ResourceType>5</rasd:ResourceType>
+        <rasd:BusNumber>0</rasd:BusNumber>
+      </Item>
+      <Item>
+        <rasd:Caption>scsi0</rasd:Caption>
+        <rasd:Description>SCSI Controller</rasd:Description>
+        <rasd:InstanceId>4</rasd:InstanceId>
+        <rasd:ResourceType>6</rasd:ResourceType>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:BusNumber>0</rasd:BusNumber>
+      </Item>
+      <Item ovf:required="false">
+        <rasd:Caption>ide0:0</rasd:Caption>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:Connection>VM Network</rasd:Connection>
+        <rasd:InstanceID>5</rasd:InstanceID>
+        <rasd:ResourceType>15</rasd:ResourceType>
+      </Item>
+      <Item ovf:required="false">
+        <rasd:Caption>floppy0</rasd:Caption>
+        <rasd:Description>Floppy Drive</rasd:Description>
+        <rasd:InstanceId>6</rasd:InstanceId>
+        <rasd:ResourceType>14</rasd:ResourceType>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+      <Item>
+        <rasd:Caption>nic</rasd:Caption>
+        <rasd:Description>PCNet32 ethernet adapter on &quot;VMNetwork&quot;</rasd:Description>
+        <rasd:Connection>VMNetwork</rasd:Connection>
+        <rasd:InstanceID>7</rasd:InstanceID>
+	<rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+	<rasd:ResourceType>10</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:Caption>disk0</rasd:Caption>
+        <rasd:InstanceId>8</rasd:InstanceId>
+        <rasd:ResourceType>17</rasd:ResourceType>
+        <rasd:HostResource>/disk/vmdisk1</rasd:HostResource>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+      </Item>
+    </Section>
+    <Section ovf:required="false" xsi:type="ovf:AnnotationSection_Type">
+      <Info>A human-readable annotation</Info>
+      <Annotation>VM annotation</Annotation>
+    </Section>
+    <Section ovf:required="false" xsi:type="ovf:ProductSection_Type">
+      <Info>Meta-information about the installed software</Info>
+      <Product>smallxp-vapp</Product>
+    </Section>
+  </Content>
+</ovf:Envelope>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1">
+  <References/>
+  <VirtualSystem ovf:id="moref:VirtualMachine:vm-28:a7296408-184e-4b11-a4ce-d55a878fd325">
+    <Info>A Virtual system</Info>
+    <Name>vmBV8ly</Name>
+    <AnnotationSection>
+      <Info>A human-readable annotation</Info>
+      <Annotation/>
+    </AnnotationSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo">
+      <Info>Virtual hardware requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>System</vssd:InstanceID>
+      </System>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>
