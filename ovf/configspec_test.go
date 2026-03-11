@@ -735,13 +735,16 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			require.NotNil(t, va)
 			assert.NotNil(t, findProp(va, "hostname"))
 			assert.NotNil(t, findProp(va, "tier_small"))
+			assert.NotNil(t, findProp(va, "scratch_space_size_small"))
 			assert.NotNil(t, findProp(va, "size_preset"))
 			assert.Nil(t, findProp(va, "tier_medium"))
 			assert.Nil(t, findProp(va, "tier_large"))
 		})
 
 		t.Run("medium config (default): 4 CPU, 4 GiB RAM, 2 disks 2 GiB", func(t *testing.T) {
-			cs, err := e.ToConfigSpec()
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "medium",
+			})
 			require.NoError(t, err)
 			assert.Equal(t, int32(4), cs.NumCPUs)
 			assert.Equal(t, int64(4096), cs.MemoryMB)
@@ -766,6 +769,8 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			assert.NotNil(t, findProp(va, "tier_medium"))
 			assert.Nil(t, findProp(va, "tier_small"))
 			assert.Nil(t, findProp(va, "tier_large"))
+			assert.Nil(t, findProp(va, "scratch_space_size_small"))
+			assert.Nil(t, findProp(va, "scratch_space_size_large"))
 		})
 
 		t.Run("large config: 8 CPU, 8 GiB RAM, 3 disks 4 GiB", func(t *testing.T) {
@@ -795,12 +800,15 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			va, _ := cs.VAppConfig.(*types.VAppConfigSpec)
 			require.NotNil(t, va)
 			assert.NotNil(t, findProp(va, "tier_large"))
+			assert.NotNil(t, findProp(va, "scratch_space_size_large"))
 			assert.Nil(t, findProp(va, "tier_small"))
 			assert.Nil(t, findProp(va, "tier_medium"))
 		})
 
 		t.Run("property qualifiers embedded in VAppPropertyInfo.Type", func(t *testing.T) {
-			cs, err := e.ToConfigSpec()
+			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{
+				DeploymentConfiguration: "medium",
+			})
 			require.NoError(t, err)
 			va, ok := cs.VAppConfig.(*types.VAppConfigSpec)
 			require.True(t, ok)
@@ -824,11 +832,18 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 				"tier_medium has MinLen(1),MaxLen(64) => string(1..64)")
 		})
 
-		t.Run("empty DeploymentConfiguration uses default (medium)", func(t *testing.T) {
+		t.Run("empty DeploymentConfiguration uses default (large)", func(t *testing.T) {
 			cs, err := e.ToConfigSpecWithOptions(ToConfigSpecOptions{})
 			require.NoError(t, err)
-			assert.Equal(t, int32(4), cs.NumCPUs)
-			assert.Equal(t, int64(4096), cs.MemoryMB)
+			assert.Equal(t, int32(8), cs.NumCPUs)
+			assert.Equal(t, int64(8192), cs.MemoryMB)
+
+			va, _ := cs.VAppConfig.(*types.VAppConfigSpec)
+			require.NotNil(t, va)
+			assert.NotNil(t, findProp(va, "tier_large"))
+			assert.NotNil(t, findProp(va, "scratch_space_size_large"))
+			assert.Nil(t, findProp(va, "tier_small"))
+			assert.Nil(t, findProp(va, "tier_medium"))
 		})
 	})
 

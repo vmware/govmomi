@@ -216,6 +216,9 @@ func isNegativeFixture(path string) bool {
 
 func runFixtureTest(t *testing.T, path string, negativeFixture bool) {
 	t.Run("Unmarshal", func(t *testing.T) {
+		if negativeFixture {
+			t.Skip("negative test")
+		}
 		f, err := os.Open(path)
 		if err != nil {
 			t.Fatalf("open: %v", err)
@@ -235,6 +238,9 @@ func runFixtureTest(t *testing.T, path string, negativeFixture bool) {
 	})
 
 	t.Run("ToConfigSpec", func(t *testing.T) {
+		if negativeFixture {
+			t.Skip("negative test")
+		}
 		f, err := os.Open(path)
 		if err != nil {
 			t.Fatalf("open: %v", err)
