@@ -5,6 +5,8 @@
 package ovf
 
 import (
+	"fmt"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -284,6 +286,258 @@ const (
 	CIMOSTypeMicrosoftWindows81               CIMOSType = 114
 	CIMOSTypeMicrosoftWindowsServer2012R2     CIMOSType = 115
 )
+
+// cimGuestIDEntry maps a (cimId, cimVersion) pair to a vSphere GuestId.
+// Entries keyed as "cimId" are bare (no version); entries keyed as
+// "cimId-version" are version-specific.
+type cimGuestIDEntry struct {
+	cimID   int
+	version string
+	guestID types.VirtualMachineGuestOsIdentifier
+}
+
+// cimGuestIDTable maps CIM OS type integers (from the DMTF CIM schema) and
+// optional version strings to vSphere GuestId identifiers. The lookup
+// algorithm (CIMOSTypeToGuestID) first tries (cimId, version), then falls
+// back to (cimId, "").
+var cimGuestIDTable = []cimGuestIDEntry{
+	// macOS
+	{2, "", types.VirtualMachineGuestOsIdentifierDarwinGuest},
+	{2, "10", types.VirtualMachineGuestOsIdentifierDarwin10Guest},
+	{2, "11", types.VirtualMachineGuestOsIdentifierDarwin11Guest},
+	{2, "19", types.VirtualMachineGuestOsIdentifierDarwin19_64Guest},
+	{2, "20", types.VirtualMachineGuestOsIdentifierDarwin20_64Guest},
+	{2, "21", types.VirtualMachineGuestOsIdentifierDarwin21_64Guest},
+	{2, "22", types.VirtualMachineGuestOsIdentifierDarwin22_64Guest},
+	{2, "23", types.VirtualMachineGuestOsIdentifierDarwin23_64Guest},
+
+	// Debian (all versioned; no bare entry → bare cimId returns "")
+	{95, "4", types.VirtualMachineGuestOsIdentifierDebian4Guest},
+	{96, "4", types.VirtualMachineGuestOsIdentifierDebian4_64Guest},
+	{95, "5", types.VirtualMachineGuestOsIdentifierDebian5Guest},
+	{96, "5", types.VirtualMachineGuestOsIdentifierDebian5_64Guest},
+	{95, "6", types.VirtualMachineGuestOsIdentifierDebian6Guest},
+	{96, "6", types.VirtualMachineGuestOsIdentifierDebian6_64Guest},
+	{95, "7", types.VirtualMachineGuestOsIdentifierDebian7Guest},
+	{96, "7", types.VirtualMachineGuestOsIdentifierDebian7_64Guest},
+	{95, "8", types.VirtualMachineGuestOsIdentifierDebian8Guest},
+	{96, "8", types.VirtualMachineGuestOsIdentifierDebian8_64Guest},
+	{95, "9", types.VirtualMachineGuestOsIdentifierDebian9Guest},
+	{96, "9", types.VirtualMachineGuestOsIdentifierDebian9_64Guest},
+	{95, "10", types.VirtualMachineGuestOsIdentifierDebian10Guest},
+	{96, "10", types.VirtualMachineGuestOsIdentifierDebian10_64Guest},
+	{95, "11", types.VirtualMachineGuestOsIdentifierDebian11Guest},
+	{96, "11", types.VirtualMachineGuestOsIdentifierDebian11_64Guest},
+	{95, "12", types.VirtualMachineGuestOsIdentifierDebian12Guest},
+	{96, "12", types.VirtualMachineGuestOsIdentifierDebian12_64Guest},
+	{95, "13", types.VirtualMachineGuestOsIdentifierDebian13Guest},
+	{96, "13", types.VirtualMachineGuestOsIdentifierDebian13_64Guest},
+	{96, "1", types.VirtualMachineGuestOsIdentifierPardus_64Guest},
+
+	// DOS
+	{14, "", types.VirtualMachineGuestOsIdentifierDosGuest},
+
+	// FreeBSD
+	{42, "", types.VirtualMachineGuestOsIdentifierFreebsdGuest},
+	{78, "", types.VirtualMachineGuestOsIdentifierFreebsd64Guest},
+	{42, "11", types.VirtualMachineGuestOsIdentifierFreebsd11Guest},
+	{78, "11", types.VirtualMachineGuestOsIdentifierFreebsd11_64Guest},
+	{42, "12", types.VirtualMachineGuestOsIdentifierFreebsd12Guest},
+	{78, "12", types.VirtualMachineGuestOsIdentifierFreebsd12_64Guest},
+	{42, "13", types.VirtualMachineGuestOsIdentifierFreebsd13Guest},
+	{78, "13", types.VirtualMachineGuestOsIdentifierFreebsd13_64Guest},
+	{42, "14", types.VirtualMachineGuestOsIdentifierFreebsd14Guest},
+	{78, "14", types.VirtualMachineGuestOsIdentifierFreebsd14_64Guest},
+	{42, "15", types.VirtualMachineGuestOsIdentifierFreebsd15Guest},
+	{78, "15", types.VirtualMachineGuestOsIdentifierFreebsd15_64Guest},
+
+	// Mandriva
+	{89, "", types.VirtualMachineGuestOsIdentifierMandrivaGuest},
+	{90, "", types.VirtualMachineGuestOsIdentifierMandriva64Guest},
+
+	// NetWare (all versioned; no bare entry → bare cimId returns "")
+	{21, "4", types.VirtualMachineGuestOsIdentifierNetware4Guest},
+	{21, "5", types.VirtualMachineGuestOsIdentifierNetware5Guest},
+	{21, "6", types.VirtualMachineGuestOsIdentifierNetware6Guest},
+
+	// Novell
+	{87, "", types.VirtualMachineGuestOsIdentifierNld9Guest},
+	{86, "", types.VirtualMachineGuestOsIdentifierOesGuest},
+
+	// SCO
+	{26, "5", types.VirtualMachineGuestOsIdentifierOpenServer5Guest},
+	{26, "6", types.VirtualMachineGuestOsIdentifierOpenServer6Guest},
+
+	// OS/2
+	{12, "", types.VirtualMachineGuestOsIdentifierOs2Guest},
+
+	// Linux generic
+	{97, "", types.VirtualMachineGuestOsIdentifierOther24xLinuxGuest},
+	{98, "", types.VirtualMachineGuestOsIdentifierOther24xLinux64Guest},
+	{99, "", types.VirtualMachineGuestOsIdentifierOther26xLinuxGuest},
+	{100, "", types.VirtualMachineGuestOsIdentifierOther26xLinux64Guest},
+	{1, "", types.VirtualMachineGuestOsIdentifierOtherGuest},
+	{101, "", types.VirtualMachineGuestOsIdentifierOtherLinux64Guest},
+	{102, "", types.VirtualMachineGuestOsIdentifierOtherGuest64},
+	{36, "", types.VirtualMachineGuestOsIdentifierOtherLinuxGuest},
+
+	// RHEL (bare entry for 32-bit; no bare entry for 64-bit → versioned only)
+	{79, "", types.VirtualMachineGuestOsIdentifierRedhatGuest},
+	{79, "2", types.VirtualMachineGuestOsIdentifierRhel2Guest},
+	{79, "3", types.VirtualMachineGuestOsIdentifierRhel3Guest},
+	{80, "3", types.VirtualMachineGuestOsIdentifierRhel3_64Guest},
+	{79, "4", types.VirtualMachineGuestOsIdentifierRhel4Guest},
+	{80, "4", types.VirtualMachineGuestOsIdentifierRhel4_64Guest},
+	{79, "5", types.VirtualMachineGuestOsIdentifierRhel5Guest},
+	{80, "5", types.VirtualMachineGuestOsIdentifierRhel5_64Guest},
+	{79, "6", types.VirtualMachineGuestOsIdentifierRhel6Guest},
+	{80, "6", types.VirtualMachineGuestOsIdentifierRhel6_64Guest},
+	{79, "7", types.VirtualMachineGuestOsIdentifierRhel7Guest},
+	{80, "7", types.VirtualMachineGuestOsIdentifierRhel7_64Guest},
+	{80, "8", types.VirtualMachineGuestOsIdentifierRhel8_64Guest},
+	{80, "9", types.VirtualMachineGuestOsIdentifierRhel9_64Guest},
+	{80, "10", types.VirtualMachineGuestOsIdentifierRhel10_64Guest},
+
+	// Sun Java Desktop
+	{88, "", types.VirtualMachineGuestOsIdentifierSjdsGuest},
+
+	// SLES
+	{84, "", types.VirtualMachineGuestOsIdentifierSlesGuest},
+	{85, "", types.VirtualMachineGuestOsIdentifierSles64Guest},
+	{84, "10", types.VirtualMachineGuestOsIdentifierSles10Guest},
+	{85, "10", types.VirtualMachineGuestOsIdentifierSles10_64Guest},
+	{84, "11", types.VirtualMachineGuestOsIdentifierSles11Guest},
+	{85, "11", types.VirtualMachineGuestOsIdentifierSles11_64Guest},
+	{84, "12", types.VirtualMachineGuestOsIdentifierSles12Guest},
+	{85, "12", types.VirtualMachineGuestOsIdentifierSles12_64Guest},
+	{85, "15", types.VirtualMachineGuestOsIdentifierSles15_64Guest},
+	{85, "16", types.VirtualMachineGuestOsIdentifierSles16_64Guest},
+
+	// SUSE
+	{82, "", types.VirtualMachineGuestOsIdentifierSuseGuest},
+	{83, "", types.VirtualMachineGuestOsIdentifierSuse64Guest},
+	{82, "11", types.VirtualMachineGuestOsIdentifierOpensuseGuest},
+	{83, "11", types.VirtualMachineGuestOsIdentifierOpensuse64Guest},
+
+	// Solaris (all versioned; no bare entry → bare cimId returns "")
+	{29, "6", types.VirtualMachineGuestOsIdentifierSolaris6Guest},
+	{29, "7", types.VirtualMachineGuestOsIdentifierSolaris7Guest},
+	{29, "8", types.VirtualMachineGuestOsIdentifierSolaris8Guest},
+	{29, "9", types.VirtualMachineGuestOsIdentifierSolaris9Guest},
+	{29, "10", types.VirtualMachineGuestOsIdentifierSolaris10Guest},
+	{81, "10", types.VirtualMachineGuestOsIdentifierSolaris10_64Guest},
+	{81, "11", types.VirtualMachineGuestOsIdentifierSolaris11_64Guest},
+
+	// TurboLinux
+	{91, "", types.VirtualMachineGuestOsIdentifierTurboLinuxGuest},
+	{92, "", types.VirtualMachineGuestOsIdentifierTurboLinux64Guest},
+
+	// Ubuntu
+	{93, "", types.VirtualMachineGuestOsIdentifierUbuntuGuest},
+	{94, "", types.VirtualMachineGuestOsIdentifierUbuntu64Guest},
+
+	// SCO UnixWare
+	{25, "7", types.VirtualMachineGuestOsIdentifierUnixWare7Guest},
+
+	// Windows Desktop (legacy)
+	{15, "", types.VirtualMachineGuestOsIdentifierWin31Guest},
+	{16, "", types.VirtualMachineGuestOsIdentifierWin95Guest},
+	{17, "", types.VirtualMachineGuestOsIdentifierWin98Guest},
+	{18, "", types.VirtualMachineGuestOsIdentifierWinNTGuest},
+	{63, "", types.VirtualMachineGuestOsIdentifierWinMeGuest},
+	{67, "", types.VirtualMachineGuestOsIdentifierWinXPProGuest},
+	{71, "", types.VirtualMachineGuestOsIdentifierWinXPPro64Guest},
+	{73, "", types.VirtualMachineGuestOsIdentifierWinVistaGuest},
+	{74, "", types.VirtualMachineGuestOsIdentifierWinVista64Guest},
+	{105, "", types.VirtualMachineGuestOsIdentifierWindows7Guest},
+
+	// Windows Server
+	// win2000ServGuest is the only non-starred bare entry for cimId=58
+	{58, "", types.VirtualMachineGuestOsIdentifierWin2000ServGuest},
+	// winNetStandardGuest is the only non-starred bare entry for cimId=69/70
+	{69, "", types.VirtualMachineGuestOsIdentifierWinNetStandardGuest},
+	{70, "", types.VirtualMachineGuestOsIdentifierWinNetStandard64Guest},
+	// WinServer2008 (76/77) entries are all starred → no bare entry → returns ""
+	{103, "", types.VirtualMachineGuestOsIdentifierWindows7Server64Guest},
+	{112, "", types.VirtualMachineGuestOsIdentifierWindows8Server64Guest},
+	{115, "", types.VirtualMachineGuestOsIdentifierWindows9Server64Guest},
+
+	// CentOS (bare entry maps to generic centos/centos64, not versioned centos7)
+	{106, "", types.VirtualMachineGuestOsIdentifierCentosGuest},
+	{107, "", types.VirtualMachineGuestOsIdentifierCentos64Guest},
+	{106, "6", types.VirtualMachineGuestOsIdentifierCentos6Guest},
+	{107, "6", types.VirtualMachineGuestOsIdentifierCentos6_64Guest},
+	{106, "7", types.VirtualMachineGuestOsIdentifierCentos7Guest},
+	{107, "7", types.VirtualMachineGuestOsIdentifierCentos7_64Guest},
+	{107, "8", types.VirtualMachineGuestOsIdentifierCentos8_64Guest},
+	{107, "9", types.VirtualMachineGuestOsIdentifierCentos9_64Guest},
+
+	// Oracle Linux
+	{108, "", types.VirtualMachineGuestOsIdentifierOracleLinuxGuest},
+	{109, "", types.VirtualMachineGuestOsIdentifierOracleLinux64Guest},
+	{108, "6", types.VirtualMachineGuestOsIdentifierOracleLinux6Guest},
+	{109, "6", types.VirtualMachineGuestOsIdentifierOracleLinux6_64Guest},
+	{108, "7", types.VirtualMachineGuestOsIdentifierOracleLinux7Guest},
+	{109, "7", types.VirtualMachineGuestOsIdentifierOracleLinux7_64Guest},
+	{109, "8", types.VirtualMachineGuestOsIdentifierOracleLinux8_64Guest},
+	{109, "9", types.VirtualMachineGuestOsIdentifierOracleLinux9_64Guest},
+	{109, "10", types.VirtualMachineGuestOsIdentifierOracleLinux10_64Guest},
+
+	// eComStation
+	{110, "", types.VirtualMachineGuestOsIdentifierEComStationGuest},
+	{110, "2", types.VirtualMachineGuestOsIdentifierEComStation2Guest},
+
+	// VMware ESXi (all versioned; no bare entry → bare cimId returns "")
+	{104, "4", types.VirtualMachineGuestOsIdentifierVmkernelGuest},
+	{104, "5", types.VirtualMachineGuestOsIdentifierVmkernel5Guest},
+	{104, "6", types.VirtualMachineGuestOsIdentifierVmkernel6Guest},
+	{104, "65", types.VirtualMachineGuestOsIdentifierVmkernel65Guest},
+	{104, "7", types.VirtualMachineGuestOsIdentifierVmkernel7Guest},
+	{104, "8", types.VirtualMachineGuestOsIdentifierVmkernel8Guest},
+	{104, "9", types.VirtualMachineGuestOsIdentifierVmkernel9Guest},
+}
+
+// cimGuestIDIndex is a two-level index built from cimGuestIDTable.
+// Keys are "cimId" (bare) or "cimId-version" (versioned).
+var cimGuestIDIndex map[string]types.VirtualMachineGuestOsIdentifier
+
+func init() {
+	cimGuestIDIndex = make(map[string]types.VirtualMachineGuestOsIdentifier, len(cimGuestIDTable))
+	for _, e := range cimGuestIDTable {
+		key := cimGuestIDKey(e.cimID, e.version)
+		cimGuestIDIndex[key] = e.guestID
+	}
+}
+
+func cimGuestIDKey(cimID int, version string) string {
+	if version == "" {
+		return fmt.Sprintf("%d", cimID)
+	}
+	return fmt.Sprintf("%d-%s", cimID, version)
+}
+
+// CIMOSTypeToGuestID translates a CIM OSType value and optional version string
+// to a vSphere Guest OS identifier. It first tries the exact (cimId, version)
+// pair, then falls back to the bare cimId with no version. Returns an empty
+// string when no mapping exists (e.g. CIMOSTypeUnknown, WINCE, NetWare without
+// a version, WinServer2008, or other CIM types with no vSphere equivalent).
+func CIMOSTypeToGuestID(osType CIMOSType, version string) types.VirtualMachineGuestOsIdentifier {
+	id := int(osType)
+
+	// Try exact (cimId, version) match first.
+	if version != "" {
+		if g, ok := cimGuestIDIndex[cimGuestIDKey(id, version)]; ok {
+			return g
+		}
+	}
+
+	// Fall back to bare cimId.
+	if g, ok := cimGuestIDIndex[cimGuestIDKey(id, "")]; ok {
+		return g
+	}
+
+	return ""
+}
 
 // GuestIDToCIMOSType translates a vSphere Guest OS identifier to a CIM
 // OSType value.
