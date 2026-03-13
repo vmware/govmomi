@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- A disk in a VM in a storage group. That is, the disk itself does not have a storage group
+         indication, but current behaviour then is that it should inherit from the VM. -->
+
+    <References>
+        <!--
+             If relative paths ever start working, delete the vmdks from this dir and refer
+             to the parent folder instead.
+
+             http://bugzilla.eng.vmware.com/show_bug.cgi?id=1069809
+        -->
+        <File ovf:href="empty-disk.vmdk" ovf:id="file1" ovf:size="68096" />
+    </References>
+
+    <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="256" ovf:capacityAllocationUnits="byte * 2^20" ovf:diskId="vmdisk1"
+            ovf:fileRef="file1"
+            ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" />
+    </DiskSection>
+
+    <vmw:StorageGroupSection vmw:id="group1" vmw:name="My Storage Profile" />
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>VS1</Name>
+        <vmw:StorageSection vmw:group="group1" />
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:Parent>1</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </Item>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>

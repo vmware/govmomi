@@ -211,7 +211,8 @@ func isNegativeFixture(path string) bool {
 		strings.Contains(path, "negative_") ||
 		strings.Contains(path, "ovf_negative") ||
 		strings.Contains(pathLower, "invalid") ||
-		strings.Contains(pathSlash, "/Neg/")
+		strings.Contains(pathSlash, "/Neg/") ||
+		strings.Contains(pathSlash, "corrupted")
 }
 
 func runFixtureTest(t *testing.T, path string, negativeFixture bool) {
