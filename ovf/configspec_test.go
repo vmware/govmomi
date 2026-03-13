@@ -47,6 +47,14 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		})
 	})
 
+	t.Run("Empty", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/empty.ovf")
+		configSpec, err := e.ToConfigSpec()
+		assert.NoError(t, err)
+		var expectedConfigSpec types.VirtualMachineConfigSpec
+		assert.Equal(t, expectedConfigSpec, configSpec)
+	})
+
 	t.Run("VirtualSystemCollection", func(t *testing.T) {
 		t.Run("No index", func(t *testing.T) {
 			e := testEnvelope(t, "fixtures/virtualsystemcollection.ovf")
