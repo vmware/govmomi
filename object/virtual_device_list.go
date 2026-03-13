@@ -857,6 +857,8 @@ func (l VirtualDeviceList) CreateEthernetCard(name string, backing types.BaseVir
 
 	if name == "" {
 		name = ctypes.deviceName(ctypes[0])
+	} else if name == "sriovethernetcard" {
+		name = "sriov"
 	}
 
 	found := ctypes.Select(func(device types.BaseVirtualDevice) bool {
