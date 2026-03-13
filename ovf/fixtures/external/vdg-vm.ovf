@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <References />
+  <NetworkSection>
+    <Info>The list of logical networks</Info>
+    <Network ovf:name="VM Network">
+      <Description>The VM Network network</Description>
+    </Network>
+  </NetworkSection>
+  <vmw:VirtualDeviceGroupSection>
+    <Info>Virtual device groups</Info>
+    <DeviceGroup ovf:deviceGroupName="testGroup0" ovf:groupInstanceKey="0" ovf:label="Device Group 0" ovf:summary="Vendor Device Group"/>
+    <DeviceGroup ovf:deviceGroupName="testGroup1" ovf:groupInstanceKey="1" ovf:label="Device Group 1" ovf:summary="Vendor Device Group"/>
+  </vmw:VirtualDeviceGroupSection>
+  <VirtualSystem ovf:id="vdg-vm">
+    <Info>A virtual machine</Info>
+    <Name>vdg-vm</Name>
+    <VirtualHardwareSection>
+      <Info>Virtual hardware requirements</Info>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>1024MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:Reservation>1024</rasd:Reservation>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>1024</rasd:VirtualQuantity>
+        <rasd:Weight>10240</rasd:Weight>
+        <vmw:Config ovf:required="false" vmw:key="sharesLevel" vmw:value="normal"/>
+      </Item>
+      <Item ovf:required="false">
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:ElementName>PCI device 0</rasd:ElementName>
+        <rasd:InstanceID>7</rasd:InstanceID>
+        <rasd:ResourceSubType>vmware.pci.passthrough-vmiop</rasd:ResourceSubType>
+        <rasd:ResourceType>1</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:key="backing.vgpu" vmw:value="mockup-vmiop"/>
+        <vmw:Config ovf:required="false" vmw:key="deviceGroupInfo.groupInstanceKey" vmw:value="0"/>
+        <vmw:Config ovf:required="false" vmw:key="deviceGroupInfo.sequenceId" vmw:value="0"/>
+      </Item>
+      <Item ovf:required="false">
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:ElementName>PCI device 1</rasd:ElementName>
+        <rasd:InstanceID>8</rasd:InstanceID>
+        <rasd:ResourceSubType>vmware.pci.passthrough-vmiop</rasd:ResourceSubType>
+        <rasd:ResourceType>1</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:key="backing.vgpu" vmw:value="mockup-vmiop"/>
+        <vmw:Config ovf:required="false" vmw:key="deviceGroupInfo.groupInstanceKey" vmw:value="1"/>
+        <vmw:Config ovf:required="false" vmw:key="deviceGroupInfo.sequenceId" vmw:value="0"/>
+      </Item>
+      <Item>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>VM Network</rasd:Connection>
+        <rasd:Description>SriovEthernetCard ethernet adapter on "VM Network"</rasd:Description>
+        <rasd:ElementName>SR-IOV Network Adapter 1</rasd:ElementName>
+        <rasd:InstanceID>9</rasd:InstanceID>
+        <rasd:ResourceSubType>SriovEthernetCard</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:key="dvx.deviceClass" vmw:value="com.vmware.dvxpassthru"/>
+        <vmw:Config ovf:required="false" vmw:key="virtualDev" vmw:value="dvx"/>
+        <vmw:Config ovf:required="false" vmw:key="wakeOnLanEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="connectable.allowGuestControl" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="deviceGroupInfo.groupInstanceKey" vmw:value="1"/>
+        <vmw:Config ovf:required="false" vmw:key="deviceGroupInfo.sequenceId" vmw:value="1"/>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

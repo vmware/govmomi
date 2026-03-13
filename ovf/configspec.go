@@ -273,8 +273,9 @@ func (e Envelope) toHardware(
 
 	var hw VirtualHardwareSection
 	if len(vs.VirtualHardware) == 0 {
-		return errors.New("no VirtualHardware")
+		return nil
 	}
+
 	hw = vs.VirtualHardware[0]
 
 	// Set the hardware version.

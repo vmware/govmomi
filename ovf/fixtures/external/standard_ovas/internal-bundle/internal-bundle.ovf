@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <References/>
+
+    <VirtualSystem ovf:id="vsc1">
+        <Info>A virtual machine collection</Info>
+        <Name>Test System Collection</Name>
+        <EulaSection>
+           <Info>EULA Section</Info>
+           <License ovf:msgid="msg1">eula</License>
+        </EulaSection>
+
+        <VirtualHardwareSection>
+            <Info>Defines reservations for CPU and memory for the collection of VMs</Info>
+         </VirtualHardwareSection>
+    </VirtualSystem>
+
+    <Strings>
+        <Msg ovf:msgid="msg1">大饿发</Msg>
+    </Strings>
+</Envelope>

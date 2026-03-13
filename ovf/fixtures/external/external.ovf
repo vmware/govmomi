@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:test="http://www.vmware.com/ovf/test"
+    xmlns:vcd="http://www.vmware.com/vcloud"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <References>
+       <File ovf:id="msgbundle" ovf:size="592" ovf:href="msgbundle001.msgs"/>
+       <File ovf:id="msgbundle-da" ovf:size="258" ovf:href="msgbundle001-da.msgs"/>
+       <File ovf:id="msgbundle-de" ovf:size="258" ovf:href="msgbundle001-de.msgs"/>
+    </References>
+
+    <VirtualSystemCollection ovf:id="vsc1">
+        <Info ovf:msgid="info2">A virtual machine collection</Info>
+        <Name ovf:msgid="name1">Test System Collection</Name>
+
+        <RandomSection ovf:required="false">
+           <Info ovf:msgid="info3">A test custom section</Info>
+           <!-- No data -->
+        </RandomSection>
+
+        <VirtualSystemCollection ovf:id="vsc2">
+            <Info ovf:msgid="not-defined">DEFAULT</Info>
+            <Name ovf:msgid="name2">Test System Collection</Name>
+	</VirtualSystemCollection>
+    </VirtualSystemCollection>
+
+    <Strings ovf:fileRef="msgbundle"/>
+    <Strings ovf:fileRef="msgbundle-da" xml:lang="da">
+        <Msg ovf:msgid="msg2">Overridden in msgbundle-da</Msg>
+        <Msg ovf:msgid="msg3">text-msg3-local</Msg>
+    </Strings>
+    <Strings ovf:fileRef="msgbundle-de" xml:lang="de"/>
+</Envelope>

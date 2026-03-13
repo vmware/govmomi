@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+  <References />
+  <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="2097152" ovf:diskId="vmdisk1" />
+  </DiskSection>
+  <vmw:IpAssignmentSection>
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <VirtualSystemCollection ovf:id="two-vms-vapp">
+    <Info>A virtual system collection</Info>
+    <Name>two-vms-vapp</Name>
+    <StartupSection>
+      <Info>Specifies the startup order of the application.</Info>
+      <Item ovf:id="vs1" ovf:order="1"/>
+      <Item ovf:id="vs2" ovf:order="2"/>
+    </StartupSection>
+    <ProductSection>
+      <Info>Information about the installed software</Info>
+    </ProductSection>
+    <VirtualSystem ovf:id="vs1">
+        <Info>vAppVm1</Info>
+        <Name>VirtualMachine1</Name>
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:Parent>1</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </Item>
+	    <vmw:ExtraConfig ovf:required="false" vmw:key="nvram" vmw:value="Test System.nvram"/>
+	    <vmw:ExtraConfig ovf:required="false" vmw:key="vmotion.checkpointFBSize" vmw:value="8388608"/>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+    <VirtualSystem ovf:id="vs2">
+        <Info>vAppVm2</Info>
+        <Name>VirtualMachine2</Name>
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:Parent>1</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </Item>
+            <vmw:ExtraConfig ovf:required="false" vmw:key="disable_acceleration" vmw:value="false"/>
+            <vmw:ExtraConfig ovf:required="false" vmw:key="vmotion.checkpointFBSize" vmw:value="8388608"/>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+  </VirtualSystemCollection>
+</Envelope>
