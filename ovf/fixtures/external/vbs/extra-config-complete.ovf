@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+        xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+        xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+        xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+        xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References />
+
+    <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="2097152" ovf:diskId="vmdisk1" />
+    </DiskSection>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:Parent>1</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </Item>
+            <vmw:ExtraConfig ovf:required="false" vmw:key="nvram" vmw:value="Test System.nvram"/>
+            <vmw:ExtraConfig ovf:required="false" vmw:key="disable_acceleration" vmw:value="false"/>
+            <vmw:ExtraConfig ovf:required="false" vmw:key="vmotion.checkpointFBSize" vmw:value="8388608"/>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>

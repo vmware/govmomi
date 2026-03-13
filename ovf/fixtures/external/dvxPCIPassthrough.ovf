@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <References />
+  <NetworkSection>
+    <Info>The list of logical networks</Info>
+    <Network ovf:name="VM Network">
+      <Description>The VM Network network</Description>
+    </Network>
+  </NetworkSection>
+  <VirtualSystem ovf:id="dvx-pci-vm">
+    <Info>A virtual machine</Info>
+    <Name>dvx-pci-vm</Name>
+    <VirtualHardwareSection>
+      <Info>Virtual hardware requirements</Info>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>1024MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:Reservation>1024</rasd:Reservation>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>1024</rasd:VirtualQuantity>
+        <rasd:Weight>10240</rasd:Weight>
+        <vmw:Config ovf:required="false" vmw:key="sharesLevel" vmw:value="normal"/>
+      </Item>
+      <Item ovf:required="false">
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:ElementName>PCI device 0</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceSubType>vmware.pci.passthrough-dvx</rasd:ResourceSubType>
+        <rasd:ResourceType>1</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:key="dvx.config.deviceId" vmw:value="testDeviceID"/>
+        <vmw:Config ovf:required="false" vmw:key="dvx.config.customKey2" vmw:value="customVal2"/>
+        <vmw:Config ovf:required="false" vmw:key="dvx.config.customKey4" vmw:value="customVal4"/>
+        <vmw:Config ovf:required="false" vmw:key="virtualDev" vmw:value="dvx"/>
+        <vmw:Config ovf:required="false" vmw:key="dvx.deviceClass" vmw:value="com.vmware.dvxpassthru"/>
+        <vmw:Config ovf:required="false" vmw:key="dvx.config.customKey1" vmw:value="customVal1"/>
+        <vmw:Config ovf:required="false" vmw:key="dvx.config.customKey3" vmw:value="customVal3"/>
+        <vmw:Config ovf:required="false" vmw:key="dvx.config.vendorId" vmw:value="testVendorID"/>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:test="http://www.vmware.com/ovf/test"
+    xmlns:vcd="http://www.vmware.com/vcloud"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <References/>
+
+    <test:UnitTestSection ovf:required="false">
+        <Info>Describes an OVF parse unit test</Info>
+        <test:Description>Zero or more TagBasedPlacementSection may be used on VirtualSystem</test:Description>
+        <test:OvfSpecification test:version="vmw"/>
+        <test:Category>ElementMultiplicity</test:Category>
+
+        <test:Result test:outcome="pass"/>
+    </test:UnitTestSection>
+
+    <vmw:TagBasedPlacementGroupSection vmw:id="group1" vmw:name="groupName" vmw:priority="0">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="Security Service" vmw:id="1"/>
+        <vmw:TagValue vmw:name="TPM Enabled" vmw:id="1"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+    <vmw:TagBasedPlacementGroupSection vmw:id="group2" vmw:name="groupName" vmw:priority="0">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="Cluster Type" vmw:id="2"/>
+        <vmw:TagValue vmw:name="Production" vmw:id="2"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+
+	  <!-- Zero or more TagBasedPlacementSection may be used on VirtualSystem -->
+        <vmw:TagBasedPlacementSection vmw:group="group1">
+            <Info>Tag based placement policy group reference</Info>
+        </vmw:TagBasedPlacementSection>
+
+        <vmw:TagBasedPlacementSection vmw:group="group2">
+            <Info>Tag based placement policy group reference</Info>
+        </vmw:TagBasedPlacementSection>
+
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+
+</Envelope>
