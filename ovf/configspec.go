@@ -244,9 +244,20 @@ func (e Envelope) ToConfigSpecWithOptions(
 		Name:  vs.ID,
 	}
 
-	// Set the guest ID.
-	if os := vs.OperatingSystem; os != nil && os.OSType != nil {
-		dst.GuestId = *os.OSType
+	// Set the guest ID from vmw:osType if present, otherwise derive from the
+	// DMTF-standard CIM OS type integer (ovf:id) and optional version string.
+	if os := vs.OperatingSystem; os != nil {
+		if os.OSType != nil {
+			dst.GuestId = *os.OSType
+		} else {
+			ver := ""
+			if os.Version != nil {
+				ver = *os.Version
+			}
+			if guestID := CIMOSTypeToGuestID(CIMOSType(os.ID), ver); guestID != "" {
+				dst.GuestId = string(guestID)
+			}
+		}
 	}
 
 	// Parse the hardware.
