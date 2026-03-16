@@ -55,6 +55,26 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		assert.Equal(t, expectedConfigSpec, configSpec)
 	})
 
+	t.Run("DMTF OS id parsing", func(t *testing.T) {
+		t.Run("bare cimId only", func(t *testing.T) {
+			// dmtf_gos_test.ovf has ovf:id="36" (CIMOSTypeLINUX) with no
+			// vmw:osType and no version attribute.
+			e := testEnvelope(t, "fixtures/dmtf_gos_test.ovf")
+			cs, err := e.ToConfigSpec()
+			assert.NoError(t, err)
+			assert.Equal(t, "otherLinuxGuest", cs.GuestId)
+		})
+
+		t.Run("versioned cimId", func(t *testing.T) {
+			// dmtf_gos_versioned_test.ovf has ovf:id="95" ovf:version="12"
+			// (Debian 12) with no vmw:osType attribute.
+			e := testEnvelope(t, "fixtures/dmtf_gos_versioned_test.ovf")
+			cs, err := e.ToConfigSpec()
+			assert.NoError(t, err)
+			assert.Equal(t, "debian12Guest", cs.GuestId)
+		})
+	})
+
 	t.Run("VirtualSystemCollection", func(t *testing.T) {
 		t.Run("No index", func(t *testing.T) {
 			e := testEnvelope(t, "fixtures/virtualsystemcollection.ovf")
@@ -391,6 +411,15 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 				"OVF property %q: expected vAppPropertyInfo.Type %q, got %q",
 				id, wantType, p.Type)
 		}
+	})
+
+	t.Run("DMTF standard OS id only", func(t *testing.T) {
+		// ann_sec_valid.ovf has only ovf:id="36" (CIMOSTypeLINUX) on
+		// OperatingSystemSection with no vmw:osType attribute.
+		e := testEnvelope(t, "fixtures/dmtf_gos_test.ovf")
+		cs, err := e.ToConfigSpec()
+		assert.NoError(t, err)
+		assert.Equal(t, "otherLinuxGuest", cs.GuestId)
 	})
 
 	t.Run("Photon 5", func(t *testing.T) {
@@ -1380,4 +1409,120 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestCIMOSTypeToGuestID(t *testing.T) {
+	tests := []struct {
+		name    string
+		osType  CIMOSType
+		version string
+		want    string
+	}{
+		// Bare cimId mappings
+		{"linux bare", CIMOSTypeLINUX, "", "otherLinuxGuest"},
+		{"macos bare", CIMOSTypeMACOS, "", "darwinGuest"},
+		{"dos", CIMOSTypeMSDOS, "", "dosGuest"},
+		{"win3x", CIMOSTypeWIN3x, "", "win31Guest"},
+		{"win95", CIMOSTypeWIN95, "", "win95Guest"},
+		{"win98", CIMOSTypeWIN98, "", "win98Guest"},
+		{"winnt", CIMOSTypeWINNT, "", "winNTGuest"},
+		{"winme", CIMOSTypeWindowsMe, "", "winMeGuest"},
+		// win2000ServGuest is the canonical bare entry (not win2000ProGuest)
+		{"win2000", CIMOSTypeWindows2000, "", "win2000ServGuest"},
+		{"winxp", CIMOSTypeWindowsXP, "", "winXPProGuest"},
+		{"winxp64", CIMOSTypeWindowsXP64Bit, "", "winXPPro64Guest"},
+		{"winvista", CIMOSTypeWindowsVista, "", "winVistaGuest"},
+		{"winvista64", CIMOSTypeWindowsVista64Bit, "", "winVista64Guest"},
+		// winNetStandardGuest is the canonical bare entry for WinServer2003
+		{"winserver2003", CIMOSTypeMicrosoftWindowsServer2003, "", "winNetStandardGuest"},
+		{"winserver2003_64", CIMOSTypeMicrosoftWindowsServer2003_64Bit, "", "winNetStandard64Guest"},
+		{"win7", CIMOSTypeMicrosoftWindows7, "", "windows7Guest"},
+		{"winserver2008r2", CIMOSTypeMicrosoftWindowsServer2008R2, "", "windows7Server64Guest"},
+		{"winserver2012", CIMOSTypeMicrosoftWindowsServer2012, "", "windows8Server64Guest"},
+		{"winserver2012r2", CIMOSTypeMicrosoftWindowsServer2012R2, "", "windows9Server64Guest"},
+		{"rhel bare", CIMOSTypeRedHatEnterpriseLinux, "", "redhatGuest"},
+		{"suse bare", CIMOSTypeSUSE, "", "suseGuest"},
+		{"suse64 bare", CIMOSTypeSUSE64Bit, "", "suse64Guest"},
+		{"sles bare", CIMOSTypeSLES, "", "slesGuest"},
+		{"sles64 bare", CIMOSTypeSLES64Bit, "", "sles64Guest"},
+		{"ubuntu bare", CIMOSTypeUbuntu, "", "ubuntuGuest"},
+		{"ubuntu64 bare", CIMOSTypeUbuntu64Bit, "", "ubuntu64Guest"},
+		{"mandriva bare", CIMOSTypeMandriva, "", "mandrivaGuest"},
+		{"mandriva64 bare", CIMOSTypeMandriva64Bit, "", "mandriva64Guest"},
+		{"turbolinux bare", CIMOSTypeTurboLinux, "", "turboLinuxGuest"},
+		{"turbolinux64 bare", CIMOSTypeTurboLinux64Bit, "", "turboLinux64Guest"},
+		{"freebsd bare", CIMOSTypeFreeBSD, "", "freebsdGuest"},
+		{"freebsd64 bare", CIMOSTypeFreeBSD64Bit, "", "freebsd64Guest"},
+		{"novell oes", CIMOSTypeNovellOES, "", "oesGuest"},
+		{"novell nld", CIMOSTypeNovellLinuxDesktop, "", "nld9Guest"},
+		{"sun java desktop", CIMOSTypeSunJavaDesktopSystem, "", "sjdsGuest"},
+		{"os2", CIMOSTypeOS2, "", "os2Guest"},
+		{"ecomstation", CIMOSTypeeComStation32bitx, "", "eComStationGuest"},
+		{"centos bare", CIMOSTypeCentOS32bit, "", "centosGuest"},
+		{"centos64 bare", CIMOSTypeCentOS64bit, "", "centos64Guest"},
+		{"oracle bare", CIMOSTypeOracle32bit, "", "oracleLinuxGuest"},
+		{"oracle64 bare", CIMOSTypeOracle64bit, "", "oracleLinux64Guest"},
+		{"other", CIMOSTypeOther, "", "otherGuest"},
+		{"other64", CIMOSTypeOther64Bit, "", "otherGuest64"},
+		{"linux64", CIMOSTypeLinux64Bit, "", "otherLinux64Guest"},
+		{"linux24x", CIMOSTypeLinux24x, "", "other24xLinuxGuest"},
+		{"linux24x64", CIMOSTypeLinux24x64Bit, "", "other24xLinux64Guest"},
+		{"linux26x", CIMOSTypeLinux26x, "", "other26xLinuxGuest"},
+		{"linux26x64", CIMOSTypeLinux26x64Bit, "", "other26xLinux64Guest"},
+
+		// Versioned lookups
+		{"debian12", CIMOSTypeDebian, "12", "debian12Guest"},
+		{"debian12_64", CIMOSTypeDebian64Bit, "12", "debian12_64Guest"},
+		{"debian7", CIMOSTypeDebian, "7", "debian7Guest"},
+		{"pardus_64", CIMOSTypeDebian64Bit, "1", "pardus_64Guest"},
+		{"rhel7_64", CIMOSTypeRedHatEnterpriseLinux64Bit, "7", "rhel7_64Guest"},
+		{"rhel9_64", CIMOSTypeRedHatEnterpriseLinux64Bit, "9", "rhel9_64Guest"},
+		{"solaris10", CIMOSTypeSolaris, "10", "solaris10Guest"},
+		{"solaris10_64", CIMOSTypeSolaris64Bit, "10", "solaris10_64Guest"},
+		{"netware6", CIMOSTypeNetWare, "6", "netware6Guest"},
+		{"centos7", CIMOSTypeCentOS32bit, "7", "centos7Guest"},
+		{"centos7_64", CIMOSTypeCentOS64bit, "7", "centos7_64Guest"},
+		{"vmkernel6", CIMOSTypeVMwareESXi, "6", "vmkernel6Guest"},
+		{"vmkernel9", CIMOSTypeVMwareESXi, "9", "vmkernel9Guest"},
+		{"sles12", CIMOSTypeSLES, "12", "sles12Guest"},
+		{"opensuse", CIMOSTypeSUSE, "11", "opensuseGuest"},
+		{"macos19", CIMOSTypeMACOS, "19", "darwin19_64Guest"},
+		{"ecomstation2", CIMOSTypeeComStation32bitx, "2", "eComStation2Guest"},
+
+		// Cases that should return "" (no mapping)
+		{"unknown", CIMOSTypeUnknown, "", ""},
+		// WINCE has no bare entry in OsMap.cpp
+		{"wince", CIMOSTypeWINCE, "", ""},
+		// NetWare with no version has no bare entry
+		{"netware bare", CIMOSTypeNetWare, "", ""},
+		// Solaris with no version has no bare entry
+		{"solaris bare", CIMOSTypeSolaris, "", ""},
+		// WinServer2008 entries are all starred
+		{"winserver2008", CIMOSTypeMicrosoftWindowsServer2008, "", ""},
+		{"winserver2008_64", CIMOSTypeMicrosoftWindowsServer2008_64Bit, "", ""},
+		// RHEL64 bare has no entry (all versioned)
+		{"rhel64 bare", CIMOSTypeRedHatEnterpriseLinux64Bit, "", ""},
+		// Solaris64 bare has no entry (all versioned)
+		{"solaris64 bare", CIMOSTypeSolaris64Bit, "", ""},
+		// Debian bare has no entry (all versioned)
+		{"debian bare", CIMOSTypeDebian, "", ""},
+		{"debian64 bare", CIMOSTypeDebian64Bit, "", ""},
+		// VMwareESXi bare has no entry (all versioned)
+		{"esxi bare", CIMOSTypeVMwareESXi, "", ""},
+		// Win8/Win8_64 entries are starred
+		{"win8", CIMOSTypeMicrosoftWindows8, "", ""},
+		{"win8_64", CIMOSTypeMicrosoftWindows81, "", ""},
+		// Exotic CIM types with no vSphere equivalent
+		{"attunix", CIMOSTypeATTUNIX, "", ""},
+		{"dgux", CIMOSTypeDGUX, "", ""},
+		{"openvms", CIMOSTypeOpenVMS, "", ""},
+		{"qnx", CIMOSTypeQNX, "", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := CIMOSTypeToGuestID(tt.osType, tt.version)
+			assert.Equal(t, types.VirtualMachineGuestOsIdentifier(tt.want), got)
+		})
+	}
 }
