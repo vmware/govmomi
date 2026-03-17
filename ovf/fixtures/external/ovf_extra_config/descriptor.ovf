@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData">
+  <References>
+    <File ovf:id="file1" ovf:href="disk-vdcs-1.vmdk"/>
+  </References>
+  <DiskSection>
+    <Info>List of the virtual disks</Info>
+    <Disk ovf:capacityAllocationUnits="byte" ovf:fileRef="file1" ovf:diskId="vmdisk1" ovf:capacity="1073741824" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"/>
+  </DiskSection>
+  <NetworkSection>
+    <Info>The list of logical networks</Info>
+    <Network ovf:name="VM Network">
+      <Description>The VM Network network</Description>
+    </Network>
+  </NetworkSection>
+  <VirtualSystem ovf:id="testvm1">
+    <Info>A Virtual system</Info>
+    <Name>testvm1WithExtra</Name>
+    <OperatingSystemSection ovf:id="103" vmw:osType="windows7Server64Guest">
+      <Info>The operating system installed</Info>
+      <Description>Microsoft Windows Server 2008 R2 (64-bit)</Description>
+    </OperatingSystemSection>
+    <VirtualHardwareSection>
+      <Info>Virtual hardware requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-11</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+        <vmw:CoresPerSocket ovf:required="false">1</vmw:CoresPerSocket>
+      </Item>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>1024MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>1024</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>SCSI Controller</rasd:Description>
+        <rasd:ElementName>SCSI Controller 1</rasd:ElementName>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogicsas</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>SATA Controller</rasd:Description>
+        <rasd:ElementName>SATA Controller 1</rasd:ElementName>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:ResourceSubType>vmware.sata.ahci</rasd:ResourceSubType>
+        <rasd:ResourceType>20</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+        <rasd:InstanceID>5</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+        <rasd:InstanceID>6</rasd:InstanceID>
+        <rasd:Parent>4</rasd:Parent>
+        <rasd:ResourceSubType>vmware.cdrom.remotepassthrough</rasd:ResourceSubType>
+        <rasd:ResourceType>15</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:Description>Floppy Drive</rasd:Description>
+        <rasd:ElementName>Floppy Drive 1</rasd:ElementName>
+        <rasd:InstanceID>7</rasd:InstanceID>
+        <rasd:ResourceSubType>vmware.floppy.remotedevice</rasd:ResourceSubType>
+        <rasd:ResourceType>14</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+        <rasd:Connection>VM Network</rasd:Connection>
+        <rasd:ElementName>Network adapter 1</rasd:ElementName>
+        <rasd:InstanceID>8</rasd:InstanceID>
+        <rasd:ResourceSubType>E1000</rasd:ResourceSubType>
+        <rasd:ResourceType>10</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:value="true" vmw:key="connectable.allowGuestControl"/>
+        <vmw:Config ovf:required="false" vmw:value="true" vmw:key="wakeOnLanEnabled"/>
+      </Item>
+      <Item ovf:required="false">
+        <rasd:ElementName>Video card</rasd:ElementName>
+        <rasd:InstanceID>9</rasd:InstanceID>
+        <rasd:ResourceType>24</rasd:ResourceType>
+        <vmw:Config ovf:required="false" vmw:value="false" vmw:key="enableMPTSupport"/>
+        <vmw:Config ovf:required="false" vmw:value="8192" vmw:key="videoRamSizeInKB"/>
+        <vmw:Config ovf:required="false" vmw:value="1" vmw:key="numDisplays"/>
+        <vmw:Config ovf:required="false" vmw:value="false" vmw:key="enable3DSupport"/>
+        <vmw:Config ovf:required="false" vmw:value="262144" vmw:key="graphicsMemorySizeInKB"/>
+        <vmw:Config ovf:required="false" vmw:value="false" vmw:key="useAutoDetect"/>
+        <vmw:Config ovf:required="false" vmw:value="automatic" vmw:key="use3dRenderer"/>
+      </Item>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge7.present"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge5.present"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="testvm1.nvram" vmw:key="nvram"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="" vmw:key="migrate.hostLog"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="false" vmw:key="tools.guest.desktop.autolock"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge4.functions"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="off" vmw:key="sched.scsi0:0.throughputCap"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="isolation.tools.diskWiper.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge4.virtualDev"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="0" vmw:key="vmware.tools.internalversion"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="none" vmw:key="migrate.hostLogState"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="1048576" vmw:key="tools.setInfo.sizeLimit"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge0.present"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="9541" vmw:key="vmware.tools.requiredversion"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="false" vmw:key="mks.enable3d"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="1" vmw:key="RemoteDisplay.maxConnections"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="isolation.tools.dnd.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge6.virtualDev"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge5.functions"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value=" FALSE" vmw:key="tools.guestlib.enableHostInfo"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="FALSE" vmw:key="isolation.tools.setGUIOptions.enable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge4.present"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge7.functions"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="false" vmw:key="isolation.tools.diskShrink.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value=" 100000" vmw:key="log.rotateSize"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="isolation.tools.autoInstall.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value=" TRUE" vmw:key="isolation.device.edit.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="isolation.tools.paste.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="isolation.tools.copy.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="10" vmw:key="log.keepOld"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="isolation.device.connectable.disable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge5.virtualDev"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="disk.EnableUUID"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value=" FALSE" vmw:key="vmsafe.enable"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value=" FALSE" vmw:key="RemoteDisplay.vnc.enabled"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="pciBridge6.present"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="0" vmw:key="migrate.migrationId"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="8" vmw:key="pciBridge6.functions"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="false" vmw:key="vmci0.unrestricted"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value=" TRUE" vmw:key="svga.vgaonly"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="true" vmw:key="hpet0.present"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="TRUE" vmw:key="svga.present"/>
+      <vmw:ExtraConfig ovf:required="false" vmw:value="pcieRootPort" vmw:key="pciBridge7.virtualDev"/>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

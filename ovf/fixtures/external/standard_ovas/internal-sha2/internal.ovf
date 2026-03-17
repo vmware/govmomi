@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:test="http://www.vmware.com/ovf/test"
+    xmlns:vcd="http://www.vmware.com/vcloud"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- Used to test localization of:
+
+      * Annotation element on AnnotationSection
+      * License element on EulaSection
+      * Description element on NetworkSection
+      * Description element on OperatingSystemSection
+      * Description, Product, Vendor, Label, and Category elements on ProductSection Description and Label elements on Property
+      * Description and Label elements on DeploymentOptionSection
+      * ElementName, Caption and Description subelements on Item elements in VirtualHardwareSection
+      * ElementName, Caption and Description subelements on Item elements in ResourceAllocationSection
+    -->
+
+    <References/>
+
+    <NetworkSection>
+        <Info>List of logical networks used in the package</Info>
+        <Network ovf:name="red">
+            <Description ovf:msgid="msg1">The network the Red service is available on</Description>
+        </Network>
+        <Network ovf:name="blue">
+            <Description ovf:msgid="msg2">The network the Blue service is available on</Description>
+        </Network>
+    </NetworkSection>
+
+    <DeploymentOptionSection>
+        <Info>Deployment Configuration</Info>
+        <Configuration ovf:id="Minimal">
+            <Label ovf:msgid="msg1">Minimal</Label>
+            <Description ovf:msgid="msg2">Some description</Description>
+        </Configuration>
+    </DeploymentOptionSection>
+
+    <VirtualSystemCollection ovf:id="vsc">
+        <Info>A VirtualSystemCollection</Info>
+
+        <AnnotationSection>
+            <Info>Annotation of VApp</Info>
+            <Annotation ovf:msgid="msg1">anno</Annotation>
+        </AnnotationSection>
+
+       <ResourceAllocationSection>
+            <Info>Defines reservations for CPU and memory for the collection of VMs</Info>
+            <Item>
+               <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+               <rasd:Caption ovf:msgid="msg1">Caption</rasd:Caption>
+               <rasd:Description ovf:msgid="msg2">Description</rasd:Description>
+               <rasd:ElementName ovf:msgid="msg3">300 MB reservation</rasd:ElementName>
+               <rasd:InstanceID>0</rasd:InstanceID>
+               <rasd:Reservation>300</rasd:Reservation>
+               <rasd:ResourceType>4</rasd:ResourceType>
+            </Item>
+        </ResourceAllocationSection>
+
+    <VirtualSystem ovf:id="vsc1">
+        <Info>A virtual machine collection</Info>
+        <Name>Test System Collection</Name>
+
+        <EulaSection>
+           <Info>EULA Section</Info>
+           <License ovf:msgid="msg1">eula</License>
+        </EulaSection>
+
+        <OperatingSystemSection ovf:id="1">
+           <Info>OS Section</Info>
+           <Description ovf:msgid="msg1">os description</Description>
+        </OperatingSystemSection>
+
+        <ProductSection ovf:class="com.mycrm.myservice" ovf:instance="1">
+           <Info>Describes product information for the service</Info>
+           <Product ovf:msgid="msg1">MyCRM Enterprise</Product>
+           <Vendor  ovf:msgid="msg2">MyCRM Corporation</Vendor>
+           <Version>4.5</Version>
+           <FullVersion>4.5-b4523</FullVersion>
+           <ProductUrl>http://www.mycrm.com/enterprise</ProductUrl>
+           <VendorUrl>http://www.mycrm.com</VendorUrl>
+           <Category ovf:msgid="msg3">Email properties</Category>
+           <Property ovf:key="admin.email" ovf:type="string" ovf:userConfigurable="true">
+               <Label ovf:msgid="msg4">Admin email</Label>
+               <Description ovf:msgid="msg5">Email address of administrator</Description>
+           </Property>
+        </ProductSection>
+
+        <VirtualHardwareSection>
+            <Info>Defines reservations for CPU and memory for the collection of VMs</Info>
+            <Item>
+              <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+              <rasd:Caption ovf:msgid="msg1">Caption</rasd:Caption>
+              <rasd:Description ovf:msgid="msg2">Description</rasd:Description>
+              <rasd:ElementName ovf:msgid="msg3">300 MB reservation</rasd:ElementName>
+              <rasd:InstanceID>0</rasd:InstanceID>
+              <rasd:Reservation>300</rasd:Reservation>
+              <rasd:ResourceType>4</rasd:ResourceType>
+           </Item>
+         </VirtualHardwareSection>
+    </VirtualSystem>
+    </VirtualSystemCollection>
+
+    <Strings>
+        <Msg ovf:msgid="msg1">msg1</Msg>
+        <Msg ovf:msgid="msg2">msg2</Msg>
+        <Msg ovf:msgid="msg3">msg3</Msg>
+        <Msg ovf:msgid="msg4">msg4</Msg>
+        <Msg ovf:msgid="msg5">msg5</Msg>
+    </Strings>
+
+    <Strings xml:lang="da-DK">
+        <Msg ovf:msgid="msg1">da-msg1</Msg>
+        <Msg ovf:msgid="msg2">da-msg2</Msg>
+        <Msg ovf:msgid="msg3">da-msg3</Msg>
+        <Msg ovf:msgid="msg4">da-msg4</Msg>
+        <Msg ovf:msgid="msg5">da-msg5</Msg>
+    </Strings>
+
+</Envelope>

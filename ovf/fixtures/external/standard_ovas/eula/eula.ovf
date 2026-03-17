@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+EulaSections on VirtualSystemCollection and VirtualSystem.
+
+ -->
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References/>
+
+    <VirtualSystemCollection ovf:id="vsc1">
+        <Info>A vApp</Info>
+        <Name>Test vApp</Name>
+
+        <EulaSection>
+            <Info>An end-user license agreement</Info>
+            <License>License for vApp</License>
+        </EulaSection>
+
+        <VirtualSystem ovf:id="vs1">
+            <Info>VM with one EULA</Info>
+            <Name>Test VM</Name>
+
+            <EulaSection>
+                <Info>An end-user license agreement</Info>
+                <License>License for VM 1</License>
+            </EulaSection>
+
+            <VirtualHardwareSection>
+                <Info>Virtual hardware requirements</Info>
+            </VirtualHardwareSection>
+        </VirtualSystem>
+
+        <VirtualSystem ovf:id="vs2">
+            <Info>VM with two EULAs</Info>
+            <Name>Test VM 2</Name>
+
+            <EulaSection>
+                <Info>An end-user license agreement</Info>
+                <License>First license for VM 2</License>
+            </EulaSection>
+            <EulaSection>
+                <Info>An end-user license agreement</Info>
+                <License>Second license for VM 2</License>
+            </EulaSection>
+
+            <VirtualHardwareSection>
+                <Info>Virtual hardware requirements</Info>
+            </VirtualHardwareSection>
+        </VirtualSystem>
+
+    </VirtualSystemCollection>
+
+
+
+</Envelope>

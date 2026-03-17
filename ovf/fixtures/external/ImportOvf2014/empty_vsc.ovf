@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1">
+    <References/>
+    <VirtualSystemCollection ovf:id="empty-vsc">
+        <Info/>
+        <Name>Empty vApp</Name>
+    </VirtualSystemCollection>
+</Envelope>

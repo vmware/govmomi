@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope vmw:buildId="build-00000"
+          xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+          xmlns:vmw="http://www.vmware.com/schema/ovf"
+          xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+    <References />
+    <VirtualSystem ovf:id="VBS-Vm">
+        <Info>A virtual machine</Info>
+        <Name>Nostalgia</Name>
+        <OperatingSystemSection ovf:id="114" vmw:osType="windows9_64Guest">
+            <Info>The kind of installed guest operating system</Info>
+            <Description>Microsoft Windows 10 (64-bit)</Description>
+        </OperatingSystemSection>
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <System>
+                <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                <vssd:InstanceID>0</vssd:InstanceID>
+                <vssd:VirtualSystemIdentifier>Nostalgia</vssd:VirtualSystemIdentifier>
+                <vssd:VirtualSystemType>vmx-14</vssd:VirtualSystemType>
+            </System>
+            <Item>
+                <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+            </Item>
+            <Item>
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:Description>Memory Size</rasd:Description>
+                <rasd:ElementName>64MB of memory</rasd:ElementName>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:ResourceType>4</rasd:ResourceType>
+                <rasd:VirtualQuantity>64</rasd:VirtualQuantity>
+            </Item>
+            <vmw:Config ovf:required="false" vmw:key="flags.vbsEnabled" vmw:value="true"/>
+            <vmw:Config ovf:required="false" vmw:key="nestedHVEnabled" vmw:value="true"/>
+	    <vmw:Config ovf:required="false" vmw:key="flags.vvtdEnabled" vmw:value="true"/>
+	    <vmw:Config ovf:required="false" vmw:key="firmware" vmw:value="efi"/>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>

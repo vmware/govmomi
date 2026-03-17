@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FakeEnvelope>
+<References>
+        <File ovf:size="224391387"  ovf:href="../../../vmdk/dummy.vmdk" ></File>
+</References>
+<DiskSection>
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:capacity="1073741824"  ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized"  ovf:diskId="vmdisk1"  ovf:fileRef="file1" ></Disk>
+</DiskSection>
+<VirtualSystem ovf:id="PTC01_VM" >
+	<Info>The virtual machince "ArchLinux"</Info>
+	<OperatingSystemSection ovf:id="36" >
+		<Info>Guest Operating System</Info>
+		<Description>Other Linux (32-bit)</Description>
+        </OperatingSystemSection>
+	<VirtualHardwareSection ovf:required="true" >
+            <Info>512 MB , 1 CPU, 1 disk, 1 nic</Info>
+            <System>
+                <vssd:InstanceId>0</vssd:InstanceId>
+                <vssd:VirtualSystemIdentifier>system id</vssd:VirtualSystemIdentifier>
+                <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+            </System>
+            <Item><rasd:Address>0</rasd:Address>
+<rasd:Description>LsiLogic SCSI Controller</rasd:Description>
+<rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+<rasd:InstanceId>8</rasd:InstanceId>
+<rasd:ResourceSubType>whatever</rasd:ResourceSubType>
+<rasd:ResourceType>6</rasd:ResourceType>
+		</Item>
+            <Item><rasd:Description>some device</rasd:Description>
+<rasd:ElementName>Unknown device</rasd:ElementName>
+<rasd:InstanceId>9</rasd:InstanceId>
+<rasd:ResourceType>89</rasd:ResourceType>
+		</Item>
+        </VirtualHardwareSection>
+</VirtualSystem>
+</FakeEnvelope>

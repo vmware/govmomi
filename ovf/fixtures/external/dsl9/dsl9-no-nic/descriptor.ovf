@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_VirtualSystemSettingData.xsd http://schemas.dmtf.org/ovf/envelope/1 http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.1.0.xsd http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd">
+    <ovf:References>
+        <ovf:File ovf:size="68096" ovf:id="file-c27724c6-be87-4c2f-8e3a-e8a601335281-2000" ovf:href="vm-c27724c6-be87-4c2f-8e3a-e8a601335281-disk-0.vmdk"/>
+    </ovf:References>
+    <ovf:DiskSection>
+        <ovf:Info>Virtual disk information</ovf:Info>
+        <ovf:Disk ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:fileRef="file-c27724c6-be87-4c2f-8e3a-e8a601335281-2000" ovf:diskId="vmdisk-c27724c6-be87-4c2f-8e3a-e8a601335281-2000" ovf:capacityAllocationUnits="byte * 2^20" ovf:capacity="4"/>
+    </ovf:DiskSection>
+    <ovf:NetworkSection>
+        <ovf:Info>The list of logical networks</ovf:Info>
+    </ovf:NetworkSection>
+    <ovf:VirtualSystem ovf:id="vm-9">
+        <ovf:Info>A virtual machine: </ovf:Info>
+        <ovf:Name>vm-9</ovf:Name>
+        <ovf:OperatingSystemSection xmlns:vmw="http://www.vmware.com/schema/ovf" ovf:id="102" vmw:osType="windows7Server64Guest">
+            <ovf:Info>Specifies the operating system installed</ovf:Info>
+            <ovf:Description>Microsoft Windows Server 2008 R2 (64-bit)</ovf:Description>
+        </ovf:OperatingSystemSection>
+        <ovf:VirtualHardwareSection ovf:transport="">
+            <ovf:Info>Virtual hardware requirements</ovf:Info>
+            <ovf:System>
+                <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                <vssd:InstanceID>0</vssd:InstanceID>
+                <vssd:VirtualSystemIdentifier>vm-9</vssd:VirtualSystemIdentifier>
+                <vssd:VirtualSystemType>vmx-09</vssd:VirtualSystemType>
+            </ovf:System>
+            <ovf:Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>lsilogicsas</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:Description>Hard disk</rasd:Description>
+                <rasd:ElementName>Hard disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk-c27724c6-be87-4c2f-8e3a-e8a601335281-2000</rasd:HostResource>
+                <rasd:InstanceID>2000</rasd:InstanceID>
+                <rasd:Parent>1</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>IDE Controller</rasd:Description>
+                <rasd:ElementName>IDE Controller 0</rasd:ElementName>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:ResourceType>5</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+                <rasd:Description>Floppy Drive</rasd:Description>
+                <rasd:ElementName>Floppy Drive 1</rasd:ElementName>
+                <rasd:HostResource/>
+                <rasd:InstanceID>8000</rasd:InstanceID>
+                <rasd:ResourceType>14</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                <rasd:InstanceID>3</rasd:InstanceID>
+                <rasd:Reservation>0</rasd:Reservation>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                <rasd:Weight>1000</rasd:Weight>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:Description>Memory Size</rasd:Description>
+                <rasd:ElementName>512 MB of memory</rasd:ElementName>
+                <rasd:InstanceID>4</rasd:InstanceID>
+                <rasd:Reservation>0</rasd:Reservation>
+                <rasd:ResourceType>4</rasd:ResourceType>
+                <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+                <rasd:Weight>5120</rasd:Weight>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+                <rasd:Description>CD/DVD Drive</rasd:Description>
+                <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+                <rasd:HostResource/>
+                <rasd:InstanceID>3000</rasd:InstanceID>
+                <rasd:Parent>2</rasd:Parent>
+                <rasd:ResourceType>15</rasd:ResourceType>
+            </ovf:Item>
+        </ovf:VirtualHardwareSection>
+    </ovf:VirtualSystem>
+</ovf:Envelope>

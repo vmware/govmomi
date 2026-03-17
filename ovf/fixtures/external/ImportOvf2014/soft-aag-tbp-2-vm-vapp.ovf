@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Single VirtualSystemCollection OVF containing tag based placement sections.
+  This is for testing basic PBM OVF integration.
+  -->
+
+<Envelope vmw:buildId="build-258902" 
+	xmlns="http://schemas.dmtf.org/ovf/envelope/1" 
+	xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common" 
+	xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" 
+	xmlns:ovf2="http://schemas.dmtf.org/ovf/envelope/2"
+	xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" 
+	xmlns:vmw="http://www.vmware.com/schema/ovf" 
+	xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <References>
+        <File ovf:href="nostalgia-disk1.vmdk" ovf:id="file1" ovf:size="6872576" />
+    </References>
+
+    <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="107373568" ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" />
+    </DiskSection>
+
+    <NetworkSection>
+        <Info>The list of logical networks</Info>
+        <Network ovf:name="none">
+            <Description>The none network</Description>
+        </Network>
+    </NetworkSection>
+	
+	<vmw:TagBasedPlacementGroupSection vmw:id="group1" vmw:name="TagGroup1">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="ovf-test-policy" vmw:id="##CAT_ID##"/>
+        <vmw:TagValue vmw:name="ovf-test-policy-tag-0" vmw:id="##TAG_ID##"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+	<ovf2:PlacementGroupSection ovf2:id="section4" ovf2:policy="availability" vmw:policyId="##AAG_POLICY_ID##" vmw:priority="1" vmw:name="group-4" ovf:required="false">
+		<Info>Placement policy for group of VMs</Info>
+		<ovf2:Description>Placement policy for web tier</ovf2:Description>
+	</ovf2:PlacementGroupSection>
+
+	<VirtualSystemCollection ovf:id="aag1PGS1VAPP2VMs">
+		<Info>A multi-tiered software solution</Info>
+		<Name>aag1PGS1VAPP1VMs</Name>
+
+		<VirtualSystem ovf:id="vs1">
+			<Info>A virtual machine</Info>
+			<Name>Test System</Name>
+			<VirtualHardwareSection>
+				<Info>Virtual hardware requirements</Info>
+			</VirtualHardwareSection>
+			<vmw:TagBasedPlacementSection vmw:group="group1" vmw:priority="0">
+				<Info>Tag based placement policy group reference</Info>
+			</vmw:TagBasedPlacementSection>
+			<ovf2:PlacementSection ovf2:group="section4" ovf:required="false">
+				<Info>Placement policy group reference</Info>
+			</ovf2:PlacementSection>
+		</VirtualSystem>
+		<VirtualSystem ovf:id="vs2">
+			<Info>A virtual machine</Info>
+			<Name>Test System</Name>
+			<VirtualHardwareSection>
+				<Info>Virtual hardware requirements</Info>
+			</VirtualHardwareSection>
+			<vmw:TagBasedPlacementSection vmw:group="group1" vmw:priority="0">
+				<Info>Tag based placement policy group reference</Info>
+			</vmw:TagBasedPlacementSection>
+			<ovf2:PlacementSection ovf2:group="section4" ovf:required="false">
+				<Info>Placement policy group reference</Info>
+			</ovf2:PlacementSection>
+		</VirtualSystem>
+
+		</VirtualSystemCollection>
+</Envelope>

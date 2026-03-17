@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ovf:Envelope  xmlns:xsi-namespace="http://www.w3.org/2001/XMLSchema-instance" xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns:vssd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:rasd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" ovf:version="0.9">
+    <References>
+	    <File ovf:id="file1" ovf:href="../../../vmdk/dummy.vmdk" ovf:size="0"/>
+    </References>
+    <Section xsi-namespace:type="ovf:VirtualHardwareSection_Type" ovf:required="true">
+		<Info/>
+    </Section>
+    <Content xsi-namespace:type="ovf:VirtualSystem_Type" ovf:id="PTC01_VM">
+      <Info/>
+	<Section xsi-namespace:type="ovf:OperatingSystemSection_Type" ovf:id="36">
+		<Info/>
+	</Section>
+	 <Section xsi-namespace:type="ovf:VirtualHardwareSection_Type" ovf:required="true">
+		<Info/>
+	 </Section>
+    </Content>
+</ovf:Envelope>

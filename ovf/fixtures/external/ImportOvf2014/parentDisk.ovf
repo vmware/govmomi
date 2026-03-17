@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <References>
+        <!--
+             If relative paths ever start working, delete the vmdk from this dir and refer
+             to the haoUnOS2VMs or hw folder instead.
+
+             http://bugzilla.eng.vmware.com/show_bug.cgi?id=1069809
+
+             And move this OVF to somewhere else (resources will be fine) since it has
+             nothing directly to do with datastore. Just put it here to avoid duplicating the
+             vmdks again-again.
+
+             This is a screwy use of parent disks (using the same image), but at least it should
+             get us far enough for the purpose of testing imports.
+        -->
+        <File ovf:href="UnOS2.vmdk" ovf:id="file1" ovf:size="828928" />
+        <File ovf:href="UnOS2-2.vmdk" ovf:id="file2" ovf:size="828928" />
+    </References>
+    <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="107373568" ovf:diskId="basedisk1"
+            ovf:fileRef="file1"
+            ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" />
+        <Disk ovf:capacity="107373568" ovf:diskId="vmdisk1"
+            ovf:fileRef="file2"
+            ovf:parentRef="basedisk1"
+            ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" />
+    </DiskSection>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </Item>
+            <Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:Parent>1</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+            </Item>
+        </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>

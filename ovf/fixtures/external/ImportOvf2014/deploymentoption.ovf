@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+DeploymentOptionSection. It currently does not contain examples of hardware;
+will get to that once we get to hardware.
+
+ -->
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References/>
+
+    <DeploymentOptionSection>
+        <Info>The list of deployment options</Info>
+        <Configuration ovf:id="small">
+            <Label>Development</Label>
+            <Description>Small description</Description>
+        </Configuration>
+        <Configuration ovf:id="medium" ovf:default="true">
+            <Label>Production</Label>
+            <Description>Medium description</Description>
+        </Configuration>
+        <Configuration ovf:id="large">
+            <Label>Enterprise</Label>
+            <Description>Large description</Description>
+        </Configuration>
+    </DeploymentOptionSection>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+            <!-- Example of use of deployment options once we get to that:
+            <System>
+                <vssd:ElementName>VMware Virtual Hardware Family 4</vssd:ElementName>
+                <vssd:InstanceID>0</vssd:InstanceID>
+                <vssd:VirtualSystemIdentifier>db</vssd:VirtualSystemIdentifier>
+                <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+            </System>
+            <Item>
+                <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+            </Item>
+            <Item ovf:configuration="large">
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:ElementName>2 virtual CPU(s) for large setup</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>2</rasd:VirtualQuantity>
+            </Item>
+            -->
+        </VirtualHardwareSection>
+    </VirtualSystem>
+</Envelope>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  Single VirtualSystem OVF containing a 'complete' set of OVF sections.
+  Importing this OVF should generate all OVF parameter types.
+  -->
+
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf2="http://schemas.dmtf.org/ovf/envelope/2"
+    xmlns:vmw="http://www.vmware.com/schema/ovf">
+
+    <References>
+        <File ovf:href="../../../content/nostalgia-disk1.vmdk" ovf:id="file1" ovf:size="6872576" />
+    </References>
+
+    <DiskSection>
+        <Info>Virtual disk information</Info>
+        <Disk ovf:capacity="107373568" ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" />
+    </DiskSection>
+
+    <NetworkSection>
+        <Info>The list of logical networks</Info>
+        <Network ovf:name="VM Network">
+            <Description>The VM Network network</Description>
+        </Network>
+    </NetworkSection>
+
+    <DeploymentOptionSection>
+        <Info>The list of deployment options</Info>
+        <Configuration ovf:id="small">
+            <Label>Development</Label>
+            <Description>Small description</Description>
+        </Configuration>
+        <Configuration ovf:id="medium" ovf:default="true">
+            <Label>Production</Label>
+            <Description>Medium description</Description>
+        </Configuration>
+        <Configuration ovf:id="large">
+            <Label>Enterprise</Label>
+            <Description>Large description</Description>
+        </Configuration>
+    </DeploymentOptionSection>
+
+    <vmw:IpAssignmentSection ovf:required="false"
+            vmw:protocols="IPv4,IPv6"
+            vmw:schemes="ovfenv,dhcp">
+        <Info>Supported IP assignment schemes</Info>
+    </vmw:IpAssignmentSection>
+
+    <vmw:TagBasedPlacementGroupSection vmw:id="group1" vmw:name="TagGroup1">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="Security Service" vmw:id="1"/>
+        <vmw:TagValue vmw:name="TPM Enabled" vmw:id="1"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+    <VirtualSystem ovf:id="vs1">
+        <Info>A virtual machine</Info>
+        <Name>Test System</Name>
+
+        <VirtualHardwareSection>
+            <Info>Virtual hardware requirements</Info>
+        </VirtualHardwareSection>
+
+        <EulaSection>
+            <Info>An end-user license agreement</Info>
+            <License>Contents of license</License>
+        </EulaSection>
+
+        <ProductSection ovf:class="com.vmware.test" ovf:instance="117">
+            <Info>Information about the installed software</Info>
+            <!-- A property without category (and no label or description)-->
+            <Property ovf:key="username" ovf:type="string" ovf:userConfigurable="true">
+            </Property>
+
+            <Category>Network properties</Category>
+            <Property ovf:key="ip0" ovf:type="string" ovf:userConfigurable="true">
+                <Label>IP address</Label>
+                <Description>IP address</Description>
+            </Property>
+
+            <!-- UI optional properties -->
+            <Category vmw:uioptional="true">UI optional properties</Category>
+            <Property ovf:key="optional0" ovf:type="string" ovf:userConfigurable="true"
+                    ovf:value="This is the default value">
+                <Label>Optional</Label>
+                <Description>An optional property</Description>
+            </Property>
+        </ProductSection>
+
+        <vmw:TagBasedPlacementSection vmw:group="group1" vmw:priority="0">
+            <Info>Tag based placement policy group reference</Info>
+        </vmw:TagBasedPlacementSection>
+
+        <!-- Unrecognized section -->
+        <foo:FooSection ovf:required="false" xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+                xmlns:foo="http://www.vmware.com/foo">
+            <Info>The foo section</Info>
+            <foo:Vex foo:name="Zebra">
+               <foo:Description>Confusing my monochromatic friend</foo:Description>
+            </foo:Vex>
+        </foo:FooSection>
+
+    </VirtualSystem>
+
+</Envelope>

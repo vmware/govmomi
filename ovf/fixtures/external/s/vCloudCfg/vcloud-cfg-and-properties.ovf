@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ovf:Envelope vmw:buildId="build-00000" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" 
+  xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" 
+  xmlns:vcloud="http://www.vmware.com/vcloud/v1.5" 
+  xmlns:vmw="http://www.vmware.com/schema/ovf" 
+  xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xsi:schemaLocation="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_VirtualSystemSettingData.xsd http://www.vmware.com/schema/ovf http://www.vmware.com/schema/ovf http://schemas.dmtf.org/ovf/envelope/1 http://schemas.dmtf.org/ovf/envelope/1/dsp8023_1.1.0.xsd http://www.vmware.com/vcloud/v1.5 http://10.20.63.108/api/v1.5/schema/master.xsd http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.22.0/CIM_ResourceAllocationSettingData.xsd">
+    <ovf:References>
+        <ovf:File ovf:href="vm-disk1.vmdk" ovf:id="file-3dd2c6b9-377a-42fc-8951-031ae8e6b5f5-2000" ovf:size="6872576"/>
+    </ovf:References>
+    <ovf:DiskSection>
+        <ovf:Info>Virtual disk information</ovf:Info>
+        <ovf:Disk ovf:capacity="107373568" ovf:capacityAllocationUnits="byte" ovf:diskId="vmdisk-3dd2c6b9-377a-42fc-8951-031ae8e6b5f5-2000" ovf:fileRef="file-3dd2c6b9-377a-42fc-8951-031ae8e6b5f5-2000" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:populatedSize="11141120"/>
+    </ovf:DiskSection>
+    <ovf:NetworkSection>
+        <ovf:Info>The list of logical networks</ovf:Info>
+        <ovf:Network ovf:name="VM Network">
+            <ovf:Description>This is the VM Network</ovf:Description>
+        </ovf:Network>
+        <ovf:Network ovf:name="VM Network 2">
+            <ovf:Description>The network that the web application will be available on</ovf:Description>
+        </ovf:Network>
+        <ovf:Network ovf:name="VM Network 3">
+            <ovf:Description>The VM Network 3 roxx!</ovf:Description>
+        </ovf:Network>
+        <ovf:Network ovf:name="VM2 Network">
+            <ovf:Description>This is the VM2 Network</ovf:Description>
+        </ovf:Network>
+        <ovf:Network ovf:name="VM2 Network 2">
+            <ovf:Description>The network that the web application will be available on</ovf:Description>
+        </ovf:Network>
+        <ovf:Network ovf:name="VM2 Network 3">
+            <ovf:Description>The VM2 Network 3 roxx!</ovf:Description>
+        </ovf:Network>
+    </ovf:NetworkSection>
+    
+    <vcloud:NetworkConfigSection ovf:required="false">
+        <ovf:Info>The configuration parameters for logical networks</ovf:Info>
+        <vcloud:NetworkConfig networkName="VM Network">
+            <vcloud:Description/>
+            <vcloud:Configuration>
+                <vcloud:IpScopes>
+                    <vcloud:IpScope>
+                        <vcloud:IsInherited>false</vcloud:IsInherited>
+                        <vcloud:Gateway>192.168.2.1</vcloud:Gateway>
+                        <vcloud:Netmask>255.255.255.0</vcloud:Netmask>
+                        <vcloud:IsEnabled>true</vcloud:IsEnabled>
+                        <vcloud:IpRanges>
+                            <vcloud:IpRange>
+                                <vcloud:StartAddress>192.168.2.100</vcloud:StartAddress>
+                                <vcloud:EndAddress>192.168.2.199</vcloud:EndAddress>
+                            </vcloud:IpRange>
+                        </vcloud:IpRanges>
+                    </vcloud:IpScope>
+                </vcloud:IpScopes>
+                <vcloud:ParentNetwork href="" name="orgvdcnet"/>
+                <vcloud:FenceMode>natRouted</vcloud:FenceMode>
+                <vcloud:RetainNetInfoAcrossDeployments>true</vcloud:RetainNetInfoAcrossDeployments>
+                <vcloud:Features>
+                    <vcloud:DhcpService>
+                        <vcloud:IsEnabled>false</vcloud:IsEnabled>
+                        <vcloud:DefaultLeaseTime>3600</vcloud:DefaultLeaseTime>
+                        <vcloud:MaxLeaseTime>7200</vcloud:MaxLeaseTime>
+                    </vcloud:DhcpService>
+                    <vcloud:FirewallService>
+                        <vcloud:IsEnabled>true</vcloud:IsEnabled>
+                        <vcloud:DefaultAction>allow</vcloud:DefaultAction>
+                        <vcloud:LogDefaultAction>false</vcloud:LogDefaultAction>
+                    </vcloud:FirewallService>
+                    <vcloud:NatService>
+                        <vcloud:IsEnabled>true</vcloud:IsEnabled>
+                        <vcloud:NatType>ipTranslation</vcloud:NatType>
+                        <vcloud:Policy>allowTrafficIn</vcloud:Policy>
+                        <vcloud:NatRule>
+                            <vcloud:Id>65537</vcloud:Id>
+                            <vcloud:OneToOneVmRule>
+                                <vcloud:MappingMode>automatic</vcloud:MappingMode>
+                                <vcloud:VAppScopedVmId>VM</vcloud:VAppScopedVmId>
+                                <vcloud:VmNicId>1</vcloud:VmNicId>
+                            </vcloud:OneToOneVmRule>
+                        </vcloud:NatRule>
+                    </vcloud:NatService>
+                </vcloud:Features>
+                <vcloud:SyslogServerSettings/>
+            </vcloud:Configuration>
+            <vcloud:IsDeployed>false</vcloud:IsDeployed>
+        </vcloud:NetworkConfig>
+        <vcloud:NetworkConfig networkName="VM Network 2">
+            <vcloud:Description/>
+            <vcloud:Configuration>
+                <vcloud:IpScopes>
+                    <vcloud:IpScope>
+                        <vcloud:IsInherited>false</vcloud:IsInherited>
+                        <vcloud:Gateway>192.168.2.1</vcloud:Gateway>
+                        <vcloud:Netmask>255.255.255.0</vcloud:Netmask>
+                        <vcloud:IsEnabled>true</vcloud:IsEnabled>
+                        <vcloud:IpRanges>
+                            <vcloud:IpRange>
+                                <vcloud:StartAddress>192.168.2.100</vcloud:StartAddress>
+                                <vcloud:EndAddress>192.168.2.199</vcloud:EndAddress>
+                            </vcloud:IpRange>
+                        </vcloud:IpRanges>
+                    </vcloud:IpScope>
+                </vcloud:IpScopes>
+                <vcloud:FenceMode>isolated</vcloud:FenceMode>
+                <vcloud:RetainNetInfoAcrossDeployments>false</vcloud:RetainNetInfoAcrossDeployments>
+                <vcloud:Features>
+                    <vcloud:DhcpService>
+                        <vcloud:IsEnabled>false</vcloud:IsEnabled>
+                        <vcloud:DefaultLeaseTime>3600</vcloud:DefaultLeaseTime>
+                        <vcloud:MaxLeaseTime>7200</vcloud:MaxLeaseTime>
+                    </vcloud:DhcpService>
+                </vcloud:Features>
+            </vcloud:Configuration>
+            <vcloud:IsDeployed>false</vcloud:IsDeployed>
+        </vcloud:NetworkConfig>
+        <vcloud:NetworkConfig networkName="VM Network 3">
+            <vcloud:Description/>
+            <vcloud:Configuration>
+                <vcloud:IpScopes>
+                    <vcloud:IpScope>
+                        <vcloud:IsInherited>true</vcloud:IsInherited>
+                        <vcloud:Gateway>192.168.0.10</vcloud:Gateway>
+                        <vcloud:Netmask>255.255.0.0</vcloud:Netmask>
+                        <vcloud:Dns1>10.20.60.1</vcloud:Dns1>
+                        <vcloud:IsEnabled>true</vcloud:IsEnabled>
+                        <vcloud:IpRanges>
+                            <vcloud:IpRange>
+                                <vcloud:StartAddress>192.168.11.150</vcloud:StartAddress>
+                                <vcloud:EndAddress>192.168.11.200</vcloud:EndAddress>
+                            </vcloud:IpRange>
+                        </vcloud:IpRanges>
+                    </vcloud:IpScope>
+                </vcloud:IpScopes>
+                <vcloud:ParentNetwork href="" name="orgvdcnet"/>
+                <vcloud:FenceMode>bridged</vcloud:FenceMode>
+                <vcloud:RetainNetInfoAcrossDeployments>false</vcloud:RetainNetInfoAcrossDeployments>
+            </vcloud:Configuration>
+            <vcloud:IsDeployed>false</vcloud:IsDeployed>
+        </vcloud:NetworkConfig>
+    </vcloud:NetworkConfigSection>
+    
+    <ovf:VirtualSystemCollection ovf:id="vcloud-cfg-vapp">
+        <ovf:Info>2 VMs, no props, vCloud net config</ovf:Info>
+        <ovf:Name>vcloud-cfg-vapp</ovf:Name>
+    <ovf:VirtualSystem ovf:id="VM">
+        <ovf:Info>A virtual machine</ovf:Info>
+        <ovf:Name>VM</ovf:Name>
+        <ovf:OperatingSystemSection ovf:id="1" vmw:osType="otherGuest">
+            <ovf:Info>Specifies the operating system installed</ovf:Info>
+            <ovf:Description>Other (32-bit)</ovf:Description>
+        </ovf:OperatingSystemSection>
+        <ovf:VirtualHardwareSection ovf:transport="">
+            <ovf:Info>Virtual hardware requirements</ovf:Info>
+            <ovf:System>
+                <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+                <vssd:InstanceID>0</vssd:InstanceID>
+                <vssd:VirtualSystemIdentifier>VM</vssd:VirtualSystemIdentifier>
+                <vssd:VirtualSystemType>vmx-07</vssd:VirtualSystemType>
+            </ovf:System>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                <rasd:Connection vcloud:ipAddressingMode="POOL" vcloud:primaryNetworkConnection="false">VM Network</rasd:Connection>
+                <rasd:Description>E1000 ethernet adapter on &quot;VM Network&quot;</rasd:Description>
+                <rasd:ElementName>Network adapter 1</rasd:ElementName>
+                <rasd:InstanceID>1</rasd:InstanceID>
+                <rasd:ResourceSubType>E1000</rasd:ResourceSubType>
+                <rasd:ResourceType>10</rasd:ResourceType>
+                <vmw:Config ovf:required="false" vmw:key="connectable.allowGuestControl" vmw:value="true"/>
+                <vmw:Config ovf:required="false" vmw:key="wakeOnLanEnabled" vmw:value="true"/>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>1</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                <rasd:Connection vcloud:ipAddressingMode="POOL" vcloud:primaryNetworkConnection="false">VM Network 2</rasd:Connection>
+                <rasd:Description>Vmxnet3 ethernet adapter on &quot;VM Network 2&quot;</rasd:Description>
+                <rasd:ElementName>Network adapter 2</rasd:ElementName>
+                <rasd:InstanceID>2</rasd:InstanceID>
+                <rasd:ResourceSubType>VMXNET3</rasd:ResourceSubType>
+                <rasd:ResourceType>10</rasd:ResourceType>
+                <vmw:Config ovf:required="false" vmw:key="connectable.allowGuestControl" vmw:value="true"/>
+                <vmw:Config ovf:required="false" vmw:key="wakeOnLanEnabled" vmw:value="true"/>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>2</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                <rasd:Connection vcloud:ipAddressingMode="DHCP" vcloud:primaryNetworkConnection="true">VM Network 3</rasd:Connection>
+                <rasd:Description>PCNet32 ethernet adapter on &quot;VM Network 3&quot;</rasd:Description>
+                <rasd:ElementName>Network adapter 0</rasd:ElementName>
+                <rasd:InstanceID>3</rasd:InstanceID>
+                <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>
+                <rasd:ResourceType>10</rasd:ResourceType>
+                <vmw:Config ovf:required="false" vmw:key="connectable.allowGuestControl" vmw:value="true"/>
+                <vmw:Config ovf:required="false" vmw:key="wakeOnLanEnabled" vmw:value="true"/>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>SCSI Controller</rasd:Description>
+                <rasd:ElementName>SCSI Controller 0</rasd:ElementName>
+                <rasd:InstanceID>4</rasd:InstanceID>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>
+                <rasd:ResourceType>6</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:Description>Hard disk</rasd:Description>
+                <rasd:ElementName>Hard disk 1</rasd:ElementName>
+                <rasd:HostResource>ovf:/disk/vmdisk-3dd2c6b9-377a-42fc-8951-031ae8e6b5f5-2000</rasd:HostResource>
+                <rasd:InstanceID>2000</rasd:InstanceID>
+                <rasd:Parent>4</rasd:Parent>
+                <rasd:ResourceType>17</rasd:ResourceType>
+                <vmw:Config ovf:required="false" vmw:key="backing.writeThrough" vmw:value="false"/>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:Address>0</rasd:Address>
+                <rasd:Description>IDE Controller</rasd:Description>
+                <rasd:ElementName>IDE Controller 0</rasd:ElementName>
+                <rasd:InstanceID>5</rasd:InstanceID>
+                <rasd:ResourceType>5</rasd:ResourceType>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+                <rasd:InstanceID>6</rasd:InstanceID>
+                <rasd:Reservation>0</rasd:Reservation>
+                <rasd:ResourceType>3</rasd:ResourceType>
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+                <rasd:Weight>1000</rasd:Weight>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+                <rasd:Description>Memory Size</rasd:Description>
+                <rasd:ElementName>64 MB of memory</rasd:ElementName>
+                <rasd:InstanceID>7</rasd:InstanceID>
+                <rasd:Reservation>0</rasd:Reservation>
+                <rasd:ResourceType>4</rasd:ResourceType>
+                <rasd:VirtualQuantity>64</rasd:VirtualQuantity>
+                <rasd:Weight>640</rasd:Weight>
+            </ovf:Item>
+            <ovf:Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+                <rasd:Description>CD/DVD Drive</rasd:Description>
+                <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+                <rasd:HostResource/>
+                <rasd:InstanceID>3000</rasd:InstanceID>
+                <rasd:Parent>5</rasd:Parent>
+                <rasd:ResourceType>15</rasd:ResourceType>
+                <vmw:Config ovf:required="false" vmw:key="connectable.allowGuestControl" vmw:value="true"/>
+            </ovf:Item>
+            <vmw:Config ovf:required="false" vmw:key="cpuHotAddEnabled" vmw:value="false"/>
+            <vmw:Config ovf:required="false" vmw:key="cpuHotRemoveEnabled" vmw:value="false"/>
+            <vmw:Config ovf:required="false" vmw:key="firmware" vmw:value="bios"/>
+            <vmw:Config ovf:required="false" vmw:key="virtualICH7MPresent" vmw:value="false"/>
+            <vmw:Config ovf:required="false" vmw:key="virtualSMCPresent" vmw:value="false"/>
+            <vmw:Config ovf:required="false" vmw:key="memoryHotAddEnabled" vmw:value="false"/>
+            <vmw:Config ovf:required="false" vmw:key="nestedHVEnabled" vmw:value="false"/>
+            <vmw:Config ovf:required="false" vmw:key="powerOpInfo.powerOffType" vmw:value="soft"/>
+            <vmw:Config ovf:required="false" vmw:key="powerOpInfo.resetType" vmw:value="soft"/>
+            <vmw:Config ovf:required="false" vmw:key="powerOpInfo.standbyAction" vmw:value="checkpoint"/>
+            <vmw:Config ovf:required="false" vmw:key="powerOpInfo.suspendType" vmw:value="hard"/>
+            <vmw:Config ovf:required="false" vmw:key="tools.afterPowerOn" vmw:value="true"/>
+            <vmw:Config ovf:required="false" vmw:key="tools.afterResume" vmw:value="true"/>
+            <vmw:Config ovf:required="false" vmw:key="tools.beforeGuestShutdown" vmw:value="true"/>
+            <vmw:Config ovf:required="false" vmw:key="tools.beforeGuestStandby" vmw:value="true"/>
+            <vmw:Config ovf:required="false" vmw:key="tools.syncTimeWithHost" vmw:value="false"/>
+            <vmw:Config ovf:required="false" vmw:key="tools.toolsUpgradePolicy" vmw:value="manual"/>
+        </ovf:VirtualHardwareSection>
+        <ovf:EulaSection>
+           <ovf:Info>End User License Agreement</ovf:Info>
+           <ovf:License ovf:msgid="license_0">END USER LICENSE AGREEMENT</ovf:License>
+        </ovf:EulaSection>
+        <ovf:ProductSection ovf:instance="CentOS_6_JeOS_-_Client" ovf:class="vami" ovf:required="true">
+            <ovf:Info>Information about the installed software</ovf:Info>
+        </ovf:ProductSection>
+        <ovf:ProductSection ovf:instance="" ovf:class="" ovf:required="true">
+            <ovf:Info>Information about the installed software</ovf:Info>
+            <ovf:Product>CentOS 6 JeOS - Client</ovf:Product>
+            <ovf:Vendor>VMware R&amp;D, Denmark</ovf:Vendor>
+            <ovf:Version>1.0</ovf:Version>
+            <ovf:FullVersion>1.0.0</ovf:FullVersion>
+            <ovf:VendorUrl>http://wiki.eng.vmware.com/Aarhus</ovf:VendorUrl>
+            <ovf:Property ovf:value="" ovf:userConfigurable="true" ovf:type="string" ovf:password="false" 
+               ovf:key="otherIp" vmw:qualifiers="Ip('VM Network')">
+                <ovf:Label>Other IP Address</ovf:Label>
+                <ovf:Description>IP address on the VM Network.</ovf:Description>
+                <ovf:Value ovf:value="192.168.6.118"/>
+            </ovf:Property>
+        </ovf:ProductSection>
+        <vcloud:NetworkConnectionSection ovf:required="false">
+            <ovf:Info>Specifies the available VM network connections</ovf:Info>
+            <vcloud:PrimaryNetworkConnectionIndex>0</vcloud:PrimaryNetworkConnectionIndex>
+            <vcloud:NetworkConnection needsCustomization="true" network="VM Network">
+                <vcloud:NetworkConnectionIndex>0</vcloud:NetworkConnectionIndex>
+                <vcloud:IpAddress>192.168.2.100</vcloud:IpAddress>
+                <vcloud:IsConnected>true</vcloud:IsConnected>
+                <vcloud:MACAddress>00:50:56:01:00:09</vcloud:MACAddress>
+                <vcloud:IpAddressAllocationMode>POOL</vcloud:IpAddressAllocationMode>
+            </vcloud:NetworkConnection>
+            <vcloud:NetworkConnection needsCustomization="true" network="VM Network 2">
+                <vcloud:NetworkConnectionIndex>1</vcloud:NetworkConnectionIndex>
+                <vcloud:IpAddress>192.168.2.22</vcloud:IpAddress>
+                <vcloud:IsConnected>true</vcloud:IsConnected>
+                <vcloud:MACAddress>00:50:56:01:00:02</vcloud:MACAddress>
+                <vcloud:IpAddressAllocationMode>POOL</vcloud:IpAddressAllocationMode>
+            </vcloud:NetworkConnection>
+            <vcloud:NetworkConnection needsCustomization="true" network="VM Network 3">
+                <vcloud:NetworkConnectionIndex>2</vcloud:NetworkConnectionIndex>
+                <vcloud:IsConnected>true</vcloud:IsConnected>
+                <vcloud:MACAddress>00:50:56:01:00:0a</vcloud:MACAddress>
+                <vcloud:IpAddressAllocationMode>DHCP</vcloud:IpAddressAllocationMode>
+            </vcloud:NetworkConnection>
+        </vcloud:NetworkConnectionSection>
+    </ovf:VirtualSystem>
+    </ovf:VirtualSystemCollection>
+</ovf:Envelope>
