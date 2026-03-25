@@ -35,19 +35,21 @@ type NamespaceInstanceInfoV2 struct {
 	VmServiceSpec        VmServiceSpec      `json:"vm_service_spec"`
 	ContentLibraries     []ContentLibraryV2 `json:"content_libraries"`
 	SelfServiceNamespace bool               `json:"self_service_namespace"`
+	NetworkSpec          *NetworkConfigInfo `json:"network_spec,omitempty"`
 }
 
 // NamespaceInstanceCreateSpecV2
 // https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20CreateSpecV2
 // Since 8.0.0.1
 type NamespaceInstanceCreateSpecV2 struct {
-	Namespace            string              `json:"namespace"`
-	Supervisor           string              `json:"supervisor"`
-	Description          *string             `json:"description,omitempty"`
-	StorageSpecs         *[]StorageSpec      `json:"storage_specs,omitempty"`
-	VmServiceSpec        *VmServiceSpec      `json:"vm_service_spec,omitempty"`
-	ContentLibraries     *[]ContentLibraryV2 `json:"content_libraries,omitempty"`
-	SelfServiceNamespace *bool               `json:"self_service_namespace,omitempty"`
+	Namespace            string                   `json:"namespace"`
+	Supervisor           string                   `json:"supervisor"`
+	Description          *string                  `json:"description,omitempty"`
+	StorageSpecs         *[]StorageSpec           `json:"storage_specs,omitempty"`
+	VmServiceSpec        *VmServiceSpec           `json:"vm_service_spec,omitempty"`
+	ContentLibraries     *[]ContentLibraryV2      `json:"content_libraries,omitempty"`
+	SelfServiceNamespace *bool                    `json:"self_service_namespace,omitempty"`
+	NetworkSpec          *NetworkConfigCreateSpec `json:"network_spec,omitempty"`
 }
 
 type Stats struct {
@@ -61,6 +63,48 @@ type ContentLibraryV2 struct {
 	Writable               bool   `json:"writable"`
 	AllowImport            bool   `json:"allow_import"`
 	ResourceNamingStrategy string `json:"resource_naming_strategy"`
+}
+
+// NetworkConfigInfo
+// https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20NetworkConfigInfo/
+// Since 9.0.0.0
+type NetworkConfigInfo struct {
+	NetworkProvider string          `json:"network_provider"`
+	VpcNetwork      *VpcNetworkInfo `json:"vpc_network,omitempty"`
+}
+
+// VpcNetworkInfo
+// https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20VpcNetworkInfo/
+// Since 9.0.0.0
+type VpcNetworkInfo struct {
+	VpcConfig         VpcConfig `json:"vpc_config"`
+	Vpc               string    `json:"vpc"`
+	AutoCreated       bool      `json:"auto_created"`
+	DefaultSubnetSize int64     `json:"default_subnet_size"`
+}
+
+// VpcConfig
+// https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20VpcConfig/
+// Since 9.0.0.0
+type VpcConfig struct {
+	PrivateCidrs []Ipv4Cidr `json:"private_cidrs,omitempty"`
+}
+
+// NetworkConfigCreateSpec
+// https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20NetworkConfigCreateSpec/
+// Since 9.0.0.0
+type NetworkConfigCreateSpec struct {
+	NetworkProvider string                `json:"network_provider"`
+	VpcNetwork      *VpcNetworkCreateSpec `json:"vpc_network,omitempty"`
+}
+
+// VpcNetworkCreateSpec
+// https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20VpcNetworkCreateSpec/
+// Since 9.0.0.0
+type VpcNetworkCreateSpec struct {
+	VpcConfig         *VpcConfig `json:"vpc_config,omitempty"`
+	Vpc               *string    `json:"vpc,omitempty"`
+	DefaultSubnetSize *int64     `json:"default_subnet_size,omitempty"`
 }
 
 // ListNamespacesV2 https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/api/vcenter/namespaces/instances/v2/get/
