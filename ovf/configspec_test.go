@@ -705,6 +705,32 @@ func TestEnvelopeToConfigSpec(t *testing.T) {
 		})
 	})
 
+	t.Run("multiple_disks.ovf: multiple disks", func(t *testing.T) {
+		e := testEnvelope(t, "fixtures/multiple_disks.ovf")
+
+		cs, err := e.ToConfigSpec()
+		require.NoError(t, err)
+
+		capacities := map[string]int64{}
+		for _, dc := range cs.DeviceChange {
+			if d, ok := dc.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+				if bfb, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
+					fb := bfb.GetVirtualDeviceFileBackingInfo()
+					capacities[fb.FileName] = d.CapacityInBytes
+				}
+			}
+		}
+
+		oneGiB := int64(1 * 1024 * 1024 * 1024)
+
+		assert.Equal(t, map[string]int64{
+			"disk0.vmdk": 40 * oneGiB,
+			"disk1.vmdk": 50 * oneGiB,
+			"disk2.vmdk": 100 * oneGiB,
+			"":           20 * oneGiB,
+		}, capacities)
+	})
+
 	t.Run("DeploymentConfiguration", func(t *testing.T) {
 		e := testEnvelope(t, "fixtures/configspec.ovf")
 

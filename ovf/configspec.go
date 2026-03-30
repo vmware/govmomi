@@ -583,11 +583,24 @@ func (e Envelope) setPCISlotNumber(
 }
 
 func (e Envelope) ovfDisk(diskID string) *VirtualDiskDesc {
+
+	if strings.HasPrefix(diskID, "ovf:/disk/") {
+		// Find an exact match.
+		diskID = strings.TrimPrefix(diskID, "ovf:/disk/")
+		for _, disk := range e.Disk.Disks {
+			if diskID == disk.DiskID {
+				return &disk
+			}
+		}
+	}
+
 	for _, disk := range e.Disk.Disks {
+		// Find a suffix match.
 		if strings.HasSuffix(diskID, disk.DiskID) {
 			return &disk
 		}
 	}
+
 	return nil
 }
 
