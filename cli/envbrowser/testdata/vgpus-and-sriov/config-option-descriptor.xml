@@ -1,0 +1,160 @@
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-03</key>
+  <description>ESX 2.x virtual machine</description>
+  <createSupported>false</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>false</runSupported>
+  <upgradeSupported>false</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-04</key>
+  <description>ESX 3.x virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-07</key>
+  <description>ESX/ESXi 4.x virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-08</key>
+  <description>ESXi 5.0 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-09</key>
+  <description>ESXi 5.1 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-10</key>
+  <description>ESXi 5.5 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-11</key>
+  <description>ESXi 6.0 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-12</key>
+  <description>Workstation 12 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-13</key>
+  <description>ESXi 6.5 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-14</key>
+  <description>ESXi 6.7 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-15</key>
+  <description>ESXi 6.7 U2 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-16</key>
+  <description>Workstation 15 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-17</key>
+  <description>ESXi 7.0 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-18</key>
+  <description>ESXi 7.0 U1 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-19</key>
+  <description>ESXi 7.0 U2 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-20</key>
+  <description>ESXi 8.0 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-21</key>
+  <description>ESXi 8.0 U2 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-22</key>
+  <description>ESXi 9.0 virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-23</key>
+  <description>ESXi 9.x virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>true</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
+<VirtualMachineConfigOptionDescriptor>
+  <key>vmx-99</key>
+  <description>Unrecognized virtual machine</description>
+  <createSupported>true</createSupported>
+  <defaultConfigOption>false</defaultConfigOption>
+  <runSupported>true</runSupported>
+  <upgradeSupported>true</upgradeSupported>
+</VirtualMachineConfigOptionDescriptor>
