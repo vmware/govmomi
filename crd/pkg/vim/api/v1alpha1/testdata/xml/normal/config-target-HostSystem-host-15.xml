@@ -1,0 +1,198 @@
+<ConfigTarget>
+  <numCpus>6</numCpus>
+  <numCpuCores>6</numCpuCores>
+  <numNumaNodes>1</numNumaNodes>
+  <maxCpusPerHost>6</maxCpusPerHost>
+  <smcPresent>false</smcPresent>
+  <datastore>
+    <name>sharedVmfs-0</name>
+    <datastore>
+      <datastore type="Datastore">datastore-34</datastore>
+      <name>sharedVmfs-0</name>
+      <url>ds:///vmfs/volumes/69c1c0aa-abd37243-f332-02000c9e9b36/</url>
+      <capacity>375541202944</capacity>
+      <freeSpace>285707599872</freeSpace>
+      <uncommitted>15660482560</uncommitted>
+      <accessible>true</accessible>
+      <multipleHostAccess>true</multipleHostAccess>
+      <type>VMFS</type>
+      <maintenanceMode>normal</maintenanceMode>
+    </datastore>
+    <capability>
+      <directoryHierarchySupported>true</directoryHierarchySupported>
+      <rawDiskMappingsSupported>true</rawDiskMappingsSupported>
+      <perFileThinProvisioningSupported>true</perFileThinProvisioningSupported>
+      <storageIORMSupported>false</storageIORMSupported>
+      <nativeSnapshotSupported>false</nativeSnapshotSupported>
+      <topLevelDirectoryCreateSupported>true</topLevelDirectoryCreateSupported>
+      <seSparseSupported>true</seSparseSupported>
+      <vmfsSparseSupported>false</vmfsSparseSupported>
+      <vsanSparseSupported>false</vsanSparseSupported>
+      <vmdkExpandSupported>true</vmdkExpandSupported>
+      <clusteredVmdkSupported>false</clusteredVmdkSupported>
+    </capability>
+    <maxFileSize>70368744177664</maxFileSize>
+    <maxVirtualDiskCapacity>68169720922112</maxVirtualDiskCapacity>
+    <maxPhysicalRDMFileSize>70368744177664</maxPhysicalRDMFileSize>
+    <maxVirtualRDMFileSize>68169720922112</maxVirtualRDMFileSize>
+    <mode>readWrite</mode>
+    <vStorageSupport>vStorageSupported</vStorageSupport>
+    <supportedVDiskFormats>native_512</supportedVDiskFormats>
+    <supportedVDiskFormats>native_4k</supportedVDiskFormats>
+  </datastore>
+  <datastore>
+    <name>local-0</name>
+    <datastore>
+      <datastore type="Datastore">datastore-35</datastore>
+      <name>local-0</name>
+      <url>ds:///vmfs/volumes/69c1c0ad-569d24bb-1fc4-02000c3f6266/</url>
+      <capacity>16911433728</capacity>
+      <freeSpace>15397289984</freeSpace>
+      <accessible>true</accessible>
+      <multipleHostAccess>false</multipleHostAccess>
+      <type>VMFS</type>
+      <maintenanceMode>normal</maintenanceMode>
+    </datastore>
+    <capability>
+      <directoryHierarchySupported>true</directoryHierarchySupported>
+      <rawDiskMappingsSupported>true</rawDiskMappingsSupported>
+      <perFileThinProvisioningSupported>true</perFileThinProvisioningSupported>
+      <storageIORMSupported>false</storageIORMSupported>
+      <nativeSnapshotSupported>false</nativeSnapshotSupported>
+      <topLevelDirectoryCreateSupported>true</topLevelDirectoryCreateSupported>
+      <seSparseSupported>true</seSparseSupported>
+      <vmfsSparseSupported>false</vmfsSparseSupported>
+      <vsanSparseSupported>false</vsanSparseSupported>
+      <vmdkExpandSupported>true</vmdkExpandSupported>
+      <clusteredVmdkSupported>false</clusteredVmdkSupported>
+    </capability>
+    <maxFileSize>70368744177664</maxFileSize>
+    <maxVirtualDiskCapacity>68169720922112</maxVirtualDiskCapacity>
+    <maxPhysicalRDMFileSize>70368744177664</maxPhysicalRDMFileSize>
+    <maxVirtualRDMFileSize>68169720922112</maxVirtualRDMFileSize>
+    <mode>readWrite</mode>
+    <vStorageSupport>vStorageUnsupported</vStorageSupport>
+    <supportedVDiskFormats>native_512</supportedVDiskFormats>
+  </datastore>
+  <distributedVirtualPortgroup>
+    <switchName>primary-vds</switchName>
+    <switchUuid>50 38 41 15 6c 36 92 f1-f5 58 6d 22 bd d0 56 e8</switchUuid>
+    <portgroupName>flb-mgmt</portgroupName>
+    <portgroupKey>dvportgroup-48</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>false</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-48</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualPortgroup>
+    <switchName>primary-vds</switchName>
+    <switchUuid>50 38 41 15 6c 36 92 f1-f5 58 6d 22 bd d0 56 e8</switchUuid>
+    <portgroupName>primary</portgroupName>
+    <portgroupKey>dvportgroup-40</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>false</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-40</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualPortgroup>
+    <switchName>primary-vds</switchName>
+    <switchUuid>50 38 41 15 6c 36 92 f1-f5 58 6d 22 bd d0 56 e8</switchUuid>
+    <portgroupName>primary-vds-DVUplinks-38</portgroupName>
+    <portgroupKey>dvportgroup-39</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>true</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-39</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualPortgroup>
+    <switchName>network-1-vds</switchName>
+    <switchUuid>50 38 f0 11 85 96 06 eb-be 3e e6 41 d6 ca e2 46</switchUuid>
+    <portgroupName>network-1</portgroupName>
+    <portgroupKey>dvportgroup-46</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>false</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-46</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualPortgroup>
+    <switchName>network-1-vds</switchName>
+    <switchUuid>50 38 f0 11 85 96 06 eb-be 3e e6 41 d6 ca e2 46</switchUuid>
+    <portgroupName>network-1-vds-DVUplinks-44</portgroupName>
+    <portgroupKey>dvportgroup-45</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>true</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-45</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualPortgroup>
+    <switchName>mgmt-network-vds</switchName>
+    <switchUuid>50 38 f6 17 8e 88 3b 6a-d9 3d 4f 9a fa f8 f5 14</switchUuid>
+    <portgroupName>vm-network</portgroupName>
+    <portgroupKey>dvportgroup-53</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>false</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-53</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualPortgroup>
+    <switchName>mgmt-network-vds</switchName>
+    <switchUuid>50 38 f6 17 8e 88 3b 6a-d9 3d 4f 9a fa f8 f5 14</switchUuid>
+    <portgroupName>vmk-network</portgroupName>
+    <portgroupKey>dvportgroup-52</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>false</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-52</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualPortgroup>
+    <switchName>mgmt-network-vds</switchName>
+    <switchUuid>50 38 f6 17 8e 88 3b 6a-d9 3d 4f 9a fa f8 f5 14</switchUuid>
+    <portgroupName>mgmt-network-vds-DVUplinks-50</portgroupName>
+    <portgroupKey>dvportgroup-51</portgroupKey>
+    <portgroupType>earlyBinding</portgroupType>
+    <uplinkPortgroup>true</uplinkPortgroup>
+    <portgroup type="DistributedVirtualPortgroup">dvportgroup-51</portgroup>
+    <networkReservationSupported>false</networkReservationSupported>
+    <backingType>standard</backingType>
+  </distributedVirtualPortgroup>
+  <distributedVirtualSwitch>
+    <switchName>primary-vds</switchName>
+    <switchUuid>50 38 41 15 6c 36 92 f1-f5 58 6d 22 bd d0 56 e8</switchUuid>
+    <distributedVirtualSwitch type="VmwareDistributedVirtualSwitch">dvs-38</distributedVirtualSwitch>
+    <networkReservationSupported>false</networkReservationSupported>
+  </distributedVirtualSwitch>
+  <distributedVirtualSwitch>
+    <switchName>network-1-vds</switchName>
+    <switchUuid>50 38 f0 11 85 96 06 eb-be 3e e6 41 d6 ca e2 46</switchUuid>
+    <distributedVirtualSwitch type="VmwareDistributedVirtualSwitch">dvs-44</distributedVirtualSwitch>
+    <networkReservationSupported>false</networkReservationSupported>
+  </distributedVirtualSwitch>
+  <distributedVirtualSwitch>
+    <switchName>mgmt-network-vds</switchName>
+    <switchUuid>50 38 f6 17 8e 88 3b 6a-d9 3d 4f 9a fa f8 f5 14</switchUuid>
+    <distributedVirtualSwitch type="VmwareDistributedVirtualSwitch">dvs-50</distributedVirtualSwitch>
+    <networkReservationSupported>false</networkReservationSupported>
+  </distributedVirtualSwitch>
+  <maxMemMBOptimalPerf>32766</maxMemMBOptimalPerf>
+  <supportedMaxMemMB>25149440</supportedMaxMemMB>
+  <sgxTargetInfo>
+    <name></name>
+    <maxEpcSize>0</maxEpcSize>
+    <flcModes>off</flcModes>
+    <requireAttestationSupported>true</requireAttestationSupported>
+  </sgxTargetInfo>
+  <precisionClockInfo>
+    <name></name>
+  </precisionClockInfo>
+  <sevSupported>false</sevSupported>
+  <maxSimultaneousThreads>1</maxSimultaneousThreads>
+  <sevSnpSupported>false</sevSnpSupported>
+  <tdxSupported>false</tdxSupported>
+</ConfigTarget>
