@@ -1,0 +1,52 @@
+VIM API uses statically allocated device keys to identify
+devices.  Keys are assigned as follows:
+
+DeviceKey
+Start   End     Device          Max  Operation           Unit Index
+   100     100  PCI Controller    1    100
+   200     201  IDE Controller    2    200+ch
+   300     300  PS/2 Controller   1    300
+   400     400  SIO Controller    1    400
+   500     500  Video Card        1    500                pci:0
+   600     600  Keyboard          1    600
+   700     700  Mouse             1    700
+  1000    1003  SCSI HBA          4    1000+hba           pci:3..6
+  2000    2063  SCSI Disk      4*16    2000+hba*16+tgt
+  3000    3003  IDE Disk        2*2    3000+ch*2+dev
+  4000    4009  Ethernet NIC     10    4000+dev           pci:7..16
+  5000    5000  Audio             1    5000               pci:2
+  7000    7000  UHCI/EHCI         1    7000               pci:22
+  8000    8001  Floppy Drives     2    8000+dev
+  9000    9031  Serial Ports     32    9000+dev
+ 10000   10003  Parallel Ports    4    10000+dev
+ 11000   11000  TPM               1    11000
+ 12000   12000  VMCI              1    12000              pci:17
+ 13000   13127  PCI Passthru    128    13000+dev          pci:18..21,pci:38..161
+ 14000   14000  XHCI              1    14000              pci:23
+ 15000   15003  SATA HBA          4    15000+hba          pci:24..27
+ 16000   16119  SATA Disk      4*30    16000+hba*30+dev
+ 18000   18000  WDT               1    18000
+ 19000   19000  PrecisionClock    1    19000+dev
+ 27000   27000  NVDIMM Ctlr       1    27000
+ 28000   28063  NVDIMM Device    64    28000+dev
+ 31000   31003  NVMe HBA          4    31000+hba          pci:30..33
+ 32000   32059  NVMe Disk      4*15    32000+hba*15+dev  (hba < 4 && dev < 15)
+ 32060   33083  NVMe Disk #2  4*256    32060+hba*256+dev (hba >= 4 || dev >= 15)
+ 41000   41099  USB devices     100    41000+dev
+ 42000   42019  USB EHCI Disk   20     42000+dev
+ 43000   43019  USB XHCI Disk   20     43000+dev
+131072  132095  SCSI Disk #2  4*256    131072+hba*256+dev
+
+PCI Controller Unit Allocation:
+Start  End  Count  Device
+  0     0      1    Video Card
+  2     2      1    Audio
+  3     6      4    SCSI HBA
+  7    16     10    Ethernet NIC
+ 17    17      1    VMCI
+ 18    21      4    PCI Passthrough-0..3
+ 22    22      1    UHCI/EHCI
+ 23    23      1    XHCI
+ 24    27      4    SATA HBA
+ 30    33      4    NVMe HBA
+ 38   161    124    PCI Passthrough-4..127
