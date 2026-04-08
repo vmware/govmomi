@@ -395,3 +395,43 @@ func CnsUnregisterVolume(ctx context.Context, r soap.RoundTripper, req *types.Cn
 
 	return resBody.Res, nil
 }
+
+type CnsSetVolumeControlFlagsBody struct {
+	Req    *types.CnsSetVolumeControlFlags         `xml:"urn:vsan CnsSetVolumeControlFlags,omitempty"`
+	Res    *types.CnsSetVolumeControlFlagsResponse `xml:"urn:vsan CnsSetVolumeControlFlagsResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsSetVolumeControlFlagsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsSetVolumeControlFlags(ctx context.Context, r soap.RoundTripper, req *types.CnsSetVolumeControlFlags) (*types.CnsSetVolumeControlFlagsResponse, error) {
+	var reqBody, resBody CnsSetVolumeControlFlagsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type CnsClearVolumeControlFlagsBody struct {
+	Req    *types.CnsClearVolumeControlFlags         `xml:"urn:vsan CnsClearVolumeControlFlags,omitempty"`
+	Res    *types.CnsClearVolumeControlFlagsResponse `xml:"urn:vsan CnsClearVolumeControlFlagsResponse,omitempty"`
+	Fault_ *soap.Fault                               `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsClearVolumeControlFlagsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsClearVolumeControlFlags(ctx context.Context, r soap.RoundTripper, req *types.CnsClearVolumeControlFlags) (*types.CnsClearVolumeControlFlagsResponse, error) {
+	var reqBody, resBody CnsClearVolumeControlFlagsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}

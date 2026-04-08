@@ -334,3 +334,23 @@ func (c *Client) UnregisterVolume(ctx context.Context, spec []cnstypes.CnsUnregi
 	}
 	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
+
+// SetVolumeControlFlags calls the CNS CnsSetVolumeControlFlags API (synchronous).
+func (c *Client) SetVolumeControlFlags(ctx context.Context, controlFlagsSpecs []cnstypes.CnsVolumeControlFlagsSpec) error {
+	req := cnstypes.CnsSetVolumeControlFlags{
+		This:              CnsVolumeManagerInstance,
+		ControlFlagsSpecs: controlFlagsSpecs,
+	}
+	_, err := methods.CnsSetVolumeControlFlags(ctx, c, &req)
+	return err
+}
+
+// ClearVolumeControlFlags calls the CNS CnsClearVolumeControlFlags API (synchronous).
+func (c *Client) ClearVolumeControlFlags(ctx context.Context, controlFlagsSpecs []cnstypes.CnsVolumeControlFlagsSpec) error {
+	req := cnstypes.CnsClearVolumeControlFlags{
+		This:              CnsVolumeManagerInstance,
+		ControlFlagsSpecs: controlFlagsSpecs,
+	}
+	_, err := methods.CnsClearVolumeControlFlags(ctx, c, &req)
+	return err
+}
