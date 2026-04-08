@@ -124,3 +124,32 @@ const (
 func init() {
 	types.Add("vsan:CnsVolumeBackingType", reflect.TypeOf((*CnsVolumeBackingType)(nil)).Elem())
 }
+
+// CnsVolumeControlFlags enumerates volume control flags for CnsSetVolumeControlFlags /
+// CnsClearVolumeControlFlags (aligned with vim.vslm.VStorageObjectControlFlag).
+type CnsVolumeControlFlags string
+
+const (
+	CnsVolumeControlFlagsKeepAfterDeleteVm          = CnsVolumeControlFlags("keepAfterDeleteVm")
+	CnsVolumeControlFlagsDisableRelocation          = CnsVolumeControlFlags("disableRelocation")
+	CnsVolumeControlFlagsEnableChangedBlockTracking = CnsVolumeControlFlags("enableChangedBlockTracking")
+)
+
+func init() {
+	types.Add("CnsVolumeControlFlags", reflect.TypeOf((*CnsVolumeControlFlags)(nil)).Elem())
+}
+
+// CnsVolumeCBTStatus enumerates changed block tracking (CBT) status for a CNS volume
+// (QueryVolume / CnsVolume and QueryFilter.changedBlockTracking).
+type CnsVolumeCBTStatus string
+
+const (
+	CnsVolumeCBTStatusEnabled  = CnsVolumeCBTStatus("ENABLED")
+	CnsVolumeCBTStatusDisabled = CnsVolumeCBTStatus("DISABLED")
+	// CnsVolumeCBTStatusUnknown is returned when an older client cannot interpret the value.
+	CnsVolumeCBTStatusUnknown = CnsVolumeCBTStatus("VolumeCBTStatus_Unknown")
+)
+
+func init() {
+	types.Add("CnsVolumeCBTStatus", reflect.TypeOf((*CnsVolumeCBTStatus)(nil)).Elem())
+}
