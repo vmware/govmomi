@@ -2100,6 +2100,11 @@ func TestBlockVolumeCBT(t *testing.T) {
 	if len(queryResult.Volumes) != 1 {
 		t.Fatalf("QueryVolume: want 1 volume, got %d", len(queryResult.Volumes))
 	}
+	if queryResult.Volumes[0].ChangedBlockTracking != cnstypes.CnsVolumeCBTStatusEnabled {
+		t.Fatalf("expected CBT enabled on volume, changedBlockTracking=%q (want %q)",
+			queryResult.Volumes[0].ChangedBlockTracking, cnstypes.CnsVolumeCBTStatusEnabled)
+	}
+
 	queryByCBT := cnstypes.CnsQueryFilter{
 		VolumeIds:            []cnstypes.CnsVolumeId{{Id: volumeID}},
 		ChangedBlockTracking: cnstypes.CnsVolumeCBTStatusEnabled,
@@ -2111,10 +2116,7 @@ func TestBlockVolumeCBT(t *testing.T) {
 	if len(queryByCBTResult.Volumes) != 1 {
 		t.Fatalf("QueryVolume with CBT filter: want 1 volume, got %d", len(queryByCBTResult.Volumes))
 	}
-	if queryResult.Volumes[0].ChangedBlockTracking != cnstypes.CnsVolumeCBTStatusEnabled {
-		t.Fatalf("expected CBT enabled on volume, changedBlockTracking=%q (want %q)",
-			queryResult.Volumes[0].ChangedBlockTracking, cnstypes.CnsVolumeCBTStatusEnabled)
-	}
+
 	cnsSnapshotCreateSpec := cnstypes.CnsSnapshotCreateSpec{
 		VolumeId:    cnstypes.CnsVolumeId{Id: volumeID},
 		Description: "cbt-test-snapshot",
