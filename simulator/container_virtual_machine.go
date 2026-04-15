@@ -174,10 +174,10 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context) error {
 		}
 
 		nic := types.GuestNicInfo{
-			Network:      networkName,
-			IpAddress:    []string{netSettings.IPAddress},
-			MacAddress:   netSettings.MacAddress,
-			Connected:    true,
+			Network:        networkName,
+			IpAddress:      []string{netSettings.IPAddress},
+			MacAddress:     netSettings.MacAddress,
+			Connected:      true,
 			DeviceConfigId: nicIndex,
 			IpConfig: &types.NetIpConfigInfo{
 				IpAddress: []types.NetIpConfigInfoIpAddress{{
@@ -194,10 +194,10 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context) error {
 	// If no networks found in the Networks map, use the default network settings
 	if len(guestNics) == 0 && primaryNet.IPAddress != "" {
 		nic := types.GuestNicInfo{
-			Network:      "default",
-			IpAddress:    []string{primaryNet.IPAddress},
-			MacAddress:   primaryNet.MacAddress,
-			Connected:    true,
+			Network:        "default",
+			IpAddress:      []string{primaryNet.IPAddress},
+			MacAddress:     primaryNet.MacAddress,
+			Connected:      true,
 			DeviceConfigId: 0,
 			IpConfig: &types.NetIpConfigInfo{
 				IpAddress: []types.NetIpConfigInfoIpAddress{{
