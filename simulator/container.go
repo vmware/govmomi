@@ -407,10 +407,11 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 	}
 
 	run := []string{"docker", "create", "--name", c.name}
-	// Add privileged mode for systemd compatibility
-	run = append(run, "--privileged")
 
 	if nestedContainers {
+		// Add privileged mode for systemd compatibility
+		run = append(run, "--privileged")
+
 		// Nested container mode: flags adapted from kind's provision.go for running
 		// Kubernetes inside the container. These enable proper cgroup isolation and
 		// allow containerd/kubelet to create nested containers.
