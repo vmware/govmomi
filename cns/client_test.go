@@ -32,6 +32,7 @@ import (
 const VSphere70u3VersionInt = 703
 const VSphere80u3VersionInt = 803
 const VSphere91VersionInt = 910
+const VSphere92VersionInt = 920
 
 func TestClient(t *testing.T) {
 	// set CNS_DEBUG to true if you need to emit soap traces from these tests
@@ -1957,6 +1958,250 @@ func TestUnregisterVolume(t *testing.T) {
 	t.Logf("Volume unregistered successfully: %s", volumeId)
 }
 
+// TestBlockVolumeCBT exercises CnsSetVolumeControlFlags, CnsClearVolumeControlFlags,
+// QueryVolume changedBlockTracking (CnsVolumeCBTStatus), and snapshot changedBlockTrackingId.
+// Requires vSphere 9.2.0 or later.
+func TestBlockVolumeCBT(t *testing.T) {
+	ctx := context.Background()
+	url := os.Getenv("CNS_VC_URL")
+	datacenter := os.Getenv("CNS_DATACENTER")
+	datastore := os.Getenv("CNS_DATASTORE")
+	if url == "" || datacenter == "" || datastore == "" {
+		t.Skip("CNS_VC_URL, CNS_DATACENTER, and CNS_DATASTORE must be set")
+	}
+	u, err := soap.ParseURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := govmomi.NewClient(ctx, u, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isvSphereVersion92orAbove(ctx, c.ServiceContent.About) {
+		t.Skip("This test requires vSphere 9.2.0 or above")
+	}
+
+	cnsClient, err := NewClient(ctx, c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder := find.NewFinder(cnsClient.vim25Client, false)
+	dc, err := finder.Datacenter(ctx, datacenter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc)
+	ds, err := finder.Datastore(ctx, datastore)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var dsList []vim25types.ManagedObjectReference
+	dsList = append(dsList, ds.Reference())
+
+	containerCluster := cnstypes.CnsContainerCluster{
+		ClusterType:         string(cnstypes.CnsClusterTypeKubernetes),
+		ClusterId:           "demo-cluster-id",
+		VSphereUser:         "Administrator@vsphere.local",
+		ClusterFlavor:       string(cnstypes.CnsClusterFlavorVanilla),
+		ClusterDistribution: "OpenShift",
+	}
+
+	volumeName := "pvc-cbt-" + uuid.New().String()
+	cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+		Name:       volumeName,
+		VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+		Metadata: cnstypes.CnsVolumeMetadata{
+			ContainerCluster: containerCluster,
+		},
+		BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+			CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+				CapacityInMb: 5120,
+			},
+		},
+		Datastores: dsList,
+	}
+	var volumeID, snapshotID string
+	t.Cleanup(func() {
+		cctx := context.Background()
+		if snapshotID != "" && volumeID != "" {
+			delSnap := []cnstypes.CnsSnapshotDeleteSpec{{
+				VolumeId:   cnstypes.CnsVolumeId{Id: volumeID},
+				SnapshotId: cnstypes.CnsSnapshotId{Id: snapshotID},
+			}}
+			task, err := cnsClient.DeleteSnapshots(cctx, delSnap)
+			if err != nil {
+				t.Logf("cleanup DeleteSnapshots: %v", err)
+			} else if taskInfo, err := GetTaskInfo(cctx, task); err != nil {
+				t.Logf("cleanup GetTaskInfo DeleteSnapshots: %v", err)
+			} else if taskResult, err := GetTaskResult(cctx, taskInfo); err != nil {
+				t.Logf("cleanup GetTaskResult DeleteSnapshots: %v", err)
+			} else if taskResult != nil {
+				if op := taskResult.GetCnsVolumeOperationResult(); op != nil && op.Fault != nil {
+					t.Logf("cleanup DeleteSnapshots fault: %+v", op.Fault)
+				}
+			}
+		}
+		if volumeID != "" {
+			delVol := []cnstypes.CnsVolumeId{{Id: volumeID}}
+			task, err := cnsClient.DeleteVolume(cctx, delVol, true)
+			if err != nil {
+				t.Logf("cleanup DeleteVolume: %v", err)
+			} else if taskInfo, err := GetTaskInfo(cctx, task); err != nil {
+				t.Logf("cleanup GetTaskInfo DeleteVolume: %v", err)
+			} else if taskResult, err := GetTaskResult(cctx, taskInfo); err != nil {
+				t.Logf("cleanup GetTaskResult DeleteVolume: %v", err)
+			} else if taskResult != nil {
+				if op := taskResult.GetCnsVolumeOperationResult(); op != nil && op.Fault != nil {
+					t.Logf("cleanup DeleteVolume fault: %+v", op.Fault)
+				}
+			}
+		}
+	})
+
+	createTask, err := cnsClient.CreateVolume(ctx, []cnstypes.CnsVolumeCreateSpec{cnsVolumeCreateSpec})
+	if err != nil {
+		t.Fatal(err)
+	}
+	createTaskInfo, err := GetTaskInfo(ctx, createTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createTaskResult, err := GetTaskResult(ctx, createTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if createTaskResult == nil {
+		t.Fatal("empty create volume task result")
+	}
+	createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
+	if createVolumeOperationRes.Fault != nil {
+		t.Fatalf("create volume fault: %+v", createVolumeOperationRes.Fault)
+	}
+	volumeID = createVolumeOperationRes.VolumeId.Id
+	t.Logf("CBT test: created block volume %q", volumeID)
+
+	cbtFlag := string(cnstypes.CnsVolumeControlFlagsEnableChangedBlockTracking)
+	err = cnsClient.SetVolumeControlFlags(ctx, []cnstypes.CnsVolumeControlFlagsSpec{{
+		VolumeId:     cnstypes.CnsVolumeId{Id: volumeID},
+		ControlFlags: []string{cbtFlag},
+	}})
+	if err != nil {
+		t.Fatalf("SetVolumeControlFlags(enable CBT): %v", err)
+	}
+
+	queryFilter := cnstypes.CnsQueryFilter{
+		VolumeIds: []cnstypes.CnsVolumeId{{Id: volumeID}},
+	}
+	queryResult, err := cnsClient.QueryVolume(ctx, &queryFilter)
+	if err != nil {
+		t.Fatalf("QueryVolume after enabling CBT: %v", err)
+	}
+	if len(queryResult.Volumes) != 1 {
+		t.Fatalf("QueryVolume: want 1 volume, got %d", len(queryResult.Volumes))
+	}
+	if queryResult.Volumes[0].ChangedBlockTracking != cnstypes.CnsVolumeCBTStatusEnabled {
+		t.Fatalf("expected CBT enabled on volume, changedBlockTracking=%q (want %q)",
+			queryResult.Volumes[0].ChangedBlockTracking, cnstypes.CnsVolumeCBTStatusEnabled)
+	}
+
+	queryByCBT := cnstypes.CnsQueryFilter{
+		VolumeIds:            []cnstypes.CnsVolumeId{{Id: volumeID}},
+		ChangedBlockTracking: cnstypes.CnsVolumeCBTStatusEnabled,
+	}
+	queryByCBTResult, err := cnsClient.QueryVolume(ctx, &queryByCBT)
+	if err != nil {
+		t.Fatalf("QueryVolume with ChangedBlockTracking=%s: %v", cnstypes.CnsVolumeCBTStatusEnabled, err)
+	}
+	if len(queryByCBTResult.Volumes) != 1 {
+		t.Fatalf("QueryVolume with CBT filter: want 1 volume, got %d", len(queryByCBTResult.Volumes))
+	}
+
+	cnsSnapshotCreateSpec := cnstypes.CnsSnapshotCreateSpec{
+		VolumeId:    cnstypes.CnsVolumeId{Id: volumeID},
+		Description: "cbt-test-snapshot",
+	}
+	createSnapshotsTask, err := cnsClient.CreateSnapshots(ctx, []cnstypes.CnsSnapshotCreateSpec{cnsSnapshotCreateSpec})
+	if err != nil {
+		t.Fatal(err)
+	}
+	createSnapshotsTaskInfo, err := GetTaskInfo(ctx, createSnapshotsTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createSnapshotsTaskResult, err := GetTaskResult(ctx, createSnapshotsTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if createSnapshotsTaskResult == nil {
+		t.Fatal("empty create snapshot task result")
+	}
+	if createSnapshotsOperationRes := createSnapshotsTaskResult.GetCnsVolumeOperationResult(); createSnapshotsOperationRes.Fault != nil {
+		t.Fatalf("CreateSnapshots fault: %+v", createSnapshotsOperationRes.Fault)
+	}
+	snapshotCreateResult, ok := createSnapshotsTaskResult.(*cnstypes.CnsSnapshotCreateResult)
+	if !ok {
+		t.Fatalf("unexpected create snapshot result type %T", createSnapshotsTaskResult)
+	}
+	snapshotID = snapshotCreateResult.Snapshot.SnapshotId.Id
+	if snapshotCreateResult.Snapshot.ChangedBlockTrackingId == "" {
+		t.Fatalf("expected non-empty changedBlockTrackingId (CBT change id) on snapshot, got %q",
+			snapshotCreateResult.Snapshot.ChangedBlockTrackingId)
+	}
+	t.Logf("snapshot %q changedBlockTrackingId=%q", snapshotID, snapshotCreateResult.Snapshot.ChangedBlockTrackingId)
+
+	snapshotQueryFilter := cnstypes.CnsSnapshotQueryFilter{
+		SnapshotQuerySpecs: []cnstypes.CnsSnapshotQuerySpec{{
+			VolumeId:   cnstypes.CnsVolumeId{Id: volumeID},
+			SnapshotId: &cnstypes.CnsSnapshotId{Id: snapshotID},
+		}},
+	}
+	querySnapshotsTask, err := cnsClient.QuerySnapshots(ctx, snapshotQueryFilter)
+	if err != nil {
+		t.Fatalf("QuerySnapshots: %v", err)
+	}
+	querySnapshotsTaskInfo, err := GetTaskInfo(ctx, querySnapshotsTask)
+	if err != nil {
+		t.Fatalf("QuerySnapshots GetTaskInfo: %v", err)
+	}
+	snapQueryResult, err := GetQuerySnapshotsTaskResult(ctx, querySnapshotsTaskInfo)
+	if err != nil {
+		t.Fatalf("QuerySnapshots GetQuerySnapshotsTaskResult: %v", err)
+	}
+	if len(snapQueryResult.Entries) != 1 {
+		t.Fatalf("QuerySnapshots: want 1 entry, got %d", len(snapQueryResult.Entries))
+	}
+	if snapQueryResult.Entries[0].Error != nil {
+		t.Fatalf("QuerySnapshots entry error: %+v", snapQueryResult.Entries[0].Error)
+	}
+	queriedSnap := snapQueryResult.Entries[0].Snapshot
+	if queriedSnap.ChangedBlockTrackingId == "" {
+		t.Fatalf("expected non-empty changedBlockTrackingId from QuerySnapshots, got %q",
+			queriedSnap.ChangedBlockTrackingId)
+	}
+	t.Logf("snapshot %q changedBlockTrackingId=%q (from QuerySnapshots)", snapshotID, queriedSnap.ChangedBlockTrackingId)
+
+	err = cnsClient.ClearVolumeControlFlags(ctx, []cnstypes.CnsVolumeControlFlagsSpec{{
+		VolumeId:     cnstypes.CnsVolumeId{Id: volumeID},
+		ControlFlags: []string{cbtFlag},
+	}})
+	if err != nil {
+		t.Fatalf("ClearVolumeControlFlags(disable CBT): %v", err)
+	}
+
+	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
+	if err != nil {
+		t.Fatalf("QueryVolume after disabling CBT: %v", err)
+	}
+	if len(queryResult.Volumes) != 1 {
+		t.Fatalf("QueryVolume: want 1 volume, got %d", len(queryResult.Volumes))
+	}
+	if queryResult.Volumes[0].ChangedBlockTracking == cnstypes.CnsVolumeCBTStatusEnabled {
+		t.Fatalf("expected CBT disabled on volume, changedBlockTracking=%q (want not %q)",
+			queryResult.Volumes[0].ChangedBlockTracking, cnstypes.CnsVolumeCBTStatusEnabled)
+	}
+}
+
 func TestHandleCnsNotRegisteredFault(t *testing.T) {
 	ctx := context.Background()
 	// Setup: create a CNS client and a volume to unregister
@@ -2268,5 +2513,22 @@ func isvSphereVersion91orAbove(ctx context.Context, aboutInfo vim25types.AboutIn
 		}
 	}
 	// For all other versions
+	return false
+}
+
+// isvSphereVersion92orAbove checks if specified version is 9.2.0 or higher
+// using the same compact version encoding as isvSphereVersion91orAbove (e.g. "9.2.0" → 920).
+func isvSphereVersion92orAbove(ctx context.Context, aboutInfo vim25types.AboutInfo) bool {
+	items := strings.Split(aboutInfo.Version, ".")
+	version := strings.Join(items[:], "")
+	if len(version) >= 3 {
+		vSphereVersionInt, err := strconv.Atoi(version[0:3])
+		if err != nil {
+			return false
+		}
+		if vSphereVersionInt >= VSphere92VersionInt {
+			return true
+		}
+	}
 	return false
 }
