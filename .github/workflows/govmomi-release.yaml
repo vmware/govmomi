@@ -122,7 +122,7 @@ jobs:
           retention-days: 14
       - name: Simulate Release without Pushing Artifacts
         if: ${{ inputs.dryrun }}
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -130,7 +130,7 @@ jobs:
           args: release --snapshot --clean --release-notes RELEASE_CHANGELOG.md
       - name: Create Release
         if: ${{ !inputs.dryrun }}
-        uses: goreleaser/goreleaser-action@ec59f474b9834571250b370d4735c50f8e2d1e29 # v7.0.0
+        uses: goreleaser/goreleaser-action@e24998b8b67b290c2fa8b7c14fcfa7de2c5c9b8c # v7.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GOVMOMI_RELEASE }}
         with:
