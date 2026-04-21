@@ -35,9 +35,25 @@ const (
 )
 
 func init() {
-	if sh, err := exec.LookPath("bash"); err != nil {
+	if sh, err := exec.LookPath("bash"); err == nil && sh != "" {
 		shell = sh
 	}
+}
+
+// commandError logs and returns an error from a command execution failure, including stderr if available.
+func commandError(operation string, args []string, err error) error {
+	stderr := ""
+	if xerr, ok := err.(*exec.ExitError); ok {
+		stderr = strings.TrimSpace(string(xerr.Stderr))
+	}
+	var cmdErr error
+	if stderr != "" {
+		cmdErr = fmt.Errorf("%s %v failed: %s: %s", operation, args, err, stderr)
+	} else {
+		cmdErr = fmt.Errorf("%s %v failed: %s", operation, args, err)
+	}
+	log.Print(cmdErr)
+	return cmdErr
 }
 
 type eventWatcher struct {
@@ -186,14 +202,13 @@ func copyFromGuest(id string, src string, sink func(int64, io.Reader) error) err
 //
 //	uid - string
 //	err - error or nil
-func createVolume(volumeName string, labels []string, files []tarEntry) (string, error) {
+func createVolume(volumeName string, labels []string, files []tarEntry) (uid string, err error) {
 	image := os.Getenv("VCSIM_BUSYBOX")
 	if image == "" {
 		image = "busybox"
 	}
 
 	name := sanitizeName(volumeName)
-	uid := ""
 
 	// label the volume if specified - this requires the volume be created before use
 	if len(labels) > 0 {
@@ -205,7 +220,7 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (string,
 		cmd := exec.Command("docker", run...)
 		out, err := cmd.Output()
 		if err != nil {
-			return "", err
+			return "", commandError("volume create", cmd.Args, err)
 		}
 		uid = strings.TrimSpace(string(out))
 
@@ -223,9 +238,8 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (string,
 		return uid, err
 	}
 
-	err = cmd.Start()
-	if err != nil {
-		return uid, err
+	if err = cmd.Start(); err != nil {
+		return uid, commandError("volume population start", cmd.Args, err)
 	}
 
 	tw := tar.NewWriter(stdin)
@@ -259,14 +273,7 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (string,
 	}
 
 	if waitErr := cmd.Wait(); waitErr != nil {
-		stderr := ""
-		if xerr, ok := waitErr.(*exec.ExitError); ok {
-			stderr = string(xerr.Stderr)
-		}
-		log.Printf("%s %s: %s %s", name, cmd.Args, waitErr, stderr)
-
-		err = fmt.Errorf("%s, wait: {%s}", err, waitErr)
-		return uid, err
+		return uid, commandError("volume population", cmd.Args, waitErr)
 	}
 
 	return uid, err
@@ -359,9 +366,10 @@ func createBridge(bridgeName string, labels ...string) (string, error) {
 //   - networks - set of bridges to connect the container to
 //   - volumes - colon separated tuple of volume name to mount path. Passed directly to docker via -v so mount options can be postfixed.
 //   - env - array of environment vairables in name=value form
+//   - nestedContainers - if true, adds flags required for running containers inside the container (e.g., Kubernetes)
 //   - optsAndImage - pass-though options and must include at least the container image to use, including tag if necessary
 //   - args - the command+args to pass to the container
-func create(ctx *Context, name string, id string, networks []string, volumes []string, ports []string, env []string, image string, args []string) (*container, error) {
+func create(ctx *Context, name string, id string, networks []string, volumes []string, ports []string, env []string, nestedContainers bool, image string, args []string) (*container, error) {
 	if len(image) == 0 {
 		return nil, errors.New("cannot create container backing without an image")
 	}
@@ -399,6 +407,40 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 	}
 
 	run := []string{"docker", "create", "--name", c.name}
+
+	if nestedContainers {
+		// Add privileged mode for systemd compatibility
+		run = append(run, "--privileged")
+
+		// Nested container mode: flags adapted from kind's provision.go for running
+		// Kubernetes inside the container. These enable proper cgroup isolation and
+		// allow containerd/kubelet to create nested containers.
+		// Reference: https://github.com/kubernetes-sigs/kind/blob/main/pkg/cluster/internal/providers/docker/provision.go
+		//
+		// --cgroupns=private: Gives container its own cgroup namespace, required for
+		//   proper cgroup v2 delegation to nested containers
+		// --security-opt seccomp=unconfined: Allows syscalls needed by systemd/containerd
+		// --security-opt apparmor=unconfined: Disables AppArmor restrictions
+		// --tmpfs /tmp,/run: Required for systemd to function properly
+		// --volume /var: Persistent storage for containerd/kubelet data
+		// --volume /lib/modules: Kernel modules for iptables/networking
+		// --device /dev/fuse: Required for fuse-overlayfs snapshotter
+		run = append(run,
+			"--cgroupns=private",
+			"--security-opt", "seccomp=unconfined",
+			"--security-opt", "apparmor=unconfined",
+			"--tmpfs", "/tmp",
+			"--tmpfs", "/run",
+			"--volume", "/var",
+			"--volume", "/lib/modules:/lib/modules:ro",
+			"--device", "/dev/fuse",
+		)
+	} else {
+		// Standard mode: use host cgroup namespace for access to all controllers
+		// --cgroupns=host: gives access to all cgroup controllers (cpuset, etc.)
+		run = append(run, "--cgroupns=host")
+	}
+
 	run = append(run, dockerNet...)
 	run = append(run, dockerVol...)
 	run = append(run, dockerPort...)
@@ -411,13 +453,7 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 	cmd := exec.Command(shell, "-c", strings.Join(run, " "))
 	out, err := cmd.Output()
 	if err != nil {
-		stderr := ""
-		if xerr, ok := err.(*exec.ExitError); ok {
-			stderr = string(xerr.Stderr)
-		}
-		log.Printf("%s %s: %s %s", name, cmd.Args, err, stderr)
-
-		return nil, err
+		return nil, commandError("container create", cmd.Args, err)
 	}
 
 	c.id = strings.TrimSpace(string(out))
@@ -506,12 +542,26 @@ func (c *container) start(ctx *Context) error {
 	}
 
 	cmd := exec.Command("docker", start, c.id)
-	err = cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("%s %s: %s", c.name, cmd.Args, err)
+		errMsg := fmt.Sprintf("container %s failed: %s", start, err)
+		if len(out) > 0 {
+			stderr := strings.TrimSpace(string(out))
+			errMsg = fmt.Sprintf("%s: %s", errMsg, stderr)
+			// Check for common podman permission errors related to DMI mount
+			if strings.Contains(stderr, "Permission denied") || strings.Contains(stderr, "OCI permission denied") {
+				if strings.Contains(stderr, "/sys/class/dmi") || strings.Contains(stderr, "dmi") {
+					errMsg = fmt.Sprintf("%s (hint: rootless podman cannot mount to /sys/class/dmi/id - set VM ExtraConfig 'RUN.mountdmi=false' to disable, or run with root privileges)", errMsg)
+				} else {
+					errMsg = fmt.Sprintf("%s (hint: this may be a rootless container permission issue - check volume mounts to system paths, or set VM ExtraConfig 'RUN.mountdmi=false' if using DMI mount)", errMsg)
+				}
+			}
+		}
+		log.Printf("%s %s: %s", c.name, cmd.Args, errMsg)
+		return errors.New(errMsg)
 	}
 
-	return err
+	return nil
 }
 
 // pause the container (if any) for the given vm.
@@ -689,7 +739,7 @@ func (c *container) updated() {
 // returns:
 //
 //	err - uninitializedContainer error - if c.id is empty
-func (c *container) watchContainer(ctx *Context, updateFn func(*containerDetails, *container) error) error {
+func (c *container) watchContainer(ctx *Context, updateFn func(*Context, *containerDetails, *container) error) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -720,7 +770,7 @@ func (c *container) watchContainer(ctx *Context, updateFn func(*containerDetails
 				rmErr = c.remove(ctx)
 			}
 
-			updateErr := updateFn(&details, c)
+			updateErr := updateFn(ctx, &details, c)
 			// if we don't succeed we want to re-try
 			if removing && rmErr == nil && updateErr == nil {
 				ticker.Stop()
