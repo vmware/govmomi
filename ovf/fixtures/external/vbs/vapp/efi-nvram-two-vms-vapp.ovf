@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+  <References>
+    <File ovf:id="file1" ovf:href="efi-nvram-two-vms-vapp-1.vmdk"/>
+    <File ovf:id="file2" ovf:href="efi-nvram-two-vms-vapp-2.nvram" ovf:size="74232"/>
+    <File ovf:id="file3" ovf:href="efi-nvram-two-vms-vapp-3.vmdk"/>
+    <File ovf:id="file4" ovf:href="efi-nvram-two-vms-vapp-4.nvram" ovf:size="74232"/>
+  </References>
+  <DiskSection>
+    <Info>List of the virtual disks</Info>
+    <Disk ovf:capacityAllocationUnits="byte" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:diskId="vmdisk1" ovf:capacity="4194304" ovf:fileRef="file1"/>
+    <Disk ovf:capacityAllocationUnits="byte" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:diskId="vmdisk2" ovf:capacity="4194304" ovf:fileRef="file3"/>
+  </DiskSection>
+  <vmw:IpAssignmentSection>
+    <Info>Supported IP assignment schemes</Info>
+  </vmw:IpAssignmentSection>
+  <VirtualSystemCollection ovf:id="efi-nvram-two-vms-vapp">
+    <Info>A virtual system collection</Info>
+    <Name>efi-nvram-two-vms-vapp</Name>
+    <StartupSection>
+      <Info>Specifies the startup order of the application.</Info>
+      <Item ovf:id="Vm-TestExportVmWithEfiBoot-20170314-211451-1" ovf:order="1"/>
+      <Item ovf:id="Vm-TestExportVmWithEfiBoot-20170314-211451-2" ovf:order="2"/>
+    </StartupSection>
+    <ProductSection>
+      <Info>Information about the installed software</Info>
+    </ProductSection>
+    <VirtualSystem ovf:id="Vm-TestExportVmWithEfiBoot-20170314-211451-1">
+      <Info>A Virtual system</Info>
+      <Name>efi-nvram-vm1</Name>
+      <AnnotationSection>
+        <Info>A human-readable annotation</Info>
+        <Annotation>Quick Dummy</Annotation>
+      </AnnotationSection>
+      <OperatingSystemSection ovf:id="113" vmw:osType="windows8Guest">
+        <Info>The operating system installed</Info>
+        <Description>Microsoft Windows 8.x (32-bit)</Description>
+      </OperatingSystemSection>
+      <VirtualHardwareSection>
+        <Info>Virtual hardware requirements</Info>
+        <System>
+          <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+          <vssd:InstanceID>0</vssd:InstanceID>
+          <vssd:VirtualSystemType>vmx-13</vssd:VirtualSystemType>
+        </System>
+        <Item>
+          <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+          <rasd:Description>Number of Virtual CPUs</rasd:Description>
+          <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+          <rasd:InstanceID>1</rasd:InstanceID>
+          <rasd:ResourceType>3</rasd:ResourceType>
+          <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+          <vmw:CoresPerSocket ovf:required="false">1</vmw:CoresPerSocket>
+        </Item>
+        <Item>
+          <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+          <rasd:Description>Memory Size</rasd:Description>
+          <rasd:ElementName>128MB of memory</rasd:ElementName>
+          <rasd:InstanceID>2</rasd:InstanceID>
+          <rasd:ResourceType>4</rasd:ResourceType>
+          <rasd:VirtualQuantity>128</rasd:VirtualQuantity>
+        </Item>
+        <Item>
+          <rasd:Address>0</rasd:Address>
+          <rasd:Description>IDE Controller</rasd:Description>
+          <rasd:ElementName>IDE Controller 1</rasd:ElementName>
+          <rasd:InstanceID>3</rasd:InstanceID>
+          <rasd:ResourceType>5</rasd:ResourceType>
+        </Item>
+        <Item>
+          <rasd:AddressOnParent>0</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+          <rasd:InstanceID>4</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+        <Item ovf:required="false">
+          <rasd:ElementName>Video card</rasd:ElementName>
+          <rasd:InstanceID>5</rasd:InstanceID>
+          <rasd:ResourceType>24</rasd:ResourceType>
+          <vmw:Config ovf:required="false" vmw:key="videoRamSizeInKB" vmw:value="4096"/>
+          <vmw:Config ovf:required="false" vmw:key="useAutoDetect" vmw:value="false"/>
+          <vmw:Config ovf:required="false" vmw:key="enable3DSupport" vmw:value="false"/>
+          <vmw:Config ovf:required="false" vmw:key="numDisplays" vmw:value="1"/>
+          <vmw:Config ovf:required="false" vmw:key="graphicsMemorySizeInKB" vmw:value="262144"/>
+          <vmw:Config ovf:required="false" vmw:key="use3dRenderer" vmw:value="automatic"/>
+        </Item>
+        <vmw:Config ovf:required="false" vmw:key="cpuHotAddEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="nestedHVEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="virtualSMCPresent" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="cpuHotRemoveEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="memoryHotAddEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="firmware" vmw:value="efi"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:key="nvram" vmw:value="ovf:/file/file2"/>
+      </VirtualHardwareSection>
+    </VirtualSystem>
+    <VirtualSystem ovf:id="Vm-TestExportVmWithEfiBoot-20170314-211451-2">
+      <Info>A Virtual system</Info>
+      <Name>efi-nvram-vm2</Name>
+      <AnnotationSection>
+        <Info>A human-readable annotation</Info>
+        <Annotation>Quick Dummy</Annotation>
+      </AnnotationSection>
+      <OperatingSystemSection ovf:id="113" vmw:osType="windows8Guest">
+        <Info>The operating system installed</Info>
+        <Description>Microsoft Windows 8.x (32-bit)</Description>
+      </OperatingSystemSection>
+      <VirtualHardwareSection>
+        <Info>Virtual hardware requirements</Info>
+        <System>
+          <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+          <vssd:InstanceID>0</vssd:InstanceID>
+          <vssd:VirtualSystemType>vmx-13</vssd:VirtualSystemType>
+        </System>
+        <Item>
+          <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+          <rasd:Description>Number of Virtual CPUs</rasd:Description>
+          <rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+          <rasd:InstanceID>1</rasd:InstanceID>
+          <rasd:ResourceType>3</rasd:ResourceType>
+          <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+          <vmw:CoresPerSocket ovf:required="false">1</vmw:CoresPerSocket>
+        </Item>
+        <Item>
+          <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+          <rasd:Description>Memory Size</rasd:Description>
+          <rasd:ElementName>128MB of memory</rasd:ElementName>
+          <rasd:InstanceID>2</rasd:InstanceID>
+          <rasd:ResourceType>4</rasd:ResourceType>
+          <rasd:VirtualQuantity>128</rasd:VirtualQuantity>
+        </Item>
+        <Item>
+          <rasd:Address>0</rasd:Address>
+          <rasd:Description>IDE Controller</rasd:Description>
+          <rasd:ElementName>IDE Controller 1</rasd:ElementName>
+          <rasd:InstanceID>3</rasd:InstanceID>
+          <rasd:ResourceType>5</rasd:ResourceType>
+        </Item>
+        <Item>
+          <rasd:AddressOnParent>0</rasd:AddressOnParent>
+          <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+          <rasd:HostResource>ovf:/disk/vmdisk2</rasd:HostResource>
+          <rasd:InstanceID>4</rasd:InstanceID>
+          <rasd:Parent>3</rasd:Parent>
+          <rasd:ResourceType>17</rasd:ResourceType>
+        </Item>
+        <Item ovf:required="false">
+          <rasd:ElementName>Video card</rasd:ElementName>
+          <rasd:InstanceID>5</rasd:InstanceID>
+          <rasd:ResourceType>24</rasd:ResourceType>
+          <vmw:Config ovf:required="false" vmw:key="use3dRenderer" vmw:value="automatic"/>
+          <vmw:Config ovf:required="false" vmw:key="videoRamSizeInKB" vmw:value="4096"/>
+          <vmw:Config ovf:required="false" vmw:key="graphicsMemorySizeInKB" vmw:value="262144"/>
+          <vmw:Config ovf:required="false" vmw:key="enable3DSupport" vmw:value="false"/>
+          <vmw:Config ovf:required="false" vmw:key="numDisplays" vmw:value="1"/>
+          <vmw:Config ovf:required="false" vmw:key="useAutoDetect" vmw:value="false"/>
+        </Item>
+        <vmw:Config ovf:required="false" vmw:key="cpuHotAddEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="nestedHVEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="virtualSMCPresent" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="cpuHotRemoveEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="memoryHotAddEnabled" vmw:value="false"/>
+        <vmw:Config ovf:required="false" vmw:key="firmware" vmw:value="efi"/>
+        <vmw:ExtraConfig ovf:required="false" vmw:key="nvram" vmw:value="ovf:/file/file4"/>
+      </VirtualHardwareSection>
+    </VirtualSystem>
+  </VirtualSystemCollection>
+</Envelope>

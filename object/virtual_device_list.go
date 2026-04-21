@@ -585,7 +585,10 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, ds types.Ma
 		},
 	}
 
-	l.AssignController(device, c)
+	if c != nil {
+		l.AssignController(device, c)
+	}
+
 	return device
 }
 
@@ -854,6 +857,8 @@ func (l VirtualDeviceList) CreateEthernetCard(name string, backing types.BaseVir
 
 	if name == "" {
 		name = ctypes.deviceName(ctypes[0])
+	} else if name == "sriovethernetcard" {
+		name = "sriov"
 	}
 
 	found := ctypes.Select(func(device types.BaseVirtualDevice) bool {

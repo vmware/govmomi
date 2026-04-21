@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ovf:Envelope xmlns:xsi-namespace="http://www.w3.org/2001/XMLSchema-instance" xmlns:ovf="http://www.vmware.com/schema/ovf/1/envelope" xmlns:vssd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:rasd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" ovf:version="0.9">
+    <References>
+        <File ovf:id="file1" ovf:href="../../../vmdk/dummy.vmdk"/>
+    </References>
+    <Section xsi-namespace:type="ovf:DiskSection_Type">
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:capacity="1073741824" ovf:format="http://www.vmware.com/specifications/vmdk.html#sparse" />
+    </Section>
+     <Content xsi-namespace:type="ovf:VirtualSystem_Type" ovf:id="PTC01_VM">
+        <Info>The virtual machince "ArchLinux"</Info>
+        <Section xsi-namespace:type="ovf:OperatingSystemSection_Type" ovf:id="36">
+            <Info>Guest Operating System</Info>
+            <Description>Other Linux (32-bit)</Description>
+        </Section>
+	<Section xsi-namespace:type="ovf:VirtualHardwareSection_Type" ovf:required="true">
+            <Info>512 MB , 1 CPU, 1 disk, 1 nic</Info>
+            <System>
+                <vssd-namespace:InstanceId>0</vssd-namespace:InstanceId>
+                <vssd-namespace:VirtualSystemIdentifier>system id</vssd-namespace:VirtualSystemIdentifier>
+                <vssd-namespace:VirtualSystemType>vmx-04</vssd-namespace:VirtualSystemType>
+            </System>
+        </Section>
+     </Content>
+</ovf:Envelope>

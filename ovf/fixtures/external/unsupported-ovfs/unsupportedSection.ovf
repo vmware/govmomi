@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ovf:Envelope
+   xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+   xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+   xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+   xmlns:xml="http://www.w3.org/XML/1998/namespace"
+   xmlns:vmwovf="http://www.vmware.com/schema/ovf">
+
+  <References>
+
+  </References>
+
+  <Section xsi:type="ovf:UnsupportedSectionFoo">
+  <Info>The unsupported section Foo</Info>
+</Section>
+
+  <Section xsi:type="ovf:UnknwonSection_Type" ovf:required="false">
+    <Info>An unknown section</Info>
+  </Section>
+
+  <Content xsi:type="ovf:VirtualSystemCollection_Type" ovf:id="MyService">
+    <Info>A collection of virtual machines</Info>
+
+
+
+    <Content xsi:type="ovf:VirtualSystem_Type" ovf:id="i18test">
+      <Info>The virtual machince "ArchLinux"</Info>
+
+
+
+      <Section xsi:type="ovf:VirtualHardwareSection_Type" ovf:required="true">
+        <Info>512 MB , 1 CPU, 1 disk, 1 nic</Info>
+        <System>
+          <vssd:InstanceId>0</vssd:InstanceId>
+          <vssd:VirtualSystemIdentifier>system id</vssd:VirtualSystemIdentifier>
+          <vssd:VirtualSystemType>foobar, xen3</vssd:VirtualSystemType>
+        </System>
+      </Section>
+
+    </Content>
+  </Content>
+
+
+</ovf:Envelope>
+

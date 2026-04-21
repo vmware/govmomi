@@ -1130,8 +1130,25 @@ type StorageSpec struct {
 
 // NamespacesInstanceUpdateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/UpdateSpec/
 type NamespacesInstanceUpdateSpec struct {
-	VmServiceSpec VmServiceSpec `json:"vm_service_spec,omitempty"`
-	StorageSpecs  []StorageSpec `json:"storage_specs,omitempty"`
+	VmServiceSpec VmServiceSpec            `json:"vm_service_spec,omitempty"`
+	StorageSpecs  []StorageSpec            `json:"storage_specs,omitempty"`
+	NetworkSpec   *NetworkConfigUpdateSpec `json:"network_spec,omitempty"`
+}
+
+// NetworkConfigUpdateSpec
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20NetworkConfigUpdateSpec/
+// Since 9.0.0.0
+type NetworkConfigUpdateSpec struct {
+	NetworkProvider string                `json:"network_provider"`
+	VpcConfig       *VpcNetworkUpdateSpec `json:"vpc_config,omitempty"`
+}
+
+// VpcNetworkUpdateSpec
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20VpcNetworkUpdateSpec/
+// Since 9.0.0.0
+type VpcNetworkUpdateSpec struct {
+	DefaultSubnetSize *int64     `json:"default_subnet_size,omitempty"`
+	PrivateCidrs      []Ipv4Cidr `json:"private_cidrs,omitempty"`
 }
 
 // ListNamespaces https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/get/

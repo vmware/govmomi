@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Testing ScaleOutSection together with StartupSection.
+-->
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf2="http://schemas.dmtf.org/ovf/envelope/2">
+    <References/>
+
+    <VirtualSystemCollection ovf:id="root">
+        <Info/>
+        <Name>Root vApp</Name>
+
+        <ovf2:ScaleOutSection ovf2:id="childVapp">
+            <Info/>
+            <ovf2:InstanceCount ovf2:minimum="1" ovf2:default="2" ovf2:maximum="4" />
+        </ovf2:ScaleOutSection>
+
+        <StartupSection>
+            <Info/>
+            <Item ovf:id="childVapp" ovf:order="1" ovf:startAction="powerOn" ovf:startDelay="345" />
+        </StartupSection>
+
+        <VirtualSystemCollection ovf:id="childVapp">
+            <Info/>
+            <Name>Child vApp</Name>
+
+            <ovf2:ScaleOutSection ovf2:id="grandChildVapp">
+                <Info/>
+                <ovf2:InstanceCount ovf2:minimum="1" ovf2:default="2" ovf2:maximum="4" />
+            </ovf2:ScaleOutSection>
+
+            <StartupSection>
+                <Info/>
+                <Item ovf:id="grandChildVapp" ovf:order="0"/>
+            </StartupSection>
+
+            <VirtualSystemCollection ovf:id="grandChildVapp">
+                <Info/>
+                <Name>Grand child vApp</Name>
+            </VirtualSystemCollection>
+
+        </VirtualSystemCollection>
+    </VirtualSystemCollection>
+</Envelope>

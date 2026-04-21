@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <References>
+    <File ovf:href="valid_disk.vmdk"  ovf:size="68096"  ovf:id="file1" ></File>
+  </References>
+  <DiskSection>
+    <Info>Virtual disk information</Info>
+    <Disk ovf:capacityAllocationUnits="byte * 2^20"  ovf:diskId="vmdisk1"  ovf:fileRef="file1"  ovf:format="http://www.vmware.com/interfaces/interfaces/specifications/vmdk.html#streamOptimized"  ovf:capacity="8" ></Disk>
+  </DiskSection>
+  <NetworkSection>
+    <Info>The list of logical networks</Info>
+    <Network ovf:name="VM Network" >
+      <Description>The VM Network network</Description>
+    </Network>
+  </NetworkSection>
+  <VirtualSystem ovf:id="dummy" >
+    <Info>A virtual machine</Info>
+    <Name>dummy</Name>
+    <OperatingSystemSection vmw:osType="winNetStandardGuest"  ovf:id="69" >
+      <Info>The kind of installed guest operating system</Info>
+      <Description>Microsoft Windows Server 2003, Standard Edition (32-bit)</Description>
+    </OperatingSystemSection>
+    <VirtualHardwareSection>
+      <Info>Virtual hardware requirements</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemIdentifier>dummy</vssd:VirtualSystemIdentifier>
+        <vssd:VirtualSystemType>vmx-07</vssd:VirtualSystemType>
+      </System>
+      <Item><rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+<rasd:Description>Number of Virtual CPUs</rasd:Description>
+<rasd:ElementName>1 virtual CPU(s)</rasd:ElementName>
+<rasd:InstanceID>1</rasd:InstanceID>
+<rasd:ResourceType>3</rasd:ResourceType>
+<rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+		</Item>
+      <Item><rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+<rasd:Description>Memory Size</rasd:Description>
+<rasd:ElementName>32MB of memory</rasd:ElementName>
+<rasd:InstanceID>2</rasd:InstanceID>
+<rasd:ResourceType>4</rasd:ResourceType>
+<rasd:VirtualQuantity>32</rasd:VirtualQuantity>
+		</Item>
+      <Item><rasd:Address>0</rasd:Address>
+<rasd:Description>SCSI Controller</rasd:Description>
+<rasd:ElementName>SCSI controller 0</rasd:ElementName>
+<rasd:InstanceID>3</rasd:InstanceID>
+<rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+<rasd:ResourceType>6</rasd:ResourceType>
+		</Item>
+      <Item><rasd:Address>1</rasd:Address>
+<rasd:Description>IDE Controller</rasd:Description>
+<rasd:ElementName>IDE 1</rasd:ElementName>
+<rasd:InstanceID>4</rasd:InstanceID>
+<rasd:ResourceType>5</rasd:ResourceType>
+		</Item>
+      <Item><rasd:Address>0</rasd:Address>
+<rasd:Description>IDE Controller</rasd:Description>
+<rasd:ElementName>IDE 0</rasd:ElementName>
+<rasd:InstanceID>5</rasd:InstanceID>
+<rasd:ResourceType>5</rasd:ResourceType>
+		</Item>
+      <Item><rasd:AddressOnParent>0</rasd:AddressOnParent>
+<rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+<rasd:Description>Floppy Drive</rasd:Description>
+<rasd:ElementName>Floppy drive 1</rasd:ElementName>
+<rasd:InstanceID>6</rasd:InstanceID>
+<rasd:ResourceType>14</rasd:ResourceType>
+		</Item>
+      <Item><rasd:AddressOnParent>0</rasd:AddressOnParent>
+<rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+<rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+<rasd:InstanceID>7</rasd:InstanceID>
+<rasd:Parent>4</rasd:Parent>
+<rasd:ResourceType>15</rasd:ResourceType>
+		</Item>
+      <Item><rasd:AddressOnParent>7</rasd:AddressOnParent>
+<rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+<rasd:Connection>VM Network</rasd:Connection>
+<rasd:Description>E1000 ethernet adapter on "VM Network"</rasd:Description>
+<rasd:ElementName>Network adapter 1</rasd:ElementName>
+<rasd:InstanceID>8</rasd:InstanceID>
+<rasd:ResourceSubType>E1000</rasd:ResourceSubType>
+<rasd:ResourceType>10</rasd:ResourceType>
+		</Item>
+      <Item><rasd:AddressOnParent>0</rasd:AddressOnParent>
+<rasd:ElementName>Hard disk 1</rasd:ElementName>
+<rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+<rasd:InstanceID>9</rasd:InstanceID>
+<rasd:Parent>3</rasd:Parent>
+<rasd:ResourceType>17</rasd:ResourceType>
+		</Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

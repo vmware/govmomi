@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- qualifiers.ovf: All OVF property qualifiers (DMTF Table 7 + vSphere QualifierMap). -->
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+          xmlns:vmw="http://www.vmware.com/schema/ovf"
+          xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+          xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData">
+  <References>
+    <File ovf:id="file1" ovf:href="disk.vmdk" ovf:size="65536"/>
+  </References>
+  <DiskSection>
+    <Info>Single disk</Info>
+    <Disk ovf:capacity="1" ovf:capacityAllocationUnits="byte * 2^30" ovf:diskId="vmdisk1" ovf:fileRef="file1"/>
+  </DiskSection>
+  <NetworkSection>
+    <Info>Networks</Info>
+    <Network ovf:name="Management">
+      <Description>Management network</Description>
+    </Network>
+    <Network ovf:name="Workload">
+      <Description>Workload network</Description>
+    </Network>
+  </NetworkSection>
+  <VirtualSystem ovf:id="qualifiers-vm">
+    <Info>Fixture for all OVF qualifiers (DMTF + vSphere)</Info>
+    <Name>qualifiers-vm</Name>
+    <OperatingSystemSection ovf:id="101" vmw:osType="other3xLinux64Guest">
+      <Info>Guest OS</Info>
+      <Description>Other 3.x or later Linux (64-bit)</Description>
+    </OperatingSystemSection>
+    <ProductSection ovf:class="qualifiers" ovf:required="false">
+      <Info>DMTF Table 7 and vSphere QualifierMap</Info>
+      <Product>QualifiersFixture</Product>
+      <Vendor>Test</Vendor>
+      <Version>1.0</Version>
+      <!-- DMTF: MinValue/MaxValue int -->
+      <Property ovf:key="port" ovf:type="int" ovf:qualifiers="MinValue(1),MaxValue(65535)" ovf:userConfigurable="true" ovf:value="8080">
+        <Label>Port</Label>
+        <Description>TCP port (1-65535)</Description>
+      </Property>
+      <!-- DMTF: MinValue/MaxValue real -->
+      <Property ovf:key="ratio" ovf:type="real" ovf:qualifiers="MinValue(0),MaxValue(1)" ovf:userConfigurable="true" ovf:value="0.5">
+        <Label>Ratio</Label>
+        <Description>Real in [0,1]</Description>
+      </Property>
+      <!-- DMTF: MinLen + MaxLen string -->
+      <Property ovf:key="hostname" ovf:type="string" ovf:qualifiers="MinLen(1),MaxLen(253)" ovf:userConfigurable="true" ovf:value="test.local">
+        <Label>Hostname</Label>
+        <Description>1-253 chars</Description>
+      </Property>
+      <!-- DMTF: MaxLen only (min 0) -->
+      <Property ovf:key="short_id" ovf:type="string" ovf:qualifiers="MaxLen(8)" ovf:userConfigurable="true" ovf:value="abc">
+        <Label>Short ID</Label>
+        <Description>Up to 8 chars</Description>
+      </Property>
+      <!-- DMTF: MinLen only -->
+      <Property ovf:key="long_desc" ovf:type="string" ovf:qualifiers="MinLen(10)" ovf:userConfigurable="true" ovf:value="optional...">
+        <Label>Long description</Label>
+        <Description>At least 10 chars</Description>
+      </Property>
+      <!-- DMTF: ValueMap string -->
+      <Property ovf:key="mode" ovf:type="string" ovf:qualifiers="ValueMap{&quot;low&quot;,&quot;medium&quot;,&quot;high&quot;}" ovf:userConfigurable="true" ovf:value="medium">
+        <Label>Mode</Label>
+        <Description>Choice from ValueMap</Description>
+      </Property>
+      <!-- DMTF: ValueMap int -->
+      <Property ovf:key="priority" ovf:type="int" ovf:qualifiers="ValueMap{1,2,3}" ovf:userConfigurable="true" ovf:value="2">
+        <Label>Priority</Label>
+        <Description>1, 2, or 3</Description>
+      </Property>
+      <!-- vSphere: Ip (bare) -->
+      <Property ovf:key="mgmt_ip" ovf:type="string" ovf:qualifiers="Ip" ovf:userConfigurable="true" ovf:value="">
+        <Label>Management IP</Label>
+        <Description>IP, no network arg</Description>
+      </Property>
+      <!-- vSphere: Ip() explicit -->
+      <Property ovf:key="any_ip" ovf:type="string" ovf:qualifiers="Ip()" ovf:userConfigurable="true" ovf:value="">
+        <Label>Any IP</Label>
+        <Description>Ip() form</Description>
+      </Property>
+      <!-- vSphere: Ip(Management) -->
+      <Property ovf:key="net_ip" ovf:type="string" ovf:qualifiers="Ip(Management)" ovf:userConfigurable="true" ovf:value="">
+        <Label>Network IP</Label>
+        <Description>IP on Management network</Description>
+      </Property>
+      <!-- vSphere: Ip(Workload) -->
+      <Property ovf:key="workload_ip" ovf:type="string" ovf:qualifiers="Ip(Workload)" ovf:userConfigurable="true" ovf:value="">
+        <Label>Workload IP</Label>
+        <Description>IP on Workload network</Description>
+      </Property>
+      <!-- vSphere expression: VimIp (bare) -->
+      <Property ovf:key="guest_ip" ovf:type="string" ovf:qualifiers="VimIp" ovf:userConfigurable="true" ovf:value="">
+        <Label>Guest IP</Label>
+        <Description>${vimIp:}</Description>
+      </Property>
+      <!-- vSphere expression: Net(Management) -->
+      <Property ovf:key="net_expr" ovf:type="string" ovf:qualifiers="Net(Management)" ovf:userConfigurable="true" ovf:value="">
+        <Label>Net expression</Label>
+        <Description>${net:Management}</Description>
+      </Property>
+      <!-- vSphere expression: AutoIp -->
+      <Property ovf:key="auto_ip_expr" ovf:type="string" ovf:qualifiers="AutoIp" ovf:userConfigurable="true" ovf:value="">
+        <Label>AutoIp</Label>
+        <Description>${autoIp:}</Description>
+      </Property>
+      <!-- vSphere expression: Netmask, Gateway, DomainName, HostPrefix, Dns, Subnet, SearchPath, HttpProxy -->
+      <Property ovf:key="netmask_expr" ovf:type="string" ovf:qualifiers="Netmask" ovf:userConfigurable="true" ovf:value="">
+        <Label>Netmask</Label>
+      </Property>
+      <Property ovf:key="gateway_expr" ovf:type="string" ovf:qualifiers="Gateway" ovf:userConfigurable="true" ovf:value="">
+        <Label>Gateway</Label>
+      </Property>
+      <Property ovf:key="domain_expr" ovf:type="string" ovf:qualifiers="DomainName" ovf:userConfigurable="true" ovf:value="">
+        <Label>DomainName</Label>
+      </Property>
+      <Property ovf:key="host_prefix_expr" ovf:type="string" ovf:qualifiers="HostPrefix" ovf:userConfigurable="true" ovf:value="">
+        <Label>HostPrefix</Label>
+      </Property>
+      <Property ovf:key="dns_expr" ovf:type="string" ovf:qualifiers="Dns" ovf:userConfigurable="true" ovf:value="">
+        <Label>Dns</Label>
+      </Property>
+      <Property ovf:key="subnet_expr" ovf:type="string" ovf:qualifiers="Subnet" ovf:userConfigurable="true" ovf:value="">
+        <Label>Subnet</Label>
+      </Property>
+      <Property ovf:key="search_path_expr" ovf:type="string" ovf:qualifiers="SearchPath" ovf:userConfigurable="true" ovf:value="">
+        <Label>SearchPath</Label>
+      </Property>
+      <Property ovf:key="http_proxy_expr" ovf:type="string" ovf:qualifiers="HttpProxy" ovf:userConfigurable="true" ovf:value="">
+        <Label>HttpProxy</Label>
+      </Property>
+    </ProductSection>
+    <VirtualHardwareSection ovf:transport="com.vmware.guestInfo">
+      <Info>Virtual hardware</Info>
+      <System>
+        <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+        <vssd:InstanceID>0</vssd:InstanceID>
+        <vssd:VirtualSystemType>vmx-13</vssd:VirtualSystemType>
+      </System>
+      <Item>
+        <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+        <rasd:Description>Number of Virtual CPUs</rasd:Description>
+        <rasd:ElementName>1 virtual CPU</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>3</rasd:ResourceType>
+        <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:AllocationUnits>byte * 2^20</rasd:AllocationUnits>
+        <rasd:Description>Memory Size</rasd:Description>
+        <rasd:ElementName>512MB of memory</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:ResourceType>4</rasd:ResourceType>
+        <rasd:VirtualQuantity>512</rasd:VirtualQuantity>
+      </Item>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>SCSI Controller</rasd:Description>
+        <rasd:ElementName>SCSI Controller 1</rasd:ElementName>
+        <rasd:InstanceID>3</rasd:InstanceID>
+        <rasd:ResourceSubType>lsilogic</rasd:ResourceSubType>
+        <rasd:ResourceType>6</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>Hard Disk 1</rasd:ElementName>
+        <rasd:HostResource>ovf:/disk/vmdisk1</rasd:HostResource>
+        <rasd:InstanceID>4</rasd:InstanceID>
+        <rasd:Parent>3</rasd:Parent>
+        <rasd:ResourceType>17</rasd:ResourceType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

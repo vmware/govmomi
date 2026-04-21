@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ovf-namespace:Envelope xmlns:xsi-namespace="http://www.w3.org/2001/XMLSchema-instance" xmlns:ovf-namespace="http://www.vmware.com/schema/ovf/1/envelope" xmlns:vssd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:rasd-namespace="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" ovf-namespace:version="0.9">
+    <References>
+        <File ovf-namespace:id="file1" ovf-namespace:href="../../../vmdk/valid_disk.vmdk" ovf-namespace:size="329197568"/>
+    </References>
+    <Section xsi-namespace:type="ovf-namespace:DiskSection_Type">
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf-namespace:diskId="vmdisk1" ovf-namespace:fileRef="file1" ovf-namespace:capacity="329197568" ovf-namespace:format="http://www.vmware.com/specifications/vmdk.html#sparse" />
+    </Section>
+     <Content xsi-namespace:type="ovf-namespace:VirtualSystem_Type" ovf-namespace:id="PTC01_VM">
+        <Info>The virtual machince "ArchLinux"</Info>
+        <Section xsi-namespace:type="ovf-namespace:OperatingSystemSection_Type" ovf-namespace:id="36">
+            <Info>Guest Operating System</Info>
+            <Description>Other Linux (32-bit)</Description>
+        </Section>
+	<Section xsi-namespace:type="ovf-namespace:VirtualHardwareSection_Type" ovf-namespace:required="true">
+            <Info>512 MB , 1 CPU, 1 disk, 1 nic</Info>
+            <System/>
+            <Item>
+                <rasd-namespace:Caption>Hard Disk 1</rasd-namespace:Caption>
+                <rasd-namespace:Description />
+                <rasd-namespace:InstanceId>6</rasd-namespace:InstanceId>
+                <rasd-namespace:ResourceType>17</rasd-namespace:ResourceType>
+                <rasd-namespace:HostResource>/disk/vmdisk1</rasd-namespace:HostResource>
+                <rasd-namespace:Parent>8</rasd-namespace:Parent>
+                <rasd-namespace:AddressOnParent>0</rasd-namespace:AddressOnParent>
+            </Item>
+	    <Item>
+                <rasd-namespace:Caption>SCSI Controller 0</rasd-namespace:Caption>
+                <rasd-namespace:Description>LsiLogic SCSI Controller</rasd-namespace:Description>
+                <rasd-namespace:InstanceId>8</rasd-namespace:InstanceId>
+                <rasd-namespace:ResourceType>6</rasd-namespace:ResourceType>
+                <rasd-namespace:ResourceSubType>someother, lsilogic</rasd-namespace:ResourceSubType>
+                <rasd-namespace:BusNumber>0</rasd-namespace:BusNumber>
+            </Item>
+        </Section>
+     </Content>
+</ovf-namespace:Envelope>

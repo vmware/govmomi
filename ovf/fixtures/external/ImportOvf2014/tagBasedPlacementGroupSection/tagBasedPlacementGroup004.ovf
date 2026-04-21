@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:test="http://www.vmware.com/ovf/test"
+    xmlns:vcd="http://www.vmware.com/vcloud"
+    xmlns:vmw="http://www.vmware.com/schema/ovf"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <References/>
+
+    <test:UnitTestSection ovf:required="false">
+        <Info>Describes an OVF parse unit test</Info>
+        <test:Description>Zero or more TagBasedPlacementGroupSection may be used on Envelope</test:Description>
+        <test:OvfSpecification test:version="vmw"/>
+        <test:Category>ElementMultiplicity</test:Category>
+
+        <test:Result test:outcome="pass"/>
+    </test:UnitTestSection>
+
+    <vmw:TagBasedPlacementGroupSection vmw:id="group1" vmw:name="groupName" vmw:priority="0">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="Security Service" vmw:id="1"/>
+        <vmw:TagValue vmw:name="TPM Enabled" vmw:id="1"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+    <vmw:TagBasedPlacementGroupSection vmw:id="group2" vmw:name="groupName" vmw:priority="0">
+        <Info>Tag based placement policy for group of VMs</Info>
+        <vmw:Description>Tag based placement policy for group1 tier</vmw:Description>
+        <vmw:TagCategory vmw:name="Cluster Type" vmw:id="2"/>
+        <vmw:TagValue vmw:name="Production" vmw:id="2"/>
+    </vmw:TagBasedPlacementGroupSection>
+
+    <VirtualSystemCollection ovf:id="vsc1">
+        <Info>A virtual machine collection</Info>
+        <Name>Test System Collection</Name>
+    </VirtualSystemCollection>
+
+</Envelope>

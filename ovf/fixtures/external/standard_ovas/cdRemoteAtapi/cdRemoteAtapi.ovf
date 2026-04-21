@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1"
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData"
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <References />
+  <DiskSection>
+    <Info>Virtual disk information</Info>
+  </DiskSection>
+  <VirtualSystem ovf:id="vs1">
+    <Info>A virtual machine</Info>
+    <Name>VS1</Name>
+    <VirtualHardwareSection>
+      <Info>Virtual hardware requirements</Info>
+      <Item>
+        <rasd:Address>0</rasd:Address>
+        <rasd:Description>IDE Controller</rasd:Description>
+        <rasd:ElementName>IDE 1</rasd:ElementName>
+        <rasd:InstanceID>1</rasd:InstanceID>
+        <rasd:ResourceType>5</rasd:ResourceType>
+      </Item>
+      <Item>
+        <rasd:AddressOnParent>0</rasd:AddressOnParent>
+        <rasd:ElementName>CD/DVD Drive 1</rasd:ElementName>
+        <rasd:InstanceID>2</rasd:InstanceID>
+        <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+        <rasd:Parent>1</rasd:Parent>
+        <rasd:ResourceType>15</rasd:ResourceType>
+        <rasd:ResourceSubType>vmware.cdrom.remoteatapi</rasd:ResourceSubType>
+      </Item>
+    </VirtualHardwareSection>
+  </VirtualSystem>
+</Envelope>

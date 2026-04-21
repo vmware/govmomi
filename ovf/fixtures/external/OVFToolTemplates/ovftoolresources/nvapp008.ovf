@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope
+    xmlns="http://schemas.dmtf.org/ovf/envelope/1" 
+    xmlns:cim="http://schemas.dmtf.org/wbem/wscim/1/common" 
+    xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" 
+    xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" 
+    xmlns:vmw="http://www.vmware.com/schema/ovf" 
+    xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <References>
+  </References>
+
+  <DiskSection>
+    <Info>Meta-information about the virtual disks</Info>
+  </DiskSection>
+
+  <NetworkSection>
+    <Info>The list of logical networks</Info>
+    <Network ovf:name="Network">
+      <Description>The network that the SugarCRM application will be available on</Description>
+    </Network>
+  </NetworkSection>
+
+  <DeploymentOptionSection>
+    <Info>The list of deployment options</Info>
+    <Configuration ovf:id="small">
+      <Label>Evaluation</Label>
+      <Description>Use this configuration for evaluation purposes only. The number of CPUs required and amount of memory used is minimized, making it possible to run the system on a desktop system.</Description>
+    </Configuration>
+    <Configuration ovf:id="medium">
+      <Label>Production</Label>
+      <Description>Standard settings for a typical product environment. This deployment option is suitable for a SMB production environment with less than 500 users.
+      </Description>
+    </Configuration>
+    <Configuration ovf:id="large">
+     <Label>Enterprise</Label>
+     <Description>Settings for large enterprise production environments. This deployment option is suitable for a large enterprise production environment with more than 500 users.
+     </Description>
+    </Configuration>
+   </DeploymentOptionSection>
+
+  <VirtualSystemCollection ovf:id="SugarCRM">
+    <Info>A virtual service</Info>
+    <Name>SugarCRM Solution</Name>
+
+<!-- Missing Annotation Section 
+    <AnnotationSection>
+      <Info>A human-readable annotation</Info>
+      <Annotation>The sweet way to manage customer relationships.</Annotation>
+    </AnnotationSection>
+-->
+
+    <EulaSection>
+      <Info>An end-user license agreement</Info>	
+      <License ovf:msgid="eula">SugarCRM Professional Subscription Agreement 
+                               stored in external message bundle 
+      </License>
+    </EulaSection>
+
+    <ResourceAllocationSection>
+       <Info>CPU and Memory Reservations</Info>
+       <Item>
+          <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+          <rasd:ElementName>CPU Reservation for the large configuration</rasd:ElementName>
+          <rasd:InstanceID>cpuRes</rasd:InstanceID>
+          <rasd:Reservation>1</rasd:Reservation>
+          <rasd:ResourceType>3</rasd:ResourceType>
+       </Item>
+
+       <Item>
+	  <rasd:AllocationUnits>byte * 2 ^ 20</rasd:AllocationUnits>
+	  <rasd:ElementName>512MB reservation for the large configuration</rasd:ElementName>
+	  <rasd:InstanceID>memRes</rasd:InstanceID>
+	  <rasd:Reservation>512</rasd:Reservation>
+	  <rasd:ResourceType>4</rasd:ResourceType>
+      </Item>
+    </ResourceAllocationSection>
+
+
+  </VirtualSystemCollection>
+
+  <Strings ovf:fileRef="eula"/>
+
+</Envelope>

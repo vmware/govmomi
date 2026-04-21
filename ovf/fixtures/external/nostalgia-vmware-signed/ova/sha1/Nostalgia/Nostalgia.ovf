@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns="http://schemas.dmtf.org/ovf/envelope/1" xmlns:ovf="http://schemas.dmtf.org/ovf/envelope/1" xmlns:rasd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_ResourceAllocationSettingData" xmlns:vmw="http://www.vmware.com/schema/ovf" xmlns:vssd="http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/CIM_VirtualSystemSettingData" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <References>
+        <File ovf:href="Nostalgia-disk1.vmdk" ovf:id="file1" ovf:size="6872576"/>
+    </References>
+    <DiskSection>
+        <Info>Describes the set of virtual disks</Info>
+        <Disk ovf:capacity="107373568" ovf:capacityAllocationUnits="byte" ovf:diskId="vmdisk1" ovf:fileRef="file1" ovf:format="http://www.vmware.com/interfaces/specifications/vmdk.html#streamOptimized" ovf:populatedSize="11141120"/>
+    </DiskSection>
+    <NetworkSection>
+        <Info>List of logical networks used in the package</Info>
+        <Network ovf:name="VM NW 2">
+            <Description>The &quot;VM NW 2&quot; network</Description>
+        </Network>
+    </NetworkSection>
+    <VirtualSystem ovf:id="Nostalgia">
+        <Info>The virtual machince &quot;Nostalgia&quot;</Info>
+        <Name>Nostalgia</Name>
+        <OperatingSystemSection ovf:id="1">
+            <Info>Guest Operating System</Info>
+            <Description>MSDOS</Description>
+        </OperatingSystemSection>
+        <VirtualHardwareSection ovf:required="true">
+            <Info>64 MB , 1 CPU, 1 disk, 2 nic</Info>
+            <System>
+                <vssd:ElementName>Virtual Hardware Family</vssd:ElementName>
+		<vssd:InstanceId>0</vssd:InstanceId>
+                <vssd:VirtualSystemIdentifier>system id</vssd:VirtualSystemIdentifier>
+                <vssd:VirtualSystemType>vmx-04</vssd:VirtualSystemType>
+            </System>
+            <Item>
+                <rasd:AllocationUnits>hertz * 10^6</rasd:AllocationUnits>
+                <rasd:Caption>1 virtual CPU</rasd:Caption>
+                <rasd:Description>Number of Virtual CPUs</rasd:Description>
+                <rasd:InstanceId>1</rasd:InstanceId>
+                <rasd:ResourceType>3</rasd:ResourceType>                
+                <rasd:VirtualQuantity>1</rasd:VirtualQuantity>
+            </Item>
+            <Item>
+                <rasd:AllocationUnits>MegaBytes</rasd:AllocationUnits>
+                <rasd:Caption>64MB of memory</rasd:Caption>
+                <rasd:Description>Memory Size</rasd:Description>
+                <rasd:InstanceId>2</rasd:InstanceId>
+                <rasd:ResourceType>4</rasd:ResourceType>                
+                <rasd:VirtualQuantity>64</rasd:VirtualQuantity>
+            </Item>
+            <Item ovf:required="false">
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>false</rasd:AutomaticAllocation>
+                <rasd:Caption>CD/DVD Drive 1</rasd:Caption>
+                <rasd:InstanceId>3</rasd:InstanceId>
+                <rasd:Parent>7</rasd:Parent>
+                <rasd:ResourceType>15</rasd:ResourceType>                                                
+            </Item>
+            <Item>
+                <rasd:AddressOnParent>7</rasd:AddressOnParent>
+                <rasd:AutomaticAllocation>true</rasd:AutomaticAllocation>
+                <rasd:Caption>Network Adapter 1</rasd:Caption>
+                <rasd:Connection>VM NW 2</rasd:Connection>
+                <rasd:Description>PCNet32 ethernet adapter on &quot;VM NW 2&quot;</rasd:Description>
+                <rasd:InstanceId>4</rasd:InstanceId>
+                <rasd:ResourceSubType>PCNet32</rasd:ResourceSubType>                
+                <rasd:ResourceType>10</rasd:ResourceType>                                                
+            </Item>
+            <Item>
+                <rasd:AddressOnParent>0</rasd:AddressOnParent>
+                <rasd:Caption>Hard Disk 1</rasd:Caption>
+                <rasd:Description/>
+                <rasd:HostResource>/disk/vmdisk1</rasd:HostResource>
+                <rasd:InstanceId>6</rasd:InstanceId>
+                <rasd:Parent>8</rasd:Parent>                
+                <rasd:ResourceType>17</rasd:ResourceType>                                
+            </Item>
+            <Item>                
+                <rasd:Caption>IDE 0</rasd:Caption>
+                <rasd:Description>IDE Controller</rasd:Description>
+                <rasd:InstanceId>7</rasd:InstanceId>
+                <rasd:ResourceType>5</rasd:ResourceType>                
+            </Item>
+            <Item>                
+                <rasd:Caption>SCSI Controller 0</rasd:Caption>
+                <rasd:Description>LsiLogic SCSI Controller</rasd:Description>
+                <rasd:InstanceId>8</rasd:InstanceId>
+                <rasd:ResourceSubType>buslogic</rasd:ResourceSubType>                
+                <rasd:ResourceType>6</rasd:ResourceType>                
+            </Item>
+        </VirtualHardwareSection>
+        <AnnotationSection>
+            <Info>An annotation</Info>
+            <Annotation>Nostalgia contains a great collection of ancient DOS Games, ready to play!
+
+Now you can begin to waste your time once again.</Annotation>
+        </AnnotationSection>
+    </VirtualSystem>
+</Envelope>                        
