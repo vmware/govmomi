@@ -42,14 +42,15 @@ type NamespaceInstanceInfoV2 struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20CreateSpecV2
 // Since 8.0.0.1
 type NamespaceInstanceCreateSpecV2 struct {
-	Namespace            string                   `json:"namespace"`
-	Supervisor           string                   `json:"supervisor"`
-	Description          *string                  `json:"description,omitempty"`
-	StorageSpecs         *[]StorageSpec           `json:"storage_specs,omitempty"`
-	VmServiceSpec        *VmServiceSpec           `json:"vm_service_spec,omitempty"`
-	ContentLibraries     *[]ContentLibraryV2      `json:"content_libraries,omitempty"`
-	SelfServiceNamespace *bool                    `json:"self_service_namespace,omitempty"`
-	NetworkSpec          *NetworkConfigCreateSpec `json:"network_spec,omitempty"`
+	Namespace            string                      `json:"namespace"`
+	Supervisor           string                      `json:"supervisor"`
+	Description          *string                     `json:"description,omitempty"`
+	StorageSpecs         *[]StorageSpec              `json:"storage_specs,omitempty"`
+	VmServiceSpec        *VmServiceSpec              `json:"vm_service_spec,omitempty"`
+	ContentLibraries     *[]ContentLibraryV2         `json:"content_libraries,omitempty"`
+	SelfServiceNamespace *bool                       `json:"self_service_namespace,omitempty"`
+	NetworkSpec          *NetworkConfigCreateSpec    `json:"network_spec,omitempty"`
+	NamespaceNetwork     *NamespaceNetworkCreateSpec `json:"namespace_network,omitempty"`
 }
 
 type Stats struct {
@@ -63,6 +64,29 @@ type ContentLibraryV2 struct {
 	Writable               bool   `json:"writable"`
 	AllowImport            bool   `json:"allow_import"`
 	ResourceNamingStrategy string `json:"resource_naming_strategy"`
+}
+
+// NamespaceNetworkCreateSpec represents the complete namespace_network field for creation
+type NamespaceNetworkCreateSpec struct {
+	NetworkProvider string                  `json:"network_provider"`
+	Network         *NamespaceNetworkConfig `json:"network,omitempty"`
+}
+
+// NamespaceNetworkConfig represents the network configuration within namespace_network
+type NamespaceNetworkConfig struct {
+	NamespaceNetworkCidrs []CidrBlock `json:"namespace_network_cidrs"`
+	IngressCidrs          []CidrBlock `json:"ingress_cidrs"`
+	EgressCidrs           []CidrBlock `json:"egress_cidrs"`
+	NsxTier0Gateway       string      `json:"nsx_tier0_gateway"`
+	SubnetPrefixLength    int         `json:"subnet_prefix_length"`
+	RoutedMode            bool        `json:"routed_mode"`
+	LoadBalancerSize      string      `json:"load_balancer_size"`
+}
+
+// CidrBlock represents a CIDR block with address and prefix
+type CidrBlock struct {
+	Address string `json:"address"`
+	Prefix  int    `json:"prefix"`
 }
 
 // NetworkConfigInfo
