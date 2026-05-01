@@ -202,3 +202,46 @@ func init() {
 	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
 	t["BaseClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
 }
+
+// SharedDiskVmGroupInfoSharedDiskVmInfo is a row in SharedDiskVmGroupInfo (vim.vm.SharedDiskVmGroupInfo.SharedDiskVmInfo).
+type SharedDiskVmGroupInfoSharedDiskVmInfo struct {
+	DynamicData
+
+	DiskKey       int32           `xml:"diskKey" json:"diskKey"`
+	VirtualDiskId []VirtualDiskId `xml:"virtualDiskId,omitempty" json:"virtualDiskId,omitempty"`
+}
+
+func init() {
+	t["SharedDiskVmGroupInfoSharedDiskVmInfo"] = reflect.TypeOf((*SharedDiskVmGroupInfoSharedDiskVmInfo)(nil)).Elem()
+}
+
+// SharedDiskVmGroupInfo describes VMs sharing multi-writer or SCSI bus-sharing disks (vim.vm.SharedDiskVmGroupInfo).
+type SharedDiskVmGroupInfo struct {
+	DynamicData
+
+	SharedDiskVmInfo []SharedDiskVmGroupInfoSharedDiskVmInfo `xml:"sharedDiskVmInfo,omitempty" json:"sharedDiskVmInfo,omitempty"`
+}
+
+func init() {
+	t["SharedDiskVmGroupInfo"] = reflect.TypeOf((*SharedDiskVmGroupInfo)(nil)).Elem()
+}
+
+type FetchVmGroupForMultiwriterDisksRequestType struct {
+	This    ManagedObjectReference `xml:"_this" json:"-"`
+	DiskIds *ArrayOfInt            `xml:"diskIds,omitempty" json:"diskIds,omitempty"`
+}
+
+func init() {
+	t["FetchVmGroupForMultiwriterDisksRequestType"] = reflect.TypeOf((*FetchVmGroupForMultiwriterDisksRequestType)(nil)).Elem()
+}
+
+// FetchVmGroupForMultiwriterDisks is VirtualMachine#fetchVmGroupForMultiwriterDisks (MultiwriterDiskVMotion).
+type FetchVmGroupForMultiwriterDisks FetchVmGroupForMultiwriterDisksRequestType
+
+func init() {
+	t["FetchVmGroupForMultiwriterDisks"] = reflect.TypeOf((*FetchVmGroupForMultiwriterDisks)(nil)).Elem()
+}
+
+type FetchVmGroupForMultiwriterDisksResponse struct {
+	Returnval *SharedDiskVmGroupInfo `xml:"returnval,omitempty" json:"returnval,omitempty"`
+}

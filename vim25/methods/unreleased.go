@@ -50,3 +50,23 @@ func UpdatePodVMProperty(ctx context.Context, r soap.RoundTripper, req *types.Up
 
 	return reqBody.Res, nil
 }
+
+type FetchVmGroupForMultiwriterDisksBody struct {
+	Req    *types.FetchVmGroupForMultiwriterDisks         `xml:"urn:vim25 FetchVmGroupForMultiwriterDisks,omitempty"`
+	Res    *types.FetchVmGroupForMultiwriterDisksResponse `xml:"FetchVmGroupForMultiwriterDisksResponse,omitempty"`
+	Fault_ *soap.Fault                                    `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *FetchVmGroupForMultiwriterDisksBody) Fault() *soap.Fault { return b.Fault_ }
+
+func FetchVmGroupForMultiwriterDisks(ctx context.Context, r soap.RoundTripper, req *types.FetchVmGroupForMultiwriterDisks) (*types.FetchVmGroupForMultiwriterDisksResponse, error) {
+	var reqBody, resBody FetchVmGroupForMultiwriterDisksBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}

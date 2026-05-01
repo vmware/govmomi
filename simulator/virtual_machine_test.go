@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vmdk"
@@ -4396,6 +4397,105 @@ func TestVirtualDiskUUIDAssignment(t *testing.T) {
 		assert.True(t, ok, "found disk backing should be VirtualDiskFlatVer2BackingInfo")
 		assert.Equal(t, explicitUUID, foundDiskBacking.Uuid, "disk UUID should match the explicitly set UUID")
 	})
+}
+
+func TestFetchVmGroupForMultiwriterDisks(t *testing.T) {
+	ctx := context.Background()
+
+	for _, tc := range []struct {
+		name  string
+		model *Model
+	}{
+		{"ESX", ESX()},
+		{"VPX", VPX()},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			model := tc.model
+			defer model.Remove()
+			if err := model.Create(); err != nil {
+				t.Fatal(err)
+			}
+
+			s := model.Service.NewServer()
+			defer s.Close()
+
+			c, err := govmomi.NewClient(ctx, s.URL, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			finder := find.NewFinder(c.Client, false)
+			dc, err := finder.DefaultDatacenter(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			finder.SetDatacenter(dc)
+
+			vms, err := finder.VirtualMachineList(ctx, "*")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(vms) < 2 {
+				t.Fatalf("need at least 2 VMs, got %d", len(vms))
+			}
+
+			vmA, vmB := vms[0], vms[1]
+			sharedPath := "[LocalDS_0] shared-mw.vmdk"
+
+			keyA, err := AttachMultiWriterDisk(ctx, vmA, sharedPath, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			keyB, err := AttachMultiWriterDisk(ctx, vmB, sharedPath, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			t.Run("PeerListedForMWDisk", func(t *testing.T) {
+				res, err := methods.FetchVmGroupForMultiwriterDisks(ctx, c.Client, &types.FetchVmGroupForMultiwriterDisks{
+					This: vmA.Reference(),
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				if res == nil || res.Returnval == nil {
+					t.Fatal("nil response or Returnval")
+				}
+
+				var row *types.SharedDiskVmGroupInfoSharedDiskVmInfo
+				for i := range res.Returnval.SharedDiskVmInfo {
+					if res.Returnval.SharedDiskVmInfo[i].DiskKey == keyA {
+						row = &res.Returnval.SharedDiskVmInfo[i]
+						break
+					}
+				}
+				if row == nil {
+					t.Fatalf("no row for caller diskKey %d in %#v", keyA, res.Returnval.SharedDiskVmInfo)
+				}
+				wantPeers := []types.VirtualDiskId{{Vm: vmB.Reference(), DiskId: keyB}}
+				if !reflect.DeepEqual(row.VirtualDiskId, wantPeers) {
+					t.Fatalf("peers: got %#v want %#v", row.VirtualDiskId, wantPeers)
+				}
+			})
+
+			t.Run("CallerExcludedFromPeers", func(t *testing.T) {
+				res, err := methods.FetchVmGroupForMultiwriterDisks(ctx, c.Client, &types.FetchVmGroupForMultiwriterDisks{
+					This: vmA.Reference(),
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, row := range res.Returnval.SharedDiskVmInfo {
+					for _, p := range row.VirtualDiskId {
+						if p.Vm.Value == vmA.Reference().Value {
+							t.Fatalf("caller VM listed as a peer in %#v", row)
+						}
+					}
+				}
+			})
+
+		})
+	}
 }
 
 func createTestVM(
