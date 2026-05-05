@@ -3529,3 +3529,124 @@ func (vm *VirtualMachine) updateTagSpec(
 
 	return nil
 }
+
+// multiWriterDiskShareKey returns the normalized backing identity for a
+// VirtualDisk that uses sharingMultiWriter. Two attachments (on any VMs)
+// that produce the same key are treated as referring to the same shared
+// multi-writer disk. Mirrors vCenter's URL-based grouping in
+// vpx/vpxd/vm/moVm.cpp::VmMo::GetSharedVmDisks; vcsim does not normalize
+// to a URL so the backing file name from config is used directly.
+func multiWriterDiskShareKey(d *types.VirtualDisk) (shareKey string, ok bool) {
+	const want = string(types.VirtualDiskSharingSharingMultiWriter)
+	var name, sharing string
+	switch b := d.Backing.(type) {
+	case *types.VirtualDiskFlatVer2BackingInfo:
+		name = b.FileName
+		sharing = b.Sharing
+	case *types.VirtualDiskRawDiskMappingVer1BackingInfo:
+		name = b.FileName
+		sharing = b.Sharing
+	case *types.VirtualDiskRawDiskVer2BackingInfo:
+		name = b.DescriptorFileName
+		sharing = b.Sharing
+	default:
+		return "", false
+	}
+	if sharing != want || name == "" {
+		return "", false
+	}
+	return name, true
+}
+
+// vmMultiWriterDisks returns (deviceKey, shareKey) for every multi-writer
+// disk on the given VM, in device order. Mirrors VC's
+// VmMo::GetAllMultiwriterDiskUrls.
+func vmMultiWriterDisks(vm *VirtualMachine) []struct {
+	Key      int32
+	ShareKey string
+} {
+	var out []struct {
+		Key      int32
+		ShareKey string
+	}
+	for _, dev := range vm.Config.Hardware.Device {
+		d, ok := dev.(*types.VirtualDisk)
+		if !ok {
+			continue
+		}
+		sk, ok := multiWriterDiskShareKey(d)
+		if !ok {
+			continue
+		}
+		out = append(out, struct {
+			Key      int32
+			ShareKey string
+		}{Key: d.Key, ShareKey: sk})
+	}
+	return out
+}
+
+// FetchVmGroupForMultiwriterDisks is a vcsim implementation of
+// VirtualMachine.fetchVmGroupForMultiwriterDisks (see
+// vpx/vpxd/vm/moVm.cpp::VmMo::FetchVmGroupForMultiwriterDisks).
+//
+// vcsim behavior (aligned with VC where noted):
+//
+//  1. Enumerate THIS VM's multi-writer disks: FlatVer2, RawDiskVer2, or
+//     RawDiskMappingVer1 backing with sharing=sharingMultiWriter (same
+//     backing families as VpxdVmprovUtil::IsMultiWriterDisk).
+//
+//  2. For each such disk, emit one SharedDiskVmInfo with DiskKey set to the
+//     caller's device key and VirtualDiskId listing every OTHER VM (caller
+//     excluded) that has a multi-writer disk on the same backing share key
+//
+//     Peer discovery in vcsim is implemented as a full scan of every
+//     VirtualMachine in the simulator map and each VM's in-memory device
+//     list (config.hardware.device), comparing multiWriterDiskShareKey to the
+//     caller disk's share key. Real VC runs a VCDB query per disk and applies
+//     session privilege checks; vcsim does neither.
+//
+//  3. A row is emitted for every multi-writer disk on the caller, even when
+//     no peer shares that backing (empty VirtualDiskId), matching VC.
+//
+// Simplification: req.DiskIds is ignored. Real VC de-duplicates diskIds,
+// restricts to those keys, and faults with InvalidArgument(diskIds) if any
+// id is not a multi-writer disk on this VM. vcsim always reports all MW disks
+// on the VM so tests and clients do not need to pass diskIds.
+func (vm *VirtualMachine) FetchVmGroupForMultiwriterDisks(ctx *Context, req *types.FetchVmGroupForMultiwriterDisks) soap.HasFault {
+	body := new(methods.FetchVmGroupForMultiwriterDisksBody)
+	_ = req
+
+	mw := vmMultiWriterDisks(vm)
+
+	rows := make([]types.SharedDiskVmGroupInfoSharedDiskVmInfo, 0, len(mw))
+	for _, e := range mw {
+		var peers []types.VirtualDiskId
+		for _, ent := range ctx.Map.All("VirtualMachine") {
+			ovm, ok := ent.(*VirtualMachine)
+			if !ok || ovm.Self.Value == vm.Self.Value {
+				continue
+			}
+			for _, dev := range ovm.Config.Hardware.Device {
+				od, ok := dev.(*types.VirtualDisk)
+				if !ok {
+					continue
+				}
+				osk, ok := multiWriterDiskShareKey(od)
+				if !ok || osk != e.ShareKey {
+					continue
+				}
+				peers = append(peers, types.VirtualDiskId{Vm: ovm.Self, DiskId: od.Key})
+			}
+		}
+		rows = append(rows, types.SharedDiskVmGroupInfoSharedDiskVmInfo{
+			DiskKey:       e.Key,
+			VirtualDiskId: peers,
+		})
+	}
+
+	body.Res = &types.FetchVmGroupForMultiwriterDisksResponse{
+		Returnval: &types.SharedDiskVmGroupInfo{SharedDiskVmInfo: rows},
+	}
+	return body
+}
