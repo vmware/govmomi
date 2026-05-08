@@ -1128,10 +1128,10 @@ type StorageSpec struct {
 	Limit  int64  `json:"limit,omitempty"`
 }
 
-// NamespacesInstanceUpdateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/UpdateSpec/
+// NamespacesInstanceUpdateSpec https://developer.broadcom.com/xapis/vsphere-automation-api/v7.0U3/vcenter/api/vcenter/namespaces/instances/namespace/patch/
 type NamespacesInstanceUpdateSpec struct {
 	VmServiceSpec VmServiceSpec            `json:"vm_service_spec,omitempty"`
-	StorageSpecs  []StorageSpec            `json:"storage_specs,omitempty"`
+	StorageSpecs  []StorageSpec            `json:"storage_specs"`
 	NetworkSpec   *NetworkConfigUpdateSpec `json:"network_spec,omitempty"`
 }
 
