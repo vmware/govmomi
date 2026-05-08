@@ -1128,32 +1128,11 @@ type StorageSpec struct {
 	Limit  int64  `json:"limit,omitempty"`
 }
 
-// NamespacesInstanceUpdateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/UpdateSpec/
+// NamespacesInstanceUpdateSpec https://developer.broadcom.com/xapis/vsphere-automation-api/v7.0U3/vcenter/api/vcenter/namespaces/instances/namespace/patch/
 type NamespacesInstanceUpdateSpec struct {
 	VmServiceSpec VmServiceSpec            `json:"vm_service_spec,omitempty"`
-	StorageSpecs  []StorageSpec            `json:"storage_specs,omitempty"`
+	StorageSpecs  []StorageSpec            `json:"storage_specs"`
 	NetworkSpec   *NetworkConfigUpdateSpec `json:"network_spec,omitempty"`
-}
-
-// MarshalJSON is implemented to handle the case where StorageSpecs is explicitly set to an empty slice vs nil.
-func (spec NamespacesInstanceUpdateSpec) MarshalJSON() ([]byte, error) {
-	type Alias NamespacesInstanceUpdateSpec
-
-	// Check if StorageSpecs is explicitly set to empty slice vs nil
-	if spec.StorageSpecs != nil && len(spec.StorageSpecs) == 0 {
-		// Force inclusion of empty storage_specs array
-		aux := struct {
-			VmServiceSpec VmServiceSpec `json:"vm_service_spec,omitempty"`
-			StorageSpecs  []StorageSpec `json:"storage_specs"` // No omitempty
-		}{
-			VmServiceSpec: spec.VmServiceSpec,
-			StorageSpecs:  spec.StorageSpecs,
-		}
-		return json.Marshal(aux)
-	}
-
-	// Use default marshalling for all other cases (nil or non-empty StorageSpecs)
-	return json.Marshal((Alias)(spec))
 }
 
 // NetworkConfigUpdateSpec
