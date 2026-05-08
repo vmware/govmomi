@@ -15,7 +15,7 @@ jobs:
     name: Run Unit Tests
     strategy:
       matrix:
-        go-version: ["1.24", "1.25"]
+        go-version: ["1.25", "1.26"]
         platform: [ubuntu-latest]
       fail-fast: false
 
