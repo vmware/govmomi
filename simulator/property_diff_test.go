@@ -6,8 +6,10 @@ package simulator
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -192,25 +194,24 @@ func TestCheckpoint(t *testing.T) {
 	}
 	original.Self = types.ManagedObjectReference{Type: "VirtualMachine", Value: "vm-1"}
 
-	// Create checkpoint
-	checkpoint := Checkpoint(original)
+	// Checkpoint always returns the embedded mo type as mo.Reference.
+	snapshot := Checkpoint(original)
+	cp := snapshot.(*mo.VirtualMachine)
 
-	// Verify it's a different pointer
-	require.False(t, checkpoint == original, "checkpoint should be a different pointer")
+	require.NotSame(t, original, cp, "snapshot should be a different pointer")
+	assert.Equal(t, original.Name, cp.Name, "snapshot Name mismatch: %q vs %q", cp.Name, original.Name)
+	assert.Equal(t, original.Guest.IpAddress, cp.Guest.IpAddress, "snapshot Guest.IpAddress mismatch")
 
-	// Verify values are equal
-	assert.Equal(t, original.Name, checkpoint.Name, "checkpoint Name mismatch: %q vs %q", checkpoint.Name, original.Name)
-	assert.Equal(t, original.Guest.IpAddress, checkpoint.Guest.IpAddress, "checkpoint Guest.IpAddress mismatch")
-
-	// Modify original, checkpoint should be unchanged
+	// Mutate original — snapshot must be unaffected.
 	original.Name = "modified"
 	original.Guest.IpAddress = "10.0.0.1"
 
-	assert.Equal(t, "original", checkpoint.Name, "checkpoint should not be affected by changes to original")
-	assert.Equal(t, "192.168.1.1", checkpoint.Guest.IpAddress, "checkpoint Guest.IpAddress should not be affected by changes to original")
+	assert.Equal(t, "original", cp.Name, "snapshot should not reflect later changes to original")
+	assert.Equal(t, "192.168.1.1", cp.Guest.IpAddress, "snapshot Guest.IpAddress should not reflect later changes to original")
 }
 
-// TestPropertyDiff_WithSimulator tests PropertyDiff in the context of a running simulator
+// TestPropertyDiff_WithSimulator tests that ctx.AutoUpdate produces property changes
+// visible via the PropertyCollector.
 func TestPropertyDiff_WithSimulator(t *testing.T) {
 	ctx := context.Background()
 
@@ -230,31 +231,20 @@ func TestPropertyDiff_WithSimulator(t *testing.T) {
 	vm, err := finder.VirtualMachine(ctx, "DC0_H0_VM0")
 	require.NoError(t, err, "expected no error retrieving VM")
 
-	// Get the simulator's internal VM object
 	simCtx := m.Service.Context
 	ref := vm.Reference()
 	obj := simCtx.Map.Get(ref).(*VirtualMachine)
 
-	// Create a checkpoint of the VM state
-	checkpoint := Checkpoint(&obj.VirtualMachine)
+	// ctx.AutoUpdate holds the object lock for checkpoint + modifications + diff +
+	// update — all in one acquisition, preventing races with concurrent SOAP handlers.
+	simCtx.AutoUpdate(obj, func() {
+		if obj.Guest == nil {
+			obj.Guest = &types.GuestInfo{}
+		}
+		obj.Guest.IpAddress = "10.20.30.40"
+		obj.Guest.HostName = "test-hostname"
+	})
 
-	// Modify the VM's guest info
-	if obj.Guest == nil {
-		obj.Guest = &types.GuestInfo{}
-	}
-	obj.Guest.IpAddress = "10.20.30.40"
-	obj.Guest.HostName = "test-hostname"
-
-	// Generate property changes
-	changes := PropertyDiff(checkpoint, &obj.VirtualMachine)
-
-	// Verify we got changes
-	require.Greater(t, len(changes), 0, "expected property changes after modifying VM")
-
-	// Apply the changes via Update
-	simCtx.Update(obj, changes)
-
-	// Now verify the changes are visible via the property collector
 	pc := property.DefaultCollector(c.Client)
 	var mvm mo.VirtualMachine
 	err = pc.RetrieveOne(ctx, ref, []string{"guest.ipAddress", "guest.hostName"}, &mvm)
@@ -290,60 +280,57 @@ func TestPropertyDiff_MultipleChanges(t *testing.T) {
 	ref := vm.Reference()
 	obj := simCtx.Map.Get(ref).(*VirtualMachine)
 
-	// Create a checkpoint of the VM state
-	checkpoint := Checkpoint(&obj.VirtualMachine)
+	// Checkpoint, field writes, PropertyDiff, and Update must all happen
+	// under the object lock to prevent races with concurrent SOAP handlers.
+	var foundName, foundGuest bool
+	simCtx.WithLock(obj, func() {
+		checkpoint := Checkpoint(&obj.VirtualMachine)
 
-	// Make multiple changes
-	obj.Name = "renamed-vm"
-	if obj.Guest == nil {
-		obj.Guest = &types.GuestInfo{}
-	}
-	obj.Guest.IpAddress = "99.99.99.99"
-	obj.Guest.HostName = "test-hostname"
-	obj.Guest.Net = []types.GuestNicInfo{
-		{
-			IpAddress:  []string{"99.99.99.99", "fe80::1"},
-			MacAddress: "00:50:56:aa:bb:cc",
-		},
-	}
-
-	// Generate property changes
-	changes := PropertyDiff(checkpoint, &obj.VirtualMachine)
-
-	// Verify we got changes for name and guest
-	foundName := false
-	foundGuest := false
-	for _, c := range changes {
-		if c.Name == "name" {
-			foundName = true
-			assert.Equal(t, "renamed-vm", c.Val, "expected name 'renamed-vm', got %v", c.Val)
+		obj.Name = "renamed-vm"
+		if obj.Guest == nil {
+			obj.Guest = &types.GuestInfo{}
 		}
-		if c.Name == "guest" {
-			foundGuest = true
-			// The value can be either *types.GuestInfo or types.GuestInfo depending on wrapping
-			var guestIP string
-			var netLen int
-			switch v := c.Val.(type) {
-			case *types.GuestInfo:
-				guestIP = v.IpAddress
-				netLen = len(v.Net)
-			case types.GuestInfo:
-				guestIP = v.IpAddress
-				netLen = len(v.Net)
-			default:
-				assert.IsType(t, types.GuestInfo{}, c.Val, "expected GuestInfo type, got %T", c.Val)
-				return
+		obj.Guest.IpAddress = "99.99.99.99"
+		obj.Guest.HostName = "test-hostname"
+		obj.Guest.Net = []types.GuestNicInfo{
+			{
+				IpAddress:  []string{"99.99.99.99", "fe80::1"},
+				MacAddress: "00:50:56:aa:bb:cc",
+			},
+		}
+
+		changes := PropertyDiff(checkpoint, &obj.VirtualMachine)
+
+		for _, c := range changes {
+			if c.Name == "name" {
+				foundName = true
+				assert.Equal(t, "renamed-vm", c.Val, "expected name 'renamed-vm', got %v", c.Val)
 			}
-			assert.Equal(t, "99.99.99.99", guestIP, "expected IpAddress '99.99.99.99', got %q", guestIP)
-			assert.Equal(t, 1, netLen, "expected 1 NIC, got %d", netLen)
+			if c.Name == "guest" {
+				foundGuest = true
+				var guestIP string
+				var netLen int
+				switch v := c.Val.(type) {
+				case *types.GuestInfo:
+					guestIP = v.IpAddress
+					netLen = len(v.Net)
+				case types.GuestInfo:
+					guestIP = v.IpAddress
+					netLen = len(v.Net)
+				default:
+					assert.IsType(t, types.GuestInfo{}, c.Val, "expected GuestInfo type, got %T", c.Val)
+					return
+				}
+				assert.Equal(t, "99.99.99.99", guestIP, "expected IpAddress '99.99.99.99', got %q", guestIP)
+				assert.Equal(t, 1, netLen, "expected 1 NIC, got %d", netLen)
+			}
 		}
-	}
+
+		simCtx.Update(obj, changes)
+	})
 
 	assert.True(t, foundName, "expected change for 'name' property")
 	assert.True(t, foundGuest, "expected change for 'guest' property")
-
-	// Apply changes
-	simCtx.Update(obj, changes)
 
 	// Verify changes are visible via property collector
 	pc := property.DefaultCollector(c.Client)
@@ -414,6 +401,146 @@ func TestDetermineChangeOp(t *testing.T) {
 
 func stringPtr(s string) *string {
 	return &s
+}
+
+// TestContext_Checkpoint verifies that ctx.Checkpoint returns an independent deep copy
+// of the object's mo state, protected by the object lock.
+func TestContext_Checkpoint(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+	require.NoError(t, m.Create())
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	reg := m.Service.Context.Map
+	obj := reg.All("VirtualMachine")[0].(*VirtualMachine)
+
+	simCtx := &Context{Context: context.Background(), Map: reg}
+
+	// Capture a snapshot of the original name.
+	simCtx.WithLock(obj, func() {
+		obj.Name = "before"
+	})
+
+	snapshot := simCtx.Checkpoint(obj)
+	snapVM := snapshot.(*mo.VirtualMachine)
+
+	require.Equal(t, "before", snapVM.Name, "snapshot should capture state at checkpoint time")
+
+	// Mutate the live object after taking the snapshot.
+	simCtx.WithLock(obj, func() {
+		obj.Name = "after"
+	})
+
+	assert.Equal(t, "before", snapVM.Name, "snapshot must not be affected by later mutations")
+	simCtx.WithLock(obj, func() {
+		assert.Equal(t, "after", obj.Name, "live object should have the new name")
+	})
+}
+
+// TestContext_PropertyDiff verifies that ctx.PropertyDiff computes changes from an old
+// snapshot to the current live state and applies them so they are visible via the
+// PropertyCollector.
+func TestContext_PropertyDiff(t *testing.T) {
+	goCtx := context.Background()
+
+	m := VPX()
+	defer m.Remove()
+	require.NoError(t, m.Create())
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(goCtx, s.URL, true)
+	require.NoError(t, err)
+
+	finder := find.NewFinder(c.Client)
+	vm, err := finder.VirtualMachine(goCtx, "DC0_H0_VM0")
+	require.NoError(t, err)
+
+	simCtx := m.Service.Context
+	ref := vm.Reference()
+	obj := simCtx.Map.Get(ref).(*VirtualMachine)
+
+	// Take checkpoint, then modify fields and apply diff — all under one lock so
+	// field writes are protected alongside the checkpoint and diff reads.
+	simCtx.WithLock(obj, func() {
+		snapshot := simCtx.Checkpoint(obj) // re-entrant: already holds the lock
+		if obj.Guest == nil {
+			obj.Guest = &types.GuestInfo{}
+		}
+		obj.Guest.IpAddress = "1.2.3.4"
+		simCtx.UpdateDiff(snapshot, obj) // re-entrant: computes diff, calls Update
+	})
+
+	pc := property.DefaultCollector(c.Client)
+	var mvm mo.VirtualMachine
+	require.NoError(t, pc.RetrieveOne(goCtx, ref, []string{"guest.ipAddress"}, &mvm))
+	require.NotNil(t, mvm.Guest)
+	assert.Equal(t, "1.2.3.4", mvm.Guest.IpAddress)
+}
+
+// TestContext_AutoUpdate verifies that ctx.AutoUpdate correctly applies field changes
+// and makes them visible via the PropertyCollector, and is concurrency-safe when
+// called from multiple goroutines with independent *Context values.
+func TestContext_AutoUpdate(t *testing.T) {
+	goCtx := context.Background()
+
+	m := VPX()
+	defer m.Remove()
+	require.NoError(t, m.Create())
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(goCtx, s.URL, true)
+	require.NoError(t, err)
+
+	finder := find.NewFinder(c.Client)
+	vm, err := finder.VirtualMachine(goCtx, "DC0_H0_VM0")
+	require.NoError(t, err)
+
+	simCtx := m.Service.Context
+	ref := vm.Reference()
+	obj := simCtx.Map.Get(ref).(*VirtualMachine)
+
+	// Single call: apply changes and verify they are visible.
+	simCtx.AutoUpdate(obj, func() {
+		if obj.Guest == nil {
+			obj.Guest = &types.GuestInfo{}
+		}
+		obj.Guest.IpAddress = "5.6.7.8"
+		obj.Guest.HostName = "autohost"
+	})
+
+	pc := property.DefaultCollector(c.Client)
+	var mvm mo.VirtualMachine
+	require.NoError(t, pc.RetrieveOne(goCtx, ref, []string{"guest.ipAddress", "guest.hostName"}, &mvm))
+	require.NotNil(t, mvm.Guest)
+	assert.Equal(t, "5.6.7.8", mvm.Guest.IpAddress)
+	assert.Equal(t, "autohost", mvm.Guest.HostName)
+
+	// Concurrent calls: two goroutines, each with their own *Context, using AutoUpdate.
+	reg := m.Service.Context.Map
+	newCtx := func() *Context { return &Context{Context: context.Background(), Map: reg} }
+
+	const iters = 100
+	var wg sync.WaitGroup
+	for g := 0; g < 2; g++ {
+		wg.Add(1)
+		g := g
+		go func() {
+			defer wg.Done()
+			ctx := newCtx()
+			for i := 0; i < iters; i++ {
+				ctx.AutoUpdate(obj, func() {
+					if obj.Guest == nil {
+						obj.Guest = &types.GuestInfo{}
+					}
+					obj.Guest.IpAddress = fmt.Sprintf("10.%d.%d.1", g, i)
+				})
+			}
+		}()
+	}
+	wg.Wait()
 }
 
 // TestPropertyDiff_RuntimePowerState tests that runtime.powerState changes are properly tracked
@@ -542,15 +669,6 @@ func TestContainerVMNetworkPropertyChanges(t *testing.T) {
 			busybox = "busybox"
 		}
 
-		network := os.Getenv("VCSIM_NETWORK")
-		if network == "" {
-			// podman requires we specify a network to get an IP at all.
-			// podman doesn't allow "bridge" as a network name, so we create a custom name
-			network = "generic-bridge"
-			_, err := createBridge(network)
-			require.NoError(t, err, "expected no error creating bridge network")
-		}
-
 		spec := types.VirtualMachineConfigSpec{
 			Name: "busybox-network-test",
 			Files: &types.VirtualMachineFileInfo{
@@ -558,10 +676,9 @@ func TestContainerVMNetworkPropertyChanges(t *testing.T) {
 			},
 			ExtraConfig: []types.BaseOptionValue{
 				&types.OptionValue{Key: ContainerBackingOptionKey, Value: busybox + " sleep 300"},
-				&types.OptionValue{Key: "RUN.mountdmi", Value: "false"},
-				&types.OptionValue{Key: "RUN.network", Value: network},
 			},
 		}
+		require.NoError(t, test.ApplyContainerRuntimeDefaults(&spec), "expected no error applying container runtime defaults")
 
 		f, err := dc.Folders(ctx)
 		require.NoError(t, err, "expected no error retrieving folders")
@@ -698,4 +815,73 @@ func TestContainerVMNetworkPropertyChanges(t *testing.T) {
 		}
 
 	})
+}
+
+// TestPropertyDiff_ConcurrentAccess is a race regression test for the pattern used in
+// syncNetworkConfigToVMGuestProperties. It verifies that ctx.AutoUpdate (and the
+// underlying checkpoint → modify → diff → update sequence) is safe when called
+// concurrently from multiple goroutines, each using its own *Context.
+//
+// Note: each goroutine must use its own *Context value (not a shared pointer) because
+// ObjectLock uses the context pointer as the lock-identity for re-entrancy detection.
+// Two goroutines sharing the same *Context would bypass mutual exclusion.
+//
+// Run with -race to confirm no data races:
+//
+//	go test -race -run TestPropertyDiff_ConcurrentAccess ./simulator/
+func TestPropertyDiff_ConcurrentAccess(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+
+	err := m.Create()
+	require.NoError(t, err, "failed to create VPX model")
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	reg := m.Service.Context.Map
+	obj := reg.All("VirtualMachine")[0].(*VirtualMachine)
+
+	// Each goroutine gets its own Context so ObjectLock's re-entrancy check
+	// correctly serialises the goroutines rather than treating them as the same holder.
+	newCtx := func() *Context {
+		return &Context{Context: context.Background(), Map: reg}
+	}
+
+	const iters = 200
+	var wg sync.WaitGroup
+
+	// Goroutine A: simulates a background watcher (e.g. watchContainer callback).
+	// ctx.AutoUpdate holds a single lock for checkpoint + modify + diff + update.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx := newCtx()
+		for i := 0; i < iters; i++ {
+			ctx.AutoUpdate(obj, func() {
+				if obj.Guest == nil {
+					obj.Guest = &types.GuestInfo{}
+				}
+				obj.Guest.IpAddress = fmt.Sprintf("10.0.0.%d", i)
+			})
+		}
+	}()
+
+	// Goroutine B: simulates a concurrent SOAP handler that modifies VM fields
+	// under the object lock, as all SOAP task handlers do via Task.Run → AcquireLock.
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		ctx := newCtx()
+		for i := 0; i < iters; i++ {
+			ctx.WithLock(obj, func() {
+				if obj.Guest == nil {
+					obj.Guest = &types.GuestInfo{}
+				}
+				obj.Guest.HostName = fmt.Sprintf("host-%d", i)
+			})
+		}
+	}()
+
+	wg.Wait()
 }

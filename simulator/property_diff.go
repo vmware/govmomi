@@ -92,27 +92,24 @@ func determineChangeOp(oldVal, newVal reflect.Value) types.PropertyChangeOp {
 	}
 }
 
-// Checkpoint creates a deep copy of a managed object that can later be used
-// with PropertyDiff to generate property changes. This is a convenience wrapper
-// around deepCopy for the common pattern of snapshotting object state.
+// Checkpoint creates a deep copy of a managed object's mo state that can later
+// be used with PropertyDiff to generate property changes.
+//
+// obj may be either a pure mo-package type (e.g. *mo.VirtualMachine) or a
+// simulator wrapper type (e.g. *simulator.VirtualMachine). In the latter case
+// the embedded mo type is extracted first so that deepCopy only operates on
+// known vSphere types; the returned snapshot is always a *mo.T value.
 //
 // Example:
 //
-//	checkpoint := Checkpoint(vm)
+//	checkpoint := Checkpoint(vm) // vm can be *simulator.VirtualMachine or *mo.VirtualMachine
 //	// ... make changes to vm ...
 //	changes := PropertyDiff(checkpoint, vm)
 //	ctx.Update(vm, changes)
-func Checkpoint[T mo.Reference](obj T) T {
-	// Create a new instance of the same type
-	objVal := reflect.ValueOf(obj)
-	if objVal.Kind() != reflect.Ptr {
-		panic("Checkpoint requires a pointer to a managed object")
-	}
-
-	// Create a new pointer to the same type
-	newPtr := reflect.New(objVal.Elem().Type())
-	dst := newPtr.Interface().(T)
-
-	deepCopy(obj, dst)
+func Checkpoint(obj mo.Reference) mo.Reference {
+	moVal := getManagedObject(obj)
+	newPtr := reflect.New(moVal.Type())
+	dst := newPtr.Interface().(mo.Reference)
+	deepCopy(moVal.Addr().Interface(), dst)
 	return dst
 }
