@@ -455,6 +455,61 @@ func (c *Context) Update(obj mo.Reference, changes []types.PropertyChange) {
 	c.Map.Update(c, obj, changes)
 }
 
+// Checkpoint takes a locked snapshot of obj's managed-object state and returns it.
+// The lock is acquired and released within this call. obj may be a simulator
+// wrapper type; the returned snapshot is always the embedded *mo.T.
+//
+// The returned snapshot is suitable as the "old" argument to ctx.PropertyDiff.
+// Any field modifications to obj between Checkpoint and PropertyDiff must also
+// be performed under ctx.WithLock to avoid races with concurrent SOAP handlers.
+// For the common checkpoint → modify → diff → update pattern, prefer ctx.AutoUpdate.
+func (c *Context) Checkpoint(obj mo.Reference) mo.Reference {
+	var snapshot mo.Reference
+	c.WithLock(obj, func() {
+		snapshot = Checkpoint(obj)
+	})
+	return snapshot
+}
+
+// UpdateDiff computes property changes from old to the current state of obj
+// (under the object lock) and applies them via Update. old is typically a snapshot
+// returned by ctx.Checkpoint taken before modifications to obj.
+//
+// Field modifications to obj between ctx.Checkpoint and ctx.PropertyDiff must also
+// be performed under ctx.WithLock to avoid races. For the common
+// checkpoint → modify → diff → update pattern, prefer ctx.AutoUpdate.
+func (c *Context) UpdateDiff(old, obj mo.Reference) {
+	c.WithLock(obj, func() {
+		changes := PropertyDiff(old, obj)
+		if len(changes) > 0 {
+			c.Update(obj, changes)
+		}
+	})
+}
+
+// AutoUpdate is the correct way to modify a managed object from outside the normal
+// SOAP dispatch path (e.g. background goroutines such as container watchers).
+// Under a single lock acquisition it: takes a Checkpoint, calls f (which should
+// modify the object's fields), computes a PropertyDiff, and applies the changes
+// via Update.
+//
+// Using one lock for the entire sequence prevents the data race that would occur
+// if Checkpoint and PropertyDiff were called with separate lock acquisitions while
+// field writes between them remained unprotected.
+//
+// Callers that need to inspect the generated []types.PropertyChange directly should
+// use ctx.WithLock + the package-level Checkpoint, PropertyDiff, and Update.
+func (c *Context) AutoUpdate(obj mo.Reference, f func()) {
+	c.WithLock(obj, func() {
+		snapshot := Checkpoint(obj)
+		f()
+		changes := PropertyDiff(snapshot, obj)
+		if len(changes) > 0 {
+			c.Update(obj, changes)
+		}
+	})
+}
+
 // postEvent wraps EventManager.PostEvent for internal use, with a lock on the EventManager.
 func (c *Context) postEvent(events ...types.BaseEvent) {
 	m := c.Map.EventManager()
