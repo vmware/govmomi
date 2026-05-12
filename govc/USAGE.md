@@ -144,6 +144,9 @@ but appear via `govc $cmd -h`:
  - [dvs.portgroup.change](#dvsportgroupchange)
  - [dvs.portgroup.info](#dvsportgroupinfo)
  - [env](#env)
+ - [envbrowser.query-config-option](#envbrowserquery-config-option)
+ - [envbrowser.query-config-option-descriptor](#envbrowserquery-config-option-descriptor)
+ - [envbrowser.query-config-target](#envbrowserquery-config-target)
  - [events](#events)
  - [export.ovf](#exportovf)
  - [extension.info](#extensioninfo)
@@ -2499,6 +2502,64 @@ Useful as bash scripting helper to parse GOVC_URL.
 
 Options:
   -x=false               Output variables for each GOVC_URL component
+```
+
+## envbrowser.query-config-option
+
+```
+Usage: govc envbrowser.query-config-option [OPTIONS]
+
+Query the environment browser for a config option.
+
+Examples:
+  govc envbrowser.query-config-option -cluster my-cluster
+  govc envbrowser.query-config-option -cluster my-cluster -host my-host
+  govc envbrowser.query-config-option -cluster my-cluster -hardware-version vmx-22
+  govc envbrowser.query-config-option -cluster my-cluster -hardware-version vmx-22 -guest-ids otherLinuxGuest,ubuntu64Guest
+  govc envbrowser.query-config-option -cluster my-cluster -all-hardware-versions
+  govc envbrowser.query-config-option -cluster my-cluster -hardware-version vmx-22 -copy-to-file
+  govc envbrowser.query-config-option -cluster my-cluster -all-hardware-versions -copy-to-file
+
+Options:
+  -all-hardware-versions=false  True to query all hardware versions.
+  -cluster=                     Cluster [GOVC_CLUSTER]
+  -copy-to-file=false           True to marshal the result's XML to a file.
+  -guest-ids=                   A comma-delimited list of guest IDs.
+  -hardware-version=vmx-19      The hardware version to query.
+  -host=                        Host system [GOVC_HOST]
+```
+
+## envbrowser.query-config-option-descriptor
+
+```
+Usage: govc envbrowser.query-config-option-descriptor [OPTIONS]
+
+Query the environment browser for the config descriptors.
+
+Examples:
+  govc envbrowser.query-config-option-descriptor -cluster my-cluster
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -copy-to-file=false    True to marshal the result's XML to a file.
+  -host=                 Host system [GOVC_HOST]
+```
+
+## envbrowser.query-config-target
+
+```
+Usage: govc envbrowser.query-config-target [OPTIONS]
+
+Query the environment browser for a config target.
+
+Examples:
+  govc envbrowser.query-config-target -cluster my-cluster
+  govc envbrowser.query-config-target -cluster my-cluster -host my-host
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -copy-to-file=false    True to marshal the result's XML to a file.
+  -host=                 Host system [GOVC_HOST]
 ```
 
 ## events

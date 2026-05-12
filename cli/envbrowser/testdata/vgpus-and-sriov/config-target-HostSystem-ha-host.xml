@@ -1,0 +1,666 @@
+<ConfigTarget>
+  <numCpus>80</numCpus>
+  <numCpuCores>40</numCpuCores>
+  <numNumaNodes>2</numNumaNodes>
+  <maxCpusPerHost>80</maxCpusPerHost>
+  <smcPresent>false</smcPresent>
+  <datastore>
+    <name>w1-hs5-p1301_store</name>
+    <datastore>
+      <datastore type="Datastore">60db7a95-395e6512-daed-78ac443ae2ea</datastore>
+      <name>w1-hs5-p1301_store</name>
+      <url>/vmfs/volumes/60db7a95-395e6512-daed-78ac443ae2ea</url>
+      <capacity>1782679863296</capacity>
+      <freeSpace>1760858996736</freeSpace>
+      <accessible>true</accessible>
+      <type>VMFS</type>
+    </datastore>
+    <capability>
+      <directoryHierarchySupported>true</directoryHierarchySupported>
+      <rawDiskMappingsSupported>true</rawDiskMappingsSupported>
+      <perFileThinProvisioningSupported>true</perFileThinProvisioningSupported>
+      <storageIORMSupported>true</storageIORMSupported>
+      <nativeSnapshotSupported>false</nativeSnapshotSupported>
+      <topLevelDirectoryCreateSupported>true</topLevelDirectoryCreateSupported>
+      <seSparseSupported>true</seSparseSupported>
+      <vmfsSparseSupported>false</vmfsSparseSupported>
+      <vsanSparseSupported>false</vsanSparseSupported>
+      <upitSupported>false</upitSupported>
+      <vmdkExpandSupported>true</vmdkExpandSupported>
+      <clusteredVmdkSupported>false</clusteredVmdkSupported>
+    </capability>
+    <maxFileSize>70368744177664</maxFileSize>
+    <maxVirtualDiskCapacity>68169720922112</maxVirtualDiskCapacity>
+    <mode>readWrite</mode>
+    <vStorageSupport>vStorageUnsupported</vStorageSupport>
+    <supportedVDiskFormats>native_512</supportedVDiskFormats>
+  </datastore>
+  <datastore>
+    <name>datastore</name>
+    <datastore>
+      <datastore type="Datastore">685504ef-7dedcc48-ad64-78ac443ae2ea</datastore>
+      <name>datastore</name>
+      <url>/vmfs/volumes/685504ef-7dedcc48-ad64-78ac443ae2ea</url>
+      <capacity>1920118816768</capacity>
+      <freeSpace>1471743524864</freeSpace>
+      <uncommitted>3629326336</uncommitted>
+      <accessible>true</accessible>
+      <type>VMFS</type>
+    </datastore>
+    <capability>
+      <directoryHierarchySupported>true</directoryHierarchySupported>
+      <rawDiskMappingsSupported>true</rawDiskMappingsSupported>
+      <perFileThinProvisioningSupported>true</perFileThinProvisioningSupported>
+      <storageIORMSupported>true</storageIORMSupported>
+      <nativeSnapshotSupported>false</nativeSnapshotSupported>
+      <topLevelDirectoryCreateSupported>true</topLevelDirectoryCreateSupported>
+      <seSparseSupported>true</seSparseSupported>
+      <vmfsSparseSupported>false</vmfsSparseSupported>
+      <vsanSparseSupported>false</vsanSparseSupported>
+      <upitSupported>false</upitSupported>
+      <vmdkExpandSupported>true</vmdkExpandSupported>
+      <clusteredVmdkSupported>false</clusteredVmdkSupported>
+    </capability>
+    <maxFileSize>70368744177664</maxFileSize>
+    <maxVirtualDiskCapacity>68169720922112</maxVirtualDiskCapacity>
+    <mode>readWrite</mode>
+    <vStorageSupport>vStorageUnsupported</vStorageSupport>
+    <supportedVDiskFormats>native_512</supportedVDiskFormats>
+  </datastore>
+  <network>
+    <name>VM Network</name>
+    <network xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="NetworkSummary">
+      <network type="Network">HaNetwork-VM Network</network>
+      <name>VM Network</name>
+      <accessible>true</accessible>
+      <ipPoolName></ipPoolName>
+    </network>
+    <vswitch>vSwitch0</vswitch>
+  </network>
+  <serial>
+    <name>/dev/char/serial/uart1</name>
+  </serial>
+  <maxMemMBOptimalPerf>195992</maxMemMBOptimalPerf>
+  <supportedMaxMemMB>33538048</supportedMaxMemMB>
+  <pciPassthrough xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="VirtualMachinePciPassthroughInfo">
+    <name></name>
+    <pciDevice>
+      <id>0000:05:00.1</id>
+      <classId>512</classId>
+      <bus>5</bus>
+      <slot>0</slot>
+      <physicalSlot>-1</physicalSlot>
+      <slotDescription>NIC2</slotDescription>
+      <function>1</function>
+      <vendorId>-32634</vendorId>
+      <subVendorId>4136</subVendorId>
+      <vendorName>Intel(R)</vendorName>
+      <deviceId>5490</deviceId>
+      <subDeviceId>0</subDeviceId>
+      <parentBridge>0000:00:1d.4</parentBridge>
+      <deviceName>Ethernet Controller X710 for 10GbE SFP+</deviceName>
+      <deviceClassName>Ethernet controller</deviceClassName>
+    </pciDevice>
+    <systemId>69c2ad94-7c22-3506-dd02-78ac443ae2ea</systemId>
+  </pciPassthrough>
+  <sriov>
+    <name></name>
+    <pciDevice>
+      <id>0000:8a:00.0</id>
+      <classId>770</classId>
+      <bus>138</bus>
+      <slot>0</slot>
+      <physicalSlot>6</physicalSlot>
+      <slotDescription>PCIe Slot 6</slotDescription>
+      <function>0</function>
+      <vendorId>4318</vendorId>
+      <subVendorId>4318</subVendorId>
+      <vendorName>NVIDIA Corporation</vendorName>
+      <deviceId>8433</deviceId>
+      <subDeviceId>5215</subDeviceId>
+      <parentBridge>0000:85:03.0</parentBridge>
+      <deviceName>NVIDIA A100-PCIE-40GB</deviceName>
+      <deviceClassName>3D controller</deviceClassName>
+    </pciDevice>
+    <systemId>69c2ad94-7c22-3506-dd02-78ac443ae2ea</systemId>
+    <virtualFunction>false</virtualFunction>
+  </sriov>
+  <sriov>
+    <name></name>
+    <pciDevice>
+      <id>0000:8c:00.0</id>
+      <classId>770</classId>
+      <bus>140</bus>
+      <slot>0</slot>
+      <physicalSlot>7</physicalSlot>
+      <slotDescription>PCIe Slot 7</slotDescription>
+      <function>0</function>
+      <vendorId>4318</vendorId>
+      <subVendorId>4318</subVendorId>
+      <vendorName>NVIDIA Corporation</vendorName>
+      <deviceId>8433</deviceId>
+      <subDeviceId>5215</subDeviceId>
+      <parentBridge>0000:85:04.0</parentBridge>
+      <deviceName>NVIDIA A100-PCIE-40GB</deviceName>
+      <deviceClassName>3D controller</deviceClassName>
+    </pciDevice>
+    <systemId>69c2ad94-7c22-3506-dd02-78ac443ae2ea</systemId>
+    <virtualFunction>false</virtualFunction>
+  </sriov>
+  <sriov>
+    <name></name>
+    <pciDevice>
+      <id>0000:c1:00.0</id>
+      <classId>770</classId>
+      <bus>193</bus>
+      <slot>0</slot>
+      <physicalSlot>8</physicalSlot>
+      <slotDescription>PCIe Slot 8</slotDescription>
+      <function>0</function>
+      <vendorId>4318</vendorId>
+      <subVendorId>4318</subVendorId>
+      <vendorName>NVIDIA Corporation</vendorName>
+      <deviceId>8433</deviceId>
+      <subDeviceId>5215</subDeviceId>
+      <parentBridge>0000:bc:04.0</parentBridge>
+      <deviceName>NVIDIA A100-PCIE-40GB</deviceName>
+      <deviceClassName>3D controller</deviceClassName>
+    </pciDevice>
+    <systemId>69c2ad94-7c22-3506-dd02-78ac443ae2ea</systemId>
+    <virtualFunction>false</virtualFunction>
+  </sriov>
+  <sriov>
+    <name></name>
+    <pciDevice>
+      <id>0000:c3:00.0</id>
+      <classId>770</classId>
+      <bus>195</bus>
+      <slot>0</slot>
+      <physicalSlot>9</physicalSlot>
+      <slotDescription>PCIe Slot 9</slotDescription>
+      <function>0</function>
+      <vendorId>4318</vendorId>
+      <subVendorId>4318</subVendorId>
+      <vendorName>NVIDIA Corporation</vendorName>
+      <deviceId>8433</deviceId>
+      <subDeviceId>5215</subDeviceId>
+      <parentBridge>0000:bc:05.0</parentBridge>
+      <deviceName>NVIDIA A100-PCIE-40GB</deviceName>
+      <deviceClassName>3D controller</deviceClassName>
+    </pciDevice>
+    <systemId>69c2ad94-7c22-3506-dd02-78ac443ae2ea</systemId>
+    <virtualFunction>false</virtualFunction>
+  </sriov>
+  <sharedGpuPassthroughTypes>
+    <name></name>
+    <vgpu>grid_a100-4c</vgpu>
+  </sharedGpuPassthroughTypes>
+  <sharedGpuPassthroughTypes>
+    <name></name>
+    <vgpu>grid_a100-5c</vgpu>
+  </sharedGpuPassthroughTypes>
+  <sharedGpuPassthroughTypes>
+    <name></name>
+    <vgpu>grid_a100-8c</vgpu>
+  </sharedGpuPassthroughTypes>
+  <sharedGpuPassthroughTypes>
+    <name></name>
+    <vgpu>grid_a100-10c</vgpu>
+  </sharedGpuPassthroughTypes>
+  <sharedGpuPassthroughTypes>
+    <name></name>
+    <vgpu>grid_a100-20c</vgpu>
+  </sharedGpuPassthroughTypes>
+  <sharedGpuPassthroughTypes>
+    <name></name>
+    <vgpu>grid_a100-40c</vgpu>
+  </sharedGpuPassthroughTypes>
+  <dynamicPassthrough>
+    <name></name>
+    <vendorName>Intel(R)</vendorName>
+    <deviceName>Ethernet Controller X710 for 10GbE SFP+</deviceName>
+    <vendorId>32902</vendorId>
+    <deviceId>5490</deviceId>
+  </dynamicPassthrough>
+  <sgxTargetInfo>
+    <name></name>
+    <maxEpcSize>0</maxEpcSize>
+    <flcModes>off</flcModes>
+    <requireAttestationSupported>true</requireAttestationSupported>
+  </sgxTargetInfo>
+  <precisionClockInfo>
+    <name></name>
+  </precisionClockInfo>
+  <vgpuDeviceInfo>
+    <name></name>
+    <deviceName>NVIDIA A100-PCIE-40GB</deviceName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <maxFbSizeInGib>40</maxFbSizeInGib>
+    <timeSlicedCapable>true</timeSlicedCapable>
+    <migCapable>true</migCapable>
+    <computeProfileCapable>true</computeProfileCapable>
+    <quadroProfileCapable>false</quadroProfileCapable>
+  </vgpuDeviceInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-1-5c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>5</fbSizeInGib>
+    <profileSharing>mig</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-2-10c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>10</fbSizeInGib>
+    <profileSharing>mig</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-3-20c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>20</fbSizeInGib>
+    <profileSharing>mig</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-4-20c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>20</fbSizeInGib>
+    <profileSharing>mig</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-7-40c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>40</fbSizeInGib>
+    <profileSharing>mig</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-4c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>4</fbSizeInGib>
+    <profileSharing>timeSliced</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-5c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>5</fbSizeInGib>
+    <profileSharing>timeSliced</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-8c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>8</fbSizeInGib>
+    <profileSharing>timeSliced</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-10c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>10</fbSizeInGib>
+    <profileSharing>timeSliced</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-20c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>20</fbSizeInGib>
+    <profileSharing>timeSliced</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-40c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>40</fbSizeInGib>
+    <profileSharing>timeSliced</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-1-5cme</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>5</fbSizeInGib>
+    <profileSharing>mig</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vgpuProfileInfo>
+    <name></name>
+    <profileName>grid_a100-1-10c</profileName>
+    <deviceVendorId>552669406</deviceVendorId>
+    <fbSizeInGib>10</fbSizeInGib>
+    <profileSharing>mig</profileSharing>
+    <profileClass>compute</profileClass>
+  </vgpuProfileInfo>
+  <vendorDeviceGroupInfo>
+    <name></name>
+    <deviceGroupName>Nvidia:2@grid_a100-40c%NVLink</deviceGroupName>
+    <deviceGroupDescription>2 Nvidia grid_a100-40c NVLink</deviceGroupDescription>
+    <componentDeviceInfo>
+      <type>nvidiaVgpu</type>
+      <vendorName>NVIDIA Corporation</vendorName>
+      <deviceName>NVIDIA A100-PCIE-40GB grid_a100-40c</deviceName>
+      <isConfigurable>false</isConfigurable>
+      <device xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="VirtualPCIPassthrough">
+        <key>0</key>
+        <backing _XMLSchema-instance:type="VirtualPCIPassthroughVmiopBackingInfo">
+          <vgpu>grid_a100-40c</vgpu>
+        </backing>
+      </device>
+    </componentDeviceInfo>
+    <componentDeviceInfo>
+      <type>nvidiaVgpu</type>
+      <vendorName>NVIDIA Corporation</vendorName>
+      <deviceName>NVIDIA A100-PCIE-40GB grid_a100-40c</deviceName>
+      <isConfigurable>false</isConfigurable>
+      <device xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="VirtualPCIPassthrough">
+        <key>0</key>
+        <backing _XMLSchema-instance:type="VirtualPCIPassthroughVmiopBackingInfo">
+          <vgpu>grid_a100-40c</vgpu>
+        </backing>
+      </device>
+    </componentDeviceInfo>
+  </vendorDeviceGroupInfo>
+  <maxSimultaneousThreads>2</maxSimultaneousThreads>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Test [Checkpoint, RP]</label>
+      <summary>A DVX Test device with checkpoint support and restore parameters.</summary>
+      <key>com.vmware.dvxtestconst.rp</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>false</sriovNic>
+    <configParams>
+      <label>Checkpoint size</label>
+      <summary>Checkpoint size in bytes.</summary>
+      <key>cptBytes</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>0</defaultValue>
+      </optionType>
+    </configParams>
+    <configParams>
+      <label>BAR1 Size</label>
+      <summary>The size of BAR1 in bytes.</summary>
+      <key>bar1size</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>16384</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Test [Checkpoint, Mode]</label>
+      <summary>A DVX Test device with modes and checkpoint support.</summary>
+      <key>com.vmware.dvxtestconst.mode</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>false</sriovNic>
+    <configParams>
+      <label>Mode</label>
+      <summary>The device mode.</summary>
+      <key>mode</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ChoiceOption">
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>1 DC</label>
+          <summary>1 DC</summary>
+          <key>1</key>
+        </choiceInfo>
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>2 DCs</label>
+          <summary>2 DCs</summary>
+          <key>2</key>
+        </choiceInfo>
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>4 DCs</label>
+          <summary>4 DCs</summary>
+          <key>4</key>
+        </choiceInfo>
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>8 DCs</label>
+          <summary>8 DCs</summary>
+          <key>8</key>
+        </choiceInfo>
+      </optionType>
+    </configParams>
+    <configParams>
+      <label>BAR1 Size</label>
+      <summary>The size of BAR1 in bytes.</summary>
+      <key>bar1size</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>16384</defaultValue>
+      </optionType>
+    </configParams>
+    <configParams>
+      <label>Checkpoint size</label>
+      <summary>Checkpoint size in bytes.</summary>
+      <key>cptBytes</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>0</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Test [Checkpoint]</label>
+      <summary>A DVX Test device with checkpoint support.</summary>
+      <key>com.vmware.dvxtestconst</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>false</sriovNic>
+    <configParams>
+      <label>Checkpoint size</label>
+      <summary>Checkpoint size in bytes.</summary>
+      <key>cptBytes</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>0</defaultValue>
+      </optionType>
+    </configParams>
+    <configParams>
+      <label>BAR1 Size</label>
+      <summary>The size of BAR1 in bytes.</summary>
+      <key>bar1size</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>16384</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Test [Net, Checkpoint]</label>
+      <summary>A DVX Test networking device with checkpoint support.</summary>
+      <key>com.vmware.dvxtestconst.net</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>true</sriovNic>
+    <configParams>
+      <label>Checkpoint size</label>
+      <summary>Checkpoint size in bytes.</summary>
+      <key>cptBytes</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>0</defaultValue>
+      </optionType>
+    </configParams>
+    <configParams>
+      <label>BAR1 Size</label>
+      <summary>The size of BAR1 in bytes.</summary>
+      <key>bar1size</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>16384</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>Mellanox NIC/HCA (S/R)</label>
+      <summary>Mellanox/NVIDIA Network Adapter with Suspend/Resume support</summary>
+      <key>com.mellanox.nmlx5_core.dvx.sr</key>
+    </deviceClass>
+    <vendorName>Mellanox/NVIDIA</vendorName>
+    <sriovNic>true</sriovNic>
+    <configParams>
+      <label>VF size limit, MB</label>
+      <summary>Max host RAM size the VF can use</summary>
+      <key>maxVfSizeMb</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>100</min>
+        <max>16777215</max>
+        <defaultValue>10240</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Passthru Sample</label>
+      <summary>A sample DVX Passthru device.</summary>
+      <key>com.vmware.dvxpassthru</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>false</sriovNic>
+    <configParams>
+      <label>Profile</label>
+      <summary>Device profile</summary>
+      <key>profile</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ChoiceOption">
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>Profile 1</label>
+          <summary>Profile 1: small profile</summary>
+          <key>1</key>
+        </choiceInfo>
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>Profile 2</label>
+          <summary>Profile 2: large profile</summary>
+          <key>2</key>
+        </choiceInfo>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Test [Profile, RP]</label>
+      <summary>A DVX Test device with profiles and restore parameters.</summary>
+      <key>com.vmware.dvxtest.profile.rp</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>false</sriovNic>
+    <configParams>
+      <label>Profile</label>
+      <summary>The device profile</summary>
+      <key>profile</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ChoiceOption">
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>Profile 0</label>
+          <summary>Profile 0</summary>
+          <key>0</key>
+        </choiceInfo>
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>Profile 1</label>
+          <summary>Profile 1</summary>
+          <key>1</key>
+        </choiceInfo>
+        <choiceInfo _XMLSchema-instance:type="ElementDescription">
+          <label>Profile 2</label>
+          <summary>Profile 2</summary>
+          <key>2</key>
+        </choiceInfo>
+      </optionType>
+    </configParams>
+    <configParams>
+      <label>BAR1 Size</label>
+      <summary>The size of BAR1 in bytes.</summary>
+      <key>bar1size</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>16384</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Test</label>
+      <summary>A DVX Test device without checkpoint support.</summary>
+      <key>com.vmware.dvxtest</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>false</sriovNic>
+    <configParams>
+      <label>BAR1 Size</label>
+      <summary>The size of BAR1 in bytes.</summary>
+      <key>bar1size</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>0</min>
+        <max>9223372036854775807</max>
+        <defaultValue>16384</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>Mellanox NIC/HCA (no S/R)</label>
+      <summary>Mellanox/NVIDIA Network Adapter without Suspend/Resume support</summary>
+      <key>com.mellanox.nmlx5_core.dvx.nosr</key>
+    </deviceClass>
+    <vendorName>Mellanox/NVIDIA</vendorName>
+    <sriovNic>true</sriovNic>
+    <configParams>
+      <label>VF size limit, MB</label>
+      <summary>Max host RAM size the VF can use</summary>
+      <key>maxVfSizeMb</key>
+      <optionType xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="LongOption">
+        <valueIsReadonly>false</valueIsReadonly>
+        <min>100</min>
+        <max>16777215</max>
+        <defaultValue>10240</defaultValue>
+      </optionType>
+    </configParams>
+  </dvxClassInfo>
+  <dvxClassInfo>
+    <deviceClass xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="ElementDescription">
+      <label>DVX Sample</label>
+      <summary>A sample DVX device.</summary>
+      <key>com.vmware.dvxsample</key>
+    </deviceClass>
+    <vendorName>VMware</vendorName>
+    <sriovNic>false</sriovNic>
+  </dvxClassInfo>
+</ConfigTarget>
