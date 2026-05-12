@@ -1,3 +1,5 @@
+.DS_Store
+
 secrets.yml
 dist/
 .idea/

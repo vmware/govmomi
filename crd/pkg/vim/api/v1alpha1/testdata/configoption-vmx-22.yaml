@@ -1,0 +1,1259 @@
+apiVersion: environment-browser.vmware.com/v1alpha1
+kind: VirtualMachineConfigOptions
+metadata:
+  creationTimestamp: null
+  name: vmx-22
+spec:
+  hardwareVersion: vmx-22
+status:
+  observedGeneration: 1
+  conditions:
+  - lastTransitionTime: "2024-01-01T00:00:00Z"
+    message: ""
+    observedGeneration: 1
+    reason: ReconcileSucceeded
+    status: "True"
+    type: Ready
+  description: ESXi 9.0 virtual machine
+  guestOSDefaultIndex: 4
+  guestOSDescriptors:
+
+  # index 0
+  - id: almalinux_64Guest
+    fullName: AlmaLinux (64-bit)
+    family: linuxGuest
+    supportedMaxCPUs: 960
+    numSupportedPhysicalSockets: 128
+    numSupportedCoresPerSocket: 960
+    supportedMinMem: "512Mi"
+    supportedMaxMem: "25149440Mi"
+    recommendedMem: "2048Mi"
+    recommendedColorDepth: 16
+    supportedDiskControllers:
+    - VirtualParaVirtual
+    - VirtualIDE
+    - VirtualAHCI
+    - VirtualNVMe
+    recommendedSCSIController: VirtualParaVirtual
+    recommendedDiskController: VirtualParaVirtual
+    supportedNumDisks: 16
+    recommendedDiskSize: "16384Mi"
+    recommendedCdromController: VirtualAHCIController
+    supportedEthernetCards:
+    - VirtualE1000e
+    - VirtualSriovEthernetCard
+    - VirtualVmxnet3
+    - VirtualVmxnet3Vrdma
+    recommendedEthernetCard: VirtualVmxnet3
+    supportsSlaveDisk: true
+    supportsMemoryHotAdd: true
+    supportsCpuHotAdd: true
+    supportedFirmware:
+    - BIOS
+    - EFI
+    recommendedFirmware: EFI
+    supportedUSBControllerList:
+    - VirtualUSBController
+    - VirtualUSBXHCIController
+    supports3D: true
+    supportLevel: Supported
+    supportedForCreate: true
+    vRAMSize:
+      min: "8Mi"
+      max: "128Mi"
+      default: "8Mi"
+    numSupportedFloppyDevices: 2
+    wakeOnLanEthernetCard:
+    - VirtualVmxnet3
+    supportsPvscsiControllerForBoot: true
+    supportsHotPlugPCI: true
+    supportsSecureBoot: true
+    defaultSecureBoot: true
+    persistentMemorySupported: true
+    supportedMinPersistentMemory: "4Mi"
+    supportedMaxPersistentMemory: "25149440Mi"
+    recommendedPersistentMemory: "8192Mi"
+    persistentMemoryHotAddSupported: false
+    persistentMemoryHotRemoveSupported: false
+    persistentMemoryColdGrowthSupported: true
+    persistentMemoryColdGrowthGranularity:
+      min: "4Mi"
+      max: "4Mi"
+      default: "4Mi"
+    persistentMemoryHotGrowthSupported: false
+    numRecommendedPhysicalSockets: 1
+    numRecommendedCoresPerSocket: 1
+    vvtdSupported:
+      supported: true
+    vsgxSupported:
+      supported: true
+    vsgxRemoteAttestationSupported: true
+    supportsTPM20: true
+    vwdtSupported: true
+
+  # index 1
+  - id: rockylinux_64Guest
+    fullName: Rocky Linux (64-bit)
+    family: linuxGuest
+    supportedMaxCPUs: 960
+    numSupportedPhysicalSockets: 128
+    numSupportedCoresPerSocket: 960
+    supportedMinMem: "512Mi"
+    supportedMaxMem: "25149440Mi"
+    recommendedMem: "2048Mi"
+    recommendedColorDepth: 16
+    supportedDiskControllers:
+    - VirtualParaVirtual
+    - VirtualIDE
+    - VirtualAHCI
+    - VirtualNVMe
+    recommendedSCSIController: VirtualParaVirtual
+    recommendedDiskController: VirtualParaVirtual
+    supportedNumDisks: 16
+    recommendedDiskSize: "16384Mi"
+    recommendedCdromController: VirtualAHCIController
+    supportedEthernetCards:
+    - VirtualE1000e
+    - VirtualSriovEthernetCard
+    - VirtualVmxnet3
+    - VirtualVmxnet3Vrdma
+    recommendedEthernetCard: VirtualVmxnet3
+    supportsSlaveDisk: true
+    supportsMemoryHotAdd: true
+    supportsCpuHotAdd: true
+    supportedFirmware:
+    - BIOS
+    - EFI
+    recommendedFirmware: EFI
+    supportedUSBControllerList:
+    - VirtualUSBController
+    - VirtualUSBXHCIController
+    supports3D: true
+    supportLevel: Supported
+    supportedForCreate: true
+    vRAMSize:
+      min: "8Mi"
+      max: "128Mi"
+      default: "8Mi"
+    numSupportedFloppyDevices: 2
+    wakeOnLanEthernetCard:
+    - VirtualVmxnet3
+    supportsPvscsiControllerForBoot: true
+    supportsHotPlugPCI: true
+    supportsSecureBoot: true
+    defaultSecureBoot: true
+    persistentMemorySupported: true
+    supportedMinPersistentMemory: "4Mi"
+    supportedMaxPersistentMemory: "25149440Mi"
+    recommendedPersistentMemory: "8192Mi"
+    persistentMemoryHotAddSupported: false
+    persistentMemoryHotRemoveSupported: false
+    persistentMemoryColdGrowthSupported: true
+    persistentMemoryColdGrowthGranularity:
+      min: "4Mi"
+      max: "4Mi"
+      default: "4Mi"
+    persistentMemoryHotGrowthSupported: false
+    numRecommendedPhysicalSockets: 1
+    numRecommendedCoresPerSocket: 1
+    vvtdSupported:
+      supported: true
+    vsgxSupported:
+      supported: true
+    vsgxRemoteAttestationSupported: true
+    supportsTPM20: true
+    vwdtSupported: true
+
+  # index 2
+  - id: windows2022srvNext_64Guest
+    fullName: Microsoft Windows Server 2025 (64-bit)
+    family: windowsGuest
+    supportedMaxCPUs: 960
+    numSupportedPhysicalSockets: 64
+    numSupportedCoresPerSocket: 960
+    supportedMinMem: "512Mi"
+    supportedMaxMem: "25149440Mi"
+    recommendedMem: "4096Mi"
+    recommendedColorDepth: 8
+    supportedDiskControllers:
+    - VirtualParaVirtual
+    - VirtualLsiLogicSAS
+    - VirtualAHCI
+    - VirtualNVMe
+    recommendedSCSIController: VirtualParaVirtual
+    recommendedDiskController: VirtualParaVirtual
+    supportedNumDisks: 16
+    recommendedDiskSize: "92160Mi"
+    recommendedCdromController: VirtualAHCIController
+    supportedEthernetCards:
+    - VirtualE1000e
+    - VirtualSriovEthernetCard
+    - VirtualVmxnet3
+    recommendedEthernetCard: VirtualVmxnet3
+    supportsSlaveDisk: true
+    supportsWakeOnLan: true
+    supportsMemoryHotAdd: true
+    supportsCpuHotAdd: true
+    supportedFirmware:
+    - BIOS
+    - EFI
+    recommendedFirmware: EFI
+    supportedUSBControllerList:
+    - VirtualUSBController
+    - VirtualUSBXHCIController
+    recommendedUSBController: VirtualUSBXHCIController
+    usbRecommended: true
+    supportLevel: Supported
+    supportedForCreate: true
+    vRAMSize:
+      min: "8Mi"
+      max: "128Mi"
+      default: "8Mi"
+    numSupportedFloppyDevices: 2
+    wakeOnLanEthernetCard:
+    - VirtualE1000e
+    - VirtualVmxnet3
+    supportsPvscsiControllerForBoot: true
+    diskUuidEnabled: true
+    supportsHotPlugPCI: true
+    supportsSecureBoot: true
+    defaultSecureBoot: true
+    persistentMemorySupported: true
+    supportedMinPersistentMemory: "4Mi"
+    supportedMaxPersistentMemory: "25149440Mi"
+    recommendedPersistentMemory: "8192Mi"
+    persistentMemoryHotAddSupported: false
+    persistentMemoryHotRemoveSupported: false
+    persistentMemoryColdGrowthSupported: true
+    persistentMemoryColdGrowthGranularity:
+      min: "4Mi"
+      max: "4Mi"
+      default: "4Mi"
+    persistentMemoryHotGrowthSupported: false
+    numRecommendedPhysicalSockets: 1
+    numRecommendedCoresPerSocket: 2
+    vvtdSupported:
+      supported: true
+    vbsSupported:
+      supported: true
+    vsgxSupported:
+      supported: true
+    vsgxRemoteAttestationSupported: true
+    supportsTPM20: true
+    vwdtSupported: true
+
+  # index 3
+  - id: windows2019srvNext_64Guest
+    fullName: Microsoft Windows Server 2022 (64-bit)
+    family: windowsGuest
+    supportedMaxCPUs: 960
+    numSupportedPhysicalSockets: 64
+    numSupportedCoresPerSocket: 960
+    supportedMinMem: "512Mi"
+    supportedMaxMem: "25149440Mi"
+    recommendedMem: "4096Mi"
+    recommendedColorDepth: 8
+    supportedDiskControllers:
+    - VirtualParaVirtual
+    - VirtualLsiLogicSAS
+    - VirtualIDE
+    - VirtualAHCI
+    - VirtualNVMe
+    recommendedSCSIController: VirtualParaVirtual
+    recommendedDiskController: VirtualParaVirtual
+    supportedNumDisks: 16
+    recommendedDiskSize: "92160Mi"
+    recommendedCdromController: VirtualAHCIController
+    supportedEthernetCards:
+    - VirtualE1000e
+    - VirtualSriovEthernetCard
+    - VirtualVmxnet3
+    recommendedEthernetCard: VirtualVmxnet3
+    supportsSlaveDisk: true
+    supportsWakeOnLan: true
+    supportsMemoryHotAdd: true
+    supportsCpuHotAdd: true
+    supportedFirmware:
+    - BIOS
+    - EFI
+    recommendedFirmware: EFI
+    supportedUSBControllerList:
+    - VirtualUSBController
+    - VirtualUSBXHCIController
+    recommendedUSBController: VirtualUSBXHCIController
+    usbRecommended: true
+    supportLevel: Supported
+    supportedForCreate: true
+    vRAMSize:
+      min: "8Mi"
+      max: "128Mi"
+      default: "8Mi"
+    numSupportedFloppyDevices: 2
+    wakeOnLanEthernetCard:
+    - VirtualE1000e
+    - VirtualVmxnet3
+    supportsPvscsiControllerForBoot: true
+    diskUuidEnabled: true
+    supportsHotPlugPCI: true
+    supportsSecureBoot: true
+    defaultSecureBoot: true
+    persistentMemorySupported: true
+    supportedMinPersistentMemory: "4Mi"
+    supportedMaxPersistentMemory: "25149440Mi"
+    recommendedPersistentMemory: "8192Mi"
+    persistentMemoryHotAddSupported: false
+    persistentMemoryHotRemoveSupported: false
+    persistentMemoryColdGrowthSupported: true
+    persistentMemoryColdGrowthGranularity:
+      min: "4Mi"
+      max: "4Mi"
+      default: "4Mi"
+    persistentMemoryHotGrowthSupported: false
+    numRecommendedPhysicalSockets: 1
+    numRecommendedCoresPerSocket: 2
+    vvtdSupported:
+      supported: true
+    vbsSupported:
+      supported: true
+    vsgxSupported:
+      supported: true
+    vsgxRemoteAttestationSupported: true
+    supportsTPM20: true
+    vwdtSupported: true
+
+  # index 4 (default)
+  - id: windows2019srv_64Guest
+    fullName: Microsoft Windows Server 2019 (64-bit)
+    family: windowsGuest
+    supportedMaxCPUs: 960
+    numSupportedPhysicalSockets: 64
+    numSupportedCoresPerSocket: 960
+    supportedMinMem: "512Mi"
+    supportedMaxMem: "25149440Mi"
+    recommendedMem: "4096Mi"
+    recommendedColorDepth: 8
+    supportedDiskControllers:
+    - VirtualParaVirtual
+    - VirtualLsiLogicSAS
+    - VirtualIDE
+    - VirtualAHCI
+    - VirtualNVMe
+    recommendedSCSIController: VirtualLsiLogicSAS
+    recommendedDiskController: VirtualLsiLogicSAS
+    supportedNumDisks: 16
+    recommendedDiskSize: "92160Mi"
+    recommendedCdromController: VirtualAHCIController
+    supportedEthernetCards:
+    - VirtualE1000e
+    - VirtualSriovEthernetCard
+    - VirtualVmxnet3
+    recommendedEthernetCard: VirtualE1000e
+    supportsSlaveDisk: true
+    supportsWakeOnLan: true
+    supportsMemoryHotAdd: true
+    supportsCpuHotAdd: true
+    supportedFirmware:
+    - BIOS
+    - EFI
+    recommendedFirmware: EFI
+    supportedUSBControllerList:
+    - VirtualUSBController
+    - VirtualUSBXHCIController
+    recommendedUSBController: VirtualUSBXHCIController
+    usbRecommended: true
+    supportLevel: Supported
+    supportedForCreate: true
+    vRAMSize:
+      min: "8Mi"
+      max: "128Mi"
+      default: "8Mi"
+    numSupportedFloppyDevices: 2
+    wakeOnLanEthernetCard:
+    - VirtualE1000e
+    - VirtualVmxnet3
+    supportsPvscsiControllerForBoot: true
+    diskUuidEnabled: true
+    supportsHotPlugPCI: true
+    supportsSecureBoot: true
+    defaultSecureBoot: true
+    persistentMemorySupported: true
+    supportedMinPersistentMemory: "4Mi"
+    supportedMaxPersistentMemory: "25149440Mi"
+    recommendedPersistentMemory: "8192Mi"
+    persistentMemoryHotAddSupported: false
+    persistentMemoryHotRemoveSupported: false
+    persistentMemoryColdGrowthSupported: true
+    persistentMemoryColdGrowthGranularity:
+      min: "4Mi"
+      max: "4Mi"
+      default: "4Mi"
+    persistentMemoryHotGrowthSupported: false
+    numRecommendedPhysicalSockets: 1
+    numRecommendedCoresPerSocket: 2
+    vvtdSupported:
+      supported: true
+    vbsSupported:
+      supported: true
+    vsgxSupported:
+      supported: true
+    vsgxRemoteAttestationSupported: true
+    supportsTPM20: true
+    vwdtSupported: true
+
+  hardwareOptions:
+    hardwareVersion: vmx-22
+    numCPU:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 32
+    - 64
+    - 128
+    - 256
+    - 512
+    - 960
+    numCoresPerSocket:
+      min: 1
+      max: 960
+      default: 1
+    autoCoresPerSocket:
+      supported: true
+      default: true
+    numCPUSimultaneousThreads:
+      min: 1
+      max: 2
+      default: 1
+    memory:
+      min: "4Mi"
+      max: "25149440Mi"
+      default: "256Mi"
+    numNumaNodes:
+      min: 1
+      max: 64
+      default: 1
+    numPCIControllers:
+      min: 1
+      max: 1
+      default: 1
+    numIDEControllers:
+      min: 2
+      max: 2
+      default: 2
+    numUSBControllers:
+      min: 0
+      max: 1
+      default: 0
+    numUSBXHCIControllers:
+      min: 0
+      max: 1
+      default: 0
+    numSIOControllers:
+      min: 1
+      max: 1
+      default: 1
+    numPS2Controllers:
+      min: 1
+      max: 1
+      default: 1
+    numSupportedWwnPorts:
+      min: 1
+      max: 16
+      default: 4
+    numSupportedWwnNodes:
+      min: 1
+      max: 1
+      default: 1
+    numTPMDevices:
+      min: 0
+      max: 1
+      default: 0
+    numNVDIMMControllers:
+      min: 0
+      max: 1
+      default: 0
+    numPrecisionClockDevices:
+      min: 0
+      max: 1
+      default: 0
+    numWDTDevices:
+      min: 0
+      max: 1
+      default: 0
+    numDeviceGroups:
+      min: 0
+      max: 4
+      default: 0
+    epcMemory:
+      min: "2Mi"
+      max: "25149440Mi"
+      default: "16Mi"
+    acpiHostBridgesFirmware:
+    - EFI
+    deviceGroupTypes:
+    - VirtualMachineVirtualDeviceGroupsVendorDeviceGroup
+    virtualDeviceOptions:
+      serialPort:
+        type: VirtualSerialPort
+        connectOption:
+          startConnected:
+            supported: true
+            default: true
+          allowGuestControl:
+            supported: true
+            default: true
+        controllerType: VirtualSIOController
+        yieldOnPoll:
+          supported: true
+          default: true
+      parallelPort:
+        type: VirtualParallelPort
+        connectOption:
+          startConnected:
+            supported: true
+            default: true
+          allowGuestControl:
+            supported: true
+            default: true
+        controllerType: VirtualSIOController
+      floppy:
+        type: VirtualFloppy
+        connectOption:
+          startConnected:
+            supported: true
+            default: true
+          allowGuestControl:
+            supported: true
+            default: true
+        controllerType: VirtualSIOController
+        autoAssignController:
+          supported: true
+          default: true
+      cdrom:
+        type: VirtualCdrom
+        connectOption:
+          startConnected:
+            supported: true
+            default: true
+          allowGuestControl:
+            supported: true
+            default: true
+        controllerType: VirtualIDEController
+      controller:
+        sio:
+          type: VirtualSIOController
+          autoAssignController:
+            supported: true
+            default: true
+          devices:
+            min: 0
+            max: 4
+            default: 0
+          supportedDevice:
+          - VirtualFloppyOption
+          - VirtualSerialPortOption
+          - VirtualParallelPortOption
+        sata:
+          ahci:
+            type: VirtualAHCIController
+            controllerType: VirtualPCIController
+            autoAssignController:
+              supported: true
+              default: true
+            plugAndPlay: true
+            hotRemoveSupported: true
+            devices:
+              min: 0
+              max: 30
+              default: 0
+            supportedDevice:
+            - VirtualDiskOption
+            - VirtualCdromOption
+        scsi:
+          busLogic:
+            type: VirtualBusLogicController
+            controllerType: VirtualPCIController
+            autoAssignController:
+              supported: true
+              default: true
+            plugAndPlay: true
+            hotRemoveSupported: true
+            numaSupported: true
+            devices:
+              min: 0
+              max: 15
+              default: 0
+            supportedDevice:
+            - VirtualDiskOption
+            - VirtualSCSIPassthroughOption
+          lsiLogic:
+            type: VirtualLsiLogicController
+            controllerType: VirtualPCIController
+            autoAssignController:
+              supported: true
+              default: true
+            plugAndPlay: true
+            hotRemoveSupported: true
+            numaSupported: true
+            devices:
+              min: 0
+              max: 15
+              default: 0
+            supportedDevice:
+            - VirtualDiskOption
+            - VirtualSCSIPassthroughOption
+          lsiLogicSAS:
+            type: VirtualLsiLogicSASController
+            controllerType: VirtualPCIController
+            autoAssignController:
+              supported: true
+              default: true
+            plugAndPlay: true
+            hotRemoveSupported: true
+            numaSupported: true
+            devices:
+              min: 0
+              max: 15
+              default: 0
+            supportedDevice:
+            - VirtualDiskOption
+            - VirtualSCSIPassthroughOption
+          paraVirtual:
+            type: ParaVirtualSCSIController
+            controllerType: VirtualPCIController
+            autoAssignController:
+              supported: true
+              default: true
+            plugAndPlay: true
+            hotRemoveSupported: true
+            numaSupported: true
+            devices:
+              min: 0
+              max: 64
+              default: 0
+            supportedDevice:
+            - VirtualDiskOption
+            - VirtualSCSIPassthroughOption
+        nvme:
+          type: VirtualNVMEController
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          devices:
+            min: 0
+            max: 64
+            default: 0
+          supportedDevice:
+          - VirtualDiskOption
+        usb:
+          usb:
+            type: VirtualUSBController
+            controllerType: VirtualPCIController
+            autoAssignController:
+              supported: true
+              default: true
+            plugAndPlay: true
+            hotRemoveSupported: true
+            numaSupported: true
+            devices:
+              min: 0
+              max: 20
+              default: 0
+            supportedDevice:
+            - VirtualUSBOption
+            - VirtualDiskOption
+            - VirtualCdromOption
+          usbXHCI:
+            type: VirtualUSBXHCIController
+            controllerType: VirtualPCIController
+            autoAssignController:
+              supported: true
+              default: true
+            plugAndPlay: true
+            hotRemoveSupported: true
+            numaSupported: true
+            devices:
+              min: 0
+              max: 20
+              default: 0
+            supportedDevice:
+            - VirtualUSBOption
+            - VirtualDiskOption
+            - VirtualCdromOption
+        pci:
+          type: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          devices:
+            min: 0
+            max: 160
+            default: 2
+          supportedDevice:
+          - VirtualSCSIControllerOption
+          - VirtualEthernetCardOption
+          - VirtualSoundCardOption
+          - VirtualVideoCardOption
+          - VirtualSATAControllerOption
+          - VirtualNVMEControllerOption
+        ide:
+          type: VirtualIDEController
+          autoAssignController:
+            supported: true
+            default: true
+          devices:
+            min: 0
+            max: 2
+            default: 0
+          supportedDevice:
+          - VirtualCdromOption
+          - VirtualDiskOption
+        ps2:
+          type: VirtualPS2Controller
+          autoAssignController:
+            supported: true
+            default: true
+          devices:
+            min: 0
+            max: 2
+            default: 2
+          supportedDevice:
+          - VirtualPointingDeviceOption
+          - VirtualKeyboardOption
+      disk:
+        type: VirtualDisk
+        controllerType: VirtualSCSIController
+        capacity:
+          min: "1Mi"
+          max: "16Ti"
+          default: "1Gi"
+      ethernetCard:
+        virtualE1000Options:
+          type: VirtualE1000
+          connectOption:
+            startConnected:
+              supported: true
+              default: true
+            allowGuestControl:
+              supported: true
+              default: true
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          wakeOnLanEnabled:
+            supported: true
+            default: true
+          vmDirectPathGen2Supported: false
+        virtualE1000eOptions:
+          type: VirtualE1000e
+          connectOption:
+            startConnected:
+              supported: true
+              default: true
+            allowGuestControl:
+              supported: true
+              default: true
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          wakeOnLanEnabled:
+            supported: true
+            default: true
+          vmDirectPathGen2Supported: false
+        virtualPCNet32Options:
+          type: VirtualPCNet32
+          connectOption:
+            startConnected:
+              supported: true
+              default: true
+            allowGuestControl:
+              supported: true
+              default: true
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          wakeOnLanEnabled:
+            supported: true
+            default: true
+          vmDirectPathGen2Supported: false
+          supportsMorphing: true
+        virtualSriovEthernetCardOptions:
+          type: VirtualSriovEthernetCard
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          vmDirectPathGen2Supported: false
+        virtualVmxnetOptions:
+          type: VirtualVmxnet
+          connectOption:
+            startConnected:
+              supported: true
+              default: true
+            allowGuestControl:
+              supported: true
+              default: true
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          deprecated: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          wakeOnLanEnabled:
+            supported: true
+            default: true
+          vmDirectPathGen2Supported: false
+        virtualVmxnet2Options:
+          type: VirtualVmxnet2
+          connectOption:
+            startConnected:
+              supported: true
+              default: true
+            allowGuestControl:
+              supported: true
+              default: true
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          wakeOnLanEnabled:
+            supported: true
+            default: true
+          vmDirectPathGen2Supported: false
+        virtualVmxnet3Options:
+          type: VirtualVmxnet3
+          connectOption:
+            startConnected:
+              supported: true
+              default: true
+            allowGuestControl:
+              supported: true
+              default: true
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          wakeOnLanEnabled:
+            supported: true
+            default: true
+          vmDirectPathGen2Supported: true
+          uptv2Enabled:
+            supported: true
+          strictLatencyConfigOption:
+            allowed:
+              supported: true
+            measureLatency:
+              supported: true
+              default: true
+            maxTxQueues:
+              min: 1
+              max: 32
+              default: 1
+            maxRxQueues:
+              min: 1
+              max: 32
+              default: 1
+            txDataRingDescSize:
+              min: 128
+              max: 2048
+              default: 256
+            rxDataRingDescSize:
+              min: 128
+              max: 2048
+              default: 256
+            disableOffload:
+              choices:
+              - TSO_LRO
+              - NONE
+              - TSO
+              - LRO
+        virtualVmxnet3VrdmaOptions:
+          type: VirtualVmxnet3Vrdma
+          connectOption:
+            startConnected:
+              supported: true
+              default: true
+            allowGuestControl:
+              supported: true
+              default: true
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+          supportedOUI:
+            choices:
+            - "00:50:56"
+          macType:
+            choices:
+            - assigned
+            - manual
+            - generated
+          wakeOnLanEnabled:
+            supported: true
+            default: true
+          vmDirectPathGen2Supported: false
+          deviceProtocol:
+            choices:
+            - rocev2
+      keyboard:
+        type: VirtualKeyboard
+        controllerType: VirtualPS2Controller
+        autoAssignController:
+          supported: true
+          default: true
+      vmci:
+        type: VirtualMachineVMCIDevice
+        controllerType: VirtualPCIController
+        autoAssignController:
+          supported: true
+          default: true
+        plugAndPlay: true
+        hotRemoveSupported: true
+        allowUnrestrictedCommunication:
+          supported: true
+        filterSpecOption:
+          action:
+            choices:
+            - deny
+            - allow
+          protocol:
+            choices:
+            - anyProtocol
+            - hypervisor
+            - doorbell
+            - queuepair
+            - datagram
+            - stream
+          direction:
+            choices:
+            - anyDirection
+            - guest
+            - host
+          lowerDstPortBoundary:
+            min: 0
+            max: 4294967294
+            default: 0
+          upperDstPortBoundary:
+            min: 0
+            max: 4294967294
+            default: 4294967294
+        filterSupported:
+          supported: true
+      nvdimm:
+        type: VirtualNVDIMM
+        controllerType: VirtualNVDIMMController
+        capacity:
+          min: "16Mi"
+          max: "25149440Mi"
+          default: "25149440Mi"
+        growable: true
+        granularity:
+          min: "4Mi"
+          max: "4Mi"
+          default: "4Mi"
+      pciPassthrough:
+        type: VirtualPCIPassthrough
+        controllerType: VirtualPCIController
+        hotRemoveSupported: true
+        numaSupported: true
+      pointingDevice:
+        type: VirtualPointingDevice
+        controllerType: VirtualPS2Controller
+        autoAssignController:
+          supported: true
+          default: true
+      precisionClock:
+        type: VirtualPrecisionClock
+      scsiPassthrough:
+        type: VirtualSCSIPassthrough
+        controllerType: VirtualSCSIController
+        plugAndPlay: true
+        hotRemoveSupported: true
+      soundCard:
+        hdAudioCard:
+          type: VirtualHdAudioCard
+          controllerType: VirtualPCIController
+          autoAssignController:
+            supported: true
+            default: true
+          plugAndPlay: true
+          hotRemoveSupported: true
+          numaSupported: true
+      tpm:
+        type: VirtualTPM
+        autoAssignController:
+          supported: true
+          default: true
+        supportedFirmware:
+        - EFI
+      usb:
+        type: VirtualUSB
+        controllerType: VirtualUSBController
+        autoAssignController:
+          supported: true
+          default: true
+        plugAndPlay: true
+        hotRemoveSupported: true
+      videoCard:
+        type: VirtualMachineVideoCard
+        controllerType: VirtualPCIController
+        autoAssignController:
+          supported: true
+          default: true
+        plugAndPlay: false
+        videoRamSize:
+          min: "1200Ki"
+          max: "256Mi"
+          default: "4Mi"
+        numDisplays:
+          min: 1
+          max: 10
+          default: 1
+        useAutoDetect:
+          supported: true
+        support3D:
+          supported: true
+        use3dRendererSupported:
+          supported: true
+        graphicsMemorySize:
+          min: "32Mi"
+          max: "8Gi"
+          default: "256Mi"
+        graphicsMemorySizeSupported:
+          supported: true
+      wdt:
+        type: VirtualWDT
+        autoAssignController:
+          supported: true
+          default: true
+        runOnBoot:
+          supported: true
+
+  capabilities:
+    snapshotOperationsSupported: true
+    multipleSnapshotsSupported: true
+    snapshotConfigSupported: true
+    poweredOffSnapshotsSupported: true
+    memorySnapshotsSupported: true
+    revertToSnapshotSupported: true
+    quiescedSnapshotsSupported: true
+    consolePreferencesSupported: true
+    cpuFeatureMaskSupported: true
+    s1AcpiManagementSupported: true
+    settingScreenResolutionSupported: true
+    vmNpivWwnSupported: true
+    npivWwnOnNonRdmVmSupported: true
+    vmNpivWwnDisableSupported: true
+    vmNpivWwnUpdateSupported: true
+    swapPlacementSupported: true
+    toolsSyncTimeSupported: true
+    diskSharesSupported: true
+    bootOptionsSupported: true
+    bootRetryOptionsSupported: true
+    settingVideoRamSizeSupported: true
+    multipleCoresPerSocketSupported: true
+    hostBasedReplicationSupported: true
+    guestAutoLockSupported: true
+    memoryReservationLockSupported: true
+    featureRequirementSupported: true
+    poweredOnMonitorTypeChangeSupported: true
+    seSparseDiskSupported: true
+    nestedHVSupported: true
+    vpmcSupported: true
+    perVmEvcSupported: true
+    virtualMmuUsageIgnored: true
+    virtualExecUsageIgnored: true
+    toolsSyncTimeAllowSupported: true
+    sevSupported: true
+    requireSgxAttestationSupported: true
+    vendorDeviceGroupSupported: true
+    sevSnpSupported: true
+    tdxSupported: true
+
+  storageClassOptions:
+    unsupportedVolumes:
+    - HostVmfsVolume
+
+  defaultDevices:
+    controllers:
+      ide:
+      - key: 200
+        deviceInfo:
+          label: "IDE 0"
+          summary: "IDE 0"
+        busNumber: 0
+      - key: 201
+        deviceInfo:
+          label: "IDE 1"
+          summary: "IDE 1"
+        busNumber: 1
+      pci:
+      - key: 100
+        deviceInfo:
+          label: "PCI controller 0"
+          summary: "PCI controller 0"
+        busNumber: 0
+        device:
+        - 500
+        - 12000
+      ps2:
+      - key: 300
+        deviceInfo:
+          label: "PS2 controller 0"
+          summary: "PS2 controller 0"
+        busNumber: 0
+        device:
+        - 600
+        - 700
+      sio:
+      - key: 400
+        deviceInfo:
+          label: "SIO controller 0"
+          summary: "SIO controller 0"
+        busNumber: 0
+    keyboards:
+    - key: 600
+      deviceInfo:
+        label: "Keyboard "
+        summary: Keyboard
+      controllerKey: 300
+      unitNumber: 0
+    pointingDevices:
+    - key: 700
+      deviceInfo:
+        label: "Pointing device"
+        summary: "Pointing device; Device"
+      controllerKey: 300
+      unitNumber: 1
+    videoCards:
+    - key: 500
+      deviceInfo:
+        label: "Video card "
+        summary: "Video card"
+      controllerKey: 100
+      unitNumber: 0
+      useAutoDetect: false
+      enable3DSupport: false
+    vmciDevices:
+    - key: 12000
+      deviceInfo:
+        label: VMCI device
+        summary: "Device on the virtual machine PCI bus that provides support for the virtual machine communication interface"
+      controllerKey: 100
+      unitNumber: 17
+      allowUnrestrictedCommunication: false
+
+  supportedMonitorTypes:
+  - release
+  - debug
+  - stats
+
+  propertyRelations:
+  - key:
+      name: flags.vbsEnabled
+      value: "true"
+    relations:
+    - name: flags.vvtdEnabled
+      value: "true"
+    - name: nestedHVEnabled
+      value: "true"
+    - name: firmware
+      value: efi
+    - name: bootOptions.efiSecureBootEnabled
+      value: "true"
