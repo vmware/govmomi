@@ -11,3 +11,7 @@ dist/
 # Ignore editor temp files
 *~
 .vscode/
+.cursor/
+
+# Test binaries
+*.test

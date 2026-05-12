@@ -24,10 +24,13 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-// takes a content string to serve from the container and returns ExtraConfig options
-// to construct container
-// content - the contents of index.html
-// port - the port to forward to the container port 80
+// constructNginxBacking returns ExtraConfig options for a container-backed nginx VM.
+// Runtime-specific defaults (e.g. RUN.mountdmi, RUN.network on rootless podman)
+// are NOT included here; call test.ApplyContainerRuntimeDefaults on the resulting
+// spec to add them.
+//
+// content - the contents of index.html served by nginx
+// port - the host port forwarded to container port 80
 func constructNginxBacking(t *testing.T, content string, port int) []types.BaseOptionValue {
 	dir := t.TempDir()
 	// experience shows that a parent directory created as part of the TempDir call may not have
@@ -55,13 +58,24 @@ func constructNginxBacking(t *testing.T, content string, port int) []types.BaseO
 	}
 }
 
-// validates the VM is serving the expected content on the expected ports
-// pairs with constructNginxBacking
-func validateNginxContainer(t *testing.T, vm *object.VirtualMachine, expected string, port int) error {
+// validateNginxContainer checks that vm is serving expected content via both
+// the container IP (direct bridge access) and the host port-mapped endpoint.
+// network is the bridge to join for the curlimages/curl probe; pass "" to use
+// the runtime default bridge (appropriate for root Docker).  On rootless
+// podman pass test.ContainerNetworkFromSpec(&spec) so the probe shares the VM
+// container's network.
+func validateNginxContainer(t *testing.T, vm *object.VirtualMachine, expected string, port int, network string) error {
 	ip, _ := vm.WaitForIP(context.Background(), true) // Returns the docker container's IP
 
-	// Count the number of bytes in feature_test.go via nginx going direct to the container
-	cmd := exec.Command("docker", "run", "--rm", "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s:80", ip))
+	// Verify direct container IP access.  Join the same bridge as the nginx
+	// container so the probe can reach it; omit --network on runtimes where
+	// the default bridge provides connectivity.
+	probeArgs := []string{"run", "--rm"}
+	if network != "" {
+		probeArgs = append(probeArgs, "--network", network)
+	}
+	probeArgs = append(probeArgs, "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s:80", ip))
+	cmd := exec.Command("docker", probeArgs...)
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	err := cmd.Run()
@@ -74,7 +88,7 @@ func validateNginxContainer(t *testing.T, vm *object.VirtualMachine, expected st
 		fmt.Printf("%d diff", buf.Len()-len(expected))
 	}
 
-	// Count the number of bytes in feature_test.go via nginx going via port remap on host
+	// Verify port-mapped access via host loopback.
 	cmd = exec.Command("curl", "-f", fmt.Sprintf("http://localhost:%d", port))
 	buf.Reset()
 	cmd.Stdout = &buf
@@ -116,6 +130,7 @@ func TestCreateVMWithContainerBacking(t *testing.T) {
 			},
 			ExtraConfig: constructNginxBacking(t, content, port),
 		}
+		require.NoError(t, test.ApplyContainerRuntimeDefaults(&spec))
 
 		f, _ := dc.Folders(ctx)
 		// Create a new VM
@@ -137,7 +152,7 @@ func TestCreateVMWithContainerBacking(t *testing.T) {
 			log.Fatal(err)
 		}
 
-		err = validateNginxContainer(t, vm, content, port)
+		err = validateNginxContainer(t, vm, content, port, test.ContainerNetworkFromSpec(&spec))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -218,6 +233,7 @@ func TestUpdateVMAddContainerBacking(t *testing.T) {
 		spec2 := types.VirtualMachineConfigSpec{
 			ExtraConfig: constructNginxBacking(t, content, port),
 		}
+		require.NoError(t, test.ApplyContainerRuntimeDefaults(&spec2))
 
 		task, err = vm.Reconfigure(ctx, spec2)
 		if err != nil {
@@ -229,7 +245,7 @@ func TestUpdateVMAddContainerBacking(t *testing.T) {
 			log.Fatal(info, err)
 		}
 
-		err = validateNginxContainer(t, vm, content, port)
+		err = validateNginxContainer(t, vm, content, port, test.ContainerNetworkFromSpec(&spec2))
 		if err != nil {
 			log.Fatal(err)
 		}
