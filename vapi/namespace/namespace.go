@@ -1118,8 +1118,8 @@ type NamespacesInstanceCreateSpec struct {
 
 // VmServiceSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/VMServiceSpec/
 type VmServiceSpec struct {
-	ContentLibraries []string `json:"content_libraries,omitempty"`
-	VmClasses        []string `json:"vm_classes,omitempty"`
+	ContentLibraries []string `json:"content_libraries"`
+	VmClasses        []string `json:"vm_classes"`
 }
 
 // StorageSpec https://developer.broadcom.com/apis/vsphere-automation-api/v7.0U3/vcenter/data-structures/Namespaces_Instances_StorageSpec/
