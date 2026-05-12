@@ -208,7 +208,7 @@ load test_helper
 
   vcsim_stop
 
-  VCSIM_SECURE_COOKIES=true vcsim_start -tls=false
+  VCSIM_SECURE_COOKIES=true vcsim_start -tls=false -l 0.0.0.0:0
 
   run govc ls
   assert_failure
