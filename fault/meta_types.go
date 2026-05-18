@@ -45,5 +45,6 @@ func IsTransientError(err any) bool {
 		Is(err, &types.NetworkDisruptedAndConfigRolledBack{}) ||
 		Is(err, &types.VAppTaskInProgress{}) ||
 		Is(err, &types.FailToLockFaultToleranceVMs{}) ||
-		Is(err, &types.HostCommunication{})
+		Is(err, &types.HostCommunication{}) ||
+		Is(err, &types.ConcurrentAccess{})
 }
