@@ -1,6 +1,6 @@
 module github.com/vmware/govmomi-tools
 
-go 1.23.0
+go 1.25.0
 
 require github.com/golangci/golangci-lint v1.64.6
 
