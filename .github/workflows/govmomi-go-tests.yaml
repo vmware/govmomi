@@ -49,7 +49,3 @@ jobs:
           TEST_TIMEOUT: 5m
           TEST_OPTS: ""
         run: make go-test
-
-      - name: Debug on Failure
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@c0afd6f790e3a5564914980036ebf83216678101 # v3.23
