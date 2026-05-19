@@ -34,7 +34,11 @@ GOVC_TEST_ISO=govc-images/$(basename $GOVC_TEST_ISO_SRC)
 GOVC_TEST_IMG_SRC=$GOVC_IMAGES/floppybird.img
 GOVC_TEST_IMG=govc-images/$(basename $GOVC_TEST_IMG_SRC)
 
-PATH="$GOPATH/bin:$PATH"
+if [ -n "$GOPATH" ]; then
+  PATH="$GOPATH/bin:$PATH"
+else
+  PATH="$(go env GOPATH)/bin:$PATH"
+fi
 
 require_docker() {
   if ! docker version ; then
