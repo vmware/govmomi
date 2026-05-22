@@ -41,7 +41,7 @@ Collaborate with the community using GitHub [discussions][govmomi-github-discuss
 
 Changes to the API are subject to [semantic versioning][reference-semver].
 
-Refer to the [CHANGELOG][govmomi-changelog] for version to version changes.
+Refer to the [Releases][govmomi-changelog] page for version to version changes.
 
 ## Related Projects
 
@@ -66,7 +66,7 @@ Follows pyvmomi and rbvmomi: language prefix + the vSphere acronym "VM Object Ma
 [govc]: govc/README.md
 [govmomi-github-issues]: https://github.com/vmware/govmomi/issues
 [govmomi-github-discussions]: https://github.com/vmware/govmomi/discussions
-[govmomi-changelog]: CHANGELOG.md
+[govmomi-changelog]: https://github.com/vmware/govmomi/releases
 [govmomi-license]: LICENSE.txt
 [go-reference]: https://pkg.go.dev/github.com/vmware/govmomi
 [go-report-card]: https://goreportcard.com/report/github.com/vmware/govmomi
