@@ -1,3 +1,7 @@
+> **Note:** As of v0.52.0, this file is no longer manually maintained.
+> For release notes on v0.52.0 and later, please refer to the
+> [GitHub Releases page](https://github.com/vmware/govmomi/releases).
+
 <a name="v0.51.0"></a>
 ## [Release v0.51.0](https://github.com/vmware/govmomi/compare/v0.51.0-alpha.0...v0.51.0)
 
