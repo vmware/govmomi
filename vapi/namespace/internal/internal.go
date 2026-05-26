@@ -16,9 +16,10 @@ const (
 	SupervisorSummaryPath                   = SupervisorsPath + "/%s/summary"
 	SupervisorTopologyPath                  = SupervisorsPath + "/%s/topology"
 
-	NamespacesPath   = "/api/vcenter/namespaces/instances"
-	NamespacesPathV2 = "/api/vcenter/namespaces/instances/v2"
-	VmClassesPath    = "/api/vcenter/namespace-management/virtual-machine-classes"
+	NamespacesPath       = "/api/vcenter/namespaces/instances"
+	NamespacesPathV2     = "/api/vcenter/namespaces/instances/v2"
+	VmClassesPath        = "/api/vcenter/namespace-management/virtual-machine-classes"
+	NamespaceNetworkPath = "/api/vcenter/namespace-management/clusters/%s/networks"
 )
 
 type SupportBundleToken struct {
