@@ -41,6 +41,7 @@ func New() *simulator.Registry {
 		volumes:                make(map[vim25types.ManagedObjectReference]map[cnstypes.CnsVolumeId]*cnstypes.CnsVolume),
 		attachments:            make(map[cnstypes.CnsVolumeId]vim25types.ManagedObjectReference),
 		snapshots:              make(map[cnstypes.CnsVolumeId]map[cnstypes.CnsSnapshotId]*cnstypes.CnsSnapshot),
+		pendingUnregisters:     make(map[cnstypes.CnsVolumeId]*cnstypes.CnsUnregisterVolumeResult),
 	})
 
 	return r
@@ -48,9 +49,10 @@ func New() *simulator.Registry {
 
 type CnsVolumeManager struct {
 	vim25types.ManagedObjectReference
-	volumes     map[vim25types.ManagedObjectReference]map[cnstypes.CnsVolumeId]*cnstypes.CnsVolume
-	attachments map[cnstypes.CnsVolumeId]vim25types.ManagedObjectReference
-	snapshots   map[cnstypes.CnsVolumeId]map[cnstypes.CnsSnapshotId]*cnstypes.CnsSnapshot
+	volumes            map[vim25types.ManagedObjectReference]map[cnstypes.CnsVolumeId]*cnstypes.CnsVolume
+	attachments        map[cnstypes.CnsVolumeId]vim25types.ManagedObjectReference
+	snapshots          map[cnstypes.CnsVolumeId]map[cnstypes.CnsSnapshotId]*cnstypes.CnsSnapshot
+	pendingUnregisters map[cnstypes.CnsVolumeId]*cnstypes.CnsUnregisterVolumeResult
 }
 
 const simulatorDiskUUID = "6000c298595bf4575739e9105b2c0c2d"
@@ -683,6 +685,83 @@ func (m *CnsVolumeManager) CnsDeleteSnapshots(ctx *simulator.Context, req *cnsty
 	return &methods.CnsDeleteSnapshotBody{
 		Res: &cnstypes.CnsDeleteSnapshotsResponse{
 			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+// CnsUnregisterVolumeEx simulates phase 1 of the two-phase unregister protocol.
+// It removes the volume from CNS, stores a PENDING_UNREGISTER record, and returns
+// the backing disk path and disk UUID in the task result.
+func (m *CnsVolumeManager) CnsUnregisterVolumeEx(ctx *simulator.Context, req *cnstypes.CnsUnregisterVolumeEx) soap.HasFault {
+	task := simulator.CreateTask(m, "CnsUnregisterVolumeEx", func(*simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
+		if len(req.UnregisterSpec) != 1 {
+			return nil, &vim25types.InvalidArgument{InvalidProperty: "unregisterSpec"}
+		}
+
+		spec := req.UnregisterSpec[0]
+		volumeId := spec.VolumeId
+
+		var backingDiskPath, diskUUID string
+		found := false
+
+		for ds, volumes := range m.volumes {
+			if vol, ok := volumes[volumeId]; ok {
+				found = true
+				if details, ok := vol.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails); ok {
+					backingDiskPath = details.BackingDiskPath
+					diskUUID = details.BackingDiskId
+				}
+				delete(m.volumes[ds], volumeId)
+				break
+			}
+		}
+
+		if !found {
+			return nil, &vim25types.NotFound{}
+		}
+
+		result := &cnstypes.CnsUnregisterVolumeResult{
+			CnsVolumeOperationResult: cnstypes.CnsVolumeOperationResult{
+				VolumeId: volumeId,
+			},
+			BackingDiskPath: backingDiskPath,
+			DiskUUID:        diskUUID,
+		}
+		m.pendingUnregisters[volumeId] = result
+
+		return &cnstypes.CnsVolumeOperationBatchResult{
+			VolumeResults: []cnstypes.BaseCnsVolumeOperationResult{result},
+		}, nil
+	})
+
+	return &methods.CnsUnregisterVolumeExBody{
+		Res: &cnstypes.CnsUnregisterVolumeExResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+// CnsAcknowledgeUnregister simulates phase 2 of the two-phase unregister protocol.
+// It deletes the PENDING_UNREGISTER record. The call is idempotent.
+func (m *CnsVolumeManager) CnsAcknowledgeUnregister(ctx context.Context, req *cnstypes.CnsAcknowledgeUnregister) soap.HasFault {
+	for _, volumeId := range req.VolumeIds {
+		delete(m.pendingUnregisters, volumeId)
+	}
+	return &methods.CnsAcknowledgeUnregisterBody{
+		Res: &cnstypes.CnsAcknowledgeUnregisterResponse{},
+	}
+}
+
+// CnsQueryPendingUnregisters simulates the crash-recovery query.
+// It returns all outstanding PENDING_UNREGISTER records.
+func (m *CnsVolumeManager) CnsQueryPendingUnregisters(ctx context.Context, req *cnstypes.CnsQueryPendingUnregisters) soap.HasFault {
+	results := make([]cnstypes.CnsUnregisterVolumeResult, 0, len(m.pendingUnregisters))
+	for _, r := range m.pendingUnregisters {
+		results = append(results, *r)
+	}
+	return &methods.CnsQueryPendingUnregistersBody{
+		Res: &cnstypes.CnsQueryPendingUnregistersResponse{
+			Returnval: results,
 		},
 	}
 }
