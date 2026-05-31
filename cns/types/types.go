@@ -1121,3 +1121,71 @@ func init() {
 
 type CnsClearVolumeControlFlagsResponse struct {
 }
+
+// CnsUnregisterVolumeResult is the result of the CnsUnregisterVolumeEx operation.
+// It extends CnsVolumeOperationResult with the backing disk path and disk UUID
+// that must be persisted by the caller before invoking CnsAcknowledgeUnregister.
+type CnsUnregisterVolumeResult struct {
+	CnsVolumeOperationResult
+
+	BackingDiskPath string `xml:"backingDiskPath,omitempty" json:"backingDiskPath,omitempty"`
+	DiskUUID        string `xml:"diskUUID,omitempty" json:"diskUUID,omitempty"`
+}
+
+func init() {
+	types.Add("CnsUnregisterVolumeResult", reflect.TypeOf((*CnsUnregisterVolumeResult)(nil)).Elem())
+}
+
+type CnsUnregisterVolumeEx CnsUnregisterVolumeExRequestType
+
+func init() {
+	types.Add("vsan:CnsUnregisterVolumeEx", reflect.TypeOf((*CnsUnregisterVolumeEx)(nil)).Elem())
+}
+
+type CnsUnregisterVolumeExRequestType struct {
+	This           types.ManagedObjectReference `xml:"_this" json:"-"`
+	UnregisterSpec []CnsUnregisterVolumeSpec    `xml:"unregisterSpec,omitempty" json:"unregisterSpec,omitempty"`
+}
+
+func init() {
+	types.Add("vsan:CnsUnregisterVolumeExRequestType", reflect.TypeOf((*CnsUnregisterVolumeExRequestType)(nil)).Elem())
+}
+
+type CnsUnregisterVolumeExResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
+}
+
+type CnsAcknowledgeUnregister CnsAcknowledgeUnregisterRequestType
+
+func init() {
+	types.Add("vsan:CnsAcknowledgeUnregister", reflect.TypeOf((*CnsAcknowledgeUnregister)(nil)).Elem())
+}
+
+type CnsAcknowledgeUnregisterRequestType struct {
+	This      types.ManagedObjectReference `xml:"_this" json:"-"`
+	VolumeIds []CnsVolumeId                `xml:"volumeIds,omitempty" json:"volumeIds,omitempty"`
+}
+
+func init() {
+	types.Add("vsan:CnsAcknowledgeUnregisterRequestType", reflect.TypeOf((*CnsAcknowledgeUnregisterRequestType)(nil)).Elem())
+}
+
+type CnsAcknowledgeUnregisterResponse struct{}
+
+type CnsQueryPendingUnregisters CnsQueryPendingUnregistersRequestType
+
+func init() {
+	types.Add("vsan:CnsQueryPendingUnregisters", reflect.TypeOf((*CnsQueryPendingUnregisters)(nil)).Elem())
+}
+
+type CnsQueryPendingUnregistersRequestType struct {
+	This types.ManagedObjectReference `xml:"_this" json:"-"`
+}
+
+func init() {
+	types.Add("vsan:CnsQueryPendingUnregistersRequestType", reflect.TypeOf((*CnsQueryPendingUnregistersRequestType)(nil)).Elem())
+}
+
+type CnsQueryPendingUnregistersResponse struct {
+	Returnval []CnsUnregisterVolumeResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
+}
