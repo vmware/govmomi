@@ -39,3 +39,16 @@ func (m TransitGateway) Reference() types.ManagedObjectReference {
 func init() {
 	t["TransitGateway"] = reflect.TypeOf((*TransitGateway)(nil)).Elem()
 }
+
+type HostDistributedVirtualSwitchManager struct {
+	Self                     types.ManagedObjectReference `json:"self"`
+	DistributedVirtualSwitch []string                     `json:"distributedVirtualSwitch"`
+}
+
+func (d HostDistributedVirtualSwitchManager) Reference() types.ManagedObjectReference {
+	return d.Self
+}
+
+func init() {
+	t["HostDistributedVirtualSwitchManager"] = reflect.TypeOf((*HostDistributedVirtualSwitchManager)(nil)).Elem()
+}
