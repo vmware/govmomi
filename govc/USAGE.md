@@ -437,6 +437,7 @@ but appear via `govc $cmd -h`:
  - [vm.vnc](#vmvnc)
  - [volume.extend](#volumeextend)
  - [volume.ls](#volumels)
+ - [volume.relocate](#volumerelocate)
  - [volume.rm](#volumerm)
  - [volume.snapshot.create](#volumesnapshotcreate)
  - [volume.snapshot.ls](#volumesnapshotls)
@@ -7816,6 +7817,25 @@ Options:
   -label=[]              List volumes with labels
   -n=[]                  List volumes with names
   -profile=[]            Storage profile name or ID
+```
+
+## volume.relocate
+
+```
+Usage: govc volume.relocate [OPTIONS] ID...
+
+Relocate one or more CNS volumes to the target datastore.
+
+All IDs are submitted in a single batch RelocateVolume call.
+Per-volume results are printed; the command exits non-zero if any relocation failed.
+
+Examples:
+  govc volume.relocate -ds vsanDatastore f75989dc-95b9-4db7-af96-8583f24bc59d
+  govc volume.relocate -ds vsanDatastore id1 id2 id3
+  govc volume.relocate -ds vsanDatastore -json id1 id2 | jq .
+
+Options:
+  -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
 ## volume.rm
