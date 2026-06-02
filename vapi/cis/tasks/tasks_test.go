@@ -59,7 +59,6 @@ func TestWaitForRunningOrTerminalState(t *testing.T) {
 		wantErr    bool
 	}{
 		{
-			// Core regression: task completes before first poll — must not hang.
 			name:       "fast task already succeeded",
 			seq:        []tasks.Status{tasks.Succeeded},
 			wantStatus: tasks.Succeeded,
@@ -136,8 +135,6 @@ func TestWaitForRunningOrError(t *testing.T) {
 			wantErr:    true,
 		},
 		{
-			// Demonstrates the race: SUCCEEDED is not Running or Failed,
-			// so the method never exits and the context deadline fires instead.
 			name: "succeeded causes hang until context expires",
 			seq:  []tasks.Status{tasks.Succeeded, tasks.Succeeded, tasks.Succeeded},
 			ctx: func() (context.Context, context.CancelFunc) {
