@@ -466,6 +466,10 @@ func (m *Model) Load(dir string) error {
 
 	m.Service = New(ctx, s)
 
+	if err = ctx.Map.AlignCounter(); err != nil {
+		return err
+	}
+
 	return m.resolveReferences(ctx)
 }
 
