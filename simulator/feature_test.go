@@ -113,6 +113,10 @@ func Example_runContainer() {
 				&types.OptionValue{Key: "RUN.port.80", Value: "8888"}, // test port remap
 			},
 		}
+		if err := test.ApplyContainerRuntimeDefaults(&spec); err != nil {
+			log.Fatal(err)
+		}
+		network := test.ContainerNetworkFromSpec(&spec)
 
 		// Create a new VM
 		task, err := f.VmFolder.CreateVM(ctx, spec, pool, nil)
@@ -135,8 +139,15 @@ func Example_runContainer() {
 
 		ip, _ := vm.WaitForIP(ctx, true) // Returns the docker container's IP
 
-		// Count the number of bytes in feature_test.go via nginx going direct to the container
-		cmd := exec.Command("docker", "run", "--rm", "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s", ip))
+		// Count the number of bytes in feature_test.go via nginx going direct to the container.
+		// Join the same bridge so the probe can reach the nginx container IP on rootless podman;
+		// omit --network on runtimes where the default bridge provides connectivity.
+		probeArgs := []string{"run", "--rm"}
+		if network != "" {
+			probeArgs = append(probeArgs, "--network", network)
+		}
+		probeArgs = append(probeArgs, "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s", ip))
+		cmd := exec.Command("docker", probeArgs...)
 		var buf bytes.Buffer
 		cmd.Stdout = &buf
 		err = cmd.Run()
