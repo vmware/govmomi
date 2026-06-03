@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -142,6 +143,24 @@ func (r *Registry) newReference(item mo.Reference) types.ManagedObjectReference 
 	}
 
 	return ref
+}
+
+func (r *Registry) AlignCounter() error {
+	maxN := int64(0)
+	for ref, _ := range r.objects {
+		prefix := valuePrefix(ref.Type)
+		suffix := strings.TrimPrefix(ref.Value, prefix)
+		n, err := strconv.ParseInt(suffix, 10, 64)
+		if err != nil {
+			continue
+		}
+		if n > maxN {
+			maxN = n
+		}
+	}
+
+	r.counter = maxN
+	return nil
 }
 
 func (r *Registry) setReference(item mo.Reference, ref types.ManagedObjectReference) {
