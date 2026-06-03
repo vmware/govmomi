@@ -7,6 +7,8 @@ package types
 import (
 	"reflect"
 	"time"
+
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 type AbandonHciWorkflow AbandonHciWorkflowRequestType
@@ -101481,6 +101483,7 @@ func init() {
 }
 
 type SetCustomValueResponse struct {
+	XMLName xml.Name `xml:"setCustomValueResponse"`
 }
 
 type StartDpuFailover StartDpuFailoverRequestType

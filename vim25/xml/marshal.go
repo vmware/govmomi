@@ -424,7 +424,7 @@ var (
 
 // marshalValue writes one or more XML elements representing val.
 // If val was obtained from a struct field, finfo must have its details.
-func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplate *StartElement) error {
+func (p *printer) marshalValue(val reflect.Value, finfo *FieldInfo, startTemplate *StartElement) error {
 	if startTemplate != nil && startTemplate.Name.Local == "" {
 		return fmt.Errorf("xml: EncodeElement of StartElement with missing name")
 	}
@@ -481,7 +481,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		return nil
 	}
 
-	tinfo, err := getTypeInfo(typ)
+	tinfo, err := GetTypeInfo(typ)
 	if err != nil {
 		return err
 	}
@@ -497,10 +497,10 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 	if startTemplate != nil {
 		start.Name = startTemplate.Name
 		start.Attr = append(start.Attr, startTemplate.Attr...)
-	} else if tinfo.xmlname != nil {
-		xmlname := tinfo.xmlname
-		if xmlname.name != "" {
-			start.Name.Space, start.Name.Local = xmlname.xmlns, xmlname.name
+	} else if tinfo.XmlName != nil {
+		xmlname := tinfo.XmlName
+		if xmlname.Name != "" {
+			start.Name.Space, start.Name.Local = xmlname.Xmlns, xmlname.Name
 		} else {
 			fv := xmlname.value(val, dontInitNilPointers)
 			if v, ok := fv.Interface().(Name); ok && v.Local != "" {
@@ -509,7 +509,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		}
 	}
 	if start.Name.Local == "" && finfo != nil {
-		start.Name.Space, start.Name.Local = finfo.xmlns, finfo.name
+		start.Name.Space, start.Name.Local = finfo.Xmlns, finfo.Name
 	}
 	if start.Name.Local == "" {
 		name := typ.Name()
@@ -524,8 +524,8 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 	}
 
 	// Attributes
-	for i := range tinfo.fields {
-		finfo := &tinfo.fields[i]
+	for _, fname := range tinfo.FieldNames {
+		finfo := tinfo.Fields[fname]
 		if finfo.flags&fAttr == 0 {
 			continue
 		}
@@ -539,7 +539,7 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 			continue
 		}
 
-		name := Name{Space: finfo.xmlns, Local: finfo.name}
+		name := Name{Space: finfo.Xmlns, Local: finfo.Name}
 		if err := p.marshalAttr(&start, name, fv); err != nil {
 			return err
 		}
@@ -551,8 +551,8 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 	}
 
 	// If an empty name was found, namespace is overridden with an empty space
-	if tinfo.xmlname != nil && start.Name.Space == "" &&
-		tinfo.xmlname.xmlns == "" && tinfo.xmlname.name == "" &&
+	if tinfo.XmlName != nil && start.Name.Space == "" &&
+		tinfo.XmlName.Xmlns == "" && tinfo.XmlName.Name == "" &&
 		len(p.tags) != 0 && p.tags[len(p.tags)-1].Space != "" {
 		start.Attr = append(start.Attr, Attr{Name{"", xmlnsPrefix}, ""})
 	}
@@ -669,16 +669,16 @@ func (p *printer) marshalAttr(start *StartElement, name Name, val reflect.Value)
 
 // defaultStart returns the default start element to use,
 // given the reflect type, field info, and start template.
-func defaultStart(typ reflect.Type, finfo *fieldInfo, startTemplate *StartElement) StartElement {
+func defaultStart(typ reflect.Type, finfo *FieldInfo, startTemplate *StartElement) StartElement {
 	var start StartElement
 	// Precedence for the XML element name is as above,
 	// except that we do not look inside structs for the first field.
 	if startTemplate != nil {
 		start.Name = startTemplate.Name
 		start.Attr = append(start.Attr, startTemplate.Attr...)
-	} else if finfo != nil && finfo.name != "" {
-		start.Name.Local = finfo.name
-		start.Name.Space = finfo.xmlns
+	} else if finfo != nil && finfo.Name != "" {
+		start.Name.Local = finfo.Name
+		start.Name.Space = finfo.Xmlns
 	} else if typ.Name() != "" {
 		start.Name.Local = typ.Name()
 	} else {
@@ -842,10 +842,10 @@ func indirect(vf reflect.Value) reflect.Value {
 	return vf
 }
 
-func (p *printer) marshalStruct(tinfo *typeInfo, val reflect.Value) error {
+func (p *printer) marshalStruct(tinfo *TypeInfo, val reflect.Value) error {
 	s := parentStack{p: p}
-	for i := range tinfo.fields {
-		finfo := &tinfo.fields[i]
+	for _, fname := range tinfo.FieldNames {
+		finfo := tinfo.Fields[fname]
 		if finfo.flags&fAttr != 0 {
 			continue
 		}
@@ -989,7 +989,7 @@ func (p *printer) marshalStruct(tinfo *typeInfo, val reflect.Value) error {
 				}
 			}
 		}
-		if err := p.marshalValue(vf, finfo, nil); err != nil {
+		if err := p.marshalValue(vf, &finfo, nil); err != nil {
 			return err
 		}
 	}

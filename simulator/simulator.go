@@ -382,26 +382,28 @@ func (r *response) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	}
 
 	// Default response namespace
-	ns := "urn:" + r.Namespace
-	// Override namespace from struct tag if defined
-	field, _ := body.Type().FieldByName("Res")
-	if tag := field.Tag.Get("xml"); tag != "" {
-		tags := strings.Split(tag, " ")
-		if len(tags) > 0 && strings.HasPrefix(tags[0], "urn") {
-			ns = tags[0]
-		}
-	}
-
 	res := xml.StartElement{
 		Name: xml.Name{
-			Space: ns,
+			Space: "urn:" + r.Namespace,
 			Local: val.Elem().Type().Name(),
 		},
 	}
-	if err := e.EncodeToken(start); err != nil {
+
+	// Override element namespace/name with struct tag if defined
+	tinfo, err := xml.GetTypeInfo(body.Type())
+	if resTinfo, ok := tinfo.Fields["Res"]; ok {
+		if resTinfo.Name != "" {
+			res.Name.Local = resTinfo.Name
+		}
+		if resTinfo.Xmlns != "" {
+			res.Name.Space = resTinfo.Xmlns
+		}
+	}
+
+	if err = e.EncodeToken(start); err != nil {
 		return err
 	}
-	if err := e.EncodeElement(val.Interface(), res); err != nil {
+	if err = e.EncodeElement(val.Interface(), res); err != nil {
 		return err
 	}
 	return e.EncodeToken(start.End())
