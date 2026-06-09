@@ -92,6 +92,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 				VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
 				LogicalSwitchUuid:            spec.LogicalSwitchUuid,
 				SegmentId:                    spec.SegmentId,
+				SubnetId:                     spec.SubnetId,
 				BackingType:                  spec.BackingType,
 			}
 
