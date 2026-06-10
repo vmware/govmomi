@@ -41,6 +41,22 @@ func SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
 	return body
 }
 
+func GetCustomFieldsAvailable(ctx *Context, ref *types.ManagedObjectReference) []types.CustomFieldDef {
+	// CustomFieldsManager is not available in ESX
+	if ctx.Map.IsESX() {
+		return nil
+	}
+
+	cfm := ctx.Map.CustomFieldsManager()
+	var filtered []types.CustomFieldDef
+	for _, f := range cfm.Field {
+		if f.ManagedObjectType == "" || f.ManagedObjectType == ref.Type {
+			filtered = append(filtered, f)
+		}
+	}
+	return filtered
+}
+
 // newUUID returns a stable UUID string based on input s
 func newUUID(s string) string {
 	return internal.OID(s).String()
