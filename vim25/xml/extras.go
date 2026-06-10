@@ -6,6 +6,7 @@ package xml
 
 import (
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -14,24 +15,29 @@ var xmlSchemaInstance = Name{Space: "http://www.w3.org/2001/XMLSchema-instance",
 var xsiType = Name{Space: "xsi", Local: "type"}
 
 var stringToTypeMap = map[string]reflect.Type{
-	"xsd:boolean":       reflect.TypeOf((*bool)(nil)).Elem(),
-	"xsd:byte":          reflect.TypeOf((*int8)(nil)).Elem(),
-	"xsd:short":         reflect.TypeOf((*int16)(nil)).Elem(),
-	"xsd:int":           reflect.TypeOf((*int32)(nil)).Elem(),
-	"xsd:long":          reflect.TypeOf((*int64)(nil)).Elem(),
-	"xsd:unsignedByte":  reflect.TypeOf((*uint8)(nil)).Elem(),
-	"xsd:unsignedShort": reflect.TypeOf((*uint16)(nil)).Elem(),
-	"xsd:unsignedInt":   reflect.TypeOf((*uint32)(nil)).Elem(),
-	"xsd:unsignedLong":  reflect.TypeOf((*uint64)(nil)).Elem(),
-	"xsd:float":         reflect.TypeOf((*float32)(nil)).Elem(),
-	"xsd:double":        reflect.TypeOf((*float64)(nil)).Elem(),
-	"xsd:string":        reflect.TypeOf((*string)(nil)).Elem(),
-	"xsd:dateTime":      reflect.TypeOf((*time.Time)(nil)).Elem(),
-	"xsd:base64Binary":  reflect.TypeOf((*[]byte)(nil)).Elem(),
+	"boolean":       reflect.TypeOf((*bool)(nil)).Elem(),
+	"byte":          reflect.TypeOf((*int8)(nil)).Elem(),
+	"short":         reflect.TypeOf((*int16)(nil)).Elem(),
+	"int":           reflect.TypeOf((*int32)(nil)).Elem(),
+	"long":          reflect.TypeOf((*int64)(nil)).Elem(),
+	"unsignedByte":  reflect.TypeOf((*uint8)(nil)).Elem(),
+	"unsignedShort": reflect.TypeOf((*uint16)(nil)).Elem(),
+	"unsignedInt":   reflect.TypeOf((*uint32)(nil)).Elem(),
+	"unsignedLong":  reflect.TypeOf((*uint64)(nil)).Elem(),
+	"float":         reflect.TypeOf((*float32)(nil)).Elem(),
+	"double":        reflect.TypeOf((*float64)(nil)).Elem(),
+	"string":        reflect.TypeOf((*string)(nil)).Elem(),
+	"dateTime":      reflect.TypeOf((*time.Time)(nil)).Elem(),
+	"base64Binary":  reflect.TypeOf((*[]byte)(nil)).Elem(),
 }
 
 // Return a reflect.Type for the specified type. Nil if unknown.
 func stringToType(s string) reflect.Type {
+	if strings.HasPrefix(s, "xs:") {
+		s = s[3:]
+	} else if strings.HasPrefix(s, "xsd:") {
+		s = s[4:]
+	}
 	return stringToTypeMap[s]
 }
 
@@ -67,7 +73,7 @@ func typeToString(typ reflect.Type) string {
 		}
 		return name
 	case reflect.Struct:
-		if typ == stringToTypeMap["xsd:dateTime"] {
+		if typ == stringToTypeMap["dateTime"] {
 			return "xsd:dateTime"
 		}
 
