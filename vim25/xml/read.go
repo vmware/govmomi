@@ -411,7 +411,7 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 		saveXMLData  []byte
 		saveAny      reflect.Value
 		sv           reflect.Value
-		tinfo        *typeInfo
+		tinfo        *TypeInfo
 		err          error
 	)
 
@@ -457,19 +457,19 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 		}
 
 		sv = v
-		tinfo, err = getTypeInfo(typ)
+		tinfo, err = GetTypeInfo(typ)
 		if err != nil {
 			return err
 		}
 
 		// Validate and assign element name.
-		if tinfo.xmlname != nil {
-			finfo := tinfo.xmlname
-			if finfo.name != "" && finfo.name != start.Name.Local {
-				return UnmarshalError("expected element type <" + finfo.name + "> but have <" + start.Name.Local + ">")
+		if tinfo.XmlName != nil {
+			finfo := tinfo.XmlName
+			if finfo.Name != "" && finfo.Name != start.Name.Local {
+				return UnmarshalError("expected element type <" + finfo.Name + "> but have <" + start.Name.Local + ">")
 			}
-			if finfo.xmlns != "" && finfo.xmlns != start.Name.Space {
-				e := "expected element <" + finfo.name + "> in name space " + finfo.xmlns + " but have "
+			if finfo.Xmlns != "" && finfo.Xmlns != start.Name.Space {
+				e := "expected element <" + finfo.Name + "> in name space " + finfo.Xmlns + " but have "
 				if start.Name.Space == "" {
 					e += "no name space"
 				} else {
@@ -486,13 +486,13 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 		// Assign attributes.
 		for _, a := range start.Attr {
 			handled := false
-			any := -1
-			for i := range tinfo.fields {
-				finfo := &tinfo.fields[i]
+			any := ""
+			for _, name := range tinfo.FieldNames {
+				finfo := tinfo.Fields[name]
 				switch finfo.flags & fMode {
 				case fAttr:
 					strv := finfo.value(sv, initNilPointers)
-					if a.Name.Local == finfo.name && (finfo.xmlns == "" || finfo.xmlns == a.Name.Space) {
+					if a.Name.Local == finfo.Name && (finfo.Xmlns == "" || finfo.Xmlns == a.Name.Space) {
 						needTypeAttr := (finfo.flags & fTypeAttr) != 0
 						// HACK: avoid using xsi:type value for a "type" attribute, such as ManagedObjectReference.Type for example.
 						if needTypeAttr || (a.Name != xmlSchemaInstance && a.Name != xsiType) {
@@ -504,13 +504,13 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 					}
 
 				case fAny | fAttr:
-					if any == -1 {
-						any = i
+					if any == "" {
+						any = name
 					}
 				}
 			}
-			if !handled && any >= 0 {
-				finfo := &tinfo.fields[any]
+			if !handled && any != "" {
+				finfo := tinfo.Fields[any]
 				strv := finfo.value(sv, initNilPointers)
 				if err := d.unmarshalAttr(strv, a); err != nil {
 					return err
@@ -519,8 +519,8 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 		}
 
 		// Determine whether we need to save character data or comments.
-		for i := range tinfo.fields {
-			finfo := &tinfo.fields[i]
+		for _, name := range tinfo.FieldNames {
+			finfo := tinfo.Fields[name]
 			switch finfo.flags & fMode {
 			case fCDATA, fCharData:
 				if !saveData.IsValid() {
@@ -742,12 +742,12 @@ func copyValue(dst reflect.Value, src []byte) (err error) {
 // The consumed result tells whether XML elements have been consumed
 // from the Decoder until start's matching end element, or if it's
 // still untouched because start is uninteresting for sv's fields.
-func (d *Decoder) unmarshalPath(tinfo *typeInfo, sv reflect.Value, parents []string, start *StartElement, depth int) (consumed bool, err error) {
+func (d *Decoder) unmarshalPath(tinfo *TypeInfo, sv reflect.Value, parents []string, start *StartElement, depth int) (consumed bool, err error) {
 	recurse := false
 Loop:
-	for i := range tinfo.fields {
-		finfo := &tinfo.fields[i]
-		if finfo.flags&fElement == 0 || len(finfo.parents) < len(parents) || finfo.xmlns != "" && finfo.xmlns != start.Name.Space {
+	for _, name := range tinfo.FieldNames {
+		finfo := tinfo.Fields[name]
+		if finfo.flags&fElement == 0 || len(finfo.parents) < len(parents) || finfo.Xmlns != "" && finfo.Xmlns != start.Name.Space {
 			continue
 		}
 		for j := range parents {
@@ -755,7 +755,7 @@ Loop:
 				continue Loop
 			}
 		}
-		if len(finfo.parents) == len(parents) && finfo.name == start.Name.Local {
+		if len(finfo.parents) == len(parents) && finfo.Name == start.Name.Local {
 			// It's a perfect match, unmarshal the field.
 			return true, d.unmarshal(finfo.value(sv, initNilPointers), start, depth+1)
 		}
