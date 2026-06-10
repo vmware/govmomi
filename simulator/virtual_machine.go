@@ -2652,7 +2652,13 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		destHost = req.Spec.Location.Host
 	}
 
-	folder, _ := asFolderMO(ctx.Map.Get(req.Folder))
+	folder, ok := asFolderMO(ctx.Map.Get(req.Folder))
+	if !ok {
+		return &methods.CloneVM_TaskBody{
+			Fault_: Fault("Invalid folder", &types.RuntimeFault{}),
+		}
+	}
+
 	host := ctx.Map.Get(*destHost).(*HostSystem)
 	event := vm.event(ctx)
 
