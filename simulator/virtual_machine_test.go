@@ -437,24 +437,49 @@ func TestCloneVm(t *testing.T) {
 		vmName string
 		config types.VirtualMachineCloneSpec
 		fail   bool
+		folder func(*object.Folder) *object.Folder
 	}{
 		{
-			"clone a vm",
-			"cloned-vm",
-			types.VirtualMachineCloneSpec{
+			name:   "clone a vm",
+			vmName: "cloned-vm",
+			config: types.VirtualMachineCloneSpec{
 				Template: false,
 				PowerOn:  false,
 			},
-			false,
+			fail: false,
 		},
 		{
-			"vm name is duplicated",
-			"DC0_H0_VM0",
-			types.VirtualMachineCloneSpec{
+			name:   "vm name is duplicated",
+			vmName: "DC0_H0_VM0",
+			config: types.VirtualMachineCloneSpec{
 				Template: false,
 				PowerOn:  false,
 			},
-			true,
+			fail: true,
+		},
+		{
+			name:   "clone to non-existent folder",
+			vmName: "cloned-vm",
+			config: types.VirtualMachineCloneSpec{
+				Template: false,
+				PowerOn:  false,
+			},
+			fail: true,
+			folder: func(f *object.Folder) *object.Folder {
+				return object.NewFolder(f.Client(), types.ManagedObjectReference{Type: "Folder", Value: "invalid-folder-value"})
+			},
+		},
+		{
+			name:   "clone to invalid folder type",
+			vmName: "cloned-vm",
+			config: types.VirtualMachineCloneSpec{
+				Template: false,
+				PowerOn:  false,
+			},
+			fail: true,
+			folder: func(f *object.Folder) *object.Folder {
+				return object.NewFolder(f.Client(), types.ManagedObjectReference{Type: "HostSystem", Value: "host-12"})
+			},
 		},
 	}
 
@@ -478,16 +503,17 @@ func TestCloneVm(t *testing.T) {
 				}
 
 				vmFolder := folders.VmFolder
+				if test.folder != nil {
+					vmFolder = test.folder(vmFolder)
+				}
 
 				vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
 				vm := object.NewVirtualMachine(c, vmm.Reference())
 
 				task, err := vm.Clone(ctx, vmFolder, test.vmName, test.config)
-				if err != nil {
-					t.Fatal(err)
+				if err == nil {
+					err = task.Wait(ctx)
 				}
-
-				err = task.Wait(ctx)
 				if test.fail {
 					if err == nil {
 						t.Errorf("%s: expected error", test.name)
