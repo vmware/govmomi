@@ -11,6 +11,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -186,6 +187,77 @@ func TestObjectCustomFields(t *testing.T) {
 
 	if len(vm.AvailableField) != 0 {
 		t.Fatalf("len(vm.AvailableField) expected 0, got %d", len(vm.AvailableField))
+	}
+}
+
+func TestVirtualMachineAvailableFieldViaRetrievePropertiesEx(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cfm, err := object.GetCustomFieldsManager(c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Find any VM in the simulator map
+	vmSim := m.Map().Any("VirtualMachine").(*VirtualMachine)
+	vmRef := vmSim.Reference()
+
+	// 1. Initially, availableField should be empty
+	var moVM mo.VirtualMachine
+	err = c.RetrieveOne(ctx, vmRef, []string{"availableField"}, &moVM)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(moVM.AvailableField) != 0 {
+		t.Fatalf("expected 0 available fields, got %d", len(moVM.AvailableField))
+	}
+
+	// 2. Add a custom field definition for Virtual Machines
+	fieldName := "testAvailableFieldProperty"
+	field, err := cfm.Add(ctx, fieldName, vmRef.Type, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 3. Set the custom field value on the VM
+	vmm := object.NewVirtualMachine(c.Client, vmRef)
+	err = vmm.SetCustomValue(ctx, fieldName, "someValue")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 4. Retrieve properties via client (calls RetrievePropertiesEx) and verify availableField
+	err = c.RetrieveOne(ctx, vmRef, []string{"availableField"}, &moVM)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(moVM.AvailableField) != 1 {
+		t.Fatalf("expected 1 available field, got %d", len(moVM.AvailableField))
+	}
+
+	if moVM.AvailableField[0].Name != fieldName {
+		t.Fatalf("expected available field name to be %q, got %s", fieldName, moVM.AvailableField[0].Name)
+	}
+
+	if moVM.AvailableField[0].Key != field.Key {
+		t.Fatalf("expected available field key to be %d, got %d", field.Key, moVM.AvailableField[0].Key)
 	}
 }
 

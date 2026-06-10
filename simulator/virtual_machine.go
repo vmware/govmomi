@@ -52,7 +52,7 @@ func asVirtualMachineMO(obj mo.Reference) (*mo.VirtualMachine, bool) {
 func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
 	vm := &VirtualMachine{}
 	vm.Parent = &parent
-	ctx.Map.reference(vm)
+	ref := ctx.Map.reference(vm)
 
 	folder := ctx.Map.Get(parent)
 
@@ -164,6 +164,9 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	// put vm in the folder only if no errors occurred
 	f, _ := asFolderMO(folder)
 	folderPutChild(ctx, f, vm)
+
+	// add available fields
+	vm.AvailableField = GetCustomFieldsAvailable(ctx, &ref)
 
 	return vm, nil
 }
