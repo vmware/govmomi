@@ -21,7 +21,9 @@
     "vim25/xml/**",
     "govc/**/*.sh",
     "gen/**/*.yaml",
-    "dist/**/*"
+    "dist/**/*",
+    "crd/**/*.yaml",
+    "crd/**/*.xml"
   ],
   "maxScanLines": 10
 }

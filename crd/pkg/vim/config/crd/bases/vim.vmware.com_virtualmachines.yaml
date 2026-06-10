@@ -1,0 +1,3135 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.1
+  name: virtualmachines.vim.vmware.com
+spec:
+  group: vim.vmware.com
+  names:
+    kind: VirtualMachine
+    listKind: VirtualMachineList
+    plural: virtualmachines
+    shortNames:
+    - vm
+    singular: virtualmachine
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          VirtualMachine is the schema for the
+          VirtualMachine API and
+          represents the desired state and observed status of a
+          VirtualMachine resource.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: VirtualMachineSpec defines the desired state of a VirtualMachine.
+            properties:
+              config:
+                description: |-
+                  VirtualMachineConfigInfoSpec encapsulates the configuration settings and
+                  virtual hardware for a virtual machine.
+                  It corresponds to vim.vm.ConfigInfo.
+                properties:
+                  alternateGuestName:
+                    description: |-
+                      AlternateGuestName is used as the display name for the operating
+                      system if GuestID is "other" or "other-64".
+                    type: string
+                  annotation:
+                    description: Annotation is a description for the virtual machine.
+                    type: string
+                  bootOptions:
+                    description: BootOptions defines the boot-time behavior of the
+                      virtual machine.
+                    properties:
+                      bootDelay:
+                        description: |-
+                          BootDelay is the delay in milliseconds before starting the boot
+                          sequence. The boot delay specifies a time interval between virtual
+                          machine power on or restart and the beginning of the boot sequence.
+                        format: int64
+                        type: integer
+                      bootOrder:
+                        description: |-
+                          BootOrder is the boot order. Listed devices are used for booting.
+                          After the list is exhausted, the default BIOS boot device
+                          algorithm is used. The order of entries is significant: the first
+                          device is tried first, then the second, and so on.
+                        items:
+                          description: |-
+                            VirtualMachineBootOptionsBootableDevice represents a device in the boot
+                            order for a virtual machine.
+                            It corresponds to vim.vm.BootOptions.BootableDevice and its subtypes
+                            (BootableCdromDevice, BootableDiskDevice, BootableEthernetDevice,
+                            BootableFloppyDevice).
+                          properties:
+                            deviceKey:
+                              description: |-
+                                DeviceKey is the device key of the bootable device.
+                                Only applicable when Type is Disk or Ethernet; it references the
+                                key property of the corresponding virtual device.
+                              format: int32
+                              type: integer
+                            type:
+                              description: Type identifies the concrete bootable device
+                                type.
+                              enum:
+                              - Cdrom
+                              - Disk
+                              - Ethernet
+                              - Floppy
+                              type: string
+                          required:
+                          - type
+                          type: object
+                        type: array
+                      bootRetryDelay:
+                        description: |-
+                          BootRetryDelay is the delay in milliseconds before a boot retry.
+                          The virtual machine uses this value only if BootRetryEnabled is
+                          true.
+                        format: int64
+                        type: integer
+                      bootRetryEnabled:
+                        description: |-
+                          BootRetryEnabled indicates whether a virtual machine that fails to
+                          boot will try again after the BootRetryDelay time period has
+                          expired. When false, the virtual machine waits indefinitely for
+                          you to initiate boot retry.
+                        type: boolean
+                      efiSecureBootEnabled:
+                        description: |-
+                          EFISecureBootEnabled indicates whether the virtual machine's
+                          firmware will perform signature checks of any EFI images loaded
+                          during startup, and will refuse to start any images that do not
+                          pass those signature checks.
+                        type: boolean
+                      enterBIOSSetup:
+                        description: |-
+                          EnterBIOSSetup indicates that the virtual machine automatically
+                          enters BIOS setup the next time it boots. The virtual machine
+                          resets this flag to false so that subsequent boots proceed
+                          normally.
+                        type: boolean
+                      networkBootProtocol:
+                        description: |-
+                          NetworkBootProtocol is the protocol to attempt during PXE network
+                          boot or NetBoot.
+                        enum:
+                        - ipv4
+                        - ipv6
+                        type: string
+                    type: object
+                  changeTrackingEnabled:
+                    description: |-
+                      ChangeTrackingEnabled indicates whether changed block tracking for
+                      this VM's disks is active.
+                    type: boolean
+                  cpuAffinity:
+                    description: |-
+                      CPUAffinity defines the CPU affinity settings for this virtual
+                      machine.
+                    properties:
+                      affinitySet:
+                        description: |-
+                          AffinitySet is the list of processors that may be used by the
+                          virtual machine. An empty list removes any existing affinity.
+                        items:
+                          format: int32
+                          type: integer
+                        type: array
+                    type: object
+                  cpuAllocation:
+                    description: CPUAllocation defines the resource limits for CPU.
+                    properties:
+                      expandableReservation:
+                        description: |-
+                          ExpandableReservation indicates whether the reservation can grow
+                          beyond the specified value.
+                        type: boolean
+                      limit:
+                        description: |-
+                          Limit is the maximum allowed resource usage. Set to -1 for no
+                          fixed limit. Units are MHz for CPU.
+                        format: int64
+                        type: integer
+                      overheadLimit:
+                        description: |-
+                          OverheadLimit is the maximum allowed overhead resource reservation.
+                          Units are MB.
+                        format: int64
+                        type: integer
+                      reservation:
+                        description: |-
+                          Reservation is the guaranteed amount of resource available to the
+                          virtual machine. Units are MHz for CPU.
+                        format: int64
+                        type: integer
+                      shares:
+                        description: Shares describes the resource shares used in
+                          case of contention.
+                        properties:
+                          level:
+                            description: |-
+                              Level is the allocation level. Levels map to pre-determined numeric
+                              share values.
+                            enum:
+                            - custom
+                            - high
+                            - low
+                            - normal
+                            type: string
+                          shares:
+                            description: |-
+                              Shares is the number of shares allocated. Only meaningful when
+                              Level is set to "custom".
+                            format: int32
+                            type: integer
+                        required:
+                        - level
+                        - shares
+                        type: object
+                    type: object
+                  cpuFeatureMask:
+                    description: |-
+                      CPUFeatureMask specifies CPU feature compatibility masks that
+                      override the defaults from the virtual machine's guest OS
+                      descriptor.
+                    items:
+                      description: |-
+                        HostCPUIDInfo describes the CPU features of a host or the CPU feature
+                        requirements of a virtual machine.
+                        It corresponds to vim.host.CpuIdInfo.
+                      properties:
+                        eax:
+                          description: EAX represents the required EAX bits as a formatted
+                            bit mask string.
+                          type: string
+                        ebx:
+                          description: EBX represents the required EBX bits as a formatted
+                            bit mask string.
+                          type: string
+                        ecx:
+                          description: ECX represents the required ECX bits as a formatted
+                            bit mask string.
+                          type: string
+                        edx:
+                          description: EDX represents the required EDX bits as a formatted
+                            bit mask string.
+                          type: string
+                        level:
+                          description: Level is the level (EAX input to CPUID).
+                          format: int32
+                          type: integer
+                        vendor:
+                          description: Vendor is the CPU vendor for which this mask
+                            applies.
+                          type: string
+                      required:
+                      - level
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  cpuHotAddEnabled:
+                    description: |-
+                      CPUHotAddEnabled indicates whether virtual processors can be added
+                      while this virtual machine is running.
+                    type: boolean
+                  cpuHotRemoveEnabled:
+                    description: |-
+                      CPUHotRemoveEnabled indicates whether virtual processors can be
+                      removed while this virtual machine is running.
+                    type: boolean
+                  defaultPowerOps:
+                    description: |-
+                      DefaultPowerOps defines the configured defaults for power operations
+                      on the virtual machine.
+                    properties:
+                      defaultPowerOffType:
+                        description: |-
+                          DefaultPowerOffType is the default power-off operation: "soft",
+                          "hard", or "preset".
+                        type: string
+                      defaultResetType:
+                        description: |-
+                          DefaultResetType is the default reset operation: "soft", "hard",
+                          or "preset".
+                        type: string
+                      defaultSuspendType:
+                        description: |-
+                          DefaultSuspendType is the default suspend operation: "soft",
+                          "hard", or "preset".
+                        type: string
+                      powerOffType:
+                        description: PowerOffType is the advisory default power-off
+                          type.
+                        type: string
+                      resetType:
+                        description: ResetType is the advisory default reset type.
+                        type: string
+                      standbyAction:
+                        description: |-
+                          StandbyAction describes the behavior of the virtual machine when
+                          it receives the S1 ACPI call.
+                        type: string
+                      suspendType:
+                        description: SuspendType is the advisory default suspend type.
+                        type: string
+                    type: object
+                  deviceGroups:
+                    description: |-
+                      DeviceGroups describes the assignable hardware device groups for
+                      this virtual machine.
+                    properties:
+                      deviceGroup:
+                        description: DeviceGroup is the list of device groups used
+                          by this VM.
+                        items:
+                          description: |-
+                            VirtualMachineVirtualDeviceGroupsDeviceGroup describes a device group
+                            in a virtual machine.
+                            It corresponds to vim.vm.VirtualDeviceGroups.DeviceGroup.
+                          properties:
+                            deviceInfo:
+                              description: DeviceInfo provides a label and summary
+                                for the device group.
+                              properties:
+                                label:
+                                  description: Label is the display label.
+                                  type: string
+                                summary:
+                                  description: Summary is the summary description.
+                                  type: string
+                              required:
+                              - label
+                              - summary
+                              type: object
+                            groupInstanceKey:
+                              description: GroupInstanceKey is a unique integer identifying
+                                this device group.
+                              format: int32
+                              type: integer
+                          required:
+                          - groupInstanceKey
+                          type: object
+                        type: array
+                    type: object
+                  deviceSwap:
+                    description: DeviceSwap reports the current status of the device
+                      swap feature.
+                    properties:
+                      lsiToPvscsi:
+                        description: |-
+                          LsiToPvscsi describes the status of LSI Logic to ParaVirtual SCSI
+                          controller swap.
+                        properties:
+                          applicable:
+                            description: |-
+                              Applicable indicates whether the swap operation is applicable to
+                              this virtual machine.
+                            type: boolean
+                          enabled:
+                            description: |-
+                              Enabled indicates whether the swap operation is enabled for this
+                              virtual machine.
+                            type: boolean
+                          status:
+                            description: Status is the status of the operation.
+                            type: string
+                        type: object
+                    type: object
+                  extraConfig:
+                    description: |-
+                      ExtraConfig contains additional configuration information for the
+                      virtual machine.
+                    items:
+                      description: |-
+                        OptionValue is a key-value configuration parameter.
+                        It corresponds to vim.option.OptionValue.
+                      properties:
+                        key:
+                          description: Key is the option key.
+                          type: string
+                        value:
+                          description: Value is the option value, encoded as a string.
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  files:
+                    description: |-
+                      Files describes the locations of files associated with the virtual
+                      machine.
+                    properties:
+                      ftMetadataDirectory:
+                        description: |-
+                          FTMetadataDirectory is the path to the directory for fault
+                          tolerance metadata files.
+                        type: string
+                      logDirectory:
+                        description: |-
+                          LogDirectory is the path to the directory for log files. Defaults
+                          to the same directory as the configuration file.
+                        type: string
+                      snapshotDirectory:
+                        description: |-
+                          SnapshotDirectory is the path to the directory that holds suspend
+                          and snapshot files belonging to the virtual machine.
+                        type: string
+                      suspendDirectory:
+                        description: SuspendDirectory is the path to the directory
+                          for suspend files.
+                        type: string
+                      vmPathName:
+                        description: |-
+                          VMPathName is the path to the configuration file for the virtual
+                          machine, e.g., the .vmx file. This also implicitly defines the
+                          configuration directory.
+                        type: string
+                    type: object
+                  firmware:
+                    description: Firmware is the firmware type for this virtual machine.
+                    enum:
+                    - BIOS
+                    - EFI
+                    type: string
+                  fixedPassthruHotPlugEnabled:
+                    description: |-
+                      FixedPassthruHotPlugEnabled indicates whether support to add and
+                      remove fixed passthrough devices when the VM is running is enabled.
+                    type: boolean
+                  ftEncryptionMode:
+                    description: |-
+                      FTEncryptionMode describes whether encrypted Fault Tolerance is
+                      required for this VM.
+                    type: string
+                  guestAutoLockEnabled:
+                    description: |-
+                      GuestAutoLockEnabled indicates whether the guest operating system
+                      will logout any active sessions when there are no remote display
+                      connections open to the virtual machine.
+                    type: boolean
+                  guestFullName:
+                    description: |-
+                      GuestFullName is the full name of the guest operating system for
+                      the virtual machine. For example: Windows 2000 Professional.
+                    type: string
+                  guestId:
+                    description: |-
+                      GuestID is the guest operating system configured on a virtual
+                      machine.
+                    type: string
+                  hardware:
+                    description: |-
+                      Hardware contains the processor, memory, and virtual device
+                      configuration of the virtual machine.
+                    properties:
+                      autoCoresPerSocket:
+                        description: |-
+                          AutoCoresPerSocket indicates whether cores per socket is
+                          automatically determined.
+                        type: boolean
+                      devices:
+                        description: |-
+                          - 100 SATA, 60 NVMe, 1024 SCSI, 4 IDE, 20 USB
+                          - 4 IDE, 20 USB, 100 SATA
+                        items:
+                          description: |-
+                            VirtualDevice is the base data object type for devices in a virtual machine.
+                            It corresponds to vim.vm.device.VirtualDevice.
+                          properties:
+                            backing:
+                              description: Backing describes the device's backing
+                                information.
+                              properties:
+                                device:
+                                  description: Device contains host device backing
+                                    information.
+                                  properties:
+                                    cdromPassthrough:
+                                      description: |-
+                                        VirtualCdromPassthroughBackingInfo defines device pass-through backing for a
+                                        virtual CD-ROM.
+                                        It corresponds to vim.vm.device.VirtualCdrom.PassthroughBackingInfo.
+                                      properties:
+                                        exclusive:
+                                          description: |-
+                                            Exclusive indicates whether the virtual machine has exclusive CD-ROM
+                                            device access.
+                                          type: boolean
+                                      required:
+                                      - exclusive
+                                      type: object
+                                    deviceName:
+                                      description: DeviceName is the name of the device
+                                        on the host system.
+                                      type: string
+                                    diskRawDiskVer2:
+                                      description: |-
+                                        VirtualDiskRawDiskVer2BackingInfo defines raw host device (VMware Server)
+                                        backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.RawDiskVer2BackingInfo.
+                                      properties:
+                                        changeId:
+                                          description: ChangeId is the change ID for
+                                            tracking incremental changes.
+                                          type: string
+                                        descriptorFileName:
+                                          description: DescriptorFileName is the name
+                                            of the raw disk descriptor file.
+                                          type: string
+                                        partitioned:
+                                          description: |-
+                                            VirtualDiskPartitionedRawDiskVer2BackingInfo defines partitioned raw host
+                                            device backing for a virtual disk.
+                                            It corresponds to vim.vm.device.VirtualDisk.PartitionedRawDiskVer2BackingInfo.
+                                          properties:
+                                            partition:
+                                              description: Partition is the list of
+                                                partition indexes on the physical
+                                                disk drive.
+                                              items:
+                                                format: int32
+                                                type: integer
+                                              type: array
+                                          required:
+                                          - partition
+                                          type: object
+                                        sharing:
+                                          description: Sharing is the sharing mode
+                                            of the virtual disk.
+                                          type: string
+                                        uuid:
+                                          description: Uuid is the disk UUID.
+                                          type: string
+                                      required:
+                                      - descriptorFileName
+                                      type: object
+                                    ethernetCardNetwork:
+                                      description: |-
+                                        VirtualEthernetCardNetworkBackingInfo defines standard network backing for
+                                        a virtual Ethernet card.
+                                        It corresponds to vim.vm.device.VirtualEthernetCard.NetworkBackingInfo.
+                                      properties:
+                                        network:
+                                          description: |-
+                                            ManagedObjectReference is a referenced to a managed object on a given
+                                            vSphere instance.
+                                          properties:
+                                            id:
+                                              description: ID is the object's ID.
+                                              type: string
+                                            serverID:
+                                              description: ServerID is the ID of the
+                                                server to which the object belongs.
+                                              type: string
+                                            type:
+                                              description: Type is the object's type.
+                                              type: string
+                                          required:
+                                          - id
+                                          - type
+                                          type: object
+                                      type: object
+                                    pciPassthroughDevice:
+                                      description: |-
+                                        VirtualPCIPassthroughDeviceBackingInfo contains information about the host
+                                        PCI device backing for a PCI passthrough device.
+                                        It corresponds to vim.vm.device.VirtualPCIPassthrough.DeviceBackingInfo.
+                                      properties:
+                                        deviceId:
+                                          description: DeviceId is the PCI device
+                                            ID.
+                                          type: string
+                                        id:
+                                          description: Id is the PCI name ID, composed
+                                            of "bus:slot.function".
+                                          type: string
+                                        systemId:
+                                          description: SystemId is the ID of the system
+                                            the PCI device is attached to.
+                                          type: string
+                                        vendorId:
+                                          description: VendorId is the PCI vendor
+                                            ID.
+                                          type: integer
+                                      required:
+                                      - deviceId
+                                      - id
+                                      - systemId
+                                      - vendorId
+                                      type: object
+                                    pciPassthroughDynamic:
+                                      description: |-
+                                        VirtualPCIPassthroughDynamicBackingInfo contains information about the
+                                        Dynamic DirectPath PCI device backing.
+                                        It corresponds to vim.vm.device.VirtualPCIPassthrough.DynamicBackingInfo.
+                                      properties:
+                                        allowedDevice:
+                                          description: |-
+                                            AllowedDevice lists the allowed PCI devices for this Dynamic DirectPath
+                                            device.
+                                          items:
+                                            description: |-
+                                              VirtualPCIPassthroughAllowedDevice specifies an allowed PCI device for
+                                              Dynamic DirectPath.
+                                              It corresponds to vim.vm.device.VirtualPCIPassthrough.AllowedDevice.
+                                            properties:
+                                              deviceId:
+                                                description: DeviceId is the PCI device
+                                                  ID.
+                                                format: int32
+                                                type: integer
+                                              revisionId:
+                                                description: RevisionId is the PCI
+                                                  revision ID.
+                                                format: int32
+                                                type: integer
+                                              subDeviceId:
+                                                description: SubDeviceId is the PCI
+                                                  subdevice ID.
+                                                format: int32
+                                                type: integer
+                                              subVendorId:
+                                                description: SubVendorId is the PCI
+                                                  subvendor ID.
+                                                format: int32
+                                                type: integer
+                                              vendorId:
+                                                description: VendorId is the PCI vendor
+                                                  ID.
+                                                format: int32
+                                                type: integer
+                                            required:
+                                            - deviceId
+                                            - vendorId
+                                            type: object
+                                          type: array
+                                        assignedId:
+                                          description: AssignedId is the ID of the
+                                            device assigned when the VM is powered
+                                            on.
+                                          type: string
+                                        customLabel:
+                                          description: CustomLabel is an optional
+                                            label that the device must also have set.
+                                          type: string
+                                      type: object
+                                    pointingDeviceDevice:
+                                      description: |-
+                                        VirtualPointingDeviceDeviceBackingInfo defines host mouse device backing for
+                                        a virtual pointing device.
+                                        It corresponds to vim.vm.device.VirtualPointingDevice.DeviceBackingInfo.
+                                      properties:
+                                        hostPointingDevice:
+                                          description: |-
+                                            HostPointingDevice defines the mouse type used to interact with the
+                                            host mouse.
+                                          type: string
+                                      required:
+                                      - hostPointingDevice
+                                      type: object
+                                    usbRemoteHost:
+                                      description: |-
+                                        VirtualUSBRemoteHostBackingInfo identifies a USB device on a specific ESX
+                                        host, supporting persistent access across vMotion.
+                                        It corresponds to vim.vm.device.VirtualUSB.RemoteHostBackingInfo.
+                                      properties:
+                                        hostname:
+                                          description: |-
+                                            Hostname is the name of the ESX host to which the physical USB device
+                                            is attached.
+                                          type: string
+                                      required:
+                                      - hostname
+                                      type: object
+                                    useAutoDetect:
+                                      description: |-
+                                        UseAutoDetect indicates whether the device should be auto-detected
+                                        instead of directly specified. When true, DeviceName is ignored.
+                                      type: boolean
+                                  type: object
+                                  x-kubernetes-validations:
+                                  - message: at most one of cdromPassthrough, diskRawDiskVer2,
+                                      ethernetCardNetwork, pciPassthroughDevice, pciPassthroughDynamic,
+                                      pointingDeviceDevice, or usbRemoteHost may be
+                                      specified
+                                    rule: '[has(self.cdromPassthrough), has(self.diskRawDiskVer2),
+                                      has(self.ethernetCardNetwork), has(self.pciPassthroughDevice),
+                                      has(self.pciPassthroughDynamic), has(self.pointingDeviceDevice),
+                                      has(self.usbRemoteHost)].filter(x, x).size()
+                                      <= 1'
+                                ethernetCardDistributedVirtualPort:
+                                  description: |-
+                                    EthernetCardDistributedVirtualPort contains DVS port backing
+                                    information for virtual Ethernet cards.
+                                  properties:
+                                    port:
+                                      description: Port is the distributed virtual
+                                        switch port or portgroup connection.
+                                      properties:
+                                        connectionCookie:
+                                          description: |-
+                                            ConnectionCookie is a unique identifier for this port connection
+                                            instance, assigned by the server.
+                                          format: int32
+                                          type: integer
+                                        portKey:
+                                          description: |-
+                                            PortKey is the key of the specific port. Specify this to connect to a
+                                            particular port rather than a portgroup.
+                                          type: string
+                                        portgroupKey:
+                                          description: |-
+                                            PortgroupKey is the key of the portgroup. Specify this to connect to a
+                                            portgroup rather than a specific port.
+                                          type: string
+                                        switchUuid:
+                                          description: SwitchUuid is the UUID of the
+                                            distributed virtual switch.
+                                          type: string
+                                      required:
+                                      - switchUuid
+                                      type: object
+                                  required:
+                                  - port
+                                  type: object
+                                ethernetCardOpaqueNetwork:
+                                  description: |-
+                                    EthernetCardOpaqueNetwork contains opaque network backing
+                                    information for virtual Ethernet cards.
+                                  properties:
+                                    opaqueNetworkId:
+                                      description: OpaqueNetworkId is the opaque network
+                                        identifier.
+                                      type: string
+                                    opaqueNetworkType:
+                                      description: OpaqueNetworkType is the opaque
+                                        network type.
+                                      type: string
+                                  required:
+                                  - opaqueNetworkId
+                                  - opaqueNetworkType
+                                  type: object
+                                file:
+                                  description: File contains host file backing information.
+                                  properties:
+                                    backingObjectId:
+                                      description: |-
+                                        BackingObjectId is the backing object's durable and immutable
+                                        identifier.
+                                      type: string
+                                    fileName:
+                                      description: FileName is the filename for the
+                                        host file used in this backing.
+                                      type: string
+                                    nvdimm:
+                                      description: |-
+                                        VirtualNVDIMMBackingInfo contains information about the file backing for a
+                                        virtual NVDIMM device.
+                                        It corresponds to vim.vm.device.VirtualNVDIMM.BackingInfo.
+                                      properties:
+                                        changeId:
+                                          description: |-
+                                            ChangeId is the change ID of the virtual NVDIMM for the corresponding
+                                            snapshot, used to track incremental changes.
+                                          type: string
+                                        parent:
+                                          type: object
+                                          x-kubernetes-preserve-unknown-fields: true
+                                      type: object
+                                    virtualDiskFlatVer1:
+                                      description: |-
+                                        VirtualDiskFlatVer1BackingInfo defines flat-format (GSX Server 2.x) file
+                                        backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.FlatVer1BackingInfo.
+                                      properties:
+                                        contentId:
+                                          description: |-
+                                            ContentId indicates the logical contents of the disk backing and its
+                                            parents.
+                                          type: string
+                                        diskMode:
+                                          description: DiskMode is the disk persistence
+                                            mode.
+                                          type: string
+                                        parent:
+                                          description: Parent is the parent backing
+                                            if this is a delta disk backing.
+                                          type: object
+                                          x-kubernetes-preserve-unknown-fields: true
+                                        split:
+                                          description: |-
+                                            Split indicates whether the virtual disk is stored in multiple 2 GB
+                                            files.
+                                          type: boolean
+                                        writeThrough:
+                                          description: |-
+                                            WriteThrough indicates whether writes go directly to the file system
+                                            or are buffered.
+                                          type: boolean
+                                      required:
+                                      - diskMode
+                                      type: object
+                                    virtualDiskFlatVer2:
+                                      description: |-
+                                        VirtualDiskFlatVer2BackingInfo defines flat-format (ESX Server 2.x/3.x)
+                                        file backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.FlatVer2BackingInfo.
+                                      properties:
+                                        changeId:
+                                          description: ChangeId is the change ID for
+                                            tracking incremental changes.
+                                          type: string
+                                        contentId:
+                                          description: |-
+                                            ContentId indicates the logical contents of the disk backing and its
+                                            parents.
+                                          type: string
+                                        deltaDiskFormat:
+                                          description: DeltaDiskFormat is the format
+                                            of the delta disk.
+                                          type: string
+                                        deltaDiskFormatVariant:
+                                          description: |-
+                                            DeltaDiskFormatVariant provides more detailed information for the delta
+                                            disk format.
+                                          type: string
+                                        deltaGrainSize:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: DeltaGrainSize is the grain
+                                            size for seSparseFormat delta disks.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        digestEnabled:
+                                          description: |-
+                                            DigestEnabled indicates whether the disk backing has digest file
+                                            enabled.
+                                          type: boolean
+                                        diskMode:
+                                          description: DiskMode is the disk persistence
+                                            mode.
+                                          type: string
+                                        eagerlyScrub:
+                                          description: |-
+                                            EagerlyScrub indicates whether the backing file is completely scrubbed
+                                            at creation time.
+                                          type: boolean
+                                        keyId:
+                                          description: KeyId is the encryption key
+                                            identifier for this disk backing.
+                                          properties:
+                                            keyId:
+                                              description: KeyId is the unique key
+                                                ID.
+                                              type: string
+                                            providerId:
+                                              description: ProviderId identifies the
+                                                provider that holds the key.
+                                              properties:
+                                                id:
+                                                  description: Id is the globally
+                                                    unique ID for the crypto key provider.
+                                                  type: string
+                                              required:
+                                              - id
+                                              type: object
+                                          required:
+                                          - keyId
+                                          type: object
+                                        parent:
+                                          description: Parent is the parent backing
+                                            if this is a delta disk backing.
+                                          type: object
+                                          x-kubernetes-preserve-unknown-fields: true
+                                        sharing:
+                                          description: Sharing is the sharing mode
+                                            of the virtual disk.
+                                          type: string
+                                        split:
+                                          description: |-
+                                            Split indicates whether the virtual disk is stored in multiple 2 GB
+                                            files.
+                                          type: boolean
+                                        thinProvisioned:
+                                          description: ThinProvisioned indicates whether
+                                            the virtual disk is thin-provisioned.
+                                          type: boolean
+                                        uuid:
+                                          description: Uuid is the disk UUID.
+                                          type: string
+                                        writeThrough:
+                                          description: |-
+                                            WriteThrough indicates whether writes go directly to the file system
+                                            or are buffered.
+                                          type: boolean
+                                      required:
+                                      - diskMode
+                                      type: object
+                                    virtualDiskLocalPMem:
+                                      description: |-
+                                        VirtualDiskLocalPMemBackingInfo defines persistent memory (PMem) file
+                                        backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.LocalPMemBackingInfo.
+                                      properties:
+                                        contentId:
+                                          description: |-
+                                            ContentId indicates the logical contents of the disk backing and its
+                                            parents.
+                                          type: string
+                                        diskMode:
+                                          description: DiskMode is the disk persistence
+                                            mode.
+                                          type: string
+                                        uuid:
+                                          description: Uuid is the disk UUID.
+                                          type: string
+                                        volumeUUID:
+                                          description: |-
+                                            VolumeUUID is the persistent memory volume UUID associating this
+                                            virtual disk with a specific host.
+                                          type: string
+                                      required:
+                                      - diskMode
+                                      type: object
+                                    virtualDiskRawDiskMappingVer1:
+                                      description: |-
+                                        VirtualDiskRawDiskMappingVer1BackingInfo defines raw device mapping (RDM)
+                                        file backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.RawDiskMappingVer1BackingInfo.
+                                      properties:
+                                        changeId:
+                                          description: ChangeId is the change ID for
+                                            tracking incremental changes.
+                                          type: string
+                                        compatibilityMode:
+                                          description: CompatibilityMode is the RDM
+                                            compatibility mode.
+                                          type: string
+                                        contentId:
+                                          description: |-
+                                            ContentId indicates the logical contents of the disk backing and its
+                                            parents.
+                                          type: string
+                                        deltaDiskFormat:
+                                          description: DeltaDiskFormat is the format
+                                            of the delta disk.
+                                          type: string
+                                        deltaGrainSize:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: DeltaGrainSize is the grain
+                                            size for seSparseFormat delta disks.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        deviceName:
+                                          description: DeviceName is the host-specific
+                                            device the LUN is accessed through.
+                                          type: string
+                                        diskMode:
+                                          description: |-
+                                            DiskMode is the disk persistence mode. Only applicable in virtual
+                                            compatibility mode.
+                                          type: string
+                                        lunUuid:
+                                          description: LunUuid is the unique identifier
+                                            of the LUN accessed by the RDM.
+                                          type: string
+                                        parent:
+                                          description: Parent is the parent backing
+                                            if this is a delta disk backing.
+                                          type: object
+                                          x-kubernetes-preserve-unknown-fields: true
+                                        sharing:
+                                          description: Sharing is the sharing mode
+                                            of the virtual disk.
+                                          type: string
+                                        uuid:
+                                          description: Uuid is the disk UUID.
+                                          type: string
+                                      type: object
+                                    virtualDiskSeSparse:
+                                      description: |-
+                                        VirtualDiskSeSparseBackingInfo defines space-efficient sparse format file
+                                        backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.SeSparseBackingInfo.
+
+                                        Deprecated: As of vSphere API 9.0, use VirtualDiskFlatVer2BackingInfo with
+                                        ThinProvisioned set to true.
+                                      properties:
+                                        changeId:
+                                          description: ChangeId is the change ID for
+                                            tracking incremental changes.
+                                          type: string
+                                        contentId:
+                                          description: |-
+                                            ContentId indicates the logical contents of the disk backing and its
+                                            parents.
+                                          type: string
+                                        deltaDiskFormat:
+                                          description: DeltaDiskFormat is the format
+                                            of the delta disk.
+                                          type: string
+                                        digestEnabled:
+                                          description: |-
+                                            DigestEnabled indicates whether the disk backing has digest file
+                                            enabled.
+                                          type: boolean
+                                        diskMode:
+                                          description: DiskMode is the disk persistence
+                                            mode.
+                                          type: string
+                                        grainSize:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: GrainSize is the grain size.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        keyId:
+                                          description: KeyId is the encryption key
+                                            identifier for this disk backing.
+                                          properties:
+                                            keyId:
+                                              description: KeyId is the unique key
+                                                ID.
+                                              type: string
+                                            providerId:
+                                              description: ProviderId identifies the
+                                                provider that holds the key.
+                                              properties:
+                                                id:
+                                                  description: Id is the globally
+                                                    unique ID for the crypto key provider.
+                                                  type: string
+                                              required:
+                                              - id
+                                              type: object
+                                          required:
+                                          - keyId
+                                          type: object
+                                        parent:
+                                          description: Parent is the parent backing
+                                            if this is a delta disk backing.
+                                          type: object
+                                          x-kubernetes-preserve-unknown-fields: true
+                                        uuid:
+                                          description: Uuid is the disk UUID.
+                                          type: string
+                                        writeThrough:
+                                          description: |-
+                                            WriteThrough indicates whether writes go directly to the file system
+                                            or are buffered.
+                                          type: boolean
+                                      required:
+                                      - diskMode
+                                      type: object
+                                    virtualDiskSparseVer1:
+                                      description: |-
+                                        VirtualDiskSparseVer1BackingInfo defines sparse-format (GSX Server 2.x)
+                                        file backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.SparseVer1BackingInfo.
+                                      properties:
+                                        contentId:
+                                          description: |-
+                                            ContentId indicates the logical contents of the disk backing and its
+                                            parents.
+                                          type: string
+                                        diskMode:
+                                          description: DiskMode is the disk persistence
+                                            mode.
+                                          type: string
+                                        parent:
+                                          description: Parent is the parent backing
+                                            if this is a delta disk backing.
+                                          type: object
+                                          x-kubernetes-preserve-unknown-fields: true
+                                        spaceUsed:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: SpaceUsed is the space in use
+                                            for this sparse disk.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        split:
+                                          description: |-
+                                            Split indicates whether the virtual disk is stored in multiple 2 GB
+                                            files.
+                                          type: boolean
+                                        writeThrough:
+                                          description: |-
+                                            WriteThrough indicates whether writes go directly to the file system
+                                            or are buffered.
+                                          type: boolean
+                                      required:
+                                      - diskMode
+                                      type: object
+                                    virtualDiskSparseVer2:
+                                      description: |-
+                                        VirtualDiskSparseVer2BackingInfo defines sparse-format (VMware Server) file
+                                        backing for a virtual disk.
+                                        It corresponds to vim.vm.device.VirtualDisk.SparseVer2BackingInfo.
+                                      properties:
+                                        changeId:
+                                          description: ChangeId is the change ID for
+                                            tracking incremental changes.
+                                          type: string
+                                        contentId:
+                                          description: |-
+                                            ContentId indicates the logical contents of the disk backing and its
+                                            parents.
+                                          type: string
+                                        diskMode:
+                                          description: DiskMode is the disk persistence
+                                            mode.
+                                          type: string
+                                        keyId:
+                                          description: KeyId is the encryption key
+                                            identifier for this disk backing.
+                                          properties:
+                                            keyId:
+                                              description: KeyId is the unique key
+                                                ID.
+                                              type: string
+                                            providerId:
+                                              description: ProviderId identifies the
+                                                provider that holds the key.
+                                              properties:
+                                                id:
+                                                  description: Id is the globally
+                                                    unique ID for the crypto key provider.
+                                                  type: string
+                                              required:
+                                              - id
+                                              type: object
+                                          required:
+                                          - keyId
+                                          type: object
+                                        parent:
+                                          description: Parent is the parent backing
+                                            if this is a delta disk backing.
+                                          type: object
+                                          x-kubernetes-preserve-unknown-fields: true
+                                        spaceUsed:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: SpaceUsed is the space in use
+                                            for this sparse disk.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        split:
+                                          description: |-
+                                            Split indicates whether the virtual disk is stored in multiple 2 GB
+                                            files.
+                                          type: boolean
+                                        uuid:
+                                          description: Uuid is the disk UUID.
+                                          type: string
+                                        writeThrough:
+                                          description: |-
+                                            WriteThrough indicates whether writes go directly to the file system
+                                            or are buffered.
+                                          type: boolean
+                                      required:
+                                      - diskMode
+                                      type: object
+                                  required:
+                                  - fileName
+                                  type: object
+                                  x-kubernetes-validations:
+                                  - message: at most one of nvdimm, virtualDiskFlatVer1,
+                                      virtualDiskFlatVer2, virtualDiskLocalPMem, virtualDiskRawDiskMappingVer1,
+                                      virtualDiskSeSparse, virtualDiskSparseVer1,
+                                      or virtualDiskSparseVer2 may be specified
+                                    rule: '[has(self.nvdimm), has(self.virtualDiskFlatVer1),
+                                      has(self.virtualDiskFlatVer2), has(self.virtualDiskLocalPMem),
+                                      has(self.virtualDiskRawDiskMappingVer1), has(self.virtualDiskSeSparse),
+                                      has(self.virtualDiskSparseVer1), has(self.virtualDiskSparseVer2)].filter(x,
+                                      x).size() <= 1'
+                                pciPassthroughPlugin:
+                                  description: |-
+                                    PCIPassthroughPlugin contains plugin-based PCI passthrough backing
+                                    information.
+                                  properties:
+                                    vmiop:
+                                      description: |-
+                                        VirtualPCIPassthroughVmiopBackingInfo contains information about a VMIOP
+                                        plugin-based PCI passthrough device (typically vGPU).
+                                        It corresponds to vim.vm.device.VirtualPCIPassthrough.VmiopBackingInfo.
+                                      properties:
+                                        enhancedMigrateCapability:
+                                          description: |-
+                                            EnhancedMigrateCapability indicates whether the vGPU has enhanced
+                                            migration features for sub-second downtime.
+                                          type: boolean
+                                        migrateSupported:
+                                          description: MigrateSupported indicates
+                                            whether the vGPU device supports migration.
+                                          type: boolean
+                                        vgpu:
+                                          description: Vgpu is the vGPU configuration
+                                            type exposed by the VMIOP plugin.
+                                          type: string
+                                        vgpuMigrateDataSize:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          description: |-
+                                            VgpuMigrateDataSize is the expected size of the vGPU device state
+                                            during migration.
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                      type: object
+                                  type: object
+                                pipe:
+                                  description: Pipe contains named pipe backing information.
+                                  properties:
+                                    pipeName:
+                                      description: |-
+                                        PipeName is the pipe name for the host pipe associated with this
+                                        backing.
+                                      type: string
+                                    serialPort:
+                                      description: |-
+                                        VirtualSerialPortPipeBackingInfo defines named pipe backing for a virtual
+                                        serial port.
+                                        It corresponds to vim.vm.device.VirtualSerialPort.PipeBackingInfo.
+                                      properties:
+                                        endpoint:
+                                          description: |-
+                                            Endpoint is the role of the virtual machine as an endpoint for the
+                                            pipe ("client" or "server").
+                                          type: string
+                                        noRxLoss:
+                                          description: |-
+                                            NoRxLoss enables optimized data transfer over the pipe to prevent data
+                                            overrun.
+                                          type: boolean
+                                      required:
+                                      - endpoint
+                                      type: object
+                                  required:
+                                  - pipeName
+                                  type: object
+                                precisionClock:
+                                  description: |-
+                                    PrecisionClock contains system clock backing information for
+                                    precision clock devices.
+                                  properties:
+                                    protocol:
+                                      description: |-
+                                        Protocol is the time synchronization protocol used to discipline the
+                                        system clock (e.g. "ptp", "ntp").
+                                      type: string
+                                  type: object
+                                remoteDevice:
+                                  description: RemoteDevice contains remote device
+                                    backing information.
+                                  properties:
+                                    cdromRemotePassthrough:
+                                      description: |-
+                                        VirtualCdromRemotePassthroughBackingInfo defines remote pass-through device
+                                        backing for a virtual CD-ROM.
+                                        It corresponds to vim.vm.device.VirtualCdrom.RemotePassthroughBackingInfo.
+                                      properties:
+                                        exclusive:
+                                          description: |-
+                                            Exclusive indicates whether the virtual machine has exclusive CD-ROM
+                                            device access.
+                                          type: boolean
+                                      required:
+                                      - exclusive
+                                      type: object
+                                    deviceName:
+                                      description: DeviceName is the name of the device
+                                        on the remote system.
+                                      type: string
+                                    usbRemoteClient:
+                                      description: |-
+                                        VirtualUSBRemoteClientBackingInfo identifies a USB device on a remote client
+                                        host.
+                                        It corresponds to vim.vm.device.VirtualUSB.RemoteClientBackingInfo.
+                                      properties:
+                                        hostname:
+                                          description: |-
+                                            Hostname is the name of the remote client host where the physical USB
+                                            device resides.
+                                          type: string
+                                      required:
+                                      - hostname
+                                      type: object
+                                    useAutoDetect:
+                                      description: |-
+                                        UseAutoDetect indicates whether the device should be auto-detected
+                                        instead of directly specified. When true, DeviceName is ignored.
+                                      type: boolean
+                                  required:
+                                  - deviceName
+                                  type: object
+                                  x-kubernetes-validations:
+                                  - message: at most one of cdromRemotePassthrough
+                                      or usbRemoteClient may be specified
+                                    rule: '[has(self.cdromRemotePassthrough), has(self.usbRemoteClient)].filter(x,
+                                      x).size() <= 1'
+                                type:
+                                  description: Type is the type of the virtual device
+                                    backing information.
+                                  type: string
+                                uri:
+                                  description: URI contains network URI backing information.
+                                  properties:
+                                    direction:
+                                      description: Direction is the connection direction.
+                                      type: string
+                                    proxyURI:
+                                      description: |-
+                                        ProxyURI identifies a proxy service providing network access to
+                                        ServiceURI.
+                                      type: string
+                                    serialPort:
+                                      description: |-
+                                        VirtualSerialPortURIBackingInfo defines network URI backing for a virtual
+                                        serial port.
+                                        It corresponds to vim.vm.device.VirtualSerialPort.URIBackingInfo.
+                                      type: object
+                                    serviceURI:
+                                      description: ServiceURI identifies the local
+                                        host or a remote system on the network.
+                                      type: string
+                                  required:
+                                  - direction
+                                  - serviceURI
+                                  type: object
+                              required:
+                              - type
+                              type: object
+                              x-kubernetes-validations:
+                              - message: at most one of device, ethernetCardDistributedVirtualPort,
+                                  ethernetCardOpaqueNetwork, file, pciPassthroughPlugin,
+                                  pipe, precisionClock, remoteDevice, or uri may be
+                                  specified
+                                rule: '[has(self.device), has(self.ethernetCardDistributedVirtualPort),
+                                  has(self.ethernetCardOpaqueNetwork), has(self.file),
+                                  has(self.pciPassthroughPlugin), has(self.pipe),
+                                  has(self.precisionClock), has(self.remoteDevice),
+                                  has(self.uri)].filter(x, x).size() <= 1'
+                            connectable:
+                              description: |-
+                                Connectable provides information about the connect/disconnect behavior
+                                of the device while the virtual machine is running.
+                              properties:
+                                allowGuestControl:
+                                  description: |-
+                                    AllowGuestControl enables guest control over whether the connectable
+                                    device is connected.
+                                  type: boolean
+                                connected:
+                                  description: |-
+                                    Connected indicates whether the device is currently connected.
+                                    Valid only while the virtual machine is running.
+                                  type: boolean
+                                migrateConnect:
+                                  description: |-
+                                    MigrateConnect specifies whether to override the virtual device
+                                    connection state upon completion of a migration.
+                                  type: string
+                                startConnected:
+                                  description: |-
+                                    StartConnected specifies whether to connect the device when the virtual
+                                    machine starts.
+                                  type: boolean
+                                status:
+                                  description: |-
+                                    Status indicates the current status of the connectable device.
+                                    Valid only while the virtual machine is running.
+                                  type: string
+                              required:
+                              - allowGuestControl
+                              - connected
+                              - startConnected
+                              type: object
+                            controller:
+                              description: |-
+                                Controller contains controller-specific data when the device is a
+                                controller type.
+                              properties:
+                                busNumber:
+                                  description: BusNumber is the bus number associated
+                                    with this controller.
+                                  format: int32
+                                  type: integer
+                                device:
+                                  description: |-
+                                    Device is the list of keys of virtual devices controlled by this
+                                    controller.
+                                  items:
+                                    format: int32
+                                    type: integer
+                                  type: array
+                                nvme:
+                                  description: |-
+                                    NVMe contains NVMe controller-specific data when this controller is
+                                    an NVMe controller.
+                                  properties:
+                                    sharedBus:
+                                      description: SharedBus is the shared bus mode
+                                        of the NVMe controller.
+                                      enum:
+                                      - None
+                                      - Physical
+                                      - Virtual
+                                      type: string
+                                  type: object
+                                scsi:
+                                  description: |-
+                                    SCSI contains SCSI controller-specific data when this controller is
+                                    a SCSI controller.
+                                  properties:
+                                    hotAddRemove:
+                                      description: |-
+                                        HotAddRemove indicates whether hot-add and hot-remove of devices is
+                                        supported. Always true in the current implementation.
+                                      type: boolean
+                                    scsiCtlrUnitNumber:
+                                      description: |-
+                                        ScsiCtlrUnitNumber is the unit number of the SCSI controller on its
+                                        own bus.
+                                      format: int32
+                                      type: integer
+                                    sharedBus:
+                                      default: None
+                                      description: SharedBus is the SCSI bus sharing
+                                        mode.
+                                      enum:
+                                      - None
+                                      - Physical
+                                      - Virtual
+                                      type: string
+                                  type: object
+                                usb:
+                                  description: |-
+                                    USB contains USB HCI controller-specific data when this controller
+                                    is a USB (UHCI/EHCI) controller.
+                                  properties:
+                                    autoConnectDevices:
+                                      description: |-
+                                        AutoConnectDevices indicates whether hot-plugging of devices is enabled
+                                        on this controller.
+                                      type: boolean
+                                    ehciEnabled:
+                                      description: |-
+                                        EhciEnabled indicates whether enhanced host controller interface
+                                        (USB 2.0) is enabled on this controller.
+                                      type: boolean
+                                  type: object
+                                usbxhci:
+                                  description: |-
+                                    USBXHCI contains USB XHCI controller-specific data when this
+                                    controller is a USB 3.0 (XHCI) controller.
+                                  properties:
+                                    autoConnectDevices:
+                                      description: |-
+                                        AutoConnectDevices indicates whether hot-plugging of devices is enabled
+                                        on this controller.
+                                      type: boolean
+                                  type: object
+                              required:
+                              - busNumber
+                              type: object
+                            controllerBusNumber:
+                              description: |-
+                                ControllerBusNumber is the bus number of the controller to which this
+                                device should be attached.
+                              format: int32
+                              type: integer
+                            controllerType:
+                              description: |-
+                                ControllerType is the type of the controller to which this device should
+                                be attached.
+                              type: string
+                            deviceGroupInfo:
+                              description: |-
+                                DeviceGroupInfo describes the device group this device belongs to.
+                                Devices in a group must be added or removed as a unit.
+                              properties:
+                                groupInstanceKey:
+                                  description: GroupInstanceKey is the device group
+                                    instance key.
+                                  format: int32
+                                  type: integer
+                                sequenceId:
+                                  description: SequenceId is the device's sequence
+                                    position within the group.
+                                  format: int32
+                                  type: integer
+                              required:
+                              - groupInstanceKey
+                              - sequenceId
+                              type: object
+                            deviceInfo:
+                              description: DeviceInfo provides a label and summary
+                                for the device.
+                              properties:
+                                label:
+                                  description: Label is the display label.
+                                  type: string
+                                summary:
+                                  description: Summary is the summary description.
+                                  type: string
+                              required:
+                              - label
+                              - summary
+                              type: object
+                            disk:
+                              description: Disk contains virtual disk-specific data
+                                when the device is a disk.
+                              properties:
+                                capacity:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  description: |-
+                                    Capacity is the capacity of this virtual disk. If the disk is on
+                                    a Virtual Volume datastore the disk size must be a multiple of a
+                                    megabyte.
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                diskObjectId:
+                                  description: DiskObjectId is a durable and immutable
+                                    identifier for the virtual disk.
+                                  type: string
+                                guestReadOnly:
+                                  description: |-
+                                    GuestReadOnly indicates whether the disk is presented to the guest in
+                                    read-only mode.
+                                  type: boolean
+                                iofilter:
+                                  description: Iofilter lists the IDs of IO Filters
+                                    associated with the virtual disk.
+                                  items:
+                                    type: string
+                                  type: array
+                                nativeUnmanagedLinkedClone:
+                                  description: |-
+                                    NativeUnmanagedLinkedClone indicates whether this disk is a linked clone
+                                    from an unmanaged delta disk whose parent chain is unavailable.
+                                  type: boolean
+                                storageIOAllocation:
+                                  description: |-
+                                    StorageIOAllocation describes storage I/O resource allocation for this
+                                    virtual disk.
+                                  properties:
+                                    limit:
+                                      description: |-
+                                        Limit is the maximum number of I/O operations per second.
+                                        Set to -1 to indicate no limit.
+                                      format: int64
+                                      type: integer
+                                    reservation:
+                                      description: Reservation is the guaranteed number
+                                        of I/O operations per second.
+                                      format: int32
+                                      type: integer
+                                    shares:
+                                      description: Shares describes the I/O shares
+                                        used during resource contention.
+                                      properties:
+                                        level:
+                                          description: |-
+                                            Level is the allocation level. Levels map to pre-determined numeric
+                                            share values.
+                                          enum:
+                                          - custom
+                                          - high
+                                          - low
+                                          - normal
+                                          type: string
+                                        shares:
+                                          description: |-
+                                            Shares is the number of shares allocated. Only meaningful when
+                                            Level is set to "custom".
+                                          format: int32
+                                          type: integer
+                                      required:
+                                      - level
+                                      - shares
+                                      type: object
+                                  type: object
+                                vDiskId:
+                                  description: VDiskId is the ID of the virtual disk
+                                    as a first-class entity.
+                                  type: string
+                                vDiskVersion:
+                                  description: VDiskVersion is the disk descriptor
+                                    version of the virtual disk.
+                                  format: int32
+                                  type: integer
+                                virtualDiskFormat:
+                                  description: |-
+                                    VirtualDiskFormat indicates the disk format.
+                                    Valid values include "native_4k" and "native_512".
+                                  type: string
+                              type: object
+                            ethernetCard:
+                              description: |-
+                                EthernetCard contains Ethernet card-specific data when the device is
+                                a virtual Ethernet card.
+                              properties:
+                                addressType:
+                                  description: |-
+                                    AddressType is the MAC address assignment type.
+                                    Valid values: "Manual", "Generated", "Assigned".
+                                  type: string
+                                externalId:
+                                  description: |-
+                                    ExternalId is an identifier assigned by an external management plane or
+                                    controller.
+                                  type: string
+                                macAddress:
+                                  description: MacAddress is the MAC address assigned
+                                    to the virtual network adapter.
+                                  type: string
+                                resourceAllocation:
+                                  description: |-
+                                    ResourceAllocation describes the network resource requirements of this
+                                    virtual Ethernet card.
+                                  properties:
+                                    limit:
+                                      description: |-
+                                        Limit is the maximum network bandwidth in Mbits/sec.
+                                        Set to -1 to indicate no limit.
+                                      format: int64
+                                      type: integer
+                                    reservation:
+                                      description: |-
+                                        Reservation is the guaranteed network bandwidth in Mbits/sec.
+                                        Reservation must not exceed Limit when Limit is set.
+                                      format: int64
+                                      type: integer
+                                    share:
+                                      description: |-
+                                        Share describes the relative network bandwidth weight during resource
+                                        contention.
+                                      properties:
+                                        level:
+                                          description: |-
+                                            Level is the allocation level. Levels map to pre-determined numeric
+                                            share values.
+                                          enum:
+                                          - custom
+                                          - high
+                                          - low
+                                          - normal
+                                          type: string
+                                        shares:
+                                          description: |-
+                                            Shares is the number of shares allocated. Only meaningful when
+                                            Level is set to "custom".
+                                          format: int32
+                                          type: integer
+                                      required:
+                                      - level
+                                      - shares
+                                      type: object
+                                  required:
+                                  - share
+                                  type: object
+                                sriov:
+                                  description: |-
+                                    Sriov contains SR-IOV-specific data when this card is an SR-IOV
+                                    Ethernet adapter.
+                                  properties:
+                                    allowGuestOSMtuChange:
+                                      description: |-
+                                        AllowGuestOSMtuChange indicates whether MTU can be changed from the
+                                        guest OS.
+                                      type: boolean
+                                    dvxBacking:
+                                      description: |-
+                                        DvxBacking contains DVX backing information for DVX-based SR-IOV
+                                        devices. Mutually exclusive with SriovBacking.
+                                      properties:
+                                        configParams:
+                                          description: ConfigParams contains configuration
+                                            parameters for this device class.
+                                          items:
+                                            description: |-
+                                              OptionValue is a key-value configuration parameter.
+                                              It corresponds to vim.option.OptionValue.
+                                            properties:
+                                              key:
+                                                description: Key is the option key.
+                                                type: string
+                                              value:
+                                                description: Value is the option value,
+                                                  encoded as a string.
+                                                type: string
+                                            required:
+                                            - key
+                                            - value
+                                            type: object
+                                          type: array
+                                        deviceClass:
+                                          description: DeviceClass is the device class
+                                            that backs this DVX device.
+                                          type: string
+                                      type: object
+                                    sriovBacking:
+                                      description: |-
+                                        SriovBacking contains SR-IOV passthrough backing information.
+                                        Mutually exclusive with DvxBacking.
+                                      properties:
+                                        physicalFunctionBacking:
+                                          description: |-
+                                            PhysicalFunctionBacking is the physical function backing for this
+                                            device.
+                                          properties:
+                                            deviceId:
+                                              description: DeviceId is the PCI device
+                                                ID.
+                                              type: string
+                                            id:
+                                              description: Id is the PCI name ID,
+                                                composed of "bus:slot.function".
+                                              type: string
+                                            systemId:
+                                              description: SystemId is the ID of the
+                                                system the PCI device is attached
+                                                to.
+                                              type: string
+                                            vendorId:
+                                              description: VendorId is the PCI vendor
+                                                ID.
+                                              type: integer
+                                          required:
+                                          - deviceId
+                                          - id
+                                          - systemId
+                                          - vendorId
+                                          type: object
+                                        virtualFunctionBacking:
+                                          description: |-
+                                            VirtualFunctionBacking is the virtual function backing for this
+                                            device.
+                                          properties:
+                                            deviceId:
+                                              description: DeviceId is the PCI device
+                                                ID.
+                                              type: string
+                                            id:
+                                              description: Id is the PCI name ID,
+                                                composed of "bus:slot.function".
+                                              type: string
+                                            systemId:
+                                              description: SystemId is the ID of the
+                                                system the PCI device is attached
+                                                to.
+                                              type: string
+                                            vendorId:
+                                              description: VendorId is the PCI vendor
+                                                ID.
+                                              type: integer
+                                          required:
+                                          - deviceId
+                                          - id
+                                          - systemId
+                                          - vendorId
+                                          type: object
+                                        virtualFunctionIndex:
+                                          description: VirtualFunctionIndex is the
+                                            index of the assigned virtual function.
+                                          format: int32
+                                          type: integer
+                                      type: object
+                                  type: object
+                                subnetId:
+                                  description: |-
+                                    SubnetId is the ID of the subnet the virtual network adapter connects
+                                    to. Set only when the adapter is connected to a subnet.
+                                  type: string
+                                uptCompatibilityEnabled:
+                                  description: |-
+                                    UptCompatibilityEnabled indicates whether UPT (Universal Pass-through)
+                                    compatibility is enabled on this network adapter.
+
+                                    Deprecated: As of vSphere API 8.0, VMDirectPath Gen 2 is no longer
+                                    supported and there is no replacement.
+                                  type: boolean
+                                vmxnet3:
+                                  description: |-
+                                    Vmxnet3 contains Vmxnet3-specific data when this card is a Vmxnet3
+                                    adapter.
+                                  properties:
+                                    strictLatencyConfig:
+                                      description: |-
+                                        StrictLatencyConfig contains strict latency configuration parameters
+                                        for this adapter.
+                                      properties:
+                                        allowed:
+                                          description: |-
+                                            Allowed indicates whether strict latency configuration is permitted on
+                                            this adapter.
+                                          type: boolean
+                                        disableOffload:
+                                          description: DisableOffload is the type
+                                            of offload disable operation.
+                                          type: string
+                                        maxRxQueues:
+                                          description: MaxRxQueues is the number of
+                                            receive queues (1-32).
+                                          format: int32
+                                          type: integer
+                                        maxTxQueues:
+                                          description: MaxTxQueues is the number of
+                                            transmit queues (1-32).
+                                          format: int32
+                                          type: integer
+                                        measureLatency:
+                                          description: MeasureLatency indicates whether
+                                            latency measurement is enabled.
+                                          type: boolean
+                                        rxDataRingDescSize:
+                                          description: |-
+                                            RxDataRingDescSize is the receive data ring descriptor size
+                                            (128-2048, multiple of 64).
+                                          format: int32
+                                          type: integer
+                                        txDataRingDescSize:
+                                          description: |-
+                                            TxDataRingDescSize is the transmit data ring descriptor size
+                                            (128-2048, multiple of 64).
+                                          format: int32
+                                          type: integer
+                                      type: object
+                                    uptv2Enabled:
+                                      description: |-
+                                        Uptv2Enabled indicates whether UPTv2 (Uniform Pass-through version 2)
+                                        compatibility is enabled on this network adapter.
+                                      type: boolean
+                                    vrdma:
+                                      description: |-
+                                        Vrdma contains VRDMA-specific data when this adapter is a Vmxnet3
+                                        VRDMA adapter.
+                                      properties:
+                                        deviceProtocol:
+                                          description: DeviceProtocol is the VRDMA
+                                            device protocol.
+                                          type: string
+                                      type: object
+                                  type: object
+                                wakeOnLanEnabled:
+                                  description: |-
+                                    WakeOnLanEnabled indicates whether wake-on-LAN is enabled on this
+                                    virtual network adapter.
+                                  type: boolean
+                              type: object
+                              x-kubernetes-validations:
+                              - message: at most one of vmxnet3 or sriov may be specified
+                                rule: '[has(self.vmxnet3), has(self.sriov)].filter(x,
+                                  x).size() <= 1'
+                            numaNode:
+                              description: |-
+                                NumaNode is the virtual NUMA node for this device.
+                                A negative number indicates no NUMA affinity.
+                              format: int32
+                              type: integer
+                            nvdimm:
+                              description: |-
+                                NVDIMM contains NVDIMM-specific data when the device is a virtual
+                                NVDIMM.
+                              properties:
+                                capacity:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  description: |-
+                                    Capacity is the NVDIMM backing size.
+                                    Reported as 0 if the backing is inaccessible.
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                configuredCapacity:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  description: ConfiguredCapacity is the NVDIMM device's
+                                    configured size.
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                              required:
+                              - capacity
+                              type: object
+                            serialPort:
+                              description: |-
+                                SerialPort contains serial port-specific data when the device is a
+                                virtual serial port.
+                              properties:
+                                yieldOnPoll:
+                                  description: |-
+                                    YieldOnPoll enables CPU yield behavior when the virtual machine's sole
+                                    task is polling the virtual serial port. Requires the CPU yield option
+                                    to be supported on the host.
+                                  type: boolean
+                              required:
+                              - yieldOnPoll
+                              type: object
+                            slotInfo:
+                              description: SlotInfo describes the bus slot of the
+                                device in the virtual machine.
+                              properties:
+                                pci:
+                                  description: PCI contains PCI bus slot info.
+                                  properties:
+                                    pciSlotNumber:
+                                      description: |-
+                                        PciSlotNumber is the PCI slot number of the virtual device.
+                                        The server assigns this value; client-specified values may be
+                                        overridden if invalid or duplicated.
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - pciSlotNumber
+                                  type: object
+                                type:
+                                  description: Type indicates the concrete bus slot
+                                    info type.
+                                  enum:
+                                  - PCI
+                                  - USBControllerPCI
+                                  type: string
+                                usbControllerPCI:
+                                  description: |-
+                                    USBControllerPCI contains USB controller PCI bus slot info, which may
+                                    include a separate slot for the eHCI controller.
+                                  properties:
+                                    ehciPciSlotNumber:
+                                      description: |-
+                                        EhciPciSlotNumber is the PCI slot number of the eHCI controller.
+                                        Only meaningful when EhciEnabled is set on the USB controller.
+                                      format: int32
+                                      type: integer
+                                    pciSlotNumber:
+                                      description: |-
+                                        PciSlotNumber is the PCI slot number of the virtual device.
+                                        The server assigns this value; client-specified values may be
+                                        overridden if invalid or duplicated.
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - pciSlotNumber
+                                  type: object
+                              required:
+                              - type
+                              type: object
+                            tpm:
+                              description: TPM contains TPM-specific data when the
+                                device is a virtual TPM.
+                              properties:
+                                endorsementKeyCertificate:
+                                  description: |-
+                                    EndorsementKeyCertificate contains one or more Endorsement Key
+                                    Certificates in DER format.
+                                  items:
+                                    format: byte
+                                    type: string
+                                  type: array
+                                endorsementKeyCertificateSigningRequest:
+                                  description: |-
+                                    EndorsementKeyCertificateSigningRequest contains one or more Endorsement
+                                    Key Certificate Signing Requests in DER format.
+                                  items:
+                                    format: byte
+                                    type: string
+                                  type: array
+                              type: object
+                            type:
+                              description: Type is the type of the device.
+                              type: string
+                            unitNumber:
+                              description: UnitNumber is the unit number of this device
+                                on its controller.
+                              format: int32
+                              type: integer
+                            usbDevice:
+                              description: |-
+                                USBDevice contains USB device-specific data when the device is a
+                                virtual USB device.
+                              properties:
+                                connected:
+                                  description: |-
+                                    Connected indicates whether the device is currently connected.
+                                    The device may not be connected if the auto-connect pattern in the
+                                    device backing cannot be satisfied.
+                                  type: boolean
+                                family:
+                                  description: Family lists the device class families.
+                                  items:
+                                    type: string
+                                  type: array
+                                product:
+                                  description: Product is the product ID of the USB
+                                    device.
+                                  format: int32
+                                  type: integer
+                                speed:
+                                  description: Speed lists the device speeds detected
+                                    by the server.
+                                  items:
+                                    type: string
+                                  type: array
+                                vendor:
+                                  description: Vendor is the vendor ID of the USB
+                                    device.
+                                  format: int32
+                                  type: integer
+                              required:
+                              - connected
+                              type: object
+                            videoCard:
+                              description: |-
+                                VideoCard contains video card-specific data when the device is a
+                                virtual video card.
+                              properties:
+                                enable3DSupport:
+                                  description: |-
+                                    Enable3DSupport indicates whether the virtual video card supports 3D
+                                    functions. This property can only be updated when the virtual machine
+                                    is powered off.
+                                  type: boolean
+                                graphicsMemorySize:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  description: |-
+                                    GraphicsMemorySize is the amount of guest memory used for graphics
+                                    resources. Only meaningful when 3D support is enabled.
+                                    This property can only be updated when the virtual machine is powered
+                                    off.
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                numDisplays:
+                                  description: |-
+                                    NumDisplays is the number of supported monitors.
+                                    This property can only be updated when the virtual machine is powered
+                                    off.
+                                  format: int32
+                                  type: integer
+                                use3dRenderer:
+                                  description: |-
+                                    Use3dRenderer indicates how the virtual video device renders 3D
+                                    graphics.
+                                    Valid values: "automatic", "software", "hardware".
+                                  type: string
+                                useAutoDetect:
+                                  description: |-
+                                    UseAutoDetect indicates whether the host display settings are used to
+                                    automatically determine the virtual video card display settings. When
+                                    true, NumDisplays is ignored.
+                                  type: boolean
+                                videoRamSize:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  description: VideoRamSize is the size of the framebuffer.
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                              type: object
+                            vmci:
+                              description: |-
+                                VMCI contains VMCI device-specific data when the device is a VMCI
+                                device.
+                              properties:
+                                allowUnrestrictedCommunication:
+                                  description: |-
+                                    AllowUnrestrictedCommunication determines whether VMCI communication
+                                    with all virtual machines on the host is allowed.
+
+                                    Deprecated: As of vSphere API 5.1, the VMCI device does not support
+                                    communication with other virtual machines.
+                                  type: boolean
+                                filterEnable:
+                                  description: |-
+                                    FilterEnable determines whether filtering of VMCI communication is
+                                    enabled for this virtual machine.
+                                  type: boolean
+                                filterInfo:
+                                  description: |-
+                                    FilterInfo specifies the VMCI filter rules controlling the extent of
+                                    VMCI communication.
+                                  properties:
+                                    filters:
+                                      description: |-
+                                        Filters is the list of VMCI filter specifications.
+                                        To clear all existing filters, set to an empty list or leave unset.
+                                      items:
+                                        description: |-
+                                          VirtualMachineVMCIDeviceFilterSpec describes a VMCI communication filter
+                                          rule based on protocol, direction, and port range.
+                                          It corresponds to vim.vm.VirtualMachineVMCIDevice.FilterSpec.
+                                        properties:
+                                          action:
+                                            description: Action is the filter action.
+                                            type: string
+                                          direction:
+                                            description: Direction is the filter direction.
+                                            type: string
+                                          lowerDstPortBoundary:
+                                            description: |-
+                                              LowerDstPortBoundary is the lower bound of the destination port range.
+                                              Defaults to the lowest port number for the given protocol when unset.
+                                            format: int64
+                                            type: integer
+                                          protocol:
+                                            description: Protocol is the filter protocol.
+                                            type: string
+                                          rank:
+                                            description: |-
+                                              Rank is the filter rank. Filters are processed in ascending rank order.
+                                              Ranks within a filter array must be unique.
+                                            format: int64
+                                            type: integer
+                                          upperDstPortBoundary:
+                                            description: |-
+                                              UpperDstPortBoundary is the upper bound of the destination port range.
+                                              Defaults to the highest port number for the given protocol when unset.
+                                            format: int64
+                                            type: integer
+                                        required:
+                                        - action
+                                        - direction
+                                        - protocol
+                                        - rank
+                                        type: object
+                                      type: array
+                                  type: object
+                                id:
+                                  description: |-
+                                    Id is the unique identifier for VMCI socket access to this virtual
+                                    machine. Applications on other virtual machines use this value to
+                                    connect to this virtual machine.
+                                  format: int64
+                                  type: integer
+                              type: object
+                            wdt:
+                              description: |-
+                                WDT contains watchdog timer-specific data when the device is a
+                                virtual watchdog timer.
+                              properties:
+                                runOnBoot:
+                                  description: |-
+                                    RunOnBoot indicates whether the virtual watchdog timer device should
+                                    be initialized in the Enabled/Running sub-state.
+                                    When false, the device initializes in the Enabled/Stopped sub-state.
+                                  type: boolean
+                                running:
+                                  description: |-
+                                    Running indicates whether the virtual watchdog timer device is
+                                    currently in the Enabled/Running state.
+                                  type: boolean
+                              required:
+                              - runOnBoot
+                              - running
+                              type: object
+                          required:
+                          - type
+                          type: object
+                        type: array
+                        x-kubernetes-validations:
+                        - message: devices must not contain duplicate key values
+                          rule: self.all(i, i.key == 0 || self.filter(j, j.key !=
+                            0 && j.key == i.key).size() == 1)
+                        - message: devices must not contain more than 26 ethernet
+                            cards
+                          rule: self.filter(d, has(d.ethernetCard)).size() <= 26
+                        - message: devices must not contain more than 16 SR-IOV ethernet
+                            cards
+                          rule: self.filter(d, has(d.ethernetCard) && has(d.ethernetCard.sriov)).size()
+                            <= 16
+                        - message: devices must not contain more than 10 non-SR-IOV
+                            ethernet cards
+                          rule: self.filter(d, has(d.ethernetCard) && !has(d.ethernetCard.sriov)).size()
+                            <= 10
+                        - message: devices must not contain more than 2 IDE controllers
+                          rule: self.filter(d, d.type == 'VirtualIDEController').size()
+                            <= 2
+                        - message: devices must not contain more than 4 SCSI controllers
+                          rule: self.filter(d, d.type == 'VirtualLsiLogicController'
+                            || d.type == 'VirtualLsiLogicSASController' || d.type
+                            == 'VirtualBusLogicController' || d.type == 'ParaVirtualSCSIController').size()
+                            <= 4
+                        - message: devices must not contain more than 4 NVMe controllers
+                          rule: self.filter(d, d.type == 'VirtualNVMeController').size()
+                            <= 4
+                        - message: devices must not contain more than 1 SIO controller
+                          rule: self.filter(d, d.type == 'VirtualSIOController').size()
+                            <= 1
+                        - message: devices must not contain more than 1 PCI controller
+                          rule: self.filter(d, d.type == 'VirtualPCIController').size()
+                            <= 1
+                        - message: devices must not contain more than 1 PS2 controller
+                          rule: self.filter(d, d.type == 'VirtualPS2Controller').size()
+                            <= 1
+                        - message: devices must not contain more than 1 USB controller
+                          rule: self.filter(d, d.type == 'VirtualUSBController').size()
+                            <= 1
+                        - message: devices must not contain more than 1 USB XHCI controller
+                          rule: self.filter(d, d.type == 'VirtualUSBXHCIController').size()
+                            <= 1
+                        - message: devices must not contain more than 4 SATA controllers
+                          rule: self.filter(d, d.type == 'VirtualSATAController' ||
+                            d.type == 'VirtualAHCIController').size() <= 4
+                        - message: devices must not contain more than 20 USB devices
+                          rule: self.filter(d, d.type == 'VirtualUSB').size() <= 20
+                        - message: devices must not contain more than 1208 virtual
+                            disks
+                          rule: self.filter(d, d.type == 'VirtualDisk').size() <=
+                            1208
+                        - message: devices must not contain more than 124 CD-ROM devices
+                          rule: self.filter(d, d.type == 'VirtualCdrom').size() <=
+                            124
+                        - message: devices must not contain more than 1 keyboard
+                          rule: self.filter(d, d.type == 'VirtualKeyboard').size()
+                            <= 1
+                        - message: devices must not contain more than 1 pointing device
+                          rule: self.filter(d, d.type == 'VirtualPointingDevice').size()
+                            <= 1
+                        - message: devices must not contain more than 32 serial ports
+                          rule: self.filter(d, d.type == 'VirtualSerialPort').size()
+                            <= 32
+                        - message: devices must not contain more than 4 parallel ports
+                          rule: self.filter(d, d.type == 'VirtualParallelPort').size()
+                            <= 4
+                        - message: devices must not contain more than 1 sound card
+                          rule: self.filter(d, d.type == 'VirtualSoundBlaster16' ||
+                            d.type == 'VirtualHdAudioCard' || d.type == 'VirtualEnsoniq1371').size()
+                            <= 1
+                        - message: devices must not contain more than 1 video card
+                          rule: self.filter(d, d.type == 'VirtualVideoCard').size()
+                            <= 1
+                        - message: devices must not contain more than 128 PCI passthrough
+                            devices
+                          rule: self.filter(d, d.type == 'VirtualPCIPassthrough').size()
+                            <= 128
+                        - message: devices must not contain more than 1 precision
+                            clock
+                          rule: self.filter(d, d.type == 'VirtualPrecisionClock').size()
+                            <= 1
+                        - message: devices must not contain more than 64 NVDIMM devices
+                          rule: self.filter(d, d.type == 'VirtualNVDIMM').size() <=
+                            64
+                        - message: devices must not contain more than 1 TPM
+                          rule: self.filter(d, d.type == 'VirtualTPM').size() <= 1
+                        - message: devices must not contain more than 1 VMCI device
+                          rule: self.filter(d, d.type == 'VirtualMachineVMCIDevice').size()
+                            <= 1
+                        - message: devices must not contain more than 1 watchdog timer
+                          rule: self.filter(d, d.type == 'VirtualWDT').size() <= 1
+                      memory:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        description: Memory is the memory size.
+                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                        x-kubernetes-int-or-string: true
+                      motherboardLayout:
+                        description: |-
+                          MotherboardLayout is the motherboard layout for this virtual
+                          machine. Default is "i440bxHostBridge".
+                        type: string
+                      numCPU:
+                        description: |-
+                          NumCPU is the number of virtual CPUs present in this virtual
+                          machine.
+                        format: int32
+                        type: integer
+                      numCoresPerSocket:
+                        description: |-
+                          NumCoresPerSocket is the number of cores used to distribute virtual
+                          CPUs among sockets in this virtual machine.
+                        format: int32
+                        type: integer
+                      simultaneousThreads:
+                        description: |-
+                          SimultaneousThreads is the number of SMT (Simultaneous
+                          Multithreading) threads per core.
+                        format: int32
+                        type: integer
+                      virtualICH7MPresent:
+                        description: |-
+                          VirtualICH7MPresent indicates whether this virtual machine has a
+                          Virtual Intel I/O Controller Hub 7.
+                        type: boolean
+                      virtualSMCPresent:
+                        description: |-
+                          VirtualSMCPresent indicates whether this virtual machine has a
+                          System Management Controller.
+                        type: boolean
+                    required:
+                    - memory
+                    - numCPU
+                    type: object
+                  hardwareVersion:
+                    description: Version is the version string for this virtual machine.
+                    type: string
+                  hotPlugMemoryIncrementSize:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: |-
+                      HotPlugMemoryIncrementSize is the memory increment size
+                      for adding memory to a running virtual machine.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  hotPlugMemoryLimit:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    description: |-
+                      HotPlugMemoryLimit is the maximum amount of memory that
+                      can be added to a running virtual machine.
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
+                  initialOverhead:
+                    description: |-
+                      InitialOverhead contains resource overhead values used only for
+                      admission control when determining if a host has sufficient
+                      resources to power on this virtual machine.
+                    properties:
+                      initialMemoryReservation:
+                        description: |-
+                          InitialMemoryReservation is the memory overhead required to power
+                          on the virtual machine, in bytes.
+                        format: int64
+                        type: integer
+                      initialSwapReservation:
+                        description: |-
+                          InitialSwapReservation is the disk space required for swap when
+                          powering on the virtual machine, in bytes.
+                        format: int64
+                        type: integer
+                    type: object
+                  instanceUuid:
+                    description: |-
+                      InstanceUUID is the VirtualCenter-specific 128-bit UUID of a
+                      virtual machine, represented as a hexadecimal string.
+                    type: string
+                  keyId:
+                    description: KeyId contains the virtual machine's cryptographic
+                      key options.
+                    properties:
+                      keyId:
+                        description: KeyId is the unique key ID.
+                        type: string
+                      providerId:
+                        description: ProviderId identifies the provider that holds
+                          the key.
+                        properties:
+                          id:
+                            description: Id is the globally unique ID for the crypto
+                              key provider.
+                            type: string
+                        required:
+                        - id
+                        type: object
+                    required:
+                    - keyId
+                    type: object
+                  latencySensitivity:
+                    description: |-
+                      LatencySensitivity describes the latency-sensitivity of the virtual
+                      machine.
+                    properties:
+                      level:
+                        description: Level is the nominal latency-sensitivity level.
+                        type: string
+                      sensitivity:
+                        description: |-
+                          Sensitivity is the custom absolute latency-sensitivity value in
+                          microseconds. Only used when Level is "custom".
+
+                          Deprecated: as of vSphere 5.5.
+                        format: int32
+                        type: integer
+                    required:
+                    - level
+                    type: object
+                  locationId:
+                    description: |-
+                      LocationID is a hash incorporating the virtual machine's config
+                      file location and the UUID of the host assigned to run the virtual
+                      machine.
+                    type: string
+                  managedBy:
+                    description: ManagedBy specifies that this VM is managed by a
+                      VC extension.
+                    properties:
+                      extensionKey:
+                        description: ExtensionKey is the key of the extension managing
+                          this entity.
+                        type: string
+                      type:
+                        description: Type is the managed entity type as defined by
+                          the managing extension.
+                        type: string
+                    required:
+                    - extensionKey
+                    - type
+                    type: object
+                  maxMksConnections:
+                    description: |-
+                      MaxMKSConnections is the maximum number of active remote display
+                      connections that the virtual machine will support.
+                    format: int32
+                    type: integer
+                  memoryAffinity:
+                    description: |-
+                      MemoryAffinity defines the memory affinity settings for this
+                      virtual machine.
+
+                      Deprecated: since vSphere 6.0.
+                    properties:
+                      affinitySet:
+                        description: |-
+                          AffinitySet is the list of processors that may be used by the
+                          virtual machine. An empty list removes any existing affinity.
+                        items:
+                          format: int32
+                          type: integer
+                        type: array
+                    type: object
+                  memoryAllocation:
+                    description: MemoryAllocation defines the resource limits for
+                      memory.
+                    properties:
+                      expandableReservation:
+                        description: |-
+                          ExpandableReservation indicates whether the reservation can grow
+                          beyond the specified value.
+                        type: boolean
+                      limit:
+                        description: |-
+                          Limit is the maximum allowed resource usage. Set to -1 for no
+                          fixed limit. Units are MHz for CPU.
+                        format: int64
+                        type: integer
+                      overheadLimit:
+                        description: |-
+                          OverheadLimit is the maximum allowed overhead resource reservation.
+                          Units are MB.
+                        format: int64
+                        type: integer
+                      reservation:
+                        description: |-
+                          Reservation is the guaranteed amount of resource available to the
+                          virtual machine. Units are MHz for CPU.
+                        format: int64
+                        type: integer
+                      shares:
+                        description: Shares describes the resource shares used in
+                          case of contention.
+                        properties:
+                          level:
+                            description: |-
+                              Level is the allocation level. Levels map to pre-determined numeric
+                              share values.
+                            enum:
+                            - custom
+                            - high
+                            - low
+                            - normal
+                            type: string
+                          shares:
+                            description: |-
+                              Shares is the number of shares allocated. Only meaningful when
+                              Level is set to "custom".
+                            format: int32
+                            type: integer
+                        required:
+                        - level
+                        - shares
+                        type: object
+                    type: object
+                  memoryHotAddEnabled:
+                    description: |-
+                      MemoryHotAddEnabled indicates whether memory can be added while
+                      the virtual machine is running.
+                    type: boolean
+                  memoryReservationLockedToMax:
+                    description: |-
+                      MemoryReservationLockedToMax indicates whether memory resource
+                      reservation for this virtual machine will always be equal to the
+                      virtual machine's memory size.
+                    type: boolean
+                  messageBusTunnelEnabled:
+                    description: |-
+                      MessageBusTunnelEnabled indicates whether tunneling of clients from
+                      the guest VM into the common message bus on the host network is
+                      allowed.
+                    type: boolean
+                  metroFtEnabled:
+                    description: |-
+                      MetroFTEnabled indicates whether FT Metro Cluster is enabled for
+                      the VM.
+                    type: boolean
+                  metroFtHostGroup:
+                    description: |-
+                      MetroFTHostGroup indicates the Host Group for FT Metro Cluster
+                      enabled virtual machines.
+                    type: string
+                  migrateEncryption:
+                    description: |-
+                      MigrateEncryption describes whether encrypted vMotion is required
+                      for this VM.
+                    type: string
+                  name:
+                    description: Name is the display name of the virtual machine.
+                    type: string
+                  nestedHVEnabled:
+                    description: |-
+                      NestedHVEnabled indicates whether this VM is configured to use
+                      nested hardware-assisted virtualization.
+                    type: boolean
+                  npivDesiredNodeWwns:
+                    description: |-
+                      NPIVDesiredNodeWwns is the desired number of NPIV node WWNs to be
+                      extended from the original list.
+                    format: int32
+                    type: integer
+                  npivDesiredPortWwns:
+                    description: |-
+                      NPIVDesiredPortWwns is the desired number of NPIV port WWNs to be
+                      extended from the original list.
+                    format: int32
+                    type: integer
+                  npivNodeWorldWideName:
+                    description: |-
+                      NPIVNodeWorldWideName is a list of 64-bit node World Wide Names
+                      (WWN). These are paired with NPIVPortWorldWideName to be used by
+                      NPIV VPORTs instantiated for the virtual machine on the physical
+                      HBAs of the host.
+                    items:
+                      format: int64
+                      type: integer
+                    type: array
+                  npivOnNonRdmDisks:
+                    description: |-
+                      NPIVOnNonRdmDisks indicates whether NPIV can be enabled on the
+                      virtual machine with non-RDM disks.
+                    type: boolean
+                  npivPortWorldWideName:
+                    description: |-
+                      NPIVPortWorldWideName is a list of 64-bit port World Wide Names
+                      (WWN).
+                    items:
+                      format: int64
+                      type: integer
+                    type: array
+                  npivTemporaryDisabled:
+                    description: |-
+                      NPIVTemporaryDisabled disables the NPIV capability on the virtual
+                      machine temporarily. When set, NPIV VPORTs will not be instantiated
+                      but WWNs in the configuration are preserved.
+                    type: boolean
+                  npivWorldWideNameType:
+                    description: |-
+                      NPIVWorldWideNameType is the source that provides/generates the
+                      assigned WWNs.
+                    type: string
+                  numaInfo:
+                    description: NumaInfo describes the virtual NUMA topology of the
+                      virtual machine.
+                    properties:
+                      autoCoresPerNumaNode:
+                        description: |-
+                          AutoCoresPerNumaNode indicates whether the cores per NUMA node
+                          are determined automatically.
+                        type: boolean
+                      coresPerNumaNode:
+                        description: CoresPerNumaNode is the number of cores per virtual
+                          NUMA node.
+                        format: int32
+                        type: integer
+                      vnumaOnCpuHotaddExposed:
+                        description: |-
+                          VnumaOnCpuHotaddExposed indicates whether the virtual NUMA
+                          topology is exposed when CPU hot-add is enabled.
+                        type: boolean
+                    type: object
+                  pmemFailoverEnabled:
+                    description: |-
+                      PMEMFailoverEnabled indicates whether VMs configured to use PMem
+                      will be failed over to other hosts by HA.
+
+                      Deprecated: as of vSphere 9.0 APIs with no replacement.
+                    type: boolean
+                  rebootPowerOff:
+                    description: |-
+                      RebootPowerOff indicates whether the next reboot will result in a
+                      power off.
+                    type: boolean
+                  repConfig:
+                    description: |-
+                      RepConfig contains the vSphere Replication settings for this
+                      virtual machine.
+                    properties:
+                      dataSetsReplicationEnabled:
+                        description: |-
+                          DataSetsReplicationEnabled indicates whether DataSets files are
+                          replicated.
+                        type: boolean
+                      destination:
+                        description: |-
+                          Destination is the IP address of the HBR server in the secondary
+                          site.
+                        type: string
+                      disk:
+                        description: Disk is the set of virtual disks configured for
+                          replication.
+                        items:
+                          description: |-
+                            ReplicationInfoDiskSettings encapsulates the replication properties of
+                            a replicated virtual disk.
+                            It corresponds to vim.vm.ReplicationConfigSpec.DiskSettings.
+                          properties:
+                            diskReplicationId:
+                              description: |-
+                                DiskReplicationId uniquely identifies the replicated disk between
+                                primary and secondary sites.
+                              type: string
+                            key:
+                              description: Key is the device key of the disk in the
+                                VM's configuration.
+                              format: int32
+                              type: integer
+                          required:
+                          - diskReplicationId
+                          - key
+                          type: object
+                        type: array
+                      encryptionDestination:
+                        description: |-
+                          EncryptionDestination is the IP address of the encryption
+                          tunnelling agent on the secondary site.
+                        type: string
+                      encryptionPort:
+                        description: EncryptionPort is the port of the encryption
+                          tunnelling agent.
+                        format: int32
+                        type: integer
+                      generation:
+                        description: |-
+                          Generation is a number reflecting the freshness of the
+                          replication configuration.
+                        format: int64
+                        type: integer
+                      netCompressionEnabled:
+                        description: |-
+                          NetCompressionEnabled indicates whether compression is used when
+                          sending replication traffic over the network.
+                        type: boolean
+                      netEncryptionEnabled:
+                        description: |-
+                          NetEncryptionEnabled indicates whether encryption is used when
+                          sending replication traffic over the network.
+                        type: boolean
+                      oppUpdatesEnabled:
+                        description: |-
+                          OppUpdatesEnabled indicates whether to perform opportunistic
+                          updates between consistent replicas.
+                        type: boolean
+                      paused:
+                        description: |-
+                          Paused indicates whether the VM or group has been paused for
+                          replication.
+                        type: boolean
+                      port:
+                        description: Port is the port on the HBR server in the secondary
+                          site.
+                        format: int32
+                        type: integer
+                      quiesceGuestEnabled:
+                        description: |-
+                          QuiesceGuestEnabled indicates whether to quiesce the guest file
+                          system or applications before creating a consistent replica.
+                        type: boolean
+                      remoteCertificateThumbprint:
+                        description: |-
+                          RemoteCertificateThumbprint is the SHA256 thumbprint of the remote
+                          server certificate, used when encryption is enabled.
+                        type: string
+                      rpo:
+                        description: RPO is the Recovery Point Objective in minutes.
+                        format: int64
+                        type: integer
+                      vmReplicationId:
+                        description: |-
+                          VMReplicationId uniquely identifies the replicated VM between
+                          primary and secondary sites.
+                        type: string
+                    required:
+                    - destination
+                    - generation
+                    - oppUpdatesEnabled
+                    - paused
+                    - port
+                    - quiesceGuestEnabled
+                    - rpo
+                    - vmReplicationId
+                    type: object
+                  scheduledHardwareUpgradeInfo:
+                    description: |-
+                      ScheduledHardwareUpgradeInfo contains the configuration of
+                      scheduled hardware upgrades and the result of the last attempt.
+                    properties:
+                      fault:
+                        description: |-
+                          Fault describes the failure of the last scheduled hardware upgrade
+                          attempt, if any.
+                        properties:
+                          localizedMessage:
+                            description: LocalizedMessage is a human-readable description
+                              of the fault.
+                            type: string
+                        type: object
+                      scheduledHardwareUpgradeStatus:
+                        description: |-
+                          ScheduledHardwareUpgradeStatus is the status of the last scheduled
+                          hardware upgrade attempt.
+                        type: string
+                      upgradePolicy:
+                        description: UpgradePolicy is the scheduled hardware upgrade
+                          policy setting.
+                        type: string
+                      versionKey:
+                        description: |-
+                          VersionKey is the target hardware version key for the next
+                          scheduled upgrade.
+                        type: string
+                    type: object
+                  sevEnabled:
+                    description: |-
+                      SEVEnabled indicates whether SEV (Secure Encrypted Virtualization)
+                      is enabled.
+                    type: boolean
+                  sevSnpEnabled:
+                    description: |-
+                      SEVSNPEnabled indicates whether SEV-SNP (Secure Encrypted
+                      Virtualization Secure Nested Paging) is enabled.
+                    type: boolean
+                  sgxInfo:
+                    description: |-
+                      SgxInfo describes the virtual SGX configuration of the virtual
+                      machine.
+                    properties:
+                      epcSize:
+                        description: EpcSize is the size of the virtual Enclave Page
+                          Cache in megabytes.
+                        format: int64
+                        type: integer
+                      flcMode:
+                        description: |-
+                          FlcMode is the Flexible Launch Control mode. Defaults to
+                          "unlocked" if unset.
+                        type: string
+                      lePubKeyHash:
+                        description: |-
+                          LePubKeyHash is the SHA256 digest of the provider launch enclave's
+                          SIGSTRUCT.MODULUS. Only used when FlcMode is "locked".
+                        type: string
+                      requireAttestation:
+                        description: |-
+                          RequireAttestation indicates whether the virtual machine requires
+                          remote attestation.
+                        type: boolean
+                    required:
+                    - epcSize
+                    type: object
+                  swapPlacement:
+                    description: SwapPlacement is the virtual machine swapfile placement
+                      policy.
+                    type: string
+                  swapStorageObjectId:
+                    description: |-
+                      SwapStorageObjectID is the virtual machine swap object identifier
+                      for object-based storage systems.
+                    type: string
+                  tdxEnabled:
+                    description: |-
+                      TDXEnabled indicates whether TDX (Trust Domain Extensions) is
+                      enabled.
+                    type: boolean
+                  template:
+                    description: Template indicates whether the virtual machine is
+                      a template.
+                    type: boolean
+                  tools:
+                    description: Tools is the VMware Tools configuration for the virtual
+                      machine.
+                    properties:
+                      afterPowerOn:
+                        description: |-
+                          AfterPowerOn indicates whether scripts run after the virtual
+                          machine powers on.
+                        type: boolean
+                      afterResume:
+                        description: |-
+                          AfterResume indicates whether scripts run after the virtual machine
+                          resumes.
+                        type: boolean
+                      beforeGuestReboot:
+                        description: |-
+                          BeforeGuestReboot indicates whether scripts run before the virtual
+                          machine reboots.
+                        type: boolean
+                      beforeGuestShutdown:
+                        description: |-
+                          BeforeGuestShutdown indicates whether scripts run before the
+                          virtual machine powers off.
+                        type: boolean
+                      beforeGuestStandby:
+                        description: |-
+                          BeforeGuestStandby indicates whether scripts run before the
+                          virtual machine suspends.
+                        type: boolean
+                      customizationKeyId:
+                        description: |-
+                          CustomizationKeyId is the ID of the key used to encrypt the
+                          customization package attached to this VM.
+                        properties:
+                          keyId:
+                            description: KeyId is the unique key ID.
+                            type: string
+                          providerId:
+                            description: ProviderId identifies the provider that holds
+                              the key.
+                            properties:
+                              id:
+                                description: Id is the globally unique ID for the
+                                  crypto key provider.
+                                type: string
+                            required:
+                            - id
+                            type: object
+                        required:
+                        - keyId
+                        type: object
+                      lastInstallInfo:
+                        description: |-
+                          LastInstallInfo describes the status of the last tools upgrade
+                          attempt.
+                        properties:
+                          counter:
+                            description: |-
+                              Counter is the number of attempts made to upgrade VMware Tools on
+                              this virtual machine.
+                            format: int32
+                            type: integer
+                          fault:
+                            description: Fault describes the error from the last upgrade
+                              attempt, if any.
+                            properties:
+                              localizedMessage:
+                                description: LocalizedMessage is a human-readable
+                                  description of the fault.
+                                type: string
+                            type: object
+                        required:
+                        - counter
+                        type: object
+                      pendingCustomization:
+                        description: |-
+                          PendingCustomization is the filename of a pending customization
+                          package on the host.
+                        type: string
+                      syncTimeWithHost:
+                        description: |-
+                          SyncTimeWithHost indicates whether VMware Tools periodically
+                          synchronizes guest time with host time.
+                        type: boolean
+                      syncTimeWithHostAllowed:
+                        description: |-
+                          SyncTimeWithHostAllowed indicates whether VMware Tools is allowed
+                          to synchronize guest time with host time.
+                        type: boolean
+                      toolsInstallType:
+                        description: |-
+                          ToolsInstallType is the installation type of VMware Tools in the
+                          guest operating system.
+                        type: string
+                      toolsUpgradePolicy:
+                        description: ToolsUpgradePolicy is the upgrade policy setting
+                          for VMware Tools.
+                        type: string
+                      toolsVersion:
+                        description: ToolsVersion is the version of VMware Tools installed
+                          in the guest.
+                        format: int32
+                        type: integer
+                    type: object
+                  uuid:
+                    description: |-
+                      UUID is the 128-bit SMBIOS UUID of a virtual machine represented as
+                      a hexadecimal string in "12345678-abcd-1234-cdef-123456789abc"
+                      format.
+                    type: string
+                  vAssertsEnabled:
+                    description: |-
+                      VAssertsEnabled indicates whether user-configured virtual asserts
+                      will be triggered during virtual machine replay.
+                    type: boolean
+                  vFlashCacheReservation:
+                    description: |-
+                      VFlashCacheReservation specifies the total vFlash resource
+                      reservation for the vFlash caches associated with this VM's virtual
+                      disks, in bytes.
+
+                      Deprecated: since vSphere 7.0 because vFlash Read Cache end of
+                      availability.
+                    format: int64
+                    type: integer
+                  vPMCEnabled:
+                    description: |-
+                      VPMCEnabled indicates whether this VM has virtual CPU performance
+                      counters enabled.
+                    type: boolean
+                  vcpuConfig:
+                    description: |-
+                      VCPUConfig is the per-vCPU configuration. The array is indexed by
+                      vCPU number.
+                    items:
+                      description: |-
+                        VirtualMachineVcpuConfig is the per-vCPU configuration.
+                        It corresponds to vim.vm.VcpuConfig.
+                      properties:
+                        latencySensitivity:
+                          description: |-
+                            LatencySensitivity is the latency-sensitivity specification for
+                            this vCPU.
+                          properties:
+                            level:
+                              description: Level is the nominal latency-sensitivity
+                                level.
+                              type: string
+                            sensitivity:
+                              description: |-
+                                Sensitivity is the custom absolute latency-sensitivity value in
+                                microseconds. Only used when Level is "custom".
+
+                                Deprecated: as of vSphere 5.5.
+                              format: int32
+                              type: integer
+                          required:
+                          - level
+                          type: object
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                  vmOpNotificationTimeout:
+                    description: |-
+                      VMOpNotificationTimeout is the operation notification timeout in
+                      seconds.
+                    format: int64
+                    type: integer
+                  vmOpNotificationToAppEnabled:
+                    description: |-
+                      VMOpNotificationToAppEnabled indicates whether operation
+                      notification to applications is enabled.
+                    type: boolean
+                  vmStorageObjectId:
+                    description: |-
+                      VMStorageObjectID is the virtual machine object identifier for
+                      object-based storage systems.
+                    type: string
+                  vmxConfigChecksum:
+                    description: VMXConfigChecksum is a checksum of the VMX configuration
+                      file.
+                    format: byte
+                    type: string
+                  vmxStatsCollectionEnabled:
+                    description: |-
+                      VMXStatsCollectionEnabled indicates whether VMXStats collection is
+                      enabled for this VM.
+                    type: boolean
+                required:
+                - alternateGuestName
+                - defaultPowerOps
+                - files
+                - guestFullName
+                - guestId
+                - hardware
+                - hardwareVersion
+                - name
+                - template
+                - uuid
+                type: object
+            type: object
+          status:
+            description: |-
+              VirtualMachineStatus defines the observed state of a
+              VirtualMachine.
+            properties:
+              conditions:
+                description: Conditions describes any conditions associated with this
+                  object.
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              config:
+                description: |-
+                  VirtualMachineConfigInfoStatus encapsulates the observed state of the
+                  configuration settings and virtual hardware for a virtual machine.
+                  It corresponds to vim.vm.ConfigInfo.
+                properties:
+                  changeVersion:
+                    description: |-
+                      ChangeVersion is a unique identifier for a given version of the
+                      configuration. Each change to the configuration updates this value.
+                    type: string
+                  createDate:
+                    description: |-
+                      CreateDate is the time the virtual machine's configuration was
+                      created.
+                    format: date-time
+                    type: string
+                  datastoreURL:
+                    description: |-
+                      DatastoreURL describes the observed set of datastores on which this VM
+                      is stored, as well as the URL identification for each datastore.
+                      Changes to datastores do not generate property updates on this
+                      property. However, when this property is retrieved it returns the
+                      current datastore information.
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        url:
+                          type: string
+                      required:
+                      - name
+                      - url
+                      type: object
+                    type: array
+                  modified:
+                    description: |-
+                      Modified is the last time a virtual machine's configuration was
+                      modified.
+                    format: date-time
+                    type: string
+                  vmxRuntimeConfig:
+                    description: |-
+                      VMXRuntimeConfig contains properties established when the VM powers
+                      on and examined when the VM is resumed to ensure compatibility with
+                      the suspended device state. Only populated while the VM is powered on.
+                    items:
+                      description: |-
+                        OptionValue is a key-value configuration parameter.
+                        It corresponds to vim.option.OptionValue.
+                      properties:
+                        key:
+                          description: Key is the option key.
+                          type: string
+                        value:
+                          description: Value is the option value, encoded as a string.
+                          type: string
+                      required:
+                      - key
+                      - value
+                      type: object
+                    type: array
+                    x-kubernetes-list-type: atomic
+                required:
+                - changeVersion
+                - modified
+                type: object
+              observedGeneration:
+                description: |-
+                  ObservedGeneration describes the value of the metadata.generation field
+                  the last time this object was reconciled by its primary controller.
+                format: int64
+                type: integer
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
