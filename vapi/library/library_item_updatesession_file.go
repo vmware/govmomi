@@ -163,17 +163,26 @@ func ReadManifest(m io.Reader) (map[string]*Checksum, error) {
 
 	scanner := bufio.NewScanner(m)
 	for scanner.Scan() {
-		line := strings.SplitN(scanner.Text(), ")=", 2)
-		if len(line) != 2 {
+		// Manifest lines look like "ALG(file name)= digest". Anchor on the
+		// last ")" (the digest separator's closing paren) so that "(" or ")"
+		// or "=" inside the file name don't confuse the parse, then require an
+		// "=" after it. Whitespace around the "=" (e.g. ") = ") is tolerated.
+		line := scanner.Text()
+		rparen := strings.LastIndex(line, ")")
+		if rparen < 0 {
 			continue
 		}
-		name := strings.SplitN(line[0], "(", 2)
+		value := strings.TrimSpace(line[rparen+1:])
+		if !strings.HasPrefix(value, "=") {
+			continue
+		}
+		name := strings.SplitN(line[:rparen], "(", 2)
 		if len(name) != 2 {
 			continue
 		}
 		sum := &Checksum{
 			Algorithm: strings.TrimSpace(name[0]),
-			Checksum:  strings.TrimSpace(line[1]),
+			Checksum:  strings.TrimSpace(strings.TrimPrefix(value, "=")),
 		}
 		c[name[1]] = sum
 	}
