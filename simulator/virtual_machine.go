@@ -1260,7 +1260,12 @@ func (vm *VirtualMachine) create(ctx *Context, spec *types.VirtualMachineConfigS
 
 	vm.logPrintf("created")
 
-	return vm.configureDevices(ctx, spec)
+	err := vm.configureDevices(ctx, spec)
+	if err != nil {
+		return err
+	}
+
+	return vm.applyExtraConfig(ctx, spec)
 }
 
 var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
@@ -2728,7 +2733,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			})
 		}
 
-		if dst, src := config, req.Spec.Config; src != nil {
+		if dst, src := &config, req.Spec.Config; src != nil {
 			dst.ExtraConfig = src.ExtraConfig
 			copyNonEmptyValue(&dst.Uuid, &src.Uuid)
 			copyNonEmptyValue(&dst.InstanceUuid, &src.InstanceUuid)

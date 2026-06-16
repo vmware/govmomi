@@ -502,6 +502,85 @@ func TestCloneVm(t *testing.T) {
 	}
 }
 
+func TestCloneVmExtraConfig(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
+		vm := object.NewVirtualMachine(c, vmm.Reference())
+
+		cloneName := "cloned-vm-extra-config"
+		config := types.VirtualMachineCloneSpec{
+			Template: false,
+			PowerOn:  false,
+			Config: &types.VirtualMachineConfigSpec{
+				ExtraConfig: []types.BaseOptionValue{
+					&types.OptionValue{
+						Key:   "test-key",
+						Value: "test-value",
+					},
+				},
+			},
+		}
+
+		task, err := vm.Clone(ctx, folders.VmFolder, cloneName, config)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := task.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		cloneRef := info.Result.(types.ManagedObjectReference)
+		clonedVm := object.NewVirtualMachine(c, cloneRef)
+
+		var moVM mo.VirtualMachine
+		if err := clonedVm.Properties(
+			ctx,
+			clonedVm.Reference(),
+			[]string{"config.extraConfig"},
+			&moVM); err != nil {
+			t.Fatal(err)
+		}
+		if moVM.Config == nil {
+			t.Fatal("nil config")
+		}
+
+		var found bool
+		for _, bov := range moVM.Config.ExtraConfig {
+			if bov == nil {
+				continue
+			}
+			ov := bov.GetOptionValue()
+			if ov == nil {
+				continue
+			}
+			if ov.Key == "test-key" {
+				if ov.Value != "test-value" {
+					t.Fatalf("invalid ExtraConfig value: expected=test-value, actual=%v", ov.Value)
+				}
+				found = true
+			}
+		}
+		if !found {
+			t.Fatal("failed to copy ExtraConfig in clone request to cloned VM")
+		}
+	}, m)
+}
+
 func TestReconfigVmDevice(t *testing.T) {
 	ctx := context.Background()
 
