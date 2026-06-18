@@ -85,6 +85,7 @@ type CnsVolumeCreateSpec struct {
 	BackingObjectDetails BaseCnsBackingObjectDetails           `xml:"backingObjectDetails,typeattr" json:"backingObjectDetails"`
 	Profile              []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile"`
 	ActiveClusters       []types.ManagedObjectReference        `xml:"activeClusters,omitempty,typeattr" json:"activeClusters"`
+	Hosts                []types.ManagedObjectReference        `xml:"hosts,omitempty" json:"hosts"`
 	CreateSpec           BaseCnsBaseCreateSpec                 `xml:"createSpec,omitempty,typeattr" json:"createSpec"`
 	VolumeSource         BaseCnsVolumeSource                   `xml:"volumeSource,omitempty,typeattr" json:"volumeSource"`
 }
@@ -341,7 +342,8 @@ func init() {
 type CnsPlacementResult struct {
 	Datastore       types.ManagedObjectReference   `xml:"datastore,omitempty" json:"datastore"`
 	PlacementFaults []*types.LocalizedMethodFault  `xml:"placementFaults,omitempty" json:"placementFaults"`
-	Clusters        []types.ManagedObjectReference `xml:"clusters,omitempty" json:"clusters"`
+	Clusters        []types.ManagedObjectReference  `xml:"clusters,omitempty" json:"clusters"`
+	Host            *types.ManagedObjectReference  `xml:"host,omitempty" json:"host,omitempty"`
 }
 
 func init() {

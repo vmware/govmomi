@@ -32,6 +32,7 @@ import (
 const VSphere70u3VersionInt = 703
 const VSphere80u3VersionInt = 803
 const VSphere91VersionInt = 910
+const VSphere912VersionInt = 912
 const VSphere92VersionInt = 920
 
 func TestClient(t *testing.T) {
@@ -58,6 +59,12 @@ func TestClient(t *testing.T) {
 	// on deployment with Zone with multiple vSphere Clusters
 	// example: export CNS_RUN_MULTICLUSTER_PER_ZONE_TESTS='true'
 	run_cns_multicluster_per_zone_tests := os.Getenv("CNS_RUN_MULTICLUSTER_PER_ZONE_TESTS")
+
+	// set CNS_RUN_HOST_LOCAL_STORAGE_TESTS to true to run host-local datastore volume creation tests.
+	// The SPBM policy (CNS_SPBM_PROFILE_NAME) must have the hostLocalStorage capability.
+	// This test is applicable for vCenter 9.1.2 and above.
+	// example: export CNS_RUN_HOST_LOCAL_STORAGE_TESTS='true'
+	run_host_local_storage_tests := os.Getenv("CNS_RUN_HOST_LOCAL_STORAGE_TESTS")
 
 	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
 	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
@@ -193,6 +200,32 @@ func TestClient(t *testing.T) {
 				ProfileId: storagePolicyID,
 			},
 		}
+	} else if run_host_local_storage_tests == "true" && isvSphereVersion912orAbove(ctx, c.ServiceContent.About) {
+		hostSystems, err := finder.HostSystemList(ctx, "*")
+		if err != nil {
+			t.Fatal(err)
+		}
+		var hosts []vim25types.ManagedObjectReference
+		for _, h := range hostSystems {
+			hosts = append(hosts, h.Reference())
+		}
+		t.Logf("set cnsVolumeCreateSpec.Hosts=%v", hosts)
+		cnsVolumeCreateSpec.Hosts = hosts
+
+		pbmclient, err := pbm.NewClient(ctx, c.Client)
+		if err != nil {
+			t.Fatal(err)
+		}
+		storagePolicyID, err := pbmclient.ProfileIDByName(ctx, spbmProfileName)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("set cnsVolumeCreateSpec.Profile=%s", storagePolicyID)
+		cnsVolumeCreateSpec.Profile = []vim25types.BaseVirtualMachineProfileSpec{
+			&vim25types.VirtualMachineDefinedProfileSpec{
+				ProfileId: storagePolicyID,
+			},
+		}
 	} else {
 		cnsVolumeCreateSpec.Datastores = dsList
 	}
@@ -246,6 +279,14 @@ func TestClient(t *testing.T) {
 			t.Fatalf("clusters in the placement result in createvolumeresult can not be empty. "+
 				"volumeCreateResult.PlacementResults :%q", pretty.Sprint(volumeCreateResult.PlacementResults))
 		}
+	}
+
+	if run_host_local_storage_tests == "true" && isvSphereVersion912orAbove(ctx, c.ServiceContent.About) {
+		if volumeCreateResult.PlacementResults[0].Host == nil {
+			t.Fatalf("host in the placement result cannot be nil for host-local storage. "+
+				"volumeCreateResult.PlacementResults :%q", pretty.Sprint(volumeCreateResult.PlacementResults))
+		}
+		t.Logf("host-local storage placement host: %+v", volumeCreateResult.PlacementResults[0].Host)
 	}
 
 	// Creating Volume with same ID again on different datastore
@@ -2513,6 +2554,23 @@ func isvSphereVersion91orAbove(ctx context.Context, aboutInfo vim25types.AboutIn
 		}
 	}
 	// For all other versions
+	return false
+}
+
+// isvSphereVersion912orAbove checks if specified version is 9.1.2 or higher.
+// Host-local storage support in CNS was introduced in vCenter 9.1.2.
+func isvSphereVersion912orAbove(ctx context.Context, aboutInfo vim25types.AboutInfo) bool {
+	items := strings.Split(aboutInfo.Version, ".")
+	version := strings.Join(items[:], "")
+	if len(version) >= 3 {
+		vSphereVersionInt, err := strconv.Atoi(version[0:3])
+		if err != nil {
+			return false
+		}
+		if vSphereVersionInt >= VSphere912VersionInt {
+			return true
+		}
+	}
 	return false
 }
 
