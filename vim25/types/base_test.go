@@ -28,6 +28,10 @@ func TestAnyType(t *testing.T) {
 			Value: "test",
 		},
 		{
+			Input: x(`<name xsi:type="xs:string" xmlns:xs="http://www.w3.org/2001/XMLSchema">test</name>`),
+			Value: "test",
+		},
+		{
 			Input: x(`<name xsi:type="ArrayOfString"><string>AA</string><string>BB</string></name>`),
 			Value: ArrayOfString{String: []string{"AA", "BB"}},
 		},
