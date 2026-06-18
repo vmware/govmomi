@@ -449,6 +449,90 @@ func TestFaultInjectionInclusionExclusionFilter(t *testing.T) {
 	})
 }
 
+func TestInsufficientResourcesQuotaFaultInjection(t *testing.T) {
+	testCases := []struct {
+		name                    string
+		resourceType            string
+		resourceQuotaType       string
+		available               int64
+		requested               int64
+		entity                  string
+		resourceEnvelope        string
+		failureNotificationMode string
+	}{
+		{
+			name:                    "cpu reservation quota exceeded (transient)",
+			resourceType:            string(types.InsufficientResourcesQuotaResourceTypeCpu),
+			resourceQuotaType:       string(types.InsufficientResourcesQuotaResourceQuotaTypeReservation),
+			available:               100,
+			requested:               500,
+			entity:                  "vm-42",
+			resourceEnvelope:        "envelope-1",
+			failureNotificationMode: string(types.InsufficientResourcesQuotaFailureNotificationModeFailureModeTransient),
+		},
+		{
+			name:                    "memory configured-size quota exceeded (permanent)",
+			resourceType:            string(types.InsufficientResourcesQuotaResourceTypeMemory),
+			resourceQuotaType:       string(types.InsufficientResourcesQuotaResourceQuotaTypeConfiguredSize),
+			available:               0,
+			requested:               1 << 30,
+			entity:                  "envelope-99",
+			resourceEnvelope:        "envelope-99",
+			failureNotificationMode: string(types.InsufficientResourcesQuotaFailureNotificationModeFailureModePermanent),
+		},
+	}
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		service := ServiceFromContext(ctx)
+
+		finder := find.NewFinder(c)
+		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
+		require.NoError(t, err)
+
+		for _, tc := range testCases {
+			t.Run(tc.name, func(t *testing.T) {
+				service.ClearFaultRules()
+				vm.PowerOff(ctx)
+
+				rule := &FaultInjectionRule{
+					MethodName:  "PowerOnVM_Task",
+					ObjectType:  "*",
+					ObjectName:  "*",
+					Probability: 1.0,
+					FaultType:   FaultTypeCustom,
+					Fault: &types.InsufficientResourcesQuota{
+						ResourceType:            tc.resourceType,
+						ResourceQuotaType:       tc.resourceQuotaType,
+						Available:               tc.available,
+						Requested:               tc.requested,
+						Entity:                  tc.entity,
+						ResourceEnvelope:        tc.resourceEnvelope,
+						FailureNotificationMode: tc.failureNotificationMode,
+					},
+					Enabled: true,
+				}
+				service.AddFaultRule(rule)
+
+				_, err := vm.PowerOn(ctx)
+				require.Error(t, err)
+
+				var quotaFault *types.InsufficientResourcesQuota
+				_, ok := fault.As(err, &quotaFault)
+				require.True(t, ok, "expected InsufficientResourcesQuota fault, got: %T", err)
+				require.Equal(t, tc.resourceType, quotaFault.ResourceType)
+				require.Equal(t, tc.resourceQuotaType, quotaFault.ResourceQuotaType)
+				require.Equal(t, tc.available, quotaFault.Available)
+				require.Equal(t, tc.requested, quotaFault.Requested)
+				require.Equal(t, tc.entity, quotaFault.Entity)
+				require.Equal(t, tc.resourceEnvelope, quotaFault.ResourceEnvelope)
+				require.Equal(t, tc.failureNotificationMode, quotaFault.FailureNotificationMode)
+			})
+		}
+
+		service.ClearFaultRules()
+	})
+}
+
 func TestFaultInjectionIncorrectFilterSpecifications(t *testing.T) {
 	testCases := []struct {
 		name     string

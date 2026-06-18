@@ -245,3 +245,112 @@ func init() {
 type FetchVmGroupForMultiwriterDisksResponse struct {
 	Returnval *SharedDiskVmGroupInfo `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
+
+// InsufficientResourcesQuotaResourceType identifies the type of resource whose quota was exceeded.
+type InsufficientResourcesQuotaResourceType string
+
+const (
+	// InsufficientResourcesQuotaResourceTypeCpu indicates CPU quota was exceeded (unit: MHz).
+	InsufficientResourcesQuotaResourceTypeCpu = InsufficientResourcesQuotaResourceType("cpu")
+	// InsufficientResourcesQuotaResourceTypeMemory indicates memory quota was exceeded (unit: bytes).
+	InsufficientResourcesQuotaResourceTypeMemory = InsufficientResourcesQuotaResourceType("memory")
+)
+
+func (e InsufficientResourcesQuotaResourceType) Values() []InsufficientResourcesQuotaResourceType {
+	return []InsufficientResourcesQuotaResourceType{
+		InsufficientResourcesQuotaResourceTypeCpu,
+		InsufficientResourcesQuotaResourceTypeMemory,
+	}
+}
+
+func (e InsufficientResourcesQuotaResourceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["InsufficientResourcesQuotaResourceType"] = reflect.TypeOf((*InsufficientResourcesQuotaResourceType)(nil)).Elem()
+}
+
+// InsufficientResourcesQuotaResourceQuotaType identifies the type of quota that was violated.
+type InsufficientResourcesQuotaResourceQuotaType string
+
+const (
+	// InsufficientResourcesQuotaResourceQuotaTypeReservation indicates a violation against reservation capacity.
+	InsufficientResourcesQuotaResourceQuotaTypeReservation = InsufficientResourcesQuotaResourceQuotaType("reservation")
+	// InsufficientResourcesQuotaResourceQuotaTypeConfiguredSize indicates a violation against configured size capacity.
+	InsufficientResourcesQuotaResourceQuotaTypeConfiguredSize = InsufficientResourcesQuotaResourceQuotaType("configuredSize")
+)
+
+func (e InsufficientResourcesQuotaResourceQuotaType) Values() []InsufficientResourcesQuotaResourceQuotaType {
+	return []InsufficientResourcesQuotaResourceQuotaType{
+		InsufficientResourcesQuotaResourceQuotaTypeReservation,
+		InsufficientResourcesQuotaResourceQuotaTypeConfiguredSize,
+	}
+}
+
+func (e InsufficientResourcesQuotaResourceQuotaType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["InsufficientResourcesQuotaResourceQuotaType"] = reflect.TypeOf((*InsufficientResourcesQuotaResourceQuotaType)(nil)).Elem()
+}
+
+// InsufficientResourcesQuotaFailureNotificationMode indicates whether the failure is transient or permanent.
+type InsufficientResourcesQuotaFailureNotificationMode string
+
+const (
+	// InsufficientResourcesQuotaFailureNotificationModeFailureModeTransient indicates the failure is temporary and may be resolved through reallocation.
+	InsufficientResourcesQuotaFailureNotificationModeFailureModeTransient = InsufficientResourcesQuotaFailureNotificationMode("failureModeTransient")
+	// InsufficientResourcesQuotaFailureNotificationModeFailureModePermanent indicates the failure cannot be resolved.
+	InsufficientResourcesQuotaFailureNotificationModeFailureModePermanent = InsufficientResourcesQuotaFailureNotificationMode("failureModePermanent")
+)
+
+func (e InsufficientResourcesQuotaFailureNotificationMode) Values() []InsufficientResourcesQuotaFailureNotificationMode {
+	return []InsufficientResourcesQuotaFailureNotificationMode{
+		InsufficientResourcesQuotaFailureNotificationModeFailureModeTransient,
+		InsufficientResourcesQuotaFailureNotificationModeFailureModePermanent,
+	}
+}
+
+func (e InsufficientResourcesQuotaFailureNotificationMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["InsufficientResourcesQuotaFailureNotificationMode"] = reflect.TypeOf((*InsufficientResourcesQuotaFailureNotificationMode)(nil)).Elem()
+}
+
+// InsufficientResourcesQuota is thrown when an operation exceeds the quota in an associated resource envelope.
+type InsufficientResourcesQuota struct {
+	InsufficientResourcesFault
+
+	// ResourceType identifies the type of resource whose quota was exceeded.
+	// See InsufficientResourcesQuotaResourceType for supported values.
+	ResourceType string `xml:"resourceType" json:"resourceType"`
+	// ResourceQuotaType identifies the type of quota that was violated.
+	// See InsufficientResourcesQuotaResourceQuotaType for supported values.
+	ResourceQuotaType string `xml:"resourceQuotaType" json:"resourceQuotaType"`
+	// Available is the amount of the resource still available under the quota
+	// (MHz for CPU, bytes for memory).
+	Available int64 `xml:"available" json:"available"`
+	// Requested is the amount of the resource requested in the failed operation.
+	Requested int64 `xml:"requested" json:"requested"`
+	// Entity is the identifier of the entity that violated the quota (e.g., a VM or resource envelope).
+	Entity string `xml:"entity" json:"entity"`
+	// ResourceEnvelope is the identifier of the resource envelope whose quota was exceeded.
+	ResourceEnvelope string `xml:"resourceEnvelope" json:"resourceEnvelope"`
+	// FailureNotificationMode indicates whether the failure is transient or permanent.
+	// See InsufficientResourcesQuotaFailureNotificationMode for supported values.
+	FailureNotificationMode string `xml:"failureNotificationMode" json:"failureNotificationMode"`
+}
+
+func init() {
+	t["InsufficientResourcesQuota"] = reflect.TypeOf((*InsufficientResourcesQuota)(nil)).Elem()
+}
+
+type InsufficientResourcesQuotaFault InsufficientResourcesQuota
+
+func init() {
+	t["InsufficientResourcesQuotaFault"] = reflect.TypeOf((*InsufficientResourcesQuotaFault)(nil)).Elem()
+}
