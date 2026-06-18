@@ -167,6 +167,16 @@ func (c *Manager) WaitForRunningOrError(ctx context.Context, taskId string) (*In
 	return c.waitForState(ctx, taskId, check)
 }
 
+// WaitForRunningOrTerminalState waits for the task to leave the Pending state.
+// It returns when the status is Running, Succeeded, Failed, or Blocked.
+// If the task has failed, it will return the TaskInfo Error field as an error.
+func (c *Manager) WaitForRunningOrTerminalState(ctx context.Context, taskId string) (*Info, error) {
+	check := func(i *Info) bool {
+		return i.Status != Pending
+	}
+	return c.waitForState(ctx, taskId, check)
+}
+
 func (c *Manager) waitForState(ctx context.Context, taskId string, check func(i *Info) bool) (*Info, error) {
 	ticker := time.NewTicker(time.Second * time.Duration(c.pollingInterval))
 	defer ticker.Stop()

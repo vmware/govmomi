@@ -55,8 +55,8 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 		s.HandleFunc(internal.NamespacesPath+"/", h.namespaces)
 		s.HandleFunc(internal.NamespaceClusterPath, h.clusters)
 		s.HandleFunc(internal.NamespaceClusterPath+"/", h.clustersID)
-		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility+"/", h.listCompatibleDistributedSwitches)
-		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility+"/", h.listCompatibleEdgeClusters)
+		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility, h.listCompatibleDistributedSwitches)
+		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility, h.listCompatibleEdgeClusters)
 
 		s.HandleFunc(internal.SupervisorServicesPath, h.listServices)
 		s.HandleFunc(internal.SupervisorServicesPath+"/", h.getService)

@@ -1,3 +1,374 @@
+<a name="v0.54.0"></a>
+## [Release v0.54.0](https://github.com/vmware/govmomi/compare/v0.54.0-alpha.0...v0.54.0)
+
+> Release Date: 2026-05-08
+
+### 🐞 Fix
+
+- [a8ff1b19]	parsing vApp properties while converting from OVF envelope to VM ConfigSpec([#3964](https://github.com/vmware/govmomi/issues/3964)) (#3964)
+
+### 💫 API Changes
+
+- [92f18db2]	add FetchVmGroupForMultiwriterDisks vim25 bindings and vcsim support
+- [5ee9945f]	Fix OVF disk ID func
+- [65791278]	Support NetworkSpec in Namespaces
+- [b54705c9]	More OVF->ConfigSpec testing
+- [25afc662]	Support OVF->ConfigSpec SR-IOV NICs
+- [513e6265]	OVF->ConfigSpec support nil VHW
+- [6c60d63b]	Default to first VirtualSystem in OVF
+- [78a5ee48]	Support disks sans contrllers
+- [36033dfb]	Add OVF test fixtures
+- [76edb74e]	vSphere-specific OVF qualifiers
+- [aa917587]	Uber OVF
+- [8dc36fef]	Product categories
+- [945cef78]	Disk capacity via prop, invalid prop keys
+- [e3e5a48a]	Fix string min/max
+- [9d8ceb07]	Support explicit deployment configuration
+- [a6959449]	Parse OVF property qualifiers per DSP0243
+- [7bd69763]	File-backed disks in OVF->ConfigSpec
+
+### 💫 `govc` (CLI)
+
+- [b9612be6]	add library.import disks option
+
+### 🧹 Chore
+
+- [df7c057a]	Update version.go for v0.54.0
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [df7c057a]	chore: Update version.go for v0.54.0
+- [280e083a]	feat(updateSpec): Remove omitempty from storage spec to have it always rendered  Signed-off-by: tribock <louis.baumann93[@gmail](https://github.com/gmail).com>
+- [fb18fe03]	feat(marshal): Implement new Marshal Function to implement the removal of the last storage policy or the deletion of all policies  Signed-off-by: tribock <louis.baumann93[@gmail](https://github.com/gmail).com>
+- [92f18db2]	api: add FetchVmGroupForMultiwriterDisks vim25 bindings and vcsim support
+- [b7f92a5a]	feat(init): add initial implementation of NamespaceNetwork to support Network override in CreateNamespace Signed-off-by: tribock <louis.baumann93[@gmail](https://github.com/gmail).com>
+- [8edaddee]	chore(deps): bump nokogiri from 1.19.2 to 1.19.3 in /gen
+- [a287dcfa]	chore(deps): bump goreleaser/goreleaser-action from 7.1.0 to 7.2.1 ([#4000](https://github.com/vmware/govmomi/issues/4000)) (#4000)
+- [24621e0d]	chore(deps): bump goreleaser/goreleaser-action from 7.0.0 to 7.1.0 ([#3998](https://github.com/vmware/govmomi/issues/3998)) (#3998)
+- [7b1c3846]	chore(deps): bump chuhlomin/render-template from 1.11 to 1.12
+- [d0181b96]	chore(deps): bump chuhlomin/render-template ([#3996](https://github.com/vmware/govmomi/issues/3996)) (#3996)
+- [61e1166f]	minor change on QueryVolume result verification
+- [69ec24a3]	chore(deps): bump chuhlomin/render-template from 1.10 to 1.11 ([#3995](https://github.com/vmware/govmomi/issues/3995)) (#3995)
+- [953f8e17]	chore(deps): bump actions/cache from 5.0.4 to 5.0.5 ([#3994](https://github.com/vmware/govmomi/issues/3994)) (#3994)
+- [774caabe]	Add API for CNS CBT Control
+- [7d4ac0d6]	chore(deps): bump actions/upload-artifact from 7.0.0 to 7.0.1 ([#3992](https://github.com/vmware/govmomi/issues/3992)) (#3992)
+- [bfeb2818]	chore(deps): bump peter-evans/create-pull-request from 8.1.0 to 8.1.1 ([#3991](https://github.com/vmware/govmomi/issues/3991)) (#3991)
+- [5ee9945f]	api: Fix OVF disk ID func
+- [f9504466]	chore(deps): bump actions/setup-go from 6.3.0 to 6.4.0
+- [65791278]	api: Support NetworkSpec in Namespaces
+- [45926695]	chore(deps): bump nokogiri from 1.19.1 to 1.19.2 in /gen
+- [57d3dfb6]	chore(deps): bump actions/cache from 5.0.3 to 5.0.4 ([#3983](https://github.com/vmware/govmomi/issues/3983)) (#3983)
+- [b356a6bc]	ovf spec parser for dmtf os types
+- [b54705c9]	api: More OVF->ConfigSpec testing
+- [25afc662]	api: Support OVF->ConfigSpec SR-IOV NICs
+- [513e6265]	api: OVF->ConfigSpec support nil VHW
+- [6c60d63b]	api: Default to first VirtualSystem in OVF
+- [78a5ee48]	api: Support disks sans contrllers
+- [36033dfb]	api: Add OVF test fixtures
+- [76edb74e]	api: vSphere-specific OVF qualifiers
+- [aa917587]	api: Uber OVF
+- [8dc36fef]	api: Product categories
+- [945cef78]	api: Disk capacity via prop, invalid prop keys
+- [e3e5a48a]	api: Fix string min/max
+- [9d8ceb07]	api: Support explicit deployment configuration
+- [a6959449]	api: Parse OVF property qualifiers per DSP0243
+- [7bd69763]	api: File-backed disks in OVF->ConfigSpec
+- [b9612be6]	govc: add library.import disks option
+- [562d9cbe]	chore(deps): bump actions/upload-artifact from 6.0.0 to 7.0.0 ([#3970](https://github.com/vmware/govmomi/issues/3970)) (#3970)
+- [9e3cc86f]	reevert: "chore(deps): bump go to 1.24.13 ([#3956](https://github.com/vmware/govmomi/issues/3956))" ([#3969](https://github.com/vmware/govmomi/issues/3969)) (#3956)  (#3969)
+- [2a8ba44b]	chore(deps): bump actions/setup-go from 6.2.0 to 6.3.0 ([#3968](https://github.com/vmware/govmomi/issues/3968)) (#3968)
+- [a8ff1b19]	fix: parsing vApp properties while converting from OVF envelope to VM ConfigSpec([#3964](https://github.com/vmware/govmomi/issues/3964)) (#3964)
+- [e2054307]	chore(gh): update release workflow ([#3967](https://github.com/vmware/govmomi/issues/3967)) (#3967)
+- [2ad74826]	chore(gh): update govc tests workflow ([#3966](https://github.com/vmware/govmomi/issues/3966)) (#3966)
+- [ed441b7f]	chore(deps): bump goreleaser/goreleaser-action from 6.4.0 to 7.0.0 ([#3965](https://github.com/vmware/govmomi/issues/3965)) (#3965)
+
+<a name="v0.53.1"></a>
+## [Release v0.53.1](https://github.com/vmware/govmomi/compare/v0.53.0...v0.53.1)
+
+> Release Date: 2026-04-21
+
+### 💫 `govc` (CLI)
+
+- [5cdf9d98]	add library.import disks option
+
+### 🧹 Chore
+
+- [21f58233]	Update version.go for v0.53.1
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [21f58233]	chore: Update version.go for v0.53.1
+- [5cdf9d98]	govc: add library.import disks option
+
+<a name="v0.53.0"></a>
+## [Release v0.53.0](https://github.com/vmware/govmomi/compare/v0.53.0-alpha.0...v0.53.0)
+
+> Release Date: 2026-02-18
+
+### 🐞 Fix
+
+- [4dddb932]	cluster configuration enablement and draft APIs ([#3944](https://github.com/vmware/govmomi/issues/3944)) (#3944)
+- [5ef2d642]	change `controllerKey` and `unitNumber` to `*int32` ([#3880](https://github.com/vmware/govmomi/issues/3880)) (#3880)
+- [7b6d4590]	unit tests for sync volume ([#3881](https://github.com/vmware/govmomi/issues/3881)) (#3881)
+- [5e3df8a2]	EAM 2.0 bindings typo ([#3879](https://github.com/vmware/govmomi/issues/3879) (#3879)
+- [e481fdd7]	guard against nil role in permissions.ls ([#3840](https://github.com/vmware/govmomi/issues/3840)) (#3840)
+
+### 💫 API Changes
+
+- [65ee37d7]	add TransitGateway mo type
+- [5c626272]	Fix volumeEncrypted in CNS
+- [e6688c70]	Fix OVF userConfigurable in ToConfigSpec
+- [75fed5ce]	CnsVolumeBackingType ([#3918](https://github.com/vmware/govmomi/issues/3918)) (#3918)
+- [31d4775c]	Update ofvEnvelop.ToConfigSpec and configInfo.ToConfigSpec to handle nil ovfProperty userConfigurable
+- [c80b625d]	Handle OVF defaultVal/val correctly
+- [35b20e62]	Fix OVF defVal & ConfigSpec vAppConfig
+- [21d7947c]	Update VmPlacementPolicy interfaces to use vim.TagId
+- [01373c95]	Support OVF->ConfigSpec VirtSysColl index ([#3865](https://github.com/vmware/govmomi/issues/3865)) (#3865)
+- [c5801225]	remove podVMOverheadInfo host capability ([#3869](https://github.com/vmware/govmomi/issues/3869)) (#3869)
+- [68080d37]	Updated API bindings
+- [9e1f60ad]	Updated API bindings
+- [434104ba]	Support vmx-22
+- [79587cc6]	Make ClusterInitialPlacementAction iface
+- [b0607e6a]	Helpers for GuestID->Family/CIMOSType
+
+### 💫 `govc` (CLI)
+
+- [a7a23f87]	Fix `vm.clone` full path example root from `ClusterName` to `DatacenterName` ([#3959](https://github.com/vmware/govmomi/issues/3959)) (#3959)
+- [2a3fd101]	add `device.sata.add` ([#3936](https://github.com/vmware/govmomi/issues/3936)) (#3936)
+- [08dfb41f]	type alias support for ls -t ([#3901](https://github.com/vmware/govmomi/issues/3901)) (#3901)
+
+### 💫 `vcsim` (Simulator)
+
+- [a9a1a9ea]	Consider default devs from VM spec
+- [770f3fea]	Support tags in VM reconfig
+- [b1ee1fbc]	Support encrypt-on-copy virtual disk
+- [3bf69d12]	fix snapshot state handling
+- [5b5c932f]	Deep copy the vm config to snapshot
+
+### 🧹 Chore
+
+- [029d112e]	Update version.go for v0.53.0
+
+### ⏮ Reverts
+
+- [d7849258]	Revert vmware/govmomi[#3911](https://github.com/vmware/govmomi/issues/3911) (#3911)
+
+### ⚠️ BREAKING
+
+ [429bf0fc]:
+Change backingObjectId from string to *string
+
+### 📖 Commits
+
+- [029d112e]	chore: Update version.go for v0.53.0
+- [df5dee37]	Bump release go-version
+- [65ee37d7]	api: add TransitGateway mo type
+- [a7a23f87]	govc: Fix `vm.clone` full path example root from `ClusterName` to `DatacenterName` ([#3959](https://github.com/vmware/govmomi/issues/3959)) (#3959)
+- [2ee963aa]	chore(deps): bump test-unit from 3.7.3 to 3.7.7 in /gen ([#3941](https://github.com/vmware/govmomi/issues/3941)) (#3941)
+- [a9f124ed]	chore(deps): bump actions/stale from 10.1.1 to 10.2.0 ([#3957](https://github.com/vmware/govmomi/issues/3957)) (#3957)
+- [0b3ecc86]	chore(deps): bump nokogiri from 1.18.10 to 1.19.1 in /gen
+- [9b1a86d9]	chore(deps): bump go to 1.24.13 ([#3956](https://github.com/vmware/govmomi/issues/3956)) (#3956)
+- [4c96dc46]	chore(deps): bump golang.org/x/text from 0.33.0 to 0.34.0 ([#3955](https://github.com/vmware/govmomi/issues/3955)) (#3955)
+- [d95b9f9e]	Update simulator to return StatusOK for libraryUsages as it is /api endpoint.
+- [9e3c7f23]	Fix AddLibraryUsage to return expected output format.
+- [55b758a9]	chore(deps): bump actions/cache from 5.0.2 to 5.0.3 ([#3950](https://github.com/vmware/govmomi/issues/3950)) (#3950)
+- [32d70815]	chore(deps): bump peter-evans/create-pull-request from 8.0.0 to 8.1.0 ([#3949](https://github.com/vmware/govmomi/issues/3949)) (#3949)
+- [9fa3f602]	chore(deps): bump actions/cache from 5.0.1 to 5.0.2 ([#3948](https://github.com/vmware/govmomi/issues/3948)) (#3948)
+- [1f9b2105]	chore(deps): bump actions/setup-go from 6.1.0 to 6.2.0 ([#3946](https://github.com/vmware/govmomi/issues/3946)) (#3946)
+- [714cf8a7]	chore(deps): bump golang.org/x/text from 0.32.0 to 0.33.0 ([#3945](https://github.com/vmware/govmomi/issues/3945)) (#3945)
+- [4dddb932]	fix: cluster configuration enablement and draft APIs ([#3944](https://github.com/vmware/govmomi/issues/3944)) (#3944)
+- [caad5b56]	Add VirtualVmxnet to EthernetCardTypes
+- [429bf0fc]	Use *string for backingObjectId
+- [a9a1a9ea]	vcsim: Consider default devs from VM spec
+- [2a3fd101]	govc: add `device.sata.add` ([#3936](https://github.com/vmware/govmomi/issues/3936)) (#3936)
+- [4957c81c]	chore(gh): bump actions/checkout from 4.2.2 to 6.0.1 ([#3935](https://github.com/vmware/govmomi/issues/3935)) (#3935)
+- [f81cf44b]	chore(deps): bump actions/upload-artifact from 5.0.0 to 6.0.0 ([#3933](https://github.com/vmware/govmomi/issues/3933)) (#3933)
+- [1cd2a378]	chore(deps): bump dessant/lock-threads from 5.0.1 to 6.0.0 ([#3932](https://github.com/vmware/govmomi/issues/3932)) (#3932)
+- [eb4bc10e]	chore(deps): bump actions/cache from 5.0.0 to 5.0.1 ([#3934](https://github.com/vmware/govmomi/issues/3934)) (#3934)
+- [58758028]	chore(deps): bump actions/cache from 4.3.0 to 5.0.0 ([#3931](https://github.com/vmware/govmomi/issues/3931)) (#3931)
+- [a92bd5f7]	chore(deps): bump peter-evans/create-pull-request from 7.0.11 to 8.0.0 ([#3930](https://github.com/vmware/govmomi/issues/3930)) (#3930)
+- [ebd2c8e9]	feat: add bindings for namespace instances v2 endpoints ([#3929](https://github.com/vmware/govmomi/issues/3929)) (#3929)
+- [e177c72e]	chore(deps): bump golang.org/x/text from 0.31.0 to 0.32.0 ([#3928](https://github.com/vmware/govmomi/issues/3928)) (#3928)
+- [d1732a09]	chore(deps): bump peter-evans/create-pull-request from 7.0.9 to 7.0.11 ([#3926](https://github.com/vmware/govmomi/issues/3926)) (#3926)
+- [b3457188]	feat: add supervisor topology and summary bindings ([#3925](https://github.com/vmware/govmomi/issues/3925)) (#3925)
+- [7d2d4a52]	add go binding for CnsNotRegisteredFault
+- [5c626272]	api: Fix volumeEncrypted in CNS
+- [e6688c70]	api: Fix OVF userConfigurable in ToConfigSpec
+- [d7849258]	Revert "Revert vmware/govmomi[#3911](https://github.com/vmware/govmomi/issues/3911)" (#3911)
+- [7c4391c6]	chore(deps): bump actions/stale from 10.1.0 to 10.1.1 ([#3922](https://github.com/vmware/govmomi/issues/3922)) (#3922)
+- [0aec2ab4]	Add property-based filtering capabilities and skipCount functionality to injection rules. ([#3903](https://github.com/vmware/govmomi/issues/3903)) (#3903)
+- [3313eae5]	Revert vmware/govmomi[#3911](https://github.com/vmware/govmomi/issues/3911) (#3911)
+- [0c101ef6]	add volumeEncrypted flag to CnsVolumeAttachDetachSpec
+- [75fed5ce]	api: CnsVolumeBackingType ([#3918](https://github.com/vmware/govmomi/issues/3918)) (#3918)
+- [4da134ec]	chore(deps): bump golang.org/x/text from 0.28.0 to 0.31.0 ([#3913](https://github.com/vmware/govmomi/issues/3913)) (#3913)  (#3902)
+- [4a6daa1f]	refactor: simulated tag support ([#3916](https://github.com/vmware/govmomi/issues/3916)) (#3916)
+- [05856402]	feat: add bindings for enableOnZones and enableOnComputeCluster ([#3909](https://github.com/vmware/govmomi/issues/3909)) (#3909)
+- [f9123d5f]	chore(deps): bump test-unit from 3.7.2 to 3.7.3 in /gen ([#3915](https://github.com/vmware/govmomi/issues/3915)) (#3915)
+- [770f3fea]	vcsim: Support tags in VM reconfig
+- [3496d486]	refactor: update `NumCoresPerSocket` to `*int32` ([#3906](https://github.com/vmware/govmomi/issues/3906)) (#3906)
+- [c156b068]	chore(deps): bump test-unit from 3.7.1 to 3.7.2 in /gen ([#3912](https://github.com/vmware/govmomi/issues/3912)) (#3912)
+- [31d4775c]	api: Update ofvEnvelop.ToConfigSpec and configInfo.ToConfigSpec to handle nil ovfProperty userConfigurable
+- [d2c98e38]	vmdk: Add stream-optimised VMDK writer
+- [f5b094d9]	chore(deps): bump peter-evans/create-pull-request from 7.0.8 to 7.0.9 ([#3910](https://github.com/vmware/govmomi/issues/3910)) (#3910)
+- [c80b625d]	api: Handle OVF defaultVal/val correctly
+- [220defa3]	Reverts vmware/govmomi[#3904](https://github.com/vmware/govmomi/issues/3904) (#3904)
+- [aa5e8136]	chore(deps): bump actions/setup-go from 6.0.0 to 6.1.0 ([#3905](https://github.com/vmware/govmomi/issues/3905)) (#3905)
+- [35b20e62]	api: Fix OVF defVal & ConfigSpec vAppConfig
+- [830d0e83]	chore(deps): bump nokogiri from 1.18.9 to 1.18.10 in /gen ([#3862](https://github.com/vmware/govmomi/issues/3862)) (#3862)
+- [08dfb41f]	govc: type alias support for ls -t ([#3901](https://github.com/vmware/govmomi/issues/3901)) (#3901)
+- [0c1c5c60]	chore(deps): bump test-unit from 3.7.0 to 3.7.1 in /gen ([#3899](https://github.com/vmware/govmomi/issues/3899)) (#3899)
+- [27d3b54f]	Conditionally set disk UUID if empty in backing info and fix related issues
+- [9d1d96b3]	chore(deps): bump actions/upload-artifact from 4.6.2 to 5.0.0 ([#3895](https://github.com/vmware/govmomi/issues/3895)) (#3895)
+- [829da4c5]	chore(deps): bump mxschmitt/action-tmate from 3.22 to 3.23 ([#3894](https://github.com/vmware/govmomi/issues/3894)) (#3894)
+- [c9f0ce85]	Update hasPodVM to hasPageSharingPodVM
+- [21d7947c]	api: Update VmPlacementPolicy interfaces to use vim.TagId
+- [12f335ca]	feat: add `govc vm.customize` command to support password and custom script ([#3867](https://github.com/vmware/govmomi/issues/3867)) (#3867)
+- [1c7c0572]	add omitempty to optional certificate field
+- [5ef2d642]	fix: change `controllerKey` and `unitNumber` to `*int32` ([#3880](https://github.com/vmware/govmomi/issues/3880)) (#3880)
+- [bdaeb8d9]	fix lint issue
+- [7d40d3a0]	add processDynamicUpdate bindings
+- [7b6d4590]	fix: unit tests for sync volume ([#3881](https://github.com/vmware/govmomi/issues/3881)) (#3881)
+- [5e3df8a2]	fix: EAM 2.0 bindings typo ([#3879](https://github.com/vmware/govmomi/issues/3879) (#3879)
+- [f79ec40a]	EAM 2.0 SolutionSpecInfo should have AlternativeVmSpecs field
+- [01373c95]	api: Support OVF->ConfigSpec VirtSysColl index ([#3865](https://github.com/vmware/govmomi/issues/3865)) (#3865)
+- [37d88978]	chore(gh): bump actions/stale from 10.0.0 to 10.1.0 ([#3882](https://github.com/vmware/govmomi/issues/3882)) (#3882)
+- [c5801225]	api: remove podVMOverheadInfo host capability ([#3869](https://github.com/vmware/govmomi/issues/3869)) (#3869)
+- [2e6fc268]	chore(gh): bump peter-evans/create-or-update-comment ([#3878](https://github.com/vmware/govmomi/issues/3878)) (#3878)
+- [17f4e2b6]	Remove IgnoredDuringExecution VM placement policy strictness
+- [f9c2d2e2]	EAM 2.0 Transition API needs more fields in bindings
+- [8cd0d37a]	Fixes for EAM 2.0 Transition API Definitions
+- [16f01466]	chore(deps): bump actions/cache from 4.2.4 to 4.3.0 ([#3873](https://github.com/vmware/govmomi/issues/3873)) (#3873)
+- [b1ee1fbc]	vcsim: Support encrypt-on-copy virtual disk
+- [902891d0]	Preventing Accidental Deletion of Library Items through Usage Configuration
+- [cee443fc]	Adds EAM 2.0 Solution Transition API
+- [6a312783]	Fix TestClusterCompliance test
+- [04d73db5]	Interpret StatusNoContent as no-error and return in rest client
+- [26283ed3]	Mark all optional fields with omitempty in vapi/esx/ and vapi/tasks
+- [9cb6a9a8]	Switch to api path for library usage API
+- [8ddba3da]	Hook ComplianceFilterSpec has optional fields
+- [68080d37]	api: Updated API bindings
+- [71ee7b7e]	Lose the javadoc comments and conform to godoc standards
+- [ad8c16c9]	Add process lifecycle hooks api bindings
+- [6998f840]	Add esx.settings.clusters.vms solutions API
+- [748f5fca]	Add Notifications bindings
+- [7b62bcf5]	Add Error type and associated enums
+- [fc169176]	Add bindings for cis Task API
+- [9e1f60ad]	api: Updated API bindings
+- [6dbcf44a]	Fixed vim version required for PodVMInfo
+- [c6fdcd31]	Addressed review comments
+- [38d83cae]	Add PodVMInfo type and method
+- [434104ba]	api: Support vmx-22
+- [83504793]	chore(deps): bump github.com/stretchr/testify from 1.10.0 to 1.11.1 ([#3843](https://github.com/vmware/govmomi/issues/3843)) (#3843)
+- [343b7096]	chore(deps): bump actions/setup-go from 5.5.0 to 6.0.0 ([#3852](https://github.com/vmware/govmomi/issues/3852)) (#3852)
+- [3bf69d12]	vcsim: fix snapshot state handling
+- [f3f41f41]	chore(deps): bump actions/stale from 9.1.0 to 10.0.0 ([#3851](https://github.com/vmware/govmomi/issues/3851)) (#3851)
+- [62acc163]	Library Usage API to perform CRUD operations on Library Usage resource
+- [79587cc6]	api: Make ClusterInitialPlacementAction iface
+- [5b5c932f]	vcsim: Deep copy the vm config to snapshot
+- [b0607e6a]	api: Helpers for GuestID->Family/CIMOSType
+- [14105888]	chore(deps): bump github.com/go-viper/mapstructure/v2 ([#3841](https://github.com/vmware/govmomi/issues/3841)) (#3841)
+- [e481fdd7]	fix: guard against nil role in permissions.ls ([#3840](https://github.com/vmware/govmomi/issues/3840)) (#3840)
+
+<a name="v0.52.0"></a>
+## [Release v0.52.0](https://github.com/vmware/govmomi/compare/v0.52.0-alpha.0...v0.52.0)
+
+> Release Date: 2025-08-18
+
+### 🐞 Fix
+
+- [5c16d3fb]	vcsim: Avoid panic in QueryAvailablePerfMetric if VM has no Datastore
+
+### 💫 API Changes
+
+- [2278e0e4]	Update folder.PlaceVMsXCluster to return available candidate networks
+- [28eeab9a]	fix comments and doc links
+- [7a3647c2]	fix action parameters
+- [8ee99953]	update drafts bindings
+- [37dd0c84]	bindings for esx/settings/clusters/cluster/configuration/drafts
+- [70746555]	Placement policy WSDL names changed
+- [55501e2b]	add bindings for recent tasks and schema
+- [32307656]	add bindings for esx/settings/cluster/configuration
+- [74eea104]	add bindings for esx/settings/cluster/enablement/configuration/transition
+- [e61ad354]	Update folder.PlaceVMsXCluster to filter clusters based on candidate networks availability  - Add GoVmomi Bindings to CandidateNetworks  - Made changes suggested by Shengjie
+- [8784335c]	Add "lsilogicsas" alias for "lsilogic-sas" in CreateSCSIController
+
+### 💫 `govc` (CLI)
+
+- [0b0e0cc3]	Add vmclass configSpec options
+
+### 💫 `vcsim` (Simulator)
+
+- [3efce106]	add SearchIndex.FindAllByUuid() support
+- [5a50d408]	Fault injection
+- [2fed3413]	CreateVm should allow existing nvram files
+- [38a84889]	Resolve NSX OpaqueBacking to the DistributedVirtualPortgroup
+- [25ce2a12]	Avoid panic if VM NIC is removed after CustomizeVM
+
+### 📃 Documentation
+
+- [d0143b1a]	update `CHANGELOG.md` ([#3839](https://github.com/vmware/govmomi/issues/3839)) (#3839)
+
+### 🧹 Chore
+
+- [e53c30d0]	Update version.go for v0.52.0
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [e53c30d0]	chore: Update version.go for v0.52.0
+- [d0143b1a]	docs: update `CHANGELOG.md` ([#3839](https://github.com/vmware/govmomi/issues/3839)) (#3839)
+- [edf81adb]	build(deps): bump golang.org/x/text from 0.26.0 to 0.28.0 ([#3835](https://github.com/vmware/govmomi/issues/3835)) (#3835)
+- [521695dc]	build(deps): bump goreleaser/goreleaser-action from 6.3.0 to 6.4.0 ([#3838](https://github.com/vmware/govmomi/issues/3838)) (#3838)
+- [161b964c]	build(deps): bump github.com/go-viper/mapstructure/v2 ([#3811](https://github.com/vmware/govmomi/issues/3811)) (#3811)
+- [90a7f76a]	build(deps): bump nokogiri from 1.18.8 to 1.18.9 in /gen ([#3822](https://github.com/vmware/govmomi/issues/3822)) (#3822)
+- [57127bae]	build(deps): bump test-unit from 3.6.8 to 3.7.0 in /gen ([#3817](https://github.com/vmware/govmomi/issues/3817)) (#3817)
+- [0e836f2b]	build(deps): bump actions/cache from 4.2.3 to 4.2.4 ([#3834](https://github.com/vmware/govmomi/issues/3834)) (#3834)
+- [aa32ef3a]	vcsim : Remove the single VM limitation for PlaceVmsXCluster API
+- [2278e0e4]	api: Update folder.PlaceVMsXCluster to return available candidate networks
+- [74528cfb]	Add option to GetVirtualDiskInfoByUUID for choosing exclude snapshot disks when calculating virtualdisk size
+- [debe7c71]	update json tags and add tests for syncvolume api
+- [245af177]	binding for CnsKubernetesQueryFilter
+- [b74b010c]	Implement bindings for CNS Unregister Volume Created new method called CnsUnregisterVolume Created CnsUnregisterVolume, CnsUnregisterVolumeRequestType and CnsUnregisterVolumeResponse types Created UnregisterVolume method on CNS Client Created TestUnregisterVolume function to test the changes
+- [28eeab9a]	api: fix comments and doc links
+- [f12361c7]	Add tests for types of meta fault ([#3824](https://github.com/vmware/govmomi/issues/3824)) (#3824)
+- [7a3647c2]	api: fix action parameters
+- [8ee99953]	api: update drafts bindings
+- [37dd0c84]	api: bindings for esx/settings/clusters/cluster/configuration/drafts
+- [70746555]	api: Placement policy WSDL names changed
+- [55501e2b]	api: add bindings for recent tasks and schema
+- [32307656]	api: add bindings for esx/settings/cluster/configuration
+- [74eea104]	api: add bindings for esx/settings/cluster/enablement/configuration/transition
+- [3efce106]	vcsim: add SearchIndex.FindAllByUuid() support
+- [e48f1ffa]	Add CnsSyncVolume API bindings
+- [d25f318f]	Update govc/USAGE.md
+- [858de8d6]	Introduce Govmomi bindings to support VM placement policies
+- [b67bf1a6]	Added new simulator test TestPlaceVmsXClusterCreateAndPowerOnWithCandidateNetworks
+- [4a142ef2]	Made changes suggested in review - removed go.mod
+- [915ef1e2]	Fix binding generation by bumping Ruby version
+- [6248951d]	Updated folder.place usage
+- [9822e170]	Add shared disk parameters to Cns AttachDetach Spec
+- [e61ad354]	api: Update folder.PlaceVMsXCluster to filter clusters based on candidate networks availability  - Add GoVmomi Bindings to CandidateNetworks  - Made changes suggested by Shengjie
+- [0c586025]	Fix the quotation in the copyright header
+- [281c86f0]	update CnsVolumeCreateSpec and CnsVolumeOperationResult
+- [109a53a8]	Add SPBM internal types and methods related to K8s compliant names changes
+- [cbbe8d22]	handle vim25:NotSupported returned with CnsFault
+- [24f4996f]	skip CNS transaction tests when env CNS_RUN_TRANSACTION_TESTS is not set
+- [870f1e7b]	update CnsVolumeCreateSpec and CnsSnapshotCreateSpec for Transaction Support. add new fault CnsVolumeAlreadyExistsFault
+- [0e4a0fa8]	Added govmomi binding changes for SPBM API changes for reserve K8s compliant name feature
+- [5a50d408]	vcsim: Fault injection
+- [2fed3413]	vcsim: CreateVm should allow existing nvram files
+- [8febefc0]	Add linkedClone creation support for CNS volumes
+- [8784335c]	api: Add "lsilogicsas" alias for "lsilogic-sas" in CreateSCSIController
+- [38a84889]	vcsim: Resolve NSX OpaqueBacking to the DistributedVirtualPortgroup
+- [0b0e0cc3]	govc: Add vmclass configSpec options
+- [25ce2a12]	vcsim: Avoid panic if VM NIC is removed after CustomizeVM
+- [5c16d3fb]	fix: vcsim: Avoid panic in QueryAvailablePerfMetric if VM has no Datastore
+
 <a name="v0.51.0"></a>
 ## [Release v0.51.0](https://github.com/vmware/govmomi/compare/v0.51.0-alpha.0...v0.51.0)
 

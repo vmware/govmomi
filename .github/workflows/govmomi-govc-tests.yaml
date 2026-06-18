@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go-version: ["1.25"]
+        go-version: ["1.26"]
         platform: [ubuntu-latest]
         cmd: [govc-test]
         experimental: [false]
@@ -54,15 +54,11 @@ jobs:
         run: |
           make ${{ matrix.cmd }}
 
-      - name: Debug on Failure
-        if: ${{ failure() }}
-        uses: mxschmitt/action-tmate@c0afd6f790e3a5564914980036ebf83216678101 # v3.23
-
   govc-docs:
     name: Verify Updated Docs
     strategy:
       matrix:
-        go-version: ["1.25"]
+        go-version: ["1.26"]
         platform: [ubuntu-latest]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 3

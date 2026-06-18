@@ -14,6 +14,28 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+func TestIsTransientErrorConcurrentAccess(t *testing.T) {
+	var (
+		errFalse any
+		errTrue  any
+	)
+
+	errFalse = task.Error{
+		LocalizedMethodFault: &types.LocalizedMethodFault{
+			Fault: &types.SystemError{},
+		},
+	}
+
+	errTrue = task.Error{
+		LocalizedMethodFault: &types.LocalizedMethodFault{
+			Fault: &types.ConcurrentAccess{},
+		},
+	}
+
+	assert.False(t, fault.IsTransientError(errFalse))
+	assert.True(t, fault.IsTransientError(errTrue))
+}
+
 func TestAlreadyPoweredOff(t *testing.T) {
 	var (
 		errFalse any

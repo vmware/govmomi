@@ -5,9 +5,13 @@
 package simulator
 
 import (
+	"encoding/xml"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/vmware/govmomi/simulator/vpx"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func compareModel(t *testing.T, m *Model) {
@@ -149,4 +153,53 @@ func TestModelWithFolders(t *testing.T) {
 	}
 
 	compareModel(t, m)
+}
+
+func TestModelLoadAlignCounter(t *testing.T) {
+	dir, err := os.MkdirTemp("", "vcsim-load-test-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(dir)
+
+	// Create a Datacenter XML file to prevent resolveReferences from creating a default one
+	dcContent := types.ObjectContent{
+		Obj: types.ManagedObjectReference{Type: "Datacenter", Value: "datacenter-10"},
+	}
+	dcData, err := xml.Marshal(dcContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "datacenter-10.xml"), dcData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a VirtualMachine XML file with vm-500
+	vmContent := types.ObjectContent{
+		Obj: types.ManagedObjectReference{Type: "VirtualMachine", Value: "vm-500"},
+	}
+	vmData, err := xml.Marshal(vmContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "vm-500.xml"), vmData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Load the model from the directory using the VPX baseline configuration
+	m := VPX()
+	defer m.Remove()
+
+	if err := m.Load(dir); err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify the model registry counter was aligned to 500
+	reg := m.Map()
+	if reg.counter != 500 {
+		for k, _ := range reg.objects {
+			t.Logf("Registry object: %s:%s", k.Type, k.Value)
+		}
+		t.Errorf("expected registry counter to be 500, got %d", reg.counter)
+	}
 }
