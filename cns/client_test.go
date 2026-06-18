@@ -32,6 +32,7 @@ import (
 const VSphere70u3VersionInt = 703
 const VSphere80u3VersionInt = 803
 const VSphere91VersionInt = 910
+const VSphere912VersionInt = 912
 const VSphere92VersionInt = 920
 
 func TestClient(t *testing.T) {
@@ -61,6 +62,7 @@ func TestClient(t *testing.T) {
 
 	// set CNS_RUN_HOST_LOCAL_STORAGE_TESTS to true to run host-local datastore volume creation tests.
 	// The SPBM policy (CNS_SPBM_PROFILE_NAME) must have the hostLocalStorage capability.
+	// This test is applicable for vCenter 9.1.2 and above.
 	// example: export CNS_RUN_HOST_LOCAL_STORAGE_TESTS='true'
 	run_host_local_storage_tests := os.Getenv("CNS_RUN_HOST_LOCAL_STORAGE_TESTS")
 
@@ -198,7 +200,7 @@ func TestClient(t *testing.T) {
 				ProfileId: storagePolicyID,
 			},
 		}
-	} else if run_host_local_storage_tests == "true" {
+	} else if run_host_local_storage_tests == "true" && isvSphereVersion912orAbove(ctx, c.ServiceContent.About) {
 		hostSystems, err := finder.HostSystemList(ctx, "*")
 		if err != nil {
 			t.Fatal(err)
@@ -279,7 +281,7 @@ func TestClient(t *testing.T) {
 		}
 	}
 
-	if run_host_local_storage_tests == "true" {
+	if run_host_local_storage_tests == "true" && isvSphereVersion912orAbove(ctx, c.ServiceContent.About) {
 		if volumeCreateResult.PlacementResults[0].Host == nil {
 			t.Fatalf("host in the placement result cannot be nil for host-local storage. "+
 				"volumeCreateResult.PlacementResults :%q", pretty.Sprint(volumeCreateResult.PlacementResults))
@@ -2552,6 +2554,23 @@ func isvSphereVersion91orAbove(ctx context.Context, aboutInfo vim25types.AboutIn
 		}
 	}
 	// For all other versions
+	return false
+}
+
+// isvSphereVersion912orAbove checks if specified version is 9.1.2 or higher.
+// Host-local storage support in CNS was introduced in vCenter 9.1.2.
+func isvSphereVersion912orAbove(ctx context.Context, aboutInfo vim25types.AboutInfo) bool {
+	items := strings.Split(aboutInfo.Version, ".")
+	version := strings.Join(items[:], "")
+	if len(version) >= 3 {
+		vSphereVersionInt, err := strconv.Atoi(version[0:3])
+		if err != nil {
+			return false
+		}
+		if vSphereVersionInt >= VSphere912VersionInt {
+			return true
+		}
+	}
 	return false
 }
 
