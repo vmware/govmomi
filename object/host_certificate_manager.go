@@ -12,6 +12,7 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -97,20 +98,24 @@ func (m HostCertificateManager) InstallServerCertificate(ctx context.Context, ce
 
 	// NotifyAffectedService is internal, not exposing as we don't have a use case other than with InstallServerCertificate
 	// Without this call, hostd needs to be restarted to use the updated certificate
-	// Note: using Refresh as it has the same struct/signature, we just need to use different xml name tags
-	body := struct {
-		Req *types.Refresh         `xml:"urn:vim25 NotifyAffectedServices,omitempty"`
-		Res *types.RefreshResponse `xml:"urn:vim25 NotifyAffectedServicesResponse,omitempty"`
-		methods.RefreshBody
-	}{
-		Req: &types.Refresh{This: m.Reference()},
-	}
+	var body notifyAffectedServicesBody
+	body.Req = &types.Refresh{This: m.Reference()}
 
 	err = m.Client().RoundTrip(ctx, &body, &body)
 	if err != nil && fault.Is(err, &types.MethodNotFound{}) {
 		return nil
 	}
 	return err
+}
+
+type notifyAffectedServicesBody struct {
+	Req    *types.Refresh         `xml:"urn:vim25 NotifyAffectedServices,omitempty"`
+	Res    *types.RefreshResponse `xml:"urn:vim25 NotifyAffectedServicesResponse,omitempty"`
+	Fault_ *soap.Fault            `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *notifyAffectedServicesBody) Fault() *soap.Fault {
+	return b.Fault_
 }
 
 // ListCACertificateRevocationLists returns the SSL CRLs of Certificate Authorities that are trusted by the host system.

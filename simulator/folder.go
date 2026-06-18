@@ -1179,3 +1179,7 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 	body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "placementType"})
 	return body
 }
+
+func (f *Folder) SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
+	return SetCustomValue(ctx, req)
+}
