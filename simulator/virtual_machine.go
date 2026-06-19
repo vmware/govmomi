@@ -1436,6 +1436,32 @@ func (vm *VirtualMachine) configureDevice(
 		var net types.ManagedObjectReference
 		var name string
 
+		if card := x.GetVirtualEthernetCard(); card.SubnetId != "" && d.Backing == nil {
+			var dvpg *DistributedVirtualPortgroup
+
+			var find func(types.ManagedObjectReference)
+			find = func(child types.ManagedObjectReference) {
+				d, ok := ctx.Map.Get(child).(*DistributedVirtualPortgroup)
+				if ok && d.Config.SubnetId == card.SubnetId {
+					dvpg = d
+					return
+				}
+				walk(ctx.Map.Get(child), find)
+			}
+			f := ctx.Map.getEntityDatacenter(vm).NetworkFolder
+			walk(ctx.Map.Get(f), find) // search in NetworkFolder and any sub folders
+
+			if dvpg != nil {
+				dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+				d.Backing = &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
+					Port: types.DistributedVirtualSwitchPortConnection{
+						PortgroupKey: dvpg.Key,
+						SwitchUuid:   dvs.Uuid,
+					},
+				}
+			}
+		}
+
 		if b, ok := d.Backing.(*types.VirtualEthernetCardOpaqueNetworkBackingInfo); ok &&
 			b.OpaqueNetworkType == "nsx.LogicalSwitch" {
 
@@ -1489,6 +1515,12 @@ func (vm *VirtualMachine) configureDevice(
 			net.Value = b.Port.PortgroupKey
 			if err := vm.validateSwitchMembers(ctx, b.Port.SwitchUuid); err != nil {
 				return err
+			}
+			pgRef := types.ManagedObjectReference{Type: "DistributedVirtualPortgroup", Value: b.Port.PortgroupKey}
+			if pgObj := ctx.Map.Get(pgRef); pgObj != nil {
+				if pg, ok := pgObj.(*DistributedVirtualPortgroup); ok {
+					x.GetVirtualEthernetCard().SubnetId = pg.Config.SubnetId
+				}
 			}
 		}
 
