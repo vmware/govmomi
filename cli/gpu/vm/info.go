@@ -58,7 +58,7 @@ type gpuInfo struct {
 	Index    int    `json:"index"`
 	Label    string `json:"label"`
 	Summary  string `json:"summary"`
-	NumaNode int32  `json:"numaNode"`
+	NumaNode *int32 `json:"numaNode"`
 	Key      int32  `json:"key"`
 }
 
@@ -72,7 +72,11 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "GPU %d:\n", gpu.Index)
 		fmt.Fprintf(tw, "  Label: %s\n", gpu.Label)
 		fmt.Fprintf(tw, "  Summary: %s\n", gpu.Summary)
-		fmt.Fprintf(tw, "  Numa Node: %d\n", gpu.NumaNode)
+		if gpu.NumaNode != nil {
+			fmt.Fprintf(tw, "  Numa Node: %d\n", *gpu.NumaNode)
+		} else {
+			fmt.Fprintf(tw, "  Numa Node: unset\n")
+		}
 		fmt.Fprintf(tw, "  Key: %d\n", gpu.Key)
 	}
 	return tw.Flush()
