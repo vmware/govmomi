@@ -2257,6 +2257,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	}
 
 	event := c.event(c.ctx)
+	var customizationFault types.BaseMethodFault
 	switch c.state {
 	case types.VirtualMachinePowerStatePoweredOn:
 		if c.VirtualMachine.hostInMM(c.ctx) {
@@ -2277,7 +2278,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			&types.VmStartingEvent{VmEvent: event},
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
-		c.customize(c.ctx)
+		customizationFault = c.customize(c.ctx)
 	case types.VirtualMachinePowerStatePoweredOff:
 		c.svm.stop(c.ctx)
 		c.ctx.postEvent(
@@ -2322,7 +2323,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		{Name: "config.hardware.device", Val: devices},
 	})
 
-	return nil, nil
+	return nil, customizationFault
 }
 
 func (vm *VirtualMachine) PowerOnVMTask(ctx *Context, c *types.PowerOnVM_Task) soap.HasFault {
@@ -2805,12 +2806,25 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 
 		if req.Spec.Template {
 			_ = clone.MarkAsTemplate(&types.MarkAsTemplate{This: clone.Self})
+		} else {
+			if err := clone.setPendingCustomization(ctx, req.Spec.Customization); err != nil {
+				return nil, err
+			}
 		}
 
 		ctx.postEvent(&types.VmClonedEvent{
 			VmCloneEvent: types.VmCloneEvent{VmEvent: clone.event(ctx)},
 			SourceVm:     *event.Vm,
 		})
+
+		if !req.Spec.Template && req.Spec.PowerOn {
+			res := clone.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: clone.Self})
+			ctask := ctx.Map.Get(res.(*methods.PowerOnVM_TaskBody).Res.Returnval).(*Task)
+			ctask.Wait()
+			if ctask.Info.Error != nil {
+				return nil, ctask.Info.Error.Fault
+			}
+		}
 
 		return ref, nil
 	})
@@ -2898,19 +2912,30 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 	}
 }
 
-func (vm *VirtualMachine) customize(ctx *Context) {
+func (vm *VirtualMachine) customize(ctx *Context) types.BaseMethodFault {
 	if vm.imc == nil {
-		return
+		return nil
 	}
 
 	event := types.CustomizationEvent{VmEvent: vm.event(ctx)}
 	ctx.postEvent(&types.CustomizationStartedEvent{CustomizationEvent: event})
+	ctx.Update(vm, []types.PropertyChange{
+		{
+			Name: "guest.customizationInfo",
+			Val:  vm.customizationInfo(types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_RUNNING, ""),
+		},
+	})
 
 	changes := []types.PropertyChange{
 		{Name: "config.tools.pendingCustomization", Val: ""},
 	}
 
 	if len(vm.Guest.Net) != len(vm.imc.NicSettingMap) {
+		fault := &types.NicSettingMismatch{
+			NumberOfNicsInSpec: int32(len(vm.imc.NicSettingMap)),
+			NumberOfNicsInVM:   int32(len(vm.Guest.Net)),
+		}
+
 		ctx.postEvent(&types.CustomizationNetworkSetupFailed{
 			CustomizationFailed: types.CustomizationFailed{
 				CustomizationEvent: event,
@@ -2919,8 +2944,12 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 		})
 
 		vm.imc = nil
+		changes = append(changes, types.PropertyChange{
+			Name: "guest.customizationInfo",
+			Val:  vm.customizationInfo(types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_FAILED, "NicSettingMismatch"),
+		})
 		ctx.Update(vm, changes)
-		return
+		return fault
 	}
 
 	hostname := ""
@@ -2990,8 +3019,66 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 	}
 
 	vm.imc = nil
+	changes = append(changes, types.PropertyChange{
+		Name: "guest.customizationInfo",
+		Val:  vm.customizationInfo(types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_SUCCEEDED, ""),
+	})
 	ctx.Update(vm, changes)
 	ctx.postEvent(&types.CustomizationSucceeded{CustomizationEvent: event})
+	return nil
+}
+
+func (vm *VirtualMachine) customizationInfo(status types.GuestInfoCustomizationStatus, err string) *types.GuestInfoCustomizationInfo {
+	info := &types.GuestInfoCustomizationInfo{
+		CustomizationStatus: string(status),
+		ErrorMsg:            err,
+	}
+
+	now := time.Now()
+	switch status {
+	case types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_RUNNING:
+		info.StartTime = &now
+	case types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_SUCCEEDED, types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_FAILED:
+		if vm.Guest != nil && vm.Guest.CustomizationInfo != nil && vm.Guest.CustomizationInfo.StartTime != nil {
+			info.StartTime = vm.Guest.CustomizationInfo.StartTime
+		} else {
+			info.StartTime = &now
+		}
+		info.EndTime = &now
+	}
+
+	return info
+}
+
+func (vm *VirtualMachine) setPendingCustomization(ctx *Context, spec *types.CustomizationSpec) types.BaseMethodFault {
+	if spec == nil {
+		return nil
+	}
+
+	if vm.Config.Tools == nil {
+		vm.Config.Tools = new(types.ToolsConfigInfo)
+	}
+
+	if vm.Config.Tools.PendingCustomization != "" {
+		return new(types.CustomizationPending)
+	}
+	if len(vm.Guest.Net) != len(spec.NicSettingMap) {
+		return &types.NicSettingMismatch{
+			NumberOfNicsInSpec: int32(len(spec.NicSettingMap)),
+			NumberOfNicsInVM:   int32(len(vm.Guest.Net)),
+		}
+	}
+
+	vm.imc = spec
+	ctx.Update(vm, []types.PropertyChange{
+		{Name: "config.tools.pendingCustomization", Val: uuid.New().String()},
+		{
+			Name: "guest.customizationInfo",
+			Val:  vm.customizationInfo(types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_PENDING, ""),
+		},
+	})
+
+	return nil
 }
 
 func (vm *VirtualMachine) CustomizeVMTask(ctx *Context, req *types.CustomizeVM_Task) soap.HasFault {
@@ -3006,20 +3093,8 @@ func (vm *VirtualMachine) CustomizeVMTask(ctx *Context, req *types.CustomizeVM_T
 				ExistingState:  vm.Runtime.PowerState,
 			}
 		}
-		if vm.Config.Tools.PendingCustomization != "" {
-			return nil, new(types.CustomizationPending)
-		}
-		if len(vm.Guest.Net) != len(req.Spec.NicSettingMap) {
-			return nil, &types.NicSettingMismatch{
-				NumberOfNicsInSpec: int32(len(req.Spec.NicSettingMap)),
-				NumberOfNicsInVM:   int32(len(vm.Guest.Net)),
-			}
-		}
 
-		vm.imc = &req.Spec
-		vm.Config.Tools.PendingCustomization = uuid.New().String()
-
-		return nil, nil
+		return nil, vm.setPendingCustomization(ctx, &req.Spec)
 	})
 
 	return &methods.CustomizeVM_TaskBody{
