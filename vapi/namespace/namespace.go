@@ -213,7 +213,7 @@ type HAProxy struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Networks%20Edges%20NSXConfig
 // Since 8.0.0.1
 type EdgeNSX struct {
-	EdgeClusterID                *string    `json:"edge_cluster_id,omitempty"`
+	EdgeClusterID                *string    `json:"edge_cluster_ID,omitempty"`
 	DefaultIngressTLSCertificate *string    `json:"default_ingress_tls_certificate,omitempty"`
 	RoutingMode                  *string    `json:"routing_mode,omitempty"`
 	EgressIPRanges               *[]IPRange `json:"egress_ip_ranges,omitempty"`
