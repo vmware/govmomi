@@ -306,6 +306,20 @@ func (c *Client) SetRootCAs(pemPaths string) error {
 	return nil
 }
 
+func (c *Client) SetRootCAsFromPEM(pems [][]byte) error {
+	pool := x509.NewCertPool()
+
+	for _, pem := range pems {
+		if ok := pool.AppendCertsFromPEM(pem); !ok {
+			return errInvalidCACertificate{}
+		}
+	}
+
+	c.t.TLSClientConfig.RootCAs = pool
+
+	return nil
+}
+
 // Add default https port if missing
 func hostAddr(addr string) string {
 	_, port := splitHostPort(addr)

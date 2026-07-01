@@ -146,6 +146,74 @@ func setCAsOnClient(cas string) error {
 	return client.SetRootCAs(cas)
 }
 
+func TestValidRootCAsFromPEM(t *testing.T) {
+	pem, err := os.ReadFile("fixtures/valid-cert.pem")
+	if err != nil {
+		t.Fatalf("Failed to read valid cert: %v", err)
+	}
+
+	err = setCAsFromPEMOnClient([][]byte{pem})
+	if err != nil {
+		t.Fatalf("Err should not have occurred: %#v", err)
+	}
+}
+
+func TestInvalidRootCAsFromPEM(t *testing.T) {
+	cert := []byte(`-----BEGIN CERTIFICATE-----\n`)
+	err := setCAsFromPEMOnClient([][]byte{cert})
+
+	_, ok := err.(errInvalidCACertificate)
+	if !ok {
+		t.Fatalf("Expected errInvalidCACertificate to occur")
+	}
+}
+
+func TestMultipleRootCAsFromPEM(t *testing.T) {
+	pem, err := os.ReadFile("fixtures/valid-cert.pem")
+	if err != nil {
+		t.Fatalf("Failed to read valid cert: %v", err)
+	}
+
+	err = setCAsFromPEMOnClient([][]byte{pem, pem})
+	if err != nil {
+		t.Fatalf("Err should not have occurred with multiple valid certs: %#v", err)
+	}
+}
+
+func TestMixedValidInvalidRootCAsFromPEM(t *testing.T) {
+	validPem, err := os.ReadFile("fixtures/valid-cert.pem")
+	if err != nil {
+		t.Fatalf("Failed to read valid cert: %v", err)
+	}
+
+	invalidPem := []byte(`-----BEGIN CERTIFICATE-----\n`)
+
+	err = setCAsFromPEMOnClient([][]byte{validPem, invalidPem})
+	_, ok := err.(errInvalidCACertificate)
+	if !ok {
+		t.Fatalf("Expected errInvalidCACertificate to occur with mixed certs")
+	}
+}
+
+func TestEmptyRootCAsFromPEM(t *testing.T) {
+	err := setCAsFromPEMOnClient([][]byte{})
+	if err != nil {
+		t.Fatalf("Empty slice should not cause error: %#v", err)
+	}
+}
+
+func setCAsFromPEMOnClient(cas [][]byte) error {
+	url := &url.URL{
+		Scheme: "https",
+		Host:   "some.host.tld:8080",
+	}
+	insecure := false
+
+	client := NewClient(url, insecure)
+
+	return client.SetRootCAsFromPEM(cas)
+}
+
 func TestParseURL(t *testing.T) {
 	tests := []struct {
 		name    string
