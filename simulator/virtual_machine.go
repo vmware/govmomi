@@ -2236,8 +2236,9 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 type powerVMTask struct {
 	*VirtualMachine
 
-	state types.VirtualMachinePowerState
-	ctx   *Context
+	state                       types.VirtualMachinePowerState
+	ctx                         *Context
+	propagateCustomizationFault bool
 }
 
 func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
@@ -2323,7 +2324,11 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		{Name: "config.hardware.device", Val: devices},
 	})
 
-	return nil, customizationFault
+	if c.propagateCustomizationFault {
+		return nil, customizationFault
+	}
+
+	return nil, nil
 }
 
 func (vm *VirtualMachine) PowerOnVMTask(ctx *Context, c *types.PowerOnVM_Task) soap.HasFault {
@@ -2333,7 +2338,11 @@ func (vm *VirtualMachine) PowerOnVMTask(ctx *Context, c *types.PowerOnVM_Task) s
 		}
 	}
 
-	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOn, ctx}
+	runner := &powerVMTask{
+		VirtualMachine: vm,
+		state:          types.VirtualMachinePowerStatePoweredOn,
+		ctx:            ctx,
+	}
 	task := CreateTask(runner.Reference(), "powerOn", runner.Run)
 
 	return &methods.PowerOnVM_TaskBody{
@@ -2344,7 +2353,11 @@ func (vm *VirtualMachine) PowerOnVMTask(ctx *Context, c *types.PowerOnVM_Task) s
 }
 
 func (vm *VirtualMachine) PowerOffVMTask(ctx *Context, c *types.PowerOffVM_Task) soap.HasFault {
-	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOff, ctx}
+	runner := &powerVMTask{
+		VirtualMachine: vm,
+		state:          types.VirtualMachinePowerStatePoweredOff,
+		ctx:            ctx,
+	}
 	task := CreateTask(runner.Reference(), "powerOff", runner.Run)
 
 	return &methods.PowerOffVM_TaskBody{
@@ -2355,7 +2368,11 @@ func (vm *VirtualMachine) PowerOffVMTask(ctx *Context, c *types.PowerOffVM_Task)
 }
 
 func (vm *VirtualMachine) SuspendVMTask(ctx *Context, req *types.SuspendVM_Task) soap.HasFault {
-	runner := &powerVMTask{vm, types.VirtualMachinePowerStateSuspended, ctx}
+	runner := &powerVMTask{
+		VirtualMachine: vm,
+		state:          types.VirtualMachinePowerStateSuspended,
+		ctx:            ctx,
+	}
 	task := CreateTask(runner.Reference(), "suspend", runner.Run)
 
 	return &methods.SuspendVM_TaskBody{
@@ -2818,8 +2835,14 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		})
 
 		if !req.Spec.Template && req.Spec.PowerOn {
-			res := clone.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: clone.Self})
-			ctask := ctx.Map.Get(res.(*methods.PowerOnVM_TaskBody).Res.Returnval).(*Task)
+			runner := &powerVMTask{
+				VirtualMachine:              clone,
+				state:                       types.VirtualMachinePowerStatePoweredOn,
+				ctx:                         ctx,
+				propagateCustomizationFault: true,
+			}
+			task := CreateTask(runner.Reference(), "powerOn", runner.Run)
+			ctask := ctx.Map.Get(task.Run(ctx)).(*Task)
 			ctask.Wait()
 			if ctask.Info.Error != nil {
 				return nil, ctask.Info.Error.Fault

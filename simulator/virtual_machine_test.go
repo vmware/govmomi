@@ -699,7 +699,7 @@ func TestCustomizeVmCustomizationInfo(t *testing.T) {
 	}, m)
 }
 
-func TestPowerOnReturnsCustomizationFault(t *testing.T) {
+func TestPowerOnIgnoresCustomizationFault(t *testing.T) {
 	m := VPX()
 	defer m.Remove()
 
@@ -745,24 +745,8 @@ func TestPowerOnReturnsCustomizationFault(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		err = powerTask.Wait(ctx)
-		if err == nil {
-			t.Fatal("expected power-on task to return customization fault")
-		}
-		taskErr, ok := err.(task.Error)
-		if !ok {
-			t.Fatalf("expected task.Error; got %T: %v", err, err)
-		}
-		fault := taskErr.Fault()
-		if _, ok = fault.(types.BaseCustomizationFault); !ok {
-			t.Fatalf("expected customization fault; got %T", fault)
-		}
-		mismatch, ok := fault.(*types.NicSettingMismatch)
-		if !ok {
-			t.Fatalf("expected NicSettingMismatch fault; got %T", fault)
-		}
-		if mismatch.NumberOfNicsInSpec != 1 || mismatch.NumberOfNicsInVM != 0 {
-			t.Fatalf("expected NIC counts spec=1 vm=0; got spec=%d vm=%d", mismatch.NumberOfNicsInSpec, mismatch.NumberOfNicsInVM)
+		if err = powerTask.Wait(ctx); err != nil {
+			t.Fatal(err)
 		}
 
 		if err := vm.Properties(ctx, vm.Reference(), []string{
@@ -786,6 +770,81 @@ func TestPowerOnReturnsCustomizationFault(t *testing.T) {
 		}
 		if moVM.Guest.CustomizationInfo.ErrorMsg != "NicSettingMismatch" {
 			t.Fatalf("expected NicSettingMismatch customization error; got %q", moVM.Guest.CustomizationInfo.ErrorMsg)
+		}
+	}, m)
+}
+
+func TestCloneVmPowerOnReturnsCustomizationFault(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
+		vm := object.NewVirtualMachine(c, vmm.Reference())
+
+		config := types.VirtualMachineCloneSpec{
+			PowerOn: true,
+			Customization: &types.CustomizationSpec{
+				NicSettingMap: []types.CustomizationAdapterMapping{
+					{
+						Adapter: types.CustomizationIPSettings{
+							Ip: &types.CustomizationFixedIp{
+								IpAddress: "192.168.1.120",
+							},
+							SubnetMask: "255.255.255.0",
+						},
+					},
+					{
+						Adapter: types.CustomizationIPSettings{
+							Ip: &types.CustomizationFixedIp{
+								IpAddress: "192.168.1.121",
+							},
+							SubnetMask: "255.255.255.0",
+						},
+					},
+				},
+				Identity: &types.CustomizationLinuxPrep{
+					HostName: &types.CustomizationFixedName{
+						Name: "clone-host",
+					},
+				},
+			},
+		}
+
+		cloneTask, err := vm.Clone(ctx, folders.VmFolder, "cloned-vm-power-on-customization-fault", config)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = cloneTask.Wait(ctx)
+		if err == nil {
+			t.Fatal("expected clone task to return customization fault")
+		}
+		taskErr, ok := err.(task.Error)
+		if !ok {
+			t.Fatalf("expected task.Error; got %T: %v", err, err)
+		}
+		fault := taskErr.Fault()
+		if _, ok = fault.(types.BaseCustomizationFault); !ok {
+			t.Fatalf("expected customization fault; got %T", fault)
+		}
+		mismatch, ok := fault.(*types.NicSettingMismatch)
+		if !ok {
+			t.Fatalf("expected NicSettingMismatch fault; got %T", fault)
+		}
+		if mismatch.NumberOfNicsInSpec != 2 || mismatch.NumberOfNicsInVM != 1 {
+			t.Fatalf("expected NIC counts spec=2 vm=1; got spec=%d vm=%d", mismatch.NumberOfNicsInSpec, mismatch.NumberOfNicsInVM)
 		}
 	}, m)
 }
