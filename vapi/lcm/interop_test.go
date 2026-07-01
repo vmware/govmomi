@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -19,7 +20,8 @@ import (
 
 // newTestManager builds a Manager pointed at ts with no polling delay.
 func newTestManager(ts *httptest.Server) *lcm.Manager {
-	return lcm.NewManager(ts.URL, "user", "pass", ts.Client()).
+	u, _ := url.Parse(ts.URL)
+	return lcm.NewManager(u, "user", "pass", ts.Client()).
 		WithPollingInterval(0)
 }
 
@@ -284,7 +286,7 @@ func TestCreateInteropTaskWithIdentifier(t *testing.T) {
 }
 
 func TestNewInsecureManager(t *testing.T) {
-	m := lcm.NewInsecureManager("https://vcenter.example.com", "admin", "secret")
+	m := lcm.NewInsecureManager(&url.URL{Scheme: "https", Host: "vcenter.example.com"}, "admin", "secret")
 	if m == nil {
 		t.Fatal("expected non-nil manager from NewInsecureManager")
 	}
@@ -319,7 +321,8 @@ func TestWaitForCompletionContextCancelDuringPoll(t *testing.T) {
 	defer ts.Close()
 
 	// Long polling interval so time.After loses to the already-closed ctx.Done.
-	m := lcm.NewManager(ts.URL, "user", "pass", ts.Client()).
+	u, _ := url.Parse(ts.URL)
+	m := lcm.NewManager(u, "user", "pass", ts.Client()).
 		WithPollingInterval(time.Hour)
 
 	_, err := m.WaitForCompletion(ctx, "task-999")

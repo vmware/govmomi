@@ -137,16 +137,16 @@ type interopComponentBody struct {
 // is a separate service from the vSphere vAPI and does not accept VAPI session tokens.
 type Manager struct {
 	client          *http.Client
-	baseURL         string
+	baseURL         *url.URL
 	username        string
 	password        string
 	pollingInterval time.Duration
 }
 
 // NewManager creates a Manager. client handles TLS and transport; baseURL is
-// the scheme+host of the vCenter (e.g. "https://vcenter.example.com").
+// the scheme+host of the vCenter (e.g. &url.URL{Scheme: "https", Host: "vcenter.example.com"}).
 // Interop APIs support Basic Auth only.
-func NewManager(baseURL, username, password string, client *http.Client) *Manager {
+func NewManager(baseURL *url.URL, username, password string, client *http.Client) *Manager {
 	return &Manager{
 		client:          client,
 		baseURL:         baseURL,
@@ -164,7 +164,7 @@ func (m *Manager) WithPollingInterval(d time.Duration) *Manager {
 
 // NewInsecureManager is a convenience constructor that creates its own
 // http.Client with TLS verification disabled.
-func NewInsecureManager(baseURL, username, password string) *Manager {
+func NewInsecureManager(baseURL *url.URL, username, password string) *Manager {
 	return NewManager(baseURL, username, password, &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
@@ -173,10 +173,9 @@ func NewInsecureManager(baseURL, username, password string) *Manager {
 }
 
 func (m *Manager) lcmURL(path string, params url.Values) string {
-	u, _ := url.Parse(m.baseURL + path)
-	if len(params) > 0 {
-		u.RawQuery = params.Encode()
-	}
+	u := *m.baseURL
+	u.Path = path
+	u.RawQuery = params.Encode()
 	return u.String()
 }
 

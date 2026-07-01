@@ -7,6 +7,7 @@ package interop
 import (
 	"crypto/tls"
 	"net/http"
+	"net/url"
 
 	"github.com/vmware/govmomi/cli/flags"
 	"github.com/vmware/govmomi/vapi/lcm"
@@ -17,7 +18,7 @@ import (
 // taken directly from the session configuration.
 func newManager(f *flags.ClientFlag) *lcm.Manager {
 	u := f.Session.URL
-	baseURL := "https://" + u.Host
+	baseURL := &url.URL{Scheme: "https", Host: u.Host}
 
 	username := ""
 	password := ""
