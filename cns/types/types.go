@@ -986,8 +986,9 @@ type CnsReconfigVolumePolicyResponse struct {
 type CnsVolumePolicyReconfigSpec struct {
 	types.DynamicData
 
-	VolumeId CnsVolumeId                           `xml:"volumeId" json:"volumeId"`
-	Profile  []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile"`
+	VolumeId       CnsVolumeId                           `xml:"volumeId" json:"volumeId"`
+	Profile        []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile"`
+	ActiveClusters []types.ManagedObjectReference        `xml:"activeClusters,omitempty,typeattr" json:"activeClusters"`
 }
 
 func init() {
