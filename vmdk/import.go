@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -240,17 +239,14 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 		return err
 	}
 
-	var rename string
-
-	p.Path = strings.TrimSuffix(p.Path, "/")
-	if p.Path != "" {
-		disk.ImportName = p.Path
-		rename = path.Join(disk.ImportName, disk.Name)
+	// derive targets using shared helper so tests exercise actual behavior
+	entityName, target, err := deriveImportTargets(p, disk)
+	if err != nil {
+		return err
 	}
 
-	// "target" is the path that will be created by ImportVApp()
-	// ImportVApp uses the same name for the VM and the disk.
-	target := fmt.Sprintf("%s/%s.vmdk", disk.ImportName, disk.ImportName)
+	// set ImportName used by OVF template
+	disk.ImportName = entityName
 
 	if _, err = datastore.Stat(ctx, target); err == nil {
 		if p.Force {
@@ -260,13 +256,6 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 			}
 		} else {
 			return fmt.Errorf("%s: %s", os.ErrExist, datastore.Path(target))
-		}
-	}
-
-	// If we need to rename at the end, check if the file exists early unless Force.
-	if !p.Force && rename != "" {
-		if _, err = datastore.Stat(ctx, rename); err == nil {
-			return fmt.Errorf("%s: %s", os.ErrExist, datastore.Path(rename))
 		}
 	}
 
@@ -286,7 +275,7 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 
 	params := types.OvfCreateImportSpecParams{
 		DiskProvisioning: string(kind),
-		EntityName:       disk.ImportName,
+		EntityName:       entityName,
 	}
 
 	spec, err := m.CreateImportSpec(ctx, descriptor, pool, datastore, &params)
@@ -360,9 +349,5 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 		return err
 	}
 
-	if rename == "" {
-		return nil
-	}
-
-	return fm.Move(ctx, target, rename)
+	return nil
 }
