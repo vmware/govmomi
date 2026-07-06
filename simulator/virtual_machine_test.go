@@ -655,6 +655,138 @@ func TestCloneVmPowerOnAndCustomization(t *testing.T) {
 	}, m)
 }
 
+func TestCloneVmCloudInitCustomizationSkipsNicSettingMismatch(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		finder.SetDatacenter(dc)
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
+		vm := object.NewVirtualMachine(c, vmm.Reference())
+
+		devices, err := vm.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		nics := devices.SelectByType((*types.VirtualEthernetCard)(nil))
+		if len(nics) == 0 {
+			t.Fatal("expected source VM to have at least one NIC")
+		}
+		if err := vm.RemoveDevice(ctx, false, nics...); err != nil {
+			t.Fatal(err)
+		}
+
+		var source mo.VirtualMachine
+		if err := vm.Properties(ctx, vm.Reference(), []string{"guest.net"}, &source); err != nil {
+			t.Fatal(err)
+		}
+		if len(source.Guest.Net) != 0 {
+			t.Fatalf("expected source VM to have no NICs; got %d", len(source.Guest.Net))
+		}
+
+		network, err := finder.Network(ctx, "VM Network")
+		if err != nil {
+			t.Fatal(err)
+		}
+		backing, err := network.EthernetCardBackingInfo(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		var added object.VirtualDeviceList
+		for _, cardType := range []string{"vmxnet3", "e1000"} {
+			nic, err := added.CreateEthernetCard(cardType, backing)
+			if err != nil {
+				t.Fatal(err)
+			}
+			added = append(added, nic)
+		}
+		deviceChange, err := added.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		config := types.VirtualMachineCloneSpec{
+			PowerOn: true,
+			Config: &types.VirtualMachineConfigSpec{
+				DeviceChange: deviceChange,
+			},
+			Customization: &types.CustomizationSpec{
+				Identity: &types.CustomizationCloudinitPrep{
+					Metadata: `instance-id: clone-cloud-init
+local-hostname: clone-cloud-init
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses:
+      - 192.168.1.120/24
+    eth1:
+      addresses:
+      - 192.168.1.121/24
+`,
+				},
+			},
+		}
+
+		cloneTask, err := vm.Clone(ctx, folders.VmFolder, "cloned-vm-cloud-init-customization", config)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := cloneTask.WaitForResult(ctx, nil)
+		if err != nil {
+			if taskErr, ok := err.(task.Error); ok {
+				if _, ok := taskErr.Fault().(*types.NicSettingMismatch); ok {
+					t.Fatalf("unexpected NicSettingMismatch for cloud-init network customization: %v", err)
+				}
+			}
+			t.Fatal(err)
+		}
+
+		clone := object.NewVirtualMachine(c, info.Result.(types.ManagedObjectReference))
+		var moVM mo.VirtualMachine
+		if err := clone.Properties(ctx, clone.Reference(), []string{
+			"runtime.powerState",
+			"guest",
+			"config.tools",
+		}, &moVM); err != nil {
+			t.Fatal(err)
+		}
+		if moVM.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
+			t.Fatalf("expected clone to be powered on; got %s", moVM.Runtime.PowerState)
+		}
+		if len(moVM.Guest.Net) != len(added) {
+			t.Fatalf("expected clone to have %d guest NICs; got %d", len(added), len(moVM.Guest.Net))
+		}
+		if moVM.Guest.HostName != "clone-cloud-init" {
+			t.Fatalf("expected guest hostname %q; got %q", "clone-cloud-init", moVM.Guest.HostName)
+		}
+		if moVM.Guest.IpAddress != "192.168.1.120" {
+			t.Fatalf("expected guest IP %q; got %q", "192.168.1.120", moVM.Guest.IpAddress)
+		}
+		for i, ip := range []string{"192.168.1.120", "192.168.1.121"} {
+			if got := moVM.Guest.Net[i].IpAddress; !reflect.DeepEqual(got, []string{ip}) {
+				t.Fatalf("expected guest NIC %d IPs %v; got %v", i, []string{ip}, got)
+			}
+		}
+		if moVM.Config.Tools.PendingCustomization != "" {
+			t.Fatalf("expected pending customization to be cleared; got %q", moVM.Config.Tools.PendingCustomization)
+		}
+		assertGuestCustomizationInfo(ctx, t, clone, types.GuestInfoCustomizationStatusTOOLSDEPLOYPKG_SUCCEEDED, true, true)
+	}, m)
+}
+
 func TestCustomizeVmCustomizationInfo(t *testing.T) {
 	m := VPX()
 	defer m.Remove()
