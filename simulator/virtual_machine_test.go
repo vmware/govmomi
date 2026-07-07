@@ -734,6 +734,90 @@ func TestReconfigVmDevice(t *testing.T) {
 	}
 }
 
+func TestReconfigVmDefaultDevicesNotShared(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		finder.SetDatacenter(dc)
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		pool, err := finder.ResourcePool(ctx, "DC0_H0/Resources")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Create powered off VMs, so that the device list is not cloned by
+		// a power state change (see powerVMTask.Run).
+		create := func(name string) *object.VirtualMachine {
+			spec := types.VirtualMachineConfigSpec{
+				Name:    name,
+				GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+				Files: &types.VirtualMachineFileInfo{
+					VmPathName: "[LocalDS_0]",
+				},
+			}
+			task, err := folders.VmFolder.CreateVM(ctx, spec, pool, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			info, err := task.WaitForResult(ctx, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return object.NewVirtualMachine(c, info.Result.(types.ManagedObjectReference))
+		}
+
+		vm1 := create(t.Name() + "-vm1")
+		vm2 := create(t.Name() + "-vm2")
+
+		templateDevices := len(esx.VirtualMachineDefaultDevicePCIController.Device)
+
+		devices, err := vm2.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		pci, ok := devices.FindByKey(esx.VirtualMachineDefaultDevicePCIControllerKey).(*types.VirtualPCIController)
+		if !ok {
+			t.Fatal("vm2 PCI controller not found")
+		}
+		vm2Devices := len(pci.Device)
+
+		// Add a NIC without a UnitNumber so the simulator assigns it to the
+		// PCI controller (object.VirtualDeviceList.AssignController).
+		nic := &types.VirtualE1000{}
+		nic.Backing = &types.VirtualEthernetCardNetworkBackingInfo{
+			VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+				DeviceName: "VM Network",
+			},
+		}
+		if err := vm1.AddDevice(ctx, nic); err != nil {
+			t.Fatal(err)
+		}
+
+		if n := len(esx.VirtualMachineDefaultDevicePCIController.Device); n != templateDevices {
+			t.Errorf("esx.VirtualMachineDefaultDevicePCIController.Device count changed: %d -> %d", templateDevices, n)
+		}
+
+		devices, err = vm2.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		pci, ok = devices.FindByKey(esx.VirtualMachineDefaultDevicePCIControllerKey).(*types.VirtualPCIController)
+		if !ok {
+			t.Fatal("vm2 PCI controller not found")
+		}
+		if n := len(pci.Device); n != vm2Devices {
+			t.Errorf("vm2 PCI controller device count changed: %d -> %d", vm2Devices, n)
+		}
+	})
+}
+
 func TestConnectVmDevice(t *testing.T) {
 	ctx := context.Background()
 
