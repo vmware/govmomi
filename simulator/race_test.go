@@ -6,6 +6,7 @@ package simulator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -16,6 +17,7 @@ import (
 	"github.com/vmware/govmomi/event"
 	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
@@ -317,6 +319,149 @@ func TestRaceDestroy(t *testing.T) {
 	if !notFound {
 		t.Error("expected ManagedObjectNotFound")
 	}
+}
+
+// TestWaitForUpdatesPrefixMatchRace reproduces a data race in
+// PropertyFilter.matches: when a change name matches a parent prefix of the
+// filter's PathSet (e.g. PathSet ["config"] matching a "config.hardware.device"
+// update), the WaitForUpdatesEx goroutine re-reads the object's live property
+// state via fieldValue without holding the object's lock, racing with a
+// ReconfigVM_Task goroutine mutating the same VM under its lock.
+func TestWaitForUpdatesPrefixMatchRace(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c)
+
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		finder.SetDatacenter(dc)
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		pool, err := finder.ResourcePool(ctx, "DC0_H0/Resources")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		spec := types.VirtualMachineConfigSpec{
+			Name:    "prefix-match-race",
+			GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+			Files: &types.VirtualMachineFileInfo{
+				VmPathName: "[LocalDS_0]",
+			},
+		}
+
+		task, err := folders.VmFolder.CreateVM(ctx, spec, pool, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		info, err := task.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// The VM is intentionally left powered off: ReconfigVM_Task then
+		// mutates the device list in place.
+		vm := object.NewVirtualMachine(c, info.Result.(types.ManagedObjectReference))
+
+		wctx, cancel := context.WithCancel(ctx)
+		var watcher sync.WaitGroup
+
+		watcher.Add(1)
+		go func() {
+			defer watcher.Done()
+
+			pc := property.DefaultCollector(c)
+			// The parent field "config" forces the PropertyFilter.matches
+			// prefix path to re-read the whole config subtree on every
+			// "config.*" update.
+			werr := property.Wait(wctx, pc, vm.Reference(), []string{"config"}, func([]types.PropertyChange) bool {
+				return false // consume updates until wctx is canceled
+			})
+			if werr != nil && !errors.Is(werr, context.Canceled) {
+				t.Error(werr)
+			}
+		}()
+
+		var writers sync.WaitGroup
+
+		// Add and remove a NIC in a loop; the simulator assigns the
+		// controller and MAC address, mutating config.hardware.device
+		// during the task, after property updates have been published.
+		writers.Add(1)
+		go func() {
+			defer writers.Done()
+
+			for i := 0; i < 100; i++ {
+				nic := &types.VirtualE1000{
+					VirtualEthernetCard: types.VirtualEthernetCard{
+						VirtualDevice: types.VirtualDevice{
+							Backing: &types.VirtualEthernetCardNetworkBackingInfo{
+								VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+									DeviceName: "VM Network",
+								},
+							},
+						},
+					},
+				}
+
+				if err := vm.AddDevice(ctx, nic); err != nil {
+					t.Error(err)
+					return
+				}
+
+				devices, err := vm.Device(ctx)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+
+				cards := devices.SelectByType((*types.VirtualEthernetCard)(nil))
+				if len(cards) == 0 {
+					t.Error("no ethernet card found")
+					return
+				}
+
+				if err := vm.RemoveDevice(ctx, false, cards[len(cards)-1]); err != nil {
+					t.Error(err)
+					return
+				}
+			}
+		}()
+
+		// Reconfig ExtraConfig in a loop, mutating config.extraConfig on
+		// the same VM.
+		writers.Add(1)
+		go func() {
+			defer writers.Done()
+
+			for i := 0; i < 100; i++ {
+				rtask, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+					ExtraConfig: []types.BaseOptionValue{
+						&types.OptionValue{Key: "race.test", Value: fmt.Sprintf("%d", i)},
+					},
+				})
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				if err := rtask.Wait(ctx); err != nil {
+					t.Error(err)
+					return
+				}
+			}
+		}()
+
+		writers.Wait()
+		cancel()
+		watcher.Wait()
+	})
 }
 
 func TestRaceVmRelocate(t *testing.T) {
