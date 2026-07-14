@@ -1268,6 +1268,24 @@ func (vm *VirtualMachine) create(ctx *Context, spec *types.VirtualMachineConfigS
 		return err
 	}
 
+	// Check the ContainerImageRegistry.
+	// This allows tests to map VM config attributes (name, disk path) to OCI
+	// images without modifying the code under test. All ExtraConfig entries
+	// from the matched entry (including RUN.mountdmi, etc) are injected before
+	// the simVM is created.
+	if e := ctx.Map.ContainerImages.resolve(vm); e.OCIImage != "" {
+		vm.Config.ExtraConfig = append(
+			vm.Config.ExtraConfig,
+			&types.OptionValue{Key: ContainerBackingOptionKey, Value: e.OCIImage},
+		)
+		for k, v := range e.ExtraConfig {
+			vm.Config.ExtraConfig = append(
+				vm.Config.ExtraConfig,
+				&types.OptionValue{Key: k, Value: v},
+			)
+		}
+	}
+
 	return vm.applyExtraConfig(ctx, spec)
 }
 
