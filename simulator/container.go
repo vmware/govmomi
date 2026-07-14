@@ -704,7 +704,7 @@ func (c *container) updated() {
 // returns:
 //
 //	err - uninitializedContainer error - if c.id is empty
-func (c *container) watchContainer(ctx *Context, updateFn func(*Context, *containerDetails, *container) error) error {
+func (c *container) watchContainer(ctx *Context, updateFn func(*Context, []byte, *containerDetails, *container) error) error {
 	c.Lock()
 	defer c.Unlock()
 
@@ -727,7 +727,7 @@ func (c *container) watchContainer(ctx *Context, updateFn func(*Context, *contai
 		ticker := time.NewTicker(inspectInterval)
 
 		update := func() {
-			_, details, err := c.inspect()
+			out, details, err := c.inspect()
 			var rmErr error
 			var removing bool
 			if _, ok := err.(uninitializedContainer); ok {
@@ -735,7 +735,7 @@ func (c *container) watchContainer(ctx *Context, updateFn func(*Context, *contai
 				rmErr = c.remove(ctx)
 			}
 
-			updateErr := updateFn(ctx, &details, c)
+			updateErr := updateFn(ctx, out, &details, c)
 			// if we don't succeed we want to re-try
 			if removing && rmErr == nil && updateErr == nil {
 				ticker.Stop()
