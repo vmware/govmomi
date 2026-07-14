@@ -3507,6 +3507,28 @@ func (vm *VirtualMachine) MarkAsVirtualMachine(req *types.MarkAsVirtualMachine) 
 	return r
 }
 
+// PutUsbScanCodes sends USB HID scan codes to the VM's virtual keyboard, as
+// real vSphere does to support tools such as the Packer vSphere-ISO builder
+// that type boot-time commands without a console/VNC connection. Real
+// vSphere requires the VM to be powered on for this to succeed.
+func (vm *VirtualMachine) PutUsbScanCodes(req *types.PutUsbScanCodes) soap.HasFault {
+	r := &methods.PutUsbScanCodesBody{}
+
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
+		r.Fault_ = Fault("", &types.InvalidPowerState{
+			RequestedState: types.VirtualMachinePowerStatePoweredOn,
+			ExistingState:  vm.Runtime.PowerState,
+		})
+		return r
+	}
+
+	r.Res = &types.PutUsbScanCodesResponse{
+		Returnval: int32(len(req.Spec.KeyEvents)),
+	}
+
+	return r
+}
+
 func findSnapshotInTree(tree []types.VirtualMachineSnapshotTree, ref types.ManagedObjectReference) *types.VirtualMachineSnapshotTree {
 	if tree == nil {
 		return nil

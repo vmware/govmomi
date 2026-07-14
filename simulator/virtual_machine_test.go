@@ -2338,6 +2338,71 @@ func TestShutdownGuest(t *testing.T) {
 	})
 }
 
+func TestPutUsbScanCodes(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
+
+		state, err := vm.PowerState(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if state != types.VirtualMachinePowerStatePoweredOn {
+			t.Fatalf("expected fixture VM to be poweredOn, state=%s", state)
+		}
+
+		spec := types.UsbScanCodeSpec{
+			KeyEvents: []types.UsbScanCodeSpecKeyEvent{
+				{UsbHidCode: 0x07<<16 | 7}, // 'd' (USB HID usage 0x07), no modifier
+				{
+					UsbHidCode: 0x12<<16 | 7, // 'o' (USB HID usage 0x12) with left-shift held
+					Modifiers: &types.UsbScanCodeSpecModifierType{
+						LeftShift: types.NewBool(true),
+					},
+				},
+			},
+		}
+
+		n, err := vm.PutUsbScanCodes(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n != int32(len(spec.KeyEvents)) {
+			t.Errorf("expected Returnval=%d, got %d", len(spec.KeyEvents), n)
+		}
+
+		// An empty batch of key events is a no-op, not an error.
+		n, err = vm.PutUsbScanCodes(ctx, types.UsbScanCodeSpec{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n != 0 {
+			t.Errorf("expected Returnval=0 for an empty spec, got %d", n)
+		}
+
+		task, err := vm.PowerOff(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = task.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+
+		// PutUsbScanCodes on a powered off VM should fail.
+		_, err = vm.PutUsbScanCodes(ctx, spec)
+		if !fault.Is(err, &types.InvalidPowerState{}) {
+			t.Errorf("expected InvalidPowerState fault, got: %v", err)
+		}
+
+		task, err = vm.PowerOn(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = task.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
 func TestVmSnapshot(t *testing.T) {
 	ctx := context.Background()
 
