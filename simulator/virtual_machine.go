@@ -179,6 +179,15 @@ func (o VirtualMachine) addDefaultDevices(
 		existingDefaultDeviceMap = map[int32]struct{}{}
 	)
 
+	// Copy the package-level default devices so each VM gets its own
+	// instances. Sharing them across VMs would mean a device mutation on
+	// one VM, e.g. object.VirtualDeviceList.AssignController appending to
+	// the PCI controller's Device list, is visible on every other VM and
+	// races with concurrent readers of those VMs.
+	defaults := types.ArrayOfVirtualDevice{}
+	deepCopy(types.ArrayOfVirtualDevice{VirtualDevice: esx.VirtualDevice}, &defaults)
+	defaultDevices := object.VirtualDeviceList(defaults.VirtualDevice)
+
 	for i := range src.DeviceChange {
 		var (
 			dc     = src.DeviceChange[i]
@@ -201,36 +210,36 @@ func (o VirtualMachine) addDefaultDevices(
 		case *types.VirtualIDEController:
 			switch td.BusNumber {
 			case 0:
-				fn(esx.VirtualMachineDefaultDeviceIDEControllerBus0)
+				fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDeviceIDEControllerBus0.Key))
 			case 1:
-				fn(esx.VirtualMachineDefaultDeviceIDEControllerBus1)
+				fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDeviceIDEControllerBus1.Key))
 			}
 		case *types.VirtualPS2Controller:
-			fn(esx.VirtualMachineDefaultDevicePS2Controller)
+			fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDevicePS2Controller.Key))
 		case *types.VirtualPCIController:
-			fn(esx.VirtualMachineDefaultDevicePCIController)
+			fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDevicePCIController.Key))
 		case *types.VirtualSIOController:
-			fn(esx.VirtualMachineDefaultDeviceSIOController)
+			fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDeviceSIOController.Key))
 		case *types.VirtualKeyboard:
-			fn(esx.VirtualMachineDefaultDeviceVirtualKeyboard)
+			fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDeviceVirtualKeyboard.Key))
 		case *types.VirtualPointingDevice:
-			fn(esx.VirtualMachineDefaultDeviceVirtualPointingDevice)
+			fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDeviceVirtualPointingDevice.Key))
 		case *types.VirtualMachineVideoCard:
-			fn(esx.VirtualMachineDefaultDeviceVideoCard)
+			fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDeviceVideoCard.Key))
 		case *types.VirtualMachineVMCIDevice:
-			fn(esx.VirtualMachineDefaultDeviceVMCIDevice)
+			fn(defaultDevices.FindByKey(esx.VirtualMachineDefaultDeviceVMCIDevice.Key))
 		}
 	}
 
 	// Add any of the missing default devices.
-	for i := range esx.VirtualDevice {
-		vd := esx.VirtualDevice[i].GetVirtualDevice()
+	for i := range defaultDevices {
+		vd := defaultDevices[i].GetVirtualDevice()
 		if _, ok := existingDefaultDeviceMap[vd.Key]; !ok {
 			dst.DeviceChange = append(
 				dst.DeviceChange,
 				&types.VirtualDeviceConfigSpec{
 					Operation: types.VirtualDeviceConfigSpecOperationAdd,
-					Device:    esx.VirtualDevice[i],
+					Device:    defaultDevices[i],
 				})
 		}
 	}
