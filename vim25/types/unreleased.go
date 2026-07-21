@@ -354,3 +354,119 @@ type InsufficientResourcesQuotaFault InsufficientResourcesQuota
 func init() {
 	t["InsufficientResourcesQuotaFault"] = reflect.TypeOf((*InsufficientResourcesQuotaFault)(nil)).Elem()
 }
+
+// VirtualMachineExtensionCompatibilityConstraintType enumerates the set of
+// constraintType values defined in this release. The value is carried as an
+// open string on the wire; these are the named constants.
+type VirtualMachineExtensionCompatibilityConstraintType string
+
+const (
+	// VirtualMachineExtensionCompatibilityConstraintTypeSERVICE is the virtual machine's vCenter service (cross-vCenter move).
+	VirtualMachineExtensionCompatibilityConstraintTypeSERVICE = VirtualMachineExtensionCompatibilityConstraintType("SERVICE")
+	// VirtualMachineExtensionCompatibilityConstraintTypeFOLDER is the virtual machine's folder.
+	VirtualMachineExtensionCompatibilityConstraintTypeFOLDER = VirtualMachineExtensionCompatibilityConstraintType("FOLDER")
+	// VirtualMachineExtensionCompatibilityConstraintTypePOOL is the virtual machine's resource pool.
+	VirtualMachineExtensionCompatibilityConstraintTypePOOL = VirtualMachineExtensionCompatibilityConstraintType("POOL")
+	// VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY is the virtual machine-level storage policy.
+	VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY = VirtualMachineExtensionCompatibilityConstraintType("VM_STORAGE_POLICY")
+	// VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY is per-disk storage policies.
+	VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY = VirtualMachineExtensionCompatibilityConstraintType("DISK_STORAGE_POLICY")
+	// VirtualMachineExtensionCompatibilityConstraintTypeDEVICE is virtual device configuration (for example, device backings).
+	VirtualMachineExtensionCompatibilityConstraintTypeDEVICE = VirtualMachineExtensionCompatibilityConstraintType("DEVICE")
+)
+
+func (e VirtualMachineExtensionCompatibilityConstraintType) Values() []VirtualMachineExtensionCompatibilityConstraintType {
+	return []VirtualMachineExtensionCompatibilityConstraintType{
+		VirtualMachineExtensionCompatibilityConstraintTypeSERVICE,
+		VirtualMachineExtensionCompatibilityConstraintTypeFOLDER,
+		VirtualMachineExtensionCompatibilityConstraintTypePOOL,
+		VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY,
+		VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY,
+		VirtualMachineExtensionCompatibilityConstraintTypeDEVICE,
+	}
+}
+
+func (e VirtualMachineExtensionCompatibilityConstraintType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VirtualMachineExtensionCompatibilityConstraintType"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintType)(nil)).Elem()
+}
+
+// VirtualMachineExtensionCompatibilityConstraintKind enumerates the set of
+// constraintKind values defined in this release. The value is carried as an
+// open string on the wire; these are the named constants.
+type VirtualMachineExtensionCompatibilityConstraintKind string
+
+const (
+	// VirtualMachineExtensionCompatibilityConstraintKindINVARIANT asserts the constrained property must not change from the virtual machine's current value.
+	VirtualMachineExtensionCompatibilityConstraintKindINVARIANT = VirtualMachineExtensionCompatibilityConstraintKind("INVARIANT")
+)
+
+func (e VirtualMachineExtensionCompatibilityConstraintKind) Values() []VirtualMachineExtensionCompatibilityConstraintKind {
+	return []VirtualMachineExtensionCompatibilityConstraintKind{
+		VirtualMachineExtensionCompatibilityConstraintKindINVARIANT,
+	}
+}
+
+func (e VirtualMachineExtensionCompatibilityConstraintKind) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VirtualMachineExtensionCompatibilityConstraintKind"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintKind)(nil)).Elem()
+}
+
+type ArrayOfVirtualMachineExtensionCompatibilityConstraint struct {
+	VirtualMachineExtensionCompatibilityConstraint []VirtualMachineExtensionCompatibilityConstraint `xml:"VirtualMachineExtensionCompatibilityConstraint,omitempty" json:"_value"`
+}
+
+func init() {
+	t["ArrayOfVirtualMachineExtensionCompatibilityConstraint"] = reflect.TypeOf((*ArrayOfVirtualMachineExtensionCompatibilityConstraint)(nil)).Elem()
+}
+
+// VirtualMachineExtensionCompatibilityConstraint is a compatibility constraint
+// declared by a managing extension on a virtual machine it manages. A
+// constraint has two orthogonal dimensions: ConstraintType identifies what
+// property is constrained and ConstraintKind identifies how it is evaluated.
+// Within a single VM a constraint's identity is the (ConstraintType,
+// ConstraintKind) pair; ConstraintName is descriptive only.
+type VirtualMachineExtensionCompatibilityConstraint struct {
+	DynamicData
+
+	// ConstraintName is an optional descriptive label for the constraint,
+	// chosen by the managing extension (for example, "pool-invariant"). It is
+	// not required to be unique and is not used to evaluate or identify the
+	// constraint.
+	ConstraintName string `xml:"constraintName,omitempty" json:"constraintName,omitempty"`
+	// ConstraintType is the property that this constraint protects. The values
+	// defined today are enumerated by
+	// VirtualMachineExtensionCompatibilityConstraintType. An unrecognized value
+	// causes the create or reconfigure operation that registers the constraint
+	// to fail.
+	ConstraintType string `xml:"constraintType" json:"constraintType"`
+	// ConstraintKind is how the constraint is evaluated. The only kind defined
+	// today is
+	// VirtualMachineExtensionCompatibilityConstraintKindINVARIANT. This field is
+	// required and must be set explicitly.
+	ConstraintKind string `xml:"constraintKind" json:"constraintKind"`
+}
+
+func init() {
+	t["VirtualMachineExtensionCompatibilityConstraint"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraint)(nil)).Elem()
+}
+
+// VirtualMachineExtensionCompatibilityConstraintSet represents the set of
+// VirtualMachineExtensionCompatibilityConstraint objects declared on a virtual
+// machine. An empty Constraint array means no constraints are declared.
+type VirtualMachineExtensionCompatibilityConstraintSet struct {
+	DynamicData
+
+	// Constraint is the extension compatibility constraints in this set.
+	Constraint []VirtualMachineExtensionCompatibilityConstraint `xml:"constraint,omitempty" json:"constraint,omitempty"`
+}
+
+func init() {
+	t["VirtualMachineExtensionCompatibilityConstraintSet"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintSet)(nil)).Elem()
+}
