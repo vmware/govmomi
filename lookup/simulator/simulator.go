@@ -73,6 +73,7 @@ type ServiceRegistration struct {
 	Info []types.LookupServiceRegistrationInfo
 
 	register sync.Once
+	mu       sync.RWMutex
 }
 
 func (s *ServiceRegistration) GetSiteId(_ *types.GetSiteId) soap.HasFault {
@@ -117,11 +118,78 @@ func matchEndpointType(filter, info *types.LookupServiceRegistrationEndpointType
 
 // defer register to this point to ensure we can include vcsim's cert in ServiceEndpoints.SslTrust
 // TODO: we should be able to register within New(), but this is the only place that currently depends on vcsim's cert
-func (s *ServiceRegistration) info(ctx *simulator.Context) []types.LookupServiceRegistrationInfo {
+func (s *ServiceRegistration) info(ctx *simulator.Context) {
 	s.register.Do(func() {
 		s.Info = registrationInfo(ctx)
 	})
-	return s.Info
+}
+
+func (s *ServiceRegistration) Get(ctx *simulator.Context, req *types.Get) soap.HasFault {
+	s.info(ctx)
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, entry := range s.Info {
+		if entry.ServiceId == req.ServiceId {
+			return &methods.GetBody{
+				Res: &types.GetResponse{Returnval: entry},
+			}
+		}
+	}
+
+	body := new(methods.GetBody)
+	body.Fault_ = simulator.Fault("LookupFaultServiceFault", &vim.SystemError{
+		Reason: "Service not found: " + req.ServiceId,
+	})
+	return body
+}
+
+// Create registers a new service entry in the Lookup Service.
+// It is idempotent with respect to ServiceId: if an entry already exists it is overwritten.
+func (s *ServiceRegistration) Create(ctx *simulator.Context, req *types.Create) soap.HasFault {
+	s.info(ctx)
+
+	entry := types.LookupServiceRegistrationInfo{
+		LookupServiceRegistrationCommonServiceInfo: req.CreateSpec.LookupServiceRegistrationCommonServiceInfo,
+		ServiceId: req.ServiceId,
+		SiteId:    siteID,
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for i, existing := range s.Info {
+		if existing.ServiceId == req.ServiceId {
+			s.Info[i] = entry
+			return &methods.CreateBody{Res: new(types.CreateResponse)}
+		}
+	}
+	s.Info = append(s.Info, entry)
+
+	return &methods.CreateBody{Res: new(types.CreateResponse)}
+}
+
+// Delete removes a service entry from the Lookup Service.
+// Returns a fault if the entry isn't found.
+func (s *ServiceRegistration) Delete(ctx *simulator.Context, req *types.Delete) soap.HasFault {
+	s.info(ctx)
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for i, entry := range s.Info {
+		if entry.ServiceId == req.ServiceId {
+			s.Info = append(s.Info[:i], s.Info[i+1:]...)
+			return &methods.DeleteBody{Res: new(types.DeleteResponse)}
+		}
+	}
+
+	body := new(methods.DeleteBody)
+	body.Fault_ = simulator.Fault("LookupFaultServiceFault", &vim.SystemError{
+		Reason: "Service not found: " + req.ServiceId,
+	})
+	return body
 }
 
 func (s *ServiceRegistration) List(ctx *simulator.Context, req *types.List) soap.HasFault {
@@ -137,7 +205,12 @@ func (s *ServiceRegistration) List(ctx *simulator.Context, req *types.List) soap
 	}
 	body.Res = new(types.ListResponse)
 
-	for _, info := range s.info(ctx) {
+	s.info(ctx)
+
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	for _, info := range s.Info {
 		if filter.SiteId != "" {
 			if filter.SiteId != info.SiteId {
 				continue
