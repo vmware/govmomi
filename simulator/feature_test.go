@@ -142,11 +142,7 @@ func Example_runContainer() {
 		// Count the number of bytes in feature_test.go via nginx going direct to the container.
 		// Join the same bridge so the probe can reach the nginx container IP on rootless podman;
 		// omit --network on runtimes where the default bridge provides connectivity.
-		probeArgs := []string{"run", "--rm"}
-		if network != "" {
-			probeArgs = append(probeArgs, "--network", network)
-		}
-		probeArgs = append(probeArgs, "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s", ip))
+		probeArgs := test.ContainerCurlProbeArgs(network, fmt.Sprintf("http://%s", ip))
 		cmd := exec.Command("docker", probeArgs...)
 		var buf bytes.Buffer
 		cmd.Stdout = &buf
