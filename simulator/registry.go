@@ -74,6 +74,12 @@ type Registry struct {
 	Cookie    func(*Context) string
 
 	tagManager tagManager
+
+	// ContainerImages maps VM config attributes to OCI container images.
+	// It is consulted during PowerOn to enable container-backed simulation
+	// without requiring modifications to the code under test.
+	// See ContainerImageRegistry for details and usage examples.
+	ContainerImages ContainerImageRegistry
 }
 
 // tagManager is an interface to simplify internal interaction with the vapi tag manager simulator.
