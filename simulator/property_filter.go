@@ -123,7 +123,20 @@ func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference,
 			if strings.HasPrefix(change.Name, name) {
 				if obj := ctx.Map.Get(ref); obj != nil { // object may have since been deleted
 					change.Name = name
-					change.Val, _ = fieldValue(reflect.ValueOf(obj), name)
+					// Hold the object's lock while reading its live state, as
+					// a task (e.g. ReconfigVM_Task) may be mutating the object.
+					// fieldValue does not copy nested data, so deep copy while
+					// still holding the lock, as the change is not encoded
+					// until after the lock is released.
+					ctx.WithLock(obj, func() {
+						val, _ := fieldValue(reflect.ValueOf(obj), name)
+						if val != nil {
+							var dst types.PropertyChange
+							deepCopy(types.PropertyChange{Val: val}, &dst)
+							val = dst.Val
+						}
+						change.Val = val
+					})
 				}
 
 				return true
