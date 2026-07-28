@@ -61,137 +61,134 @@ func createSimulationVM(vm *VirtualMachine) *simVM {
 	return nil
 }
 
-// applies container network settings to vm.Guest properties.
-// If ctx is provided, property change notifications will be triggered for all modified properties.
-func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context) error {
-	if svm == nil {
+// syncNetworkConfigToVMGuestProperties applies container network settings to
+// vm.Guest properties and triggers granular property-change notifications.
+//
+// out and detail are an optional docker/podman inspect result (e.g.
+// from watchContainer's update loop, which must inspect anyway to detect
+// container removal). If detail is nil this function perform its own inspect().
+//
+// The inspect() call, when performed here, happens outside the lock to avoid
+// holding it during I/O. ctx.AutoUpdate acquires the VM lock once for the
+// whole checkpoint → modify → diff → update sequence, preventing races with
+// concurrent SOAP handlers (e.g. DestroyTask) that also hold the VM lock.
+func (svm *simVM) syncNetworkConfigToVMGuestProperties(ctx *Context, out []byte, detail *containerDetails) error {
+	if svm == nil || ctx == nil {
 		return nil
 	}
 
-	out, detail, err := svm.c.inspect()
-	if err != nil {
-		return err
+	if detail == nil {
+		o, d, err := svm.c.inspect()
+		if err != nil {
+			return err
+		}
+		out = o
+		detail = &d
 	}
 
-	svm.vm.Config.Annotation = "inspect"
-	svm.vm.logPrintf("%s: %s", svm.vm.Config.Annotation, string(out))
-
-	netS := detail.NetworkSettings.networkSettings
-
-	// ? Why is this valid - we're taking the first entry while iterating over a MAP
+	// Precompute values that don't need the VM lock.
+	//
+	// primaryNet is chosen by taking an arbitrary entry from Go's randomized
+	// map iteration over multi-network containers. This is intentional instability
+	// until we've verified the real VC algo for selecting "primary" network.
+	primaryNet := detail.NetworkSettings.networkSettings
 	for _, n := range detail.NetworkSettings.Networks {
-		netS = n
+		primaryNet = n
 		break
 	}
 
-	// Collect property changes as we modify the VM state
-	var changes []types.PropertyChange
+	ctx.AutoUpdate(svm.vm, func() {
+		svm.vm.Config.Annotation = "inspect"
+		svm.vm.logPrintf("%s: %s", svm.vm.Config.Annotation, string(out))
 
-	// Update power state based on container state
-	var oldPowerState types.VirtualMachinePowerState
-	if detail.State.Paused {
-		svm.vm.Runtime.PowerState = types.VirtualMachinePowerStateSuspended
-	} else if detail.State.Running {
-		svm.vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOn
-	} else {
-		svm.vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
-	}
-	if svm.vm.Runtime.PowerState != oldPowerState {
-		changes = append(changes, types.PropertyChange{
-			Name: "runtime.powerState",
-			Val:  svm.vm.Runtime.PowerState,
-			Op:   types.PropertyChangeOpAssign,
-		})
-	}
-
-	// Update IP address
-	newIP := netS.IPAddress
-	if svm.vm.Guest.IpAddress != newIP {
-		svm.vm.Guest.IpAddress = newIP
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.ipAddress",
-			Val:  newIP,
-			Op:   types.PropertyChangeOpAssign,
-		})
-	}
-	if svm.vm.Summary.Guest.IpAddress != newIP {
-		svm.vm.Summary.Guest.IpAddress = newIP
-		changes = append(changes, types.PropertyChange{
-			Name: "summary.guest.ipAddress",
-			Val:  newIP,
-			Op:   types.PropertyChangeOpAssign,
-		})
-	}
-
-	// Update hostname
-	if svm.vm.Guest.HostName == "" && detail.Config.Hostname != "" {
-		svm.vm.Guest.HostName = detail.Config.Hostname
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.hostName",
-			Val:  detail.Config.Hostname,
-			Op:   types.PropertyChangeOpAssign,
-		})
-	}
-
-	// Update network info if we have a NIC configured
-	if len(svm.vm.Guest.Net) != 0 {
-		net := &svm.vm.Guest.Net[0]
-		net.IpAddress = []string{newIP}
-		net.MacAddress = netS.MacAddress
-		net.IpConfig = &types.NetIpConfigInfo{
-			IpAddress: []types.NetIpConfigInfoIpAddress{{
-				IpAddress:    newIP,
-				PrefixLength: int32(netS.IPPrefixLen),
-				State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
-			}},
+		if detail.State.Paused {
+			svm.vm.Runtime.PowerState = types.VirtualMachinePowerStateSuspended
+		} else if detail.State.Running {
+			svm.vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOn
+		} else {
+			svm.vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
 		}
 
-		gsi := types.GuestStackInfo{
-			DnsConfig: &types.NetDnsConfigInfo{
-				Dhcp:         false,
-				HostName:     svm.vm.Guest.HostName,
-				DomainName:   detail.Config.Domainname,
-				IpAddress:    detail.Config.DNS,
-				SearchDomain: nil,
-			},
-			IpRouteConfig: &types.NetIpRouteConfigInfo{
-				IpRoute: []types.NetIpRouteConfigInfoIpRoute{{
-					Network:      "0.0.0.0",
-					PrefixLength: 0,
-					Gateway: types.NetIpRouteConfigInfoGateway{
-						IpAddress: netS.Gateway,
-						Device:    "0",
-					},
-				}},
-			},
+		svm.vm.Guest.IpAddress = primaryNet.IPAddress
+		svm.vm.Summary.Guest.IpAddress = primaryNet.IPAddress
+
+		if detail.Config.Hostname != "" {
+			svm.vm.Guest.HostName = detail.Config.Hostname
+			svm.vm.Summary.Guest.HostName = detail.Config.Hostname
 		}
-		svm.vm.Guest.IpStack = []types.GuestStackInfo{gsi}
 
-		// guest.net is a complex structure, trigger update for the whole thing
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.net",
-			Val:  svm.vm.Guest.Net,
-			Op:   types.PropertyChangeOpAssign,
-		})
-		changes = append(changes, types.PropertyChange{
-			Name: "guest.ipStack",
-			Val:  svm.vm.Guest.IpStack,
-			Op:   types.PropertyChangeOpAssign,
-		})
-	}
-
-	// Update MAC address on virtual ethernet card
-	for _, d := range svm.vm.Config.Hardware.Device {
-		if eth, ok := d.(types.BaseVirtualEthernetCard); ok {
-			eth.GetVirtualEthernetCard().MacAddress = netS.MacAddress
-			break
+		var guestNics []types.GuestNicInfo
+		nicIndex := int32(0)
+		for networkName, netSettings := range detail.NetworkSettings.Networks {
+			if netSettings.IPAddress == "" {
+				continue
+			}
+			nic := types.GuestNicInfo{
+				Network:        networkName,
+				IpAddress:      []string{netSettings.IPAddress},
+				MacAddress:     netSettings.MacAddress,
+				Connected:      true,
+				DeviceConfigId: nicIndex,
+				IpConfig: &types.NetIpConfigInfo{
+					IpAddress: []types.NetIpConfigInfoIpAddress{{
+						IpAddress:    netSettings.IPAddress,
+						PrefixLength: int32(netSettings.IPPrefixLen),
+						State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
+					}},
+				},
+			}
+			guestNics = append(guestNics, nic)
+			nicIndex++
 		}
-	}
 
-	// Trigger property change notifications if we have changes and context is available
-	if ctx != nil && len(changes) > 0 {
-		ctx.Update(svm.vm, changes)
-	}
+		if len(guestNics) == 0 && primaryNet.IPAddress != "" {
+			guestNics = append(guestNics, types.GuestNicInfo{
+				Network:        "default",
+				IpAddress:      []string{primaryNet.IPAddress},
+				MacAddress:     primaryNet.MacAddress,
+				Connected:      true,
+				DeviceConfigId: 0,
+				IpConfig: &types.NetIpConfigInfo{
+					IpAddress: []types.NetIpConfigInfoIpAddress{{
+						IpAddress:    primaryNet.IPAddress,
+						PrefixLength: int32(primaryNet.IPPrefixLen),
+						State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
+					}},
+				},
+			})
+		}
+
+		svm.vm.Guest.Net = guestNics
+
+		if primaryNet.IPAddress != "" {
+			svm.vm.Guest.IpStack = []types.GuestStackInfo{{
+				DnsConfig: &types.NetDnsConfigInfo{
+					Dhcp:         false,
+					HostName:     svm.vm.Guest.HostName,
+					DomainName:   detail.Config.Domainname,
+					IpAddress:    detail.Config.DNS,
+					SearchDomain: nil,
+				},
+				IpRouteConfig: &types.NetIpRouteConfigInfo{
+					IpRoute: []types.NetIpRouteConfigInfoIpRoute{{
+						Network:      "0.0.0.0",
+						PrefixLength: 0,
+						Gateway: types.NetIpRouteConfigInfoGateway{
+							IpAddress: primaryNet.Gateway,
+							Device:    "0",
+						},
+					}},
+				},
+			}}
+		}
+
+		for _, d := range svm.vm.Config.Hardware.Device {
+			if eth, ok := d.(types.BaseVirtualEthernetCard); ok {
+				eth.GetVirtualEthernetCard().MacAddress = primaryNet.MacAddress
+				break
+			}
+		}
+	})
 
 	return nil
 }
@@ -368,7 +365,7 @@ func (svm *simVM) start(ctx *Context) error {
 	// Sync network config, retrying a few times to allow the container to get an IP
 	// Container runtimes may take a moment to assign an IP address after start
 	for i := 0; i < 5; i++ {
-		if err = svm.syncNetworkConfigToVMGuestProperties(ctx); err != nil {
+		if err = svm.syncNetworkConfigToVMGuestProperties(ctx, nil, nil); err != nil {
 			log.Printf("%s inspect %s: %s", svm.vm.Name, svm.c.id, err)
 			break
 		}
@@ -378,8 +375,13 @@ func (svm *simVM) start(ctx *Context) error {
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	callback := func(callbackCtx *Context, details *containerDetails, c *container) error {
-		if c.id == "" && svm.vm != nil {
+	callback := func(callbackCtx *Context, out []byte, details *containerDetails, c *container) error {
+		// c.id is written under c.Lock() in container.remove().
+		c.Lock()
+		containerGone := c.id == ""
+		c.Unlock()
+
+		if containerGone && svm.vm != nil {
 			// If the container cannot be found then destroy this VM unless the VM is no longer configured for container backing (svm.vm == nil)
 			taskRef := svm.vm.DestroyTask(callbackCtx, &types.Destroy_Task{This: svm.vm.Self}).(*methods.Destroy_TaskBody).Res.Returnval
 			task, ok := callbackCtx.Map.Get(taskRef).(*Task)
@@ -396,14 +398,14 @@ func (svm *simVM) start(ctx *Context) error {
 			}
 		}
 
-		return svm.syncNetworkConfigToVMGuestProperties(callbackCtx)
+		return svm.syncNetworkConfigToVMGuestProperties(callbackCtx, out, details)
 	}
 
 	// Start watching the container resource.
 	err = svm.c.watchContainer(ctx, callback)
 	if _, ok := err.(uninitializedContainer); ok {
 		// the container has been deleted before we could watch, despite successful launch so clean up.
-		callback(ctx, nil, svm.c)
+		callback(ctx, nil, nil, svm.c)
 
 		// successful launch so nil the error
 		return nil

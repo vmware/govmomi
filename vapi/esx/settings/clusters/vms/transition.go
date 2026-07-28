@@ -209,3 +209,15 @@ func (m *Manager) Transition(ctx context.Context, cluster types.ManagedObjectRef
 	_, err = tasks.NewManager(m.Client).WaitForCompletion(ctx, taskId)
 	return err
 }
+
+// DeleteSolutionOnly deletes the desired specification of a solution for a given cluster
+// and marks its System VMs to be abandoned (not deleted) on the next apply.
+//
+// The operation only removes the solution from the cluster's desired state. The new
+// desired state is not applied and the solution System VMs remain untouched. A
+// consecutive Solutions#apply operation is needed to trigger the actual abandonment.
+func (m *Manager) DeleteSolutionOnly(ctx context.Context, cluster types.ManagedObjectReference, solution string) error {
+	p := clusterTransitionPath(cluster).String()
+	url := m.Resource(p).WithSubpath(solution).WithParam("action", "delete-solution-only")
+	return m.Do(ctx, url.Request(http.MethodPost, nil), nil)
+}

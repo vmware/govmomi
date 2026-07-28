@@ -7,11 +7,13 @@ package test
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/vmware/govmomi/vim25"
@@ -30,16 +32,38 @@ func HasDocker() bool {
 	return true
 }
 
+var (
+	isRootlessPodmanOnce   sync.Once
+	isRootlessPodmanResult bool
+)
+
 // IsRootlessPodman returns true when the docker CLI is backed by rootless podman.
 // Rootless podman has restrictions such as the inability to bind-mount system
 // paths like /sys/class/dmi/id.
+//
+// The detection result is memoized (sync.Once): the underlying runtime does
+// not change within a test binary's lifetime, and each call otherwise spawns
+// up to two subprocesses, which adds up across the many container-backed
+// tests that call this indirectly via ApplyContainerRuntimeDefaults.
 func IsRootlessPodman() bool {
+	isRootlessPodmanOnce.Do(func() {
+		isRootlessPodmanResult = detectRootlessPodman()
+	})
+	return isRootlessPodmanResult
+}
+
+func detectRootlessPodman() bool {
 	out, err := exec.Command("docker", "--version").Output()
-	if err != nil || !strings.Contains(string(out), "podman") {
+	if err != nil {
+		log.Printf("test: docker --version: %v", err)
+		return false
+	}
+	if !strings.Contains(string(out), "podman") {
 		return false
 	}
 	out, err = exec.Command("podman", "info", "--format", "{{.Host.Security.Rootless}}").Output()
 	if err != nil {
+		log.Printf("test: docker CLI reports podman, but podman info failed (rootless-podman detection assuming false): %v", err)
 		return false
 	}
 	return strings.TrimSpace(string(out)) == "true"
@@ -111,6 +135,19 @@ func ContainerNetworkFromSpec(spec *types.VirtualMachineConfigSpec) string {
 		}
 	}
 	return ""
+}
+
+// ContainerCurlProbeArgs returns the "docker run" argument list for probing
+// targetURL from a curlimages/curl container, joining network (if non-empty,
+// typically the result of ContainerNetworkFromSpec) so the probe can reach a
+// container-backed VM that is not on the runtime's default bridge (e.g.
+// rootless podman).
+func ContainerCurlProbeArgs(network, targetURL string) []string {
+	args := []string{"run", "--rm"}
+	if network != "" {
+		args = append(args, "--network", network)
+	}
+	return append(args, "curlimages/curl", "curl", "-f", targetURL)
 }
 
 // ApplyContainerRuntimeDefaults adds runtime-appropriate ExtraConfig defaults

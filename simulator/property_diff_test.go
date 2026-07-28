@@ -7,13 +7,18 @@ package simulator
 import (
 	"context"
 	"fmt"
+	"os"
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/test"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 
@@ -76,23 +81,27 @@ func TestPropertyDiff_NestedFields(t *testing.T) {
 	// Get the diff
 	changes := PropertyDiff(checkpoint, vm)
 
-	// We should have changes for guest and summary.guest
-	require.Len(t, changes, 2, "expected at least 2 changes, got %d: %+v", len(changes), changes)
+	// Guest is an anonymous-free pointer field, so its change is reported
+	// under its own path ("guest"). Summary is a non-anonymous value-typed
+	// field that diffFields does not recurse into, so any change inside it
+	// -- including this one, nested under Summary.Guest -- is reported as a
+	// single opaque "summary" change, not a fine-grained "summary.guest" path.
+	require.Len(t, changes, 2, "expected 2 changes, got %d: %+v", len(changes), changes)
 
 	// Check that we have the expected property paths
 	foundGuest := false
-	foundSummaryGuest := false
+	foundSummary := false
 	for _, c := range changes {
 		if c.Name == "guest" {
 			foundGuest = true
 		}
 		if c.Name == "summary" {
-			foundSummaryGuest = true
+			foundSummary = true
 		}
 	}
 
 	assert.True(t, foundGuest, "expected change for 'guest' property")
-	assert.True(t, foundSummaryGuest, "expected change for 'summary' property")
+	assert.True(t, foundSummary, "expected change for 'summary' property")
 }
 
 func TestPropertyDiff_AddRemove(t *testing.T) {
@@ -176,6 +185,32 @@ func TestPropertyDiff_SliceFields(t *testing.T) {
 	}
 
 	t.Error("expected change for 'guest' property containing network changes")
+}
+
+// TestPropertyDiff_NilVsEmptySlice verifies that a nil slice and a non-nil,
+// zero-length slice of the same field are treated as equal (no
+// PropertyChange), even though reflect.DeepEqual alone would consider them
+// different. Without this, a transition like the one
+// syncNetworkConfigToVMGuestProperties performs -- assigning a nil
+// []types.GuestNicInfo when a container has no NICs -- would report a
+// spurious "guest" change against a checkpoint whose Net field happened to
+// be a non-nil empty slice, even though nothing observable changed.
+func TestPropertyDiff_NilVsEmptySlice(t *testing.T) {
+	vm := &mo.VirtualMachine{
+		Guest: &types.GuestInfo{
+			Net: []types.GuestNicInfo{}, // non-nil, empty
+		},
+	}
+	vm.Self = types.ManagedObjectReference{Type: "VirtualMachine", Value: "vm-1"}
+
+	checkpoint := Checkpoint(vm)
+
+	vm.Guest.Net = nil // nil, empty
+
+	changes := PropertyDiff(checkpoint, vm)
+
+	require.Len(t, changes, 0,
+		"nil slice and non-nil empty slice must not produce a change, got %d: %+v", len(changes), changes)
 }
 
 func TestCheckpoint(t *testing.T) {
@@ -433,10 +468,10 @@ func TestContext_Checkpoint(t *testing.T) {
 	})
 }
 
-// TestContext_PropertyDiff verifies that ctx.PropertyDiff computes changes from an old
+// TestContext_UpdateDiff verifies that ctx.UpdateDiff computes changes from an old
 // snapshot to the current live state and applies them so they are visible via the
 // PropertyCollector.
-func TestContext_PropertyDiff(t *testing.T) {
+func TestContext_UpdateDiff(t *testing.T) {
 	goCtx := context.Background()
 
 	m := VPX()
@@ -617,7 +652,10 @@ func TestPropertyDiff_GuestNetInfo(t *testing.T) {
 	assert.True(t, foundGuest, "expected change for 'guest' property")
 }
 
-// TestPropertyDiff_SummaryGuest tests that summary.guest changes are tracked
+// TestPropertyDiff_SummaryGuest tests that a change nested under
+// Summary.Guest is tracked, reported as a single opaque "summary" change
+// (Summary is a non-anonymous value-typed field that diffFields does not
+// recurse into).
 func TestPropertyDiff_SummaryGuest(t *testing.T) {
 	vm := &mo.VirtualMachine{
 		Summary: types.VirtualMachineSummary{
@@ -641,6 +679,175 @@ func TestPropertyDiff_SummaryGuest(t *testing.T) {
 	}
 
 	t.Error("expected change for 'summary' property")
+}
+
+// TestContainerVMNetworkPropertyChanges tests that a container-backed VM produces
+// the expected network property changes when powered on, including detailed Guest.Net info.
+func TestContainerVMNetworkPropertyChanges(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		if !test.HasDocker() {
+			t.Skip("requires docker on linux")
+			return
+		}
+
+		finder := find.NewFinder(c)
+		pool, err := finder.ResourcePool(ctx, "DC0_H0/Resources")
+		require.NoError(t, err, "expected no error retrieving resource pool")
+		dc, err := finder.Datacenter(ctx, "DC0")
+		require.NoError(t, err, "expected no error retrieving datacenter")
+
+		// Use busybox with a simple sleep command to keep the container running
+		busybox := os.Getenv("VCSIM_BUSYBOX")
+		if busybox == "" {
+			busybox = "busybox"
+		}
+
+		spec := types.VirtualMachineConfigSpec{
+			Name: "busybox-network-test",
+			Files: &types.VirtualMachineFileInfo{
+				VmPathName: "[LocalDS_0] busybox-test",
+			},
+			ExtraConfig: []types.BaseOptionValue{
+				&types.OptionValue{Key: ContainerBackingOptionKey, Value: busybox + " sleep 300"},
+			},
+		}
+		require.NoError(t, test.ApplyContainerRuntimeDefaults(&spec), "expected no error applying container runtime defaults")
+
+		f, err := dc.Folders(ctx)
+		require.NoError(t, err, "expected no error retrieving folders")
+
+		// Create a new VM
+		task, err := f.VmFolder.CreateVM(ctx, spec, pool, nil)
+		require.NoError(t, err, "expected no error creating VM")
+
+		info, err := task.WaitForResult(ctx, nil)
+		require.NoError(t, err, "expected no error waiting for task result")
+
+		vmRef := info.Result.(types.ManagedObjectReference)
+		vm := object.NewVirtualMachine(c, vmRef)
+		defer func() {
+			task, _ = vm.PowerOff(ctx)
+			_ = task.Wait(ctx)
+			task, _ = vm.Destroy(ctx)
+			_ = task.Wait(ctx)
+		}()
+
+		// Get initial state before power on
+		pc := property.DefaultCollector(c)
+		var initialVM mo.VirtualMachine
+		err = pc.RetrieveOne(ctx, vmRef, []string{"runtime.powerState", "guest"}, &initialVM)
+		require.NoError(t, err, "expected no error retrieving initial VM state")
+		assert.Equal(t, types.VirtualMachinePowerStatePoweredOff, initialVM.Runtime.PowerState, "expected initial power state PoweredOff")
+
+		// Verify Guest.Net is empty before power on
+		require.NotNil(t, initialVM.Guest, "expected Guest to be set")
+		require.Equal(t, 0, len(initialVM.Guest.Net), "expected Guest.Net to be empty before power on")
+
+		// Power on the VM
+		task, err = vm.PowerOn(ctx)
+		require.NoError(t, err, "expected no error powering on VM")
+
+		err = task.Wait(ctx)
+		require.NoError(t, err, "expected no error waiting for task result")
+
+		// Wait for IP to be assigned with a timeout
+		waitCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+		defer cancel()
+		ip, err := vm.WaitForIP(waitCtx, false)
+		if err != nil {
+			t.Logf("WaitForIP error (may be expected with rootless podman): %v", err)
+		}
+
+		// Retrieve the updated VM state with all guest properties
+		var updatedVM mo.VirtualMachine
+		err = pc.RetrieveOne(ctx, vmRef, []string{
+			"runtime.powerState",
+			"guest.ipAddress",
+			"guest.hostName",
+			"guest.net",
+			"guest.ipStack",
+			"summary.guest.ipAddress",
+			"summary.guest.hostName",
+		}, &updatedVM)
+		require.NoError(t, err, "expected no error retrieving updated VM state")
+
+		// Verify power state changed
+		assert.Equal(t, types.VirtualMachinePowerStatePoweredOn, updatedVM.Runtime.PowerState, "expected power state PoweredOn")
+
+		// If we got an IP, verify detailed guest properties
+		if ip == "" {
+			t.Log("No IP assigned (rootless podman without bridge network)")
+			return
+		}
+
+		t.Logf("Container IP: %s", ip)
+
+		require.NotNil(t, updatedVM.Guest, "expected Guest to be populated")
+
+		// Verify Guest.IpAddress
+		if assert.NotEqual(t, "", updatedVM.Guest.IpAddress, "expected Guest.IpAddress to be set") {
+			t.Logf("Guest.IpAddress: %s", updatedVM.Guest.IpAddress)
+		}
+
+		// Verify Guest.HostName
+		if assert.NotEqual(t, "", updatedVM.Guest.HostName, "expected Guest.HostName to be set") {
+			t.Logf("Guest.HostName: %s", updatedVM.Guest.HostName)
+		}
+
+		// Verify Guest.Net is now populated with detailed NIC info
+		if assert.Greater(t, len(updatedVM.Guest.Net), 0, "expected Guest.Net to be populated after power on") {
+			t.Logf("Guest.Net has %d entries", len(updatedVM.Guest.Net))
+			for i, nic := range updatedVM.Guest.Net {
+				t.Logf("  NIC %d:", i)
+				t.Logf("    Network: %s", nic.Network)
+				t.Logf("    MacAddress: %s", nic.MacAddress)
+				t.Logf("    IpAddress: %v", nic.IpAddress)
+				t.Logf("    Connected: %v", nic.Connected)
+
+				// Verify NIC has expected fields populated
+				assert.NotEqual(t, "", nic.Network, "expected Network to be set")
+				assert.Greater(t, len(nic.IpAddress), 0, "expected IpAddress to be set")
+				assert.NotEqual(t, "", nic.MacAddress, "expected MacAddress to be set")
+				assert.True(t, nic.Connected, "expected Connected to be true")
+
+				// Verify IpConfig is populated
+				if assert.NotNil(t, nic.IpConfig, "expected IpConfig to be set (nic %d)", i) {
+					t.Logf("    IpConfig.IpAddress: %+v", nic.IpConfig.IpAddress)
+					if assert.Greater(t, len(nic.IpConfig.IpAddress), 0, "expected IpConfig.IpAddress to be set") {
+						ipAddr := nic.IpConfig.IpAddress[0]
+						assert.NotEqual(t, "", ipAddr.IpAddress, "expected IpConfig.IpAddress[0].IpAddress to be set")
+						assert.NotEqual(t, int32(0), ipAddr.PrefixLength, "expected PrefixLength to be set")
+					}
+				}
+			}
+		}
+
+		// Verify Guest.IpStack is populated
+		if assert.Greater(t, len(updatedVM.Guest.IpStack), 0, "expected Guest.IpStack to be populated") {
+			t.Logf("Guest.IpStack has %d entries", len(updatedVM.Guest.IpStack))
+			for i, stack := range updatedVM.Guest.IpStack {
+				if stack.DnsConfig != nil {
+					t.Logf("  Stack %d DnsConfig: HostName=%s, DomainName=%s, DNS=%v",
+						i, stack.DnsConfig.HostName, stack.DnsConfig.DomainName, stack.DnsConfig.IpAddress)
+				}
+				if stack.IpRouteConfig != nil && len(stack.IpRouteConfig.IpRoute) > 0 {
+					route := stack.IpRouteConfig.IpRoute[0]
+					t.Logf("  Stack %d DefaultRoute: Gateway=%s", i, route.Gateway.IpAddress)
+				}
+			}
+		}
+
+		// Verify Summary.Guest
+		if updatedVM.Summary.Guest != nil {
+			if assert.NotEqual(t, "", updatedVM.Summary.Guest.IpAddress, "expected Summary.Guest.IpAddress to be set") {
+				t.Logf("Summary.Guest.IpAddress: %s", updatedVM.Summary.Guest.IpAddress)
+			}
+			if updatedVM.Summary.Guest.HostName != "" {
+				t.Logf("Summary.Guest.HostName: %s", updatedVM.Summary.Guest.HostName)
+			}
+		}
+
+	})
 }
 
 // TestPropertyDiff_ConcurrentAccess is a race regression test for the pattern used in

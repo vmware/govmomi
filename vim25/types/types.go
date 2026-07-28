@@ -89576,6 +89576,10 @@ type VirtualMachineConfigInfo struct {
 	//
 	// SEV-SNP is enabled when set to true, and disabled otherwise.
 	SevSnpEnabled *bool `xml:"sevSnpEnabled" json:"sevSnpEnabled,omitempty" vim:"9.0.0.0"`
+	// The full set of extension compatibility constraints registered on this
+	// virtual machine by its managing extension. When unset, no extension
+	// compatibility constraints are registered on the virtual machine.
+	ExtensionCompatibilityConstraint *VirtualMachineExtensionCompatibilityConstraintSet `xml:"extensionCompatibilityConstraint,omitempty" json:"extensionCompatibilityConstraint,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -90356,6 +90360,19 @@ type VirtualMachineConfigSpec struct {
 	// existing vSphere compute-policies or affinity rules, then they will still
 	// be considered during this VM's placement.
 	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.1.0.0"`
+	// The full set of extension compatibility constraints for this virtual
+	// machine, declared by its managing extension (see ManagedBy) so that
+	// vCenter can protect the VM's properties during operations that would
+	// change them. At create time the constraints are persisted atomically with
+	// the VM; at reconfigure time the set fully replaces the existing set
+	// (an empty constraint array clears it).
+	ExtensionCompatibilityConstraint *VirtualMachineExtensionCompatibilityConstraintSet `xml:"extensionCompatibilityConstraint,omitempty" json:"extensionCompatibilityConstraint,omitempty" vim:"9.1.0.0"`
+	// Whether to skip enforcement of the extensionCompatibilityConstraint set.
+	// Honored only when the caller holds the
+	// VirtualMachine.ExtensionCompatibility.Bypass privilege on the virtual
+	// machine; otherwise the operation is rejected. When unset, the value is
+	// treated as false and the registered constraints are enforced.
+	SkipExtensionCompatibilityChecks *bool `xml:"skipExtensionCompatibilityChecks" json:"skipExtensionCompatibilityChecks,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
@@ -92418,6 +92435,14 @@ type VirtualMachineRelocateSpec struct {
 	// on the placement constraints defined in Supervisor. This field will be
 	// ignored except when set by Supervisor.
 	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.1.0.0"`
+	// Whether to skip enforcement of the extension compatibility constraints
+	// registered on the virtual machine (see
+	// VirtualMachineConfigInfo.ExtensionCompatibilityConstraint) for this
+	// relocate. Honored only when the caller holds the
+	// VirtualMachine.ExtensionCompatibility.Bypass privilege on the virtual
+	// machine; otherwise the operation is rejected. Built-in compatibility
+	// checks (host compatibility, SPBM, and so on) are still enforced.
+	SkipExtensionCompatibilityChecks *bool `xml:"skipExtensionCompatibilityChecks" json:"skipExtensionCompatibilityChecks,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {

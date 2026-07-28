@@ -61,7 +61,7 @@ func diffFields(prefix string, oldVal, newVal reflect.Value, rtype reflect.Type,
 		}
 
 		// Compare the field values
-		if !reflect.DeepEqual(oldField.Interface(), newField.Interface()) {
+		if !fieldsEqual(oldField, newField) {
 			change := types.PropertyChange{
 				Name: path,
 				Op:   determineChangeOp(oldField, newField),
@@ -75,6 +75,21 @@ func diffFields(prefix string, oldVal, newVal reflect.Value, rtype reflect.Type,
 			*changes = append(*changes, change)
 		}
 	}
+}
+
+// fieldsEqual reports whether oldField and newField hold equal values for the
+// purpose of change detection. A nil slice and a non-nil, zero-length slice
+// of the same element type are treated as equal: neither carries observable
+// content, so reflect.DeepEqual's usual nil-vs-empty distinction (which would
+// otherwise report a change here) would produce a spurious PropertyChange for
+// a transition that changed nothing a consumer can observe.
+func fieldsEqual(oldField, newField reflect.Value) bool {
+	if oldField.Kind() == reflect.Slice && newField.Kind() == reflect.Slice {
+		if oldField.Len() == 0 && newField.Len() == 0 {
+			return true
+		}
+	}
+	return reflect.DeepEqual(oldField.Interface(), newField.Interface())
 }
 
 // determineChangeOp determines the appropriate PropertyChangeOp based on old and new values.
