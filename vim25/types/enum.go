@@ -16195,12 +16195,46 @@ const (
 	// This is denoted by the "PreferredDuringExecution" part of this
 	// strictness value.
 	VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementPreferredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("RequiredDuringPlacementPreferredDuringExecution")
+
+	// A VmPlacementPolicy with this strictness is strictly enforced both
+	// during the initial placement operation and when the VM is in
+	// execution.
+	//
+	// Below is a detailed explanation:
+	// If an operation requires specifying a VM's `VirtualMachineConfigSpec` or
+	// `VirtualMachineRelocateSpec` and there is a VmPlacementPolicy specified in
+	// that `VirtualMachineConfigSpec.vmPlacementPolicies` or
+	// `VirtualMachineRelocateSpec.vmPlacementPolicies` with this
+	// VmPlacementPolicyStrictness, then it means the following:
+	//
+	// (1) This VmPlacementPolicy will be considered as "required" while
+	// computing the placement for that operation. This means that if a VM
+	// with this VmPlacementPolicy cannot be successfully placed on any host
+	// due to this policy, then the policy will still be honored and no
+	// placement recommendation will be generated for that operation. The
+	// policy must be satisfied to find a successful placement target for
+	// the VM for that operation. This is denoted by the
+	// "RequiredDuringPlacement" part of this strictness value.
+	//
+	// (2) This VmPlacementPolicy will be strictly enforced when that VM is in
+	// execution. For example, when the VM needs to be relocated for putting
+	// its host into maintenance mode, then this VmPlacementPolicy will be
+	// enforced strictly and will not be violated. Similarly, when the VM needs
+	// to be restarted as part of vSphere HA failover, then this
+	// VmPlacementPolicy will be enforced strictly and will not be violated.
+	// This is denoted by the "RequiredDuringExecution" part of this strictness
+	// value. Note that if a VM needs to be relocated by DRS for load-balancing,
+	// then any VmPlacementPolicy is considered as "Required" and DRS
+	// load-balancing is not included in the "RequiredDuringExecution" part of
+	// this strictness value.
+	VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementRequiredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("RequiredDuringPlacementRequiredDuringExecution")
 )
 
 func (e VmPlacementPolicyVmPlacementPolicyStrictness) Values() []VmPlacementPolicyVmPlacementPolicyStrictness {
 	return []VmPlacementPolicyVmPlacementPolicyStrictness{
 		VmPlacementPolicyVmPlacementPolicyStrictnessPreferredDuringPlacementPreferredDuringExecution,
 		VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementPreferredDuringExecution,
+		VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementRequiredDuringExecution,
 	}
 }
 
