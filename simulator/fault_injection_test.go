@@ -85,7 +85,7 @@ func TestFaultInjection(t *testing.T) {
 		// Run multiple times to test probability
 		failures := 0
 		attempts := 100
-		for i := 0; i < attempts; i++ {
+		for range attempts {
 			vm.PowerOff(ctx) // Reset state
 			taskResult, err := vm.PowerOn(ctx)
 			if err != nil {
@@ -193,7 +193,7 @@ func TestFaultInjectionMaxCount(t *testing.T) {
 		require.NoError(t, err)
 
 		// First two attempts should fail
-		for i := 0; i < 2; i++ {
+		for i := range 2 {
 			vm.PowerOff(ctx)
 			_, err := vm.PowerOn(ctx)
 			require.Error(t, err, "expected error on attempt %d", i+1)
@@ -276,7 +276,7 @@ func TestFaultInjectionSkipCount(t *testing.T) {
 		require.NoError(t, err)
 
 		// First two attempts should succeed (skipped)
-		for i := 0; i < 2; i++ {
+		for i := range 2 {
 			vm.PowerOff(ctx)
 			taskResult, err := vm.PowerOn(ctx)
 			require.NoError(t, err, "expected success on attempt %d (should be skipped)", i+1)
@@ -329,7 +329,7 @@ func TestFaultInjectionSkipCountWithMaxCount(t *testing.T) {
 		}
 
 		// Second and third attempts should fail (after skip, max 2 injections)
-		for i := 0; i < 2; i++ {
+		for i := range 2 {
 			vm.PowerOff(ctx)
 			_, err = vm.PowerOn(ctx)
 			require.Error(t, err, "expected error on attempt %d", i+2)

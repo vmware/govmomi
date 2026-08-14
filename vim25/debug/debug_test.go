@@ -30,7 +30,7 @@ func TestSetProvider(t *testing.T) {
 		rc := rest.NewClient(c)
 
 		// hit the debug package with some concurrency (see PR #2469)
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()

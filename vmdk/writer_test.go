@@ -239,7 +239,7 @@ func TestCalculateGrainTableLocations_TableDriven(t *testing.T) {
 		{"0 bytes", 0, []uint64{}},
 		{"1TB", 1099511627776, func() []uint64 {
 			locations := make([]uint64, 32768)
-			for i := uint64(0); i < 32768; i++ {
+			for i := range uint64(32768) {
 				locations[i] = 277 + (i * 4)
 			}
 			return locations

@@ -153,7 +153,7 @@ func TestAgency(t *testing.T) {
 			waitIntervalSecs = time.Duration(1) * time.Second
 		)
 		hasIssues := false
-		for i := 0; i < waitTotalSecs; i++ {
+		for range waitTotalSecs {
 			runtime, err := agency.Runtime(client.ctx)
 			if err != nil {
 				t.Fatal(err)

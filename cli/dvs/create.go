@@ -89,7 +89,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	if numUplinkPorts > 0 {
 		var policy types.DVSNameArrayUplinkPortPolicy
-		for i := 0; i < numUplinkPorts; i++ {
+		for i := range numUplinkPorts {
 			policy.UplinkPortName = append(policy.UplinkPortName, fmt.Sprintf("Uplink %d", i+1))
 		}
 		cmd.configSpec.UplinkPortPolicy = &policy

@@ -105,7 +105,7 @@ func (p *PerformanceManager) buildAvailablePerfMetricsQueryResponse(ids []types.
 	for _, id := range ids {
 		switch id.Instance {
 		case "$cpu":
-			for i := 0; i < numCPU; i++ {
+			for i := range numCPU {
 				r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: strconv.Itoa(i)})
 			}
 		case "$physDisk":

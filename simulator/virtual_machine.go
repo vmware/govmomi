@@ -109,7 +109,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		// Create VM directory, renaming if already exists
 		name := dir
 
-		for i := 0; i < 1024; /* just in case */ i++ {
+		for i := range 1024 {
 			err := os.Mkdir(name, 0700)
 			if err != nil {
 				if os.IsExist(err) {

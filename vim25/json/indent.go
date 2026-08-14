@@ -62,7 +62,7 @@ func compact(dst *bytes.Buffer, src []byte, escape bool) error {
 func newline(dst *bytes.Buffer, prefix, indent string, depth int) {
 	dst.WriteByte('\n')
 	dst.WriteString(prefix)
-	for i := 0; i < depth; i++ {
+	for range depth {
 		dst.WriteString(indent)
 	}
 }

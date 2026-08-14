@@ -24,7 +24,7 @@ func TestAggregatorMultipleSinks(t *testing.T) {
 	ch := make(chan Report)
 	a := NewAggregator(dummySinker{ch})
 
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		go func(ch chan<- Report) {
 			ch <- dummyReport{}
 			ch <- dummyReport{}

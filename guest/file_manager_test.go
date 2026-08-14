@@ -26,7 +26,7 @@ func TestTranferURL(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		for i := 0; i < 2; i++ { // 2nd time is to validate the cached value
+		for range 2 { // 2nd time is to validate the cached value
 			turl := "https://esx:443/foo/bar"
 			u, err := m.TransferURL(ctx, turl)
 			if err != nil {
@@ -55,7 +55,7 @@ func TestTranferURL(t *testing.T) {
 			}
 		}
 
-		for i := 0; i < 2; i++ { // 2nd time is to validate the cached value
+		for range 2 { // 2nd time is to validate the cached value
 			turl := "https://esx2:443/foo/bar"
 			u, err := m.TransferURL(ctx, turl)
 			if err != nil {

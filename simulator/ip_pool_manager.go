@@ -269,7 +269,7 @@ func (p *IpPool) init() error {
 				return err
 			}
 
-			for i := 0; i < length; i++ {
+			for i := range length {
 				p.ipv4Pool = append(p.ipv4Pool, net.IPv4(ip[0], ip[1], ip[2], ip[3]+byte(i)).String())
 			}
 		}
@@ -294,7 +294,7 @@ func (p *IpPool) init() error {
 				return err
 			}
 
-			for i := 0; i < length; i++ {
+			for i := range length {
 				var ipv6 [16]byte
 				copy(ipv6[:], ip)
 				ipv6[15] += byte(i)

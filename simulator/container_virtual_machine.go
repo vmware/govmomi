@@ -364,7 +364,7 @@ func (svm *simVM) start(ctx *Context) error {
 
 	// Sync network config, retrying a few times to allow the container to get an IP
 	// Container runtimes may take a moment to assign an IP address after start
-	for i := 0; i < 5; i++ {
+	for range 5 {
 		if err = svm.syncNetworkConfigToVMGuestProperties(ctx, nil, nil); err != nil {
 			log.Printf("%s inspect %s: %s", svm.vm.Name, svm.c.id, err)
 			break
@@ -554,7 +554,7 @@ func productSerial(id uuid.UUID) string {
 	var dst [len(id)*2 + len(id) - 1]byte
 
 	j := 0
-	for i := 0; i < len(id); i++ {
+	for i := range len(id) {
 		hex.Encode(dst[j:j+2], id[i:i+1])
 		j += 3
 		if j < len(dst) {

@@ -554,13 +554,13 @@ func TestContext_AutoUpdate(t *testing.T) {
 
 	const iters = 100
 	var wg sync.WaitGroup
-	for g := 0; g < 2; g++ {
+	for g := range 2 {
 		wg.Add(1)
 		g := g
 		go func() {
 			defer wg.Done()
 			ctx := newCtx()
-			for i := 0; i < iters; i++ {
+			for i := range iters {
 				ctx.AutoUpdate(obj, func() {
 					if obj.Guest == nil {
 						obj.Guest = &types.GuestInfo{}
@@ -890,7 +890,7 @@ func TestPropertyDiff_ConcurrentAccess(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		ctx := newCtx()
-		for i := 0; i < iters; i++ {
+		for i := range iters {
 			ctx.AutoUpdate(obj, func() {
 				if obj.Guest == nil {
 					obj.Guest = &types.GuestInfo{}
@@ -906,7 +906,7 @@ func TestPropertyDiff_ConcurrentAccess(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		ctx := newCtx()
-		for i := 0; i < iters; i++ {
+		for i := range iters {
 			ctx.WithLock(obj, func() {
 				if obj.Guest == nil {
 					obj.Guest = &types.GuestInfo{}

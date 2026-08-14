@@ -12,7 +12,7 @@ import (
 )
 
 func TestAuthorizationManager(t *testing.T) {
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		model := VPX()
 		ctx := NewContext()
 		_ = New(NewServiceInstance(ctx, model.ServiceContent, model.RootFolder)) // 2nd pass panics w/o copying RoleList
