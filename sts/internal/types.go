@@ -368,12 +368,15 @@ func init() {
 	types.Add("rsa:RenewRestrictionType", reflect.TypeOf((*RenewRestriction)(nil)).Elem())
 }
 
+// Conditions field order must match that of an issued token, as C14N preserves document order.
+// The STS appends AudienceRestriction after the Condition elements, hence its position here.
 type Conditions struct {
-	XMLName          xml.Name
-	NotBefore        string            `xml:",attr"`
-	NotOnOrAfter     string            `xml:",attr"`
-	ProxyRestriction *ProxyRestriction `xml:",omitempty"`
-	Condition        []BaseCondition   `xml:",omitempty"`
+	XMLName             xml.Name
+	NotBefore           string                `xml:",attr"`
+	NotOnOrAfter        string                `xml:",attr"`
+	ProxyRestriction    *ProxyRestriction     `xml:",omitempty"`
+	Condition           []BaseCondition       `xml:",omitempty"`
+	AudienceRestriction []AudienceRestriction `xml:",omitempty"`
 }
 
 func (c *Conditions) C14N() string {
@@ -400,7 +403,28 @@ func (c *Conditions) C14N() string {
 		}
 	}
 
+	for i := range c.AudienceRestriction {
+		r := &c.AudienceRestriction[i]
+		names = append(names, &r.XMLName)
+		for j := range r.Audience {
+			names = append(names, &r.Audience[j].XMLName)
+		}
+	}
+
 	return mkns("saml2", c, names...)
+}
+
+type Audience struct {
+	XMLName xml.Name
+	Value   string `xml:",innerxml"`
+}
+
+// AudienceRestriction is a Conditions element that scopes a token to specific relying parties.
+// Unlike DelegateRestriction and RenewRestriction, this is a concrete saml2 element rather than
+// an xsi:type extension of the abstract saml2:Condition element, so it needs no type attribute.
+type AudienceRestriction struct {
+	XMLName  xml.Name
+	Audience []Audience
 }
 
 type ProxyRestriction struct {
