@@ -154,6 +154,15 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 
 	vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
 	vm.Runtime.ConnectionState = types.VirtualMachineConnectionStateConnected
+	// FaultToleranceState and RecordReplayState have no xml omitempty tag, so
+	// leaving them at Go's zero value ("") serializes as an empty XML element
+	// (e.g. <faultToleranceState></faultToleranceState>) instead of omitting
+	// it. Real vCenter always populates these with a valid enum value; some
+	// SOAP clients (e.g. yavijava) call Enum.valueOf() on the string and throw
+	// IllegalArgumentException on an empty one, which fails the entire batched
+	// RetrievePropertiesEx response for every VM in that page - not just one.
+	vm.Runtime.FaultToleranceState = types.VirtualMachineFaultToleranceStateNotConfigured
+	vm.Runtime.RecordReplayState = types.VirtualMachineRecordReplayStateInactive
 	vm.Summary.Runtime = vm.Runtime
 
 	vm.Capability.ChangeTrackingSupported = changeTrackingSupported(spec)
