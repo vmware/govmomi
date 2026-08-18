@@ -40,11 +40,22 @@ type Datastore struct {
 // path returns the real on-disk directory backing this datastore, for vcsim's own
 // internal file resolution -- as opposed to Summary.Url/Info.Url, which for local
 // datastores is a synthesized value meant only for external API consumers.
+//
+// localPath is only set for datastores that went through CreateLocalDatastore or
+// model() (the -load path); for every other datastore Summary.Url/Info.Url still
+// hold a real path, so fall back to those. Info is checked last because some
+// callers construct a Datastore with only Info.Url populated.
 func (ds *Datastore) path() string {
 	if ds.localPath != "" {
 		return ds.localPath
 	}
-	return ds.Summary.Url
+	if ds.Summary.Url != "" {
+		return ds.Summary.Url
+	}
+	if ds.Info != nil {
+		return ds.Info.GetDatastoreInfo().Url
+	}
+	return ""
 }
 
 func (ds *Datastore) eventArgument() *types.DatastoreEventArgument {
