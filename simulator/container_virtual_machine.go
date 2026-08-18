@@ -38,11 +38,25 @@
 //     --volume /var, --volume /lib/modules:/lib/modules:ro, --device /dev/fuse.
 //     Reference: https://github.com/kubernetes-sigs/kind/blob/main/pkg/cluster/internal/providers/docker/provision.go
 //
+//   - RUN.vmci: Boolean. Activate the VMCI simulation layer:
+//     a per-VM GuestRPC unix socket server — injects the socket at
+//     /run/vmware/rpc.sock and sets VMX_RPC_SOCK so vmware-rpctool (toolbox
+//     binary) uses it. Clients must tolerate AF_VSOCK being unavailable and
+//     fall back to the VMX_RPC_SOCK unix socket path. A seccomp-based AF_VSOCK
+//     interception layer is tracked as future work.
+//
 //   - RUN.port.<containerPort>: Map container port to host port.
 //     Example: RUN.port.80 = "8080" maps container port 80 to host port 8080.
 //
 //   - RUN.env.<name>: Set environment variable in the container.
 //     Example: RUN.env.DEBUG = "true" sets DEBUG=true in the container.
+//
+//   - guestinfo.*: Each key is exposed as a VMX_GUESTINFO_* environment
+//     variable and VMX_GUESTINFO=true is set so cloud-init's DataSourceVMware
+//     uses the envvar seed (cloud-init's container detection always skips the
+//     guestinfo transport).  With RUN.vmci=true the GuestRPC server also
+//     serves these keys via info-get for in-container write-back (e.g. an
+//     init process writing back a status key such as guestinfo.myapp.ready).
 //
 // # Example: Basic Container
 //
@@ -102,8 +116,9 @@ var (
 )
 
 type simVM struct {
-	vm *VirtualMachine
-	c  *container
+	vm       *VirtualMachine
+	c        *container
+	guestRPC *GuestRPCServer // non-nil when RUN.vmci=true; per-VM unix socket RPCI server
 }
 
 // createSimulationVM inspects the provided VirtualMachine and creates a simVM binding for it if
@@ -442,8 +457,53 @@ func (svm *simVM) start(ctx *Context) error {
 	}
 
 	if len(env) != 0 {
-		// Configure env as the data access method for cloud-init-vmware-guestinfo
+		// VMX_GUESTINFO=true activates DataSourceVMware's envvar seed so that
+		// cloud-init reads guestinfo from VMX_GUESTINFO_* environment variables.
+		//
+		// The guestinfo transport (cloud-init calling vmware-rpctool as a
+		// subprocess) is always skipped in containers: cloud-init's
+		// read_dmi_data() returns nil for containers (it calls is_container(),
+		// which detects the podman environment via /run/systemd/container and
+		// container= in PID 1's environ), so is_vmware_platform() always returns
+		// false, and the guestinfo transport's require_vmware_platform guard
+		// skips it.  The envvar seed (require_vmware_platform=false) is therefore
+		// the only transport cloud-init will use in a container.
+		//
+		// In-container WRITE operations (e.g. an init process writing back a
+		// status key such as guestinfo.myapp.ready) use GuestRPC via the
+		// toolbox binary auto-injected at /usr/bin/vmware-rpctool if VMCI sim
+		// is enabled.
 		env = append(env, "VMX_GUESTINFO=true")
+	}
+
+	// VMCI simulation: start the per-VM GuestRPC server before creating the container
+	// so the socket exists when the container process first connects to it.
+	// Activated by RUN.vmci=true.
+	// GuestRPC server over unix socket (no kernel requirements).
+	// AF_VSOCK seccomp interception is disabled; see RUN.vmci doc.
+	if vmciEnabled(svm.vm.Config.ExtraConfig) {
+		socketPath := GuestRPCSocketPath(svm.vm.uid.String())
+		socketDirPath := GuestRPCSocketDirPath(svm.vm.uid.String())
+		srv := newGuestRPCServer(svm.vm, socketPath)
+		if err := srv.Start(ctx); err != nil {
+			return fmt.Errorf("guestrpc server: %w", err)
+		}
+		svm.guestRPC = srv
+
+		// Bind-mount the socket DIRECTORY (not the file) so the mount is visible
+		// even when RUN.nestedContainers=true adds --tmpfs /run. See guestRPCVolumeMount.
+		extraVolumes = append(extraVolumes, guestRPCVolumeMount(socketDirPath))
+		env = append(env, "VMX_RPC_SOCK="+GuestRPCSocketName)
+
+		// Build the toolbox binary (once per process).
+		toolboxBin, shimBuildErr := buildToolboxArtifact()
+		if shimBuildErr != nil {
+			log.Printf("%s: toolbox artifact build failed (%v); vmware-rpctool auto-injection skipped", svm.vm.Name, shimBuildErr)
+		} else if toolboxBin != "" && !hasVolumeDest(svm.vm.Config.ExtraConfig, "/usr/bin/vmware-rpctool") {
+			// Inject the govmomi/toolbox binary at /usr/bin/vmware-rpctool.
+			// Skip if the caller already bound this destination explicitly.
+			extraVolumes = append(extraVolumes, toolboxBin+":/usr/bin/vmware-rpctool:ro")
+		}
 	}
 
 	volumes := []string{}
@@ -548,8 +608,11 @@ func (svm *simVM) stop(ctx *Context) error {
 	err := svm.c.stop(ctx)
 	if err != nil {
 		log.Printf("%s %s: %s", svm.vm.Name, "stop", err)
-
 		return err
+	}
+
+	if svm.guestRPC != nil {
+		svm.guestRPC.Stop()
 	}
 
 	ctx.Update(svm.vm, toolsNotRunning)
@@ -599,10 +662,13 @@ func (svm *simVM) remove(ctx *Context) error {
 		return nil
 	}
 
+	if svm.guestRPC != nil {
+		svm.guestRPC.Stop()
+	}
+
 	err := svm.c.remove(ctx)
 	if err != nil {
 		log.Printf("%s %s: %s", svm.vm.Name, "remove", err)
-
 		return err
 	}
 
