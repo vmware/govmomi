@@ -26,6 +26,24 @@ type Datastore struct {
 	mo.Datastore
 
 	namespace map[string]string // TODO: make thread safe
+
+	// localPath is the real on-disk directory backing this datastore. It is only
+	// set for datastores created via CreateLocalDatastore, where Info.Url/Summary.Url
+	// are overwritten with a synthesized ds:///vmfs/volumes/<uuid>/ style value to
+	// match what a real vCenter local/VMFS datastore reports (some SOAP clients parse
+	// this URL and reject vcsim's raw temp-dir path). All other datastore types leave
+	// this empty and continue to use Summary.Url directly, which is already a real path.
+	localPath string
+}
+
+// path returns the real on-disk directory backing this datastore, for vcsim's own
+// internal file resolution -- as opposed to Summary.Url/Info.Url, which for local
+// datastores is a synthesized value meant only for external API consumers.
+func (ds *Datastore) path() string {
+	if ds.localPath != "" {
+		return ds.localPath
+	}
+	return ds.Summary.Url
 }
 
 func (ds *Datastore) eventArgument() *types.DatastoreEventArgument {
@@ -72,7 +90,7 @@ func (ds *Datastore) model(m *Model) error {
 // Note that VirtualDevice file backing paths must use the vSAN uuid.
 func (ds *Datastore) resolve(ctx *Context, p string, remove ...bool) string {
 	if p == "" || !internal.IsDatastoreVSAN(ds.Datastore) {
-		return path.Join(ds.Summary.Url, p)
+		return path.Join(ds.path(), p)
 	}
 
 	rm := len(remove) != 0 && remove[0]
@@ -110,7 +128,7 @@ func (ds *Datastore) resolve(ctx *Context, p string, remove ...bool) string {
 		}
 	}
 
-	return path.Join(ds.Summary.Url, p)
+	return path.Join(ds.path(), p)
 }
 
 func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodFault) {
@@ -126,7 +144,7 @@ func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodF
 func (ds *Datastore) RefreshDatastore(*Context, *types.RefreshDatastore) soap.HasFault {
 	r := &methods.RefreshDatastoreBody{}
 
-	_, err := os.Stat(ds.Info.GetDatastoreInfo().Url)
+	_, err := os.Stat(ds.path())
 	if err != nil {
 		r.Fault_ = Fault(err.Error(), &types.HostConfigFault{})
 		return r

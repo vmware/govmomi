@@ -685,9 +685,9 @@ func (s *Service) ServeDatastore(w http.ResponseWriter, r *http.Request) {
 	default:
 		// ds.resolve() may have translated vsan friendly name to uuid,
 		// apply the same to the Request.URL.Path
-		r.URL.Path = strings.TrimPrefix(p, ds.Summary.Url)
+		r.URL.Path = strings.TrimPrefix(p, ds.path())
 
-		fs := http.FileServer(http.Dir(ds.Summary.Url))
+		fs := http.FileServer(http.Dir(ds.path()))
 
 		fs.ServeHTTP(w, r)
 	}
