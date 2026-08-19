@@ -106,7 +106,7 @@ func TestRetryNetworkError(t *testing.T) {
 
 		simulator.StatusSDK = http.StatusBadGateway
 		// beyond max retry attempts, should result in an erro
-		for i := 0; i < 3; i++ {
+		for range 3 {
 			_, err = vm.PowerState(ctx)
 		}
 

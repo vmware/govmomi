@@ -43,7 +43,7 @@ func TestRegistry(t *testing.T) {
 func TestRemoveReference(t *testing.T) {
 	var refs []types.ManagedObjectReference
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		refs = append(refs, types.ManagedObjectReference{Type: "any", Value: fmt.Sprintf("%d", i)})
 	}
 

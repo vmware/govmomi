@@ -25,7 +25,7 @@ func ExampleSession_Login() {
 		// Login() each client twice
 		// 1) creates a new authenticated session
 		// 2) uses a cached session (proved by removing the password)
-		for i := 0; i < 2; i++ {
+		for range 2 {
 			s := &cache.Session{
 				URL:      u,
 				Insecure: true,

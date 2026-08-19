@@ -40,7 +40,7 @@ func (v version) Lte(u version) bool {
 	lv := len(v)
 	lu := len(u)
 
-	for i := 0; i < lv; i++ {
+	for i := range lv {
 		// Everything up to here has been equal and v has more elements than u.
 		if i >= lu {
 			return false

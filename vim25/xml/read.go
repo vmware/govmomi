@@ -346,7 +346,7 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement, depth int) e
 				return err
 			}
 
-			for i := 0; i < 2; i++ {
+			for range 2 {
 				if typ.Implements(val.Type()) {
 					val.Set(pval)
 					return nil

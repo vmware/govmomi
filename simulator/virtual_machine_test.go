@@ -4327,7 +4327,7 @@ func TestEncryptDecryptVM(t *testing.T) {
 				if err := tsk.Wait(ctx); err != nil {
 					return err
 				}
-				for i := 0; i < 2; i++ {
+				for i := range 2 {
 					tsk, err := vm.CreateSnapshot(
 						ctx,
 						fmt.Sprintf("snap-%d", i),

@@ -168,7 +168,7 @@ func TestWriteArchive(t *testing.T) {
 	gz := gzip.NewWriter(&buf)
 	tw := tar.NewWriter(gz)
 
-	for i := 0; i < nfiles; i++ {
+	for i := range nfiles {
 		data := bytes.NewBufferString(strings.Repeat("X", i+1024))
 
 		header := &tar.Header{

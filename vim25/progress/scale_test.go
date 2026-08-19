@@ -14,7 +14,7 @@ func TestScaleMany(t *testing.T) {
 	s := Scale(a, 5)
 
 	go func() {
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			go func(ch chan<- Report) {
 				ch <- dummyReport{p: 0.0}
 				ch <- dummyReport{p: 50.0}

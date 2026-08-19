@@ -480,7 +480,7 @@ func (l VirtualDeviceList) PickController(kind types.BaseVirtualController) type
 func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController, offset int) int32 {
 	units := make([]bool, 30)
 
-	for i := 0; i < offset; i++ {
+	for i := range offset {
 		units[i] = true
 	}
 

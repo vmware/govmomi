@@ -50,7 +50,7 @@ func TestManager_GetCategories(t *testing.T) {
 			created = append(created, cat)
 		}
 
-		for i := 0; i < deleteCount; i++ {
+		for i := range deleteCount {
 			tr.deleted = append(tr.deleted, created[i])
 		}
 

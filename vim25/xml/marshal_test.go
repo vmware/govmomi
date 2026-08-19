@@ -2393,7 +2393,7 @@ func TestRace9796(t *testing.T) {
 		C []A `xml:"X>Y"`
 	}
 	var wg sync.WaitGroup
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		wg.Add(1)
 		go func() {
 			Marshal(B{[]A{{}}})

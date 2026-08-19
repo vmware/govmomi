@@ -236,7 +236,7 @@ func (s *Server) CloseClientConnections() {
 	// in tests.
 	timer := time.NewTimer(5 * time.Second)
 	defer timer.Stop()
-	for i := 0; i < nconn; i++ {
+	for range nconn {
 		select {
 		case <-ch:
 		case <-timer.C:

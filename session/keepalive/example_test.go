@@ -42,7 +42,7 @@ func ExampleHandlerSOAP() {
 
 		// check twice if session is valid, sleeping > SessionIdleTimeout in between
 		check := func() {
-			for i := 0; i < 2; i++ {
+			for i := range 2 {
 				s, err := m.UserSession(ctx)
 				if err != nil {
 					log.Fatal(err)
@@ -101,7 +101,7 @@ func ExampleHandlerREST() {
 
 		// check twice if session is valid, sleeping > SessionIdleTimeout in between.
 		check := func() {
-			for i := 0; i < 2; i++ {
+			for i := range 2 {
 				s, err := c.Session(ctx)
 				if err != nil {
 					log.Fatal(err)

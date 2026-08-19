@@ -132,7 +132,7 @@ func TestRace(t *testing.T) {
 		}
 	}()
 
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		spec := types.VirtualMachineConfigSpec{
 			Name:    fmt.Sprintf("race-test-%d", i),
 			GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
@@ -164,7 +164,7 @@ func TestRace(t *testing.T) {
 				t.Error(err)
 			}
 
-			for j := 0; j < 2; j++ {
+			for j := range 2 {
 				cspec := spec // copy spec and give it a unique name
 				cspec.Name += fmt.Sprintf("-%d", j)
 
@@ -345,7 +345,7 @@ func TestRaceVmRelocate(t *testing.T) {
 		var failed atomic.Int32
 		var wg sync.WaitGroup
 
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			spec := types.VirtualMachineRelocateSpec{
 				Folder: types.NewReference(vmFolder.Reference()),
 			}

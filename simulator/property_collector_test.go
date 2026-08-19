@@ -1485,7 +1485,7 @@ func TestPropertyCollectorSession(t *testing.T) { // aka issue-923
 		t.Fatal(err)
 	}
 
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		if err = c.Login(ctx, u); err != nil {
 			t.Fatal(err)
 		}
@@ -1792,7 +1792,7 @@ func TestPageUpdateSet(t *testing.T) {
 
 			for i := 0; i < test.filters; i++ {
 				f := types.PropertyFilterUpdate{}
-				for j := 0; j < 156; j++ {
+				for range 156 {
 					f.ObjectSet = append(f.ObjectSet, types.ObjectUpdate{})
 				}
 				update.FilterSet = append(update.FilterSet, f)
