@@ -886,9 +886,7 @@ func TestPropertyDiff_ConcurrentAccess(t *testing.T) {
 
 	// Goroutine A: simulates a background watcher (e.g. watchContainer callback).
 	// ctx.AutoUpdate holds a single lock for checkpoint + modify + diff + update.
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		ctx := newCtx()
 		for i := range iters {
 			ctx.AutoUpdate(obj, func() {
@@ -898,13 +896,11 @@ func TestPropertyDiff_ConcurrentAccess(t *testing.T) {
 				obj.Guest.IpAddress = fmt.Sprintf("10.0.0.%d", i)
 			})
 		}
-	}()
+	})
 
 	// Goroutine B: simulates a concurrent SOAP handler that modifies VM fields
 	// under the object lock, as all SOAP task handlers do via Task.Run → AcquireLock.
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		ctx := newCtx()
 		for i := range iters {
 			ctx.WithLock(obj, func() {
@@ -914,7 +910,7 @@ func TestPropertyDiff_ConcurrentAccess(t *testing.T) {
 				obj.Guest.HostName = fmt.Sprintf("host-%d", i)
 			})
 		}
-	}()
+	})
 
 	wg.Wait()
 }

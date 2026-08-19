@@ -53,15 +53,13 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 		delay := time.Second / 2
 		var wg sync.WaitGroup
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			t.Logf("delaying map update for %v", delay)
 			time.Sleep(delay)
 			if err := reconfig("10.0.0.1"); err != nil {
 				t.Logf("reconfig error: %s", err)
 			}
-		}()
+		})
 
 		ip, err = vm.WaitForIP(ctx, true)
 		if err != nil {

@@ -174,9 +174,7 @@ func (h *ArchiveHandler) newArchiveToGuest(u *url.URL) (File, error) {
 		return cerr
 	}
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 
 		c := func() error {
 			// Drain the pipe of tar trailer data (two null blocks)
@@ -206,7 +204,7 @@ func (h *ArchiveHandler) newArchiveToGuest(u *url.URL) (File, error) {
 
 		_ = c()
 		_ = r.CloseWithError(cerr)
-	}()
+	})
 
 	return a, nil
 }

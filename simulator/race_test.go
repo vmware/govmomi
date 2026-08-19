@@ -51,9 +51,7 @@ func TestRace(t *testing.T) {
 	em := event.NewManager(c.Client)
 
 	wg.Add(1)
-	collectors.Add(1)
-	go func() {
-		defer collectors.Done()
+	collectors.Go(func() {
 
 		werr := em.Events(wctx, []types.ManagedObjectReference{content.RootFolder}, 50, true, false,
 			func(_ types.ManagedObjectReference, e []types.BaseEvent) error {
@@ -68,11 +66,9 @@ func TestRace(t *testing.T) {
 		if werr != nil {
 			t.Error(werr)
 		}
-	}()
+	})
 
-	collectors.Add(1)
-	go func() {
-		defer collectors.Done()
+	collectors.Go(func() {
 
 		ec, werr := em.CreateCollectorForEvents(ctx, types.EventFilterSpec{})
 		if werr != nil {
@@ -102,7 +98,7 @@ func TestRace(t *testing.T) {
 			case <-time.After(time.Millisecond * 100):
 			}
 		}
-	}()
+	})
 
 	ntasks := -1
 	tv, err := view.NewManager(c.Client).CreateTaskView(ctx, content.TaskManager)
@@ -116,9 +112,7 @@ func TestRace(t *testing.T) {
 	}
 
 	wg.Add(1)
-	collectors.Add(1)
-	go func() {
-		defer collectors.Done()
+	collectors.Go(func() {
 
 		werr := tv.Collect(ctx, func(tasks []types.TaskInfo) {
 			if ntasks == -1 {
@@ -130,7 +124,7 @@ func TestRace(t *testing.T) {
 		if werr != nil {
 			t.Error(werr)
 		}
-	}()
+	})
 
 	for i := range 2 {
 		spec := types.VirtualMachineConfigSpec{
@@ -141,9 +135,7 @@ func TestRace(t *testing.T) {
 			},
 		}
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 
 			finder := find.NewFinder(c.Client, false)
 			pc := property.DefaultCollector(c.Client)
@@ -168,9 +160,7 @@ func TestRace(t *testing.T) {
 				cspec := spec // copy spec and give it a unique name
 				cspec.Name += fmt.Sprintf("-%d", j)
 
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
+				wg.Go(func() {
 
 					task, _ := f.VmFolder.CreateVM(ctx, cspec, pool, nil)
 					r, terr := task.WaitForResult(ctx, nil)
@@ -181,7 +171,7 @@ func TestRace(t *testing.T) {
 					if terr != nil {
 						t.Error(terr)
 					}
-				}()
+				})
 			}
 
 			vms, err := finder.VirtualMachineList(ctx, "*")
@@ -193,9 +183,7 @@ func TestRace(t *testing.T) {
 				props := []string{"runtime.powerState"}
 				vm := vms[i]
 
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
+				wg.Go(func() {
 
 					werr := property.Wait(ctx, pc, vm.Reference(), props, func(changes []types.PropertyChange) bool {
 						for _, change := range changes {
@@ -224,9 +212,9 @@ func TestRace(t *testing.T) {
 							t.Error(werr)
 						}
 					}
-				}()
+				})
 			}
-		}()
+		})
 	}
 
 	wg.Wait()
@@ -280,9 +268,7 @@ func TestRaceDestroy(t *testing.T) {
 	notFound := false
 	var wg sync.WaitGroup
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		for _, vm := range vms {
 			task, err := vm.Destroy(ctx)
 			if err != nil {
@@ -297,11 +283,9 @@ func TestRaceDestroy(t *testing.T) {
 				}
 			}
 		}
-	}()
+	})
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		task, err := folder.Destroy(ctx)
 		if err != nil {
 			t.Error(err)
@@ -310,7 +294,7 @@ func TestRaceDestroy(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-	}()
+	})
 
 	wg.Wait()
 
@@ -350,9 +334,7 @@ func TestRaceVmRelocate(t *testing.T) {
 				Folder: types.NewReference(vmFolder.Reference()),
 			}
 
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 				task, err := vm.Relocate(ctx, spec, types.VirtualMachineMovePriorityDefaultPriority)
 				if err != nil {
 					panic(err)
@@ -360,7 +342,7 @@ func TestRaceVmRelocate(t *testing.T) {
 				if err = task.Wait(ctx); err != nil {
 					failed.Add(1)
 				}
-			}()
+			})
 
 			vmFolder, err = vmFolder.CreateFolder(ctx, "child")
 			if err != nil {

@@ -260,11 +260,9 @@ func (s *Server) Client() *http.Client {
 }
 
 func (s *Server) goServe() {
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
+	s.wg.Go(func() {
 		s.Config.Serve(s.Listener)
-	}()
+	})
 }
 
 // wrap installs the connection state-tracking hook to know which
