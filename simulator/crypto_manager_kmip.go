@@ -206,13 +206,7 @@ func (m *CryptoManagerKmip) SetDefaultKmsCluster(
 				if req.Entity == nil {
 					c.UseAsDefault = true
 				} else {
-					found := false
-					for j := range c.UseAsEntityDefault {
-						if *req.Entity == c.UseAsEntityDefault[j] {
-							found = true
-							break
-						}
-					}
+					found := slices.Contains(c.UseAsEntityDefault, *req.Entity)
 					if !found {
 						c.UseAsEntityDefault = append(
 							c.UseAsEntityDefault,

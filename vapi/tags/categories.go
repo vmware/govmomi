@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/vmware/govmomi/vapi/internal"
@@ -26,12 +27,7 @@ type Category struct {
 }
 
 func (c *Category) hasType(kind string) bool {
-	for _, k := range c.AssociableTypes {
-		if kind == k {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(c.AssociableTypes, kind)
 }
 
 // Patch merges Category changes from the given src.

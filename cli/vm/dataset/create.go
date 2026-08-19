@@ -9,6 +9,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/vmware/govmomi/cli"
@@ -31,12 +32,7 @@ func guestAccessUsage() string {
 }
 
 func validateDataSetAccess(access dataset.Access) bool {
-	for _, validAccess := range accessModes {
-		if string(access) == validAccess {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(accessModes, string(access))
 }
 
 type create struct {

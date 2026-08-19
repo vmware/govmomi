@@ -6,6 +6,7 @@ package simulator
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -351,11 +352,8 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 		filtered := []types.DistributedVirtualPort{}
 
 		for _, p := range ports {
-			for _, pgk := range criteria.PortgroupKey {
-				if p.PortgroupKey == pgk {
-					filtered = append(filtered, p)
-					break
-				}
+			if slices.Contains(criteria.PortgroupKey, p.PortgroupKey) {
+				filtered = append(filtered, p)
 			}
 		}
 		return filtered
@@ -365,13 +363,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 	filtered := []types.DistributedVirtualPort{}
 
 	for _, p := range ports {
-		found := false
-		for _, pgk := range criteria.PortgroupKey {
-			if p.PortgroupKey == pgk {
-				found = true
-				break
-			}
-		}
+		found := slices.Contains(criteria.PortgroupKey, p.PortgroupKey)
 
 		if !found {
 			filtered = append(filtered, p)
@@ -391,11 +383,8 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortKey(
 	filtered := []types.DistributedVirtualPort{}
 
 	for _, p := range ports {
-		for _, pk := range criteria.PortKey {
-			if p.Key == pk {
-				filtered = append(filtered, p)
-				break
-			}
+		if slices.Contains(criteria.PortKey, p.Key) {
+			filtered = append(filtered, p)
 		}
 	}
 

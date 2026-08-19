@@ -20,6 +20,7 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -240,12 +241,10 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	}
 
 	if e, ok := handler.(mo.Entity); ok {
-		for _, dm := range e.Entity().DisabledMethod {
-			if name == dm {
-				msg := fmt.Sprintf("%s method is disabled: %s", method.This, method.Name)
-				fault := &types.MethodDisabled{}
-				return &serverFaultBody{Reason: Fault(msg, fault)}
-			}
+		if slices.Contains(e.Entity().DisabledMethod, name) {
+			msg := fmt.Sprintf("%s method is disabled: %s", method.This, method.Name)
+			fault := &types.MethodDisabled{}
+			return &serverFaultBody{Reason: Fault(msg, fault)}
 		}
 	}
 

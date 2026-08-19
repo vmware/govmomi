@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -482,12 +483,7 @@ func (m *VcenterVStorageObjectManager) VCenterUpdateVStorageObjectMetadataExTask
 		var metadata []types.KeyValue
 
 		remove := func(key string) bool {
-			for _, dk := range req.DeleteKeys {
-				if key == dk {
-					return true
-				}
-			}
-			return false
+			return slices.Contains(req.DeleteKeys, key)
 		}
 
 		for _, kv := range obj.Metadata {

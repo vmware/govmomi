@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -469,10 +470,8 @@ func (r *Registry) FindByName(name string, refs []types.ManagedObjectReference) 
 // FindReference returns the 1st match found in refs, or nil if not found.
 func FindReference(refs []types.ManagedObjectReference, match ...types.ManagedObjectReference) *types.ManagedObjectReference {
 	for _, ref := range refs {
-		for _, m := range match {
-			if ref == m {
-				return &ref
-			}
+		if slices.Contains(match, ref) {
+			return &ref
 		}
 	}
 

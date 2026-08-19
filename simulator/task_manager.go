@@ -6,6 +6,7 @@ package simulator
 
 import (
 	"container/list"
+	"slices"
 	"sync"
 	"time"
 
@@ -231,14 +232,7 @@ func (c *TaskHistoryCollector) stateMatches(_ *Context, task *types.TaskInfo, sp
 		return true
 	}
 
-	for _, state := range spec.State {
-		if task.State == state {
-			return true
-
-		}
-	}
-
-	return false
+	return slices.Contains(spec.State, task.State)
 }
 
 func (c *TaskHistoryCollector) timeMatches(_ *Context, task *types.TaskInfo, spec types.TaskFilterSpec) bool {

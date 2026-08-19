@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/url"
 	"path"
+	"slices"
 	"strings"
 	"time"
 
@@ -110,12 +111,7 @@ func folderRemoveReference(ctx *Context, f *mo.Folder, o mo.Reference) {
 }
 
 func folderHasChildType(f *mo.Folder, kind string) bool {
-	for _, t := range f.ChildType {
-		if t == kind {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(f.ChildType, kind)
 }
 
 func (f *Folder) typeNotSupported() *soap.Fault {

@@ -5,6 +5,7 @@
 package simulator
 
 import (
+	"slices"
 	"time"
 
 	"github.com/vmware/govmomi/eam/methods"
@@ -82,12 +83,7 @@ func (m *EamObject) Resolve(
 
 	// issueExists is a helper function that returns true
 	issueExists := func(issueKey int32) bool {
-		for _, k := range req.IssueKey {
-			if k == issueKey {
-				return true
-			}
-		}
-		return false
+		return slices.Contains(req.IssueKey, issueKey)
 	}
 
 	// Iterate over the object's issues, and if a key matches, then remove
