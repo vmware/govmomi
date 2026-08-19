@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/xml"
 	"github.com/vmware/govmomi/vmdk"
 )
 
@@ -5306,4 +5307,69 @@ func createTestVM(
 		c.Client,
 		taskInfo.Result.(types.ManagedObjectReference),
 	), nil
+}
+
+// TestVirtualMachineRuntimeEnumFields asserts that the enum fields on
+// VirtualMachineRuntimeInfo are populated with valid values rather than left at Go's
+// zero value. Neither FaultToleranceState nor RecordReplayState carries an xml
+// omitempty tag, so an unset field still serializes as an empty element
+// (<faultToleranceState></faultToleranceState>) instead of being omitted. Real
+// vCenter always populates both, and strict clients reject the empty string -- e.g. a
+// Java client calling Enum.valueOf() on it throws, failing the entire batched
+// RetrievePropertiesEx response for every VM in that page.
+func TestVirtualMachineRuntimeEnumFields(t *testing.T) {
+	m := VPX()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Remove()
+
+	ctx := m.Service.Context
+
+	var checked int
+	for ref, obj := range ctx.Map.objects {
+		if ref.Type != "VirtualMachine" {
+			continue
+		}
+		vm, ok := obj.(*VirtualMachine)
+		if !ok {
+			t.Fatalf("%s is not a *VirtualMachine", ref)
+		}
+		checked++
+
+		// runtime, and the copy presented under summary.runtime
+		for name, rt := range map[string]types.VirtualMachineRuntimeInfo{
+			"runtime":         vm.Runtime,
+			"summary.runtime": vm.Summary.Runtime,
+		} {
+			if rt.FaultToleranceState != types.VirtualMachineFaultToleranceStateNotConfigured {
+				t.Errorf("%s %s.faultToleranceState = %q, want %q", ref, name,
+					rt.FaultToleranceState, types.VirtualMachineFaultToleranceStateNotConfigured)
+			}
+			if rt.RecordReplayState != types.VirtualMachineRecordReplayStateInactive {
+				t.Errorf("%s %s.recordReplayState = %q, want %q", ref, name,
+					rt.RecordReplayState, types.VirtualMachineRecordReplayStateInactive)
+			}
+		}
+
+		// The regression this guards against is at the XML layer: an unset field is
+		// emitted as an empty element rather than omitted.
+		b, err := xml.Marshal(vm.Runtime)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, empty := range []string{
+			"<faultToleranceState></faultToleranceState>",
+			"<recordReplayState></recordReplayState>",
+		} {
+			if strings.Contains(string(b), empty) {
+				t.Errorf("%s runtime serialized an empty enum element: %s", ref, empty)
+			}
+		}
+	}
+
+	if checked == 0 {
+		t.Fatal("no VirtualMachine objects found in the model")
+	}
 }
