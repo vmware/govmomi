@@ -128,7 +128,7 @@ func (pc *change) output(name string, rval reflect.Value, rtype reflect.Type) {
 
 	kind := rval.Kind()
 
-	if kind == reflect.Ptr || kind == reflect.Interface {
+	if kind == reflect.Pointer || kind == reflect.Interface {
 		if rval.IsNil() {
 			s = ""
 		} else {
@@ -138,7 +138,7 @@ func (pc *change) output(name string, rval reflect.Value, rtype reflect.Type) {
 	}
 
 	switch kind {
-	case reflect.Ptr, reflect.Interface:
+	case reflect.Pointer, reflect.Interface:
 	case reflect.Slice:
 		if rval.Len() == 0 {
 			s = ""

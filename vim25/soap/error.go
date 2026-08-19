@@ -68,7 +68,7 @@ type vimFaultError struct {
 
 func (v vimFaultError) Error() string {
 	typ := reflect.TypeOf(v.fault)
-	for typ.Kind() == reflect.Ptr {
+	for typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
 	}
 

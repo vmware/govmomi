@@ -264,7 +264,7 @@ func (*verbose) str(val reflect.Value) string {
 	}
 
 	switch val.Kind() {
-	case reflect.Ptr, reflect.Interface:
+	case reflect.Pointer, reflect.Interface:
 		if val.IsNil() {
 			return "nil"
 		}
@@ -297,7 +297,7 @@ func (*verbose) str(val reflect.Value) string {
 
 func (v *verbose) value(val types.AnyType) string {
 	rval := reflect.ValueOf(val)
-	if rval.Kind() == reflect.Ptr && !rval.IsNil() {
+	if rval.Kind() == reflect.Pointer && !rval.IsNil() {
 		rval = rval.Elem()
 	}
 	if rval.Kind() == reflect.Struct {
@@ -409,7 +409,7 @@ func (v *verbose) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
 		p := v.str(val)
 		if p == "" {
 			switch val.Kind() {
-			case reflect.Ptr, reflect.Slice, reflect.Struct:
+			case reflect.Pointer, reflect.Slice, reflect.Struct:
 				p = val.Type().String()
 			default:
 				p = fmt.Sprintf("%v", val.Interface())

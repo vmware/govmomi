@@ -101,7 +101,7 @@ func buildName(fn string, f reflect.StructField) string {
 }
 
 func (t *typeInfo) build(typ reflect.Type, fn string, fi []int) {
-	if typ.Kind() == reflect.Ptr {
+	if typ.Kind() == reflect.Pointer {
 		typ = typ.Elem()
 	}
 
@@ -138,7 +138,7 @@ func (t *typeInfo) build(typ reflect.Type, fn string, fi []int) {
 		t.props[fnc] = fic
 
 		// Dereference pointer.
-		if ftyp.Kind() == reflect.Ptr {
+		if ftyp.Kind() == reflect.Pointer {
 			ftyp = ftyp.Elem()
 		}
 
@@ -188,7 +188,7 @@ func assignValue(val reflect.Value, fi []int, pv reflect.Value, field ...string)
 	}
 
 	// Create new value if necessary.
-	if val.Kind() == reflect.Ptr {
+	if val.Kind() == reflect.Pointer {
 		if val.IsNil() {
 			val.Set(reflect.New(val.Type().Elem()))
 		}
@@ -208,7 +208,7 @@ func assignValue(val reflect.Value, fi []int, pv reflect.Value, field ...string)
 		pt := pv.Type()
 
 		// If type is a pointer, create new instance of type.
-		if rt.Kind() == reflect.Ptr {
+		if rt.Kind() == reflect.Pointer {
 			rv.Set(reflect.New(rt.Elem()))
 			rv = rv.Elem()
 			rt = rv.Type()
@@ -216,7 +216,7 @@ func assignValue(val reflect.Value, fi []int, pv reflect.Value, field ...string)
 
 		// If the target type is a slice, but the source is not, deference any ArrayOfXYZ type
 		if rt.Kind() == reflect.Slice && pt.Kind() != reflect.Slice {
-			if pt.Kind() == reflect.Ptr {
+			if pt.Kind() == reflect.Pointer {
 				pv = pv.Elem()
 				pt = pt.Elem()
 			}
@@ -243,7 +243,7 @@ func assignValue(val reflect.Value, fi []int, pv reflect.Value, field ...string)
 			} else {
 				panic(fmt.Sprintf("type %s doesn't implement %s", pt.Name(), rt.Name()))
 			}
-		} else if rt.Kind() == reflect.Struct && pt.Kind() == reflect.Ptr {
+		} else if rt.Kind() == reflect.Struct && pt.Kind() == reflect.Pointer {
 			pv = pv.Elem()
 			pt = pv.Type()
 		}

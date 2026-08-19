@@ -272,7 +272,7 @@ func (d *decodeState) discriminatorGetValue() (reflect.Value, error) {
 	// likely the decoder was unable to decode the value.
 	if err := dd.savedError; err != nil {
 		switch v.Kind() {
-		case reflect.Ptr, reflect.Interface:
+		case reflect.Pointer, reflect.Interface:
 			v = v.Elem()
 		}
 		if v.IsZero() {
@@ -305,7 +305,7 @@ func (d *decodeState) discriminatorInterfaceDecode(t reflect.Type, v reflect.Val
 			v.Set(pdv)
 			return nil
 		}
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if dve := dv.Elem(); dve.Type().AssignableTo(t) {
 			v.Set(dve)
 			return nil
@@ -353,7 +353,7 @@ func discriminatorInterfaceEncode(e *encodeState, v reflect.Value, opts encOpts)
 	case reflect.Struct:
 		e.discriminatorEncodeTypeName = true
 		newStructEncoder(v.Type())(e, v, opts)
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if v.IsZero() {
 			newPtrEncoder(v.Type())(e, v, opts)
 		} else {
