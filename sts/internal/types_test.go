@@ -54,7 +54,77 @@ func TestTimestamp(t *testing.T) {
 }
 
 func TestAssertion(t *testing.T) {
-	token := `<saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="_1881a9ba-4a76-4baa-839b-36e2cba10743" IssueInstant="2018-03-04T00:27:56.409Z" Version="2.0"><saml2:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">https://office1-sfo2-dhcp221.eng.vmware.com/websso/SAML2/Metadata/vsphere.local</saml2:Issuer><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI="#_1881a9ba-4a76-4baa-839b-36e2cba10743"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"><ec:InclusiveNamespaces xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#" PrefixList="xs xsi"/></ds:Transform></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>l/0AzCGiPB69oTstUdrCkihBIDtwb83A93zAe10tG3k=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>EKHf14V0CHctwqXRlhYSYNyID5lNJLimbw57eUBm/QlAMLY7GJ1wth44oeQPSj3eMpJaXKHEYYtn
+	token := assertionFixture
+
+	var a Assertion
+	err := xml.Unmarshal([]byte(token), &a)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isC14N(a.C14N()) {
+		t.Error("not c14n")
+	}
+
+	a.Signature.SignedInfo.NS = DSIG
+	if !isC14N(a.Signature.SignedInfo.C14N()) {
+		t.Error("not c14n")
+	}
+}
+
+// TestAssertionConditions covers C14N of the Conditions element with every restriction
+// the STS can include. The STS emits them in this order: ProxyRestriction, the
+// DelegationRestriction and RenewRestriction Condition elements, then AudienceRestriction.
+// Dropping any of them from C14N yields a digest the STS cannot verify, failing an
+// ActAs Issue request with "Signature is invalid".
+func TestAssertionConditions(t *testing.T) {
+	// Written in canonical form (empty elements expanded, attributes in C14N order) so
+	// that it serves as both the input and the expected C14N output.
+	conditions := `<saml2:Conditions NotBefore="2018-03-04T00:22:01.401Z" NotOnOrAfter="2018-03-04T00:27:01.401Z">` +
+		`<saml2:ProxyRestriction Count="10"></saml2:ProxyRestriction>` +
+		`<saml2:Condition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="del:DelegationRestrictionType">` +
+		`<del:Delegate xmlns:del="urn:oasis:names:tc:SAML:2.0:conditions:delegation" DelegationInstant="2018-03-04T00:22:01.401Z">` +
+		`<saml2:NameID Format="http://schemas.xmlsoap.org/claims/UPN">Administrator@VSPHERE.LOCAL</saml2:NameID>` +
+		`</del:Delegate></saml2:Condition>` +
+		`<saml2:Condition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Count="10" xsi:type="rsa:RenewRestrictionType"></saml2:Condition>` +
+		`<saml2:AudienceRestriction>` +
+		`<saml2:Audience>https://8e2c5f8b-3f7a-4c1e-9d0b-2a6f4c8e1b93/saml</saml2:Audience>` +
+		`</saml2:AudienceRestriction>` +
+		`</saml2:Conditions>`
+
+	original := `<saml2:Conditions NotBefore="2018-03-04T00:22:01.401Z" NotOnOrAfter="2018-03-04T00:27:01.401Z"><saml2:ProxyRestriction Count="10"/></saml2:Conditions>`
+	token := strings.Replace(assertionFixture, original, conditions, 1)
+	if token == assertionFixture {
+		t.Fatal("fixture Conditions not found")
+	}
+
+	// Unmarshal, not xml.Unmarshal, as the xsi:type Condition elements need TypeFunc.
+	// This is the same decode the ActAs signing path performs.
+	var a Assertion
+	if err := Unmarshal([]byte(token), &a); err != nil {
+		t.Fatal(err)
+	}
+
+	if len(a.Conditions.AudienceRestriction) != 1 {
+		t.Fatalf("AudienceRestriction=%d", len(a.Conditions.AudienceRestriction))
+	}
+	if n := len(a.Conditions.Condition); n != 2 {
+		t.Fatalf("Condition=%d", n)
+	}
+
+	c14n := a.C14N()
+
+	if !isC14N(c14n) {
+		t.Error("not c14n")
+	}
+
+	// The Conditions element round-trips byte for byte, preserving element order.
+	if !strings.Contains(c14n, conditions) {
+		t.Errorf("Conditions C14N mismatch, got:\n%s\nwant to contain:\n%s", c14n, conditions)
+	}
+}
+
+const assertionFixture = `<saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="_1881a9ba-4a76-4baa-839b-36e2cba10743" IssueInstant="2018-03-04T00:27:56.409Z" Version="2.0"><saml2:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">https://office1-sfo2-dhcp221.eng.vmware.com/websso/SAML2/Metadata/vsphere.local</saml2:Issuer><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI="#_1881a9ba-4a76-4baa-839b-36e2cba10743"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"><ec:InclusiveNamespaces xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#" PrefixList="xs xsi"/></ds:Transform></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>l/0AzCGiPB69oTstUdrCkihBIDtwb83A93zAe10tG3k=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>EKHf14V0CHctwqXRlhYSYNyID5lNJLimbw57eUBm/QlAMLY7GJ1wth44oeQPSj3eMpJaXKHEYYtn
 fqMngciTrq4ZP2SS7KizxuBjcHChWGmcp+t0zn7+fTbp5sL8HfF3AfOwcyZxwj8n2S7E6Eee7zeC
 cjZpKKZ1QIEwASwpuMCs7vU9IuXsUguHAaN55Jpx3N5u7PlSo/NZE0TJZ+zNWP8m9H5shPDY272D
 Vnp3MGfoD+Dj6T4H8OVF6bMp6czbHsEHTthwPh+pBTzR8ppkyxPKWLkC7OWiOtZBKqLSMTchQyqn
@@ -94,19 +164,3 @@ RmCeqz3ODZq6JwZEnTTqZjvUVckmt/L/QaRUHAW27MU+SuN8rP0Nghf/gkOabsaWfyT2ADquko4e
 b7seYIlR5mJs+pxVBBsBB2nzxuaV5EjkgestxBqpGkxMnKEDhG6+VjqVxsZoEiNzdBNU7eM67Jc2
 2KU85jHKAao9LfMbwbHOA//1RStXXElyzPQvecq17ATvpw8AxCRu2KeKRwp3Pm2RiquDQFx8aiCe
 2Re4gkrEemA=</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><saml2:Subject><saml2:NameID Format="http://schemas.xmlsoap.org/claims/UPN">Administrator@VSPHERE.LOCAL</saml2:NameID><saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml2:SubjectConfirmationData NotOnOrAfter="2018-03-04T00:27:01.401Z"/></saml2:SubjectConfirmation></saml2:Subject><saml2:Conditions NotBefore="2018-03-04T00:22:01.401Z" NotOnOrAfter="2018-03-04T00:27:01.401Z"><saml2:ProxyRestriction Count="10"/></saml2:Conditions><saml2:AuthnStatement AuthnInstant="2018-03-04T00:27:56.402Z"><saml2:AuthnContext><saml2:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml2:AuthnContextClassRef></saml2:AuthnContext></saml2:AuthnStatement><saml2:AttributeStatement><saml2:Attribute FriendlyName="Groups" Name="http://rsa.com/schemas/attr-names/2009/01/GroupIdentity" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">vsphere.local\Users</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\CAAdmins</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\ComponentManager.Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\SystemConfiguration.BashShellAdministrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\SystemConfiguration.Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\LicenseService.Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\ActAsUsers</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\Everyone</saml2:AttributeValue></saml2:Attribute><saml2:Attribute FriendlyName="givenName" Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">Administrator</saml2:AttributeValue></saml2:Attribute><saml2:Attribute FriendlyName="surname" Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">vsphere.local</saml2:AttributeValue></saml2:Attribute><saml2:Attribute FriendlyName="Subject Type" Name="http://vmware.com/schemas/attr-names/2011/07/isSolution" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">false</saml2:AttributeValue></saml2:Attribute></saml2:AttributeStatement></saml2:Assertion>`
-
-	var a Assertion
-	err := xml.Unmarshal([]byte(token), &a)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !isC14N(a.C14N()) {
-		t.Error("not c14n")
-	}
-
-	a.Signature.SignedInfo.NS = DSIG
-	if !isC14N(a.Signature.SignedInfo.C14N()) {
-		t.Error("not c14n")
-	}
-}
