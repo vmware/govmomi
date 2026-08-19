@@ -88,7 +88,7 @@ func ApplyPropertyChange(obj Reference, changes []types.PropertyChange) {
 // RetrieveProperties{Ex} to one or more managed objects.
 func LoadObjectContent(content []types.ObjectContent, dst any) error {
 	rt := reflect.TypeOf(dst)
-	if rt == nil || rt.Kind() != reflect.Ptr {
+	if rt == nil || rt.Kind() != reflect.Pointer {
 		panic("need pointer")
 	}
 
@@ -235,7 +235,7 @@ func References(s any, follow ...bool) []types.ManagedObjectReference {
 	rval := reflect.ValueOf(s)
 	rtype := rval.Type()
 
-	if rval.Kind() == reflect.Ptr {
+	if rval.Kind() == reflect.Pointer {
 		rval = rval.Elem()
 		rtype = rval.Type()
 	}
@@ -264,7 +264,7 @@ func References(s any, follow ...bool) []types.ManagedObjectReference {
 			continue
 		}
 
-		if ftype.Kind() == reflect.Ptr {
+		if ftype.Kind() == reflect.Pointer {
 			if val.IsNil() {
 				continue
 			}

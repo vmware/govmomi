@@ -127,7 +127,7 @@ func dumpValue(val any) any {
 	}
 
 	rval := reflect.ValueOf(val)
-	if rval.Type().Kind() != reflect.Ptr {
+	if rval.Type().Kind() != reflect.Pointer {
 		return val
 	}
 

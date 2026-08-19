@@ -42,7 +42,7 @@ func As(err, target any) (localizedMessage string, okay bool) {
 	}
 	val := reflect.ValueOf(target)
 	typ := val.Type()
-	if typ.Kind() != reflect.Ptr || val.IsNil() {
+	if typ.Kind() != reflect.Pointer || val.IsNil() {
 		panic("fault: target must be a non-nil pointer")
 	}
 	targetType := typ.Elem()

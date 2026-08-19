@@ -182,7 +182,7 @@ func (c *Client) getPathForName(this types.ManagedObjectReference, name string) 
 // struct "This" member is the this MoRef value.
 func unpackSOAPRequest(req HasFault) (this types.ManagedObjectReference, method string, params any, err error) {
 	reqBodyPtr := reflect.ValueOf(req)
-	if reqBodyPtr.Kind() != reflect.Ptr {
+	if reqBodyPtr.Kind() != reflect.Pointer {
 		err = fmt.Errorf("Expected pointer to request body as input. %w", errInputError)
 		return
 	}
@@ -192,7 +192,7 @@ func unpackSOAPRequest(req HasFault) (this types.ManagedObjectReference, method 
 		return
 	}
 	methodRequestPtr := reqBody.FieldByName("Req")
-	if methodRequestPtr.Kind() != reflect.Ptr {
+	if methodRequestPtr.Kind() != reflect.Pointer {
 		err = fmt.Errorf("Expected method request body field to be pointer to struct. %w", errInputError)
 		return
 	}
@@ -222,7 +222,7 @@ func unpackSOAPRequest(req HasFault) (this types.ManagedObjectReference, method 
 // reflection from a SOAP data structure used for marshalling.
 func getSOAPResultPtr(result HasFault) (res any, err error) {
 	resBodyPtr := reflect.ValueOf(result)
-	if resBodyPtr.Kind() != reflect.Ptr {
+	if resBodyPtr.Kind() != reflect.Pointer {
 		err = fmt.Errorf("Expected pointer to result body as input. %w", errInputError)
 		return
 	}
@@ -232,7 +232,7 @@ func getSOAPResultPtr(result HasFault) (res any, err error) {
 		return
 	}
 	methodResponsePtr := resBody.FieldByName("Res")
-	if methodResponsePtr.Kind() != reflect.Ptr {
+	if methodResponsePtr.Kind() != reflect.Pointer {
 		err = fmt.Errorf("Expected method response body field to be pointer to struct. %w", errInputError)
 		return
 	}
