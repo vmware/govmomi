@@ -1078,9 +1078,9 @@ func TestClient(t *testing.T) {
 	updateVolumeOperationRes := updateTaskResult.GetCnsVolumeOperationResult()
 	if updateVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to update volume metadata: fault=%+v", updateVolumeOperationRes.Fault)
-	} else {
-		t.Logf("Successfully updated volume metadata")
 	}
+
+	t.Logf("Successfully updated volume metadata")
 
 	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
 	queryResult, err = cnsClient.QueryVolume(ctx, &queryFilter)
@@ -1642,10 +1642,10 @@ func TestClient(t *testing.T) {
 			fault, ok := createVolumeOperationRes.Fault.Fault.(*cnstypes.CnsAlreadyRegisteredFault)
 			if !ok {
 				t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
-			} else {
-				t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %s is already registered", backingDiskURLPath)
-				volumeID = fault.VolumeId.Id
 			}
+
+			t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %s is already registered", backingDiskURLPath)
+			volumeID = fault.VolumeId.Id
 		} else {
 			volumeID = createVolumeOperationRes.VolumeId.Id
 			t.Logf("Volume created successfully with backingDiskURLPath: %s. volumeId: %s", backingDiskURLPath, volumeID)
@@ -1691,9 +1691,9 @@ func TestClient(t *testing.T) {
 				_, ok := reCreateVolumeOperationRes.Fault.Fault.(*cnstypes.CnsAlreadyRegisteredFault)
 				if !ok {
 					t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
-				} else {
-					t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %q is already registered", backingDiskURLPath)
 				}
+
+				t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %q is already registered", backingDiskURLPath)
 			}
 		}
 
@@ -2413,9 +2413,9 @@ func TestHandleCnsNotRegisteredFault(t *testing.T) {
 		_, ok := extendVolumeOperationRes.Fault.Fault.(*cnstypes.CnsNotRegisteredFault)
 		if !ok {
 			t.Fatalf("Fault is not CnsNotRegisteredFault")
-		} else {
-			t.Logf("Fault is CnsNotRegisteredFault")
 		}
+
+		t.Logf("Fault is CnsNotRegisteredFault")
 	}
 	var staticCnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 	staticCnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{

@@ -73,7 +73,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	} else if err := cmd.WriteResult(createResult(draftId)); err != nil {
 		return err
-	} else {
-		return nil
 	}
+
+	return nil
 }

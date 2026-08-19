@@ -185,9 +185,9 @@ func TestSimulator(t *testing.T) {
 			if soap.IsSoapFault(err) {
 				fault := soap.ToSoapFault(err).VimFault()
 				t.Fatalf("%[1]T %[1]v", fault)
-			} else {
-				t.Fatalf("%[1]T %[1]v", err)
 			}
+
+			t.Fatalf("%[1]T %[1]v", err)
 		}
 		t.Logf("created agency: %v", agency.Reference())
 

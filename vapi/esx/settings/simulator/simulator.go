@@ -140,10 +140,10 @@ func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
 		} else if len(segments) > 2 && segments[1] == "software" && segments[2] == "base-image" {
 			h.clustersSoftwareDraftsBaseImage(w, r)
 			return
-		} else {
-			h.clustersSoftwareDrafts(w, r, segments)
-			return
 		}
+
+		h.clustersSoftwareDrafts(w, r, segments)
+		return
 	} else if len(segments) > 3 && segments[2] == "enablement" && segments[3] == "software" {
 		h.clustersSoftwareEnablement(w, r)
 		return
@@ -175,10 +175,10 @@ func (h *Handler) clustersSoftwareDrafts(w http.ResponseWriter, r *http.Request,
 			if _, contains := h.SoftwareDrafts[*draftId]; !contains {
 				vapi.ApiErrorNotFound(w)
 				return
-			} else {
-				delete(h.SoftwareDrafts, *draftId)
-				vapi.StatusOK(w)
 			}
+
+			delete(h.SoftwareDrafts, *draftId)
+			vapi.StatusOK(w)
 		}
 	case http.MethodPost:
 		if strings.Contains(r.URL.RawQuery, "action=commit") {
@@ -186,10 +186,10 @@ func (h *Handler) clustersSoftwareDrafts(w http.ResponseWriter, r *http.Request,
 				if _, contains := h.SoftwareDrafts[*draftId]; !contains {
 					vapi.ApiErrorNotFound(w)
 					return
-				} else {
-					delete(h.SoftwareDrafts, *draftId)
-					vapi.StatusOK(w)
 				}
+
+				delete(h.SoftwareDrafts, *draftId)
+				vapi.StatusOK(w)
 			}
 		}
 		// Only one active draft is permitted

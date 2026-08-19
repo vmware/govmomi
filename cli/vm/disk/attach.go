@@ -111,12 +111,12 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		disk = devices.ChildDisk(disk)
 		return vm.AddDevice(ctx, disk)
+	}
+
+	if cmd.persist {
+		backing.DiskMode = string(types.VirtualDiskModePersistent)
 	} else {
-		if cmd.persist {
-			backing.DiskMode = string(types.VirtualDiskModePersistent)
-		} else {
-			backing.DiskMode = string(types.VirtualDiskModeNonpersistent)
-		}
+		backing.DiskMode = string(types.VirtualDiskModeNonpersistent)
 	}
 
 	if len(cmd.mode) != 0 {
