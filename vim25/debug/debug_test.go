@@ -31,16 +31,14 @@ func TestSetProvider(t *testing.T) {
 
 		// hit the debug package with some concurrency (see PR #2469)
 		for range 5 {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
+			wg.Go(func() {
 				finder := find.NewFinder(c)
 
 				_, err := finder.VirtualMachineList(ctx, "*")
 				if err != nil {
 					t.Error(err)
 				}
-			}()
+			})
 		}
 
 		wg.Wait()

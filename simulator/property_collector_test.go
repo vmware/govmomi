@@ -278,11 +278,9 @@ func TestWaitForUpdates(t *testing.T) {
 
 	wctx, cancel := context.WithCancel(ctx)
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		_ = property.Wait(wctx, pc, folder.Reference(), props, cb(false))
-	}()
+	})
 	<-updates
 	cancel()
 	wg.Wait()
@@ -410,9 +408,7 @@ func TestIncrementalWaitForUpdates(t *testing.T) {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 
 		filter := new(property.WaitFilter).Add(v.Reference(), ref.Type, tests[0].props, v.TraversalSpec())
 		perr := property.WaitForUpdates(ctx, pc, filter, func(updates []types.ObjectUpdate) bool {
@@ -431,7 +427,7 @@ func TestIncrementalWaitForUpdates(t *testing.T) {
 		if perr != nil {
 			t.Error(perr)
 		}
-	}()
+	})
 
 	wg.Wait() // wait for 1st enter
 	wg.Add(1)

@@ -138,11 +138,9 @@ func (flag *DebugFlag) newFormatReader(rc io.ReadCloser, w io.Writer, ext string
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
+	wg.Go(func() {
 		_, _ = io.Copy(w, stdout)
-		wg.Done()
-	}()
+	})
 
 	return debug.ReadCloser{
 		Reader: io.TeeReader(rc, stdin),

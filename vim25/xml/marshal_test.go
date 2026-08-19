@@ -2394,11 +2394,9 @@ func TestRace9796(t *testing.T) {
 	}
 	var wg sync.WaitGroup
 	for range 2 {
-		wg.Add(1)
-		go func() {
+		wg.Go(func() {
 			Marshal(B{[]A{{}}})
-			wg.Done()
-		}()
+		})
 	}
 	wg.Wait()
 }
