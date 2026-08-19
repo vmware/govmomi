@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"text/tabwriter"
 
@@ -96,13 +97,7 @@ func (e *kinds) wanted(kind string) bool {
 		return true
 	}
 
-	for _, k := range *e {
-		if kind == k {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(*e, kind)
 }
 
 func init() {

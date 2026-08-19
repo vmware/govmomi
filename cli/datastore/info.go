@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/cli"
@@ -77,11 +78,8 @@ Examples:
 func intersect(common []types.ManagedObjectReference, refs []types.ManagedObjectReference) []types.ManagedObjectReference {
 	var shared []types.ManagedObjectReference
 	for i := range common {
-		for j := range refs {
-			if common[i] == refs[j] {
-				shared = append(shared, common[i])
-				break
-			}
+		if slices.Contains(refs, common[i]) {
+			shared = append(shared, common[i])
 		}
 	}
 	return shared

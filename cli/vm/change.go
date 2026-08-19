@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 
 	"github.com/vmware/govmomi/cli"
@@ -80,13 +81,11 @@ func (cmd *change) setLatency() error {
 	if cmd.Latency == "" {
 		return nil
 	}
-	for _, l := range latencyLevels {
-		if l == cmd.Latency {
-			cmd.LatencySensitivity = &types.LatencySensitivity{
-				Level: types.LatencySensitivitySensitivityLevel(cmd.Latency),
-			}
-			return nil
+	if slices.Contains(latencyLevels, cmd.Latency) {
+		cmd.LatencySensitivity = &types.LatencySensitivity{
+			Level: types.LatencySensitivitySensitivityLevel(cmd.Latency),
 		}
+		return nil
 	}
 	return fmt.Errorf("latency must be one of: %s", strings.Join(latencyLevels, "|"))
 }
@@ -102,13 +101,11 @@ func (cmd *change) setHwUpgradePolicy() error {
 	if cmd.hwUpgradePolicy == "" {
 		return nil
 	}
-	for _, l := range hwUpgradePolicies {
-		if l == cmd.hwUpgradePolicy {
-			cmd.ScheduledHardwareUpgradeInfo = &types.ScheduledHardwareUpgradeInfo{
-				UpgradePolicy: string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicy(cmd.hwUpgradePolicy)),
-			}
-			return nil
+	if slices.Contains(hwUpgradePolicies, cmd.hwUpgradePolicy) {
+		cmd.ScheduledHardwareUpgradeInfo = &types.ScheduledHardwareUpgradeInfo{
+			UpgradePolicy: string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicy(cmd.hwUpgradePolicy)),
 		}
+		return nil
 	}
 	return fmt.Errorf("Hardware upgrade policy must be one of: %s", strings.Join(hwUpgradePolicies, "|"))
 }

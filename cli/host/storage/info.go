@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"text/tabwriter"
 
@@ -26,11 +27,9 @@ type infoType string
 func (t *infoType) Set(s string) error {
 	s = strings.ToLower(s)
 
-	for _, e := range infoTypes {
-		if s == e {
-			*t = infoType(s)
-			return nil
-		}
+	if slices.Contains(infoTypes, s) {
+		*t = infoType(s)
+		return nil
 	}
 
 	return fmt.Errorf("invalid type")

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"path"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -140,13 +141,7 @@ func (m Match) ObjectContent(objects []types.ObjectContent) []types.ManagedObjec
 
 // AnyList returns true if any given props match.
 func (m Match) AnyList(props []types.DynamicProperty) bool {
-	for _, p := range props {
-		if m.Property(p) {
-			return true
-		}
-	}
-
-	return false
+	return slices.ContainsFunc(props, m.Property)
 }
 
 // AnyObjectContent returns a list of ObjectContent.Obj where the

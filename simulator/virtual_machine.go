@@ -1397,10 +1397,8 @@ func (vm *VirtualMachine) validateSwitchMembers(ctx *Context, id string) types.B
 	h := ctx.Map.Get(*vm.Runtime.Host).(*HostSystem)
 	c := hostParent(ctx, &h.HostSystem)
 	isMember := func(val types.ManagedObjectReference) bool {
-		for _, mem := range dswitch.Summary.HostMember {
-			if mem == val {
-				return true
-			}
+		if slices.Contains(dswitch.Summary.HostMember, val) {
+			return true
 		}
 		log.Printf("%s is not a member of VDS %s", h.Name, dswitch.Name)
 		return false
