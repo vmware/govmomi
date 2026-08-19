@@ -206,8 +206,21 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 		// Loop through each interval "tick"
 		metrics.SampleInfo = make([]types.PerfSampleInfo, n)
 		metrics.Value = make([]types.BasePerfMetricSeries, len(qs.MetricId))
+		// Emit samples in ascending (oldest first) chronological order, which is what a real
+		// vCenter returns. Indexing tick 0 at `end` produced descending order, so tick 0 was the
+		// newest sample. Clients that assume the vSphere convention -- e.g. taking
+		// SampleInfo[len-1] as the most recent sample to compute a rollup boundary, then walking
+		// forward expecting increasing timestamps -- discard the whole series: the first element
+		// already looks newer than the boundary. Observed with a real collector, which fetched
+		// the series successfully and then silently rolled up zero points.
+		// This also lines the values up with their timestamps: Value[tick] is taken from the
+		// canned data at `offset+tick` where offset is derived from `start`, so tick 0 should be
+		// the sample nearest `start`, i.e. the oldest.
 		for tick := int32(0); tick < n; tick++ {
-			metrics.SampleInfo[tick] = types.PerfSampleInfo{Timestamp: end.Add(time.Duration(-interval*tick) * time.Second), Interval: interval}
+			metrics.SampleInfo[tick] = types.PerfSampleInfo{
+				Timestamp: end.Add(time.Duration(-interval*(n-1-tick)) * time.Second),
+				Interval:  interval,
+			}
 		}
 
 		series := make([]*types.PerfMetricIntSeries, len(qs.MetricId))
