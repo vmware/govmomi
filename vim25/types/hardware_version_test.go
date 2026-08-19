@@ -6,7 +6,7 @@ package types
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 	"strconv"
 	"testing"
 )
@@ -218,8 +218,8 @@ func TestHardwareVersion(t *testing.T) {
 
 	t.Run("GetHardwareVersions", func(t *testing.T) {
 		a, e := uniqueExpectedVersions, GetHardwareVersions()
-		sort.Slice(a, func(i, j int) bool { return a[i] < a[j] })
-		sort.Slice(e, func(i, j int) bool { return e[i] < e[j] })
+		slices.Sort(a)
+		slices.Sort(e)
 		if a, e := len(a), len(e); a != e {
 			t.Errorf("unexpected number of versions: a=%d, e=%d", a, e)
 		}
