@@ -121,7 +121,7 @@ func main() {
 
 	if methodDelay != "" {
 		m := make(map[string]int)
-		for _, s := range strings.Split(methodDelay, ",") {
+		for s := range strings.SplitSeq(methodDelay, ",") {
 			s = strings.TrimSpace(s)
 			tuples := strings.Split(s, ":")
 			if len(tuples) == 2 {

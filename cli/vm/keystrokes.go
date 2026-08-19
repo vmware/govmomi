@@ -628,7 +628,7 @@ func (cmd *keystrokes) processUsbCode() ([]hidKey, error) {
 
 	if cmd.hexCodeProvided() {
 		var retKeyArray []hidKey
-		for _, c := range strings.Split(cmd.UsbHidCodes, ",") {
+		for c := range strings.SplitSeq(cmd.UsbHidCodes, ",") {
 			var s int32
 			lookupvalue, ok := hidKeyMap[c]
 			if ok {

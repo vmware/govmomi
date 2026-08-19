@@ -102,7 +102,7 @@ func createCapabilityInstances(rules []Capability) ([]types.PbmCapabilityInstanc
 				property.Value = propertyRule.Value
 			case "set":
 				set := types.PbmCapabilityDiscreteSet{}
-				for _, val := range strings.Split(propertyRule.Value, ",") {
+				for val := range strings.SplitSeq(propertyRule.Value, ",") {
 					set.Values = append(set.Values, val)
 				}
 				property.Value = set

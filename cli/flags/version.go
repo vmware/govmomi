@@ -23,8 +23,8 @@ func ParseVersion(s string) (version, error) {
 	v := make(version, 0)
 
 	ds := strings.Split(s, "-")
-	ps := strings.Split(ds[0], ".")
-	for _, p := range ps {
+	ps := strings.SplitSeq(ds[0], ".")
+	for p := range ps {
 		i, err := strconv.Atoi(p)
 		if err != nil {
 			return nil, err

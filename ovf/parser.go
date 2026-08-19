@@ -48,10 +48,10 @@ func ParseCapacityAllocationUnits(s string) int64 {
 	// Split s on multiplication operator (*) so that we can just calculate integer multipliers. Each token will
 	// then be either an integer, an exponential term to be converted to an integer, or a unit term to be converted
 	// to an integer
-	tokens := strings.Split(s, "*")
+	tokens := strings.SplitSeq(s, "*")
 
 	// Loop through all tokens and convert any to integers if necessary and use to compute a running product
-	for _, token := range tokens {
+	for token := range tokens {
 		switch {
 		// "" should be treated identically to "byte". capacityBytes is already set to 1 so there is nothing to do
 		case len(token) == 0:

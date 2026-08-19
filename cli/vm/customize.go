@@ -117,7 +117,7 @@ Examples:
 
 // Parse a string of multiple IPv6 addresses with optional netmask; separated by comma
 func parseIPv6Argument(argv string) (ipconf []types.BaseCustomizationIpV6Generator, err error) {
-	for _, substring := range strings.Split(argv, ",") {
+	for substring := range strings.SplitSeq(argv, ",") {
 		// remove leading and trailing white space
 		substring = strings.TrimSpace(substring)
 		// handle "dhcp6" and lists of static IPv6 addresses

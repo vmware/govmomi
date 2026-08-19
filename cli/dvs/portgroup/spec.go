@@ -52,8 +52,8 @@ func (spec *DVPortgroupConfigSpec) Register(ctx context.Context, f *flag.FlagSet
 
 func getRange(vlanRange string) []types.NumericRange {
 	nRanges := make([]types.NumericRange, 0)
-	strRanges := strings.Split(vlanRange, ",")
-	for _, v := range strRanges {
+	strRanges := strings.SplitSeq(vlanRange, ",")
+	for v := range strRanges {
 		vlans := strings.Split(v, "-")
 		if len(vlans) != 2 {
 			panic(fmt.Sprintf("range %s does not follow format with vlanId-vlanId", v))

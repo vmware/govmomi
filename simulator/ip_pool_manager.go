@@ -252,8 +252,8 @@ func NewIpPool(config *types.IpPool) (*IpPool, error) {
 func (p *IpPool) init() error {
 	// IPv4 range
 	if p.config.Ipv4Config != nil {
-		ranges := strings.Split(p.config.Ipv4Config.Range, ",")
-		for _, r := range ranges {
+		ranges := strings.SplitSeq(p.config.Ipv4Config.Range, ",")
+		for r := range ranges {
 			sp := strings.Split(r, "#")
 			if len(sp) != 2 {
 				return fmt.Errorf("format of range should be ip#number; got %q", r)
@@ -277,8 +277,8 @@ func (p *IpPool) init() error {
 
 	// IPv6 range
 	if p.config.Ipv6Config != nil {
-		ranges := strings.Split(p.config.Ipv6Config.Range, ",")
-		for _, r := range ranges {
+		ranges := strings.SplitSeq(p.config.Ipv6Config.Range, ",")
+		for r := range ranges {
 			sp := strings.Split(r, "#")
 			if len(sp) != 2 {
 				return fmt.Errorf("format of range should be ip#number; got %q", r)
