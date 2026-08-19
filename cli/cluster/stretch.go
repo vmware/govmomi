@@ -174,7 +174,7 @@ func (cmd *stretch) getManagedObjectRefs(domainHosts string, ctx context.Context
 	}
 
 	var refs []vim.ManagedObjectReference
-	for _, host := range strings.Split(domainHosts, ",") {
+	for host := range strings.SplitSeq(domainHosts, ",") {
 		h, err := finder.HostSystem(ctx, host)
 		if err != nil {
 			return nil, err

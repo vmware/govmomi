@@ -83,7 +83,7 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	backing := new(types.DistributedVirtualSwitchHostMemberPnicBacking)
 
-	for _, vmnic := range strings.Split(cmd.pnic, ",") {
+	for vmnic := range strings.SplitSeq(cmd.pnic, ",") {
 		backing.PnicSpec = append(backing.PnicSpec, types.DistributedVirtualSwitchHostMemberPnicSpec{
 			PnicDevice: strings.TrimSpace(vmnic),
 		})

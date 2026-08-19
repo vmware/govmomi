@@ -779,8 +779,8 @@ var validSCSIControllerTypes = map[string]struct{}{
 func resolveSCSIControllerType(resourceSubType string) string {
 	trimmed := strings.TrimSpace(resourceSubType)
 	// Split on comma or space (one or more of either)
-	tokens := strings.Fields(strings.ReplaceAll(trimmed, ",", " "))
-	for _, tok := range tokens {
+	tokens := strings.FieldsSeq(strings.ReplaceAll(trimmed, ",", " "))
+	for tok := range tokens {
 		t := strings.TrimSpace(tok)
 		lower := strings.ToLower(t)
 		if _, ok := validSCSIControllerTypes[lower]; ok {
