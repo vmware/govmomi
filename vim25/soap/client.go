@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"maps"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -243,9 +244,7 @@ func (c *Client) newServiceClientWithTransport(path string, namespace string, t 
 
 	// Copy the trusted thumbprints
 	c.hostsMu.Lock()
-	for k, v := range c.hosts {
-		client.hosts[k] = v
-	}
+	maps.Copy(client.hosts, c.hosts)
 	c.hostsMu.Unlock()
 
 	// Copy the cookies
