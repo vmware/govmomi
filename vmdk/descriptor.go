@@ -85,7 +85,7 @@ func ParseDescriptor(r io.Reader) (*Descriptor, error) {
 
 		key, val := strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
 		val = strings.Trim(val, `"`)
-		if k := strings.TrimPrefix(key, "ddb."); k != key {
+		if k, ok := strings.CutPrefix(key, "ddb."); ok {
 			d.DDB[k] = val
 			continue
 		}
