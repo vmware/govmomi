@@ -266,9 +266,21 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		args = append(args, reflect.ValueOf(ctx))
 	}
 	args = append(args, reflect.ValueOf(method.Body))
-	ctx.Map.WithLock(ctx, handler, func() {
+
+	// WaitForUpdates{,Ex} block until an update or cancel, and
+	// CancelWaitForUpdates must interrupt such a blocked call. They
+	// synchronize internally via pc.mu and lock each collected object as
+	// needed, so they must not be serialized under the per-object dispatch
+	// lock: holding it across a blocking wait deadlocks the cancel (a method
+	// on the same PropertyCollector) against the waiter.
+	switch method.Name {
+	case "WaitForUpdates", "WaitForUpdatesEx", "CancelWaitForUpdates":
 		res = m.Call(args)
-	})
+	default:
+		ctx.Map.WithLock(ctx, handler, func() {
+			res = m.Call(args)
+		})
+	}
 
 	return res[0].Interface().(soap.HasFault)
 }
