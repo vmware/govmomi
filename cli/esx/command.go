@@ -108,7 +108,7 @@ func (c *Command) Parse(params []CommandInfoParam) ([]internal.ReflectManagedMet
 		return nil, err
 	}
 
-	args := []internal.ReflectManagedMethodExecuterSoapArgument{}
+	var args []internal.ReflectManagedMethodExecuterSoapArgument
 
 	for i, p := range params {
 		if len(vals[i]) != 0 {

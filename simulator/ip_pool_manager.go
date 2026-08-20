@@ -83,7 +83,7 @@ func (m *IpPoolManager) DestroyIpPool(req *types.DestroyIpPool) soap.HasFault {
 }
 
 func (m *IpPoolManager) QueryIpPools(req *types.QueryIpPools) soap.HasFault {
-	pools := []types.IpPool{}
+	var pools []types.IpPool
 
 	for i := int32(1); i < m.nextPoolId; i++ {
 		if p, ok := m.pools[i]; ok {

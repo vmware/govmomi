@@ -91,7 +91,7 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	rmDevices := []types.BaseVirtualDevice{}
+	var rmDevices []types.BaseVirtualDevice
 	for _, d := range vmDevices.SelectByType(&types.VirtualPCIPassthrough{}) {
 		name := vmDevices.Name(d)
 		_, ok := reqDevices[name]

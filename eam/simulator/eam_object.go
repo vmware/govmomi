@@ -79,7 +79,7 @@ func (m *EamObject) Resolve(
 
 	// notFoundKeys is a list of issue keys that were sent but
 	// not found for the given object.
-	notFoundKeys := []int32{}
+	var notFoundKeys []int32
 
 	// issueExists is a helper function that returns true
 	issueExists := func(issueKey int32) bool {

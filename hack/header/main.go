@@ -142,7 +142,7 @@ func checkHeader(path string, headerLines []string) (bool, error) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	lines := []string{}
+	var lines []string
 	skipShebang := filepath.Ext(path) == ".sh" // Handle shebang for shell scripts.
 
 	// Only scan the first `MaxScanLines` lines.

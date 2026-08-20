@@ -830,7 +830,8 @@ func TestUnmarshalEmptyValues(t *testing.T) {
 		t.Fatalf("zero: Unmarshal failed: got %v", err)
 	}
 
-	zBytes, zInt, zStr, zFloat, zBool := []byte{}, 0, "", float32(0), false
+	var zBytes []byte
+	zInt, zStr, zFloat, zBool := 0, "", float32(0), false
 	want := &Parent{
 		IPtr:         &zInt,
 		Is:           []int{zInt},

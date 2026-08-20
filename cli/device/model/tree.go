@@ -110,7 +110,7 @@ func getTree[T, K any]() treeprint.Tree {
 	var (
 		rootObj       K
 		rootType      = reflect.TypeOf(rootObj)
-		allTypes      = []reflect.Type{}
+		allTypes      []reflect.Type
 		embedsTypeMap = map[reflect.Type][]reflect.Type{}
 		rootIfaceType = reflect.TypeOf((*T)(nil)).Elem()
 	)
@@ -141,7 +141,7 @@ func getTree[T, K any]() treeprint.Tree {
 
 	// Each child should have a single parent.
 	for child, parents := range embedsTypeMap {
-		notAncestors := []reflect.Type{}
+		var notAncestors []reflect.Type
 		for i := range parents {
 			p := parents[i]
 			if !typeEmbeddedBy(p, parents...) {

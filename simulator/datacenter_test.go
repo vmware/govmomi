@@ -113,7 +113,7 @@ func TestDatacenterPowerOnMultiVMs(t *testing.T) {
 	if len(vms) < numTestVMs {
 		t.Fatalf("Need at least %v VMs in a datacenter for this test", numTestVMs)
 	}
-	testVMs := []types.ManagedObjectReference{}
+	var testVMs []types.ManagedObjectReference
 	for _, vm := range vms[:numTestVMs] {
 		testVMs = append(testVMs, vm.Reference())
 	}

@@ -25,4 +25,4 @@ var AdvancedOptions = []types.BaseOptionValue{
 // Capture method:
 //
 //	govc object.collect -s -dump OptionManager:HostAgentSettings setting
-var Setting = []types.BaseOptionValue{}
+var Setting []types.BaseOptionValue

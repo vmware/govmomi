@@ -155,7 +155,7 @@ func TestDestroyHostSystem(t *testing.T) {
 	hs := m.Map().Get(*vm.Runtime.Host).(*HostSystem)
 	host := object.NewHostSystem(c, hs.Self)
 
-	vms := []*VirtualMachine{}
+	var vms []*VirtualMachine
 	for _, vmref := range hs.Vm {
 		vms = append(vms, m.Map().Get(vmref).(*VirtualMachine))
 	}

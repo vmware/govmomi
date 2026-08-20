@@ -171,7 +171,7 @@ func (cmd *instantclone) instantcloneVM(ctx context.Context) (*object.VirtualMac
 		}
 
 		// prepare virtual device config spec for network card
-		configSpecs := []types.BaseVirtualDeviceConfigSpec{}
+		var configSpecs []types.BaseVirtualDeviceConfigSpec
 
 		op := types.VirtualDeviceConfigSpecOperationAdd
 		card, derr := cmd.NetworkFlag.Device()

@@ -21,7 +21,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-var allTypes = []string{}
+var allTypes []string
 
 var createAndPowerOnTypes = []string{
 	string(types.PlaceVmsXClusterSpecPlacementTypeCreateAndPowerOn),

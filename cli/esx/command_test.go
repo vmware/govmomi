@@ -105,7 +105,7 @@ func TestNetworkVmListCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expect := []internal.ReflectManagedMethodExecuterSoapArgument{}
+	var expect []internal.ReflectManagedMethodExecuterSoapArgument
 
 	if !reflect.DeepEqual(args, expect) {
 		t.Errorf("%s != %s", args, expect)

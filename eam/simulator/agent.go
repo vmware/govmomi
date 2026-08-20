@@ -79,7 +79,7 @@ func NewAgent(
 		var vmRef vim.ManagedObjectReference
 
 		// vmExtraConfig is used when creating the VM for this agent.
-		vmExtraConfig := []vim.BaseOptionValue{}
+		var vmExtraConfig []vim.BaseOptionValue
 
 		// If config.OvfPackageUrl is non-empty and does not appear to point to
 		// a local file or an HTTP URI, then assume it is a container.

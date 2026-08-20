@@ -130,7 +130,7 @@ func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 		return
 	}
 
-	keys := []int{}
+	var keys []int
 	for k := range trafficRuleSet[portID] {
 		keys = append(keys, k)
 	}

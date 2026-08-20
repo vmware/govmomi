@@ -331,7 +331,7 @@ func (svm *simVM) start(ctx *Context) error {
 		env = append(env, "VMX_GUESTINFO=true")
 	}
 
-	volumes := []string{}
+	var volumes []string
 	if mountDMI {
 		volumes = append(volumes, constructVolumeName(svm.vm.Name, svm.vm.uid.String(), "dmi")+":/sys/class/dmi/id")
 	}

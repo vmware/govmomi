@@ -222,7 +222,7 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 		return nil, err
 	}
 
-	es := []Element{}
+	var es []Element
 	for _, v := range dst {
 		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
@@ -280,7 +280,7 @@ func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 		return nil, err
 	}
 
-	es := []Element{}
+	var es []Element
 	for _, v := range dst {
 		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
@@ -347,7 +347,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 		return nil, err
 	}
 
-	es := []Element{}
+	var es []Element
 	for _, v := range dst {
 		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
@@ -410,7 +410,7 @@ func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 		return nil, err
 	}
 
-	es := []Element{}
+	var es []Element
 	for _, v := range dst {
 		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
@@ -477,7 +477,7 @@ func (l Lister) ListHostSystem(ctx context.Context) ([]Element, error) {
 		return nil, err
 	}
 
-	es := []Element{}
+	var es []Element
 	for _, v := range dst {
 		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
@@ -540,7 +540,7 @@ func (l Lister) ListDistributedVirtualSwitch(ctx context.Context) ([]Element, er
 		return nil, err
 	}
 
-	es := []Element{}
+	var es []Element
 	for _, v := range dst {
 		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
@@ -605,7 +605,7 @@ func (l Lister) ListVirtualApp(ctx context.Context) ([]Element, error) {
 		return nil, err
 	}
 
-	es := []Element{}
+	var es []Element
 	for _, v := range dst {
 		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}

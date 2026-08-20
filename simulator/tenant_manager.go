@@ -37,7 +37,7 @@ func (t *TenantManager) unmarkEntities(entities []types.ManagedObjectReference) 
 }
 
 func (t *TenantManager) getEntities() []types.ManagedObjectReference {
-	entities := []types.ManagedObjectReference{}
+	var entities []types.ManagedObjectReference
 	for e := range t.spEntities {
 		entities = append(entities, e)
 	}

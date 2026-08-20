@@ -287,7 +287,7 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 	}
 
 	// prepare virtual device config spec for network card
-	configSpecs := []types.BaseVirtualDeviceConfigSpec{}
+	var configSpecs []types.BaseVirtualDeviceConfigSpec
 
 	if cmd.NetworkFlag.IsSet() {
 		op := types.VirtualDeviceConfigSpecOperationAdd

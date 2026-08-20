@@ -68,7 +68,7 @@ var localTypes = []string{
 	"local",
 }
 
-var allTypes = []string{}
+var allTypes []string
 
 func init() {
 	allTypes = append(allTypes, nasTypes...)

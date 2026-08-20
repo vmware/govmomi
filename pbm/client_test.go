@@ -541,7 +541,7 @@ func TestStoragePolicyK8sCompliantNames(t *testing.T) {
 			assert.EqualError(t, err, "ServerFaultCode: Duplicate Name")
 
 			// Resolve K8sCompliantName and otherK8sCompliantNames for the policy
-			otherK8sCompliantNamesResolved := []string{}
+			var otherK8sCompliantNamesResolved []string
 			otherK8sCompliantNamesResolved = append(otherK8sCompliantNamesResolved, otherK8sCompliantNamesSuccess...)
 			otherK8sCompliantNamesResolved = append(otherK8sCompliantNamesResolved, validK8sCompliantName+"-latebinding")
 			err = pc.ResolveK8sCompliantNames(ctx)

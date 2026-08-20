@@ -349,7 +349,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 
 	// inside portgroup keys
 	if *criteria.Inside {
-		filtered := []types.DistributedVirtualPort{}
+		var filtered []types.DistributedVirtualPort
 
 		for _, p := range ports {
 			if slices.Contains(criteria.PortgroupKey, p.PortgroupKey) {
@@ -360,7 +360,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 	}
 
 	// outside portgroup keys
-	filtered := []types.DistributedVirtualPort{}
+	var filtered []types.DistributedVirtualPort
 
 	for _, p := range ports {
 		found := slices.Contains(criteria.PortgroupKey, p.PortgroupKey)
@@ -380,7 +380,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortKey(
 		return ports
 	}
 
-	filtered := []types.DistributedVirtualPort{}
+	var filtered []types.DistributedVirtualPort
 
 	for _, p := range ports {
 		if slices.Contains(criteria.PortKey, p.Key) {
@@ -399,7 +399,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByConnected(
 		return ports
 	}
 
-	filtered := []types.DistributedVirtualPort{}
+	var filtered []types.DistributedVirtualPort
 
 	for _, p := range ports {
 		connected := p.Connectee != nil

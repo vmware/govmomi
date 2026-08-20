@@ -1247,7 +1247,7 @@ func (x byIndex) Less(i, j int) bool {
 // and then any reachable anonymous structs.
 func typeFields(t reflect.Type) structFields {
 	// Anonymous fields to explore at the current level and the next.
-	current := []field{}
+	var current []field
 	next := []field{{typ: t}}
 
 	// Count of queued names for current level and the next.

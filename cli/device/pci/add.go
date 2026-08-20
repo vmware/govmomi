@@ -110,7 +110,7 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		reqDevices[info.PciDevice.Id] = info
 	}
 
-	newDevices := []types.BaseVirtualDevice{}
+	var newDevices []types.BaseVirtualDevice
 	for id, d := range reqDevices {
 		if d == nil {
 			return fmt.Errorf("%s is not found in allowed PCI passthrough device list", id)

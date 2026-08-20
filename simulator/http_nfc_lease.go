@@ -189,7 +189,7 @@ func (l *HttpNfcLease) getDeviceKey(name string) string {
 }
 
 func (l *HttpNfcLease) HttpNfcLeaseGetManifest(ctx *Context, req *types.HttpNfcLeaseGetManifest) soap.HasFault {
-	entries := []types.HttpNfcLeaseManifestEntry{}
+	var entries []types.HttpNfcLeaseManifestEntry
 	for name, md := range l.metadata {
 		entries = append(entries, types.HttpNfcLeaseManifestEntry{
 			Key:  l.getDeviceKey(name),
