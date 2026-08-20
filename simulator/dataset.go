@@ -5,6 +5,8 @@
 package simulator
 
 import (
+	"maps"
+
 	"github.com/vmware/govmomi/vapi/vm/dataset"
 )
 
@@ -46,8 +48,6 @@ func copyDataSet(src *DataSet) *DataSet {
 
 func copyEntries(src map[string]string) map[string]string {
 	copy := make(map[string]string, len(src))
-	for k, v := range src {
-		copy[k] = v
-	}
+	maps.Copy(copy, src)
 	return copy
 }

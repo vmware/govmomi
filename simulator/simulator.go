@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"maps"
 	"net"
 	"net/http"
 	"net/url"
@@ -498,9 +499,7 @@ func (s *Service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 // multiple paths.
 func (s *Service) RegisterSDK(r *Registry, alias ...string) {
 	if existing, ok := s.sdk[r.Path]; ok {
-		for id, obj := range r.objects {
-			existing.objects[id] = obj
-		}
+		maps.Copy(existing.objects, r.objects)
 		return
 	}
 
