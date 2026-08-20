@@ -527,7 +527,8 @@ func (cmd *keystrokes) Usage() string {
 }
 
 func (cmd *keystrokes) Description() string {
-	description := `Send Keystrokes to VM.
+	var description strings.Builder
+	description.WriteString(`Send Keystrokes to VM.
 
 Examples:
  Default Scenario
@@ -539,7 +540,7 @@ Examples:
   govc vm.keystrokes -vm $vm -c 0x15,KEY_ENTER # writes an 'r' to the console and press ENTER
 
 List of available aliases:
-`
+`)
 	keys := make([]string, 0)
 	for key, _ := range hidKeyMap {
 		keys = append(keys, key)
@@ -547,11 +548,11 @@ List of available aliases:
 	sort.Strings(keys)
 	for i, key := range keys {
 		if i > 0 {
-			description += ", "
+			description.WriteString(", ")
 		}
-		description += key
+		description.WriteString(key)
 	}
-	return description + "\n"
+	return description.String() + "\n"
 }
 
 func (cmd *keystrokes) Process(ctx context.Context) error {

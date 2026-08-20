@@ -6,6 +6,7 @@ package tags
 
 import (
 	"fmt"
+	"strings"
 )
 
 const (
@@ -28,16 +29,16 @@ func (b BatchErrors) Error() string {
 		return ""
 	}
 
-	var errString string
+	var errString strings.Builder
 	for i := range b {
 		errType := b[i].Type
 		reason := b[i].Message
-		errString += fmt.Sprintf(errFormat, i, errType, reason)
+		errString.WriteString(fmt.Sprintf(errFormat, i, errType, reason))
 
 		// no separator after last item
 		if i+1 < len(b) {
-			errString += separator
+			errString.WriteString(separator)
 		}
 	}
-	return errString
+	return errString.String()
 }
