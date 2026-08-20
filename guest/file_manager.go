@@ -140,9 +140,9 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 	if ok {
 		turl.Host = mname
 		return turl, nil
-	} else {
-		mname = turl.Host
 	}
+
+	mname = turl.Host
 
 	c := property.DefaultCollector(m.c)
 

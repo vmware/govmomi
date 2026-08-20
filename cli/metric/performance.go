@@ -80,9 +80,9 @@ func (f *PerformanceFlag) Interval(val int32) int32 {
 
 			if n > math.MaxInt32 {
 				panic(fmt.Errorf("value out of range for int32: %d", n))
-			} else {
-				interval = int32(n)
 			}
+
+			interval = int32(n)
 		}
 	}
 

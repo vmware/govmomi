@@ -68,7 +68,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	} else if _, err = tasks.NewManager(rc).WaitForCompletion(ctx, taskId); err != nil {
 		return err
-	} else {
-		return nil
 	}
+
+	return nil
 }
