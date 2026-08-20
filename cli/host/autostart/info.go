@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/cli"
@@ -80,16 +81,16 @@ func (r *infoResult) vmPaths() (map[string]string, error) {
 			return nil, err
 		}
 
-		path := ""
+		var path strings.Builder
 		for _, me := range mes {
 			// Skip root entity in building inventory path.
 			if me.Parent == nil {
 				continue
 			}
-			path += "/" + me.Name
+			path.WriteString("/" + me.Name)
 		}
 
-		paths[info.Key.Value] = path
+		paths[info.Key.Value] = path.String()
 	}
 
 	return paths, nil
