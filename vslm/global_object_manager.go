@@ -83,9 +83,9 @@ func (this *Task) WaitNonDefault(ctx context.Context, timeoutNS time.Duration, s
 			}
 		} else if info.State == types.VslmTaskInfoStateError {
 			return nil, soap.WrapVimFault(info.Error.Fault)
+		} else {
+			break
 		}
-
-		break
 		// Check context here to see if we should exit
 	}
 	return this.QueryResult(ctx)
