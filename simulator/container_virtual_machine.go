@@ -514,13 +514,17 @@ func (svm *simVM) start(ctx *Context) error {
 
 	var err error
 	svm.c, err = create(ctx, svm.vm.Name, svm.vm.uid.String(), args[0], args[1:], createOptions{
-		Networks:          networks,
-		Volumes:           volumes,
-		Ports:             ports,
-		Env:               env,
-		Privileged:        privileged,
-		NestedContainers:  nestedContainers,
-		SeccompProfile:    "",
+		Networks:         networks,
+		Volumes:          volumes,
+		Ports:            ports,
+		Env:              env,
+		Privileged:       privileged,
+		NestedContainers: nestedContainers,
+		// A crashed prior test run leaves this VM's container name in use;
+		// vcsim is exclusively a test/simulation harness, so recovering from
+		// that residue is always correct here (a real VM's backing has no
+		// equivalent stale-name problem to guard against).
+		RecreateIfExists:  true,
 		QuoteImageAndArgs: jsonArgs,
 	})
 	if err != nil {

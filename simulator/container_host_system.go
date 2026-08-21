@@ -209,6 +209,7 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 		Volumes:           dockerVol,
 		Env:               dockerEnv,
 		QuoteImageAndArgs: true,
+		RecreateIfExists:  true,
 	})
 	if err != nil {
 		return nil, err

@@ -36,21 +36,6 @@ func shellQuote(s string) string {
 	return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'"
 }
 
-// filterSeccompUnconfined removes the "--security-opt seccomp=unconfined" pair
-// from run (in-place, preserving order).  Used when a custom seccomp profile
-// replaces the unconfined setting added by nestedContainers mode.
-func filterSeccompUnconfined(run []string) []string {
-	out := run[:0]
-	for i := 0; i < len(run); i++ {
-		if run[i] == "--security-opt" && i+1 < len(run) && run[i+1] == "seccomp=unconfined" {
-			i++ // skip both tokens
-			continue
-		}
-		out = append(out, run[i])
-	}
-	return out
-}
-
 const (
 	deleteWithContainer = "lifecycle=container"
 	createdByVcsim      = "createdBy=vcsim"
@@ -423,7 +408,6 @@ type createOptions struct {
 	// NestedContainers=true forces privileged to true regardless of the
 	// Privileged field's value.
 	NestedContainers bool
-	SeccompProfile   string // when non-empty, "--security-opt seccomp=<profile>"
 
 	// QuoteImageAndArgs controls shell quoting of image and args before they
 	// are joined into the bash -c command string:
@@ -535,15 +519,6 @@ func create(ctx *Context, name string, id string, image string, args []string, o
 		// Standard mode: use host cgroup namespace for access to all controllers
 		// --cgroupns=host: gives access to all cgroup controllers (cpuset, etc.)
 		run = append(run, "--cgroupns=host")
-	}
-
-	if opts.SeccompProfile != "" {
-		// RUN.vmci=true generates a per-VM seccomp filter with
-		// defaultAction=SCMP_ACT_ALLOW plus AF_VSOCK intercept rules.
-		// Remove any "--security-opt seccomp=unconfined" that nestedContainers mode
-		// already added — two seccomp options confuse podman/runc.
-		run = filterSeccompUnconfined(run)
-		run = append(run, "--security-opt", "seccomp="+opts.SeccompProfile)
 	}
 
 	run = append(run, dockerNet...)
