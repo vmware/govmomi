@@ -85,7 +85,17 @@ func WriteUnixFrame(w io.Writer, buf []byte) error {
 	return err
 }
 
+// MaxUnixFrameSize bounds the payload length ReadUnixFrame will accept.
+//
+// The length prefix is supplied by the peer. On a container-backed VM the
+// socket directory is bind-mounted read-write into a container that may run an
+// arbitrary image, so without a bound four bytes from the guest would size an
+// allocation in the host process (up to 4 GiB). RPCI commands and their
+// responses are small; 1 MiB is well above any legitimate frame.
+const MaxUnixFrameSize = 1 << 20
+
 // ReadUnixFrame reads a 4-byte LE length prefix and then that many bytes.
+// Frames declaring more than MaxUnixFrameSize are rejected before allocating.
 // Exported so that govmomi/simulator can share the same framing.
 func ReadUnixFrame(r io.Reader) ([]byte, error) {
 	var hdr [4]byte
@@ -95,6 +105,9 @@ func ReadUnixFrame(r io.Reader) ([]byte, error) {
 	n := binary.LittleEndian.Uint32(hdr[:])
 	if n == 0 {
 		return nil, nil
+	}
+	if n > MaxUnixFrameSize {
+		return nil, fmt.Errorf("unix frame too large: %d bytes (max %d)", n, MaxUnixFrameSize)
 	}
 	buf := make([]byte, n)
 	_, err := io.ReadFull(r, buf)
