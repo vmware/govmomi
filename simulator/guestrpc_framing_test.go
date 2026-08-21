@@ -6,11 +6,15 @@ package simulator
 
 import (
 	"net"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/vmware/govmomi/toolbox"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // serveOnePipe runs serveConn against one end of a net.Pipe and returns the
@@ -102,4 +106,75 @@ func TestInfoSet_RejectsNonGuestinfoNamespace(t *testing.T) {
 			t.Errorf("info-set %s: got %q, want a rejection", key, got)
 		}
 	}
+}
+
+// TestInfoSet_RejectsSlashInKey pins real VMX's second guest-write
+// restriction: a key containing "/" is read-only from the guest even when it
+// is otherwise under guestinfo.*. This is distinct from the namespace check
+// above — a key can pass the guestinfo. prefix and still be unwritable.
+func TestInfoSet_RejectsSlashInKey(t *testing.T) {
+	srv := newGuestRPCServer(&VirtualMachine{}, "")
+
+	for _, key := range []string{
+		"guestinfo.foo/bar",
+		"guestinfo./tools/state",
+	} {
+		if got := srv.dispatch("info-set " + key + " value"); !strings.HasPrefix(got, "0 ") {
+			t.Errorf("info-set %s: got %q, want a rejection", key, got)
+		}
+	}
+}
+
+// TestInfoGet_RejectsNonGuestinfoNamespace mirrors
+// TestInfoSet_RejectsNonGuestinfoNamespace for the read side. Real VMX
+// restricts info-get to guestinfo.* the same as info-set; before this test
+// existed, info-get had no namespace check at all and would return the value
+// of any ExtraConfig key present on the VM, including RUN.* host-config
+// directives.
+func TestInfoGet_RejectsNonGuestinfoNamespace(t *testing.T) {
+	srv := newGuestRPCServer(&VirtualMachine{}, "")
+
+	for _, key := range []string{
+		"RUN.container",
+		"RUN.vmci",
+		"RUN.volume.evil",
+		"guestinfoNoDot",
+	} {
+		if got := srv.dispatch("info-get " + key); !strings.HasPrefix(got, "0 ") {
+			t.Errorf("info-get %s: got %q, want a rejection", key, got)
+		}
+	}
+}
+
+// TestInfoGet_AllowsSlashInKey pins the asymmetry: unlike info-set, info-get
+// does NOT reject a slash-containing guestinfo.* key. Real VMX makes such
+// keys read-only from the guest, not unreadable — the host (e.g. via
+// ReconfigVM) can still set one, and the guest can still read it back.
+func TestInfoGet_AllowsSlashInKey(t *testing.T) {
+	env := newVCSIMEnv(t)
+
+	vmObj := firstVM(env.simCtx)
+	require.NotNil(t, vmObj, "no VMs in test inventory")
+
+	const key = "guestinfo.foo/bar"
+	const val = "host-value"
+
+	// Host-side write, bypassing GuestRPC entirely (as ReconfigVM would).
+	// Only the guest info-set path enforces the slash restriction.
+	env.simCtx.AutoUpdate(vmObj, func() {
+		vmObj.Config.ExtraConfig = append(vmObj.Config.ExtraConfig,
+			&types.OptionValue{Key: key, Value: val})
+	})
+
+	socketPath := GuestRPCSocketPath(vmObj.Self.Value)
+	t.Cleanup(func() { _ = os.Remove(socketPath) })
+
+	srv := newGuestRPCServer(vmObj, socketPath)
+	require.NoError(t, srv.Start(env.simCtx))
+	t.Cleanup(srv.Stop)
+
+	out := dialGuestRPC(t, socketPath)
+	reply, err := out.Request([]byte("info-get " + key))
+	require.NoError(t, err, "info-get")
+	require.Equal(t, val, strings.TrimSpace(string(reply)))
 }

@@ -31,12 +31,27 @@ const (
 	// bind-mount creates a new submount that overrides the tmpfs contents at that path.
 	GuestRPCSocketDir = "/run/vmware"
 
-	// guestInfoPrefix is the only ExtraConfig namespace a guest may write via
-	// info-set. Real VMX restricts guest writes to guestinfo.*, and vcsim reads
-	// other namespaces (RUN.*) as host-side container directives — so accepting
-	// them here would let guest code reconfigure its own backing on next start.
+	// guestInfoPrefix is the only ExtraConfig namespace a guest may read or
+	// write via GuestRPC. Real VMX restricts guest access to guestinfo.*, and
+	// vcsim reads other namespaces (RUN.*) as host-side container directives —
+	// so accepting them here would let guest code inspect or reconfigure its
+	// own backing on next start.
 	guestInfoPrefix = "guestinfo."
 )
+
+// isGuestReadable reports whether key is a namespace a guest may read via
+// info-get. Real VMX restricts guest reads to guestinfo.*.
+func isGuestReadable(key string) bool {
+	return strings.HasPrefix(key, guestInfoPrefix)
+}
+
+// isGuestWritable reports whether key is a namespace a guest may write via
+// info-set. Real VMX additionally makes any key containing "/" read-only
+// from the guest (used for host/tools-managed sub-namespaces under
+// guestinfo.*), so a writable key must be readable AND slash-free.
+func isGuestWritable(key string) bool {
+	return isGuestReadable(key) && !strings.Contains(key, "/")
+}
 
 // GuestRPCServer is a per-VM host-side server that implements the toolbox RPCI
 // protocol over a Unix stream socket.
@@ -260,6 +275,10 @@ func (s *GuestRPCServer) dispatch(cmd string) string {
 
 // infoGet reads key from the VM's ExtraConfig under the object lock.
 func (s *GuestRPCServer) infoGet(key string) string {
+	if !isGuestReadable(key) {
+		return "0 Permission denied"
+	}
+
 	s.rpcMu.RLock()
 	defer s.rpcMu.RUnlock()
 
@@ -287,7 +306,7 @@ func (s *GuestRPCServer) infoGet(key string) string {
 
 // infoSet writes key=value to the VM's ExtraConfig and emits a PropertyChange.
 func (s *GuestRPCServer) infoSet(key, value string) string {
-	if !strings.HasPrefix(key, guestInfoPrefix) {
+	if !isGuestWritable(key) {
 		return "0 Permission denied"
 	}
 
