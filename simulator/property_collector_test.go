@@ -311,6 +311,82 @@ func TestWaitForUpdates(t *testing.T) {
 	}
 }
 
+// TestWaitForUpdatesConcurrentCancel guards a documented contract:
+// CancelWaitForUpdates must be callable from another goroutine to interrupt a
+// WaitForUpdatesEx blocked waiting for changes. PropertyCollector opts out of
+// the request dispatcher's per-object lock (see nopLocker), so the two don't
+// serialize against each other today, but if that opt-out were ever lost --
+// e.g. the dispatch lock started being cached/shared for PropertyCollector --
+// this would deadlock: the cancel could not acquire the lock on the same
+// collector until the wait returns, which it never would.
+func TestWaitForUpdatesConcurrentCancel(t *testing.T) {
+	folder := esx.RootFolder
+	ctx := NewContext()
+	s := New(NewServiceInstance(ctx, esx.ServiceContent, folder))
+
+	ts := s.NewServer()
+	defer ts.Close()
+
+	c, err := govmomi.NewClient(ctx, ts.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pc := property.DefaultCollector(c.Client)
+	p, err := pc.Create(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	spec := types.PropertyFilterSpec{
+		ObjectSet: []types.ObjectSpec{{Obj: folder.Reference()}},
+		PropSet:   []types.PropertySpec{{Type: "Folder", PathSet: []string{"name"}}},
+	}
+	if _, err = methods.CreateFilter(ctx, c.Client, &types.CreateFilter{This: p.Reference(), Spec: spec}); err != nil {
+		t.Fatal(err)
+	}
+
+	// Initial call returns the current state and a version token.
+	res, err := methods.WaitForUpdatesEx(ctx, c.Client, &types.WaitForUpdatesEx{This: p.Reference()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	version := res.Returnval.Version
+
+	// This second call blocks server-side: nothing changes "name", so it waits.
+	waitDone := make(chan struct{})
+	go func() {
+		_, _ = methods.WaitForUpdatesEx(ctx, c.Client, &types.WaitForUpdatesEx{
+			This:    p.Reference(),
+			Version: version,
+		})
+		close(waitDone)
+	}()
+
+	// Give the blocking wait time to enter the server-side wait loop.
+	time.Sleep(200 * time.Millisecond)
+
+	cancelDone := make(chan error, 1)
+	go func() {
+		cancelDone <- p.CancelWaitForUpdates(ctx)
+	}()
+
+	select {
+	case err = <-cancelDone:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("deadlock: CancelWaitForUpdates blocked behind WaitForUpdatesEx holding the PropertyCollector object lock")
+	}
+
+	select {
+	case <-waitDone:
+	case <-time.After(5 * time.Second):
+		t.Fatal("WaitForUpdatesEx did not return after CancelWaitForUpdates")
+	}
+}
+
 func TestIncrementalWaitForUpdates(t *testing.T) {
 	ctx := context.Background()
 

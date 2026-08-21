@@ -7,6 +7,7 @@ package simulator
 import (
 	"reflect"
 	"strings"
+	"sync/atomic"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -19,7 +20,12 @@ type PropertyFilter struct {
 
 	pc   *PropertyCollector
 	refs map[types.ManagedObjectReference]struct{}
-	sync bool
+	// sync is atomic so UpdateObject can flag a re-sync without taking this
+	// filter's object lock. UpdateObject runs from applyHandlers while the
+	// caller already holds the traversal object's lock (e.g. ModifyListView
+	// holds the ListView lock); taking the filter lock there inverts the
+	// filter->object order used by update/collect and deadlocks.
+	sync atomic.Bool
 }
 
 func (f *PropertyFilter) UpdateObject(ctx *Context, o mo.Reference, changes []types.PropertyChange) {
@@ -32,7 +38,7 @@ func (f *PropertyFilter) UpdateObject(ctx *Context, o mo.Reference, changes []ty
 
 	for _, set := range f.Spec.ObjectSet {
 		if set.Obj == ref && len(set.SelectSet) != 0 {
-			ctx.WithLock(f, func() { f.sync = true })
+			f.sync.Store(true)
 			break
 		}
 	}
@@ -65,12 +71,12 @@ func (f *PropertyFilter) collect(ctx *Context) (*types.RetrieveResult, types.Bas
 }
 
 func (f *PropertyFilter) update(ctx *Context) {
+	if !f.sync.CompareAndSwap(true, false) {
+		return
+	}
 	ctx.WithLock(f, func() {
-		if f.sync {
-			f.sync = false
-			clear(f.refs)
-			_, _ = f.collect(ctx)
-		}
+		clear(f.refs)
+		_, _ = f.collect(ctx)
 	})
 }
 
