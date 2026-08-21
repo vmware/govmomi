@@ -13,15 +13,18 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	// Remove any leftover vcsim GuestRPC sockets from previously crashed test
-	// runs.  A fresh Start() would also remove them, but sweeping here catches
-	// all patterns before any test even begins.
+	// Remove leftover vcsim GuestRPC socket directories from crashed test runs.
+	//
+	// The socket lives at <TempDir>/vcsim-rpc-<uid>/rpc.sock, so the pattern
+	// must match the DIRECTORY: filepath.Match does not let * cross a path
+	// separator, so a "vcsim-rpc-*.sock" pattern matched nothing and the
+	// directories accumulated under TempDir.
 	for _, pattern := range []string{
-		filepath.Join(os.TempDir(), "vcsim-rpc-*.sock"),
+		filepath.Join(os.TempDir(), "vcsim-rpc-*"),
 	} {
 		if matches, err := filepath.Glob(pattern); err == nil {
 			for _, f := range matches {
-				_ = os.Remove(f)
+				_ = os.RemoveAll(f)
 			}
 		}
 	}

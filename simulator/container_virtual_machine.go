@@ -605,14 +605,18 @@ func (svm *simVM) stop(ctx *Context) error {
 		return nil
 	}
 
+	// Release the GuestRPC server on every path out, including the error path
+	// below: a container-stop failure must not leave the listener, its
+	// goroutines and the socket alive. remove() defers identically, so the two
+	// teardown paths agree rather than differing for no stated reason.
+	if svm.guestRPC != nil {
+		defer svm.guestRPC.Stop()
+	}
+
 	err := svm.c.stop(ctx)
 	if err != nil {
 		log.Printf("%s %s: %s", svm.vm.Name, "stop", err)
 		return err
-	}
-
-	if svm.guestRPC != nil {
-		svm.guestRPC.Stop()
 	}
 
 	ctx.Update(svm.vm, toolsNotRunning)
@@ -662,8 +666,9 @@ func (svm *simVM) remove(ctx *Context) error {
 		return nil
 	}
 
+	// Deferred to match stop(): released on the error path too.
 	if svm.guestRPC != nil {
-		svm.guestRPC.Stop()
+		defer svm.guestRPC.Stop()
 	}
 
 	err := svm.c.remove(ctx)
