@@ -16,6 +16,15 @@ const (
 	DMFieldTypeString = 2
 )
 
+// MaxDataMapEntries bounds the entries section ReadDataMapPacket will accept.
+//
+// The length prefix is supplied by the peer. govmomi/simulator bind-mounts the
+// GuestRPC socket directory read-write into a container that may run an
+// arbitrary image, so without a bound four bytes from the guest would size an
+// allocation in the host process (up to 4 GiB). RPCI commands and their
+// responses are small; 1 MiB is well above any legitimate packet.
+const MaxDataMapEntries = 1 << 20
+
 // GuestRPC DataMap field IDs (from open-vm-tools lib/guestRpc/tclodefs.h).
 const (
 	GuestRPCFieldType      = 1
@@ -43,6 +52,10 @@ func ReadDataMapPacket(r io.Reader) (payload []byte, fastClose bool, err error) 
 	entriesLen := binary.BigEndian.Uint32(hdr[:])
 	if entriesLen == 0 {
 		return nil, false, nil
+	}
+	if entriesLen > MaxDataMapEntries {
+		return nil, false, fmt.Errorf(
+			"DataMap packet too large: %d bytes (max %d)", entriesLen, MaxDataMapEntries)
 	}
 
 	entries := make([]byte, entriesLen)

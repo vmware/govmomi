@@ -5,8 +5,6 @@
 package simulator
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"io"
 	"log"
@@ -33,11 +31,6 @@ const (
 	// bind-mount creates a new submount that overrides the tmpfs contents at that path.
 	GuestRPCSocketDir = "/run/vmware"
 
-	// dataMapMinEntries is the smallest possible DataMap entries section: one
-	// field header of fieldType(4B) + fieldID(4B). Used to rule out DataMap
-	// framing without consuming bytes the LE path would need.
-	dataMapMinEntries = 8
-
 	// guestInfoPrefix is the only ExtraConfig namespace a guest may write via
 	// info-set. Real VMX restricts guest writes to guestinfo.*, and vcsim reads
 	// other namespaces (RUN.*) as host-side container directives — so accepting
@@ -48,9 +41,11 @@ const (
 // GuestRPCServer is a per-VM host-side server that implements the toolbox RPCI
 // protocol over a Unix stream socket.
 //
-// Wire format: 4-byte LE uint32 length prefix + payload bytes, matching
-// toolbox.WriteUnixFrame / toolbox.ReadUnixFrame. Response status prefix:
-// "1 " = success, "0 " = error (same as toolbox.rpciOK / rpciERR).
+// Wire format: DataMap packets, the same framing real vmtoolsd uses over
+// AF_VSOCK (toolbox.ReadDataMapPacket / WriteDataMapPacket). Using one framing
+// across every GuestRPC transport means this server never has to guess what it
+// is reading. Response status prefix: "1 " = success, "0 " = error (same as
+// toolbox.rpciOK / rpciERR).
 //
 // Each VM with RUN.vmci=true has its own GuestRPCServer at a unique socket path.
 // Multiple concurrent VMs do not share any state.
@@ -191,86 +186,11 @@ func (s *GuestRPCServer) serveConn(conn net.Conn) {
 		}
 	}()
 
-	// Detect which framing this connection uses.
-	//
-	// Two protocols reach this server and both begin with a 4-byte length, so
-	// the length alone cannot separate them: a DataMap length is big-endian, an
-	// LE-frame length is little-endian, and the two readings overlap. A
-	// magnitude threshold therefore has holes in both directions — measured, a
-	// DataMap entries section of 256 bytes (an ordinary info-set) reads as
-	// 65536 little-endian and would be misrouted.
-	//
-	// Discriminate on STRUCTURE instead. A DataMap entries section opens with a
-	// field header of fieldType(4B) fieldID(4B), both big-endian and both small
-	// (see toolbox.ReadDataMapPacket). An LE frame's payload is an RPCI command
-	// string, so its first bytes are ASCII and can never be the zero bytes a
-	// big-endian small integer starts with.
-	var hdr [4]byte
-	if _, err := io.ReadFull(conn, hdr[:]); err != nil {
-		return
-	}
-	beLen := binary.BigEndian.Uint32(hdr[:])
-	leLen := binary.LittleEndian.Uint32(hdr[:])
-
-	consumed := hdr[:]
-	isDataMap := false
-
-	// A DataMap entries section holds at least one 8-byte field header. When
-	// either reading rules that out, the framing is settled without reading
-	// further — which also avoids blocking on a short or zero-length LE frame.
-	if beLen >= dataMapMinEntries && leLen >= dataMapMinEntries {
-		var probe [8]byte
-		if _, err := io.ReadFull(conn, probe[:]); err != nil {
-			return
-		}
-		consumed = append(hdr[:], probe[:]...)
-
-		fieldType := binary.BigEndian.Uint32(probe[0:4])
-		fieldID := binary.BigEndian.Uint32(probe[4:8])
-		isDataMap = (fieldType == toolbox.DMFieldTypeInt64 || fieldType == toolbox.DMFieldTypeString) &&
-			fieldID >= toolbox.GuestRPCFieldType && fieldID <= toolbox.GuestRPCFieldFastClose
-	}
-
-	// MultiReader replays every byte consumed above so the framing logic can
-	// re-read the header it was given.
-	mr := io.MultiReader(bytes.NewReader(consumed), conn)
-
-	if isDataMap {
-		s.serveConnDataMap(mr, conn)
-	} else {
-		s.serveConnLEWithConn(mr, conn)
-	}
-}
-
-// serveConnLEWithConn handles connections using the 4-byte LE length-prefix
-// framing (toolbox.UnixChannel / vmci-guest test binary protocol).
-func (s *GuestRPCServer) serveConnLEWithConn(r io.Reader, w io.Writer) {
-	for {
-		select {
-		case <-s.done:
-			return
-		default:
-		}
-
-		msg, err := toolbox.ReadUnixFrame(r)
-		if err != nil {
-			return
-		}
-		if msg == nil {
-			if werr := toolbox.WriteUnixFrame(w, []byte("1 ")); werr != nil {
-				return
-			}
-			continue
-		}
-		rpcCmd := strings.TrimRight(string(msg), "\x00")
-		if Trace {
-			log.Printf("GuestRPCServer %s: cmd=%q", s.vm.Name, rpcCmd)
-		}
-		resp := s.dispatch(rpcCmd)
-		if werr := toolbox.WriteUnixFrame(w, []byte(resp)); werr != nil {
-			return
-		}
-	}
+	// One framing on this socket: DataMap, the format real vmtoolsd speaks.
+	// There is nothing to detect, which is deliberate — two self-delimiting
+	// framings sharing one socket cannot be told apart reliably by any length
+	// heuristic, and the guest chooses the lengths by padding its payload.
+	s.serveConnDataMap(conn, conn)
 }
 
 // serveConnDataMap handles connections using the DataMap framing protocol,

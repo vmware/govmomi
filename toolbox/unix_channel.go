@@ -5,20 +5,23 @@
 package toolbox
 
 import (
-	"encoding/binary"
 	"fmt"
-	"io"
 	"net"
 )
 
 // UnixChannel implements the Channel interface over a Unix stream socket.
 //
-// Wire format: each message is framed as a 4-byte little-endian uint32 length
-// prefix followed by that many payload bytes. The same framing is used in both
-// directions (Send and Receive). Zero-length messages are valid (empty payload).
+// Wire format: DataMap packets — the same framing real vmtoolsd uses over
+// AF_VSOCK, and the same framing VsockChannel speaks. One framing across every
+// GuestRPC transport means the server never has to guess which it is reading,
+// and it keeps the simulator exercising the parse path a real guest exercises.
 //
-// This framing is compatible with the ChannelOut.Request pattern used throughout
-// the toolbox package: Send("info-set guestinfo.xxx value") then Receive() returns
+// fastClose is NOT set: the connection is opened once by Start and reused for
+// the lifetime of the channel, so the server must keep serving it. (VsockChannel
+// sets fastClose because it opens a fresh connection per exchange.)
+//
+// This is compatible with the ChannelOut.Request pattern used throughout the
+// toolbox package: Send("info-set guestinfo.xxx value") then Receive() returns
 // "1 " on success or "0 <error>" on failure.
 //
 // Usage (guest side – inside a container or test binary):
@@ -60,56 +63,13 @@ func (c *UnixChannel) Stop() error {
 	return err
 }
 
-// Send transmits buf as a length-prefixed frame to the server.
+// Send transmits buf as a DataMap packet to the server.
 func (c *UnixChannel) Send(buf []byte) error {
-	return WriteUnixFrame(c.conn, buf)
+	return WriteDataMapPacket(c.conn, buf, false)
 }
 
-// Receive reads one length-prefixed frame from the server.
+// Receive reads one DataMap packet from the server.
 func (c *UnixChannel) Receive() ([]byte, error) {
-	return ReadUnixFrame(c.conn)
-}
-
-// WriteUnixFrame writes a 4-byte LE length prefix followed by buf.
-// Exported so that govmomi/simulator can share the same framing.
-func WriteUnixFrame(w io.Writer, buf []byte) error {
-	var hdr [4]byte
-	binary.LittleEndian.PutUint32(hdr[:], uint32(len(buf)))
-	if _, err := w.Write(hdr[:]); err != nil {
-		return err
-	}
-	if len(buf) == 0 {
-		return nil
-	}
-	_, err := w.Write(buf)
-	return err
-}
-
-// MaxUnixFrameSize bounds the payload length ReadUnixFrame will accept.
-//
-// The length prefix is supplied by the peer. On a container-backed VM the
-// socket directory is bind-mounted read-write into a container that may run an
-// arbitrary image, so without a bound four bytes from the guest would size an
-// allocation in the host process (up to 4 GiB). RPCI commands and their
-// responses are small; 1 MiB is well above any legitimate frame.
-const MaxUnixFrameSize = 1 << 20
-
-// ReadUnixFrame reads a 4-byte LE length prefix and then that many bytes.
-// Frames declaring more than MaxUnixFrameSize are rejected before allocating.
-// Exported so that govmomi/simulator can share the same framing.
-func ReadUnixFrame(r io.Reader) ([]byte, error) {
-	var hdr [4]byte
-	if _, err := io.ReadFull(r, hdr[:]); err != nil {
-		return nil, err
-	}
-	n := binary.LittleEndian.Uint32(hdr[:])
-	if n == 0 {
-		return nil, nil
-	}
-	if n > MaxUnixFrameSize {
-		return nil, fmt.Errorf("unix frame too large: %d bytes (max %d)", n, MaxUnixFrameSize)
-	}
-	buf := make([]byte, n)
-	_, err := io.ReadFull(r, buf)
-	return buf, err
+	payload, _, err := ReadDataMapPacket(c.conn)
+	return payload, err
 }
