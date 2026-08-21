@@ -32,6 +32,17 @@ const (
 	// A file bind-mount target under a tmpfs must already exist as a file; a directory
 	// bind-mount creates a new submount that overrides the tmpfs contents at that path.
 	GuestRPCSocketDir = "/run/vmware"
+
+	// dataMapMinEntries is the smallest possible DataMap entries section: one
+	// field header of fieldType(4B) + fieldID(4B). Used to rule out DataMap
+	// framing without consuming bytes the LE path would need.
+	dataMapMinEntries = 8
+
+	// guestInfoPrefix is the only ExtraConfig namespace a guest may write via
+	// info-set. Real VMX restricts guest writes to guestinfo.*, and vcsim reads
+	// other namespaces (RUN.*) as host-side container directives — so accepting
+	// them here would let guest code reconfigure its own backing on next start.
+	guestInfoPrefix = "guestinfo."
 )
 
 // GuestRPCServer is a per-VM host-side server that implements the toolbox RPCI
@@ -84,7 +95,7 @@ func newGuestRPCServer(vm *VirtualMachine, socketPath string) *GuestRPCServer {
 	}
 }
 
-// GuestRPCSocketDir returns the canonical per-VM host-side socket directory.
+// GuestRPCSocketDirPath returns the canonical per-VM host-side socket directory.
 // The directory is bind-mounted at GuestRPCSocketDir inside the container.
 // Using a directory mount (not a file mount) means the submount is visible even
 // when RUN.nestedContainers=true adds --tmpfs /run: the directory mount is applied
@@ -162,7 +173,9 @@ func (s *GuestRPCServer) acceptLoop() {
 				return
 			}
 		}
-		log.Printf("GuestRPCServer %s: new connection from %s", s.vm.Name, conn.RemoteAddr())
+		if Trace {
+			log.Printf("GuestRPCServer %s: new connection from %s", s.vm.Name, conn.RemoteAddr())
+		}
 		s.wg.Add(1)
 		go s.serveConn(conn)
 	}
@@ -178,21 +191,20 @@ func (s *GuestRPCServer) serveConn(conn net.Conn) {
 		}
 	}()
 
-	// Peek at the first 4 bytes to detect the framing protocol in use.
+	// Detect which framing this connection uses.
 	//
-	// Two protocols reach this server:
+	// Two protocols reach this server and both begin with a 4-byte length, so
+	// the length alone cannot separate them: a DataMap length is big-endian, an
+	// LE-frame length is little-endian, and the two readings overlap. A
+	// magnitude threshold therefore has holes in both directions — measured, a
+	// DataMap entries section of 256 bytes (an ordinary info-set) reads as
+	// 65536 little-endian and would be misrouted.
 	//
-	//  1. DataMap / vsock protocol — used by real vmtoolsd binaries.
-	//     The first 4 bytes are a big-endian uint32 = length of the DataMap
-	//     entries section.  For realistic payloads this value is 10–500 bytes,
-	//     so the first byte is 0x00.  Interpreted as little-endian the value
-	//     is enormous (> 1 GB), which is the distinguishing property.
-	//
-	//  2. LE-frame protocol — used by the vmci-guest test binary and
-	//     toolbox.UnixChannel.  The first 4 bytes are a little-endian uint32 =
-	//     payload length.  For realistic payloads this value is 10–500 bytes,
-	//     so the last byte is 0x00.  Interpreted as big-endian the value is
-	//     enormous (> 1 GB).
+	// Discriminate on STRUCTURE instead. A DataMap entries section opens with a
+	// field header of fieldType(4B) fieldID(4B), both big-endian and both small
+	// (see toolbox.ReadDataMapPacket). An LE frame's payload is an RPCI command
+	// string, so its first bytes are ASCII and can never be the zero bytes a
+	// big-endian small integer starts with.
 	var hdr [4]byte
 	if _, err := io.ReadFull(conn, hdr[:]); err != nil {
 		return
@@ -200,16 +212,32 @@ func (s *GuestRPCServer) serveConn(conn net.Conn) {
 	beLen := binary.BigEndian.Uint32(hdr[:])
 	leLen := binary.LittleEndian.Uint32(hdr[:])
 
-	// MultiReader replays the header bytes so framing logic can re-read them.
-	mr := io.MultiReader(bytes.NewReader(hdr[:]), conn)
+	consumed := hdr[:]
+	isDataMap := false
 
-	const maxReasonableLen = 1 << 20 // 1 MiB
-	if beLen < maxReasonableLen && leLen >= maxReasonableLen {
-		// DataMap framing: big-endian length prefix + DataMap-encoded body.
+	// A DataMap entries section holds at least one 8-byte field header. When
+	// either reading rules that out, the framing is settled without reading
+	// further — which also avoids blocking on a short or zero-length LE frame.
+	if beLen >= dataMapMinEntries && leLen >= dataMapMinEntries {
+		var probe [8]byte
+		if _, err := io.ReadFull(conn, probe[:]); err != nil {
+			return
+		}
+		consumed = append(hdr[:], probe[:]...)
+
+		fieldType := binary.BigEndian.Uint32(probe[0:4])
+		fieldID := binary.BigEndian.Uint32(probe[4:8])
+		isDataMap = (fieldType == toolbox.DMFieldTypeInt64 || fieldType == toolbox.DMFieldTypeString) &&
+			fieldID >= toolbox.GuestRPCFieldType && fieldID <= toolbox.GuestRPCFieldFastClose
+	}
+
+	// MultiReader replays every byte consumed above so the framing logic can
+	// re-read the header it was given.
+	mr := io.MultiReader(bytes.NewReader(consumed), conn)
+
+	if isDataMap {
 		s.serveConnDataMap(mr, conn)
 	} else {
-		// LE-frame framing: little-endian length prefix + raw payload.
-		// Reads via mr (replays header), writes directly to conn.
 		s.serveConnLEWithConn(mr, conn)
 	}
 }
@@ -235,7 +263,9 @@ func (s *GuestRPCServer) serveConnLEWithConn(r io.Reader, w io.Writer) {
 			continue
 		}
 		rpcCmd := strings.TrimRight(string(msg), "\x00")
-		log.Printf("GuestRPCServer %s: cmd=%q", s.vm.Name, rpcCmd)
+		if Trace {
+			log.Printf("GuestRPCServer %s: cmd=%q", s.vm.Name, rpcCmd)
+		}
 		resp := s.dispatch(rpcCmd)
 		if werr := toolbox.WriteUnixFrame(w, []byte(resp)); werr != nil {
 			return
@@ -263,8 +293,10 @@ func (s *GuestRPCServer) serveConnDataMap(r io.Reader, w io.Writer) {
 		}
 
 		rpcCmd := strings.TrimRight(string(payload), "\x00")
-		log.Printf("GuestRPCServer %s: [vsock/DataMap] cmd=%q fastClose=%v",
-			s.vm.Name, rpcCmd, fastClose)
+		if Trace {
+			log.Printf("GuestRPCServer %s: [vsock/DataMap] cmd=%q fastClose=%v",
+				s.vm.Name, rpcCmd, fastClose)
+		}
 
 		resp := s.dispatch(rpcCmd)
 		if werr := toolbox.WriteDataMapPacket(w, []byte(resp), false); werr != nil {
@@ -335,10 +367,18 @@ func (s *GuestRPCServer) infoGet(key string) string {
 
 // infoSet writes key=value to the VM's ExtraConfig and emits a PropertyChange.
 func (s *GuestRPCServer) infoSet(key, value string) string {
+	if !strings.HasPrefix(key, guestInfoPrefix) {
+		return "0 Permission denied"
+	}
+
 	s.rpcMu.Lock()
 	defer s.rpcMu.Unlock()
 
-	log.Printf("GuestRPCServer %s: info-set %s=%q", s.vm.Name, key, value)
+	// The value is guest-supplied and routinely carries cloud-init userdata,
+	// so it is never logged; the key alone identifies the operation.
+	if Trace {
+		log.Printf("GuestRPCServer %s: info-set %s", s.vm.Name, key)
+	}
 	s.ctx.AutoUpdate(s.vm, func() {
 		for _, opt := range s.vm.Config.ExtraConfig {
 			v := opt.GetOptionValue()
@@ -353,9 +393,13 @@ func (s *GuestRPCServer) infoSet(key, value string) string {
 	return "1 "
 }
 
-// vmciEnabled reports whether the full VMCI simulation layer (Component A:
-// GuestRPC unix socket server + Component B: seccomp AF_VSOCK intercept) should
-// be activated for this VM.  Returns true when RUN.vmci is set to "true"
+// vmciEnabled reports whether the GuestRPC simulation layer should be
+// activated for this VM: a per-VM unix socket server speaking RPCI, plus
+// injection of the toolbox binary as /usr/bin/vmware-rpctool.
+//
+// A seccomp AF_VSOCK interception layer is future work and is NOT part of this
+// implementation; nothing here provides AF_VSOCK inside a container.
+// Returns true when RUN.vmci is set to "true"
 // (case-insensitive, whitespace-trimmed) in extraConfig.
 func vmciEnabled(extraConfig []types.BaseOptionValue) bool {
 	for _, opt := range extraConfig {
