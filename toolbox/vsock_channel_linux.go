@@ -106,11 +106,15 @@ func (c *VsockChannel) Receive() ([]byte, error) {
 	return payload, err
 }
 
-// IsVsockAvailable returns true if the kernel supports creating AF_VSOCK
-// sockets on this system. On govmomi/simulator container-backed VMs the seccomp
-// intercept handles the socket() call, so this returns true inside containers
-// with RUN.vmci=true. On bare containers or non-VM hosts without the vmci kernel
-// module it returns false, enabling the backdoor fallback.
+// IsVsockAvailable reports whether the kernel will CREATE an AF_VSOCK socket
+// on this system. It does not report that any peer is reachable: socket(2)
+// succeeds on any host with the vsock address family compiled in, including
+// hosts with no vmci module loaded and containers under govmomi/simulator,
+// where nothing answers on the vsock CID.
+//
+// It is therefore a capability probe, not a reachability test, and must not be
+// used to select a transport on its own — see rpcTransports in
+// toolbox/toolbox, which selects by successful connection instead.
 func IsVsockAvailable() bool {
 	fd, err := syscall.Socket(afVsock, syscall.SOCK_STREAM, 0)
 	if err != nil {

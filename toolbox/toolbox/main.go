@@ -121,15 +121,96 @@ func main() {
 }
 
 // selectChannels returns (in, out) channels for daemon mode.
-// VMX_RPC_SOCK is NOT used here: the Unix socket server closes after each
-// request, so a persistent daemon channel would break on the second exchange.
-// Daemon mode relies on AF_VSOCK (which the seccomp intercept keeps alive
-// during initial crun setup) or the x86 backdoor.
+//
+// It selects from rpcTransports, the same ordered list the one-shot modes use,
+// so daemon mode cannot drift apart from them. A transport is chosen by
+// connecting to it and then discarding the probe: Service.Start opens the
+// channel it is handed, so returning an already-started channel would dial
+// twice and leak the first connection.
+//
+// The Unix socket is a valid daemon transport. govmomi/simulator's GuestRPC
+// server serves a connection until read error and does not close after each
+// request, so a persistent daemon channel over it survives repeated exchanges.
 func selectChannels() (toolbox.Channel, toolbox.Channel) {
-	if toolbox.IsVsockAvailable() {
-		return toolbox.NewNoopChannelIn(), toolbox.NewVsockChannelOut()
+	all := rpcTransports()
+
+	for _, t := range all {
+		probe := t.out()
+		if err := probe.Start(); err != nil {
+			continue
+		}
+		_ = probe.Stop()
+		return t.in(), t.out()
 	}
-	return toolbox.NewBackdoorChannelIn(), toolbox.NewBackdoorChannelOut()
+
+	// Nothing answered. Hand back the last transport so Service.Start reports a
+	// real channel error rather than this function failing silently.
+	last := all[len(all)-1]
+	return last.in(), last.out()
+}
+
+// rpcTransport is one GuestRPC transport candidate.
+//
+// out and in are constructors rather than channel instances so that a caller
+// may probe a transport, discard the probe, and still hand an unopened channel
+// to a consumer that opens its own.
+type rpcTransport struct {
+	name string
+	out  func() toolbox.Channel
+	in   func() toolbox.Channel
+}
+
+// rpcTransports returns the GuestRPC transports in preference order.
+//
+// Every invocation mode selects from this one list, which is what keeps the
+// modes consistent; the ordering exists in exactly one place.
+//
+// Selection is by SUCCESSFUL CONNECTION, never by capability probe.
+// IsVsockAvailable reports only that the kernel will create an AF_VSOCK
+// socket, which succeeds on any host with the vsock family compiled in
+// regardless of whether a peer is listening, so choosing a transport on that
+// signal alone selects an endpoint that nothing answers on.
+//
+// Order:
+//  1. $VMX_RPC_SOCK unix socket — set by govmomi/simulator on container-backed
+//     VMs. Accessible for the full container lifetime, and unaffected by the
+//     crun-to-systemd exec transition.
+//  2. Well-known unix path — the same socket reached by path when
+//     VMX_RPC_SOCK is absent from the environment, which is the case for
+//     systemd service units (systemd does not propagate PID 1's environment).
+//  3. AF_VSOCK with DataMap framing — real VMs with the vmci module loaded.
+//  4. x86 backdoor — VMware Workstation/Fusion fallback.
+func rpcTransports() []rpcTransport {
+	noopIn := func() toolbox.Channel { return toolbox.NewNoopChannelIn() }
+
+	var transports []rpcTransport
+	seen := map[string]bool{}
+
+	for _, sockPath := range []string{os.Getenv("VMX_RPC_SOCK"), wellKnownGuestRPCSock} {
+		if sockPath == "" || seen[sockPath] {
+			continue
+		}
+		seen[sockPath] = true
+
+		transports = append(transports, rpcTransport{
+			name: "unix:" + sockPath,
+			out:  func() toolbox.Channel { return toolbox.NewUnixChannelOut(sockPath) },
+			in:   noopIn,
+		})
+	}
+
+	return append(transports,
+		rpcTransport{
+			name: "vsock",
+			out:  func() toolbox.Channel { return toolbox.NewVsockChannelOut() },
+			in:   noopIn,
+		},
+		rpcTransport{
+			name: "backdoor",
+			out:  func() toolbox.Channel { return toolbox.NewBackdoorChannelOut() },
+			in:   func() toolbox.Channel { return toolbox.NewBackdoorChannelIn() },
+		},
+	)
 }
 
 // wellKnownGuestRPCSock is the path at which govmomi/simulator bind-mounts the
@@ -140,44 +221,23 @@ func selectChannels() (toolbox.Channel, toolbox.Channel) {
 // variables from PID 1's environment to child service units).
 const wellKnownGuestRPCSock = "/run/vmware/rpc.sock"
 
-// openRPCChannel returns the best available GuestRPC outbound channel.
+// openRPCChannel returns a started Channel on the first transport in
+// rpcTransports that accepts a connection.
 //
-// Selection order:
-//  1. VMX_RPC_SOCK unix socket — set by govmomi/simulator on container-backed VMs.
-//     The socket is accessible for the full container lifetime and is not affected
-//     by the crun→systemd exec transition that invalidates the AF_VSOCK seccomp fd.
-//  2. Well-known unix socket path (/run/vmware/rpc.sock) — same socket as (1)
-//     but accessed by path when VMX_RPC_SOCK is not present in the process
-//     environment (e.g. systemd service units invoked from the bootstrapper).
-//  3. AF_VSOCK (DataMap framing) — real ESX VMs or RUN.vmci=true during crun phase.
-//  4. x86 backdoor — VMware Workstation/Fusion fallback.
-//
-// Returns a non-nil error only if all four transports are unavailable.
+// Returns a non-nil error only when no transport could be reached.
 func openRPCChannel() (toolbox.Channel, error) {
-	// Unix socket: try VMX_RPC_SOCK env var first, then the well-known path.
-	// If both resolve to the same path (or if VMX_RPC_SOCK is unset), the
-	// extra attempt is two fast dial failures — acceptable cost for simplicity.
-	for _, sockPath := range []string{os.Getenv("VMX_RPC_SOCK"), wellKnownGuestRPCSock} {
-		if sockPath == "" {
-			continue
-		}
-		ch := toolbox.NewUnixChannelOut(sockPath)
+	var names []string
+
+	for _, t := range rpcTransports() {
+		ch := t.out()
 		if err := ch.Start(); err == nil {
 			return ch, nil
 		}
+		names = append(names, t.name)
 	}
-	if toolbox.IsVsockAvailable() {
-		ch := toolbox.NewVsockChannelOut()
-		if err := ch.Start(); err == nil {
-			return ch, nil
-		}
-	}
-	ch := toolbox.NewBackdoorChannelOut()
-	if err := ch.Start(); err != nil {
-		return nil, fmt.Errorf("GuestRPC channel unavailable: unix socket not found at %s or %s, AF_VSOCK not present, and backdoor failed: %w",
-			os.Getenv("VMX_RPC_SOCK"), wellKnownGuestRPCSock, err)
-	}
-	return ch, nil
+
+	return nil, fmt.Errorf("GuestRPC channel unavailable: none of %s could be reached",
+		strings.Join(names, ", "))
 }
 
 // rpcCmd sends a raw GuestRPC command and prints the raw server response
