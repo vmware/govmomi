@@ -22,18 +22,16 @@ var (
 	vmciArtifactsErr         error
 )
 
-// artifactsBinDir returns the stable host directory used to cache vmci
-// simulation binaries across test invocations.
+// artifactsBinDir returns the stable host directory used to hold the built
+// toolbox binary across test invocations.
 //
-// The directory is simulator/bin/ relative to this source file so that the
-// binaries persist between "go test" runs.  When a binary already exists it is
-// re-used without invoking "go build", benefiting from Go's incremental build:
-// repeated test runs pay the compilation cost only on the first invocation (or
-// after sources change and the caller deletes the stale binary).
-//
-// To force a rebuild, delete the cache directory:
-//
-//	rm -rf <govmomi>/simulator/bin/
+// The directory is simulator/bin/ relative to this source file. "go build -o"
+// is invoked on every call (see buildToolboxArtifact); the directory only
+// exists to give that output a stable, discoverable path, not to skip the
+// build. Go's own content-addressed build cache (~/.cache/go-build) is what
+// makes repeated invocations cheap when toolbox sources are unchanged — this
+// directory deliberately carries no invalidation logic of its own, so a
+// presence check can never serve a binary built from stale sources.
 //
 // Falls back to os.MkdirTemp when the source path is unavailable (e.g. binaries
 // built with -trimpath or deployed outside the source tree).
@@ -70,25 +68,28 @@ func buildToolboxArtifact() (toolboxBinPath string, err error) {
 		}
 
 		toolboxBin := filepath.Join(dir, "toolbox")
-		if _, statErr := os.Stat(toolboxBin); os.IsNotExist(statErr) {
-			toolboxBuild := exec.Command(
-				"go", "build",
-				"-o", toolboxBin,
-				"github.com/vmware/govmomi/toolbox/toolbox",
-			)
-			toolboxBuild.Env = append(os.Environ(),
-				"CGO_ENABLED=0",
-				"GOOS=linux",
-				"GOARCH=amd64",
-			)
-			if out, buildErr := toolboxBuild.CombinedOutput(); buildErr != nil {
-				vmciArtifactsErr = fmt.Errorf("toolbox build: %w\n%s", buildErr, out)
-				return
-			}
-			log.Printf("vmci-artifacts: built toolbox at %s", toolboxBin)
-		} else {
-			log.Printf("vmci-artifacts: toolbox cached at %s", toolboxBin)
+		// Always build: a presence check here previously let an ancient binary
+		// (built before a toolbox wire-protocol change) go on serving requests
+		// indefinitely, since nothing about this directory's content changes
+		// when the sources it was built from do. "go build -o" always
+		// overwrites toolboxBin with a binary matching the current sources;
+		// Go's own build cache (keyed on source content, not a stat) is what
+		// keeps the repeat-invocation cost low.
+		toolboxBuild := exec.Command(
+			"go", "build",
+			"-o", toolboxBin,
+			"github.com/vmware/govmomi/toolbox/toolbox",
+		)
+		toolboxBuild.Env = append(os.Environ(),
+			"CGO_ENABLED=0",
+			"GOOS=linux",
+			"GOARCH=amd64",
+		)
+		if out, buildErr := toolboxBuild.CombinedOutput(); buildErr != nil {
+			vmciArtifactsErr = fmt.Errorf("toolbox build: %w\n%s", buildErr, out)
+			return
 		}
+		log.Printf("vmci-artifacts: built toolbox at %s", toolboxBin)
 		vmciArtifactsToolboxPath = toolboxBin
 	})
 	return vmciArtifactsToolboxPath, vmciArtifactsErr
