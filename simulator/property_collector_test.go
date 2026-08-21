@@ -311,13 +311,14 @@ func TestWaitForUpdates(t *testing.T) {
 	}
 }
 
-// TestWaitForUpdatesConcurrentCancel reproduces a simulator deadlock: the
-// request dispatcher holds a PropertyCollector's object lock for the entire
-// duration of a method call, so a WaitForUpdatesEx that blocks waiting for
-// changes holds that lock the whole time. CancelWaitForUpdates is documented
-// to be callable from another thread to interrupt a blocked wait, but it is a
-// method on the same collector, so it cannot acquire the object lock until the
-// wait returns -- which it never will. The two deadlock.
+// TestWaitForUpdatesConcurrentCancel guards a documented contract:
+// CancelWaitForUpdates must be callable from another goroutine to interrupt a
+// WaitForUpdatesEx blocked waiting for changes. PropertyCollector opts out of
+// the request dispatcher's per-object lock (see nopLocker), so the two don't
+// serialize against each other today, but if that opt-out were ever lost --
+// e.g. the dispatch lock started being cached/shared for PropertyCollector --
+// this would deadlock: the cancel could not acquire the lock on the same
+// collector until the wait returns, which it never would.
 func TestWaitForUpdatesConcurrentCancel(t *testing.T) {
 	folder := esx.RootFolder
 	ctx := NewContext()
