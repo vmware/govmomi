@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi/performance"
 	"github.com/vmware/govmomi/simulator/esx"
@@ -400,6 +401,81 @@ func TestQueryPerf(t *testing.T) {
 		}
 		if err := testPerfQueryCSV(ctx, m, ctx.Map.Any("ResourcePool"), 300, maxSample); err != nil {
 			t.Fatal(err)
+		}
+	}
+}
+
+// TestQueryPerfSampleInfoOrder asserts that QueryPerf returns PerfSampleInfo in
+// ascending (oldest first) chronological order, which is what a real vCenter does.
+// Returning them newest-first breaks clients that follow the vSphere convention of
+// treating SampleInfo[len-1] as the most recent sample.
+func TestQueryPerfSampleInfoOrder(t *testing.T) {
+	m := VPX()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Remove()
+
+	ctx := m.Service.Context
+	p := performance.NewManager(m.Service.client())
+
+	for _, test := range []struct {
+		kind     string
+		interval int32
+	}{
+		{"VirtualMachine", 20},
+		{"VirtualMachine", 300},
+		{"HostSystem", 20},
+		{"ClusterComputeResource", 300},
+	} {
+		entity := ctx.Map.Any(test.kind)
+
+		result, err := p.Query(ctx, []types.PerfQuerySpec{{
+			IntervalId: test.interval,
+			MetricId:   []types.PerfMetricId{{CounterId: 1}},
+			Entity:     entity.Reference(),
+		}})
+		if err != nil {
+			t.Fatalf("%s interval=%d: %s", test.kind, test.interval, err)
+		}
+
+		series, err := p.ToMetricSeries(ctx, result)
+		if err != nil {
+			t.Fatalf("%s interval=%d: %s", test.kind, test.interval, err)
+		}
+		if len(series) == 0 {
+			t.Fatalf("%s interval=%d: empty metric series", test.kind, test.interval)
+		}
+
+		for _, em := range series {
+			if len(em.SampleInfo) < 2 {
+				t.Fatalf("%s interval=%d: need >1 sample to check ordering, got %d",
+					test.kind, test.interval, len(em.SampleInfo))
+			}
+
+			for i := 1; i < len(em.SampleInfo); i++ {
+				prev, cur := em.SampleInfo[i-1].Timestamp, em.SampleInfo[i].Timestamp
+				if !cur.After(prev) {
+					t.Errorf("%s interval=%d: SampleInfo not ascending at index %d: %s then %s",
+						test.kind, test.interval, i, prev, cur)
+				}
+			}
+
+			// The interval spacing should match what was requested.
+			gap := em.SampleInfo[1].Timestamp.Sub(em.SampleInfo[0].Timestamp)
+			if want := time.Duration(test.interval) * time.Second; gap != want {
+				t.Errorf("%s interval=%d: sample spacing = %s, want %s",
+					test.kind, test.interval, gap, want)
+			}
+
+			// Values must line up 1:1 with the sample timestamps.
+			for _, v := range em.Value {
+				if len(v.Value) != len(em.SampleInfo) {
+					t.Errorf("%s interval=%d: %d values for %d samples",
+						test.kind, test.interval, len(v.Value), len(em.SampleInfo))
+				}
+			}
 		}
 	}
 }
