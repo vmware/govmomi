@@ -72,6 +72,8 @@ func main() {
 	flag.BoolVar(&model.Autostart, "autostart", model.Autostart, "Autostart model created VMs")
 	v := &model.ServiceContent.About.ApiVersion
 	flag.StringVar(v, "api-version", *v, "API version")
+	pv := &model.ServiceContent.About.Version
+	flag.StringVar(pv, "version", *pv, "Product version (e.g. vCenter version shown in About)")
 
 	isESX := flag.Bool("esx", false, "Simulate standalone ESX")
 	isTLS := flag.Bool("tls", true, "Enable TLS")
