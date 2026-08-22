@@ -273,6 +273,14 @@ func (s *SearchIndex) FindAllByIp(ctx *Context, req *types.FindAllByIp) soap.Has
 	if req.VmSearch {
 		// Find Virtual Machine using IP
 		for ref, obj := range ctx.Map.objects {
+			// ctx.Map.objects also holds non-entity helper objects (e.g.
+			// ManagedMethodExecuter, DynamicTypeManager, lazily created per
+			// HostSystem on esxcli passthrough use) that don't embed an mo
+			// type. asVirtualMachineMO -> getManagedObject panics on those,
+			// so skip anything that isn't actually a VirtualMachine first.
+			if ref.Type != "VirtualMachine" {
+				continue
+			}
 			vm, ok := asVirtualMachineMO(obj)
 			if !ok {
 				continue
@@ -284,6 +292,9 @@ func (s *SearchIndex) FindAllByIp(ctx *Context, req *types.FindAllByIp) soap.Has
 	} else {
 		// Find Host System using IP
 		for ref, obj := range ctx.Map.objects {
+			if ref.Type != "HostSystem" {
+				continue
+			}
 			host, ok := asHostSystemMO(obj)
 			if !ok {
 				continue
