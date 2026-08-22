@@ -7,9 +7,11 @@ package simulator
 import (
 	"context"
 	"crypto/tls"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"os"
 	"path"
 	"path/filepath"
@@ -88,6 +90,17 @@ type Model struct {
 	// ClusterHost specifies the number of HostSystems entities to create within a Cluster
 	// Name prefix: H, vcsim flag: -host
 	ClusterHost int `json:"clusterHost,omitempty"`
+
+	// HostIPBase, if set, assigns each created HostSystem's management vnic (vmk0)
+	// a deterministic IPv4 address starting at this value, incrementing by one per
+	// host across both standalone and cluster host creation, in creation order.
+	// This overrides the default template IP (127.0.0.1) that every HostSystem
+	// otherwise shares. Since HostConnectSpec.HostName doubles as both the
+	// connect address and the host's initial display name, the host's name
+	// becomes its IP rather than the usual "<prefix>_H<n>" pattern.
+	// Not applied in -esx (standalone ESX) mode, which does not go through this
+	// host-creation path. vcsim flag: -host-ip-base
+	HostIPBase net.IP `json:"-"`
 
 	// Pool specifies the number of ResourcePool entities to create per Cluster
 	// Note that every cluster has a root ResourcePool named "Resources", as real vCenter does.
@@ -498,6 +511,25 @@ func (m *Model) CreateInfrastructure(ctx *Context) error {
 	// 1 NIC per VM, backed by a DVPG if Model.Portgroup > 0
 	vmnet := esx.EthernetCard.Backing
 
+	// nextHostIP returns the next deterministic host IP when Model.HostIPBase
+	// is set, incrementing across all hosts created by this Model (standalone
+	// and cluster hosts share the same counter, in creation order). Returns ""
+	// if HostIPBase is unset or not a valid IPv4 address.
+	hostIPOffset := uint32(0)
+	nextHostIP := func() string {
+		base := m.HostIPBase.To4()
+		if base == nil {
+			return ""
+		}
+
+		next := binary.BigEndian.Uint32(base) + hostIPOffset
+		hostIPOffset++
+
+		var b [4]byte
+		binary.BigEndian.PutUint32(b[:], next)
+		return net.IP(b[:]).String()
+	}
+
 	// addHost adds a cluster host or a standalone host.
 	addHost := func(name string, f func(types.HostConnectSpec) (*object.Task, error)) (*object.HostSystem, error) {
 		spec := types.HostConnectSpec{
@@ -725,8 +757,12 @@ func (m *Model) CreateInfrastructure(ctx *Context) error {
 
 		for nhost := 0; nhost < m.Host; nhost++ {
 			name := m.fmtName(dcName+"_H", nhost)
+			hostName := name
+			if m.HostIPBase != nil {
+				hostName = nextHostIP()
+			}
 
-			host, err := addHost(name, func(spec types.HostConnectSpec) (*object.Task, error) {
+			host, err := addHost(hostName, func(spec types.HostConnectSpec) (*object.Task, error) {
 				return folders.HostFolder.AddStandaloneHost(ctx, spec, true, nil, nil)
 			})
 			if err != nil {
@@ -746,8 +782,12 @@ func (m *Model) CreateInfrastructure(ctx *Context) error {
 
 			for nhost := 0; nhost < m.ClusterHost; nhost++ {
 				name := m.fmtName(clusterName+"_H", nhost)
+				hostName := name
+				if m.HostIPBase != nil {
+					hostName = nextHostIP()
+				}
 
-				_, err = addHost(name, func(spec types.HostConnectSpec) (*object.Task, error) {
+				_, err = addHost(hostName, func(spec types.HostConnectSpec) (*object.Task, error) {
 					return cluster.AddHost(ctx, spec, true, nil, nil)
 				})
 				if err != nil {

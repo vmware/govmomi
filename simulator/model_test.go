@@ -6,6 +6,8 @@ package simulator
 
 import (
 	"encoding/xml"
+	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"testing"
@@ -201,5 +203,92 @@ func TestModelLoadAlignCounter(t *testing.T) {
 			t.Logf("Registry object: %s:%s", k.Type, k.Value)
 		}
 		t.Errorf("expected registry counter to be 500, got %d", reg.counter)
+	}
+}
+
+// TestModelHostIPBase asserts that Model.HostIPBase gives every created HostSystem a
+// deterministic management IP on vmk0, sequentially across the whole model rather than
+// resetting per cluster. Without it, esx.HostConfigInfo's shared template leaves every
+// host reporting 127.0.0.1, so clients cannot tell hosts apart by address.
+func TestModelHostIPBase(t *testing.T) {
+	m := VPX()
+	m.Datacenter = 1
+	m.Cluster = 2
+	m.ClusterHost = 2
+	m.Host = 1 // standalone; IPs are assigned across both loops from one counter
+	m.HostIPBase = net.ParseIP("10.20.8.0")
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Remove()
+
+	ctx := m.Service.Context
+
+	got := make(map[string]string) // ip -> host reference
+	for ref, obj := range ctx.Map.objects {
+		if ref.Type != "HostSystem" {
+			continue
+		}
+		host, ok := obj.(*HostSystem)
+		if !ok {
+			t.Fatalf("%s is not a *HostSystem", ref)
+		}
+
+		vnic := host.Config.Network.Vnic
+		if len(vnic) == 0 {
+			t.Fatalf("%s has no vnic", ref)
+		}
+		ip := vnic[0].Spec.Ip.IpAddress
+
+		if ip == "127.0.0.1" {
+			t.Errorf("%s still has the default shared IP %s", ref, ip)
+		}
+		if net.ParseIP(ip) == nil {
+			t.Errorf("%s vmk0 IP %q is not a valid address", ref, ip)
+		}
+		if prev, dup := got[ip]; dup {
+			t.Errorf("%s and %s share IP %s", prev, ref, ip)
+		}
+		got[ip] = ref.String()
+
+		// HostName doubles as the display name, so the host is named for its IP.
+		if host.Name != ip {
+			t.Errorf("%s name = %q, want the assigned IP %q", ref, host.Name, ip)
+		}
+	}
+
+	// 2 clusters x 2 hosts + 1 standalone
+	if want := 5; len(got) != want {
+		t.Fatalf("got %d distinct host IPs, want %d", len(got), want)
+	}
+
+	// Sequential from the base, with no gap or reset at the standalone->cluster boundary.
+	for i := 0; i < 5; i++ {
+		ip := fmt.Sprintf("10.20.8.%d", i)
+		if _, ok := got[ip]; !ok {
+			t.Errorf("expected a host at %s; assigned IPs were %v", ip, got)
+		}
+	}
+}
+
+// TestModelHostIPBaseUnset asserts the default is untouched when HostIPBase is not set.
+func TestModelHostIPBaseUnset(t *testing.T) {
+	m := VPX()
+	m.Datacenter = 1
+	m.Cluster = 1
+	m.ClusterHost = 1
+	m.Host = 0
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Remove()
+
+	ctx := m.Service.Context
+	host := ctx.Map.Any("HostSystem").(*HostSystem)
+
+	if ip := host.Config.Network.Vnic[0].Spec.Ip.IpAddress; ip != "127.0.0.1" {
+		t.Errorf("vmk0 IP = %q, want the untouched default 127.0.0.1", ip)
 	}
 }
