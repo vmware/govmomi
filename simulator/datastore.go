@@ -26,6 +26,36 @@ type Datastore struct {
 	mo.Datastore
 
 	namespace map[string]string // TODO: make thread safe
+
+	// localPath is the real on-disk directory backing this datastore. It is set by
+	// CreateLocalDatastore and by model() (the -load path), both of which need
+	// Info.Url/Summary.Url to look like a real vCenter URL (ds:///vmfs/volumes/<uuid>/)
+	// for external API consumers -- some SOAP clients parse it and reject vcsim's raw
+	// temp-dir path -- while vcsim itself still needs a real, on-disk directory for its
+	// own file resolution. Datastores loaded/created any other way leave this empty and
+	// continue to use Summary.Url directly, which is already a real path.
+	localPath string
+}
+
+// path returns the real on-disk directory backing this datastore, for vcsim's own
+// internal file resolution -- as opposed to Summary.Url/Info.Url, which for local
+// datastores is a synthesized value meant only for external API consumers.
+//
+// localPath is only set for datastores that went through CreateLocalDatastore or
+// model() (the -load path); for every other datastore Summary.Url/Info.Url still
+// hold a real path, so fall back to those. Info is checked last because some
+// callers construct a Datastore with only Info.Url populated.
+func (ds *Datastore) path() string {
+	if ds.localPath != "" {
+		return ds.localPath
+	}
+	if ds.Summary.Url != "" {
+		return ds.Summary.Url
+	}
+	if ds.Info != nil {
+		return ds.Info.GetDatastoreInfo().Url
+	}
+	return ""
 }
 
 func (ds *Datastore) eventArgument() *types.DatastoreEventArgument {
@@ -39,7 +69,12 @@ func (ds *Datastore) model(m *Model) error {
 	info := ds.Info.GetDatastoreInfo()
 	u, _ := url.Parse(info.Url)
 	if u.Scheme == "ds" {
-		// rewrite saved vmfs path to a local temp dir
+		// This is a real vCenter datastore's ds:///vmfs/volumes/<uuid>/ URL,
+		// captured via `govc object.save` -- back it locally with a fresh temp
+		// dir for vcsim's own file resolution (the real backing storage doesn't
+		// exist here), but keep reporting the original, already-real-vCenter-shaped
+		// Url to API clients instead of overwriting it with the local temp dir
+		// (some SOAP clients parse this URL and reject anything else).
 		u.Path = path.Clean(u.Path)
 		parent := strings.ReplaceAll(path.Dir(u.Path), "/", "_")
 		name := strings.ReplaceAll(path.Base(u.Path), ":", "_")
@@ -49,15 +84,18 @@ func (ds *Datastore) model(m *Model) error {
 			return err
 		}
 
-		info.Url = dir
+		ds.localPath = dir
 	} else {
-		// rewrite local path from a saved vcsim instance
+		// This was itself a raw local path (e.g. re-loading a previously-saved
+		// vcsim instance's local datastore) -- there's no real-vCenter-shaped Url
+		// to preserve, so synthesize one, same as CreateLocalDatastore.
 		dir, err := m.createTempDir(path.Base(u.Path))
 		if err != nil {
 			return err
 		}
 
-		info.Url = dir
+		ds.localPath = dir
+		info.Url = "ds:///vmfs/volumes/" + uuid.NewString() + "/"
 	}
 
 	ds.Summary.Url = info.Url
@@ -72,7 +110,7 @@ func (ds *Datastore) model(m *Model) error {
 // Note that VirtualDevice file backing paths must use the vSAN uuid.
 func (ds *Datastore) resolve(ctx *Context, p string, remove ...bool) string {
 	if p == "" || !internal.IsDatastoreVSAN(ds.Datastore) {
-		return path.Join(ds.Summary.Url, p)
+		return path.Join(ds.path(), p)
 	}
 
 	rm := len(remove) != 0 && remove[0]
@@ -110,7 +148,7 @@ func (ds *Datastore) resolve(ctx *Context, p string, remove ...bool) string {
 		}
 	}
 
-	return path.Join(ds.Summary.Url, p)
+	return path.Join(ds.path(), p)
 }
 
 func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodFault) {
@@ -126,7 +164,7 @@ func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodF
 func (ds *Datastore) RefreshDatastore(*Context, *types.RefreshDatastore) soap.HasFault {
 	r := &methods.RefreshDatastoreBody{}
 
-	_, err := os.Stat(ds.Info.GetDatastoreInfo().Url)
+	_, err := os.Stat(ds.path())
 	if err != nil {
 		r.Fault_ = Fault(err.Error(), &types.HostConfigFault{})
 		return r
