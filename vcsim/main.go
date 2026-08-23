@@ -69,6 +69,7 @@ func main() {
 	flag.IntVar(&model.PortgroupNSX, "pg-nsx", model.PortgroupNSX, "Number of NSX backed port groups")
 	flag.IntVar(&model.OpaqueNetwork, "nsx", model.OpaqueNetwork, "Number of NSX backed opaque networks")
 	flag.IntVar(&model.Folder, "folder", model.Folder, "Number of folders")
+	hostIPBase := flag.String("host-ip-base", "", "Base IPv4 address to assign HostSystems from, incrementing by one per host (e.g. 10.20.8.0)")
 	flag.BoolVar(&model.Autostart, "autostart", model.Autostart, "Autostart model created VMs")
 	v := &model.ServiceContent.About.ApiVersion
 	flag.StringVar(v, "api-version", *v, "API version")
@@ -145,6 +146,14 @@ func main() {
 
 	if err = updateHostTemplate(u.Host); err != nil {
 		log.Fatal(err)
+	}
+
+	if *hostIPBase != "" {
+		ip := net.ParseIP(*hostIPBase).To4()
+		if ip == nil {
+			log.Fatalf("-host-ip-base: invalid IPv4 address: %s", *hostIPBase)
+		}
+		model.HostIPBase = ip
 	}
 
 	if *isESX {
