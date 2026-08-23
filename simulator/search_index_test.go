@@ -311,3 +311,72 @@ func TestSearchIndexFindChild(t *testing.T) {
 		}
 	}
 }
+
+// TestSearchIndexFindByIpWithEsxcliHelpers asserts that FindByIp/FindAllByIp tolerate
+// the non-entity helper objects the registry accumulates.
+//
+// RetrieveManagedMethodExecuter/RetrieveDynamicTypeManager (esxcli passthrough) lazily
+// register ManagedMethodExecuter and DynamicTypeManager objects, keyed with their owning
+// host's reference Value but a different Type. Those don't embed an mo type, so
+// converting them via asHostSystemMO/asVirtualMachineMO panics in getManagedObject.
+// FindAllByIp used to iterate every registry object without checking the type first, so
+// any FindByIp call after an esxcli passthrough crashed the request.
+func TestSearchIndexFindByIpWithEsxcliHelpers(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+	m.Datacenter = 1
+	m.Cluster = 1
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Remove()
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sctx := m.Service.Context
+	host := sctx.Map.Any("HostSystem").(*HostSystem)
+
+	// Give the host a known management IP to search for.
+	const ip = "10.20.30.40"
+	host.Config.Network.Vnic[0].Spec.Ip.IpAddress = ip
+
+	// Trigger the lazy helper-object registration exactly as an esxcli passthrough
+	// caller would.
+	host.RetrieveManagedMethodExecuter(sctx, nil)
+	host.RetrieveDynamicTypeManager(sctx, nil)
+
+	for _, kind := range []string{"ManagedMethodExecuter", "DynamicTypeManager"} {
+		ref := types.ManagedObjectReference{Type: kind, Value: host.Self.Value}
+		if sctx.Map.Get(ref) == nil {
+			t.Fatalf("%s helper object was not registered", kind)
+		}
+	}
+
+	si := object.NewSearchIndex(c.Client)
+
+	// Before the fix this panicked while walking the registry, surfacing as
+	// "http: panic serving ...: <ref> does not have an embedded mo type".
+	ref, err := si.FindByIp(ctx, nil, ip, false)
+	if err != nil {
+		t.Fatalf("FindByIp: %s", err)
+	}
+	if ref == nil {
+		t.Fatal("FindByIp returned no result for the host IP")
+	}
+	if ref.Reference() != host.Self {
+		t.Errorf("FindByIp = %s, want %s", ref.Reference(), host.Self)
+	}
+
+	// vm=true takes the VirtualMachine branch, which had the same problem.
+	if _, err = si.FindByIp(ctx, nil, ip, true); err != nil {
+		t.Fatalf("FindByIp(vm=true): %s", err)
+	}
+}
