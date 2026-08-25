@@ -2683,7 +2683,7 @@ func (s *handler) libraryPath(l *library.Library, id string) string {
 		panic("invalid file name")
 	}
 
-	return path.Join(append([]string{ds.Info.GetDatastoreInfo().Url, "contentlib-" + l.ID}, id)...)
+	return path.Join(append([]string{ds.Path(), "contentlib-" + l.ID}, id)...)
 }
 
 func (s *handler) libraryItemFileCreate(

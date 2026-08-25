@@ -534,9 +534,9 @@ func TestLocalDatastoreURLFormat(t *testing.T) {
 
 	// ...but internally, the backing directory must still be a real one, so vcsim's own
 	// file operations keep working.
-	backing := ds.path()
+	backing := ds.Path()
 	if backing == ds.Summary.Url {
-		t.Fatalf("internal path() returned the synthesized URL %q", backing)
+		t.Fatalf("internal Path() returned the synthesized URL %q", backing)
 	}
 	fi, err := os.Stat(backing)
 	if err != nil {
@@ -588,7 +588,7 @@ func TestDatastoreModelURLHandling(t *testing.T) {
 		if ds.Summary.Url != saved {
 			t.Errorf("Summary.Url = %q, want %q", ds.Summary.Url, saved)
 		}
-		if _, err := os.Stat(ds.path()); err != nil {
+		if _, err := os.Stat(ds.Path()); err != nil {
 			t.Errorf("no real backing dir was created: %s", err)
 		}
 	})
@@ -613,7 +613,7 @@ func TestDatastoreModelURLHandling(t *testing.T) {
 		if ds.Summary.Url != ds.Info.GetDatastoreInfo().Url {
 			t.Errorf("Summary.Url (%q) != Info.Url (%q)", ds.Summary.Url, ds.Info.GetDatastoreInfo().Url)
 		}
-		if _, err := os.Stat(ds.path()); err != nil {
+		if _, err := os.Stat(ds.Path()); err != nil {
 			t.Errorf("no real backing dir was created: %s", err)
 		}
 	})
