@@ -6,9 +6,12 @@ package vim25
 
 import (
 	"context"
+	"strings"
 	"time"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type RetryFunc func(err error) (retry bool, delay time.Duration)
@@ -47,6 +50,22 @@ func IsTemporaryNetworkError(err error) bool {
 	}
 
 	return t.Temporary()
+}
+
+// RetryTooManyOutstandingOperations returns a RetryFunc that retries when the
+// server responds with vCenter's "Too many outstanding operations" SystemError
+// fault, waiting delay between attempts. vCenter returns this fault when its
+// internal operation queue is briefly saturated -- common when traversing
+// inventories with thousands of objects -- and it typically clears within a
+// few seconds.
+func RetryTooManyOutstandingOperations(delay time.Duration) RetryFunc {
+	return func(err error) (bool, time.Duration) {
+		var f *types.SystemError
+		if _, ok := fault.As(err, &f); ok && strings.Contains(f.Reason, "Too many outstanding operations") {
+			return true, delay
+		}
+		return false, 0
+	}
 }
 
 type retry struct {

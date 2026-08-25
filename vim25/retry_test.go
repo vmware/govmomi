@@ -17,6 +17,16 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+func systemErrorFault(reason string) error {
+	return soap.WrapSoapFault(&soap.Fault{
+		Detail: struct {
+			Fault types.AnyType `xml:",any,typeattr"`
+		}{
+			Fault: types.SystemError{Reason: reason},
+		},
+	})
+}
+
 type tempError struct{}
 
 func (tempError) Error() string   { return "tempError" }
@@ -74,6 +84,47 @@ func TestRetry(t *testing.T) {
 		if err != tc.expected {
 			t.Errorf("Expected: %s, got: %s", tc.expected, err)
 		}
+	}
+}
+
+func TestRetryTooManyOutstandingOperations(t *testing.T) {
+	var tcs = []struct {
+		name     string
+		errs     []error
+		expected error
+	}{
+		{
+			name:     "recovers after transient throttling",
+			errs:     []error{systemErrorFault("A general system error occurred: Too many outstanding operations"), nil},
+			expected: nil,
+		},
+		{
+			name: "gives up after exhausting attempts",
+			errs: []error{
+				systemErrorFault("Too many outstanding operations"),
+				systemErrorFault("Too many outstanding operations"),
+			},
+			expected: systemErrorFault("Too many outstanding operations"),
+		},
+		{
+			name:     "does not retry unrelated faults",
+			errs:     []error{systemErrorFault("some other system error")},
+			expected: systemErrorFault("some other system error"),
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			var rt soap.RoundTripper = &fakeRoundTripper{errs: tc.errs}
+			rt = vim25.Retry(rt, vim25.RetryTooManyOutstandingOperations(0), 2)
+
+			err := rt.RoundTrip(context.TODO(), nil, nil)
+			if (err == nil) != (tc.expected == nil) {
+				t.Errorf("expected: %v, got: %v", tc.expected, err)
+			} else if err != nil && err.Error() != tc.expected.Error() {
+				t.Errorf("expected: %v, got: %v", tc.expected, err)
+			}
+		})
 	}
 }
 
