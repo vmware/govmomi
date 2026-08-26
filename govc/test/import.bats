@@ -15,9 +15,10 @@ load test_helper
   run govc vm.destroy "$TTYLINUX_NAME"
   assert_success
 
-  # link ovf/ova to datastore so we can test with an http source
-  dir=$(govc datastore.info -json | jq -r .datastores[].info.url)
-  ln -s "$GOVC_IMAGES/$TTYLINUX_NAME"* "$dir"
+  # upload ovf/ova to datastore so we can test with an http source
+  for f in "$GOVC_IMAGES/$TTYLINUX_NAME"*; do
+    govc datastore.upload "$f" "$(basename "$f")"
+  done
 
   run govc import.spec "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
   assert_success

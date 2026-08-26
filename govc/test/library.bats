@@ -213,14 +213,16 @@ load test_helper
 
 @test "library.deploy" {
   vcsim_env
+  unset GOVC_HOST # else datastore.download tries via ESX
 
   run govc library.create my-content
   assert_success
   library_id="$output"
 
-  # link ovf/ova to datastore so we can test library.import with an http source
-  dir=$(govc datastore.info -json | jq -r .datastores[].info.url)
-  ln -s "$GOVC_IMAGES/$TTYLINUX_NAME."* "$dir"
+  # upload ovf/ova to datastore so we can test library.import with an http source
+  for f in "$GOVC_IMAGES/$TTYLINUX_NAME."*; do
+    govc datastore.upload "$f" "$(basename "$f")"
+  done
 
   run govc library.import -c fake -pull my-content -n invalid-sha1 "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
   assert_failure # invalid checksum
@@ -252,7 +254,7 @@ load test_helper
   assert_success
 
   item_id=$(govc library.info -json /my-content/ttylinux-unpacked | jq -r .[].id)
-  assert_equal "$(cat "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")" "$(cat "$dir/contentlib-$library_id/$item_id/$TTYLINUX_NAME.ovf")"
+  assert_equal "$(cat "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")" "$(govc datastore.download "contentlib-$library_id/$item_id/$TTYLINUX_NAME.ovf" -)"
 
   cat > "$BATS_TMPDIR/ttylinux.json" <<EOF
 {
