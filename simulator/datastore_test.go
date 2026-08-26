@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -490,4 +491,130 @@ func TestDatastoreHTTP(t *testing.T) {
 			}
 		}
 	}
+}
+
+// dsURLPattern matches the ds:///vmfs/volumes/<uuid>/ form a real vCenter reports for a
+// local/VMFS datastore.
+var dsURLPattern = regexp.MustCompile(`^ds:///vmfs/volumes/[0-9a-fA-F-]+/$`)
+
+// TestLocalDatastoreURLFormat asserts that a datastore created via CreateLocalDatastore
+// reports a real-vCenter-shaped Url to API clients, while vcsim keeps using the actual
+// on-disk directory for its own file resolution.
+//
+// Reporting the raw temp-dir path (the previous behaviour) breaks clients that parse the
+// datastore URL: a real collector rejected it with "Datastore url format is not correct
+// /tmp/govcsim-.../DC0-LocalDS_0", which killed Datastore config collection entirely.
+func TestLocalDatastoreURLFormat(t *testing.T) {
+	m := VPX()
+	m.Datastore = 1
+	m.Machine = 1
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Remove()
+
+	ctx := m.Service.Context
+	ds := ctx.Map.Any("Datastore").(*Datastore)
+
+	info := ds.Info.GetDatastoreInfo()
+
+	// Externally visible URL must look like a real vCenter's, not a filesystem path.
+	for name, u := range map[string]string{"Info.Url": info.Url, "Summary.Url": ds.Summary.Url} {
+		if !dsURLPattern.MatchString(u) {
+			t.Errorf("%s = %q, want ds:///vmfs/volumes/<uuid>/", name, u)
+		}
+		if strings.HasPrefix(u, "/") {
+			t.Errorf("%s = %q, still a raw filesystem path", name, u)
+		}
+	}
+	if info.Url != ds.Summary.Url {
+		t.Errorf("Info.Url (%q) and Summary.Url (%q) disagree", info.Url, ds.Summary.Url)
+	}
+
+	// ...but internally, the backing directory must still be a real one, so vcsim's own
+	// file operations keep working.
+	backing := ds.Path()
+	if backing == ds.Summary.Url {
+		t.Fatalf("internal Path() returned the synthesized URL %q", backing)
+	}
+	fi, err := os.Stat(backing)
+	if err != nil {
+		t.Fatalf("internal backing dir %q: %s", backing, err)
+	}
+	if !fi.IsDir() {
+		t.Fatalf("internal backing dir %q is not a directory", backing)
+	}
+
+	// End-to-end: a VM created by the model must have its files on that real directory.
+	vm := ctx.Map.Any("VirtualMachine").(*VirtualMachine)
+	vmx := vm.Config.Files.VmPathName
+	p, fault := parseDatastorePath(vmx)
+	if fault != nil {
+		t.Fatalf("parse %q: %v", vmx, fault)
+	}
+	if _, err := os.Stat(path.Join(backing, p.Path)); err != nil {
+		t.Errorf("VM file %q not found under the datastore's real backing dir: %s", vmx, err)
+	}
+}
+
+// TestDatastoreModelURLHandling covers Datastore.model(), which runs on the vcsim -load
+// path (an inventory captured from a real vCenter via `govc object.save`).
+func TestDatastoreModelURLHandling(t *testing.T) {
+	m := VPX()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+	defer m.Remove()
+
+	t.Run("preserves a real vCenter ds:// URL", func(t *testing.T) {
+		const saved = "ds:///vmfs/volumes/5e7a2b1c-deadbeef/"
+
+		ds := &Datastore{}
+		ds.Name = "preserve"
+		ds.Info = &types.LocalDatastoreInfo{
+			DatastoreInfo: types.DatastoreInfo{Name: ds.Name, Url: saved},
+		}
+
+		if err := ds.model(m); err != nil {
+			t.Fatal(err)
+		}
+
+		// The captured URL was already correct, so it must not be rewritten.
+		if got := ds.Info.GetDatastoreInfo().Url; got != saved {
+			t.Errorf("Info.Url = %q, want it left as %q", got, saved)
+		}
+		if ds.Summary.Url != saved {
+			t.Errorf("Summary.Url = %q, want %q", ds.Summary.Url, saved)
+		}
+		if _, err := os.Stat(ds.Path()); err != nil {
+			t.Errorf("no real backing dir was created: %s", err)
+		}
+	})
+
+	t.Run("synthesizes a URL for a raw local path", func(t *testing.T) {
+		dir := t.TempDir()
+
+		ds := &Datastore{}
+		ds.Name = "synth"
+		ds.Info = &types.LocalDatastoreInfo{
+			DatastoreInfo: types.DatastoreInfo{Name: ds.Name, Url: dir},
+		}
+
+		if err := ds.model(m); err != nil {
+			t.Fatal(err)
+		}
+
+		// Nothing real to preserve here, so a ds:// URL is synthesized.
+		if got := ds.Info.GetDatastoreInfo().Url; !dsURLPattern.MatchString(got) {
+			t.Errorf("Info.Url = %q, want ds:///vmfs/volumes/<uuid>/", got)
+		}
+		if ds.Summary.Url != ds.Info.GetDatastoreInfo().Url {
+			t.Errorf("Summary.Url (%q) != Info.Url (%q)", ds.Summary.Url, ds.Info.GetDatastoreInfo().Url)
+		}
+		if _, err := os.Stat(ds.Path()); err != nil {
+			t.Errorf("no real backing dir was created: %s", err)
+		}
+	})
 }

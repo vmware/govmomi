@@ -39,7 +39,7 @@ func (m *DatastoreNamespaceManager) ConvertNamespacePathToUuidPath(ctx *Context,
 
 	for _, ref := range dc.Datastore {
 		ds = ctx.Map.Get(ref).(*Datastore)
-		ns = strings.TrimPrefix(req.NamespaceUrl, ds.Summary.Url)
+		ns = strings.TrimPrefix(req.NamespaceUrl, ds.Path())
 		if ns != req.NamespaceUrl {
 			break
 		}
@@ -129,7 +129,7 @@ func (m *DatastoreNamespaceManager) DeleteDirectory(ctx *Context, req *types.Del
 	var ds *Datastore
 	for _, ref := range dc.Datastore {
 		ds = ctx.Map.Get(ref).(*Datastore)
-		if strings.HasPrefix(req.DatastorePath, ds.Summary.Url) {
+		if strings.HasPrefix(req.DatastorePath, ds.Path()) {
 			break
 		}
 		ds = nil

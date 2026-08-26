@@ -31,7 +31,7 @@ load test_helper
   run govc snapshot.export -lease -vm "$vm" "$id"
   assert_success
 
-  dir=$(govc datastore.info -json | jq -r .datastores[].info.url)
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX 2>/dev/null || $mktemp -d -t govc-test-XXXXX)
   mkdir "$dir/$id"
 
   run govc snapshot.export -d "$dir/$id" -vm "$vm" "$id"

@@ -132,6 +132,19 @@ func (dss *HostDatastoreSystem) CreateLocalDatastore(ctx *Context, c *types.Crea
 		return r
 	}
 
+	// add() (and the RefreshDatastore it triggers) needs Info.Url to be the real,
+	// existing directory above, since it os.Stat()s it. Only now, after that's done,
+	// save the real path for vcsim's own internal use (ds.Path()) and overwrite the
+	// externally-visible Url/Summary.Url with a value shaped like what a real
+	// vCenter local/VMFS datastore reports (ds:///vmfs/volumes/<uuid>/) instead of
+	// vcsim's raw local temp-dir path -- at least one real collector's SOAP client
+	// parses this URL and throws on anything else (e.g.
+	// "IllegalArgumentException: Datastore url format is not correct /tmp/govcsim-.../DC0-LocalDS_0").
+	ds.localPath = c.Path
+	fakeURL := "ds:///vmfs/volumes/" + uuid.NewString() + "/"
+	ds.Info.GetDatastoreInfo().Url = fakeURL
+	ds.Summary.Url = fakeURL
+
 	r.Res = &types.CreateLocalDatastoreResponse{
 		Returnval: ds.Self,
 	}

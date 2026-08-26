@@ -7,8 +7,6 @@ package vmdk_test
 import (
 	"bytes"
 	"context"
-	"os"
-	"path"
 	"strings"
 	"testing"
 
@@ -590,17 +588,6 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 			}
 
 			datastore := object.NewDatastore(c, datastoreRef)
-			var moDatastore mo.Datastore
-			if err := datastore.Properties(
-				ctx,
-				datastore.Reference(),
-				[]string{"info"},
-				&moDatastore); err != nil {
-
-				t.Fatal(err)
-			}
-
-			datastorePath := moDatastore.Info.GetDatastoreInfo().Url
 			var diskPath object.DatastorePath
 			if !diskPath.FromString(diskInfo.FileName) {
 				t.Fatalf("invalid disk file name: %q", diskInfo.FileName)
@@ -608,10 +595,13 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 
 			const vmdkSize = 500
 
-			assert.NoError(t, os.WriteFile(
-				path.Join(datastorePath, diskPath.Path),
-				bytes.Repeat([]byte{1}, vmdkSize),
-				os.ModeAppend))
+			// Write via the datastore file service (as a real client must), rather than
+			// assuming the datastore's reported Url is a locally-writable path -- a real
+			// vCenter's Url is an opaque ds:///vmfs/volumes/<uuid>/ handle, not one.
+			upload := soap.DefaultUpload
+			data := bytes.Repeat([]byte{1}, vmdkSize)
+			upload.ContentLength = int64(len(data))
+			assert.NoError(t, datastore.Upload(ctx, bytes.NewReader(data), diskPath.Path, &upload))
 			assert.NoError(t, vm.RefreshStorageInfo(ctx))
 
 			diskInfo.Size = vmdkSize
