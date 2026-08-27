@@ -291,6 +291,11 @@ func (flag *ClientFlag) RoundTripper(c *soap.Client) soap.RoundTripper {
 	// This means a maximum of 3 attempts.
 	rt := vim25.Retry(c, vim25.RetryTemporaryNetworkError, 3)
 
+	// Retry when vCenter's operation queue is briefly saturated, e.g. when
+	// traversing large inventories. Backs off 5s between attempts, up to 5
+	// attempts (20s max additional wait).
+	rt = vim25.Retry(rt, vim25.RetryTooManyOutstandingOperations(5*time.Second), 5)
+
 	switch {
 	case flag.dump:
 		rt = &dump{roundTripper: rt}
