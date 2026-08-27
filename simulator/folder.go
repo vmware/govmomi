@@ -612,11 +612,41 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 
 		folderPutChild(ctx, &f.Folder, dvs)
 
+		// DVSCreateSpec.ProductInfo's own doc comment: "If you do not specify
+		// this property, the Server will use the latest version to create
+		// the DistributedVirtualSwitch" -- a real vCenter always reports a
+		// non-empty Vendor in both DVSSummary.ProductInfo and
+		// DVSConfigInfo.ProductInfo. `govc dvs.create` (without
+		// -product-version) sends a non-nil ProductInfo with an empty
+		// Vendor rather than omitting it, so this must default on empty
+		// Vendor, not just nil. DVSConfigInfo.ProductInfo is a required,
+		// always-serialized (non-pointer) field whose own sub-fields are
+		// all `omitempty`, so leaving it zero-valued serializes as an
+		// empty <productInfo/> with no vendor element at all -- which at
+		// least one real collector (vRNI) deserializes as a null Vendor
+		// and crashes on unconditionally.
+		productInfo := req.Spec.ProductInfo
+		if productInfo == nil {
+			productInfo = new(types.DistributedVirtualSwitchProductSpec)
+		}
+		if productInfo.Vendor == "" {
+			product := ctx.Map.content().About
+			productInfo.Name = "DVS"
+			productInfo.Vendor = product.Vendor
+			productInfo.ForwardingClass = "etherswitch"
+			if productInfo.Version == "" {
+				productInfo.Version = product.Version
+			}
+			if productInfo.Build == "" {
+				productInfo.Build = product.Build
+			}
+		}
+
 		dvs.Summary = types.DVSSummary{
 			Name:        dvs.Name,
 			Uuid:        dvs.Uuid,
 			NumPorts:    spec.NumStandalonePorts,
-			ProductInfo: req.Spec.ProductInfo,
+			ProductInfo: productInfo,
 			Description: spec.Description,
 		}
 
@@ -638,6 +668,7 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 				DefaultProxySwitchMaxNumPorts:       spec.DefaultProxySwitchMaxNumPorts,
 				InfrastructureTrafficResourceConfig: spec.InfrastructureTrafficResourceConfig,
 				NetworkResourceControlVersion:       spec.NetworkResourceControlVersion,
+				ProductInfo:                         *productInfo,
 			},
 		}
 
@@ -655,17 +686,6 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 		}
 
 		dvs.Config = configInfo
-
-		if dvs.Summary.ProductInfo == nil {
-			product := ctx.Map.content().About
-			dvs.Summary.ProductInfo = &types.DistributedVirtualSwitchProductSpec{
-				Name:            "DVS",
-				Vendor:          product.Vendor,
-				Version:         product.Version,
-				Build:           product.Build,
-				ForwardingClass: "etherswitch",
-			}
-		}
 
 		ctx.postEvent(&types.DvsCreatedEvent{
 			DvsEvent: dvs.event(ctx),

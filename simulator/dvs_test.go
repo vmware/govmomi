@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -305,6 +306,123 @@ func TestDVSConcreteType(t *testing.T) {
 				t.Errorf("query by type %q: got %d objects, want 1 (hierarchy match against the concrete type failed)",
 					queryType, len(res.Returnval))
 			}
+		}
+	})
+}
+
+// TestDVSDefaultProductInfo guards against a DVS ending up with an empty
+// Config.ProductInfo.Vendor. DVSCreateSpec.ProductInfo's own doc comment
+// states a real vCenter defaults it when the client doesn't supply one
+// ("the Server will use the latest version") -- at least one real collector
+// (vRNI) reads config.productInfo.vendor and crashes on a null value.
+// DVSConfigInfo.ProductInfo is a required, always-serialized (non-pointer)
+// field whose own sub-fields are all `omitempty`, so leaving it zero-valued
+// serializes as an empty <productInfo/> with no vendor element at all,
+// which deserializes as a null Vendor on the Java side. Neither
+// `govc dvs.create` (no -product-version) nor this simulator's own default
+// model-driven DVS creation ever supplied one, so this was always empty
+// before the fix. Summary.ProductInfo is checked too since it's the same
+// concept and real vCenter keeps both consistent.
+func TestDVSDefaultProductInfo(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DatacenterList(ctx, "*")
+		if err != nil {
+			t.Fatal(err)
+		}
+		finder.SetDatacenter(dc[0])
+		folders, err := dc[0].Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// No ProductInfo supplied -- must default rather than stay nil.
+		var spec types.DVSCreateSpec
+		spec.ConfigSpec = &types.VMwareDVSConfigSpec{}
+		spec.ConfigSpec.GetDVSConfigSpec().Name = "DVS-default-product-info"
+
+		task, err := folders.NetworkFolder.CreateDVS(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := task.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dvs := object.NewDistributedVirtualSwitch(c, info.Result.(types.ManagedObjectReference))
+
+		var moDVS mo.DistributedVirtualSwitch
+		if err := dvs.Properties(ctx, dvs.Reference(), []string{"summary", "config"}, &moDVS); err != nil {
+			t.Fatal(err)
+		}
+		if moDVS.Summary.ProductInfo == nil {
+			t.Fatal("summary.productInfo is nil, want a default value")
+		}
+		if moDVS.Summary.ProductInfo.Vendor == "" {
+			t.Error("summary.productInfo.vendor is empty, want a non-empty default")
+		}
+		if moDVS.Config.GetDVSConfigInfo().ProductInfo.Vendor == "" {
+			t.Error("config.productInfo.vendor is empty, want a non-empty default")
+		}
+
+		// An explicitly-supplied ProductInfo must still be honored, not
+		// overridden by the default.
+		var spec2 types.DVSCreateSpec
+		spec2.ConfigSpec = &types.VMwareDVSConfigSpec{}
+		spec2.ConfigSpec.GetDVSConfigSpec().Name = "DVS-explicit-product-info"
+		spec2.ProductInfo = &types.DistributedVirtualSwitchProductSpec{Vendor: "Acme Corp", Version: "1.2.3"}
+
+		task2, err := folders.NetworkFolder.CreateDVS(ctx, spec2)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info2, err := task2.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dvs2 := object.NewDistributedVirtualSwitch(c, info2.Result.(types.ManagedObjectReference))
+
+		var moDVS2 mo.DistributedVirtualSwitch
+		if err := dvs2.Properties(ctx, dvs2.Reference(), []string{"summary", "config"}, &moDVS2); err != nil {
+			t.Fatal(err)
+		}
+		if moDVS2.Summary.ProductInfo == nil || moDVS2.Summary.ProductInfo.Vendor != "Acme Corp" {
+			t.Errorf("explicit ProductInfo was not preserved: %+v", moDVS2.Summary.ProductInfo)
+		}
+		if moDVS2.Config.GetDVSConfigInfo().ProductInfo.Vendor != "Acme Corp" {
+			t.Errorf("explicit ProductInfo was not preserved in config: %+v", moDVS2.Config.GetDVSConfigInfo().ProductInfo)
+		}
+
+		// `govc dvs.create` (without -product-version) sends a non-nil
+		// ProductInfo with an empty Vendor, not a nil ProductInfo -- this
+		// must also default rather than leave Vendor empty.
+		var spec3 types.DVSCreateSpec
+		spec3.ConfigSpec = &types.VMwareDVSConfigSpec{}
+		spec3.ConfigSpec.GetDVSConfigSpec().Name = "DVS-empty-product-info"
+		spec3.ProductInfo = new(types.DistributedVirtualSwitchProductSpec)
+
+		task3, err := folders.NetworkFolder.CreateDVS(ctx, spec3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info3, err := task3.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dvs3 := object.NewDistributedVirtualSwitch(c, info3.Result.(types.ManagedObjectReference))
+
+		var moDVS3 mo.DistributedVirtualSwitch
+		if err := dvs3.Properties(ctx, dvs3.Reference(), []string{"summary", "config"}, &moDVS3); err != nil {
+			t.Fatal(err)
+		}
+		if moDVS3.Summary.ProductInfo == nil {
+			t.Fatal("summary.productInfo is nil, want a default value")
+		}
+		if moDVS3.Summary.ProductInfo.Vendor == "" {
+			t.Error("summary.productInfo.vendor is empty, want a non-empty default")
+		}
+		if moDVS3.Config.GetDVSConfigInfo().ProductInfo.Vendor == "" {
+			t.Error("config.productInfo.vendor is empty, want a non-empty default")
 		}
 	})
 }
