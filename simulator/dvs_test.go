@@ -11,7 +11,9 @@ import (
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/task"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -33,7 +35,7 @@ func TestDVS(t *testing.T) {
 	finder.SetDatacenter(dc[0])
 	folders, _ := dc[0].Folders(ctx)
 	hosts, _ := finder.HostSystemList(ctx, "*/*")
-	vswitch := m.Map().Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
 	dvs0 := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
 
 	if len(vswitch.Summary.HostMember) == 0 {
@@ -175,7 +177,7 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 	finder := find.NewFinder(c, false)
 	dc, _ := finder.DatacenterList(ctx, "*")
 	finder.SetDatacenter(dc[0])
-	vswitch := m.Map().Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
 	dvs0 := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
 	pgs := vswitch.Portgroup
 	if len(pgs) != 2 {
@@ -266,4 +268,43 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestDVSConcreteType guards against vcsim regressing to reporting its DVS as
+// the abstract DistributedVirtualSwitch type. A real vCenter always reports
+// the concrete VmwareDistributedVirtualSwitch -- vRNI's collector (and any
+// client that keys off the managed object type, e.g. to pick the SDM/config
+// type to publish) derives its behavior from that MOR type, not from
+// config content, so an abstractly-typed switch is invisible to it even
+// though its portgroups are discovered fine.
+func TestDVSConcreteType(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		ref := Map(ctx).Any("VmwareDistributedVirtualSwitch").Reference()
+		if ref.Type != "VmwareDistributedVirtualSwitch" {
+			t.Fatalf("MOR type = %q, want VmwareDistributedVirtualSwitch", ref.Type)
+		}
+
+		// A client may still query generically by the abstract type (as real
+		// vCenter clients have always been able to do, since VmwareDVS is a
+		// vmodl subtype of it) -- the property collector's type-hierarchy
+		// matching (simulator/property_collector.go's use of reflect on the
+		// anonymously-embedded mo field) must still resolve it against the
+		// concrete object after this rename.
+		pc := property.DefaultCollector(c)
+		for _, queryType := range []string{"VmwareDistributedVirtualSwitch", "DistributedVirtualSwitch"} {
+			res, err := pc.RetrieveProperties(ctx, types.RetrieveProperties{
+				SpecSet: []types.PropertyFilterSpec{{
+					ObjectSet: []types.ObjectSpec{{Obj: ref}},
+					PropSet:   []types.PropertySpec{{Type: queryType, PathSet: []string{"name"}}},
+				}},
+			})
+			if err != nil {
+				t.Fatalf("retrieve via type %s: %s", queryType, err)
+			}
+			if len(res.Returnval) != 1 {
+				t.Errorf("query by type %q: got %d objects, want 1 (hierarchy match against the concrete type failed)",
+					queryType, len(res.Returnval))
+			}
+		}
+	})
 }

@@ -1384,11 +1384,11 @@ func changedDiskSize(oldDisk *types.VirtualDisk, newDiskSpec *types.VirtualDisk)
 }
 
 func (vm *VirtualMachine) validateSwitchMembers(ctx *Context, id string) types.BaseMethodFault {
-	var dswitch *DistributedVirtualSwitch
+	var dswitch *VmwareDistributedVirtualSwitch
 
 	var find func(types.ManagedObjectReference)
 	find = func(child types.ManagedObjectReference) {
-		s, ok := ctx.Map.Get(child).(*DistributedVirtualSwitch)
+		s, ok := ctx.Map.Get(child).(*VmwareDistributedVirtualSwitch)
 		if ok && s.Uuid == id {
 			dswitch = s
 			return
@@ -1488,7 +1488,7 @@ func (vm *VirtualMachine) configureDevice(
 			walk(ctx.Map.Get(f), find) // search in NetworkFolder and any sub folders
 
 			if dvpg != nil {
-				dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+				dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 				d.Backing = &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
 					Port: types.DistributedVirtualSwitchPortConnection{
 						PortgroupKey: dvpg.Key,
@@ -1529,7 +1529,7 @@ func (vm *VirtualMachine) configureDevice(
 				return fault
 			}
 
-			dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+			dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 
 			d.Backing = &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
 				Port: types.DistributedVirtualSwitchPortConnection{

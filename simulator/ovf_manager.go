@@ -58,7 +58,7 @@ func ovfNetwork(ctx *Context, req *types.CreateImportSpec, item ovf.ResourceAllo
 			},
 		}
 	case *DistributedVirtualPortgroup:
-		dvs := ctx.Map.Get(*obj.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+		dvs := ctx.Map.Get(*obj.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 		return &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
 			Port: types.DistributedVirtualSwitchPortConnection{
 				PortgroupKey: obj.Key,

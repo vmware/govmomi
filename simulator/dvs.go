@@ -18,13 +18,13 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type DistributedVirtualSwitch struct {
-	mo.DistributedVirtualSwitch
+type VmwareDistributedVirtualSwitch struct {
+	mo.VmwareDistributedVirtualSwitch
 
 	types.FetchDVPortsResponse
 }
 
-func (s *DistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
+func (s *VmwareDistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
 	return &types.DvsEventArgument{
 		EntityEventArgument: types.EntityEventArgument{
 			Name: s.Name,
@@ -33,7 +33,7 @@ func (s *DistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
 	}
 }
 
-func (s *DistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
+func (s *VmwareDistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
 	return types.DvsEvent{
 		Event: types.Event{
 			Datacenter: datacenterEventArgument(ctx, s),
@@ -42,7 +42,7 @@ func (s *DistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
 	}
 }
 
-func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
 
@@ -181,7 +181,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 	}
 }
 
-func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.ReconfigureDvs_Task) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.ReconfigureDvs_Task) soap.HasFault {
 	task := CreateTask(s, "reconfigureDvs", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		spec := req.Spec.GetDVSConfigSpec()
 
@@ -272,7 +272,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 	}
 }
 
-func (s *DistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
 	body := &methods.FetchDVPortsBody{}
 	body.Res = &types.FetchDVPortsResponse{
 		Returnval: s.dvPortgroups(ctx, req.Criteria),
@@ -280,7 +280,7 @@ func (s *DistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDV
 	return body
 }
 
-func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		// TODO: should return ResourceInUse fault if any VM is using a port on this switch
 		// and past that, remove refs from each host.Network, etc
@@ -297,7 +297,7 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 	}
 }
 
-func (s *DistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
+func (s *VmwareDistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
 	res := s.FetchDVPortsResponse.Returnval
 	if len(res) != 0 {
 		return res
@@ -324,7 +324,7 @@ func (s *DistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *types.Di
 	return res
 }
 
-func (s *DistributedVirtualSwitch) filterDVPorts(
+func (s *VmwareDistributedVirtualSwitch) filterDVPorts(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {
@@ -339,7 +339,7 @@ func (s *DistributedVirtualSwitch) filterDVPorts(
 	return ports
 }
 
-func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
+func (s *VmwareDistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {
@@ -372,7 +372,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 	return filtered
 }
 
-func (s *DistributedVirtualSwitch) filterDVPortsByPortKey(
+func (s *VmwareDistributedVirtualSwitch) filterDVPortsByPortKey(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {
@@ -391,7 +391,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortKey(
 	return filtered
 }
 
-func (s *DistributedVirtualSwitch) filterDVPortsByConnected(
+func (s *VmwareDistributedVirtualSwitch) filterDVPortsByConnected(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {
