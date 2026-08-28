@@ -7824,18 +7824,33 @@ Options:
 ```
 Usage: govc volume.relocate [OPTIONS] ID...
 
-Relocate one or more CNS volumes to the target datastore.
+Relocate one or more CNS volumes to a target datastore.
 
-All IDs are submitted in a single batch RelocateVolume call.
+IDs can be given as arguments, or read from a CSV file with -file. Each
+CSV row has the volume ID as the first field and, optionally, the name of
+the destination datastore as the second field. Rows without a datastore
+field fall back to the datastore given by -ds. -file and ID arguments are
+mutually exclusive.
+
 Per-volume results are printed; the command exits non-zero if any relocation failed.
+The per-volume result table is also appended to a log file (relocate.log in
+the current working directory by default, or the file given by -log-file).
+For any relocation that failed, the CNS task info is appended if available,
+otherwise the full fault is appended. The log file's path is printed to
+stderr.
 
 Examples:
   govc volume.relocate -ds vsanDatastore f75989dc-95b9-4db7-af96-8583f24bc59d
   govc volume.relocate -ds vsanDatastore id1 id2 id3
   govc volume.relocate -ds vsanDatastore -json id1 id2 | jq .
+  govc volume.relocate -ds vsanDatastore -file volumes.csv
+  govc volume.relocate -ds vsanDatastore -log-file /var/log/relocate.log id1
+  govc volume.relocate -ds vsanDatastore -file volumes.csv -log-file /var/log/relocate.log
 
 Options:
-  -ds=                   Datastore [GOVC_DATASTORE]
+  -ds=                    Datastore [GOVC_DATASTORE]
+  -file=                  CSV file containing volume IDs and optional destination datastore names, one per row (mutually exclusive with ID arguments)
+  -log-file=relocate.log  File that failed relocations' task info and fault details are appended to
 ```
 
 ## volume.rm
