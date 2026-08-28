@@ -692,8 +692,11 @@ var enableLocker = os.Getenv("VCSIM_LOCKER") != "false"
 // WithLock holds a lock for the given object while then given function is run.
 func (r *Registry) WithLock(onBehalfOf *Context, obj mo.Reference, f func()) {
 	unlock := r.AcquireLock(onBehalfOf, obj)
+	// Deferred so a panic inside f releases the lock. ObjectLock.Release only
+	// clears heldBy once its refcount reaches zero, so an unwound-past unlock
+	// would leave the object permanently locked to every other caller.
+	defer unlock()
 	f()
-	unlock()
 }
 
 // AcquireLock acquires the lock for onBehalfOf then returns. The lock MUST be
