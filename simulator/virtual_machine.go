@@ -451,6 +451,20 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	vm.Config.Modified = time.Now()
 }
 
+// vAppUpdateKey resolves the key of the vApp property or product an update spec
+// targets. An add or edit carries it in Info; a remove leaves Info nil and names
+// the element in RemoveKey instead.
+func vAppUpdateKey(spec types.ArrayUpdateSpec, infoKey *int32) (int32, bool) {
+	if infoKey != nil {
+		return *infoKey, true
+	}
+	if spec.Operation != types.ArrayUpdateOperationRemove {
+		return 0, false
+	}
+	key, ok := spec.RemoveKey.(int32)
+	return key, ok
+}
+
 // updateVAppProperty updates the simulator VM with the specified VApp properties.
 func (vm *VirtualMachine) updateVAppProperty(spec *types.VmConfigSpec) types.BaseMethodFault {
 	if vm.Config.VAppConfig == nil {
@@ -462,12 +476,21 @@ func (vm *VirtualMachine) updateVAppProperty(spec *types.VmConfigSpec) types.Bas
 	productInfo := info.Product
 
 	for _, prop := range spec.Property {
+		var infoKey *int32
+		if prop.Info != nil {
+			infoKey = &prop.Info.Key
+		}
+		matchKey, ok := vAppUpdateKey(prop.ArrayUpdateSpec, infoKey)
+		if !ok {
+			return new(types.InvalidArgument)
+		}
+
 		var foundIndex int
 		exists := false
 		// Check if the specified property exists or not. This helps rejecting invalid
 		// operations (e.g., Adding a VApp property that already exists)
 		for i, p := range propertyInfo {
-			if p.Key == prop.Info.Key {
+			if p.Key == matchKey {
 				exists = true
 				foundIndex = i
 				break
@@ -494,12 +517,21 @@ func (vm *VirtualMachine) updateVAppProperty(spec *types.VmConfigSpec) types.Bas
 	}
 
 	for _, prod := range spec.Product {
+		var infoKey *int32
+		if prod.Info != nil {
+			infoKey = &prod.Info.Key
+		}
+		matchKey, ok := vAppUpdateKey(prod.ArrayUpdateSpec, infoKey)
+		if !ok {
+			return new(types.InvalidArgument)
+		}
+
 		var foundIndex int
 		exists := false
 		// Check if the specified product exists or not. This helps rejecting invalid
 		// operations (e.g., Adding a VApp product that already exists)
 		for i, p := range productInfo {
-			if p.Key == prod.Info.Key {
+			if p.Key == matchKey {
 				exists = true
 				foundIndex = i
 				break

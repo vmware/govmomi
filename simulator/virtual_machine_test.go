@@ -1805,6 +1805,83 @@ func TestVAppConfigRemove(t *testing.T) {
 				},
 			},
 		},
+		{
+			description: "returns success when a property is removed by RemoveKey",
+			existingVMConfig: &types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key: int32(3),
+							},
+						},
+					},
+				},
+			},
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationRemove,
+								RemoveKey: int32(3),
+							},
+						},
+					},
+				},
+			},
+			expectedProps: []types.VAppPropertyInfo{},
+		},
+		{
+			description: "return error when a property removed by RemoveKey does not exist",
+			expectedErr: new(types.InvalidArgument),
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationRemove,
+								RemoveKey: int32(4),
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			description: "return error when an add carries no Info",
+			expectedErr: new(types.InvalidArgument),
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			description: "return error when RemoveKey is not an int32",
+			expectedErr: new(types.InvalidArgument),
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationRemove,
+								RemoveKey: "1",
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	for _, testCase := range tests {
@@ -1829,6 +1906,67 @@ func TestVAppConfigRemove(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestVAppConfigProductRemove(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vmm := m.Map().Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
+
+	add := types.VirtualMachineConfigSpec{
+		VAppConfig: &types.VmConfigSpec{
+			Product: []types.VAppProductSpec{
+				{
+					ArrayUpdateSpec: types.ArrayUpdateSpec{
+						Operation: types.ArrayUpdateOperationAdd,
+					},
+					Info: &types.VAppProductInfo{
+						Key:  int32(1),
+						Name: "product",
+					},
+				},
+			},
+		},
+	}
+
+	rtask, _ := vm.Reconfigure(ctx, add)
+	if err := rtask.Wait(ctx); err != nil {
+		t.Fatalf("Reconfigure failed during test setup. err: %v", err)
+	}
+
+	remove := types.VmConfigSpec{
+		Product: []types.VAppProductSpec{
+			{
+				ArrayUpdateSpec: types.ArrayUpdateSpec{
+					Operation: types.ArrayUpdateOperationRemove,
+					RemoveKey: int32(1),
+				},
+			},
+		},
+	}
+
+	if fault := vmm.updateVAppProperty(&remove); fault != nil {
+		t.Fatalf("unexpected fault removing VApp product by RemoveKey: %v", fault)
+	}
+
+	if prods := vmm.Config.VAppConfig.GetVmConfigInfo().Product; len(prods) != 0 {
+		t.Errorf("expected no VApp products, got: %v", prods)
 	}
 }
 
