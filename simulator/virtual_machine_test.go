@@ -3240,6 +3240,97 @@ func TestApplyExtraConfig(t *testing.T) {
 	})
 }
 
+func TestApplyExtraConfigGuestIPAndGateway(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
+
+		task, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+			ExtraConfig: []types.BaseOptionValue{
+				&types.OptionValue{Key: "SET.guest.ipAddress", Value: "10.0.0.42/24"},
+				&types.OptionValue{Key: "SET.guest.defaultGateway", Value: "10.0.0.1"},
+				&types.OptionValue{Key: "SET.guest.dnsServer", Value: "10.0.0.1, 10.0.0.2"},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := task.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+
+		var moVM mo.VirtualMachine
+		if err := vm.Properties(ctx, vm.Reference(), []string{"guest.ipAddress", "guest.net", "guest.ipStack"}, &moVM); err != nil {
+			t.Fatal(err)
+		}
+
+		if moVM.Guest.IpAddress != "10.0.0.42" {
+			t.Errorf("guest.ipAddress=%q, want 10.0.0.42 (CIDR mask must not leak into the legacy field)", moVM.Guest.IpAddress)
+		}
+
+		if len(moVM.Guest.Net) == 0 || moVM.Guest.Net[0].IpConfig == nil || len(moVM.Guest.Net[0].IpConfig.IpAddress) == 0 {
+			t.Fatal("guest.net[0].ipConfig.ipAddress not populated")
+		}
+		addr := moVM.Guest.Net[0].IpConfig.IpAddress[0]
+		if addr.IpAddress != "10.0.0.42" {
+			t.Errorf("ipConfig.ipAddress=%q, want 10.0.0.42", addr.IpAddress)
+		}
+		if addr.PrefixLength != 24 {
+			t.Errorf("ipConfig.prefixLength=%d, want 24", addr.PrefixLength)
+		}
+		if addr.Origin != string(types.NetIpConfigInfoIpAddressOriginManual) {
+			t.Errorf("ipConfig.origin=%q, want %q", addr.Origin, types.NetIpConfigInfoIpAddressOriginManual)
+		}
+
+		if len(moVM.Guest.IpStack) == 0 || moVM.Guest.IpStack[0].IpRouteConfig == nil || len(moVM.Guest.IpStack[0].IpRouteConfig.IpRoute) == 0 {
+			t.Fatal("guest.ipStack default route not populated")
+		}
+		route := moVM.Guest.IpStack[0].IpRouteConfig.IpRoute[0]
+		if route.Network != "0.0.0.0" || route.PrefixLength != 0 {
+			t.Errorf("default route = %s/%d, want 0.0.0.0/0", route.Network, route.PrefixLength)
+		}
+		if route.Gateway.IpAddress != "10.0.0.1" {
+			t.Errorf("gateway=%q, want 10.0.0.1", route.Gateway.IpAddress)
+		}
+
+		// DNS and gateway share the same GuestStackInfo element and were both
+		// set in the same Reconfigure call above -- neither must clobber the
+		// other.
+		if moVM.Guest.IpStack[0].DnsConfig == nil {
+			t.Fatal("guest.ipStack[0].dnsConfig not populated")
+		}
+		wantDNS := []string{"10.0.0.1", "10.0.0.2"}
+		if !reflect.DeepEqual(moVM.Guest.IpStack[0].DnsConfig.IpAddress, wantDNS) {
+			t.Errorf("dnsConfig.ipAddress=%v, want %v", moVM.Guest.IpStack[0].DnsConfig.IpAddress, wantDNS)
+		}
+		if moVM.Guest.IpStack[0].IpRouteConfig == nil || len(moVM.Guest.IpStack[0].IpRouteConfig.IpRoute) == 0 {
+			t.Fatal("guest.ipStack[0].ipRouteConfig was clobbered by setting DNS in the same call")
+		}
+
+		// A plain (non-CIDR) IP must keep its prior meaning: prefix length 0,
+		// exactly as it behaved before this backdoor understood CIDR notation.
+		task, err = vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+			ExtraConfig: []types.BaseOptionValue{
+				&types.OptionValue{Key: "SET.guest.ipAddress", Value: "10.0.0.99"},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := task.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+		if err := vm.Properties(ctx, vm.Reference(), []string{"guest.ipAddress", "guest.net"}, &moVM); err != nil {
+			t.Fatal(err)
+		}
+		if moVM.Guest.IpAddress != "10.0.0.99" {
+			t.Errorf("guest.ipAddress=%q, want 10.0.0.99", moVM.Guest.IpAddress)
+		}
+		if moVM.Guest.Net[0].IpConfig.IpAddress[0].PrefixLength != 0 {
+			t.Errorf("plain IP prefixLength=%d, want 0", moVM.Guest.Net[0].IpConfig.IpAddress[0].PrefixLength)
+		}
+	})
+}
+
 func TestLastModifiedAndChangeVersionAreUpdated(t *testing.T) {
 	Test(func(ctx context.Context, c *vim25.Client) {
 		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
