@@ -74,22 +74,39 @@ func TestExtensionCompatibilityConstraint(t *testing.T) {
 	})
 
 	// Request-side write + bypass fields (vcsim does not persist these); assert
-	// they serialize.
+	// they serialize, and in VMODL sequence order: vpxd parses a DataObject
+	// with a forward cursor over the property list, so an element emitted
+	// after a later-declared property (e.g. vmProfile) is rejected with
+	// "Unexpected element tag".
 	skip := true
 	b, err := xml.Marshal(types.VirtualMachineConfigSpec{
+		ManagedBy:                        &types.ManagedByInfo{ExtensionKey: "ext", Type: "t"},
 		ExtensionCompatibilityConstraint: set,
 		SkipExtensionCompatibilityChecks: &skip,
+		MemoryReservationLockedToMax:     &skip,
+		VmProfile:                        []types.BaseVirtualMachineProfileSpec{&types.VirtualMachineDefaultProfileSpec{}},
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{
-		"extensionCompatibilityConstraint", "skipExtensionCompatibilityChecks",
-		"pool-invariant", "POOL", "INVARIANT",
-	} {
+	for _, want := range []string{"pool-invariant", "POOL", "INVARIANT"} {
 		if !strings.Contains(string(b), want) {
 			t.Errorf("expected %q in marshaled ConfigSpec:\n%s", want, b)
 		}
+	}
+	prev := -1
+	for _, name := range []string{
+		"managedBy", "extensionCompatibilityConstraint", "skipExtensionCompatibilityChecks",
+		"memoryReservationLockedToMax", "vmProfile",
+	} {
+		i := strings.Index(string(b), "<"+name)
+		if i < 0 {
+			t.Fatalf("expected %q in marshaled ConfigSpec:\n%s", name, b)
+		}
+		if i <= prev {
+			t.Errorf("%q emitted out of VMODL order in marshaled ConfigSpec:\n%s", name, b)
+		}
+		prev = i
 	}
 
 	if b, err = xml.Marshal(types.VirtualMachineRelocateSpec{SkipExtensionCompatibilityChecks: &skip}); err != nil {
