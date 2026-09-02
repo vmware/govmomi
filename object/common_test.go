@@ -70,6 +70,10 @@ func TestReferenceFromString(t *testing.T) {
 		{"group-p2", &types.ManagedObjectReference{Type: "StoragePod", Value: "group-p2"}},
 		{"resgroup-42", &types.ManagedObjectReference{Type: "ResourcePool", Value: "resgroup-42"}},
 		{"resgroup-v32", &types.ManagedObjectReference{Type: "VirtualApp", Value: "resgroup-v32"}},
+		// A real vCenter's DVS is always the concrete VmwareDistributedVirtualSwitch,
+		// never the abstract DistributedVirtualSwitch -- this must resolve to the
+		// same type real "govc collect dvs-N" needs to find the object with.
+		{"dvs-8", &types.ManagedObjectReference{Type: "VmwareDistributedVirtualSwitch", Value: "dvs-8"}},
 	}
 
 	for _, test := range tests {

@@ -30,7 +30,7 @@ func TestReconfigurePortgroup(t *testing.T) {
 	ctx := m.Service.Context
 
 	dvs := object.NewDistributedVirtualSwitch(c,
-		ctx.Map.Any("DistributedVirtualSwitch").Reference())
+		ctx.Map.Any("VmwareDistributedVirtualSwitch").Reference())
 
 	spec := []types.DVPortgroupConfigSpec{
 		{
@@ -160,7 +160,7 @@ func TestPortgroupSubnetId(t *testing.T) {
 	ctx := m.Service.Context
 
 	dvs := object.NewDistributedVirtualSwitch(c,
-		ctx.Map.Any("DistributedVirtualSwitch").Reference())
+		ctx.Map.Any("VmwareDistributedVirtualSwitch").Reference())
 
 	spec := []types.DVPortgroupConfigSpec{
 		{

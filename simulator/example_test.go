@@ -166,7 +166,7 @@ func ExampleFolder_AddOpaqueNetwork() {
 }
 
 // AddDVPortgroup against vcsim can create both standard and nsx backed DistributedVirtualPortgroup networks
-func ExampleDistributedVirtualSwitch_AddDVPortgroupTask() {
+func ExampleVmwareDistributedVirtualSwitch_AddDVPortgroupTask() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		finder := find.NewFinder(c)
 
