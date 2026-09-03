@@ -90150,6 +90150,19 @@ type VirtualMachineConfigSpec struct {
 	//
 	// Reconfigure privilege: VirtualMachine.Config.ManagedBy
 	ManagedBy *ManagedByInfo `xml:"managedBy,omitempty" json:"managedBy,omitempty"`
+	// The full set of extension compatibility constraints for this virtual
+	// machine, declared by its managing extension (see ManagedBy) so that
+	// vCenter can protect the VM's properties during operations that would
+	// change them. At create time the constraints are persisted atomically with
+	// the VM; at reconfigure time the set fully replaces the existing set
+	// (an empty constraint array clears it).
+	ExtensionCompatibilityConstraint *VirtualMachineExtensionCompatibilityConstraintSet `xml:"extensionCompatibilityConstraint,omitempty" json:"extensionCompatibilityConstraint,omitempty" vim:"9.1.0.0"`
+	// Whether to skip enforcement of the extensionCompatibilityConstraint set.
+	// Honored only when the caller holds the
+	// VirtualMachine.ExtensionCompatibility.Bypass privilege on the virtual
+	// machine; otherwise the operation is rejected. When unset, the value is
+	// treated as false and the registered constraints are enforced.
+	SkipExtensionCompatibilityChecks *bool `xml:"skipExtensionCompatibilityChecks" json:"skipExtensionCompatibilityChecks,omitempty" vim:"9.1.0.0"`
 	// If set true, memory resource reservation for this virtual machine will always be
 	// equal to the virtual machine's memory size; increases in memory size will be
 	// rejected when a corresponding reservation increase is not possible.
@@ -90360,19 +90373,6 @@ type VirtualMachineConfigSpec struct {
 	// existing vSphere compute-policies or affinity rules, then they will still
 	// be considered during this VM's placement.
 	VmPlacementPolicies []BaseVmPlacementPolicy `xml:"vmPlacementPolicies,omitempty,typeattr" json:"vmPlacementPolicies,omitempty" vim:"9.1.0.0"`
-	// The full set of extension compatibility constraints for this virtual
-	// machine, declared by its managing extension (see ManagedBy) so that
-	// vCenter can protect the VM's properties during operations that would
-	// change them. At create time the constraints are persisted atomically with
-	// the VM; at reconfigure time the set fully replaces the existing set
-	// (an empty constraint array clears it).
-	ExtensionCompatibilityConstraint *VirtualMachineExtensionCompatibilityConstraintSet `xml:"extensionCompatibilityConstraint,omitempty" json:"extensionCompatibilityConstraint,omitempty" vim:"9.1.0.0"`
-	// Whether to skip enforcement of the extensionCompatibilityConstraint set.
-	// Honored only when the caller holds the
-	// VirtualMachine.ExtensionCompatibility.Bypass privilege on the virtual
-	// machine; otherwise the operation is rejected. When unset, the value is
-	// treated as false and the registered constraints are enforced.
-	SkipExtensionCompatibilityChecks *bool `xml:"skipExtensionCompatibilityChecks" json:"skipExtensionCompatibilityChecks,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
