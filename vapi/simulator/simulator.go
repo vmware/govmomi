@@ -2132,16 +2132,36 @@ func (s *handler) libraryItemStorageByID(id string) ([]library.Storage, bool) {
 		return nil, false
 	}
 
+	// StorageURIs is client-facing: on a real vCenter it is a datastore URL,
+	// ex. "ds:///vmfs/volumes/<uuid>/contentlib-<lib>/<item>/<file>", rooted
+	// at the same value the datastore reports via summary.url. libraryPath()
+	// returns vcsim's real on-disk directory instead, which is only
+	// meaningful for vcsim's own file I/O and is never exposed to clients on
+	// a real vCenter. Only the Path field is joined (not the raw URL string)
+	// so a "ds://" scheme isn't collapsed by path.Join's slash cleaning.
+	dsref := types.ManagedObjectReference{
+		Type:  "Datastore",
+		Value: lib.Storage[0].DatastoreID,
+	}
+	ds := s.Map.Get(dsref).(*simulator.Datastore)
+
+	dsURL, err := url.Parse(ds.Summary.Url)
+	if err != nil {
+		log.Printf("invalid datastore url %q: %s", ds.Summary.Url, err)
+		return nil, false
+	}
+
 	storage := make([]library.Storage, len(item.File))
 
 	for i, file := range item.File {
+		u := *dsURL
+		u.Path = path.Join(u.Path, "contentlib-"+lib.ID, id, file.Name)
+
 		storage[i] = library.Storage{
 			StorageBacking: lib.Storage[0],
-			StorageURIs: []string{
-				path.Join(s.libraryPath(lib.Library, id), file.Name),
-			},
-			Name:    file.Name,
-			Version: file.Version,
+			StorageURIs:    []string{u.String()},
+			Name:           file.Name,
+			Version:        file.Version,
 		}
 		if file.Checksum != nil {
 			storage[i].Checksum = *file.Checksum
