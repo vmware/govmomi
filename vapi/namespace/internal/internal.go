@@ -15,6 +15,7 @@ const (
 	SupervisorsSummariesPath                = SupervisorsPath + "/summaries"
 	SupervisorSummaryPath                   = SupervisorsPath + "/%s/summary"
 	SupervisorTopologyPath                  = SupervisorsPath + "/%s/topology"
+	SupervisorNetworkEdgesPath              = SupervisorsPath + "/%s/networks/edges"
 
 	NamespacesPath       = "/api/vcenter/namespaces/instances"
 	NamespacesPathV2     = "/api/vcenter/namespaces/instances/v2"
