@@ -27,15 +27,16 @@ type NamespaceInstanceSummaryV2 struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20InfoV2
 // Since 8.0.0.1
 type NamespaceInstanceInfoV2 struct {
-	Supervisor           string             `json:"supervisor"`
-	ConfigStatus         string             `json:"config_status"`
-	Stats                Stats              `json:"stats"`
-	Description          string             `json:"description"`
-	StorageSpecs         []StorageSpec      `json:"storage_specs"`
-	VmServiceSpec        VmServiceSpec      `json:"vm_service_spec"`
-	ContentLibraries     []ContentLibraryV2 `json:"content_libraries"`
-	SelfServiceNamespace bool               `json:"self_service_namespace"`
-	NetworkSpec          *NetworkConfigInfo `json:"network_spec,omitempty"`
+	Supervisor           string              `json:"supervisor"`
+	ConfigStatus         string              `json:"config_status"`
+	Stats                Stats               `json:"stats"`
+	Description          string              `json:"description"`
+	StorageSpecs         []StorageSpec       `json:"storage_specs"`
+	VmServiceSpec        VmServiceSpec       `json:"vm_service_spec"`
+	ContentLibraries     []ContentLibraryV2  `json:"content_libraries"`
+	SelfServiceNamespace bool                `json:"self_service_namespace"`
+	NetworkSpec          *NetworkConfigInfo  `json:"network_spec,omitempty"`
+	Edges                []NamespaceEdgeSpec `json:"edges,omitempty"`
 }
 
 // NamespaceInstanceCreateSpecV2
@@ -51,6 +52,7 @@ type NamespaceInstanceCreateSpecV2 struct {
 	SelfServiceNamespace *bool                       `json:"self_service_namespace,omitempty"`
 	NetworkSpec          *NetworkConfigCreateSpec    `json:"network_spec,omitempty"`
 	NamespaceNetwork     *NamespaceNetworkCreateSpec `json:"namespace_network,omitempty"`
+	Edges                *[]NamespaceEdgeSpec        `json:"edges,omitempty"`
 }
 
 type Stats struct {
@@ -64,6 +66,22 @@ type ContentLibraryV2 struct {
 	Writable               bool   `json:"writable"`
 	AllowImport            bool   `json:"allow_import"`
 	ResourceNamingStrategy string `json:"resource_naming_strategy"`
+}
+
+// NamespaceEdgeSpec The Vcenter Namespaces Instances EdgeCreateSpec schema contains the specification required to configure Edge provider association with a namespace.
+// https://developer.broadcom.com/xapis/vsphere-automation-api/9.1.1/data-structures/Vcenter%20Namespaces%20Instances%20EdgeCreateSpec/
+// Since 9.1.0.0
+type NamespaceEdgeSpec struct {
+	// Retrieve ID from api: https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/supervisor/networks/edges/get/
+	ID string `json:"id,omitempty"`
+	// Name of the edge provider e.g.: NSX_REGISTERED_AVI
+	EdgeProvider string                `json:"edge_provider,omitempty"`
+	Avi          *NamespaceEdgeAviSpec `json:"avi,omitempty"`
+}
+
+// NamespaceEdgeAviSpec defines the SE-Group used by the namespace to provision LB
+type NamespaceEdgeAviSpec struct {
+	SeGroupName string `json:"se_group_name,omitempty"`
 }
 
 // NamespaceNetworkCreateSpec represents the complete namespace_network field for creation
