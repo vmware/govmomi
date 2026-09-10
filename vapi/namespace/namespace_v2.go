@@ -72,9 +72,11 @@ type ContentLibraryV2 struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/9.1.1/data-structures/Vcenter%20Namespaces%20Instances%20EdgeCreateSpec/
 // Since 9.1.0.0
 type NamespaceEdgeSpec struct {
-	// Retrieve ID from api: https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/supervisor/networks/edges/get/
+	// Retrieve ID from api
+	// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/supervisor/networks/edges/get/
 	ID string `json:"id,omitempty"`
-	// Name of the edge provider e.g.: NSX_REGISTERED_AVI
+	// Vcenter Namespaces Instances EdgeProvider
+	// https://developer.broadcom.com/xapis/vsphere-automation-api/9.1.1/data-structures/Vcenter%20Namespaces%20Instances%20EdgeProvider/index
 	EdgeProvider string                `json:"edge_provider,omitempty"`
 	Avi          *NamespaceEdgeAviSpec `json:"avi,omitempty"`
 }
