@@ -493,28 +493,26 @@ func (c *Manager) GetSupervisorTopology(ctx context.Context, id string) ([]Super
 	return response, err
 }
 
-// SupervisorNetworkEdge describes a network edge configured with a Supervisor.
-// The Edge field is the ID to use as NamespaceEdgeSpec.ID when creating a
-// namespace that should use this edge.
-// GET /api/vcenter/namespace-management/supervisors/{supervisor}/networks/edges
+// SupervisorNetworkEdgeInfo describes a network edge configured with a Supervisor.
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Edges%20Info/
 // Since 9.0.0.0
-type SupervisorNetworkEdge struct {
+type SupervisorNetworkEdgeInfo struct {
 	Edge     string `json:"edge"`
 	Provider string `json:"provider"`
 	Name     string `json:"name"`
 }
 
-// SupervisorNetworkEdgesResult
-// GET /api/vcenter/namespace-management/supervisors/{supervisor}/networks/edges
+// SupervisorNetworkEdgesListResult
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20NamespaceManagement%20Supervisors%20Networks%20Edges%20ListResult/
 // Since 9.0.0.0
-type SupervisorNetworkEdgesResult struct {
-	Edges []SupervisorNetworkEdge `json:"edges"`
+type SupervisorNetworkEdgesListResult struct {
+	Edges []SupervisorNetworkEdgeInfo `json:"edges"`
 }
 
 // GetSupervisorNetworkEdges retrieves the network edges configured with the specified Supervisor.
-// GET /api/vcenter/namespace-management/supervisors/{supervisor}/networks/edges
-func (c *Manager) GetSupervisorNetworkEdges(ctx context.Context, id string) ([]SupervisorNetworkEdge, error) {
-	var response SupervisorNetworkEdgesResult
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespace-management/supervisors/supervisor/networks/edges/get/
+func (c *Manager) GetSupervisorNetworkEdges(ctx context.Context, id string) ([]SupervisorNetworkEdgeInfo, error) {
+	var response SupervisorNetworkEdgesListResult
 	url := c.Resource(fmt.Sprintf(internal.SupervisorNetworkEdgesPath, id))
 	err := c.Do(ctx, url.Request(http.MethodGet), &response)
 	return response.Edges, err
