@@ -16,7 +16,7 @@ import (
 // EvalLicense is the default license
 var EvalLicense = types.LicenseManagerLicenseInfo{
 	LicenseKey: "00000-00000-00000-00000-00000",
-	EditionKey: "eval",
+	EditionKey: "vcEval",
 	Name:       "Evaluation Mode",
 	Properties: []types.KeyAnyValue{
 		{
