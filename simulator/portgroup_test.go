@@ -368,7 +368,7 @@ func TestPortgroupVmBackref(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dvsMo := simCtx.Map.Get(dvsRef).(*DistributedVirtualSwitch)
+	dvsMo := simCtx.Map.Get(dvsRef).(*VmwareDistributedVirtualSwitch)
 	pg1 := simCtx.Map.FindByName("backref-pg1", dvsMo.Portgroup).(*DistributedVirtualPortgroup)
 	pg2 := simCtx.Map.FindByName("backref-pg2", dvsMo.Portgroup).(*DistributedVirtualPortgroup)
 
