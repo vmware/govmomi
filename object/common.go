@@ -130,7 +130,7 @@ var refTypeMap = map[string]string{
 	"datastore":   "Datastore",
 	"domain":      "ComputeResource",
 	"dvportgroup": "DistributedVirtualPortgroup",
-	"dvs":         "DistributedVirtualSwitch",
+	"dvs":         "VmwareDistributedVirtualSwitch",
 	"group":       "Folder",
 	"host":        "HostSystem",
 	"network":     "Network",

@@ -18,8 +18,8 @@ type DistributedVirtualSwitchManager struct {
 func (m *DistributedVirtualSwitchManager) DVSManagerLookupDvPortGroup(ctx *Context, req *types.DVSManagerLookupDvPortGroup) soap.HasFault {
 	body := &methods.DVSManagerLookupDvPortGroupBody{}
 
-	for _, obj := range ctx.Map.All("DistributedVirtualSwitch") {
-		dvs := obj.(*DistributedVirtualSwitch)
+	for _, obj := range ctx.Map.All("VmwareDistributedVirtualSwitch") {
+		dvs := obj.(*VmwareDistributedVirtualSwitch)
 		if dvs.Uuid == req.SwitchUuid {
 			for _, ref := range dvs.Portgroup {
 				pg := ctx.Map.Get(ref).(*DistributedVirtualPortgroup)

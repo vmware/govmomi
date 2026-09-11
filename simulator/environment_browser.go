@@ -285,7 +285,7 @@ func (b *EnvironmentBrowser) QueryConfigTarget(ctx *Context, req *types.QueryCon
 					Network: n.Summary.GetNetworkSummary(),
 				})
 			case *DistributedVirtualPortgroup:
-				dvs := ctx.Map.Get(*n.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+				dvs := ctx.Map.Get(*n.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 				target.DistributedVirtualPortgroup = append(target.DistributedVirtualPortgroup, types.DistributedVirtualPortgroupInfo{
 					SwitchName:                  dvs.Name,
 					SwitchUuid:                  dvs.Uuid,
@@ -313,7 +313,7 @@ func (b *EnvironmentBrowser) QueryConfigTarget(ctx *Context, req *types.QueryCon
 						},
 					})
 				}
-			case *DistributedVirtualSwitch:
+			case *VmwareDistributedVirtualSwitch:
 				target.DistributedVirtualSwitch = append(target.DistributedVirtualSwitch, types.DistributedVirtualSwitchInfo{
 					SwitchName:                  n.Name,
 					SwitchUuid:                  n.Uuid,
