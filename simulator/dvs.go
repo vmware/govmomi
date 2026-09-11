@@ -334,7 +334,7 @@ func dvsUplinkPnics(host *HostSystem, backing types.BaseDistributedVirtualSwitch
 	return nil
 }
 
-func (s *DistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
 	body := &methods.FetchDVPortsBody{}
 	body.Res = &types.FetchDVPortsResponse{
 		Returnval: s.dvPortgroups(ctx, req.Criteria),
