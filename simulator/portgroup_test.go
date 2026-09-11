@@ -354,7 +354,7 @@ func TestPortgroupVmBackref(t *testing.T) {
 	c := m.Service.client()
 	simCtx := m.Service.Context
 
-	dvsRef := simCtx.Map.Any("DistributedVirtualSwitch").Reference()
+	dvsRef := simCtx.Map.Any("VmwareDistributedVirtualSwitch").Reference()
 	dvs := object.NewDistributedVirtualSwitch(c, dvsRef)
 
 	task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{
