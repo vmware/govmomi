@@ -375,16 +375,7 @@ func (s *VmwareDistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *ty
 			continue
 		}
 
-		for _, key := range pg.PortKeys {
-			res = append(res, types.DistributedVirtualPort{
-				DvsUuid:      s.Uuid,
-				Key:          key,
-				PortgroupKey: pg.Key,
-				Config: types.DVPortConfigInfo{
-					Setting: pg.Config.DefaultPortConfig,
-				},
-			})
-		}
+		res = append(res, s.regularPorts(ctx, pg)...)
 	}
 
 	// filter ports by criteria
@@ -457,6 +448,76 @@ func (s *VmwareDistributedVirtualSwitch) uplinkPorts(ctx *Context, pg *Distribut
 				},
 			})
 		}
+	}
+
+	return ports
+}
+
+// regularPorts generates ports for a non-uplink portgroup. It mirrors what a
+// real vCenter does when a VM's NIC connects to a DVPortgroup: one of the
+// portgroup's ports gets claimed and its Connectee set to that VM's vNIC
+// (DistributedVirtualSwitchPortConnectee, NicType "vmVnic") -- confirmed
+// against a real vCenter's recorded/replayed inventory, which sets Connectee
+// this way on every connected port, not just uplink ones. PortKeys with no
+// VM claiming them stay disconnected, matching a real vCenter's unused port
+// capacity.
+func (s *VmwareDistributedVirtualSwitch) regularPorts(ctx *Context, pg *DistributedVirtualPortgroup) []types.DistributedVirtualPort {
+	claimed := make(map[string]types.DistributedVirtualPort, len(pg.PortKeys))
+	keys := slices.Clone(pg.PortKeys)
+
+	for _, vmRef := range pg.Vm {
+		vm, ok := ctx.Map.Get(vmRef).(*VirtualMachine)
+		if !ok {
+			continue
+		}
+
+		for _, d := range vm.Config.Hardware.Device {
+			card, ok := d.(types.BaseVirtualEthernetCard)
+			if !ok {
+				continue
+			}
+
+			nic := card.GetVirtualEthernetCard()
+			b, ok := nic.Backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
+			if !ok || b.Port.PortgroupKey != pg.Key || len(keys) == 0 {
+				continue
+			}
+
+			key := keys[0]
+			keys = keys[1:]
+
+			connectedEntity := vmRef
+			claimed[key] = types.DistributedVirtualPort{
+				DvsUuid:      s.Uuid,
+				Key:          key,
+				PortgroupKey: pg.Key,
+				Connectee: &types.DistributedVirtualSwitchPortConnectee{
+					ConnectedEntity: &connectedEntity,
+					NicKey:          strconv.Itoa(int(nic.Key)),
+					Type:            string(types.DistributedVirtualSwitchPortConnecteeConnecteeTypeVmVnic),
+				},
+				Config: types.DVPortConfigInfo{
+					Setting: pg.Config.DefaultPortConfig,
+				},
+			}
+		}
+	}
+
+	ports := make([]types.DistributedVirtualPort, 0, len(pg.PortKeys))
+	for _, key := range pg.PortKeys {
+		if p, ok := claimed[key]; ok {
+			ports = append(ports, p)
+			continue
+		}
+
+		ports = append(ports, types.DistributedVirtualPort{
+			DvsUuid:      s.Uuid,
+			Key:          key,
+			PortgroupKey: pg.Key,
+			Config: types.DVPortConfigInfo{
+				Setting: pg.Config.DefaultPortConfig,
+			},
+		})
 	}
 
 	return ports

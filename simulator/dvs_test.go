@@ -191,8 +191,10 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 
 	// pgs[0] is the DVS's auto-created uplink portgroup ("DVS0-DVUplinks...").
 	// Its ports are host-scoped (one per DVS host member, each connected to
-	// that host's own pnic) -- see uplinkPorts() -- unlike pgs[1], a regular
-	// portgroup with a single, unconnected port.
+	// that host's own pnic) -- see uplinkPorts(). pgs[1] is a regular
+	// portgroup with a single port, connected to the default VM's vNIC --
+	// see regularPorts() -- since VPX()'s default VM is wired to the last
+	// plain portgroup.
 	uplinkPorts := make([]types.DistributedVirtualPort, len(vswitch.Summary.HostMember))
 	for i := range uplinkPorts {
 		uplinkPorts[i] = types.DistributedVirtualPort{PortgroupKey: pgs[0].Value, Key: "0"}
@@ -235,22 +237,22 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			[]types.DistributedVirtualPort{},
 		},
 		{
-			// uplink ports are connected (Connectee set, to each host's pnic);
-			// the regular portgroup's port is not.
+			// both the uplink ports (Connectee set to each host's pnic) and
+			// the regular portgroup's port (Connectee set to the default
+			// VM's vNIC) are connected.
 			"connected",
 			&types.DistributedVirtualSwitchPortCriteria{
 				Connected: types.NewBool(true),
 			},
-			uplinkPorts,
+			append(append([]types.DistributedVirtualPort{}, uplinkPorts...),
+				types.DistributedVirtualPort{PortgroupKey: pgs[1].Value, Key: "0"}),
 		},
 		{
 			"not connected",
 			&types.DistributedVirtualSwitchPortCriteria{
 				Connected: types.NewBool(false),
 			},
-			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[1].Value, Key: "0"},
-			},
+			[]types.DistributedVirtualPort{},
 		},
 	}
 
