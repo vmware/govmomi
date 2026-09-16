@@ -365,8 +365,15 @@ func (s *VmwareDistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *ty
 		return res
 	}
 
+	uplinkPg := s.uplinkPortgroup(ctx)
+
 	for _, ref := range s.Portgroup {
 		pg := ctx.Map.Get(ref).(*DistributedVirtualPortgroup)
+
+		if uplinkPg != nil && pg.Self == uplinkPg.Self {
+			res = append(res, s.uplinkPorts(ctx, pg)...)
+			continue
+		}
 
 		for _, key := range pg.PortKeys {
 			res = append(res, types.DistributedVirtualPort{
@@ -384,6 +391,75 @@ func (s *VmwareDistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *ty
 	res = s.filterDVPorts(res, criteria)
 
 	return res
+}
+
+// uplinkPortgroup returns the DVS's auto-created uplink portgroup. It's
+// identified by name rather than a stored reference: CreateDVSTask (folder.go)
+// creates it via a nested AddDVPortgroupTask, which -- like all vcsim tasks --
+// completes asynchronously in its own goroutine after the creating task's
+// lock is released, so there's no point during DVS creation itself where the
+// new portgroup's reference is reliably available yet to store.
+func (s *VmwareDistributedVirtualSwitch) uplinkPortgroup(ctx *Context) *DistributedVirtualPortgroup {
+	name := s.Name + "-DVUplinks" + strings.TrimPrefix(s.Self.Value, "dvs")
+
+	for _, ref := range s.Portgroup {
+		if pg, ok := ctx.Map.Get(ref).(*DistributedVirtualPortgroup); ok && pg.Name == name {
+			return pg
+		}
+	}
+
+	return nil
+}
+
+// uplinkPorts generates one DistributedVirtualPort per (host, pnic) pair
+// backing this DVS's uplink portgroup, with Connectee populated -- mirroring
+// what a real vCenter reports for physical NIC uplinks. A real vCenter's
+// uplink ports are host-scoped: the same numbered port exists once per host,
+// each instance connected to that host's own pnic (see
+// DistributedVirtualSwitchPortCriteria.Host). vcsim tracks the pnic backing
+// via HostSystem.Config.Network.ProxySwitch, populated when a host joins the
+// DVS (see ReconfigureDvsTask).
+func (s *VmwareDistributedVirtualSwitch) uplinkPorts(ctx *Context, pg *DistributedVirtualPortgroup) []types.DistributedVirtualPort {
+	var ports []types.DistributedVirtualPort
+
+	for _, hostRef := range s.Summary.HostMember {
+		host, ok := ctx.Map.Get(hostRef).(*HostSystem)
+		if !ok {
+			continue
+		}
+
+		var pnics []string
+		for _, ps := range host.Config.Network.ProxySwitch {
+			if ps.DvsUuid == s.Uuid {
+				pnics = ps.Pnic
+				break
+			}
+		}
+
+		for i, pnicKey := range pnics {
+			key := pnicKey
+			if i < len(pg.PortKeys) {
+				key = pg.PortKeys[i]
+			}
+
+			connectedEntity := hostRef
+			ports = append(ports, types.DistributedVirtualPort{
+				DvsUuid:      s.Uuid,
+				Key:          key,
+				PortgroupKey: pg.Key,
+				Connectee: &types.DistributedVirtualSwitchPortConnectee{
+					ConnectedEntity: &connectedEntity,
+					NicKey:          pnicKey,
+					Type:            string(types.DistributedVirtualSwitchPortConnecteeConnecteeTypePnic),
+				},
+				Config: types.DVPortConfigInfo{
+					Setting: pg.Config.DefaultPortConfig,
+				},
+			})
+		}
+	}
+
+	return ports
 }
 
 func (s *VmwareDistributedVirtualSwitch) filterDVPorts(

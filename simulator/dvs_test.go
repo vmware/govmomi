@@ -143,12 +143,16 @@ func TestDVS(t *testing.T) {
 		}
 	}
 
+	// dvs (DVS1) had all its hosts removed by the last test case above ("Remove
+	// dvs1 == OK"), so its uplink portgroup now correctly contributes 0 ports
+	// (uplink ports are host-scoped -- see uplinkPorts()); only the DVPG0
+	// portgroup added earlier still has its one port.
 	ports, err := dvs.FetchDVPorts(ctx, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ports) != 2 {
-		t.Fatalf("expected 2 ports in DVPorts; got %d", len(ports))
+	if len(ports) != 1 {
+		t.Fatalf("expected 1 port in DVPorts; got %d", len(ports))
 	}
 
 	dtask, err = dvs.Destroy(ctx)
@@ -185,6 +189,15 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 		t.Fatalf("expected 2 portgroups in DVS; got %d", len(pgs))
 	}
 
+	// pgs[0] is the DVS's auto-created uplink portgroup ("DVS0-DVUplinks...").
+	// Its ports are host-scoped (one per DVS host member, each connected to
+	// that host's own pnic) -- see uplinkPorts() -- unlike pgs[1], a regular
+	// portgroup with a single, unconnected port.
+	uplinkPorts := make([]types.DistributedVirtualPort, len(vswitch.Summary.HostMember))
+	for i := range uplinkPorts {
+		uplinkPorts[i] = types.DistributedVirtualPort{PortgroupKey: pgs[0].Value, Key: "0"}
+	}
+
 	tests := []struct {
 		name     string
 		criteria *types.DistributedVirtualSwitchPortCriteria
@@ -193,10 +206,8 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 		{
 			"empty criteria",
 			&types.DistributedVirtualSwitchPortCriteria{},
-			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[0].Value, Key: "0"},
-				{PortgroupKey: pgs[1].Value, Key: "0"},
-			},
+			append(append([]types.DistributedVirtualPort{}, uplinkPorts...),
+				types.DistributedVirtualPort{PortgroupKey: pgs[1].Value, Key: "0"}),
 		},
 		{
 			"inside PortgroupKeys",
@@ -204,9 +215,7 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 				PortgroupKey: []string{pgs[0].Value},
 				Inside:       types.NewBool(true),
 			},
-			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[0].Value, Key: "0"},
-			},
+			uplinkPorts,
 		},
 		{
 			"outside PortgroupKeys",
@@ -226,11 +235,13 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			[]types.DistributedVirtualPort{},
 		},
 		{
+			// uplink ports are connected (Connectee set, to each host's pnic);
+			// the regular portgroup's port is not.
 			"connected",
 			&types.DistributedVirtualSwitchPortCriteria{
 				Connected: types.NewBool(true),
 			},
-			[]types.DistributedVirtualPort{},
+			uplinkPorts,
 		},
 		{
 			"not connected",
@@ -238,7 +249,6 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 				Connected: types.NewBool(false),
 			},
 			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[0].Value, Key: "0"},
 				{PortgroupKey: pgs[1].Value, Key: "0"},
 			},
 		},
