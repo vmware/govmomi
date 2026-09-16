@@ -53,6 +53,10 @@ func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(ctx *Context, r
 		s.Config.LogicalSwitchUuid = req.Spec.LogicalSwitchUuid
 		s.Config.SubnetId = req.Spec.SubnetId
 		s.Config.BackingType = req.Spec.BackingType
+		// Invalidate FetchDVPorts cache: DVPG reconfiguration may change port structure
+		if dvs, ok := ctx.Map.Get(*s.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+			dvs.FetchDVPortsResponse.Returnval = nil
+		}
 
 		return nil, nil
 	})

@@ -1680,6 +1680,10 @@ func (vm *VirtualMachine) configureDevice(
 					// (rather than cross-referencing every VM's NIC backing)
 					// needs this to discover which VMs are on it.
 					ctx.Map.AddReference(ctx, pg, &pg.Vm, vm.Self)
+					// Invalidate FetchDVPorts cache: VM attachment changes which ports have Connectee set
+					if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+						dvs.FetchDVPortsResponse.Returnval = nil
+					}
 				}
 			}
 		}
@@ -2056,6 +2060,10 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 			if net.Type == "DistributedVirtualPortgroup" {
 				if pg, ok := ctx.Map.Get(net).(*DistributedVirtualPortgroup); ok {
 					ctx.Map.RemoveReference(ctx, pg, &pg.Vm, vm.Self)
+					// Invalidate FetchDVPorts cache: VM detachment changes which ports have Connectee set
+					if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+						dvs.FetchDVPortsResponse.Returnval = nil
+					}
 				}
 			}
 
@@ -2835,10 +2843,18 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 		ctx.Map.RemoveReference(ctx, ds, &ds.Vm, vm.Self)
 	}
 
+	// Collect DVS instances to invalidate their caches after all DVPG backrefs are removed
+	dvsToInvalidate := make(map[string]*VmwareDistributedVirtualSwitch)
 	for i := range vm.Network {
 		if pg, ok := ctx.Map.Get(vm.Network[i]).(*DistributedVirtualPortgroup); ok {
 			ctx.Map.RemoveReference(ctx, pg, &pg.Vm, vm.Self)
+			if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+				dvsToInvalidate[dvs.Self.Value] = dvs
+			}
 		}
+	}
+	for _, dvs := range dvsToInvalidate {
+		dvs.FetchDVPortsResponse.Returnval = nil
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event(ctx)})

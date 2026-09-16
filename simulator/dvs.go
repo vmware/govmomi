@@ -282,6 +282,9 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 			{Name: "summary.hostMember", Val: members},
 		})
 
+		// Invalidate FetchDVPorts cache: host membership changes affect uplink ports
+		s.FetchDVPortsResponse.Returnval = nil
+
 		ctx.postEvent(&types.DvsReconfiguredEvent{
 			DvsEvent:   s.event(ctx),
 			ConfigSpec: spec,
