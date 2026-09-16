@@ -608,7 +608,7 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 			return nil, &types.InvalidArgument{InvalidProperty: "name"}
 		}
 
-		dvs.Uuid = newUUID(dvs.Name)
+		dvs.Uuid = newDVSUuid(dvs.Name)
 
 		folderPutChild(ctx, &f.Folder, dvs)
 

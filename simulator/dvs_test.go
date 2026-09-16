@@ -7,6 +7,7 @@ package simulator
 import (
 	"context"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/vmware/govmomi/find"
@@ -281,6 +282,32 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestDVSUuidFormat verifies newDVSUuid() produces the same wire shape a
+// real vCenter/ESXi uses for a DVS UUID -- 16 hex byte pairs, space
+// separated, with a dash between the 8th and 9th pair -- rather than a plain
+// dashed UUID, and that a live DVS's Summary.Uuid actually uses it.
+func TestDVSUuidFormat(t *testing.T) {
+	re := regexp.MustCompile(`^[0-9a-f]{2}( [0-9a-f]{2}){7}-([0-9a-f]{2} ){7}[0-9a-f]{2}$`)
+
+	uuid := newDVSUuid("some-dvs-name")
+	if !re.MatchString(uuid) {
+		t.Fatalf("newDVSUuid() = %q, want the vCenter wire shape (e.g. %q)",
+			uuid, "50 13 a2 63 0a a6 77 65-37 e2 20 e6 2b 8f a2 f6")
+	}
+
+	// Stable per input name, matching newUUID()'s own contract.
+	if again := newDVSUuid("some-dvs-name"); again != uuid {
+		t.Fatalf("newDVSUuid() = %q then %q, want stable output for the same input", uuid, again)
+	}
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vswitch := Map(ctx).Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+		if !re.MatchString(vswitch.Uuid) {
+			t.Fatalf("DVS Summary.Uuid = %q, want the vCenter wire shape", vswitch.Uuid)
+		}
+	})
 }
 
 // TestDVSHostProxySwitch verifies that HostSystem.Config.Network.ProxySwitch
