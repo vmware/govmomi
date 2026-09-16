@@ -55,7 +55,7 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		{&dc.VmFolder, "vm", []string{"VirtualMachine", "VirtualApp", "Folder"}},
 		{&dc.HostFolder, "host", []string{"ComputeResource", "Folder"}},
 		{&dc.DatastoreFolder, "datastore", []string{"Datastore", "StoragePod", "Folder"}},
-		{&dc.NetworkFolder, "network", []string{"Network", "DistributedVirtualSwitch", "Folder"}},
+		{&dc.NetworkFolder, "network", []string{"Network", "DistributedVirtualSwitch", "VmwareDistributedVirtualSwitch", "Folder"}},
 	}
 
 	for _, f := range folders {

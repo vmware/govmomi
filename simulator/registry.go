@@ -441,6 +441,8 @@ func entityName(e mo.Entity) string {
 		return x.Name
 	case *mo.DistributedVirtualSwitch:
 		return x.Name
+	case *mo.VmwareDistributedVirtualSwitch:
+		return x.Name
 	case *mo.DistributedVirtualPortgroup:
 		return x.Name
 	case *mo.OpaqueNetwork:

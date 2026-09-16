@@ -58,7 +58,7 @@ func folderUpdate(ctx *Context, f *mo.Folder, o mo.Reference, u func(*Context, m
 	dc := ctx.Map.getEntityDatacenter(f)
 
 	switch ref.Type {
-	case "Network", "DistributedVirtualSwitch", "DistributedVirtualPortgroup":
+	case "Network", "DistributedVirtualSwitch", "VmwareDistributedVirtualSwitch", "DistributedVirtualPortgroup":
 		u(ctx, dc, &dc.Network, ref)
 	case "Datastore":
 		u(ctx, dc, &dc.Datastore, ref)
@@ -600,7 +600,7 @@ func (f *Folder) MoveIntoFolderTask(ctx *Context, c *types.MoveIntoFolder_Task) 
 func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.HasFault {
 	task := CreateTask(f, "createDVS", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		spec := req.Spec.ConfigSpec.GetDVSConfigSpec()
-		dvs := &DistributedVirtualSwitch{}
+		dvs := &VmwareDistributedVirtualSwitch{}
 		dvs.Name = spec.Name
 		dvs.Entity().Name = dvs.Name
 
