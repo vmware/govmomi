@@ -280,6 +280,7 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 
 		ctx.Update(s, []types.PropertyChange{
 			{Name: "summary.hostMember", Val: members},
+			{Name: "summary.numHosts", Val: int32(len(members))},
 		})
 
 		// Invalidate FetchDVPorts cache: host membership changes affect uplink ports

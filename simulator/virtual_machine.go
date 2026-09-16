@@ -1683,6 +1683,8 @@ func (vm *VirtualMachine) configureDevice(
 					// Invalidate FetchDVPorts cache: VM attachment changes which ports have Connectee set
 					if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
 						dvs.FetchDVPortsResponse.Returnval = nil
+						// Also maintain DVS.Summary.Vm[], matching real vCenter's DVS-level connected-VM list
+						ctx.Map.AddReference(ctx, dvs, &dvs.Summary.Vm, vm.Self)
 					}
 				}
 			}
@@ -2063,6 +2065,8 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 					// Invalidate FetchDVPorts cache: VM detachment changes which ports have Connectee set
 					if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
 						dvs.FetchDVPortsResponse.Returnval = nil
+						// Also remove from DVS.Summary.Vm[] to maintain consistency
+						ctx.Map.RemoveReference(ctx, dvs, &dvs.Summary.Vm, vm.Self)
 					}
 				}
 			}
@@ -2849,6 +2853,8 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 		if pg, ok := ctx.Map.Get(vm.Network[i]).(*DistributedVirtualPortgroup); ok {
 			ctx.Map.RemoveReference(ctx, pg, &pg.Vm, vm.Self)
 			if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+				// Also remove from DVS.Summary.Vm[] when VM is destroyed
+				ctx.Map.RemoveReference(ctx, dvs, &dvs.Summary.Vm, vm.Self)
 				dvsToInvalidate[dvs.Self.Value] = dvs
 			}
 		}

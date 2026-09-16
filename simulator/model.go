@@ -557,8 +557,14 @@ func (m *Model) CreateInfrastructure(ctx *Context) error {
 				}},
 			}
 
-			task, _ = dvs.Reconfigure(ctx, config)
-			_, _ = task.WaitForResult(context.Background(), nil)
+			task, err := dvs.Reconfigure(ctx, config)
+			if err != nil {
+				return nil, fmt.Errorf("failed to reconfigure DVS for host %s: %w", host.Reference().Value, err)
+			}
+			_, err = task.WaitForResult(context.Background(), nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to wait for DVS reconfigure task for host %s: %w", host.Reference().Value, err)
+			}
 		}
 
 		return host, nil

@@ -649,6 +649,9 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 			NumPorts:    spec.NumStandalonePorts,
 			ProductInfo: productInfo,
 			Description: spec.Description,
+			HostMember:  []types.ManagedObjectReference{},
+			Vm:          []types.ManagedObjectReference{},
+			NumHosts:    0,
 		}
 
 		configInfo := &types.VMwareDVSConfigInfo{
