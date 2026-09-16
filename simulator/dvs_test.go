@@ -406,6 +406,109 @@ func TestDVSHostProxySwitch(t *testing.T) {
 	}
 }
 
+// TestDVSConfigHost verifies that DVSConfigInfo.Host (config.host) and
+// Summary.NumHosts both stay in sync with Summary.HostMember when a host
+// joins or leaves a DVS -- matching real vCenter, which always keeps all
+// three consistent.
+func TestDVSConfigHost(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	finder := find.NewFinder(c, false)
+	dc, err := finder.DatacenterList(ctx, "*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc[0])
+
+	hosts, err := finder.HostSystemList(ctx, "*/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+	dvs := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+
+	// Same host-selection reasoning as TestDVSHostProxySwitch: pick a host
+	// with no VMs, since removing one that has a VM connected to one of
+	// this DVS's portgroups is rejected with ResourceInUse.
+	var hostRef types.ManagedObjectReference
+	for _, h := range hosts {
+		ref := h.Reference()
+		if len(simCtx.Map.Get(ref).(*HostSystem).Vm) == 0 {
+			hostRef = ref
+			break
+		}
+	}
+	if hostRef.Value == "" {
+		t.Fatal("expected at least one host with no VMs")
+	}
+
+	assertConsistent := func() {
+		s := simCtx.Map.Get(vswitch.Self).(*VmwareDistributedVirtualSwitch)
+		configHost := s.Config.GetDVSConfigInfo().Host
+
+		if int(s.Summary.NumHosts) != len(s.Summary.HostMember) {
+			t.Fatalf("Summary.NumHosts=%d, want %d (len(Summary.HostMember))",
+				s.Summary.NumHosts, len(s.Summary.HostMember))
+		}
+		if len(configHost) != len(s.Summary.HostMember) {
+			t.Fatalf("len(Config.Host)=%d, want %d (len(Summary.HostMember))",
+				len(configHost), len(s.Summary.HostMember))
+		}
+		for _, ref := range s.Summary.HostMember {
+			found := false
+			for _, ch := range configHost {
+				if ch.Config.Host != nil && *ch.Config.Host == ref {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("Config.Host=%v missing host %s present in Summary.HostMember", configHost, ref)
+			}
+		}
+	}
+
+	assertConsistent()
+
+	config := &types.DVSConfigSpec{
+		Host: []types.DistributedVirtualSwitchHostMemberConfigSpec{{
+			Operation: string(types.ConfigSpecOperationRemove),
+			Host:      hostRef,
+		}},
+	}
+	task, err := dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	assertConsistent()
+
+	config.Host[0].Operation = string(types.ConfigSpecOperationAdd)
+	task, err = dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	assertConsistent()
+}
+
 // TestDVSConcreteType guards against vcsim regressing to reporting its DVS as
 // the abstract DistributedVirtualSwitch type. A real vCenter always reports
 // the concrete VmwareDistributedVirtualSwitch -- any client that keys off

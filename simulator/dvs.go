@@ -186,6 +186,7 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 		spec := req.Spec.GetDVSConfigSpec()
 
 		members := s.Summary.HostMember
+		configHosts := slices.Clone(s.Config.GetDVSConfigInfo().Host)
 
 		for _, member := range spec.Host {
 			h := ctx.Map.Get(member.Host)
@@ -223,6 +224,17 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 				})
 
 				members = append(members, member.Host)
+				// A real vCenter always keeps DVSConfigInfo.Host in sync
+				// with Summary.HostMember -- a client reading config.host
+				// for host membership (rather than summary.hostMember)
+				// otherwise sees an empty list regardless of actual
+				// membership.
+				hostRef := member.Host
+				configHosts = append(configHosts, types.DistributedVirtualSwitchHostMember{
+					Config: types.DistributedVirtualSwitchHostMemberConfigInfo{
+						Host: &hostRef,
+					},
+				})
 				parent := ctx.Map.Get(*host.HostSystem.Parent)
 
 				var pgs []types.ManagedObjectReference
@@ -260,6 +272,9 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 				}
 
 				RemoveReference(&members, member.Host)
+				configHosts = slices.DeleteFunc(configHosts, func(m types.DistributedVirtualSwitchHostMember) bool {
+					return m.Config.Host != nil && *m.Config.Host == member.Host
+				})
 
 				proxySwitches := slices.Clone(host.Config.Network.ProxySwitch)
 				proxySwitches = slices.DeleteFunc(proxySwitches, func(ps types.HostProxySwitch) bool {
@@ -278,9 +293,13 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 			}
 		}
 
+		config := s.Config.GetDVSConfigInfo()
+		config.Host = configHosts
+
 		ctx.Update(s, []types.PropertyChange{
 			{Name: "summary.hostMember", Val: members},
 			{Name: "summary.numHosts", Val: int32(len(members))},
+			{Name: "config", Val: config},
 		})
 
 		// Invalidate FetchDVPorts cache: host membership changes affect uplink ports
