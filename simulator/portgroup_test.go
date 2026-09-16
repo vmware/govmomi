@@ -332,3 +332,96 @@ func TestPortgroupSubnetId(t *testing.T) {
 		t.Error("expected VirtualEthernetCard with only SubnetId to auto-resolve its backing to the matching Portgroup")
 	}
 }
+
+// TestPortgroupVmBackref verifies that DistributedVirtualPortgroup.Vm (the
+// portgroup's own reverse reference to the VMs connected to it, inherited
+// from mo.Network) is maintained across the VM's whole NIC lifecycle: initial
+// attach, re-attach to a different portgroup, and detach. A real vCenter
+// maintains this automatically; a collector that reads it directly (rather
+// than cross-referencing every VM's own NIC backing) depends on it.
+func TestPortgroupVmBackref(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer m.Remove()
+
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	dvsRef := simCtx.Map.Any("DistributedVirtualSwitch").Reference()
+	dvs := object.NewDistributedVirtualSwitch(c, dvsRef)
+
+	task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{
+		{Name: "backref-pg1", NumPorts: 10},
+		{Name: "backref-pg2", NumPorts: 10},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	dvsMo := simCtx.Map.Get(dvsRef).(*DistributedVirtualSwitch)
+	pg1 := simCtx.Map.FindByName("backref-pg1", dvsMo.Portgroup).(*DistributedVirtualPortgroup)
+	pg2 := simCtx.Map.FindByName("backref-pg2", dvsMo.Portgroup).(*DistributedVirtualPortgroup)
+
+	vmRef := simCtx.Map.Any("VirtualMachine").Reference()
+	clientVM := object.NewVirtualMachine(c, vmRef)
+
+	devices, err := clientVM.Device(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cards := devices.SelectByType((*types.VirtualEthernetCard)(nil))
+	if len(cards) == 0 {
+		t.Fatal("expected at least one ethernet card on the default VM")
+	}
+	card := cards[0]
+	nic := card.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+
+	backing := func(pg *DistributedVirtualPortgroup) *types.VirtualEthernetCardDistributedVirtualPortBackingInfo {
+		return &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
+			Port: types.DistributedVirtualSwitchPortConnection{
+				PortgroupKey: pg.Key,
+				SwitchUuid:   dvsMo.Uuid,
+			},
+		}
+	}
+
+	// Attach to pg1: pg1.Vm should gain this VM.
+	nic.Backing = backing(pg1)
+	if err := clientVM.EditDevice(ctx, card); err != nil {
+		t.Fatal(err)
+	}
+	if FindReference(pg1.Vm, vmRef) == nil {
+		t.Fatalf("pg1.Vm=%v does not contain %s after attach", pg1.Vm, vmRef)
+	}
+
+	// Re-attach to pg2: pg1.Vm should lose this VM, pg2.Vm should gain it.
+	nic.Backing = backing(pg2)
+	if err := clientVM.EditDevice(ctx, card); err != nil {
+		t.Fatal(err)
+	}
+	if FindReference(pg1.Vm, vmRef) != nil {
+		t.Fatalf("pg1.Vm=%v still contains %s after re-attach to pg2", pg1.Vm, vmRef)
+	}
+	if FindReference(pg2.Vm, vmRef) == nil {
+		t.Fatalf("pg2.Vm=%v does not contain %s after re-attach", pg2.Vm, vmRef)
+	}
+
+	// Detach entirely: pg2.Vm should lose this VM.
+	if err := clientVM.RemoveDevice(ctx, false, card); err != nil {
+		t.Fatal(err)
+	}
+	if FindReference(pg2.Vm, vmRef) != nil {
+		t.Fatalf("pg2.Vm=%v still contains %s after detach", pg2.Vm, vmRef)
+	}
+}

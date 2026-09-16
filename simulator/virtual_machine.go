@@ -1675,6 +1675,11 @@ func (vm *VirtualMachine) configureDevice(
 			if pgObj := ctx.Map.Get(pgRef); pgObj != nil {
 				if pg, ok := pgObj.(*DistributedVirtualPortgroup); ok {
 					x.GetVirtualEthernetCard().SubnetId = pg.Config.SubnetId
+					// Mirror a real vCenter's reverse VM<->network reference:
+					// a collector that reads the portgroup's own Vm property
+					// (rather than cross-referencing every VM's NIC backing)
+					// needs this to discover which VMs are on it.
+					ctx.Map.AddReference(ctx, pg, &pg.Vm, vm.Self)
 				}
 			}
 		}
@@ -2046,6 +2051,12 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 			case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
 				net.Type = "DistributedVirtualPortgroup"
 				net.Value = b.Port.PortgroupKey
+			}
+
+			if net.Type == "DistributedVirtualPortgroup" {
+				if pg, ok := ctx.Map.Get(net).(*DistributedVirtualPortgroup); ok {
+					ctx.Map.RemoveReference(ctx, pg, &pg.Vm, vm.Self)
+				}
 			}
 
 			for j, nicInfo := range vm.Guest.Net {
@@ -2822,6 +2833,12 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	for i := range vm.Datastore {
 		ds := ctx.Map.Get(vm.Datastore[i]).(*Datastore)
 		ctx.Map.RemoveReference(ctx, ds, &ds.Vm, vm.Self)
+	}
+
+	for i := range vm.Network {
+		if pg, ok := ctx.Map.Get(vm.Network[i]).(*DistributedVirtualPortgroup); ok {
+			ctx.Map.RemoveReference(ctx, pg, &pg.Vm, vm.Self)
+		}
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event(ctx)})

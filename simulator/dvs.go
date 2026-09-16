@@ -205,6 +205,23 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 				ctx.Update(host, []types.PropertyChange{
 					{Name: "network", Val: hostNetworks},
 				})
+
+				// Mirror what a real vCenter does on the host side when it joins
+				// a DVS: record a HostProxySwitch (with its uplink pnic backing)
+				// on HostSystem.Config.Network.ProxySwitch. Collectors that read
+				// the host's own proxySwitch list (rather than just the DVS's
+				// Summary.HostMember) need this to know which physical NICs back
+				// this switch on this host.
+				proxySwitch := types.HostProxySwitch{
+					DvsUuid: s.Uuid,
+					DvsName: s.Name,
+					Key:     s.Self.Value,
+					Pnic:    dvsUplinkPnics(host, member.Backing),
+				}
+				ctx.Update(host, []types.PropertyChange{
+					{Name: "config.network.proxySwitch", Val: append(host.Config.Network.ProxySwitch, proxySwitch)},
+				})
+
 				members = append(members, member.Host)
 				parent := ctx.Map.Get(*host.HostSystem.Parent)
 
@@ -244,6 +261,14 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 
 				RemoveReference(&members, member.Host)
 
+				proxySwitches := slices.Clone(host.Config.Network.ProxySwitch)
+				proxySwitches = slices.DeleteFunc(proxySwitches, func(ps types.HostProxySwitch) bool {
+					return ps.DvsUuid == s.Uuid
+				})
+				ctx.Update(host, []types.PropertyChange{
+					{Name: "config.network.proxySwitch", Val: proxySwitches},
+				})
+
 				ctx.postEvent(&types.DvsHostLeftEvent{
 					DvsEvent: s.event(ctx),
 					HostLeft: *host.eventArgument(),
@@ -272,7 +297,44 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 	}
 }
 
-func (s *VmwareDistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
+// dvsUplinkPnics returns the physical NIC device keys to back a host's proxy
+// switch for a DVS it is joining. If the caller specified pnics via
+// DistributedVirtualSwitchHostMemberPnicBacking, those are used as-is;
+// otherwise it falls back to the first pnic on the host not already claimed
+// by a standard vSwitch or another DVS proxy switch, matching what a real
+// vCenter picks when a client adds a host to a DVS without an explicit
+// uplink assignment.
+func dvsUplinkPnics(host *HostSystem, backing types.BaseDistributedVirtualSwitchHostMemberBacking) []string {
+	if b, ok := backing.(*types.DistributedVirtualSwitchHostMemberPnicBacking); ok {
+		pnics := make([]string, 0, len(b.PnicSpec))
+		for _, p := range b.PnicSpec {
+			pnics = append(pnics, "key-vim.host.PhysicalNic-"+p.PnicDevice)
+		}
+		return pnics
+	}
+
+	used := make(map[string]bool)
+	for _, vs := range host.Config.Network.Vswitch {
+		for _, key := range vs.Pnic {
+			used[key] = true
+		}
+	}
+	for _, ps := range host.Config.Network.ProxySwitch {
+		for _, key := range ps.Pnic {
+			used[key] = true
+		}
+	}
+
+	for _, pnic := range host.Config.Network.Pnic {
+		if !used[pnic.Key] {
+			return []string{pnic.Key}
+		}
+	}
+
+	return nil
+}
+
+func (s *DistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
 	body := &methods.FetchDVPortsBody{}
 	body.Res = &types.FetchDVPortsResponse{
 		Returnval: s.dvPortgroups(ctx, req.Criteria),
