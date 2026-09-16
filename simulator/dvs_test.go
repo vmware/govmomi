@@ -271,6 +271,102 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 	}
 }
 
+// TestDVSHostProxySwitch verifies that HostSystem.Config.Network.ProxySwitch
+// gains a HostProxySwitch entry for a DVS when the host joins it, and loses
+// that entry when the host leaves -- matching real vCenter, which always
+// keeps this host-side membership record in sync with the DVS's own
+// Summary.HostMember.
+func TestDVSHostProxySwitch(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	finder := find.NewFinder(c, false)
+	dc, err := finder.DatacenterList(ctx, "*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc[0])
+
+	hosts, err := finder.HostSystemList(ctx, "*/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+	dvs := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+
+	// Every host created by the model already joined this DVS -- pick one
+	// with no VMs on it (removing a host with a VM connected to one of the
+	// DVS's portgroups is rejected with ResourceInUse) and remove it first,
+	// so this test controls the join/leave transition rather than only
+	// observing the model's own initial state.
+	var hostRef types.ManagedObjectReference
+	for _, h := range hosts {
+		ref := h.Reference()
+		if len(simCtx.Map.Get(ref).(*HostSystem).Vm) == 0 {
+			hostRef = ref
+			break
+		}
+	}
+	if hostRef.Value == "" {
+		t.Fatal("expected at least one host with no VMs")
+	}
+
+	hasProxySwitch := func() bool {
+		h := simCtx.Map.Get(hostRef).(*HostSystem)
+		for _, ps := range h.Config.Network.ProxySwitch {
+			if ps.DvsUuid == vswitch.Uuid {
+				return true
+			}
+		}
+		return false
+	}
+
+	if !hasProxySwitch() {
+		t.Fatal("expected host to already have a HostProxySwitch entry for this DVS from model creation")
+	}
+
+	config := &types.DVSConfigSpec{
+		Host: []types.DistributedVirtualSwitchHostMemberConfigSpec{{
+			Operation: string(types.ConfigSpecOperationRemove),
+			Host:      hostRef,
+		}},
+	}
+	task, err := dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	if hasProxySwitch() {
+		t.Fatal("expected HostProxySwitch entry to be removed after leaving the DVS")
+	}
+
+	config.Host[0].Operation = string(types.ConfigSpecOperationAdd)
+	task, err = dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	if !hasProxySwitch() {
+		t.Fatal("expected HostProxySwitch entry to be recreated after rejoining the DVS")
+	}
+}
+
 // TestDVSConcreteType guards against vcsim regressing to reporting its DVS as
 // the abstract DistributedVirtualSwitch type. A real vCenter always reports
 // the concrete VmwareDistributedVirtualSwitch -- any client that keys off
