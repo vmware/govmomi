@@ -1218,7 +1218,7 @@ The '-type' flag value can be a managed entity type or one of the following alia
   p    ResourcePool
   r    ComputeResource
   s    Datastore
-  w    DistributedVirtualSwitch
+  w    VmwareDistributedVirtualSwitch
 
 Examples:
   govc collect - content
@@ -2697,7 +2697,7 @@ The '-type' flag value can be a managed entity type or one of the following alia
   p    ResourcePool
   r    ComputeResource
   s    Datastore
-  w    DistributedVirtualSwitch
+  w    VmwareDistributedVirtualSwitch
 
 Examples:
   govc find
@@ -4616,7 +4616,7 @@ The '-t' flag value can be a managed entity type or one of the following aliases
   p    ResourcePool
   r    ComputeResource
   s    Datastore
-  w    DistributedVirtualSwitch
+  w    VmwareDistributedVirtualSwitch
 
 Examples:
   govc ls -l '*'
