@@ -230,6 +230,18 @@ func TestIpPoolManagerLifecycle(t *testing.T) {
 		t.Fatalf("expect pool id to be 2; got %d", createResp.Returnval)
 	}
 
+	queryReq := &types.QueryIpPools{
+		This: ref,
+	}
+
+	queryResp, err := methods.QueryIpPools(ctx, c.Client, queryReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if queryResp.Returnval[1].Id != createResp.Returnval {
+		t.Fatalf("expect queried pool id to be %d; got %d", createResp.Returnval, queryResp.Returnval[1].Id)
+	}
+
 	ipPool.Id = 2
 	ipPool.Ipv4Config = &types.IpPoolIpPoolConfigInfo{
 		Netmask:       "10.20.10.255",
@@ -248,11 +260,7 @@ func TestIpPoolManagerLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queryReq := &types.QueryIpPools{
-		This: ref,
-	}
-
-	queryResp, err := methods.QueryIpPools(ctx, c.Client, queryReq)
+	queryResp, err = methods.QueryIpPools(ctx, c.Client, queryReq)
 	if err != nil {
 		t.Fatal(err)
 	}
