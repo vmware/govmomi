@@ -44,134 +44,7 @@ func (s *VmwareDistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
 
 func (s *VmwareDistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
-
-		portgroups := s.Portgroup
-		portgroupNames := s.Summary.PortgroupName
-
-		for _, spec := range c.Spec {
-			pg := &DistributedVirtualPortgroup{}
-			pg.Name = spec.Name
-			pg.Entity().Name = pg.Name
-
-			// Standard AddDVPortgroupTask() doesn't allow duplicate names, but NSX 3.0 does create some DVPGs with the same name.
-			// Allow duplicate names using this prefix so we can reproduce and test this condition.
-			if strings.HasPrefix(pg.Name, "NSX-") || spec.BackingType == string(types.DistributedVirtualPortgroupBackingTypeNsx) {
-				if spec.LogicalSwitchUuid == "" {
-					spec.LogicalSwitchUuid = uuid.New().String()
-				}
-				if spec.SegmentId == "" {
-					spec.SegmentId = fmt.Sprintf("/infra/segments/vnet_%s", uuid.New().String())
-				}
-
-			} else {
-				if obj := ctx.Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
-					return nil, &types.DuplicateName{
-						Name:   pg.Name,
-						Object: obj.Reference(),
-					}
-				}
-			}
-
-			folderPutChild(ctx, &f.Folder, pg)
-
-			pg.Key = pg.Self.Value
-			pg.Config = types.DVPortgroupConfigInfo{
-				Key:                          pg.Key,
-				Name:                         pg.Name,
-				NumPorts:                     spec.NumPorts,
-				DistributedVirtualSwitch:     &s.Self,
-				DefaultPortConfig:            spec.DefaultPortConfig,
-				Description:                  spec.Description,
-				Type:                         spec.Type,
-				Policy:                       spec.Policy,
-				PortNameFormat:               spec.PortNameFormat,
-				Scope:                        spec.Scope,
-				VendorSpecificConfig:         spec.VendorSpecificConfig,
-				ConfigVersion:                spec.ConfigVersion,
-				AutoExpand:                   spec.AutoExpand,
-				VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
-				LogicalSwitchUuid:            spec.LogicalSwitchUuid,
-				SegmentId:                    spec.SegmentId,
-				SubnetId:                     spec.SubnetId,
-				BackingType:                  spec.BackingType,
-			}
-
-			if pg.Config.LogicalSwitchUuid != "" {
-				if pg.Config.BackingType == "" {
-					pg.Config.BackingType = "nsx"
-				}
-			}
-
-			if pg.Config.DefaultPortConfig == nil {
-				pg.Config.DefaultPortConfig = &types.VMwareDVSPortSetting{
-					Vlan: new(types.VmwareDistributedVirtualSwitchVlanIdSpec),
-					UplinkTeamingPolicy: &types.VmwareUplinkPortTeamingPolicy{
-						Policy: &types.StringPolicy{
-							Value: "loadbalance_srcid",
-						},
-						ReversePolicy: &types.BoolPolicy{
-							Value: types.NewBool(true),
-						},
-						NotifySwitches: &types.BoolPolicy{
-							Value: types.NewBool(true),
-						},
-						RollingOrder: &types.BoolPolicy{
-							Value: types.NewBool(true),
-						},
-					},
-				}
-			}
-
-			if pg.Config.Policy == nil {
-				pg.Config.Policy = &types.VMwareDVSPortgroupPolicy{
-					DVPortgroupPolicy: types.DVPortgroupPolicy{
-						BlockOverrideAllowed:               true,
-						ShapingOverrideAllowed:             false,
-						VendorConfigOverrideAllowed:        false,
-						LivePortMovingAllowed:              false,
-						PortConfigResetAtDisconnect:        true,
-						NetworkResourcePoolOverrideAllowed: types.NewBool(false),
-						TrafficFilterOverrideAllowed:       types.NewBool(false),
-					},
-					VlanOverrideAllowed:           false,
-					UplinkTeamingOverrideAllowed:  false,
-					SecurityPolicyOverrideAllowed: false,
-					IpfixOverrideAllowed:          types.NewBool(false),
-				}
-			}
-
-			for i := 0; i < int(spec.NumPorts); i++ {
-				pg.PortKeys = append(pg.PortKeys, strconv.Itoa(i))
-			}
-
-			portgroups = append(portgroups, pg.Self)
-			portgroupNames = append(portgroupNames, pg.Name)
-
-			for _, h := range s.Summary.HostMember {
-				pg.Host = append(pg.Host, h)
-
-				host := ctx.Map.Get(h).(*HostSystem)
-				ctx.Map.AppendReference(ctx, host, &host.Network, pg.Reference())
-
-				parent := ctx.Map.Get(*host.HostSystem.Parent)
-				computeNetworks := append(hostParent(ctx, &host.HostSystem).Network, pg.Reference())
-				ctx.Update(parent, []types.PropertyChange{
-					{Name: "network", Val: computeNetworks},
-				})
-			}
-
-			ctx.postEvent(&types.DVPortgroupCreatedEvent{
-				DVPortgroupEvent: pg.event(ctx),
-			})
-		}
-
-		ctx.Update(s, []types.PropertyChange{
-			{Name: "portgroup", Val: portgroups},
-			{Name: "summary.portgroupName", Val: portgroupNames},
-		})
-
-		return nil, nil
+		return nil, s.addDVPortgroups(ctx, c.Spec)
 	})
 
 	return &methods.AddDVPortgroup_TaskBody{
@@ -179,6 +52,137 @@ func (s *VmwareDistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *typ
 			Returnval: task.Run(ctx),
 		},
 	}
+}
+
+func (s *VmwareDistributedVirtualSwitch) addDVPortgroups(ctx *Context, specs []types.DVPortgroupConfigSpec) types.BaseMethodFault {
+	f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
+
+	portgroups := s.Portgroup
+	portgroupNames := s.Summary.PortgroupName
+
+	for _, spec := range specs {
+		pg := &DistributedVirtualPortgroup{}
+		pg.Name = spec.Name
+		pg.Entity().Name = pg.Name
+
+		// Standard AddDVPortgroupTask() doesn't allow duplicate names, but NSX 3.0 does create some DVPGs with the same name.
+		// Allow duplicate names using this prefix so we can reproduce and test this condition.
+		if strings.HasPrefix(pg.Name, "NSX-") || spec.BackingType == string(types.DistributedVirtualPortgroupBackingTypeNsx) {
+			if spec.LogicalSwitchUuid == "" {
+				spec.LogicalSwitchUuid = uuid.New().String()
+			}
+			if spec.SegmentId == "" {
+				spec.SegmentId = fmt.Sprintf("/infra/segments/vnet_%s", uuid.New().String())
+			}
+
+		} else {
+			if obj := ctx.Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
+				return &types.DuplicateName{
+					Name:   pg.Name,
+					Object: obj.Reference(),
+				}
+			}
+		}
+
+		folderPutChild(ctx, &f.Folder, pg)
+
+		pg.Key = pg.Self.Value
+		pg.Config = types.DVPortgroupConfigInfo{
+			Key:                          pg.Key,
+			Name:                         pg.Name,
+			NumPorts:                     spec.NumPorts,
+			DistributedVirtualSwitch:     &s.Self,
+			DefaultPortConfig:            spec.DefaultPortConfig,
+			Description:                  spec.Description,
+			Type:                         spec.Type,
+			Policy:                       spec.Policy,
+			PortNameFormat:               spec.PortNameFormat,
+			Scope:                        spec.Scope,
+			VendorSpecificConfig:         spec.VendorSpecificConfig,
+			ConfigVersion:                spec.ConfigVersion,
+			AutoExpand:                   spec.AutoExpand,
+			VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
+			LogicalSwitchUuid:            spec.LogicalSwitchUuid,
+			SegmentId:                    spec.SegmentId,
+			SubnetId:                     spec.SubnetId,
+			BackingType:                  spec.BackingType,
+		}
+
+		if pg.Config.LogicalSwitchUuid != "" {
+			if pg.Config.BackingType == "" {
+				pg.Config.BackingType = "nsx"
+			}
+		}
+
+		if pg.Config.DefaultPortConfig == nil {
+			pg.Config.DefaultPortConfig = &types.VMwareDVSPortSetting{
+				Vlan: new(types.VmwareDistributedVirtualSwitchVlanIdSpec),
+				UplinkTeamingPolicy: &types.VmwareUplinkPortTeamingPolicy{
+					Policy: &types.StringPolicy{
+						Value: "loadbalance_srcid",
+					},
+					ReversePolicy: &types.BoolPolicy{
+						Value: types.NewBool(true),
+					},
+					NotifySwitches: &types.BoolPolicy{
+						Value: types.NewBool(true),
+					},
+					RollingOrder: &types.BoolPolicy{
+						Value: types.NewBool(true),
+					},
+				},
+			}
+		}
+
+		if pg.Config.Policy == nil {
+			pg.Config.Policy = &types.VMwareDVSPortgroupPolicy{
+				DVPortgroupPolicy: types.DVPortgroupPolicy{
+					BlockOverrideAllowed:               true,
+					ShapingOverrideAllowed:             false,
+					VendorConfigOverrideAllowed:        false,
+					LivePortMovingAllowed:              false,
+					PortConfigResetAtDisconnect:        true,
+					NetworkResourcePoolOverrideAllowed: types.NewBool(false),
+					TrafficFilterOverrideAllowed:       types.NewBool(false),
+				},
+				VlanOverrideAllowed:           false,
+				UplinkTeamingOverrideAllowed:  false,
+				SecurityPolicyOverrideAllowed: false,
+				IpfixOverrideAllowed:          types.NewBool(false),
+			}
+		}
+
+		for i := 0; i < int(spec.NumPorts); i++ {
+			pg.PortKeys = append(pg.PortKeys, strconv.Itoa(i))
+		}
+
+		portgroups = append(portgroups, pg.Self)
+		portgroupNames = append(portgroupNames, pg.Name)
+
+		for _, h := range s.Summary.HostMember {
+			pg.Host = append(pg.Host, h)
+
+			host := ctx.Map.Get(h).(*HostSystem)
+			ctx.Map.AppendReference(ctx, host, &host.Network, pg.Reference())
+
+			parent := ctx.Map.Get(*host.HostSystem.Parent)
+			computeNetworks := append(hostParent(ctx, &host.HostSystem).Network, pg.Reference())
+			ctx.Update(parent, []types.PropertyChange{
+				{Name: "network", Val: computeNetworks},
+			})
+		}
+
+		ctx.postEvent(&types.DVPortgroupCreatedEvent{
+			DVPortgroupEvent: pg.event(ctx),
+		})
+	}
+
+	ctx.Update(s, []types.PropertyChange{
+		{Name: "portgroup", Val: portgroups},
+		{Name: "summary.portgroupName", Val: portgroupNames},
+	})
+
+	return nil
 }
 
 func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.ReconfigureDvs_Task) soap.HasFault {
