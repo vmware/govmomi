@@ -8,6 +8,7 @@ import (
 	"context"
 	"reflect"
 	"regexp"
+	"strconv"
 	"testing"
 
 	"github.com/vmware/govmomi/find"
@@ -190,15 +191,15 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 		t.Fatalf("expected 2 portgroups in DVS; got %d", len(pgs))
 	}
 
-	// pgs[0] is the DVS's auto-created uplink portgroup ("DVS0-DVUplinks...").
-	// Its ports are host-scoped (one per DVS host member, each connected to
-	// that host's own pnic) -- see uplinkPorts(). pgs[1] is a regular
-	// portgroup with a single port, connected to the default VM's vNIC --
-	// see regularPorts() -- since VPX()'s default VM is wired to the last
-	// plain portgroup.
 	uplinkPorts := make([]types.DistributedVirtualPort, len(vswitch.Summary.HostMember))
 	for i := range uplinkPorts {
 		uplinkPorts[i] = types.DistributedVirtualPort{PortgroupKey: pgs[0].Value, Key: "0"}
+	}
+
+	regularPg := m.Map().Get(pgs[1]).(*DistributedVirtualPortgroup)
+	regularPorts := make([]types.DistributedVirtualPort, len(regularPg.Vm))
+	for i := range regularPorts {
+		regularPorts[i] = types.DistributedVirtualPort{PortgroupKey: pgs[1].Value, Key: strconv.Itoa(i)}
 	}
 
 	tests := []struct {
@@ -209,8 +210,7 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 		{
 			"empty criteria",
 			&types.DistributedVirtualSwitchPortCriteria{},
-			append(append([]types.DistributedVirtualPort{}, uplinkPorts...),
-				types.DistributedVirtualPort{PortgroupKey: pgs[1].Value, Key: "0"}),
+			append(append([]types.DistributedVirtualPort{}, uplinkPorts...), regularPorts...),
 		},
 		{
 			"inside PortgroupKeys",
@@ -226,16 +226,14 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 				PortgroupKey: []string{pgs[0].Value},
 				Inside:       types.NewBool(false),
 			},
-			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[1].Value, Key: "0"},
-			},
+			regularPorts,
 		},
 		{
 			"PortKeys",
 			&types.DistributedVirtualSwitchPortCriteria{
 				PortKey: []string{"1"},
 			},
-			[]types.DistributedVirtualPort{},
+			regularPorts[1:2],
 		},
 		{
 			// both the uplink ports (Connectee set to each host's pnic) and
@@ -245,8 +243,7 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			&types.DistributedVirtualSwitchPortCriteria{
 				Connected: types.NewBool(true),
 			},
-			append(append([]types.DistributedVirtualPort{}, uplinkPorts...),
-				types.DistributedVirtualPort{PortgroupKey: pgs[1].Value, Key: "0"}),
+			append(append([]types.DistributedVirtualPort{}, uplinkPorts...), regularPorts...),
 		},
 		{
 			"not connected",
@@ -377,6 +374,112 @@ func TestUplinkPortsPerHostScaling(t *testing.T) {
 
 	if !seen["0"] || !seen["1"] {
 		t.Errorf("expected port keys \"0\" and \"1\"; got %v", ports)
+	}
+}
+
+func TestRegularPortsExceedPreallocatedKeys(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+	dvs := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+
+	task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{{Name: "scale-pg", NumPorts: 1}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	dvsMo := simCtx.Map.Get(vswitch.Reference()).(*VmwareDistributedVirtualSwitch)
+	pg := simCtx.Map.FindByName("scale-pg", dvsMo.Portgroup).(*DistributedVirtualPortgroup)
+
+	backing := &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
+		Port: types.DistributedVirtualSwitchPortConnection{
+			PortgroupKey: pg.Key,
+			SwitchUuid:   dvsMo.Uuid,
+		},
+	}
+
+	allVMs := simCtx.Map.All("VirtualMachine")
+	if len(allVMs) < 3 {
+		t.Fatalf("expected at least 3 VMs in the default model; got %d", len(allVMs))
+	}
+
+	vmRefs := make([]types.ManagedObjectReference, 0, 3)
+	for _, v := range allVMs[:3] {
+		vmRef := v.Reference()
+		clientVM := object.NewVirtualMachine(c, vmRef)
+
+		devices, err := clientVM.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		cards := devices.SelectByType((*types.VirtualEthernetCard)(nil))
+		if len(cards) == 0 {
+			t.Fatalf("expected at least one ethernet card on VM %s", vmRef)
+		}
+		card := cards[0]
+		card.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard().Backing = backing
+
+		if err := clientVM.EditDevice(ctx, card); err != nil {
+			t.Fatal(err)
+		}
+		vmRefs = append(vmRefs, vmRef)
+	}
+
+	ports, err := dvs.FetchDVPorts(ctx, &types.DistributedVirtualSwitchPortCriteria{
+		PortgroupKey: []string{pg.Key},
+		Inside:       types.NewBool(true),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(ports) != len(vmRefs) {
+		t.Fatalf("expected %d ports (one per connected VM); got %d: %v", len(vmRefs), len(ports), ports)
+	}
+
+	connected := make(map[types.ManagedObjectReference]bool)
+	keys := make(map[string]bool)
+	for _, p := range ports {
+		if p.Connectee == nil || p.Connectee.Type != string(types.DistributedVirtualSwitchPortConnecteeConnecteeTypeVmVnic) {
+			t.Errorf("port %s: expected Connectee.Type vmVnic; got %+v", p.Key, p.Connectee)
+			continue
+		}
+		if p.Connectee.ConnectedEntity == nil {
+			t.Errorf("port %s: expected a non-nil ConnectedEntity", p.Key)
+			continue
+		}
+		connected[*p.Connectee.ConnectedEntity] = true
+		keys[p.Key] = true
+	}
+
+	for _, vmRef := range vmRefs {
+		if !connected[vmRef] {
+			t.Errorf("expected a port connected to VM %s; ports=%v", vmRef, ports)
+		}
+	}
+
+	if len(keys) != len(vmRefs) {
+		t.Errorf("expected %d unique port keys; got %v", len(vmRefs), keys)
+	}
+
+	if int(pg.Config.NumPorts) != len(vmRefs) {
+		t.Errorf("expected config.numPorts to grow to %d; got %d", len(vmRefs), pg.Config.NumPorts)
+	}
+	if len(pg.PortKeys) != len(vmRefs) {
+		t.Errorf("expected %d PortKeys after auto-expand; got %v", len(vmRefs), pg.PortKeys)
 	}
 }
 

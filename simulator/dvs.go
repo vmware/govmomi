@@ -488,6 +488,7 @@ func (s *VmwareDistributedVirtualSwitch) uplinkPorts(ctx *Context, pg *Distribut
 func (s *VmwareDistributedVirtualSwitch) regularPorts(ctx *Context, pg *DistributedVirtualPortgroup) []types.DistributedVirtualPort {
 	claimed := make(map[string]types.DistributedVirtualPort, len(pg.PortKeys))
 	keys := slices.Clone(pg.PortKeys)
+	nextKey := len(pg.PortKeys)
 
 	for _, vmRef := range pg.Vm {
 		vm, ok := ctx.Map.Get(vmRef).(*VirtualMachine)
@@ -503,12 +504,18 @@ func (s *VmwareDistributedVirtualSwitch) regularPorts(ctx *Context, pg *Distribu
 
 			nic := card.GetVirtualEthernetCard()
 			b, ok := nic.Backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
-			if !ok || b.Port.PortgroupKey != pg.Key || len(keys) == 0 {
+			if !ok || b.Port.PortgroupKey != pg.Key {
 				continue
 			}
 
-			key := keys[0]
-			keys = keys[1:]
+			var key string
+			if len(keys) > 0 {
+				key = keys[0]
+				keys = keys[1:]
+			} else {
+				key = strconv.Itoa(nextKey)
+				nextKey++
+			}
 
 			connectedEntity := vmRef
 			claimed[key] = types.DistributedVirtualPort{
@@ -525,6 +532,13 @@ func (s *VmwareDistributedVirtualSwitch) regularPorts(ctx *Context, pg *Distribu
 				},
 			}
 		}
+	}
+
+	for i := len(pg.PortKeys); i < nextKey; i++ {
+		pg.PortKeys = append(pg.PortKeys, strconv.Itoa(i))
+	}
+	if int32(nextKey) > pg.Config.NumPorts {
+		pg.Config.NumPorts = int32(nextKey)
 	}
 
 	ports := make([]types.DistributedVirtualPort, 0, len(pg.PortKeys))
