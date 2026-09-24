@@ -455,10 +455,7 @@ func (s *VmwareDistributedVirtualSwitch) uplinkPorts(ctx *Context, pg *Distribut
 		}
 
 		for i, pnicKey := range pnics {
-			key := pnicKey
-			if i < len(pg.PortKeys) {
-				key = pg.PortKeys[i]
-			}
+			key := strconv.Itoa(i)
 
 			connectedEntity := hostRef
 			ports = append(ports, types.DistributedVirtualPort{

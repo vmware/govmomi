@@ -284,6 +284,102 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 	}
 }
 
+func TestUplinkPortsPerHostScaling(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+	dvs := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+
+	var hostRef types.ManagedObjectReference
+	for _, h := range vswitch.Summary.HostMember {
+		if len(simCtx.Map.Get(h).(*HostSystem).Vm) == 0 {
+			hostRef = h
+			break
+		}
+	}
+	if hostRef.Value == "" {
+		t.Fatal("expected at least one host with no VMs")
+	}
+
+	task, err := dvs.Reconfigure(ctx, &types.DVSConfigSpec{
+		Host: []types.DistributedVirtualSwitchHostMemberConfigSpec{{
+			Operation: string(types.ConfigSpecOperationRemove),
+			Host:      hostRef,
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	task, err = dvs.Reconfigure(ctx, &types.DVSConfigSpec{
+		Host: []types.DistributedVirtualSwitchHostMemberConfigSpec{{
+			Operation: string(types.ConfigSpecOperationAdd),
+			Host:      hostRef,
+			Backing: &types.DistributedVirtualSwitchHostMemberPnicBacking{
+				PnicSpec: []types.DistributedVirtualSwitchHostMemberPnicSpec{
+					{PnicDevice: "vmnic0"},
+					{PnicDevice: "vmnic1"},
+				},
+			},
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	uplinkPg := vswitch.uplinkPortgroup(simCtx)
+	if uplinkPg == nil {
+		t.Fatal("expected uplink portgroup")
+	}
+
+	allPorts, err := dvs.FetchDVPorts(ctx, &types.DistributedVirtualSwitchPortCriteria{
+		PortgroupKey: []string{uplinkPg.Key},
+		Inside:       types.NewBool(true),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var ports []types.DistributedVirtualPort
+	for _, p := range allPorts {
+		if p.Connectee != nil && p.Connectee.ConnectedEntity != nil && *p.Connectee.ConnectedEntity == hostRef {
+			ports = append(ports, p)
+		}
+	}
+
+	if len(ports) != 2 {
+		t.Fatalf("expected 2 uplink ports for host with 2 pnics; got %d: %v", len(ports), ports)
+	}
+
+	seen := make(map[string]bool)
+	for _, p := range ports {
+		if p.Connectee.Type != string(types.DistributedVirtualSwitchPortConnecteeConnecteeTypePnic) {
+			t.Errorf("port %s: expected Connectee.Type pnic; got %q", p.Key, p.Connectee.Type)
+		}
+		seen[p.Key] = true
+	}
+
+	if !seen["0"] || !seen["1"] {
+		t.Errorf("expected port keys \"0\" and \"1\"; got %v", ports)
+	}
+}
+
 // TestDVSUuidFormat verifies newDVSUuid() produces the same wire shape a
 // real vCenter/ESXi uses for a DVS UUID -- 16 hex byte pairs, space
 // separated, with a dash between the 8th and 9th pair -- rather than a plain
