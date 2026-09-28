@@ -1503,11 +1503,11 @@ func changedDiskSize(oldDisk *types.VirtualDisk, newDiskSpec *types.VirtualDisk)
 }
 
 func (vm *VirtualMachine) validateSwitchMembers(ctx *Context, id string) types.BaseMethodFault {
-	var dswitch *DistributedVirtualSwitch
+	var dswitch *VmwareDistributedVirtualSwitch
 
 	var find func(types.ManagedObjectReference)
 	find = func(child types.ManagedObjectReference) {
-		s, ok := ctx.Map.Get(child).(*DistributedVirtualSwitch)
+		s, ok := ctx.Map.Get(child).(*VmwareDistributedVirtualSwitch)
 		if ok && s.Uuid == id {
 			dswitch = s
 			return
@@ -1607,7 +1607,7 @@ func (vm *VirtualMachine) configureDevice(
 			walk(ctx.Map.Get(f), find) // search in NetworkFolder and any sub folders
 
 			if dvpg != nil {
-				dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+				dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 				d.Backing = &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
 					Port: types.DistributedVirtualSwitchPortConnection{
 						PortgroupKey: dvpg.Key,
@@ -1648,7 +1648,7 @@ func (vm *VirtualMachine) configureDevice(
 				return fault
 			}
 
-			dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+			dvs := ctx.Map.Get(*dvpg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 
 			d.Backing = &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
 				Port: types.DistributedVirtualSwitchPortConnection{
@@ -1675,6 +1675,17 @@ func (vm *VirtualMachine) configureDevice(
 			if pgObj := ctx.Map.Get(pgRef); pgObj != nil {
 				if pg, ok := pgObj.(*DistributedVirtualPortgroup); ok {
 					x.GetVirtualEthernetCard().SubnetId = pg.Config.SubnetId
+					// Mirror a real vCenter's reverse VM<->network reference:
+					// a collector that reads the portgroup's own Vm property
+					// (rather than cross-referencing every VM's NIC backing)
+					// needs this to discover which VMs are on it.
+					ctx.Map.AddReference(ctx, pg, &pg.Vm, vm.Self)
+					// Invalidate FetchDVPorts cache: VM attachment changes which ports have Connectee set
+					if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+						dvs.FetchDVPortsResponse.Returnval = nil
+						// Also maintain DVS.Summary.Vm[], matching real vCenter's DVS-level connected-VM list
+						ctx.Map.AddReference(ctx, dvs, &dvs.Summary.Vm, vm.Self)
+					}
 				}
 			}
 		}
@@ -2046,6 +2057,18 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 			case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
 				net.Type = "DistributedVirtualPortgroup"
 				net.Value = b.Port.PortgroupKey
+			}
+
+			if net.Type == "DistributedVirtualPortgroup" {
+				if pg, ok := ctx.Map.Get(net).(*DistributedVirtualPortgroup); ok {
+					ctx.Map.RemoveReference(ctx, pg, &pg.Vm, vm.Self)
+					// Invalidate FetchDVPorts cache: VM detachment changes which ports have Connectee set
+					if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+						dvs.FetchDVPortsResponse.Returnval = nil
+						// Also remove from DVS.Summary.Vm[] to maintain consistency
+						ctx.Map.RemoveReference(ctx, dvs, &dvs.Summary.Vm, vm.Self)
+					}
+				}
 			}
 
 			for j, nicInfo := range vm.Guest.Net {
@@ -2822,6 +2845,22 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	for i := range vm.Datastore {
 		ds := ctx.Map.Get(vm.Datastore[i]).(*Datastore)
 		ctx.Map.RemoveReference(ctx, ds, &ds.Vm, vm.Self)
+	}
+
+	// Collect DVS instances to invalidate their caches after all DVPG backrefs are removed
+	dvsToInvalidate := make(map[string]*VmwareDistributedVirtualSwitch)
+	for i := range vm.Network {
+		if pg, ok := ctx.Map.Get(vm.Network[i]).(*DistributedVirtualPortgroup); ok {
+			ctx.Map.RemoveReference(ctx, pg, &pg.Vm, vm.Self)
+			if dvs, ok := ctx.Map.Get(*pg.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+				// Also remove from DVS.Summary.Vm[] when VM is destroyed
+				ctx.Map.RemoveReference(ctx, dvs, &dvs.Summary.Vm, vm.Self)
+				dvsToInvalidate[dvs.Self.Value] = dvs
+			}
+		}
+	}
+	for _, dvs := range dvsToInvalidate {
+		dvs.FetchDVPortsResponse.Returnval = nil
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event(ctx)})

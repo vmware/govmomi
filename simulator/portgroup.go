@@ -16,7 +16,7 @@ type DistributedVirtualPortgroup struct {
 }
 
 func (p *DistributedVirtualPortgroup) event(ctx *Context) types.DVPortgroupEvent {
-	dvs := ctx.Map.Get(*p.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+	dvs := ctx.Map.Get(*p.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 
 	return types.DVPortgroupEvent{
 		Event: types.Event{
@@ -53,6 +53,10 @@ func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(ctx *Context, r
 		s.Config.LogicalSwitchUuid = req.Spec.LogicalSwitchUuid
 		s.Config.SubnetId = req.Spec.SubnetId
 		s.Config.BackingType = req.Spec.BackingType
+		// Invalidate FetchDVPorts cache: DVPG reconfiguration may change port structure
+		if dvs, ok := ctx.Map.Get(*s.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
+			dvs.FetchDVPortsResponse.Returnval = nil
+		}
 
 		return nil, nil
 	})
@@ -66,7 +70,7 @@ func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(ctx *Context, r
 
 func (s *DistributedVirtualPortgroup) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		vswitch := ctx.Map.Get(*s.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+		vswitch := ctx.Map.Get(*s.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch)
 		ctx.Map.RemoveReference(ctx, vswitch, &vswitch.Portgroup, s.Reference())
 		ctx.Map.removeString(ctx, vswitch, &vswitch.Summary.PortgroupName, s.Name)
 

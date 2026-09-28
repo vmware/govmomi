@@ -54,7 +54,7 @@ var alias = []struct {
 	{"p", "ResourcePool"},
 	{"r", "ComputeResource"},
 	{"s", "Datastore"},
-	{"w", "DistributedVirtualSwitch"},
+	{"w", "VmwareDistributedVirtualSwitch"},
 }
 
 func aliasHelp() string {

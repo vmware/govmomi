@@ -249,7 +249,7 @@ var kinds = map[string]reflect.Type{
 	"Datastore":                          reflect.TypeOf((*Datastore)(nil)).Elem(),
 	"DatastoreNamespaceManager":          reflect.TypeOf((*DatastoreNamespaceManager)(nil)).Elem(),
 	"DistributedVirtualPortgroup":        reflect.TypeOf((*DistributedVirtualPortgroup)(nil)).Elem(),
-	"DistributedVirtualSwitch":           reflect.TypeOf((*DistributedVirtualSwitch)(nil)).Elem(),
+	"DistributedVirtualSwitch":           reflect.TypeOf((*VmwareDistributedVirtualSwitch)(nil)).Elem(),
 	"DistributedVirtualSwitchManager":    reflect.TypeOf((*DistributedVirtualSwitchManager)(nil)).Elem(),
 	"EnvironmentBrowser":                 reflect.TypeOf((*EnvironmentBrowser)(nil)).Elem(),
 	"EventManager":                       reflect.TypeOf((*EventManager)(nil)).Elem(),
@@ -284,7 +284,7 @@ var kinds = map[string]reflect.Type{
 	"VirtualMachine":                     reflect.TypeOf((*VirtualMachine)(nil)).Elem(),
 	"VirtualMachineCompatibilityChecker": reflect.TypeOf((*VmCompatibilityChecker)(nil)).Elem(),
 	"VirtualMachineProvisioningChecker":  reflect.TypeOf((*VmProvisioningChecker)(nil)).Elem(),
-	"VmwareDistributedVirtualSwitch":     reflect.TypeOf((*DistributedVirtualSwitch)(nil)).Elem(),
+	"VmwareDistributedVirtualSwitch":     reflect.TypeOf((*VmwareDistributedVirtualSwitch)(nil)).Elem(),
 }
 
 func loadObject(ctx *Context, content types.ObjectContent) (mo.Reference, error) {
@@ -557,8 +557,14 @@ func (m *Model) CreateInfrastructure(ctx *Context) error {
 				}},
 			}
 
-			task, _ = dvs.Reconfigure(ctx, config)
-			_, _ = task.WaitForResult(context.Background(), nil)
+			task, err := dvs.Reconfigure(ctx, config)
+			if err != nil {
+				return nil, fmt.Errorf("failed to reconfigure DVS for host %s: %w", host.Reference().Value, err)
+			}
+			_, err = task.WaitForResult(context.Background(), nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to wait for DVS reconfigure task for host %s: %w", host.Reference().Value, err)
+			}
 		}
 
 		return host, nil

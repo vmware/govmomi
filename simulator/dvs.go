@@ -18,13 +18,13 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type DistributedVirtualSwitch struct {
-	mo.DistributedVirtualSwitch
+type VmwareDistributedVirtualSwitch struct {
+	mo.VmwareDistributedVirtualSwitch
 
 	types.FetchDVPortsResponse
 }
 
-func (s *DistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
+func (s *VmwareDistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
 	return &types.DvsEventArgument{
 		EntityEventArgument: types.EntityEventArgument{
 			Name: s.Name,
@@ -33,7 +33,7 @@ func (s *DistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
 	}
 }
 
-func (s *DistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
+func (s *VmwareDistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
 	return types.DvsEvent{
 		Event: types.Event{
 			Datacenter: datacenterEventArgument(ctx, s),
@@ -42,7 +42,7 @@ func (s *DistributedVirtualSwitch) event(ctx *Context) types.DvsEvent {
 	}
 }
 
-func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
 
@@ -181,11 +181,12 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 	}
 }
 
-func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.ReconfigureDvs_Task) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.ReconfigureDvs_Task) soap.HasFault {
 	task := CreateTask(s, "reconfigureDvs", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		spec := req.Spec.GetDVSConfigSpec()
 
 		members := s.Summary.HostMember
+		configHosts := slices.Clone(s.Config.GetDVSConfigInfo().Host)
 
 		for _, member := range spec.Host {
 			h := ctx.Map.Get(member.Host)
@@ -205,7 +206,35 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				ctx.Update(host, []types.PropertyChange{
 					{Name: "network", Val: hostNetworks},
 				})
+
+				// Mirror what a real vCenter does on the host side when it joins
+				// a DVS: record a HostProxySwitch (with its uplink pnic backing)
+				// on HostSystem.Config.Network.ProxySwitch. Collectors that read
+				// the host's own proxySwitch list (rather than just the DVS's
+				// Summary.HostMember) need this to know which physical NICs back
+				// this switch on this host.
+				proxySwitch := types.HostProxySwitch{
+					DvsUuid: s.Uuid,
+					DvsName: s.Name,
+					Key:     s.Self.Value,
+					Pnic:    dvsUplinkPnics(host, member.Backing),
+				}
+				ctx.Update(host, []types.PropertyChange{
+					{Name: "config.network.proxySwitch", Val: append(host.Config.Network.ProxySwitch, proxySwitch)},
+				})
+
 				members = append(members, member.Host)
+				// A real vCenter always keeps DVSConfigInfo.Host in sync
+				// with Summary.HostMember -- a client reading config.host
+				// for host membership (rather than summary.hostMember)
+				// otherwise sees an empty list regardless of actual
+				// membership.
+				hostRef := member.Host
+				configHosts = append(configHosts, types.DistributedVirtualSwitchHostMember{
+					Config: types.DistributedVirtualSwitchHostMemberConfigInfo{
+						Host: &hostRef,
+					},
+				})
 				parent := ctx.Map.Get(*host.HostSystem.Parent)
 
 				var pgs []types.ManagedObjectReference
@@ -243,6 +272,17 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				}
 
 				RemoveReference(&members, member.Host)
+				configHosts = slices.DeleteFunc(configHosts, func(m types.DistributedVirtualSwitchHostMember) bool {
+					return m.Config.Host != nil && *m.Config.Host == member.Host
+				})
+
+				proxySwitches := slices.Clone(host.Config.Network.ProxySwitch)
+				proxySwitches = slices.DeleteFunc(proxySwitches, func(ps types.HostProxySwitch) bool {
+					return ps.DvsUuid == s.Uuid
+				})
+				ctx.Update(host, []types.PropertyChange{
+					{Name: "config.network.proxySwitch", Val: proxySwitches},
+				})
 
 				ctx.postEvent(&types.DvsHostLeftEvent{
 					DvsEvent: s.event(ctx),
@@ -253,9 +293,17 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 			}
 		}
 
+		config := s.Config.GetDVSConfigInfo()
+		config.Host = configHosts
+
 		ctx.Update(s, []types.PropertyChange{
 			{Name: "summary.hostMember", Val: members},
+			{Name: "summary.numHosts", Val: int32(len(members))},
+			{Name: "config", Val: config},
 		})
+
+		// Invalidate FetchDVPorts cache: host membership changes affect uplink ports
+		s.FetchDVPortsResponse.Returnval = nil
 
 		ctx.postEvent(&types.DvsReconfiguredEvent{
 			DvsEvent:   s.event(ctx),
@@ -272,7 +320,44 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 	}
 }
 
-func (s *DistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
+// dvsUplinkPnics returns the physical NIC device keys to back a host's proxy
+// switch for a DVS it is joining. If the caller specified pnics via
+// DistributedVirtualSwitchHostMemberPnicBacking, those are used as-is;
+// otherwise it falls back to the first pnic on the host not already claimed
+// by a standard vSwitch or another DVS proxy switch, matching what a real
+// vCenter picks when a client adds a host to a DVS without an explicit
+// uplink assignment.
+func dvsUplinkPnics(host *HostSystem, backing types.BaseDistributedVirtualSwitchHostMemberBacking) []string {
+	if b, ok := backing.(*types.DistributedVirtualSwitchHostMemberPnicBacking); ok {
+		pnics := make([]string, 0, len(b.PnicSpec))
+		for _, p := range b.PnicSpec {
+			pnics = append(pnics, "key-vim.host.PhysicalNic-"+p.PnicDevice)
+		}
+		return pnics
+	}
+
+	used := make(map[string]bool)
+	for _, vs := range host.Config.Network.Vswitch {
+		for _, key := range vs.Pnic {
+			used[key] = true
+		}
+	}
+	for _, ps := range host.Config.Network.ProxySwitch {
+		for _, key := range ps.Pnic {
+			used[key] = true
+		}
+	}
+
+	for _, pnic := range host.Config.Network.Pnic {
+		if !used[pnic.Key] {
+			return []string{pnic.Key}
+		}
+	}
+
+	return nil
+}
+
+func (s *VmwareDistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDVPorts) soap.HasFault {
 	body := &methods.FetchDVPortsBody{}
 	body.Res = &types.FetchDVPortsResponse{
 		Returnval: s.dvPortgroups(ctx, req.Criteria),
@@ -280,7 +365,7 @@ func (s *DistributedVirtualSwitch) FetchDVPorts(ctx *Context, req *types.FetchDV
 	return body
 }
 
-func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
+func (s *VmwareDistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		// TODO: should return ResourceInUse fault if any VM is using a port on this switch
 		// and past that, remove refs from each host.Network, etc
@@ -297,25 +382,23 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 	}
 }
 
-func (s *DistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
+func (s *VmwareDistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
 	res := s.FetchDVPortsResponse.Returnval
 	if len(res) != 0 {
 		return res
 	}
 
+	uplinkPg := s.uplinkPortgroup(ctx)
+
 	for _, ref := range s.Portgroup {
 		pg := ctx.Map.Get(ref).(*DistributedVirtualPortgroup)
 
-		for _, key := range pg.PortKeys {
-			res = append(res, types.DistributedVirtualPort{
-				DvsUuid:      s.Uuid,
-				Key:          key,
-				PortgroupKey: pg.Key,
-				Config: types.DVPortConfigInfo{
-					Setting: pg.Config.DefaultPortConfig,
-				},
-			})
+		if uplinkPg != nil && pg.Self == uplinkPg.Self {
+			res = append(res, s.uplinkPorts(ctx, pg)...)
+			continue
 		}
+
+		res = append(res, s.regularPorts(ctx, pg)...)
 	}
 
 	// filter ports by criteria
@@ -324,7 +407,146 @@ func (s *DistributedVirtualSwitch) dvPortgroups(ctx *Context, criteria *types.Di
 	return res
 }
 
-func (s *DistributedVirtualSwitch) filterDVPorts(
+// uplinkPortgroup returns the DVS's auto-created uplink portgroup. It's
+// identified by name rather than a stored reference: CreateDVSTask (folder.go)
+// creates it via a nested AddDVPortgroupTask, which -- like all vcsim tasks --
+// completes asynchronously in its own goroutine after the creating task's
+// lock is released, so there's no point during DVS creation itself where the
+// new portgroup's reference is reliably available yet to store.
+func (s *VmwareDistributedVirtualSwitch) uplinkPortgroup(ctx *Context) *DistributedVirtualPortgroup {
+	name := s.Name + "-DVUplinks" + strings.TrimPrefix(s.Self.Value, "dvs")
+
+	for _, ref := range s.Portgroup {
+		if pg, ok := ctx.Map.Get(ref).(*DistributedVirtualPortgroup); ok && pg.Name == name {
+			return pg
+		}
+	}
+
+	return nil
+}
+
+// uplinkPorts generates one DistributedVirtualPort per (host, pnic) pair
+// backing this DVS's uplink portgroup, with Connectee populated -- mirroring
+// what a real vCenter reports for physical NIC uplinks. A real vCenter's
+// uplink ports are host-scoped: the same numbered port exists once per host,
+// each instance connected to that host's own pnic (see
+// DistributedVirtualSwitchPortCriteria.Host). vcsim tracks the pnic backing
+// via HostSystem.Config.Network.ProxySwitch, populated when a host joins the
+// DVS (see ReconfigureDvsTask).
+func (s *VmwareDistributedVirtualSwitch) uplinkPorts(ctx *Context, pg *DistributedVirtualPortgroup) []types.DistributedVirtualPort {
+	var ports []types.DistributedVirtualPort
+
+	for _, hostRef := range s.Summary.HostMember {
+		host, ok := ctx.Map.Get(hostRef).(*HostSystem)
+		if !ok {
+			continue
+		}
+
+		var pnics []string
+		for _, ps := range host.Config.Network.ProxySwitch {
+			if ps.DvsUuid == s.Uuid {
+				pnics = ps.Pnic
+				break
+			}
+		}
+
+		for i, pnicKey := range pnics {
+			key := pnicKey
+			if i < len(pg.PortKeys) {
+				key = pg.PortKeys[i]
+			}
+
+			connectedEntity := hostRef
+			ports = append(ports, types.DistributedVirtualPort{
+				DvsUuid:      s.Uuid,
+				Key:          key,
+				PortgroupKey: pg.Key,
+				Connectee: &types.DistributedVirtualSwitchPortConnectee{
+					ConnectedEntity: &connectedEntity,
+					NicKey:          pnicKey,
+					Type:            string(types.DistributedVirtualSwitchPortConnecteeConnecteeTypePnic),
+				},
+				Config: types.DVPortConfigInfo{
+					Setting: pg.Config.DefaultPortConfig,
+				},
+			})
+		}
+	}
+
+	return ports
+}
+
+// regularPorts generates ports for a non-uplink portgroup. It mirrors what a
+// real vCenter does when a VM's NIC connects to a DVPortgroup: one of the
+// portgroup's ports gets claimed and its Connectee set to that VM's vNIC
+// (DistributedVirtualSwitchPortConnectee, NicType "vmVnic") -- confirmed
+// against a real vCenter's recorded/replayed inventory, which sets Connectee
+// this way on every connected port, not just uplink ones. PortKeys with no
+// VM claiming them stay disconnected, matching a real vCenter's unused port
+// capacity.
+func (s *VmwareDistributedVirtualSwitch) regularPorts(ctx *Context, pg *DistributedVirtualPortgroup) []types.DistributedVirtualPort {
+	claimed := make(map[string]types.DistributedVirtualPort, len(pg.PortKeys))
+	keys := slices.Clone(pg.PortKeys)
+
+	for _, vmRef := range pg.Vm {
+		vm, ok := ctx.Map.Get(vmRef).(*VirtualMachine)
+		if !ok {
+			continue
+		}
+
+		for _, d := range vm.Config.Hardware.Device {
+			card, ok := d.(types.BaseVirtualEthernetCard)
+			if !ok {
+				continue
+			}
+
+			nic := card.GetVirtualEthernetCard()
+			b, ok := nic.Backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
+			if !ok || b.Port.PortgroupKey != pg.Key || len(keys) == 0 {
+				continue
+			}
+
+			key := keys[0]
+			keys = keys[1:]
+
+			connectedEntity := vmRef
+			claimed[key] = types.DistributedVirtualPort{
+				DvsUuid:      s.Uuid,
+				Key:          key,
+				PortgroupKey: pg.Key,
+				Connectee: &types.DistributedVirtualSwitchPortConnectee{
+					ConnectedEntity: &connectedEntity,
+					NicKey:          strconv.Itoa(int(nic.Key)),
+					Type:            string(types.DistributedVirtualSwitchPortConnecteeConnecteeTypeVmVnic),
+				},
+				Config: types.DVPortConfigInfo{
+					Setting: pg.Config.DefaultPortConfig,
+				},
+			}
+		}
+	}
+
+	ports := make([]types.DistributedVirtualPort, 0, len(pg.PortKeys))
+	for _, key := range pg.PortKeys {
+		if p, ok := claimed[key]; ok {
+			ports = append(ports, p)
+			continue
+		}
+
+		ports = append(ports, types.DistributedVirtualPort{
+			DvsUuid:      s.Uuid,
+			Key:          key,
+			PortgroupKey: pg.Key,
+			Config: types.DVPortConfigInfo{
+				Setting: pg.Config.DefaultPortConfig,
+			},
+		})
+	}
+
+	return ports
+}
+
+func (s *VmwareDistributedVirtualSwitch) filterDVPorts(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {
@@ -339,7 +561,7 @@ func (s *DistributedVirtualSwitch) filterDVPorts(
 	return ports
 }
 
-func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
+func (s *VmwareDistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {
@@ -372,7 +594,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
 	return filtered
 }
 
-func (s *DistributedVirtualSwitch) filterDVPortsByPortKey(
+func (s *VmwareDistributedVirtualSwitch) filterDVPortsByPortKey(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {
@@ -391,7 +613,7 @@ func (s *DistributedVirtualSwitch) filterDVPortsByPortKey(
 	return filtered
 }
 
-func (s *DistributedVirtualSwitch) filterDVPortsByConnected(
+func (s *VmwareDistributedVirtualSwitch) filterDVPortsByConnected(
 	ports []types.DistributedVirtualPort,
 	criteria *types.DistributedVirtualSwitchPortCriteria,
 ) []types.DistributedVirtualPort {

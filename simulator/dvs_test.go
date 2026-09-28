@@ -7,11 +7,15 @@ package simulator
 import (
 	"context"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/task"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -33,7 +37,7 @@ func TestDVS(t *testing.T) {
 	finder.SetDatacenter(dc[0])
 	folders, _ := dc[0].Folders(ctx)
 	hosts, _ := finder.HostSystemList(ctx, "*/*")
-	vswitch := m.Map().Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
 	dvs0 := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
 
 	if len(vswitch.Summary.HostMember) == 0 {
@@ -140,12 +144,16 @@ func TestDVS(t *testing.T) {
 		}
 	}
 
+	// dvs (DVS1) had all its hosts removed by the last test case above ("Remove
+	// dvs1 == OK"), so its uplink portgroup now correctly contributes 0 ports
+	// (uplink ports are host-scoped -- see uplinkPorts()); only the DVPG0
+	// portgroup added earlier still has its one port.
 	ports, err := dvs.FetchDVPorts(ctx, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(ports) != 2 {
-		t.Fatalf("expected 2 ports in DVPorts; got %d", len(ports))
+	if len(ports) != 1 {
+		t.Fatalf("expected 1 port in DVPorts; got %d", len(ports))
 	}
 
 	dtask, err = dvs.Destroy(ctx)
@@ -175,11 +183,22 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 	finder := find.NewFinder(c, false)
 	dc, _ := finder.DatacenterList(ctx, "*")
 	finder.SetDatacenter(dc[0])
-	vswitch := m.Map().Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
 	dvs0 := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
 	pgs := vswitch.Portgroup
 	if len(pgs) != 2 {
 		t.Fatalf("expected 2 portgroups in DVS; got %d", len(pgs))
+	}
+
+	// pgs[0] is the DVS's auto-created uplink portgroup ("DVS0-DVUplinks...").
+	// Its ports are host-scoped (one per DVS host member, each connected to
+	// that host's own pnic) -- see uplinkPorts(). pgs[1] is a regular
+	// portgroup with a single port, connected to the default VM's vNIC --
+	// see regularPorts() -- since VPX()'s default VM is wired to the last
+	// plain portgroup.
+	uplinkPorts := make([]types.DistributedVirtualPort, len(vswitch.Summary.HostMember))
+	for i := range uplinkPorts {
+		uplinkPorts[i] = types.DistributedVirtualPort{PortgroupKey: pgs[0].Value, Key: "0"}
 	}
 
 	tests := []struct {
@@ -190,10 +209,8 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 		{
 			"empty criteria",
 			&types.DistributedVirtualSwitchPortCriteria{},
-			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[0].Value, Key: "0"},
-				{PortgroupKey: pgs[1].Value, Key: "0"},
-			},
+			append(append([]types.DistributedVirtualPort{}, uplinkPorts...),
+				types.DistributedVirtualPort{PortgroupKey: pgs[1].Value, Key: "0"}),
 		},
 		{
 			"inside PortgroupKeys",
@@ -201,9 +218,7 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 				PortgroupKey: []string{pgs[0].Value},
 				Inside:       types.NewBool(true),
 			},
-			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[0].Value, Key: "0"},
-			},
+			uplinkPorts,
 		},
 		{
 			"outside PortgroupKeys",
@@ -223,21 +238,22 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			[]types.DistributedVirtualPort{},
 		},
 		{
+			// both the uplink ports (Connectee set to each host's pnic) and
+			// the regular portgroup's port (Connectee set to the default
+			// VM's vNIC) are connected.
 			"connected",
 			&types.DistributedVirtualSwitchPortCriteria{
 				Connected: types.NewBool(true),
 			},
-			[]types.DistributedVirtualPort{},
+			append(append([]types.DistributedVirtualPort{}, uplinkPorts...),
+				types.DistributedVirtualPort{PortgroupKey: pgs[1].Value, Key: "0"}),
 		},
 		{
 			"not connected",
 			&types.DistributedVirtualSwitchPortCriteria{
 				Connected: types.NewBool(false),
 			},
-			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[0].Value, Key: "0"},
-				{PortgroupKey: pgs[1].Value, Key: "0"},
-			},
+			[]types.DistributedVirtualPort{},
 		},
 	}
 
@@ -266,4 +282,386 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestDVSUuidFormat verifies newDVSUuid() produces the same wire shape a
+// real vCenter/ESXi uses for a DVS UUID -- 16 hex byte pairs, space
+// separated, with a dash between the 8th and 9th pair -- rather than a plain
+// dashed UUID, and that a live DVS's Summary.Uuid actually uses it.
+func TestDVSUuidFormat(t *testing.T) {
+	re := regexp.MustCompile(`^[0-9a-f]{2}( [0-9a-f]{2}){7}-([0-9a-f]{2} ){7}[0-9a-f]{2}$`)
+
+	uuid := newDVSUuid("some-dvs-name")
+	if !re.MatchString(uuid) {
+		t.Fatalf("newDVSUuid() = %q, want the vCenter wire shape (e.g. %q)",
+			uuid, "50 13 a2 63 0a a6 77 65-37 e2 20 e6 2b 8f a2 f6")
+	}
+
+	// Stable per input name, matching newUUID()'s own contract.
+	if again := newDVSUuid("some-dvs-name"); again != uuid {
+		t.Fatalf("newDVSUuid() = %q then %q, want stable output for the same input", uuid, again)
+	}
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vswitch := Map(ctx).Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+		if !re.MatchString(vswitch.Uuid) {
+			t.Fatalf("DVS Summary.Uuid = %q, want the vCenter wire shape", vswitch.Uuid)
+		}
+	})
+}
+
+// TestDVSHostProxySwitch verifies that HostSystem.Config.Network.ProxySwitch
+// gains a HostProxySwitch entry for a DVS when the host joins it, and loses
+// that entry when the host leaves -- matching real vCenter, which always
+// keeps this host-side membership record in sync with the DVS's own
+// Summary.HostMember.
+func TestDVSHostProxySwitch(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	finder := find.NewFinder(c, false)
+	dc, err := finder.DatacenterList(ctx, "*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc[0])
+
+	hosts, err := finder.HostSystemList(ctx, "*/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+	dvs := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+
+	// Every host created by the model already joined this DVS -- pick one
+	// with no VMs on it (removing a host with a VM connected to one of the
+	// DVS's portgroups is rejected with ResourceInUse) and remove it first,
+	// so this test controls the join/leave transition rather than only
+	// observing the model's own initial state.
+	var hostRef types.ManagedObjectReference
+	for _, h := range hosts {
+		ref := h.Reference()
+		if len(simCtx.Map.Get(ref).(*HostSystem).Vm) == 0 {
+			hostRef = ref
+			break
+		}
+	}
+	if hostRef.Value == "" {
+		t.Fatal("expected at least one host with no VMs")
+	}
+
+	hasProxySwitch := func() bool {
+		h := simCtx.Map.Get(hostRef).(*HostSystem)
+		for _, ps := range h.Config.Network.ProxySwitch {
+			if ps.DvsUuid == vswitch.Uuid {
+				return true
+			}
+		}
+		return false
+	}
+
+	if !hasProxySwitch() {
+		t.Fatal("expected host to already have a HostProxySwitch entry for this DVS from model creation")
+	}
+
+	config := &types.DVSConfigSpec{
+		Host: []types.DistributedVirtualSwitchHostMemberConfigSpec{{
+			Operation: string(types.ConfigSpecOperationRemove),
+			Host:      hostRef,
+		}},
+	}
+	task, err := dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	if hasProxySwitch() {
+		t.Fatal("expected HostProxySwitch entry to be removed after leaving the DVS")
+	}
+
+	config.Host[0].Operation = string(types.ConfigSpecOperationAdd)
+	task, err = dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	if !hasProxySwitch() {
+		t.Fatal("expected HostProxySwitch entry to be recreated after rejoining the DVS")
+	}
+}
+
+// TestDVSConfigHost verifies that DVSConfigInfo.Host (config.host) and
+// Summary.NumHosts both stay in sync with Summary.HostMember when a host
+// joins or leaves a DVS -- matching real vCenter, which always keeps all
+// three consistent.
+func TestDVSConfigHost(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	finder := find.NewFinder(c, false)
+	dc, err := finder.DatacenterList(ctx, "*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc[0])
+
+	hosts, err := finder.HostSystemList(ctx, "*/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+	dvs := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+
+	// Same host-selection reasoning as TestDVSHostProxySwitch: pick a host
+	// with no VMs, since removing one that has a VM connected to one of
+	// this DVS's portgroups is rejected with ResourceInUse.
+	var hostRef types.ManagedObjectReference
+	for _, h := range hosts {
+		ref := h.Reference()
+		if len(simCtx.Map.Get(ref).(*HostSystem).Vm) == 0 {
+			hostRef = ref
+			break
+		}
+	}
+	if hostRef.Value == "" {
+		t.Fatal("expected at least one host with no VMs")
+	}
+
+	assertConsistent := func() {
+		s := simCtx.Map.Get(vswitch.Self).(*VmwareDistributedVirtualSwitch)
+		configHost := s.Config.GetDVSConfigInfo().Host
+
+		if int(s.Summary.NumHosts) != len(s.Summary.HostMember) {
+			t.Fatalf("Summary.NumHosts=%d, want %d (len(Summary.HostMember))",
+				s.Summary.NumHosts, len(s.Summary.HostMember))
+		}
+		if len(configHost) != len(s.Summary.HostMember) {
+			t.Fatalf("len(Config.Host)=%d, want %d (len(Summary.HostMember))",
+				len(configHost), len(s.Summary.HostMember))
+		}
+		for _, ref := range s.Summary.HostMember {
+			found := false
+			for _, ch := range configHost {
+				if ch.Config.Host != nil && *ch.Config.Host == ref {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Fatalf("Config.Host=%v missing host %s present in Summary.HostMember", configHost, ref)
+			}
+		}
+	}
+
+	assertConsistent()
+
+	config := &types.DVSConfigSpec{
+		Host: []types.DistributedVirtualSwitchHostMemberConfigSpec{{
+			Operation: string(types.ConfigSpecOperationRemove),
+			Host:      hostRef,
+		}},
+	}
+	task, err := dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	assertConsistent()
+
+	config.Host[0].Operation = string(types.ConfigSpecOperationAdd)
+	task, err = dvs.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	assertConsistent()
+}
+
+// TestDVSConcreteType guards against vcsim regressing to reporting its DVS as
+// the abstract DistributedVirtualSwitch type. A real vCenter always reports
+// the concrete VmwareDistributedVirtualSwitch -- any client that keys off
+// the managed object type (e.g. to pick the SDM/config type to publish)
+// derives its behavior from that MOR type, not from config content, so an
+// abstractly-typed switch is invisible to it even though its portgroups are
+// discovered fine.
+func TestDVSConcreteType(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		ref := Map(ctx).Any("VmwareDistributedVirtualSwitch").Reference()
+		if ref.Type != "VmwareDistributedVirtualSwitch" {
+			t.Fatalf("MOR type = %q, want VmwareDistributedVirtualSwitch", ref.Type)
+		}
+
+		// A client may still query generically by the abstract type (as real
+		// vCenter clients have always been able to do, since VmwareDVS is a
+		// vmodl subtype of it) -- the property collector's type-hierarchy
+		// matching (simulator/property_collector.go's use of reflect on the
+		// anonymously-embedded mo field) must still resolve it against the
+		// concrete object after this rename.
+		pc := property.DefaultCollector(c)
+		for _, queryType := range []string{"VmwareDistributedVirtualSwitch", "DistributedVirtualSwitch"} {
+			res, err := pc.RetrieveProperties(ctx, types.RetrieveProperties{
+				SpecSet: []types.PropertyFilterSpec{{
+					ObjectSet: []types.ObjectSpec{{Obj: ref}},
+					PropSet:   []types.PropertySpec{{Type: queryType, PathSet: []string{"name"}}},
+				}},
+			})
+			if err != nil {
+				t.Fatalf("retrieve via type %s: %s", queryType, err)
+			}
+			if len(res.Returnval) != 1 {
+				t.Errorf("query by type %q: got %d objects, want 1 (hierarchy match against the concrete type failed)",
+					queryType, len(res.Returnval))
+			}
+		}
+	})
+}
+
+// TestDVSDefaultProductInfo guards against a DVS ending up with an empty
+// Config.ProductInfo.Vendor. DVSCreateSpec.ProductInfo's own doc comment
+// states a real vCenter defaults it when the client doesn't supply one
+// ("the Server will use the latest version") -- a null Vendor is not a
+// shape a real vCenter's DVS config ever has, and a collector reading
+// config.productInfo.vendor unconditionally can crash on it.
+// DVSConfigInfo.ProductInfo is a required, always-serialized (non-pointer)
+// field whose own sub-fields are all `omitempty`, so leaving it zero-valued
+// serializes as an empty <productInfo/> with no vendor element at all,
+// which deserializes as a null Vendor on the Java side. Neither
+// `govc dvs.create` (no -product-version) nor this simulator's own default
+// model-driven DVS creation ever supplied one, so this was always empty
+// before the fix. Summary.ProductInfo is checked too since it's the same
+// concept and real vCenter keeps both consistent.
+func TestDVSDefaultProductInfo(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DatacenterList(ctx, "*")
+		if err != nil {
+			t.Fatal(err)
+		}
+		finder.SetDatacenter(dc[0])
+		folders, err := dc[0].Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// No ProductInfo supplied -- must default rather than stay nil.
+		var spec types.DVSCreateSpec
+		spec.ConfigSpec = &types.VMwareDVSConfigSpec{}
+		spec.ConfigSpec.GetDVSConfigSpec().Name = "DVS-default-product-info"
+
+		task, err := folders.NetworkFolder.CreateDVS(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info, err := task.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dvs := object.NewDistributedVirtualSwitch(c, info.Result.(types.ManagedObjectReference))
+
+		var moDVS mo.DistributedVirtualSwitch
+		if err := dvs.Properties(ctx, dvs.Reference(), []string{"summary", "config"}, &moDVS); err != nil {
+			t.Fatal(err)
+		}
+		if moDVS.Summary.ProductInfo == nil {
+			t.Fatal("summary.productInfo is nil, want a default value")
+		}
+		if moDVS.Summary.ProductInfo.Vendor == "" {
+			t.Error("summary.productInfo.vendor is empty, want a non-empty default")
+		}
+		if moDVS.Config.GetDVSConfigInfo().ProductInfo.Vendor == "" {
+			t.Error("config.productInfo.vendor is empty, want a non-empty default")
+		}
+
+		// An explicitly-supplied ProductInfo must still be honored, not
+		// overridden by the default.
+		var spec2 types.DVSCreateSpec
+		spec2.ConfigSpec = &types.VMwareDVSConfigSpec{}
+		spec2.ConfigSpec.GetDVSConfigSpec().Name = "DVS-explicit-product-info"
+		spec2.ProductInfo = &types.DistributedVirtualSwitchProductSpec{Vendor: "Acme Corp", Version: "1.2.3"}
+
+		task2, err := folders.NetworkFolder.CreateDVS(ctx, spec2)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info2, err := task2.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dvs2 := object.NewDistributedVirtualSwitch(c, info2.Result.(types.ManagedObjectReference))
+
+		var moDVS2 mo.DistributedVirtualSwitch
+		if err := dvs2.Properties(ctx, dvs2.Reference(), []string{"summary", "config"}, &moDVS2); err != nil {
+			t.Fatal(err)
+		}
+		if moDVS2.Summary.ProductInfo == nil || moDVS2.Summary.ProductInfo.Vendor != "Acme Corp" {
+			t.Errorf("explicit ProductInfo was not preserved: %+v", moDVS2.Summary.ProductInfo)
+		}
+		if moDVS2.Config.GetDVSConfigInfo().ProductInfo.Vendor != "Acme Corp" {
+			t.Errorf("explicit ProductInfo was not preserved in config: %+v", moDVS2.Config.GetDVSConfigInfo().ProductInfo)
+		}
+
+		// `govc dvs.create` (without -product-version) sends a non-nil
+		// ProductInfo with an empty Vendor, not a nil ProductInfo -- this
+		// must also default rather than leave Vendor empty.
+		var spec3 types.DVSCreateSpec
+		spec3.ConfigSpec = &types.VMwareDVSConfigSpec{}
+		spec3.ConfigSpec.GetDVSConfigSpec().Name = "DVS-empty-product-info"
+		spec3.ProductInfo = new(types.DistributedVirtualSwitchProductSpec)
+
+		task3, err := folders.NetworkFolder.CreateDVS(ctx, spec3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		info3, err := task3.WaitForResult(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dvs3 := object.NewDistributedVirtualSwitch(c, info3.Result.(types.ManagedObjectReference))
+
+		var moDVS3 mo.DistributedVirtualSwitch
+		if err := dvs3.Properties(ctx, dvs3.Reference(), []string{"summary", "config"}, &moDVS3); err != nil {
+			t.Fatal(err)
+		}
+		if moDVS3.Summary.ProductInfo == nil {
+			t.Fatal("summary.productInfo is nil, want a default value")
+		}
+		if moDVS3.Summary.ProductInfo.Vendor == "" {
+			t.Error("summary.productInfo.vendor is empty, want a non-empty default")
+		}
+		if moDVS3.Config.GetDVSConfigInfo().ProductInfo.Vendor == "" {
+			t.Error("config.productInfo.vendor is empty, want a non-empty default")
+		}
+	})
 }
