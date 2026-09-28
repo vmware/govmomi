@@ -168,6 +168,22 @@ func RetrievePropertiesEx(ctx context.Context, r soap.RoundTripper, req types.Re
 	objects := rx.Returnval.Objects
 	token := rx.Returnval.Token
 
+	// If we return before consuming the full token stream (for example, the
+	// context is canceled or a call fails partway through paging), tell
+	// vCenter to release the RetrieveResult it is holding open for this
+	// token. Use a context that is not tied to ctx's cancellation, since ctx
+	// may already be done at this point.
+	defer func() {
+		if token == "" {
+			return
+		}
+
+		_, _ = methods.CancelRetrievePropertiesEx(context.WithoutCancel(ctx), r, &types.CancelRetrievePropertiesEx{
+			This:  req.This,
+			Token: token,
+		})
+	}()
+
 	for token != "" {
 		cx, err := methods.ContinueRetrievePropertiesEx(ctx, r, &types.ContinueRetrievePropertiesEx{
 			This:  req.This,

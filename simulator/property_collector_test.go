@@ -6,6 +6,7 @@ package simulator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -1891,4 +1892,76 @@ func TestPageUpdateSet(t *testing.T) {
 			}
 		})
 	}
+}
+
+// cancelRetrieveRoundTripper cancels the caller's context when the retrieve
+// loop reaches ContinueRetrievePropertiesEx, and records the token issued by
+// the initial RetrievePropertiesEx call. Any other request,
+// CancelRetrievePropertiesEx included, is forwarded with the context given by
+// the caller, so a CancelRetrievePropertiesEx sent with the now canceled
+// context fails to reach the server.
+type cancelRetrieveRoundTripper struct {
+	soap.RoundTripper
+	cancel context.CancelFunc
+	token  string
+}
+
+func (rt *cancelRetrieveRoundTripper) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	if _, ok := req.(*methods.ContinueRetrievePropertiesExBody); ok {
+		rt.cancel()
+		return ctx.Err()
+	}
+
+	err := rt.RoundTripper.RoundTrip(ctx, req, res)
+
+	if b, ok := res.(*methods.RetrievePropertiesExBody); ok && err == nil && b.Res != nil {
+		rt.token = b.Res.Returnval.Token
+	}
+
+	return err
+}
+
+func TestCancelRetrievePropertiesEx(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		var objects []types.ObjectSpec
+		for _, vm := range Map(ctx).All("VirtualMachine") {
+			objects = append(objects, types.ObjectSpec{Obj: vm.Reference()})
+		}
+
+		req := types.RetrievePropertiesEx{
+			This: c.ServiceContent.PropertyCollector,
+			SpecSet: []types.PropertyFilterSpec{{
+				ObjectSet: objects,
+				PropSet:   []types.PropertySpec{{Type: "VirtualMachine", PathSet: []string{"name"}}},
+			}},
+			Options: types.RetrieveOptions{MaxObjects: 1}, // force a token
+		}
+
+		cancelCtx, cancel := context.WithCancel(ctx)
+		defer cancel()
+
+		rt := &cancelRetrieveRoundTripper{RoundTripper: c, cancel: cancel}
+
+		_, err := mo.RetrievePropertiesEx(cancelCtx, rt, req)
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("err=%v", err)
+		}
+
+		if rt.token == "" {
+			t.Fatal("no token")
+		}
+
+		// RetrievePropertiesEx should have canceled the token when it stopped
+		// paging, so vcsim no longer knows about it and faults. The fault is
+		// what must be asserted: using the canceled context here would fail
+		// with a context error whether or not the token was canceled.
+		_, err = methods.ContinueRetrievePropertiesEx(ctx, c, &types.ContinueRetrievePropertiesEx{
+			This:  req.This,
+			Token: rt.token,
+		})
+
+		if !soap.IsSoapFault(err) {
+			t.Errorf("expected an invalid token fault, got: %v", err)
+		}
+	})
 }

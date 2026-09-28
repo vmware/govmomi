@@ -607,6 +607,28 @@ type retrievePropertiesExPage struct {
 	Objects    []types.ObjectContent
 }
 
+// CancelRetrievePropertiesEx releases the RetrieveResult associated with the
+// given token, as created by RetrievePropertiesEx or
+// ContinueRetrievePropertiesEx. Subsequent calls to
+// ContinueRetrievePropertiesEx with this token will fail.
+func (pc *PropertyCollector) CancelRetrievePropertiesEx(ctx *Context, r *types.CancelRetrievePropertiesEx) soap.HasFault {
+	body := &methods.CancelRetrievePropertiesExBody{}
+
+	if r.Token == "" {
+		body.Fault_ = Fault("", &types.InvalidPropertyFault{Name: "token"})
+		return body
+	}
+
+	if _, ok := retrievePropertiesExBook.LoadAndDelete(r.Token); !ok {
+		body.Fault_ = Fault("", &types.InvalidPropertyFault{Name: "token"})
+		return body
+	}
+
+	body.Res = &types.CancelRetrievePropertiesExResponse{}
+
+	return body
+}
+
 func (pc *PropertyCollector) ContinueRetrievePropertiesEx(ctx *Context, r *types.ContinueRetrievePropertiesEx) soap.HasFault {
 	body := &methods.ContinueRetrievePropertiesExBody{}
 
