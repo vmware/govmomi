@@ -429,6 +429,24 @@ func (s *VmwareDistributedVirtualSwitch) uplinkPortgroup(ctx *Context) *Distribu
 	return nil
 }
 
+func dvPortState(pg *DistributedVirtualPortgroup) *types.DVPortState {
+	status := &types.DVPortStatus{
+		LinkUp: true,
+	}
+
+	if setting, ok := pg.Config.DefaultPortConfig.(*types.VMwareDVSPortSetting); ok {
+		switch vlan := setting.Vlan.(type) {
+		case *types.VmwareDistributedVirtualSwitchVlanIdSpec:
+			status.VlanIds = []types.NumericRange{{Start: vlan.VlanId, End: vlan.VlanId}}
+		case *types.VmwareDistributedVirtualSwitchTrunkVlanSpec:
+			status.VlanIds = vlan.VlanId
+			status.TrunkingMode = types.NewBool(true)
+		}
+	}
+
+	return &types.DVPortState{RuntimeInfo: status}
+}
+
 // uplinkPorts generates one DistributedVirtualPort per (host, pnic) pair
 // backing this DVS's uplink portgroup, with Connectee populated -- mirroring
 // what a real vCenter reports for physical NIC uplinks. A real vCenter's
@@ -462,6 +480,7 @@ func (s *VmwareDistributedVirtualSwitch) uplinkPorts(ctx *Context, pg *Distribut
 				DvsUuid:      s.Uuid,
 				Key:          key,
 				PortgroupKey: pg.Key,
+				ProxyHost:    &connectedEntity,
 				Connectee: &types.DistributedVirtualSwitchPortConnectee{
 					ConnectedEntity: &connectedEntity,
 					NicKey:          pnicKey,
@@ -470,6 +489,7 @@ func (s *VmwareDistributedVirtualSwitch) uplinkPorts(ctx *Context, pg *Distribut
 				Config: types.DVPortConfigInfo{
 					Setting: pg.Config.DefaultPortConfig,
 				},
+				State: dvPortState(pg),
 			})
 		}
 	}
@@ -522,11 +542,13 @@ func (s *VmwareDistributedVirtualSwitch) regularPorts(ctx *Context, pg *Distribu
 				DvsUuid:      s.Uuid,
 				Key:          key,
 				PortgroupKey: pg.Key,
+				ProxyHost:    vm.Runtime.Host,
 				Connectee: &types.DistributedVirtualSwitchPortConnectee{
 					ConnectedEntity: &connectedEntity,
 					NicKey:          strconv.Itoa(int(nic.Key)),
 					Type:            string(types.DistributedVirtualSwitchPortConnecteeConnecteeTypeVmVnic),
 				},
+				State: dvPortState(pg),
 				Config: types.DVPortConfigInfo{
 					Setting: pg.Config.DefaultPortConfig,
 				},

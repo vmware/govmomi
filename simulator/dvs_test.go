@@ -483,6 +483,75 @@ func TestRegularPortsExceedPreallocatedKeys(t *testing.T) {
 	}
 }
 
+func TestDVPortProxyHostAndState(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	if err := m.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client()
+	simCtx := m.Service.Context
+
+	vswitch := m.Map().Any("VmwareDistributedVirtualSwitch").(*VmwareDistributedVirtualSwitch)
+	dvs := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+	pgs := vswitch.Portgroup
+	if len(pgs) != 2 {
+		t.Fatalf("expected 2 portgroups in DVS; got %d", len(pgs))
+	}
+
+	uplinkPg := simCtx.Map.Get(pgs[0]).(*DistributedVirtualPortgroup)
+	regularPg := simCtx.Map.Get(pgs[1]).(*DistributedVirtualPortgroup)
+
+	uplinkPorts, err := dvs.FetchDVPorts(ctx, &types.DistributedVirtualSwitchPortCriteria{
+		PortgroupKey: []string{uplinkPg.Key},
+		Inside:       types.NewBool(true),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(uplinkPorts) == 0 {
+		t.Fatal("expected at least one uplink port")
+	}
+	for _, p := range uplinkPorts {
+		if p.ProxyHost == nil || *p.ProxyHost != *p.Connectee.ConnectedEntity {
+			t.Errorf("uplink port %s: expected ProxyHost to match the connected host; got %v (connectee %v)",
+				p.Key, p.ProxyHost, p.Connectee.ConnectedEntity)
+		}
+		if p.State == nil || p.State.RuntimeInfo == nil {
+			t.Errorf("uplink port %s: expected non-nil State.RuntimeInfo", p.Key)
+		} else if !p.State.RuntimeInfo.LinkUp {
+			t.Errorf("uplink port %s: expected State.RuntimeInfo.LinkUp true", p.Key)
+		}
+	}
+
+	regularPorts, err := dvs.FetchDVPorts(ctx, &types.DistributedVirtualSwitchPortCriteria{
+		PortgroupKey: []string{regularPg.Key},
+		Inside:       types.NewBool(true),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(regularPorts) == 0 {
+		t.Fatal("expected at least one regular port")
+	}
+	for _, p := range regularPorts {
+		vm := simCtx.Map.Get(*p.Connectee.ConnectedEntity).(*VirtualMachine)
+		if p.ProxyHost == nil || vm.Runtime.Host == nil || *p.ProxyHost != *vm.Runtime.Host {
+			t.Errorf("regular port %s: expected ProxyHost to match connected VM's runtime host; got %v (vm.Runtime.Host %v)",
+				p.Key, p.ProxyHost, vm.Runtime.Host)
+		}
+		if p.State == nil || p.State.RuntimeInfo == nil {
+			t.Errorf("regular port %s: expected non-nil State.RuntimeInfo", p.Key)
+		} else if !p.State.RuntimeInfo.LinkUp {
+			t.Errorf("regular port %s: expected State.RuntimeInfo.LinkUp true", p.Key)
+		}
+	}
+}
+
 // TestDVSUuidFormat verifies newDVSUuid() produces the same wire shape a
 // real vCenter/ESXi uses for a DVS UUID -- 16 hex byte pairs, space
 // separated, with a dash between the 8th and 9th pair -- rather than a plain
