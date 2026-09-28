@@ -438,6 +438,7 @@ func dvPortState(pg *DistributedVirtualPortgroup) *types.DVPortState {
 		switch vlan := setting.Vlan.(type) {
 		case *types.VmwareDistributedVirtualSwitchVlanIdSpec:
 			status.VlanIds = []types.NumericRange{{Start: vlan.VlanId, End: vlan.VlanId}}
+			status.TrunkingMode = types.NewBool(false)
 		case *types.VmwareDistributedVirtualSwitchTrunkVlanSpec:
 			status.VlanIds = vlan.VlanId
 			status.TrunkingMode = types.NewBool(true)
