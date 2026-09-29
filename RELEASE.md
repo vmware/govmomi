@@ -40,17 +40,17 @@ git pull origin/main
 ### Create a release branch
 
 For new releases, create a release branch from the most recent commit in
-`main`, e.g. `release-0.35`.
+`main`, e.g. `release-0.57`.
 
 ```console
-export RELEASE_BRANCH=release-0.35
+RELEASE_BRANCH=release-0.57
 git checkout -b ${RELEASE_BRANCH}
 ```
 
 For maintenance/patch releases on **existing** release branches, simply checkout the existing
 release branch and add commits to the existing release branch.
 
-### Verify `make docs` and `CONTRIBUTORS` are up to date
+### Verify `make doc` and `CONTRIBUTORS` are up to date
 
 > **Warning**
 >
@@ -88,10 +88,10 @@ navigate to `Actions -> Workflows -> Release`.
 
 Click `Run Workflow` which opens a dropdown list.
 
-Select the new/updated branch, e.g. `release-0.35`, i.e. **not** the `main`
+Select the new/updated branch, e.g. `release-0.57`, i.e. **not** the `main`
 branch.
 
-Specify a semantic `tag` to associate with the release, e.g. `v0.35.0`.
+Specify a semantic `tag` to associate with the release, e.g. `v0.57.0`.
 
 > **Warning**
 >
@@ -107,3 +107,23 @@ Click `Run Workflow` to kick off the workflow.
 After successful completion and if the newly created `tag` is the **latest**
 (semantic version sorted) tag in the repository, a PR is automatically opened
 against the `main` branch to update the `CHANGELOG`.
+
+### Create tag on main
+
+For users of the main branch via `go get github.com/vmware/govmomi@main`.
+
+The `go get` tool uses the most recent semver tag on or prior to the target commit on main. For example:
+```console
+$ go get github.com/vmware/govmomi@main
+go: downloading github.com/vmware/govmomi v0.57.0-alpha.0.0.20260928023228-1bbb1989e54d
+...
+```
+
+Create this tag on main after creating a release:
+
+```console
+MAIN_TAG=v0.58.0-alpha.0
+git checkout main
+git tag -a ${MAIN_TAG} -m ${MAIN_TAG}
+git push vmware tag ${MAIN_TAG}
+```
