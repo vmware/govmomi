@@ -8,6 +8,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25"
@@ -147,6 +148,28 @@ func TestAuthorizationManagerSetEntityPermissions(t *testing.T) {
 		}
 		if n := len(defaults) + 3; len(perms) != n {
 			t.Errorf("len(permissions)=%d, want %d", len(perms), n)
+		}
+	})
+}
+
+func TestAuthorizationManagerAddRolePrivileges(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		m := object.NewAuthorizationManager(c)
+
+		// Privileges used by vSphere Supervisor roles, on top of the ESX catalogue.
+		privs := []string{
+			"Global.LogEvent",
+			"ManagementServiceAccessGrants.Configure",
+			"ManagementServices.Configure",
+		}
+
+		if _, err := m.AddRole(ctx, "supervisor-role", privs); err != nil {
+			t.Errorf("AddRole(%v): %s", privs, err)
+		}
+
+		_, err := m.AddRole(ctx, "invalid-role", []string{"No.Such.Privilege"})
+		if !fault.Is(err, &types.InvalidArgument{}) {
+			t.Errorf("AddRole(No.Such.Privilege) err=%v, want InvalidArgument", err)
 		}
 	})
 }
