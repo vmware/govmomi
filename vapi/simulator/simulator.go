@@ -305,8 +305,11 @@ func (s *handler) hasAuthorization(r *http.Request) (string, bool) {
 	if ok { // user+pass auth
 		return u, s.Map.SessionManager().Authenticate(s.URL, &vim.Login{UserName: u, Password: p})
 	}
-	auth := r.Header.Get("Authorization")
-	return "TODO", strings.HasPrefix(auth, "SIGN ") // token auth
+	auth, ok := strings.CutPrefix(r.Header.Get("Authorization"), "SIGN ")
+	if !ok {
+		return "", false
+	}
+	return s.tokenAuthorization(r, auth) // token auth
 }
 
 func (s *handler) findTag(e vim.VslmTagEntry) *tags.Tag {
