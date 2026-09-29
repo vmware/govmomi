@@ -110,10 +110,11 @@ func init() {
 type PlaceVmsXClusterSpecVmPlacementSpec struct {
 	DynamicData
 
-	Vm                *ManagedObjectReference                                `xml:"vm,omitempty"`
-	ConfigSpec        VirtualMachineConfigSpec                               `xml:"configSpec"`
-	RelocateSpec      *VirtualMachineRelocateSpec                            `xml:"relocateSpec,omitempty"`
-	CandidateNetworks []PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks `xml:"candidateNetworks,omitempty"`
+	Vm                   *ManagedObjectReference                                `xml:"vm,omitempty"`
+	ConfigSpec           VirtualMachineConfigSpec                               `xml:"configSpec"`
+	RelocateSpec         *VirtualMachineRelocateSpec                            `xml:"relocateSpec,omitempty"`
+	CandidateNetworks    []PlaceVmsXClusterSpecVmPlacementSpecCandidateNetworks `xml:"candidateNetworks,omitempty"`
+	CandidateVsphereZone string                                                 `xml:"candidateVsphereZone,omitempty"`
 }
 
 func init() {
