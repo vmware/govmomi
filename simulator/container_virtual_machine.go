@@ -270,8 +270,13 @@ func (svm *simVM) start(ctx *Context) error {
 
 	for _, opt := range svm.vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
+		// Any value is accepted as its string form: a client may send one
+		// typed other than xsd:string, and a failed type assertion here would
+		// panic the power-on task.
+		value := fmt.Sprint(val.Value)
+
 		if val.Key == ContainerBackingOptionKey {
-			run := val.Value.(string)
+			run := value
 			err := json.Unmarshal([]byte(run), &args)
 			if err != nil {
 				args = []string{run}
@@ -282,7 +287,7 @@ func (svm *simVM) start(ctx *Context) error {
 
 		if val.Key == "RUN.mountdmi" {
 			var mount bool
-			err := json.Unmarshal([]byte(val.Value.(string)), &mount)
+			err := json.Unmarshal([]byte(value), &mount)
 			if err == nil {
 				mountDMI = mount
 			}
@@ -293,7 +298,7 @@ func (svm *simVM) start(ctx *Context) error {
 		if val.Key == "RUN.network" {
 			// Specify container network (e.g., "podman" for rootless podman bridge network)
 			// This is important for rootless podman which doesn't assign IPs without a network
-			networks = append(networks, val.Value.(string))
+			networks = append(networks, value)
 			continue
 		}
 
@@ -302,7 +307,7 @@ func (svm *simVM) start(ctx *Context) error {
 			// or inlined into the RUN.container freeform string as is the case with the nginx volume in the examples?
 			sKey := strings.Split(val.Key, ".")
 			containerPort := sKey[len(sKey)-1]
-			ports = append(ports, fmt.Sprintf("%s:%s", val.Value.(string), containerPort))
+			ports = append(ports, fmt.Sprintf("%s:%s", value, containerPort))
 
 			continue
 		}
@@ -310,12 +315,12 @@ func (svm *simVM) start(ctx *Context) error {
 		if strings.HasPrefix(val.Key, "RUN.env.") {
 			sKey := strings.Split(val.Key, ".")
 			envKey := sKey[len(sKey)-1]
-			env = append(env, fmt.Sprintf("%s=%s", envKey, val.Value.(string)))
+			env = append(env, fmt.Sprintf("%s=%s", envKey, value))
 		}
 
 		if strings.HasPrefix(val.Key, "guestinfo.") {
 			key := strings.Replace(strings.ToUpper(val.Key), ".", "_", -1)
-			env = append(env, fmt.Sprintf("VMX_%s=%s", key, val.Value.(string)))
+			env = append(env, fmt.Sprintf("VMX_%s=%s", key, value))
 
 			continue
 		}
