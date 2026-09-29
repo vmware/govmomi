@@ -41,12 +41,14 @@ func init() {
 			h := handler.(*Handler)
 			r.SessionManager().ValidToken = h.validToken
 			s.HandleFunc(tesPath, h.tokenExchange)
+			s.Handle(oidcPath+"/", http.HandlerFunc(h.openIDConnect))
 		}
 	})
 }
 
 // Handler is the STS simulator. It issues SAML tokens signed by its own key, and validates them.
-// It also implements the Token Exchange Service, which exchanges those tokens for JWTs signed by the same key.
+// It also implements the Token Exchange Service, which exchanges those tokens for JWTs signed by the same key,
+// and the OpenID Connect discovery and JWKS endpoints that JWT verifiers use.
 // Neither requests nor responses are logged, as they carry credentials.
 type Handler struct {
 	// URL is the scheme and host of the SSO server, as clients reach it.
