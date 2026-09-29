@@ -48,9 +48,9 @@ func commandError(operation string, args []string, err error) error {
 	}
 	var cmdErr error
 	if stderr != "" {
-		cmdErr = fmt.Errorf("%s %v failed: %s: %s", operation, args, err, stderr)
+		cmdErr = fmt.Errorf("%s %v failed: %w: %s", operation, args, err, stderr)
 	} else {
-		cmdErr = fmt.Errorf("%s %v failed: %s", operation, args, err)
+		cmdErr = fmt.Errorf("%s %v failed: %w", operation, args, err)
 	}
 	log.Print(cmdErr)
 	return cmdErr
@@ -252,6 +252,7 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 
 	tw := tar.NewWriter(stdin)
 
+	var tarErr error
 	for _, file := range files {
 		header := file.header
 
@@ -267,7 +268,9 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 			header.Mode = 0444
 		}
 
-		tarErr := tw.WriteHeader(header)
+		if tarErr == nil {
+			tarErr = tw.WriteHeader(header)
+		}
 		if tarErr == nil {
 			_, tarErr = tw.Write(file.content)
 		}
@@ -276,8 +279,8 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 	err = nil
 	twErr := tw.Close()
 	stdinErr := stdin.Close()
-	if twErr != nil || stdinErr != nil {
-		err = fmt.Errorf("tw: {%s}, stdin: {%s}", twErr, stdinErr)
+	if tarErr != nil || twErr != nil || stdinErr != nil {
+		err = fmt.Errorf("tar: {%s}, tw: {%s}, stdin: {%s}", tarErr, twErr, stdinErr)
 	}
 
 	if waitErr := cmd.Wait(); waitErr != nil {
