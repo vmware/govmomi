@@ -403,7 +403,7 @@ func (svm *simVM) start(ctx *Context) error {
 
 	// Start watching the container resource.
 	err = svm.c.watchContainer(ctx, callback)
-	if _, ok := err.(uninitializedContainer); ok {
+	if isUninitializedContainer(err) {
 		// the container has been deleted before we could watch, despite successful launch so clean up.
 		callback(ctx, nil, nil, svm.c)
 
