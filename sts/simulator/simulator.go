@@ -38,12 +38,15 @@ func init() {
 			}
 			s.Handle(path, handler)
 			s.Handle(sts.SystemPath, handler)
-			r.SessionManager().ValidToken = handler.(*Handler).validToken
+			h := handler.(*Handler)
+			r.SessionManager().ValidToken = h.validToken
+			s.HandleFunc(tesPath, h.tokenExchange)
 		}
 	})
 }
 
 // Handler is the STS simulator. It issues SAML tokens signed by its own key, and validates them.
+// It also implements the Token Exchange Service, which exchanges those tokens for JWTs signed by the same key.
 // Neither requests nor responses are logged, as they carry credentials.
 type Handler struct {
 	// URL is the scheme and host of the SSO server, as clients reach it.
@@ -55,6 +58,8 @@ type Handler struct {
 	key    *rsa.PrivateKey
 	cert   *x509.Certificate
 	minted []string
+
+	invalidGrant int
 }
 
 // New creates an STS simulator and configures the simulator endpoint in the given settings.
