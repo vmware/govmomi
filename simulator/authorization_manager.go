@@ -5,6 +5,7 @@
 package simulator
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/vmware/govmomi/object"
@@ -118,8 +119,27 @@ func (m *AuthorizationManager) RemoveEntityPermission(req *types.RemoveEntityPer
 	}
 }
 
+// SetEntityPermissions adds each permission to the entity, or updates the
+// permission already present for the same principal and group.
 func (m *AuthorizationManager) SetEntityPermissions(req *types.SetEntityPermissions) soap.HasFault {
-	m.permissions[req.Entity] = req.Permission
+	entity := req.Entity
+	p := m.permissions[entity]
+
+	for _, v := range req.Permission {
+		v.Entity = &entity
+
+		i := slices.IndexFunc(p, func(e types.Permission) bool {
+			return e.Principal == v.Principal && e.Group == v.Group
+		})
+
+		if i < 0 {
+			p = append(p, v)
+		} else {
+			p[i] = v
+		}
+	}
+
+	m.permissions[entity] = p
 
 	return &methods.SetEntityPermissionsBody{
 		Res: &types.SetEntityPermissionsResponse{},
