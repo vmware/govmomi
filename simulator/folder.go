@@ -696,32 +696,36 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 			Parent:   folderEventArgument(&f.Folder),
 		})
 
-		dvs.AddDVPortgroupTask(ctx, &types.AddDVPortgroup_Task{
-			Spec: []types.DVPortgroupConfigSpec{{
-				Name:     dvs.Name + "-DVUplinks" + strings.TrimPrefix(dvs.Self.Value, "dvs"),
-				Type:     string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
-				NumPorts: 1,
-				DefaultPortConfig: &types.VMwareDVSPortSetting{
-					Vlan: &types.VmwareDistributedVirtualSwitchTrunkVlanSpec{
-						VlanId: []types.NumericRange{{Start: 0, End: 4094}},
+		dvs.addDVPortgroups(ctx, []types.DVPortgroupConfigSpec{{
+			Name:     dvs.Name + "-DVUplinks" + strings.TrimPrefix(dvs.Self.Value, "dvs"),
+			Type:     string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
+			NumPorts: 1,
+			DefaultPortConfig: &types.VMwareDVSPortSetting{
+				Vlan: &types.VmwareDistributedVirtualSwitchTrunkVlanSpec{
+					VlanId: []types.NumericRange{{Start: 0, End: 4094}},
+				},
+				UplinkTeamingPolicy: &types.VmwareUplinkPortTeamingPolicy{
+					Policy: &types.StringPolicy{
+						Value: "loadbalance_srcid",
 					},
-					UplinkTeamingPolicy: &types.VmwareUplinkPortTeamingPolicy{
-						Policy: &types.StringPolicy{
-							Value: "loadbalance_srcid",
-						},
-						ReversePolicy: &types.BoolPolicy{
-							Value: types.NewBool(true),
-						},
-						NotifySwitches: &types.BoolPolicy{
-							Value: types.NewBool(true),
-						},
-						RollingOrder: &types.BoolPolicy{
-							Value: types.NewBool(true),
-						},
+					ReversePolicy: &types.BoolPolicy{
+						Value: types.NewBool(true),
+					},
+					NotifySwitches: &types.BoolPolicy{
+						Value: types.NewBool(true),
+					},
+					RollingOrder: &types.BoolPolicy{
+						Value: types.NewBool(true),
 					},
 				},
-			}},
-		})
+			},
+		}})
+
+		if uplinkPg := dvs.uplinkPortgroup(ctx); uplinkPg != nil {
+			if config, ok := dvs.Config.(*types.VMwareDVSConfigInfo); ok {
+				config.UplinkPortgroup = []types.ManagedObjectReference{uplinkPg.Reference()}
+			}
+		}
 
 		return dvs.Reference(), nil
 	})

@@ -57,6 +57,7 @@ func (m *IpPoolManager) init(*Registry) {
 func (m *IpPoolManager) CreateIpPool(req *types.CreateIpPool) soap.HasFault {
 	body := &methods.CreateIpPoolBody{}
 	id := m.nextPoolId
+	req.Pool.Id = id
 
 	var err error
 	m.pools[id], err = NewIpPool(&req.Pool)
