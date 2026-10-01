@@ -576,15 +576,57 @@ func extraConfigKey(key string) string {
 
 // parseGuestIPAndPrefix accepts either a plain IP ("10.0.0.42") or CIDR
 // notation ("10.0.0.42/24") for the SET.guest.ipAddress backdoor. A plain IP
-// keeps its prior meaning (prefix length 0) for backwards compatibility;
-// CIDR notation additionally provides the prefix length needed to compute a
-// subnet, which the legacy plain-IP form cannot express.
-func parseGuestIPAndPrefix(addr string) (ip string, prefixLen int32) {
+// keeps its prior meaning (prefix length 0, no subnet) for backwards
+// compatibility; CIDR notation additionally provides the prefix length and
+// subnet network address, which the legacy plain-IP form cannot express.
+func parseGuestIPAndPrefix(addr string) (ip string, prefixLen int32, subnet string) {
 	if i, ipNet, err := net.ParseCIDR(addr); err == nil {
 		ones, _ := ipNet.Mask.Size()
-		return i.String(), int32(ones)
+		return i.String(), int32(ones), ipNet.IP.String()
 	}
-	return addr, 0
+	return addr, 0, ""
+}
+
+// upsertGuestIpRoute adds or replaces (keyed by network+prefix) an entry in
+// the VM's single GuestStackInfo route table, so that setting the gateway
+// route and the local-subnet route via separate ExtraConfig keys -- in
+// either order, in the same or different Reconfigure calls -- never clobbers
+// the other.
+func upsertGuestIpRoute(vm *VirtualMachine, route types.NetIpRouteConfigInfoIpRoute) {
+	if len(vm.Guest.IpStack) == 0 {
+		vm.Guest.IpStack = []types.GuestStackInfo{{}}
+	}
+	if vm.Guest.IpStack[0].IpRouteConfig == nil {
+		vm.Guest.IpStack[0].IpRouteConfig = new(types.NetIpRouteConfigInfo)
+	}
+	routes := vm.Guest.IpStack[0].IpRouteConfig.IpRoute
+	for i := range routes {
+		if routes[i].Network == route.Network && routes[i].PrefixLength == route.PrefixLength {
+			routes[i] = route
+			return
+		}
+	}
+	if route.PrefixLength == 0 {
+		// Matches real vCenter's reported order: default route first,
+		// followed by any local-subnet routes.
+		vm.Guest.IpStack[0].IpRouteConfig.IpRoute = append([]types.NetIpRouteConfigInfoIpRoute{route}, routes...)
+		return
+	}
+	vm.Guest.IpStack[0].IpRouteConfig.IpRoute = append(routes, route)
+}
+
+// dnsConfig returns the VM's single GuestStackInfo.DnsConfig, allocating it
+// (and the enclosing IpStack) if needed, so the guest.hostName/dnsServer/
+// dnsDomain backdoors can each set their own field without clobbering the
+// others.
+func dnsConfig(vm *VirtualMachine) *types.NetDnsConfigInfo {
+	if len(vm.Guest.IpStack) == 0 {
+		vm.Guest.IpStack = []types.GuestStackInfo{{}}
+	}
+	if vm.Guest.IpStack[0].DnsConfig == nil {
+		vm.Guest.IpStack[0].DnsConfig = new(types.NetDnsConfigInfo)
+	}
+	return vm.Guest.IpStack[0].DnsConfig
 }
 
 func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
@@ -642,7 +684,7 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 		switch key {
 		case "guest.ipAddress":
 			addr := val.Value.(string)
-			ip, prefixLen := parseGuestIPAndPrefix(addr)
+			ip, prefixLen, subnet := parseGuestIPAndPrefix(addr)
 			// Guest.IpAddress takes the parsed address, never the raw CIDR string --
 			// same as the generic path below would do for any other real property,
 			// except the value needs parsing first.
@@ -651,9 +693,9 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 				vm.Guest.Net[0].IpAddress = []string{ip}
 				// GuestNicInfo.IpAddress is a legacy field real Tools-equipped VMs
 				// still populate for backwards compatibility, but real API consumers
-				// (e.g. vRNI's collector) read the structured IpConfig instead -- it
-				// carries the prefix length needed to resolve the VM's subnet, which
-				// the legacy field cannot express.
+				// read the structured IpConfig instead -- it carries the prefix
+				// length needed to resolve the VM's subnet, which the legacy field
+				// cannot express.
 				vm.Guest.Net[0].IpConfig = &types.NetIpConfigInfo{
 					IpAddress: []types.NetIpConfigInfoIpAddress{{
 						IpAddress:    ip,
@@ -667,6 +709,22 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 					types.PropertyChange{Name: "guest.net", Val: vm.Guest.Net},
 				)
 			}
+			if subnet != "" {
+				// Real vCenter reports a local-subnet route (no gateway) on the
+				// same GuestStackInfo as the default-gateway route below, derived
+				// from the guest's own IP/prefix -- CIDR notation is required to
+				// know the subnet, so a plain IP (prefixLen 0) adds none. Device is
+				// hardcoded to "0" since these backdoors only ever describe NIC 0
+				// (see guest.ipAddress's own doc comment).
+				upsertGuestIpRoute(vm, types.NetIpRouteConfigInfoIpRoute{
+					Network:      subnet,
+					PrefixLength: prefixLen,
+					Gateway:      types.NetIpRouteConfigInfoGateway{IpAddress: "", Device: "0"},
+				})
+				changes = append(changes,
+					types.PropertyChange{Name: "guest.ipStack", Val: vm.Guest.IpStack},
+				)
+			}
 		case "guest.defaultGateway":
 			// vcsim-only convenience key -- "guest.defaultGateway" is not a real
 			// property, so unlike every other case here this must NOT also fall
@@ -677,26 +735,22 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 			// consumers actually read a VM's default gateway from -- GuestInfo has
 			// no standalone "gateway" field.
 			//
-			// Only IpRouteConfig is touched here (DnsConfig on the same element,
-			// if already set by SET.guest.dnsServer, is preserved) since real
-			// vCenter reports both the route table and DNS config on the same
-			// GuestStackInfo entry, and a client may set gateway and DNS in the
+			// Only the default route is touched here (the local-subnet route
+			// set by SET.guest.ipAddress, and DnsConfig set by
+			// SET.guest.dnsServer, are preserved) since real vCenter reports
+			// the full route table and DNS config on the same GuestStackInfo
+			// entry, and a client may set any combination of these in the
 			// same ReconfigVM_Task.
 			gw := val.Value.(string)
 			network := "0.0.0.0"
 			if strings.Contains(gw, ":") {
 				network = "::"
 			}
-			if len(vm.Guest.IpStack) == 0 {
-				vm.Guest.IpStack = []types.GuestStackInfo{{}}
-			}
-			vm.Guest.IpStack[0].IpRouteConfig = &types.NetIpRouteConfigInfo{
-				IpRoute: []types.NetIpRouteConfigInfoIpRoute{{
-					Network:      network,
-					PrefixLength: 0,
-					Gateway:      types.NetIpRouteConfigInfoGateway{IpAddress: gw},
-				}},
-			}
+			upsertGuestIpRoute(vm, types.NetIpRouteConfigInfoIpRoute{
+				Network:      network,
+				PrefixLength: 0,
+				Gateway:      types.NetIpRouteConfigInfoGateway{IpAddress: gw, Device: "0"},
+			})
 			changes = append(changes,
 				types.PropertyChange{Name: "guest.ipStack", Val: vm.Guest.IpStack},
 			)
@@ -704,8 +758,8 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 			// vcsim-only convenience key, same rationale as guest.defaultGateway
 			// above: not a real property, must not fall through to the generic
 			// path, and shares (rather than replaces) the same GuestStackInfo
-			// element so a gateway set in the same task isn't clobbered. vRNI's
-			// collector reads DNS from GuestStackInfo.dnsConfig -- the same
+			// element so a gateway set in the same task isn't clobbered. Real
+			// API consumers read DNS from GuestStackInfo.dnsConfig -- the same
 			// ipStack entry as the gateway route -- not from the per-NIC
 			// GuestNicInfo.dnsConfig. Accepts a comma-separated list for
 			// multiple DNS servers.
@@ -713,19 +767,32 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 			for i := range servers {
 				servers[i] = strings.TrimSpace(servers[i])
 			}
-			if len(vm.Guest.IpStack) == 0 {
-				vm.Guest.IpStack = []types.GuestStackInfo{{}}
-			}
-			vm.Guest.IpStack[0].DnsConfig = &types.NetDnsConfigInfo{
-				IpAddress: servers,
-			}
+			dnsConfig(vm).IpAddress = servers
+			changes = append(changes,
+				types.PropertyChange{Name: "guest.ipStack", Val: vm.Guest.IpStack},
+			)
+		case "guest.dnsDomain":
+			// vcsim-only convenience key, same rationale as guest.dnsServer above.
+			// Real vCenter's GuestStackInfo.dnsConfig reports the same domain in
+			// both DomainName and SearchDomain (there's no separate search-list
+			// backdoor), matching the observed real-vCenter sample.
+			domain := val.Value.(string)
+			dc := dnsConfig(vm)
+			dc.DomainName = domain
+			dc.SearchDomain = []string{domain}
 			changes = append(changes,
 				types.PropertyChange{Name: "guest.ipStack", Val: vm.Guest.IpStack},
 			)
 		case "guest.hostName":
+			// GuestStackInfo.dnsConfig.HostName mirrors guest.hostName on real
+			// vCenter (both derived from the same guest-reported hostname);
+			// real API consumers read the hostname from dnsConfig, not just
+			// the top-level guest.hostName field.
+			dnsConfig(vm).HostName = val.Value.(string)
 			changes = append(changes,
 				types.PropertyChange{Name: key, Val: val.Value},
 				types.PropertyChange{Name: "summary." + key, Val: val.Value},
+				types.PropertyChange{Name: "guest.ipStack", Val: vm.Guest.IpStack},
 			)
 		default:
 			changes = append(changes, types.PropertyChange{Name: key, Val: val.Value})
