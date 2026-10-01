@@ -54,6 +54,7 @@ type Subscription struct {
 	AutomaticSyncEnabled *bool  `json:"automatic_sync_enabled,omitempty"`
 	OnDemand             *bool  `json:"on_demand,omitempty"`
 	Password             string `json:"password,omitempty"`
+	SslCertificate       string `json:"ssl_certificate,omitempty"`
 	SslThumbprint        string `json:"ssl_thumbprint,omitempty"`
 	SubscriptionURL      string `json:"subscription_url,omitempty"`
 	UserName             string `json:"user_name,omitempty"`
@@ -126,6 +127,9 @@ func (l *Library) Patch(src *Library) {
 	if src.Configuration != nil {
 		l.Configuration = src.Configuration
 	}
+	if src.Subscription != nil {
+		l.Subscription = src.Subscription
+	}
 }
 
 // Manager extends rest.Client, adding content library related methods.
@@ -177,7 +181,7 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 		if err != nil {
 			return "", err
 		}
-		if u.Scheme == "https" && sub.SslThumbprint == "" {
+		if u.Scheme == "https" && sub.SslThumbprint == "" && sub.SslCertificate == "" {
 			thumbprint := c.Thumbprint(u.Host)
 			if thumbprint == "" {
 				t := c.DefaultTransport()
@@ -214,7 +218,9 @@ func (c *Manager) PublishLibrary(ctx context.Context, library *Library, subscrip
 	return c.Do(ctx, url.Request(http.MethodPost, spec), nil)
 }
 
-// UpdateLibrary can update one or both of the tag Description and Name fields.
+// UpdateLibrary can update the Name, Description and Configuration fields.
+// For a SUBSCRIBED library, the Subscription can also be updated,
+// for example to change the subscription URL or SSL certificate.
 func (c *Manager) UpdateLibrary(ctx context.Context, l *Library) error {
 	spec := struct {
 		Library `json:"update_spec"`
@@ -225,7 +231,12 @@ func (c *Manager) UpdateLibrary(ctx context.Context, l *Library) error {
 			Configuration: l.Configuration,
 		},
 	}
-	url := c.Resource(internal.LibraryPath).WithID(l.ID)
+	path := internal.LibraryPath
+	if l.Type == "SUBSCRIBED" {
+		path = internal.SubscribedLibraryPath
+		spec.Subscription = l.Subscription
+	}
+	url := c.Resource(path).WithID(l.ID)
 	return c.Do(ctx, url.Request(http.MethodPatch, spec), nil)
 }
 
