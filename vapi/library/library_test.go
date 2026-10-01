@@ -6,6 +6,8 @@ package library_test
 
 import (
 	"context"
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/vmware/govmomi/find"
@@ -201,4 +203,41 @@ func TestManagerLibraryUsage(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
+}
+
+func TestSubscriptionSslCertificate(t *testing.T) {
+	const cert = "-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----"
+
+	b, err := json.Marshal(library.Subscription{
+		AuthenticationMethod: "NONE",
+		SslCertificate:       cert,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var m map[string]any
+	if err = json.Unmarshal(b, &m); err != nil {
+		t.Fatal(err)
+	}
+	if m["ssl_certificate"] != cert {
+		t.Errorf("ssl_certificate=%v, expected %q", m["ssl_certificate"], cert)
+	}
+
+	var sub library.Subscription
+	if err = json.Unmarshal(b, &sub); err != nil {
+		t.Fatal(err)
+	}
+	if sub.SslCertificate != cert {
+		t.Errorf("SslCertificate=%q, expected %q", sub.SslCertificate, cert)
+	}
+
+	// optional field is omitted when unset
+	b, err = json.Marshal(library.Subscription{AuthenticationMethod: "NONE"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(b), "ssl_certificate") {
+		t.Errorf("unexpected ssl_certificate in %s", b)
+	}
 }

@@ -54,6 +54,7 @@ type Subscription struct {
 	AutomaticSyncEnabled *bool  `json:"automatic_sync_enabled,omitempty"`
 	OnDemand             *bool  `json:"on_demand,omitempty"`
 	Password             string `json:"password,omitempty"`
+	SslCertificate       string `json:"ssl_certificate,omitempty"`
 	SslThumbprint        string `json:"ssl_thumbprint,omitempty"`
 	SubscriptionURL      string `json:"subscription_url,omitempty"`
 	UserName             string `json:"user_name,omitempty"`
