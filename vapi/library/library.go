@@ -178,7 +178,7 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 		if err != nil {
 			return "", err
 		}
-		if u.Scheme == "https" && sub.SslThumbprint == "" {
+		if u.Scheme == "https" && sub.SslThumbprint == "" && sub.SslCertificate == "" {
 			thumbprint := c.Thumbprint(u.Host)
 			if thumbprint == "" {
 				t := c.DefaultTransport()
