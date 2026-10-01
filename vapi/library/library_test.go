@@ -15,6 +15,7 @@ import (
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/types"
 
 	_ "github.com/vmware/govmomi/vapi/simulator"
 )
@@ -240,4 +241,74 @@ func TestSubscriptionSslCertificate(t *testing.T) {
 	if strings.Contains(string(b), "ssl_certificate") {
 		t.Errorf("unexpected ssl_certificate in %s", b)
 	}
+}
+
+func TestManagerUpdateSubscribedLibrary(t *testing.T) {
+	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
+		c := rest.NewClient(vc)
+		if err := c.Login(ctx, simulator.DefaultLogin); err != nil {
+			t.Fatal(err)
+		}
+
+		ds, err := find.NewFinder(vc).DefaultDatastore(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		m := library.NewManager(c)
+		storage := []library.StorageBacking{{
+			DatastoreID: ds.Reference().Value,
+			Type:        "DATASTORE",
+		}}
+
+		pubID, err := m.CreateLibrary(ctx, library.Library{
+			Name:        "pub",
+			Type:        "LOCAL",
+			Storage:     storage,
+			Publication: &library.Publication{Published: types.New(true)},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		pub, err := m.GetLibraryByID(ctx, pubID)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		subID, err := m.CreateLibrary(ctx, library.Library{
+			Name:    "sub",
+			Type:    "SUBSCRIBED",
+			Storage: storage,
+			Subscription: &library.Subscription{
+				AuthenticationMethod: "NONE",
+				SubscriptionURL:      "http://localhost/invalid",
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		sub, err := m.GetLibraryByID(ctx, subID)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		const cert = "-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----"
+		sub.Subscription.SubscriptionURL = pub.Publication.PublishURL
+		sub.Subscription.SslCertificate = cert
+		if err = m.UpdateLibrary(ctx, sub); err != nil {
+			t.Fatal(err)
+		}
+
+		sub, err = m.GetLibraryByID(ctx, subID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if sub.Subscription.SubscriptionURL != pub.Publication.PublishURL {
+			t.Errorf("SubscriptionURL=%q, expected %q", sub.Subscription.SubscriptionURL, pub.Publication.PublishURL)
+		}
+		if sub.Subscription.SslCertificate != cert {
+			t.Errorf("SslCertificate=%q, expected %q", sub.Subscription.SslCertificate, cert)
+		}
+	})
 }
