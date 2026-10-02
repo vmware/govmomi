@@ -65,6 +65,7 @@ import (
 	_ "github.com/vmware/govmomi/cli/importx"
 	_ "github.com/vmware/govmomi/cli/kms"
 	_ "github.com/vmware/govmomi/cli/kms/key"
+	_ "github.com/vmware/govmomi/cli/lcm/interop"
 	_ "github.com/vmware/govmomi/cli/library"
 	_ "github.com/vmware/govmomi/cli/library/policy"
 	_ "github.com/vmware/govmomi/cli/library/session"
