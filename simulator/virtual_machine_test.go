@@ -3387,6 +3387,8 @@ func TestApplyExtraConfigGuestIPAndGateway(t *testing.T) {
 				&types.OptionValue{Key: "SET.guest.ipAddress", Value: "10.0.0.42/24"},
 				&types.OptionValue{Key: "SET.guest.defaultGateway", Value: "10.0.0.1"},
 				&types.OptionValue{Key: "SET.guest.dnsServer", Value: "10.0.0.1, 10.0.0.2"},
+				&types.OptionValue{Key: "SET.guest.dnsDomain", Value: "broadcom.net"},
+				&types.OptionValue{Key: "SET.guest.hostName", Value: "platform1"},
 			},
 		})
 		if err != nil {
@@ -3442,6 +3444,30 @@ func TestApplyExtraConfigGuestIPAndGateway(t *testing.T) {
 		}
 		if moVM.Guest.IpStack[0].IpRouteConfig == nil || len(moVM.Guest.IpStack[0].IpRouteConfig.IpRoute) == 0 {
 			t.Fatal("guest.ipStack[0].ipRouteConfig was clobbered by setting DNS in the same call")
+		}
+
+		// The local-subnet route (no gateway), derived from the guest IP's
+		// CIDR prefix, must coexist with the default-gateway route above.
+		if len(moVM.Guest.IpStack[0].IpRouteConfig.IpRoute) != 2 {
+			t.Fatalf("ipRoute=%v, want 2 routes (default + local subnet)", moVM.Guest.IpStack[0].IpRouteConfig.IpRoute)
+		}
+		subnetRoute := moVM.Guest.IpStack[0].IpRouteConfig.IpRoute[1]
+		if subnetRoute.Network != "10.0.0.0" || subnetRoute.PrefixLength != 24 {
+			t.Errorf("subnet route = %s/%d, want 10.0.0.0/24", subnetRoute.Network, subnetRoute.PrefixLength)
+		}
+		if subnetRoute.Gateway.IpAddress != "" {
+			t.Errorf("subnet route gateway=%q, want empty", subnetRoute.Gateway.IpAddress)
+		}
+
+		if moVM.Guest.IpStack[0].DnsConfig.HostName != "platform1" {
+			t.Errorf("dnsConfig.hostName=%q, want platform1", moVM.Guest.IpStack[0].DnsConfig.HostName)
+		}
+		if moVM.Guest.IpStack[0].DnsConfig.DomainName != "broadcom.net" {
+			t.Errorf("dnsConfig.domainName=%q, want broadcom.net", moVM.Guest.IpStack[0].DnsConfig.DomainName)
+		}
+		wantSearch := []string{"broadcom.net"}
+		if !reflect.DeepEqual(moVM.Guest.IpStack[0].DnsConfig.SearchDomain, wantSearch) {
+			t.Errorf("dnsConfig.searchDomain=%v, want %v", moVM.Guest.IpStack[0].DnsConfig.SearchDomain, wantSearch)
 		}
 
 		// A plain (non-CIDR) IP must keep its prior meaning: prefix length 0,
