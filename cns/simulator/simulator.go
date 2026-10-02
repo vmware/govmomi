@@ -421,9 +421,9 @@ func (m *CnsVolumeManager) CnsAttachVolume(ctx *simulator.Context, req *cnstypes
 		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
 		for _, attachSpec := range req.AttachSpecs {
 			node := vctx.Map.Get(attachSpec.Vm).(*simulator.VirtualMachine)
-			if _, ok := m.attachments[attachSpec.VolumeId]; !ok {
+			if existing, ok := m.attachments[attachSpec.VolumeId]; !ok {
 				m.attachments[attachSpec.VolumeId] = node.Self
-			} else {
+			} else if existing != node.Self {
 				return nil, &vim25types.ResourceInUse{
 					Name: attachSpec.VolumeId.Id,
 				}
