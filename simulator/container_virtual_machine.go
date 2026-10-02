@@ -2,6 +2,85 @@
 // The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 // SPDX-License-Identifier: Apache-2.0
 
+// Container Backing for Virtual Machines
+//
+// This file implements container-backed VMs for vcsim. When a VM is created with
+// the ExtraConfig key "RUN.container" set to a container image, vcsim will create
+// a real container to back the simulated VM.
+//
+// # ExtraConfig Options
+//
+// The following ExtraConfig keys control container backing behavior:
+//
+//   - RUN.container: Container image to use (e.g., "nginx:latest", "alpine:3.20")
+//     Can be a simple image name or JSON array with command args.
+//
+//   - RUN.mountdmi: Boolean (default: true). Mount /sys/class/dmi/id for DMI info.
+//     Set to "false" for rootless containers that can't mount system paths.
+//
+//   - RUN.network: Container network to use (e.g., "podman", "bridge").
+//     Important for rootless podman which needs explicit network for IP assignment.
+//
+//   - RUN.privileged: Boolean (default: false). Add --privileged to the container.
+//     Use this for images that run systemd as PID 1 but do NOT need the full
+//     kind-style nested-containers setup (which adds --tmpfs /run and conflicts
+//     with the RUN.vmci GuestRPC socket bind-mount at /run/vmware/rpc.sock).
+//     For full Kubernetes-in-container workloads, use RUN.nestedContainers=true
+//     instead. Note: RUN.nestedContainers=true forces privileged to true
+//     regardless of this key's value, since the full nested-containers flag
+//     set already implies --privileged.
+//
+//   - RUN.nestedContainers: Boolean (default: false). Enable nested container mode
+//     for running Kubernetes or other container workloads inside the container.
+//     When true, adds kind-style flags:
+//     --cgroupns=private, --security-opt seccomp=unconfined,
+//     --security-opt apparmor=unconfined, --tmpfs /tmp, --tmpfs /run,
+//     --volume /var, --volume /lib/modules:/lib/modules:ro, --device /dev/fuse.
+//     Reference: https://github.com/kubernetes-sigs/kind/blob/main/pkg/cluster/internal/providers/docker/provision.go
+//
+//   - RUN.vmci: Boolean. Activate the VMCI simulation layer:
+//     a per-VM GuestRPC unix socket server — injects the socket at
+//     /run/vmware/rpc.sock and sets VMX_RPC_SOCK so vmware-rpctool (toolbox
+//     binary) uses it. Clients must tolerate AF_VSOCK being unavailable and
+//     fall back to the VMX_RPC_SOCK unix socket path. A seccomp-based AF_VSOCK
+//     interception layer is tracked as future work.
+//
+//   - RUN.port.<containerPort>: Map container port to host port.
+//     Example: RUN.port.80 = "8080" maps container port 80 to host port 8080.
+//
+//   - RUN.env.<name>: Set environment variable in the container.
+//     Example: RUN.env.DEBUG = "true" sets DEBUG=true in the container.
+//
+//   - guestinfo.*: Each key is exposed as a VMX_GUESTINFO_* environment
+//     variable and VMX_GUESTINFO=true is set so cloud-init's DataSourceVMware
+//     uses the envvar seed (cloud-init's container detection always skips the
+//     guestinfo transport).  With RUN.vmci=true the GuestRPC server also
+//     serves these keys via info-get for in-container write-back (e.g. an
+//     init process writing back a status key such as guestinfo.myapp.ready).
+//
+// # Example: Basic Container
+//
+//	spec := types.VirtualMachineConfigSpec{
+//		Name: "web-server",
+//		ExtraConfig: []types.BaseOptionValue{
+//			&types.OptionValue{Key: "RUN.container", Value: "nginx:latest"},
+//			&types.OptionValue{Key: "RUN.port.80", Value: "8080"},
+//		},
+//	}
+//
+// # Example: Kubernetes Node (Nested Containers)
+//
+//	spec := types.VirtualMachineConfigSpec{
+//		Name: "k8s-node",
+//		ExtraConfig: []types.BaseOptionValue{
+//			&types.OptionValue{Key: "RUN.container", Value: "my-k8s-image:latest"},
+//			&types.OptionValue{Key: "RUN.mountdmi", Value: "false"},
+//			&types.OptionValue{Key: "RUN.nestedContainers", Value: "true"},
+//			&types.OptionValue{Key: "guestinfo.metadata", Value: metadataEncoded},
+//			&types.OptionValue{Key: "guestinfo.userdata", Value: userdataEncoded},
+//		},
+//	}
+
 package simulator
 
 import (
@@ -37,8 +116,9 @@ var (
 )
 
 type simVM struct {
-	vm *VirtualMachine
-	c  *container
+	vm       *VirtualMachine
+	c        *container
+	guestRPC *GuestRPCServer // non-nil when RUN.vmci=true; per-VM unix socket RPCI server
 }
 
 // createSimulationVM inspects the provided VirtualMachine and creates a simVM binding for it if
@@ -266,15 +346,26 @@ func (svm *simVM) start(ctx *Context) error {
 	var env []string
 	var ports []string
 	var networks []string
+	var extraVolumes []string
 	mountDMI := true
+	privileged := false
+	nestedContainers := false
 
+	// jsonArgs is true when ContainerBackingOptionKey value was a valid JSON
+	// array (structured format: ["image","arg1","arg2"]).  It is false for the
+	// legacy raw-string format ("-v '/path' image").  create() uses this flag
+	// to decide whether to POSIX-quote image and args before passing them to
+	// the host bash shell, preventing metacharacters (&&, ;) in sh -c scripts
+	// from being interpreted by the host rather than the container shell.
+	jsonArgs := false
 	for _, opt := range svm.vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
 		if val.Key == ContainerBackingOptionKey {
 			run := val.Value.(string)
-			err := json.Unmarshal([]byte(run), &args)
-			if err != nil {
+			if err := json.Unmarshal([]byte(run), &args); err != nil {
 				args = []string{run}
+			} else {
+				jsonArgs = true
 			}
 
 			continue
@@ -285,6 +376,32 @@ func (svm *simVM) start(ctx *Context) error {
 			err := json.Unmarshal([]byte(val.Value.(string)), &mount)
 			if err == nil {
 				mountDMI = mount
+			}
+
+			continue
+		}
+
+		if val.Key == "RUN.privileged" {
+			// Add --privileged to the container without the full nestedContainers
+			// flag set. Use for systemd-init images that need privilege escalation
+			// but must NOT have --tmpfs /run (which would hide the RUN.vmci GuestRPC
+			// socket bind-mounted at /run/vmware/rpc.sock).
+			var priv bool
+			if err := json.Unmarshal([]byte(val.Value.(string)), &priv); err == nil {
+				privileged = priv
+			}
+			continue
+		}
+
+		if val.Key == "RUN.nestedContainers" {
+			// Enable nested container mode for running Kubernetes or other container
+			// workloads inside the container. This adds flags adapted from kind's
+			// provision.go including --cgroupns=private, security-opt unconfined,
+			// tmpfs mounts, and /dev/fuse device.
+			var nested bool
+			err := json.Unmarshal([]byte(val.Value.(string)), &nested)
+			if err == nil {
+				nestedContainers = nested
 			}
 
 			continue
@@ -303,6 +420,19 @@ func (svm *simVM) start(ctx *Context) error {
 			sKey := strings.Split(val.Key, ".")
 			containerPort := sKey[len(sKey)-1]
 			ports = append(ports, fmt.Sprintf("%s:%s", val.Value.(string), containerPort))
+
+			continue
+		}
+
+		if strings.HasPrefix(val.Key, "RUN.volume.") {
+			// RUN.volume.<label> adds an extra bind mount or named volume.
+			// Value format: "host_path:container_path[:options]" — the same
+			// format accepted by docker/podman -v.  Use this to inject
+			// test-specific files (scripts, configs) into the container without
+			// modifying the container image or container.go.
+			if v := strings.TrimSpace(val.Value.(string)); v != "" {
+				extraVolumes = append(extraVolumes, v)
+			}
 
 			continue
 		}
@@ -327,17 +457,76 @@ func (svm *simVM) start(ctx *Context) error {
 	}
 
 	if len(env) != 0 {
-		// Configure env as the data access method for cloud-init-vmware-guestinfo
+		// VMX_GUESTINFO=true activates DataSourceVMware's envvar seed so that
+		// cloud-init reads guestinfo from VMX_GUESTINFO_* environment variables.
+		//
+		// The guestinfo transport (cloud-init calling vmware-rpctool as a
+		// subprocess) is always skipped in containers: cloud-init's
+		// read_dmi_data() returns nil for containers (it calls is_container(),
+		// which detects the podman environment via /run/systemd/container and
+		// container= in PID 1's environ), so is_vmware_platform() always returns
+		// false, and the guestinfo transport's require_vmware_platform guard
+		// skips it.  The envvar seed (require_vmware_platform=false) is therefore
+		// the only transport cloud-init will use in a container.
+		//
+		// In-container WRITE operations (e.g. an init process writing back a
+		// status key such as guestinfo.myapp.ready) use GuestRPC via the
+		// toolbox binary auto-injected at /usr/bin/vmware-rpctool if VMCI sim
+		// is enabled.
 		env = append(env, "VMX_GUESTINFO=true")
+	}
+
+	// VMCI simulation: start the per-VM GuestRPC server before creating the container
+	// so the socket exists when the container process first connects to it.
+	// Activated by RUN.vmci=true.
+	// GuestRPC server over unix socket (no kernel requirements).
+	// AF_VSOCK seccomp interception is disabled; see RUN.vmci doc.
+	if vmciEnabled(svm.vm.Config.ExtraConfig) {
+		socketPath := GuestRPCSocketPath(svm.vm.uid.String())
+		socketDirPath := GuestRPCSocketDirPath(svm.vm.uid.String())
+		srv := newGuestRPCServer(svm.vm, socketPath)
+		if err := srv.Start(ctx); err != nil {
+			return fmt.Errorf("guestrpc server: %w", err)
+		}
+		svm.guestRPC = srv
+
+		// Bind-mount the socket DIRECTORY (not the file) so the mount is visible
+		// even when RUN.nestedContainers=true adds --tmpfs /run. See guestRPCVolumeMount.
+		extraVolumes = append(extraVolumes, guestRPCVolumeMount(socketDirPath))
+		env = append(env, "VMX_RPC_SOCK="+GuestRPCSocketName)
+
+		// Build the toolbox binary (once per process).
+		toolboxBin, shimBuildErr := buildToolboxArtifact()
+		if shimBuildErr != nil {
+			log.Printf("%s: toolbox artifact build failed (%v); vmware-rpctool auto-injection skipped", svm.vm.Name, shimBuildErr)
+		} else if toolboxBin != "" && !hasVolumeDest(svm.vm.Config.ExtraConfig, "/usr/bin/vmware-rpctool") {
+			// Inject the govmomi/toolbox binary at /usr/bin/vmware-rpctool.
+			// Skip if the caller already bound this destination explicitly.
+			extraVolumes = append(extraVolumes, toolboxBin+":/usr/bin/vmware-rpctool:ro")
+		}
 	}
 
 	volumes := []string{}
 	if mountDMI {
 		volumes = append(volumes, constructVolumeName(svm.vm.Name, svm.vm.uid.String(), "dmi")+":/sys/class/dmi/id")
 	}
+	volumes = append(volumes, extraVolumes...)
 
 	var err error
-	svm.c, err = create(ctx, svm.vm.Name, svm.vm.uid.String(), networks, volumes, ports, env, args[0], args[1:])
+	svm.c, err = create(ctx, svm.vm.Name, svm.vm.uid.String(), args[0], args[1:], createOptions{
+		Networks:         networks,
+		Volumes:          volumes,
+		Ports:            ports,
+		Env:              env,
+		Privileged:       privileged,
+		NestedContainers: nestedContainers,
+		// A crashed prior test run leaves this VM's container name in use;
+		// vcsim is exclusively a test/simulation harness, so recovering from
+		// that residue is always correct here (a real VM's backing has no
+		// equivalent stale-name problem to guard against).
+		RecreateIfExists:  true,
+		QuoteImageAndArgs: jsonArgs,
+	})
 	if err != nil {
 		return err
 	}
@@ -420,10 +609,17 @@ func (svm *simVM) stop(ctx *Context) error {
 		return nil
 	}
 
+	// Release the GuestRPC server on every path out, including the error path
+	// below: a container-stop failure must not leave the listener, its
+	// goroutines and the socket alive. remove() defers identically, so the two
+	// teardown paths agree rather than differing for no stated reason.
+	if svm.guestRPC != nil {
+		defer svm.guestRPC.Stop()
+	}
+
 	err := svm.c.stop(ctx)
 	if err != nil {
 		log.Printf("%s %s: %s", svm.vm.Name, "stop", err)
-
 		return err
 	}
 
@@ -474,10 +670,14 @@ func (svm *simVM) remove(ctx *Context) error {
 		return nil
 	}
 
+	// Deferred to match stop(): released on the error path too.
+	if svm.guestRPC != nil {
+		defer svm.guestRPC.Stop()
+	}
+
 	err := svm.c.remove(ctx)
 	if err != nil {
 		log.Printf("%s %s: %s", svm.vm.Name, "remove", err)
-
 		return err
 	}
 
