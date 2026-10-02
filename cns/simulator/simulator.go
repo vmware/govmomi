@@ -7,6 +7,7 @@ package simulator
 import (
 	"context"
 	"slices"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -51,6 +52,11 @@ type CnsVolumeManager struct {
 	volumes     map[vim25types.ManagedObjectReference]map[cnstypes.CnsVolumeId]*cnstypes.CnsVolume
 	attachments map[cnstypes.CnsVolumeId]vim25types.ManagedObjectReference
 	snapshots   map[cnstypes.CnsVolumeId]map[cnstypes.CnsSnapshotId]*cnstypes.CnsSnapshot
+
+	// mu guards attachments. CnsAttachVolume/CnsDetachVolume task bodies run
+	// in their own goroutine (see simulator.Task.Run), so concurrent attach
+	// calls for different volumes targeting the same VM can race on this map.
+	mu sync.Mutex
 }
 
 const simulatorDiskUUID = "6000c298595bf4575739e9105b2c0c2d"
@@ -421,13 +427,17 @@ func (m *CnsVolumeManager) CnsAttachVolume(ctx *simulator.Context, req *cnstypes
 		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
 		for _, attachSpec := range req.AttachSpecs {
 			node := vctx.Map.Get(attachSpec.Vm).(*simulator.VirtualMachine)
-			if _, ok := m.attachments[attachSpec.VolumeId]; !ok {
+			m.mu.Lock()
+			existing, ok := m.attachments[attachSpec.VolumeId]
+			if !ok {
 				m.attachments[attachSpec.VolumeId] = node.Self
-			} else {
+			} else if existing != node.Self {
+				m.mu.Unlock()
 				return nil, &vim25types.ResourceInUse{
 					Name: attachSpec.VolumeId.Id,
 				}
 			}
+			m.mu.Unlock()
 			operationResult = append(operationResult, &cnstypes.CnsVolumeAttachResult{
 				CnsVolumeOperationResult: cnstypes.CnsVolumeOperationResult{
 					VolumeId: attachSpec.VolumeId,
@@ -456,8 +466,13 @@ func (m *CnsVolumeManager) CnsDetachVolume(ctx *simulator.Context, req *cnstypes
 		}
 		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
 		for _, detachSpec := range req.DetachSpecs {
-			if _, ok := m.attachments[detachSpec.VolumeId]; ok {
+			m.mu.Lock()
+			_, ok := m.attachments[detachSpec.VolumeId]
+			if ok {
 				delete(m.attachments, detachSpec.VolumeId)
+			}
+			m.mu.Unlock()
+			if ok {
 				operationResult = append(operationResult, &cnstypes.CnsVolumeOperationResult{
 					VolumeId: detachSpec.VolumeId,
 				})
