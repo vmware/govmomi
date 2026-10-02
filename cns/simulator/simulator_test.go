@@ -23,6 +23,138 @@ const (
 	testValue = "testValue"
 )
 
+func TestUnregisterVolumeEx(t *testing.T) {
+	ctx := context.Background()
+
+	model := simulator.VPX()
+	defer model.Remove()
+
+	if err := model.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	s := model.Service.NewServer()
+	defer s.Close()
+
+	model.Service.RegisterSDK(New())
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cnsClient, err := cns.NewClient(ctx, c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	datastore := model.Map().Any("Datastore").(*simulator.Datastore)
+	var capacityInMb int64 = 1024
+
+	// Create a volume to operate on
+	createTask, err := cnsClient.CreateVolume(ctx, []cnstypes.CnsVolumeCreateSpec{
+		{
+			Name:       "test-unregister-ex",
+			VolumeType: "TestVolumeType",
+			Datastores: []vim25types.ManagedObjectReference{datastore.Self},
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: capacityInMb,
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	createTaskInfo, err := cns.GetTaskInfo(ctx, createTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createTaskResult, err := cns.GetTaskResult(ctx, createTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if createTaskResult == nil {
+		t.Fatal("empty create task result")
+	}
+	if createTaskResult.GetCnsVolumeOperationResult().Fault != nil {
+		t.Fatalf("create volume fault: %+v", createTaskResult.GetCnsVolumeOperationResult().Fault)
+	}
+	volumeId := createTaskResult.GetCnsVolumeOperationResult().VolumeId
+
+	// Phase 1: UnregisterVolumeEx -- removes volume and writes PENDING_UNREGISTER
+	unregExTask, err := cnsClient.UnregisterVolumeEx(ctx, []cnstypes.CnsUnregisterVolumeSpec{
+		{
+			VolumeId:         volumeId,
+			TargetVolumeType: string(cnstypes.CnsUnregisterTargetVolumeTypeLEGACY_DISK),
+		},
+	})
+	if err != nil {
+		t.Fatalf("UnregisterVolumeEx failed: %v", err)
+	}
+	unregExTaskInfo, err := cns.GetTaskInfo(ctx, unregExTask)
+	if err != nil {
+		t.Fatalf("GetTaskInfo for UnregisterVolumeEx failed: %v", err)
+	}
+	unregExResult, err := cns.GetTaskResult(ctx, unregExTaskInfo)
+	if err != nil {
+		t.Fatalf("GetTaskResult for UnregisterVolumeEx failed: %v", err)
+	}
+	if unregExResult == nil {
+		t.Fatal("empty UnregisterVolumeEx task result")
+	}
+	if unregExResult.GetCnsVolumeOperationResult().Fault != nil {
+		t.Fatalf("UnregisterVolumeEx fault: %+v", unregExResult.GetCnsVolumeOperationResult().Fault)
+	}
+	unregVolumeResult := unregExResult.(*cnstypes.CnsUnregisterVolumeResult)
+	t.Logf("UnregisterVolumeEx result: backingDiskPath=%q diskUUID=%q",
+		unregVolumeResult.BackingDiskPath, unregVolumeResult.DiskUUID)
+
+	// Verify the volume is gone from CNS
+	queryResult, err := cnsClient.QueryVolume(ctx, &cnstypes.CnsQueryFilter{
+		VolumeIds: []cnstypes.CnsVolumeId{volumeId},
+	})
+	if err != nil {
+		t.Fatalf("QueryVolume after unregister failed: %v", err)
+	}
+	if len(queryResult.Volumes) != 0 {
+		t.Fatalf("expected 0 volumes after UnregisterVolumeEx, got %d", len(queryResult.Volumes))
+	}
+
+	// QueryPendingUnregisters -- should show our volume
+	pending, err := cnsClient.QueryPendingUnregisters(ctx)
+	if err != nil {
+		t.Fatalf("QueryPendingUnregisters failed: %v", err)
+	}
+	if len(pending) != 1 {
+		t.Fatalf("expected 1 pending unregister, got %d", len(pending))
+	}
+	if pending[0].VolumeId.Id != volumeId.Id {
+		t.Fatalf("pending unregister volumeId mismatch: got %q, want %q", pending[0].VolumeId.Id, volumeId.Id)
+	}
+	t.Logf("QueryPendingUnregisters: found pending record for volume %q", pending[0].VolumeId.Id)
+
+	// Phase 2: AcknowledgeUnregister -- clears PENDING_UNREGISTER record
+	if err := cnsClient.AcknowledgeUnregister(ctx, []cnstypes.CnsVolumeId{volumeId}); err != nil {
+		t.Fatalf("AcknowledgeUnregister failed: %v", err)
+	}
+
+	// QueryPendingUnregisters again -- should be empty
+	pending, err = cnsClient.QueryPendingUnregisters(ctx)
+	if err != nil {
+		t.Fatalf("QueryPendingUnregisters after ack failed: %v", err)
+	}
+	if len(pending) != 0 {
+		t.Fatalf("expected 0 pending unregisters after ack, got %d", len(pending))
+	}
+
+	// AcknowledgeUnregister again -- idempotent, must not error
+	if err := cnsClient.AcknowledgeUnregister(ctx, []cnstypes.CnsVolumeId{volumeId}); err != nil {
+		t.Fatalf("second AcknowledgeUnregister (idempotent) failed: %v", err)
+	}
+}
+
 func TestSimulator(t *testing.T) {
 	ctx := context.Background()
 
