@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/govmomi/cns"
 	cnstypes "github.com/vmware/govmomi/cns/types"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/task"
 	vim25types "github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vslm"
 )
@@ -593,4 +594,151 @@ func TestSimulator(t *testing.T) {
 		t.Fatal("Number of volumes mismatches after deleting a single volume")
 	}
 
+}
+
+// TestCnsAttachVolumeIdempotent verifies that re-attaching a volume that is
+// already attached to the same VM succeeds instead of faulting with
+// ResourceInUse. The vSphere CSI driver's ControllerPublishVolume is expected
+// to be safely retryable (e.g. after a controller leader-election failover
+// replays its queue), so a retry targeting the same VM must be a no-op
+// success, not a permanent failure. Attaching to a different VM while still
+// attached elsewhere must still fault.
+func TestCnsAttachVolumeIdempotent(t *testing.T) {
+	ctx := context.Background()
+
+	model := simulator.VPX()
+	defer model.Remove()
+
+	if err := model.Create(); err != nil {
+		t.Fatal(err)
+	}
+
+	s := model.Service.NewServer()
+	defer s.Close()
+
+	model.Service.RegisterSDK(New())
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cnsClient, err := cns.NewClient(ctx, c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	datastore := model.Map().Any("Datastore").(*simulator.Datastore)
+
+	var capacityInMb int64 = 1024
+	createSpecList := []cnstypes.CnsVolumeCreateSpec{
+		{
+			Name:       "test-idempotent-attach",
+			VolumeType: "TestVolumeType",
+			Datastores: []vim25types.ManagedObjectReference{
+				datastore.Self,
+			},
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: capacityInMb,
+				},
+			},
+			Profile: []vim25types.BaseVirtualMachineProfileSpec{
+				&vim25types.VirtualMachineDefinedProfileSpec{
+					ProfileId: uuid.New().String(),
+				},
+			},
+		},
+	}
+	createTask, err := cnsClient.CreateVolume(ctx, createSpecList)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createTaskInfo, err := cns.GetTaskInfo(ctx, createTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createTaskResult, err := cns.GetTaskResult(ctx, createTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
+	if createVolumeOperationRes.Fault != nil {
+		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
+	}
+	volumeId := createVolumeOperationRes.VolumeId
+
+	nodeVM := model.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
+	attachSpecList := []cnstypes.CnsVolumeAttachDetachSpec{
+		{
+			VolumeId: volumeId,
+			Vm:       nodeVM.Self,
+		},
+	}
+
+	// First attach succeeds.
+	attachTask, err := cnsClient.AttachVolume(ctx, attachSpecList)
+	if err != nil {
+		t.Fatal(err)
+	}
+	attachTaskInfo, err := cns.GetTaskInfo(ctx, attachTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	attachTaskResult, err := cns.GetTaskResult(ctx, attachTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fault := attachTaskResult.GetCnsVolumeOperationResult().Fault; fault != nil {
+		t.Fatalf("Failed first attach: fault=%+v", fault)
+	}
+
+	// Retrying the attach to the SAME VM must also succeed (idempotent), not
+	// fault with ResourceInUse.
+	retryTask, err := cnsClient.AttachVolume(ctx, attachSpecList)
+	if err != nil {
+		t.Fatal(err)
+	}
+	retryTaskInfo, err := cns.GetTaskInfo(ctx, retryTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	retryTaskResult, err := cns.GetTaskResult(ctx, retryTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fault := retryTaskResult.GetCnsVolumeOperationResult().Fault; fault != nil {
+		t.Fatalf("Retrying attach to the same VM should be idempotent, got fault=%+v", fault)
+	}
+
+	// Attaching to a DIFFERENT VM while still attached elsewhere must still fault.
+	otherVM, ok := model.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
+	if ok {
+		for _, ref := range model.Map().All("VirtualMachine") {
+			vm := ref.(*simulator.VirtualMachine)
+			if vm.Self != nodeVM.Self {
+				otherVM = vm
+				break
+			}
+		}
+	}
+	if otherVM.Self != nodeVM.Self {
+		conflictTask, err := cnsClient.AttachVolume(ctx, []cnstypes.CnsVolumeAttachDetachSpec{
+			{VolumeId: volumeId, Vm: otherVM.Self},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, err = cns.GetTaskInfo(ctx, conflictTask)
+		if err == nil {
+			t.Fatalf("Expected ResourceInUse attaching to a different VM while already attached elsewhere")
+		}
+		taskErr, ok := err.(task.Error)
+		if !ok {
+			t.Fatalf("Expected a task.Error, got %T: %+v", err, err)
+		}
+		if _, ok := taskErr.Fault().(*vim25types.ResourceInUse); !ok {
+			t.Fatalf("Expected ResourceInUse fault, got %+v", taskErr.Fault())
+		}
+	}
 }
