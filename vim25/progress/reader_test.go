@@ -8,7 +8,9 @@ import (
 	"context"
 	"io"
 	"strings"
+	"sync"
 	"testing"
+	"testing/iotest"
 )
 
 func TestReader(t *testing.T) {
@@ -78,3 +80,60 @@ func TestReader(t *testing.T) {
 		t.Errorf("Expected channel to be closed")
 	}
 }
+
+// Read may be called by the http transport after Done.
+func TestReaderReadAfterDone(t *testing.T) {
+	s := "helloworld"
+	ch := make(chan Report, 2)
+	pr := NewReader(context.Background(), &dummySinker{ch}, strings.NewReader(s), int64(len(s)))
+
+	pr.Done(nil)
+	pr.Done(nil) // must not panic on double close
+
+	var buf [10]byte
+	n, err := pr.Read(buf[:]) // must not panic: send on closed channel
+	if n != len(s) || err != nil {
+		t.Errorf("n=%d err=%v", n, err)
+	}
+}
+
+// Exercise Read and Done concurrently; run with -race.
+func TestReaderConcurrentReadDone(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		ch := make(chan Report, 1024)
+		pr := NewReader(context.Background(), &dummySinker{ch}, io.LimitReader(zeroReader{}, 1<<20), 1<<20)
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			var buf [512]byte
+			for {
+				if _, err := pr.Read(buf[:]); err != nil {
+					return
+				}
+			}
+		}()
+		pr.Done(nil)
+		wg.Wait()
+	}
+}
+
+// Read errors must be returned without sending a report.
+func TestReaderReadError(t *testing.T) {
+	ch := make(chan Report, 1)
+	pr := NewReader(context.Background(), &dummySinker{ch}, iotest.ErrReader(io.ErrUnexpectedEOF), 10)
+
+	if _, err := pr.Read(make([]byte, 1)); err != io.ErrUnexpectedEOF {
+		t.Errorf("err=%v", err)
+	}
+	select {
+	case <-ch:
+		t.Error("unexpected report")
+	default:
+	}
+}
+
+type zeroReader struct{}
+
+func (zeroReader) Read(b []byte) (int, error) { clear(b); return len(b), nil }
