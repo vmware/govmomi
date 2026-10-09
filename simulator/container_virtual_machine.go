@@ -217,26 +217,37 @@ func (svm *simVM) prepareGuestOperation(auth types.BaseGuestAuthentication) type
 	return nil
 }
 
+// biosUUID returns the VM's BIOS UUID, config.uuid, which a client may set
+// with spec.uuid. It falls back to the UUID vcsim derived for the VM when
+// config.uuid does not parse.
+func (svm *simVM) biosUUID() uuid.UUID {
+	if id, err := uuid.Parse(svm.vm.Config.Uuid); err == nil {
+		return id
+	}
+	return svm.vm.uid
+}
+
 // populateDMI writes BIOS UUID DMI files to a container volume
 func (svm *simVM) populateDMI() error {
 	if svm.c == nil {
 		return nil
 	}
 
+	id := svm.biosUUID()
 	files := []tarEntry{
 		{
 			&tar.Header{
 				Name: "product_uuid",
 				Mode: 0444,
 			},
-			[]byte(productUUID(svm.vm.uid)),
+			[]byte(productUUID(id)),
 		},
 		{
 			&tar.Header{
 				Name: "product_serial",
 				Mode: 0444,
 			},
-			[]byte(productSerial(svm.vm.uid)),
+			[]byte(productSerial(id)),
 		},
 	}
 
