@@ -5628,3 +5628,62 @@ func TestVirtualMachineRuntimeEnumFields(t *testing.T) {
 		t.Fatal("no VirtualMachine objects found in the model")
 	}
 }
+
+// An edit that leaves a vNIC's MAC out keeps the MAC; the simulator used to generate a new one.
+func TestReconfigNICEditKeepsMAC(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		finder.SetDatacenter(dc)
+		vms, err := finder.VirtualMachineList(ctx, "*")
+		if err != nil || len(vms) == 0 {
+			t.Fatalf("no VMs: %v", err)
+		}
+		vm := vms[0]
+
+		devices, err := vm.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		nics := devices.SelectByType((*types.VirtualEthernetCard)(nil))
+		if len(nics) == 0 {
+			t.Skip("VM has no vNIC")
+		}
+		nic := nics[0]
+		card := nic.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+		edit := func() {
+			task, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+				DeviceChange: []types.BaseVirtualDeviceConfigSpec{&types.VirtualDeviceConfigSpec{
+					Operation: types.VirtualDeviceConfigSpecOperationEdit,
+					Device:    nic,
+				}},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := task.Wait(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		// A MAC that generateMAC would not produce, so the check cannot pass by chance.
+		const mac = "00:50:56:aa:bb:cc"
+		card.MacAddress = mac
+		edit()
+
+		card.MacAddress = ""
+		edit()
+
+		devices, err = vm.Device(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		got := devices.FindByKey(card.Key).(types.BaseVirtualEthernetCard).GetVirtualEthernetCard().MacAddress
+		if got != mac {
+			t.Errorf("vNIC MAC after an edit without one: %s, want %s", got, mac)
+		}
+	})
+}
