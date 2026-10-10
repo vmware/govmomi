@@ -414,7 +414,19 @@ func (svm *simVM) start(ctx *Context) error {
 			}
 		}
 
-		return svm.syncNetworkConfigToVMGuestProperties(callbackCtx, out, details)
+		if containerGone {
+			return svm.syncNetworkConfigToVMGuestProperties(callbackCtx, out, details)
+		}
+
+		// The watcher inspected the container without the VM's lock, so a
+		// power operation may have changed the container since, and applying
+		// that result would undo the operation's power state. Inspect again
+		// under the lock, which power operations hold.
+		var err error
+		callbackCtx.WithLock(svm.vm, func() {
+			err = svm.syncNetworkConfigToVMGuestProperties(callbackCtx, nil, nil)
+		})
+		return err
 	}
 
 	// Start watching the container resource.
