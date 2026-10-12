@@ -1153,11 +1153,13 @@ type StorageSpec struct {
 	Limit  int64  `json:"limit,omitempty"`
 }
 
-// NamespacesInstanceUpdateSpec https://developer.broadcom.com/xapis/vsphere-automation-api/v7.0U3/vcenter/api/vcenter/namespaces/instances/namespace/patch/
+// NamespacesInstanceUpdateSpec https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20UpdateSpec/
 type NamespacesInstanceUpdateSpec struct {
 	VmServiceSpec VmServiceSpec            `json:"vm_service_spec,omitempty"`
 	StorageSpecs  []StorageSpec            `json:"storage_specs"`
 	NetworkSpec   *NetworkConfigUpdateSpec `json:"network_spec,omitempty"`
+	Zones         *[]ZoneSpec              `json:"zones,omitempty"`
+	AccessList    *[]Access                `json:"access_list,omitempty"`
 }
 
 // NetworkConfigUpdateSpec
@@ -1172,8 +1174,9 @@ type NetworkConfigUpdateSpec struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20VpcNetworkUpdateSpec/
 // Since 9.0.0.0
 type VpcNetworkUpdateSpec struct {
-	DefaultSubnetSize *int64     `json:"default_subnet_size,omitempty"`
-	PrivateCidrs      []Ipv4Cidr `json:"private_cidrs,omitempty"`
+	DefaultSubnetSize *int64          `json:"default_subnet_size,omitempty"`
+	PrivateCidrs      []Ipv4Cidr      `json:"private_cidrs,omitempty"`
+	SharedSubnets     *[]SharedSubnet `json:"shared_subnets,omitempty"`
 }
 
 // ListNamespaces https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/get/
@@ -1199,7 +1202,7 @@ func (c *Manager) CreateNamespace(ctx context.Context, spec NamespacesInstanceCr
 	return c.Do(ctx, request, nil)
 }
 
-// UpdateNamespace https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/namespace/patch/
+// UpdateNamespace https://developer.broadcom.com/xapis/vsphere-automation-api/latest/api/vcenter/namespaces/instances/namespace/patch/
 func (c *Manager) UpdateNamespace(ctx context.Context, namespace string, spec NamespacesInstanceUpdateSpec) error {
 	resource := c.Resource(internal.NamespacesPath).WithSubpath(namespace)
 	request := resource.Request(http.MethodPatch, spec)
