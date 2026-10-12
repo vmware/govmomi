@@ -1484,12 +1484,7 @@ func (vm *VirtualMachine) create(ctx *Context, spec *types.VirtualMachineConfigS
 			vm.Config.ExtraConfig,
 			&types.OptionValue{Key: ContainerBackingOptionKey, Value: e.OCIImage},
 		)
-		for k, v := range e.ExtraConfig {
-			vm.Config.ExtraConfig = append(
-				vm.Config.ExtraConfig,
-				&types.OptionValue{Key: k, Value: v},
-			)
-		}
+		vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, e.extraConfigFor(vm.Config.Name)...)
 	}
 
 	return vm.applyExtraConfig(ctx, spec)
