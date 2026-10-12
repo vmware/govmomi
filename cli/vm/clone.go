@@ -186,7 +186,7 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
-	} else if cmd.Cluster == nil {
+	} else if cmd.Cluster == nil || cmd.DatastoreFlag.IsSet() {
 		cmd.Datastore, err = cmd.DatastoreFlag.Datastore()
 		if err != nil {
 			return err
@@ -389,7 +389,7 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 
 		// Get the first recommendation
 		datastoreref = recommendations[0].Action[0].(*types.StoragePlacementAction).Destination
-	} else if cmd.StoragePod == nil && cmd.Datastore != nil {
+	} else if cmd.StoragePod == nil && cmd.Cluster == nil && cmd.Datastore != nil {
 		datastoreref = cmd.Datastore.Reference()
 	} else if cmd.Cluster != nil {
 		spec := types.PlacementSpec{
@@ -398,6 +398,9 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 			CloneSpec:     cloneSpec,
 			RelocateSpec:  &cloneSpec.Location,
 			Vm:            &vmref,
+		}
+		if cmd.Datastore != nil {
+			spec.Datastores = []types.ManagedObjectReference{cmd.Datastore.Reference()}
 		}
 		result, err := cmd.Cluster.PlaceVm(ctx, spec)
 		if err != nil {
