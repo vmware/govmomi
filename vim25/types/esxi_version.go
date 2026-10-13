@@ -32,6 +32,7 @@ const (
 	ESXi8000
 	ESXi8010
 	ESXi8020
+	ESXi9000
 
 	esxiVersionEnd
 )
@@ -70,6 +71,8 @@ func (ev ESXiVersion) HardwareVersion() HardwareVersion {
 		return VMX20
 	case ESXi8020:
 		return VMX21
+	case ESXi9000:
+		return VMX22
 	}
 	return 0
 }
@@ -118,6 +121,8 @@ func (ev ESXiVersion) String() string {
 		return "8.0.1"
 	case ESXi8020:
 		return "8.0.2"
+	case ESXi9000:
+		return "9.0"
 	}
 	return ""
 }
@@ -205,6 +210,8 @@ func ParseESXiVersion(s string) (ESXiVersion, error) {
 		case major == 8 && minor == 0 && patch == 2 && update == 0,
 			major == 8 && minor == 0 && patch == 0 && update == 2:
 			return ESXi8020, nil
+		case major == 9 && minor == 0 && patch == 0 && update == 0:
+			return ESXi9000, nil
 		}
 	}
 

@@ -29,6 +29,11 @@ func (m *AuthorizationManager) init(r *Registry) {
 		m.RoleList = make([]types.AuthorizationRole, len(esx.RoleList))
 		copy(m.RoleList, esx.RoleList)
 	}
+	for _, role := range m.RoleList {
+		if role.RoleId >= m.nextID {
+			m.nextID = role.RoleId + 1
+		}
+	}
 
 	m.permissions = make(map[types.ManagedObjectReference][]types.Permission)
 
@@ -111,7 +116,22 @@ func (m *AuthorizationManager) RemoveEntityPermission(req *types.RemoveEntityPer
 }
 
 func (m *AuthorizationManager) SetEntityPermissions(req *types.SetEntityPermissions) soap.HasFault {
-	m.permissions[req.Entity] = req.Permission
+	permissions := append([]types.Permission(nil), m.permissions[req.Entity]...)
+	for _, permission := range req.Permission {
+		permission.Entity = &req.Entity
+		replaced := false
+		for i := range permissions {
+			if permissions[i].Principal == permission.Principal && permissions[i].Group == permission.Group {
+				permissions[i] = permission
+				replaced = true
+				break
+			}
+		}
+		if !replaced {
+			permissions = append(permissions, permission)
+		}
+	}
+	m.permissions[req.Entity] = permissions
 
 	return &methods.SetEntityPermissionsBody{
 		Res: &types.SetEntityPermissionsResponse{},
@@ -136,8 +156,12 @@ func (m *AuthorizationManager) RetrieveRolePermissions(req *types.RetrieveRolePe
 	}
 }
 
-func (m *AuthorizationManager) HasPrivilegeOnEntities(req *types.HasPrivilegeOnEntities) soap.HasFault {
+func (m *AuthorizationManager) HasPrivilegeOnEntities(ctx *Context, req *types.HasPrivilegeOnEntities) soap.HasFault {
 	var p []types.EntityPrivilege
+	userName := ""
+	if session, ok := ctx.sessionManager().getSession(req.SessionId); ok {
+		userName = session.UserName
+	}
 
 	for _, e := range req.Entity {
 		priv := types.EntityPrivilege{Entity: e}
@@ -145,7 +169,7 @@ func (m *AuthorizationManager) HasPrivilegeOnEntities(req *types.HasPrivilegeOnE
 		for _, id := range req.PrivId {
 			priv.PrivAvailability = append(priv.PrivAvailability, types.PrivilegeAvailability{
 				PrivId:    id,
-				IsGranted: true,
+				IsGranted: m.hasPrivilege(ctx, e, userName, id),
 			})
 		}
 
@@ -159,11 +183,15 @@ func (m *AuthorizationManager) HasPrivilegeOnEntities(req *types.HasPrivilegeOnE
 	}
 }
 
-func (m *AuthorizationManager) HasPrivilegeOnEntity(req *types.HasPrivilegeOnEntity) soap.HasFault {
+func (m *AuthorizationManager) HasPrivilegeOnEntity(ctx *Context, req *types.HasPrivilegeOnEntity) soap.HasFault {
 	p := make([]bool, len(req.PrivId))
+	userName := ""
+	if session, ok := ctx.sessionManager().getSession(req.SessionId); ok {
+		userName = session.UserName
+	}
 
 	for i := range req.PrivId {
-		p[i] = true
+		p[i] = m.hasPrivilege(ctx, req.Entity, userName, req.PrivId[i])
 	}
 
 	return &methods.HasPrivilegeOnEntityBody{
@@ -173,7 +201,7 @@ func (m *AuthorizationManager) HasPrivilegeOnEntity(req *types.HasPrivilegeOnEnt
 	}
 }
 
-func (m *AuthorizationManager) HasUserPrivilegeOnEntities(req *types.HasUserPrivilegeOnEntities) soap.HasFault {
+func (m *AuthorizationManager) HasUserPrivilegeOnEntities(ctx *Context, req *types.HasUserPrivilegeOnEntities) soap.HasFault {
 	var p []types.EntityPrivilege
 
 	for _, e := range req.Entities {
@@ -182,7 +210,7 @@ func (m *AuthorizationManager) HasUserPrivilegeOnEntities(req *types.HasUserPriv
 		for _, id := range req.PrivId {
 			priv.PrivAvailability = append(priv.PrivAvailability, types.PrivilegeAvailability{
 				PrivId:    id,
-				IsGranted: true,
+				IsGranted: m.hasPrivilege(ctx, e, req.UserName, id),
 			})
 		}
 
@@ -196,15 +224,13 @@ func (m *AuthorizationManager) HasUserPrivilegeOnEntities(req *types.HasUserPriv
 	}
 }
 
-func (m *AuthorizationManager) FetchUserPrivilegeOnEntities(req *types.FetchUserPrivilegeOnEntities) soap.HasFault {
-	admin := object.AuthorizationRoleList(m.RoleList).ByName("Admin").Privilege
-
+func (m *AuthorizationManager) FetchUserPrivilegeOnEntities(ctx *Context, req *types.FetchUserPrivilegeOnEntities) soap.HasFault {
 	var p []types.UserPrivilegeResult
 
 	for _, e := range req.Entities {
 		p = append(p, types.UserPrivilegeResult{
 			Entity:     e,
-			Privileges: admin,
+			Privileges: m.effectivePrivileges(ctx, e, req.UserName),
 		})
 	}
 
@@ -213,6 +239,73 @@ func (m *AuthorizationManager) FetchUserPrivilegeOnEntities(req *types.FetchUser
 			Returnval: p,
 		},
 	}
+}
+
+// effectivePrivileges resolves permissions on the entity and its ancestors.
+// Since the simulator has no user-to-group membership model, principals match
+// by exact name for both user and group permissions.
+func (m *AuthorizationManager) effectivePrivileges(ctx *Context, ref types.ManagedObjectReference, userName string) []string {
+	entity, ok := ctx.Map.Get(ref).(mo.Entity)
+	if !ok {
+		// The privilege-query APIs use the root folder for non-entity references.
+		entity, ok = ctx.Map.Get(ctx.Map.content().RootFolder).(mo.Entity)
+		if !ok {
+			return nil
+		}
+	}
+
+	roles := object.AuthorizationRoleList(m.RoleList)
+	privileges := make(map[string]struct{})
+	noAccess := false
+	direct := true
+	for {
+		for _, permission := range m.permissions[entity.Reference()] {
+			if permission.Principal != userName || !direct && !permission.Propagate {
+				continue
+			}
+			if role := roles.ById(permission.RoleId); role != nil {
+				if role.Name == "NoAccess" {
+					noAccess = true
+					continue
+				}
+				for _, privilege := range role.Privilege {
+					privileges[privilege] = struct{}{}
+				}
+			}
+		}
+
+		parent := entity.Entity().Parent
+		if parent == nil {
+			break
+		}
+		entity, ok = ctx.Map.Get(parent.Reference()).(mo.Entity)
+		if !ok {
+			break
+		}
+		// The entity's own permissions always apply; ancestor permissions only
+		// apply if their Propagate flag is set.
+		direct = false
+	}
+
+	if noAccess {
+		// Any applicable NoAccess permission overrides all matching grants.
+		return nil
+	}
+
+	result := make([]string, 0, len(privileges))
+	for privilege := range privileges {
+		result = append(result, privilege)
+	}
+	return result
+}
+
+func (m *AuthorizationManager) hasPrivilege(ctx *Context, entity types.ManagedObjectReference, userName, privilege string) bool {
+	for _, granted := range m.effectivePrivileges(ctx, entity, userName) {
+		if granted == privilege {
+			return true
+		}
+	}
+	return false
 }
 
 func (m *AuthorizationManager) AddAuthorizationRole(req *types.AddAuthorizationRole) soap.HasFault {
@@ -241,10 +334,9 @@ func (m *AuthorizationManager) AddAuthorizationRole(req *types.AddAuthorizationR
 		Name:      req.Name,
 		System:    false,
 	})
+	body.Res = &types.AddAuthorizationRoleResponse{Returnval: m.nextID}
 
 	m.nextID++
-
-	body.Res = &types.AddAuthorizationRoleResponse{}
 
 	return body
 }
@@ -287,6 +379,16 @@ func (m *AuthorizationManager) RemoveAuthorizationRole(req *types.RemoveAuthoriz
 
 	for i, role := range m.RoleList {
 		if role.RoleId == req.RoleId {
+			if req.FailIfUsed {
+				for _, permissions := range m.permissions {
+					for _, permission := range permissions {
+						if permission.RoleId == req.RoleId {
+							body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "roleId"})
+							return body
+						}
+					}
+				}
+			}
 			m.RoleList = append(m.RoleList[:i], m.RoleList[i+1:]...)
 
 			body.Res = &types.RemoveAuthorizationRoleResponse{}

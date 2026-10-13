@@ -191,6 +191,7 @@ func TestESXiVersion(t *testing.T) {
 	testCases = append(testCases, testCasesForMajorVersion(8, ESXi8000, "8.0", VMX20)...)
 	testCases = append(testCases, testCasesForMajorMinorUpdateVersion(8, 0, 1, ESXi8010, "8.0.1", VMX20)...)
 	testCases = append(testCases, testCasesForMajorMinorUpdateVersion(8, 0, 2, ESXi8020, "8.0.2", VMX21)...)
+	testCases = append(testCases, testCasesForMajorVersion(9, ESXi9000, "9.0", VMX22)...)
 
 	t.Run("GetESXiVersions", func(t *testing.T) {
 		a, e := uniqueExpectedVersions, GetESXiVersions()

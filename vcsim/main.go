@@ -6,6 +6,7 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/pem"
 	"expvar"
 	"flag"
 	"fmt"
@@ -71,15 +72,16 @@ func main() {
 	flag.IntVar(&model.Folder, "folder", model.Folder, "Number of folders")
 	hostIPBase := flag.String("host-ip-base", "", "Base IPv4 address to assign HostSystems from, incrementing by one per host (e.g. 10.20.8.0)")
 	flag.BoolVar(&model.Autostart, "autostart", model.Autostart, "Autostart model created VMs")
-	v := &model.ServiceContent.About.ApiVersion
-	flag.StringVar(v, "api-version", *v, "API version")
-	pv := &model.ServiceContent.About.Version
-	flag.StringVar(pv, "version", *pv, "Product version (e.g. vCenter version shown in About)")
+	apiVersion := flag.String("api-version", "", "Override the API version reported by the server (default is inferred from -version)")
+	version := flag.String("version", model.ServiceContent.About.Version, "Product version reported by the server and hosts")
+	build := flag.String("build", "", "Build number reported by the server (default is inferred for known versions)")
 
 	isESX := flag.Bool("esx", false, "Simulate standalone ESX")
 	isTLS := flag.Bool("tls", true, "Enable TLS")
 	cert := flag.String("tlscert", "", "Path to TLS certificate file")
 	key := flag.String("tlskey", "", "Path to TLS key file")
+	certOut := flag.String("tlscertout", "/tmp/vcsim.crt", "Write the TLS certificate to this file (empty to disable)")
+	hostBuild := flag.String("host-build", "", "ESXi build number reported by hosts (default is inferred for known versions)")
 	env := flag.String("E", "-", "Output vcsim variables to the given fifo or stdout")
 	listen := flag.String("l", "127.0.0.1:8989", "Listen address for vcsim")
 	user := flag.String("username", "", "Login username for vcsim (any username allowed by default)")
@@ -95,6 +97,17 @@ func main() {
 	flag.Float64Var(&model.DelayConfig.DelayJitter, "delay-jitter", model.DelayConfig.DelayJitter, "Delay jitter coefficient of variation (tip: 0.5 is a good starting value)")
 
 	flag.Parse()
+
+	versionSet := false
+	apiVersionSet := false
+	flag.Visit(func(f *flag.Flag) {
+		switch f.Name {
+		case "version":
+			versionSet = true
+		case "api-version":
+			apiVersionSet = true
+		}
+	})
 
 	if *trace != "" {
 		var err error
@@ -168,8 +181,49 @@ func main() {
 		model.DelayConfig.DelayJitter = opts.DelayConfig.DelayJitter
 	}
 
+	// A supplied product version is shared by the server and its ESXi hosts.
+	// Infer each API version and build number from that common version unless
+	// explicitly overridden.
+	if versionSet {
+		model.ServiceContent.About.Version = *version
+		esx.HostConfigInfo.Product.Version = *version
+		esx.HostConfigInfo.Product.LicenseProductVersion = *version
+		if serverAPI, hostAPI, ok := releaseAPIVersions(*version); ok {
+			if *isESX {
+				model.ServiceContent.About.ApiVersion = hostAPI
+			} else {
+				model.ServiceContent.About.ApiVersion = serverAPI
+			}
+			esx.HostConfigInfo.Product.ApiVersion = hostAPI
+		} else {
+			log.Printf("cannot infer API versions from %q; use -api-version to set the server API version", *version)
+		}
+	}
+	if apiVersionSet {
+		model.ServiceContent.About.ApiVersion = *apiVersion
+	}
+	if *build != "" {
+		model.ServiceContent.About.Build = *build
+	} else if versionSet {
+		if build, ok := releaseBuild(*version, *isESX); ok {
+			model.ServiceContent.About.Build = build
+		} else {
+			log.Printf("no known build number for version %q; use -build to set it", *version)
+		}
+	}
+	if *hostBuild != "" {
+		esx.HostConfigInfo.Product.Build = *hostBuild
+	} else if versionSet {
+		if build, ok := releaseBuild(*version, true); ok {
+			esx.HostConfigInfo.Product.Build = build
+		} else {
+			log.Printf("no known ESXi build number for version %q; use -host-build to set it", *version)
+		}
+	}
+	esx.HostConfigInfo.Product.FullName = fmt.Sprintf("%s %s build-%s", esx.HostConfigInfo.Product.Name, esx.HostConfigInfo.Product.Version, esx.HostConfigInfo.Product.Build)
+
 	tag := " (govmomi simulator)"
-	model.ServiceContent.About.FullName += tag
+	model.ServiceContent.About.FullName = fmt.Sprintf("%s %s build-%s%s", model.ServiceContent.About.Name, model.ServiceContent.About.Version, model.ServiceContent.About.Build, tag)
 	model.ServiceContent.About.OsType = runtime.GOOS + "-" + runtime.GOARCH
 
 	esx.HostSystem.Summary.Hardware.Vendor += tag
@@ -212,6 +266,15 @@ func main() {
 	model.Service.ServeMux = http.DefaultServeMux // expvar.init registers "/debug/vars" with the DefaultServeMux
 
 	s := model.Service.NewServer()
+	if *isTLS && *certOut != "" {
+		var certPEM []byte
+		for _, der := range s.TLS.Certificates[0].Certificate {
+			certPEM = append(certPEM, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der})...)
+		}
+		if err := os.WriteFile(*certOut, certPEM, 0644); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	if *tunnel >= 0 {
 		s.Tunnel = *tunnel
@@ -297,4 +360,71 @@ func secret(s *string) string {
 		log.Fatal(err)
 	}
 	return val
+}
+
+// releaseBuild returns the GA or commonly released build number for a product
+// version. Patch builds can share a product version, so callers can override
+// these values with -build or -host-build. The mappings are based on Broadcom
+// KB 326316 (vCenter) and KB 316595 (ESXi).
+func releaseBuild(version string, esx bool) (string, bool) {
+	var builds map[string]string
+	if esx {
+		builds = map[string]string{
+			"8.0.0":      "20513097",
+			"8.0.1":      "21495797",
+			"8.0.2":      "22380479",
+			"8.0.3":      "24022510",
+			"9.0.0":      "24755229",
+			"9.0.0.0":    "24755229",
+			"9.0.0.0100": "24813472",
+			"9.0.1":      "24957456",
+			"9.0.1.0":    "24957456",
+			"9.0.2":      "25148076",
+			"9.0.2.0":    "25148076",
+			"9.0.2.0100": "25595025",
+			"9.1":        "25370933",
+			"9.1.0":      "25370933",
+			"9.1.1.0":    "25714478",
+		}
+	} else {
+		builds = map[string]string{
+			"8.0.0":      "20519528",
+			"8.0.1":      "21560480",
+			"8.0.2":      "22385739",
+			"8.0.3":      "24022515",
+			"9.0.0":      "24755230",
+			"9.0.0.0":    "24755230",
+			"9.0.1":      "24957454",
+			"9.0.1.0":    "24957454",
+			"9.0.2":      "25148086",
+			"9.0.2.0":    "25148086",
+			"9.0.2.0100": "25629525",
+			"9.1":        "25370922",
+			"9.1.0":      "25370922",
+			"9.1.1.0":    "25712839",
+		}
+	}
+	build, ok := builds[version]
+	return build, ok
+}
+
+func releaseAPIVersions(version string) (server, host string, ok bool) {
+	parts := strings.Split(version, ".")
+	if len(parts) < 2 {
+		return "", "", false
+	}
+
+	for _, part := range parts[:min(len(parts), 3)] {
+		if _, err := strconv.Atoi(part); err != nil {
+			return "", "", false
+		}
+	}
+
+	server = strings.Join(parts[:2], ".")
+	hostParts := parts[:min(len(parts), 3)]
+	if len(hostParts) < 3 {
+		hostParts = append(hostParts, "0")
+	}
+	host = strings.Join(hostParts, ".") + ".0"
+	return server, host, true
 }
