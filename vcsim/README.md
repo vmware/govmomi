@@ -10,6 +10,13 @@ language, it can be used by any language that can talk to the vSphere API.
 
 The official `vcsim` [Docker images](https://hub.docker.com/r/vmware/vcsim) are built from this [Dockerfile](../Dockerfile.vcsim).
 
+To build a minimal image from source, run this from the repository root:
+
+```bash
+docker build -f vcsim/Dockerfile -t vcsim .
+docker run --rm -p 8989:8989 vcsim
+```
+
 ### Binaries
 You can find prebuilt `vcsim` binaries on the [releases page](https://github.com/vmware/govmomi/releases).
 
