@@ -1,0 +1,20 @@
+[Unit]
+Description=VMCI SystemdInit GuestRPC Test Writer
+After=basic.target
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+# vmware-rpctool expects its entire RPCI command as exactly one positional
+# argument.  Wrap with /bin/sh -c so systemd's word-splitting does not turn
+# "info-set guestinfo.vmci-systemd-test pass" into three separate argv
+# entries, which would cause the binary to print usage and exit 2.
+ExecStart=/bin/sh -c "/usr/bin/vmware-rpctool 'info-set guestinfo.vmci-systemd-test pass'"
+# Propagate the VMX_RPC_SOCK env var (set by govmomi in the container's
+# initial environment) into this service process so that vmware-rpctool
+# prefers Component A (GuestRPC Unix socket) over AF_VSOCK.
+PassEnvironment=VMX_RPC_SOCK
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

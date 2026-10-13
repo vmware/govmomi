@@ -42,6 +42,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
+      - name: Build VMCI systemd-init test image
+        # Non-fatal by design (see the Makefile target's comment): a runner without
+        # docker, or a build failure, must not fail the job. continue-on-error is
+        # belt-and-suspenders on top of that; Run Tests below triggers the same
+        # target again via go-test's prerequisite, so this step is for CI visibility.
+        continue-on-error: true
+        run: make vmci-systemd-init-image
+
       - name: Run Tests
         env:
           TEST_COUNT: 1

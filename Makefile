@@ -143,8 +143,22 @@ ifeq (-timeout,$(findstring -timeout,$(TEST_OPTS)))
 $(error Use TEST_TIMEOUT to override this option)
 endif
 
+VMCI_SYSTEMD_INIT_IMAGE ?= docker.io/library/vmci-systemd-init:latest
+
+# Always attempts a fresh build rather than checking for an existing image first, so a
+# Dockerfile change can never be shadowed by a stale image the way a stale toolbox binary
+# once was (see vcsim spec D-97-20). Never fails the build: TestVMCI_SystemdInit_GuestInfoRoundTrip
+# and TestVMCI_NestedContainers_GuestInfoRoundTrip skip themselves (t.Skipf) when the image is
+# absent, so a system without docker/podman, or any build failure (no network, etc.), must not
+# break `make test`.
+.PHONY: vmci-systemd-init-image
+vmci-systemd-init-image: ## Build the vmci-systemd-init image for simulator VMCI/nestedContainers tests
+	-@command -v docker >/dev/null 2>&1 && \
+		docker build -t $(VMCI_SYSTEMD_INIT_IMAGE) ./simulator/testdata/vmci-systemd-init/ || \
+		echo "vmci-systemd-init-image: skipping (docker/podman unavailable, or build failed); dependent simulator tests will skip themselves"
+
 .PHONY: go-test
-go-test: ## Runs go unit tests with race detector enabled
+go-test: vmci-systemd-init-image ## Runs go unit tests with race detector enabled
 	GORACE=$(GORACE) CGO_ENABLED=1 $(GO) test \
   -count $(TEST_COUNT) \
   -race \
