@@ -79,6 +79,7 @@ type NamespaceInstanceCreateSpecV2 struct {
 	Edges                *[]NamespaceEdgeSpec        `json:"edges,omitempty"`
 	Zones                *[]ZoneSpec                 `json:"zones,omitempty"`
 	AccessList           *[]Access                   `json:"access_list,omitempty"`
+	Networks             *[]string                   `json:"networks,omitempty"`
 }
 
 // ZoneSpec
@@ -202,9 +203,36 @@ type CidrBlock struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20NetworkConfigInfo/
 // Since 9.0.0.0
 type NetworkConfigInfo struct {
-	NetworkProvider string          `json:"network_provider"`
-	VpcNetwork      *VpcNetworkInfo `json:"vpc_network,omitempty"`
+	NetworkProvider string                    `json:"network_provider"`
+	VpcNetwork      *VpcNetworkInfo           `json:"vpc_network,omitempty"`
+	VsphereNetwork  *VsphereNetworkConfigInfo `json:"vsphere_network,omitempty"`
 }
+
+// VsphereNetworkConfigInfo
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20VsphereNetworkConfigInfo/
+// Since 9.1.0.0
+type VsphereNetworkConfigInfo struct {
+	DefaultWorkloadNetwork string                 `json:"default_workload_network"`
+	Networks               []NamespaceNetworkInfo `json:"networks"`
+}
+
+// NamespaceNetworkInfo
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20NetworkInfo/
+// Since 9.1.0.0
+type NamespaceNetworkInfo struct {
+	Network      string              `json:"network"`
+	ConfigStatus NetworkConfigStatus `json:"config_status"`
+}
+
+// NetworkConfigStatus
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20NetworkConfigStatus/
+// Since 9.1.0.0
+type NetworkConfigStatus string
+
+const (
+	NetworkConfigStatusActive   NetworkConfigStatus = "ACTIVE"
+	NetworkConfigStatusRemoving NetworkConfigStatus = "REMOVING"
+)
 
 // VpcNetworkInfo
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20VpcNetworkInfo/
@@ -228,8 +256,16 @@ type VpcConfig struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/9.0/data-structures/Vcenter%20Namespaces%20Instances%20NetworkConfigCreateSpec/
 // Since 9.0.0.0
 type NetworkConfigCreateSpec struct {
-	NetworkProvider string                `json:"network_provider"`
-	VpcNetwork      *VpcNetworkCreateSpec `json:"vpc_network,omitempty"`
+	NetworkProvider string                          `json:"network_provider"`
+	VpcNetwork      *VpcNetworkCreateSpec           `json:"vpc_network,omitempty"`
+	VsphereNetwork  *VsphereNetworkConfigCreateSpec `json:"vsphere_network,omitempty"`
+}
+
+// VsphereNetworkConfigCreateSpec
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20VsphereNetworkConfigCreateSpec/
+// Since 9.1.0.0
+type VsphereNetworkConfigCreateSpec struct {
+	DefaultWorkloadNetwork *string `json:"default_workload_network,omitempty"`
 }
 
 // VpcNetworkCreateSpec

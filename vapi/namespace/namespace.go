@@ -1150,7 +1150,7 @@ type VmServiceSpec struct {
 // StorageSpec https://developer.broadcom.com/apis/vsphere-automation-api/v7.0U3/vcenter/data-structures/Namespaces_Instances_StorageSpec/
 type StorageSpec struct {
 	Policy string `json:"policy"`
-	Limit  int64  `json:"limit,omitempty"`
+	Limit  *int64 `json:"limit,omitempty"`
 }
 
 // NamespacesInstanceUpdateSpec https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20UpdateSpec/
@@ -1166,8 +1166,17 @@ type NamespacesInstanceUpdateSpec struct {
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20NetworkConfigUpdateSpec/
 // Since 9.0.0.0
 type NetworkConfigUpdateSpec struct {
-	NetworkProvider string                `json:"network_provider"`
-	VpcConfig       *VpcNetworkUpdateSpec `json:"vpc_config,omitempty"`
+	NetworkProvider      string                          `json:"network_provider"`
+	VpcConfig            *VpcNetworkUpdateSpec           `json:"vpc_config,omitempty"`
+	VsphereNetworkConfig *VsphereNetworkConfigUpdateSpec `json:"vsphere_network_config,omitempty"`
+}
+
+// VsphereNetworkConfigUpdateSpec
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20VsphereNetworkConfigUpdateSpec/
+// Since 9.1.0.0
+type VsphereNetworkConfigUpdateSpec struct {
+	NetworksToAdd    []string `json:"networks_to_add,omitempty"`
+	NetworksToRemove []string `json:"networks_to_remove,omitempty"`
 }
 
 // VpcNetworkUpdateSpec
