@@ -7,6 +7,7 @@ package toolbox
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -84,6 +85,10 @@ func (c *Client) mktemp(ctx context.Context) (string, error) {
 	return c.FileManager.CreateTemporaryFile(ctx, c.Authentication, "govmomi-", "", "")
 }
 
+// ErrProcessNotFound is returned by Run when the guest does not report the process that was started,
+// such as after VMware Tools was restarted.
+var ErrProcessNotFound = errors.New("process not found in guest")
+
 type exitError struct {
 	error
 	exitCode int
@@ -94,6 +99,9 @@ func (e *exitError) ExitCode() int {
 }
 
 // Run implements exec.Cmd.Run over vmx guest RPC against standard vmware-tools or toolbox.
+// If the guest stops reporting the started process, Run returns an error wrapping ErrProcessNotFound.
+// The command was started and may have completed, so its outcome is unknown
+// and it should only be run again if it is safe to do so.
 func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 	if cmd.Stdin != nil {
 		dst, err := c.mktemp(ctx)
@@ -181,6 +189,12 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 		procs, err := c.ProcessManager.ListProcesses(ctx, c.Authentication, []int64{pid})
 		if err != nil {
 			return err
+		}
+
+		if len(procs) == 0 {
+			// The guest no longer knows about the process,
+			// such as after VMware Tools was restarted.
+			return fmt.Errorf("%s: pid %d: %w", cmd.Path, pid, ErrProcessNotFound)
 		}
 
 		p := procs[0]
