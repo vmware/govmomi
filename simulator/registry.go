@@ -345,7 +345,13 @@ func (r *Registry) Update(ctx *Context, obj mo.Reference, changes []types.Proper
 
 	val := getManagedObject(obj).Addr().Interface().(mo.Reference)
 
-	mo.ApplyPropertyChange(val, changes)
+	if t, ok := obj.(*Task); ok {
+		t.infoMu.Lock()
+		mo.ApplyPropertyChange(val, changes)
+		t.infoMu.Unlock()
+	} else {
+		mo.ApplyPropertyChange(val, changes)
+	}
 
 	r.applyHandlers(func(o RegisterObject) {
 		o.UpdateObject(ctx, val, changes)
