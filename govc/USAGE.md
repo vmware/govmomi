@@ -314,6 +314,7 @@ but appear via `govc $cmd -h`:
  - [object.save](#objectsave)
  - [option.ls](#optionls)
  - [option.set](#optionset)
+ - [permissions.check](#permissionscheck)
  - [permissions.ls](#permissionsls)
  - [permissions.remove](#permissionsremove)
  - [permissions.set](#permissionsset)
@@ -5364,6 +5365,26 @@ Examples:
   govc option.set config.vmacore.soap.sessionTimeout 90
 
 Options:
+```
+
+## permissions.check
+
+```
+Usage: govc permissions.check [OPTIONS] PATH...
+
+Check whether privileges are granted on entity PATH.
+
+Checks the current session's privileges, or those of PRINCIPAL if specified.
+
+Examples:
+  govc permissions.check -priv System.Read,VirtualMachine.Inventory.Create /dc1
+  govc permissions.check -principal user@vsphere.local -priv System.Read /dc1/host/cluster1
+  govc permissions.check -json -priv Datastore.AllocateSpace /dc1/datastore/ds1
+
+Options:
+  -i=false               Use moref instead of inventory path
+  -principal=            User name (defaults to the current session)
+  -priv=                 Comma separated list of privilege IDs
 ```
 
 ## permissions.ls
