@@ -2,6 +2,61 @@
 
 load test_helper
 
+supervisor_service_manifest() {
+  cat <<EOF
+apiVersion: data.packaging.carvel.dev/v1alpha1
+kind: PackageMetadata
+metadata:
+  name: $1
+spec:
+  displayName: $2
+  shortDescription: $4
+---
+apiVersion: data.packaging.carvel.dev/v1alpha1
+kind: Package
+metadata:
+  name: $1.$3
+spec:
+  refName: $1
+  version: $3
+EOF
+}
+
+create_supervisor_services() {
+  govc namespace.service.create <(supervisor_service_manifest service1 mock-service-1 1.0.0 "This is service 1 version 1.0.0")
+  govc namespace.service.version.create service1 <(supervisor_service_manifest service1 mock-service-1 2.0.0 "This is service 1 version 2.0.0")
+  govc namespace.service.create <(supervisor_service_manifest service2 mock-service-2 1.1.0 "This is service 2 version 1.1.0")
+  govc namespace.service.deactivate service2
+}
+
+enable_supervisor_cluster() {
+  govc dvs.create "DVPG-Management Network"
+
+  govc namespace.cluster.enable \
+    --service-cidr 10.96.0.0/23 \
+    --pod-cidrs 10.244.0.0/20 \
+    --cluster "$1" \
+    --control-plane-dns 8.8.8.8 \
+    --worker-dns 8.8.8.8 \
+    --control-plane-dns-search-domains example.com \
+    --control-plane-dns-names wcp.example.com \
+    --control-plane-ntp-servers pool.ntp.org \
+    --network-provider "NSXT_CONTAINER_PLUGIN" \
+    --workload-network.egress-cidrs 10.0.0.128/26 \
+    --workload-network.ingress-cidrs "10.0.0.64/26" \
+    --workload-network.switch VDS \
+    --workload-network.edge-cluster Edge-Cluster-1 \
+    --size TINY \
+    --mgmt-network.mode STATICRANGE \
+    --mgmt-network.network "DVPG-Management Network" \
+    --mgmt-network.gateway 10.0.0.1 \
+    --mgmt-network.starting-address 10.0.0.45 \
+    --mgmt-network.subnet-mask 255.255.255.0 \
+    --ephemeral-storage-policy "vSAN Default Storage Policy" \
+    --control-plane-storage-policy "vSAN Default Storage Policy" \
+    --image-storage-policy "vSAN Default Storage Policy"
+}
+
 @test "namespace.cluster.ls" {
     vcsim_env
 
@@ -12,6 +67,9 @@ load test_helper
     assert_success "[]"
 
     run govc cluster.create WCP-cluster
+    assert_success
+
+    run enable_supervisor_cluster WCP-cluster
     assert_success
 
     run govc namespace.cluster.ls
@@ -70,6 +128,8 @@ load test_helper
     govc cluster.create WCP-Cluster
     assert_success
 
+    enable_supervisor_cluster WCP-Cluster
+
     govc namespace.cluster.disable --cluster WCP-Cluster
     assert_success
 }
@@ -89,6 +149,7 @@ load test_helper
 
 @test "namespace.service.ls" {
     vcsim_env
+    create_supervisor_services
 
     run govc namespace.service.ls
     assert_success
@@ -113,6 +174,7 @@ load test_helper
 
 @test "namespace.service.info" {
     vcsim_env
+    create_supervisor_services
 
     run govc namespace.service.info service1
     assert_success
@@ -125,6 +187,7 @@ load test_helper
 
 @test "namespace.service.version.ls" {
     vcsim_env
+    create_supervisor_services
 
     versions=$(govc namespace.service.version.ls -json service1)
     assert_equal "2" $(echo $versions | jq '. |  length')
@@ -137,6 +200,7 @@ load test_helper
 
 @test "namespace.service.version.info notfound" {
     vcsim_env
+    create_supervisor_services
 
     run govc namespace.service.version.info service2 9.9.9
     assert_failure
@@ -145,13 +209,15 @@ load test_helper
 
 @test "namespace.service.version.info" {
     vcsim_env
+    create_supervisor_services
 
     v=$(govc namespace.service.version.info -json service2 1.1.0 | jq)
 
     assert_equal "ACTIVATED" $(echo $v |  jq -r .state)
     assert_equal "This is service 2 version 1.1.0" "$(echo $v |  jq -r .description)"
     assert_equal "CARVEL_APPS_YAML" $(echo $v |  jq -r .content_type)
-    assert_equal "abc" $(echo $v | jq -r .content)
+    manifest=$(supervisor_service_manifest service2 mock-service-2 1.1.0 "This is service 2 version 1.1.0")
+    assert_equal "$manifest" "$(echo $v | jq -r .content | base64 -d)"
 }
 
 @test "namespace.create" {
