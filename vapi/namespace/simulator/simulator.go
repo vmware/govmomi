@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -65,7 +64,7 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 		s.HandleFunc(internal.SupervisorServicesPath+"/{id}"+internal.SupervisorServicesVersionsPath+"/{version}", h.getServiceVersion)
 
 		s.HandleFunc(internal.VmClassesPath, h.vmClasses)
-		s.HandleFunc(internal.VmClassesPath+"/", h.vmClasses)
+		s.HandleFunc(internal.VmClassesPath+"/{vmClass}", h.vmClass)
 	}
 }
 
@@ -414,48 +413,15 @@ func (h *Handler) registerNamespaceVM(w http.ResponseWriter, r *http.Request) {
 var vmClassesMap = make(map[string]*namespace.VirtualMachineClassInfo)
 
 func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
-	subpath := r.URL.Path[len(internal.VmClassesPath):]
-	subpath = strings.Replace(subpath, "/", "", -1)
-
 	switch r.Method {
 	case http.MethodGet:
-		if len(subpath) > 0 {
-			if result, contains := vmClassesMap[subpath]; contains {
-				vapi.StatusOK(w, result)
-			} else {
-				vapi.ApiErrorNotFound(w)
-			}
-			return
-		} else {
-			result := make([]*namespace.VirtualMachineClassInfo, 0, len(vmClassesMap))
+		result := make([]*namespace.VirtualMachineClassInfo, 0, len(vmClassesMap))
 
-			for _, v := range vmClassesMap {
-				result = append(result, v)
-			}
-
-			vapi.StatusOK(w, result)
-		}
-	case http.MethodPatch:
-		if len(subpath) > 0 {
-			if entry, contains := vmClassesMap[subpath]; contains {
-				var spec namespace.VirtualMachineClassUpdateSpec
-				if !vapi.Decode(r, w, &spec) {
-					return
-				}
-
-				entry.CpuCount = spec.CpuCount
-				entry.MemoryMb = spec.MemoryMb
-				entry.CpuReservation = spec.CpuReservation
-				entry.MemoryReservation = spec.MemoryReservation
-				entry.Devices = spec.Devices
-				entry.ConfigSpec = spec.ConfigSpec
-
-				vapi.StatusOK(w)
-				return
-			}
+		for _, v := range vmClassesMap {
+			result = append(result, v)
 		}
 
-		vapi.ApiErrorNotFound(w)
+		vapi.StatusOK(w, result)
 	case http.MethodPost:
 		var spec namespace.VirtualMachineClassCreateSpec
 		if !vapi.Decode(r, w, &spec) {
@@ -475,14 +441,45 @@ func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 		vmClassesMap[spec.Id] = &newClass
 
 		vapi.StatusOK(w)
-	case http.MethodDelete:
-		if len(subpath) > 0 {
-			if _, contains := vmClassesMap[subpath]; contains {
-				delete(vmClassesMap, subpath)
-				vapi.StatusOK(w)
-				return
-			}
+	}
+}
+
+func (h *Handler) vmClass(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("vmClass")
+
+	switch r.Method {
+	case http.MethodGet:
+		if result, contains := vmClassesMap[id]; contains {
+			vapi.StatusOK(w, result)
+		} else {
+			vapi.ApiErrorNotFound(w)
 		}
-		vapi.ApiErrorNotFound(w)
+	case http.MethodPatch:
+		entry, contains := vmClassesMap[id]
+		if !contains {
+			vapi.ApiErrorNotFound(w)
+			return
+		}
+
+		var spec namespace.VirtualMachineClassUpdateSpec
+		if !vapi.Decode(r, w, &spec) {
+			return
+		}
+
+		entry.CpuCount = spec.CpuCount
+		entry.MemoryMb = spec.MemoryMb
+		entry.CpuReservation = spec.CpuReservation
+		entry.MemoryReservation = spec.MemoryReservation
+		entry.Devices = spec.Devices
+		entry.ConfigSpec = spec.ConfigSpec
+
+		vapi.StatusOK(w)
+	case http.MethodDelete:
+		if _, contains := vmClassesMap[id]; contains {
+			delete(vmClassesMap, id)
+			vapi.StatusOK(w)
+		} else {
+			vapi.ApiErrorNotFound(w)
+		}
 	}
 }
