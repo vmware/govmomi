@@ -52,7 +52,8 @@ func New(u *url.URL) *Handler {
 func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	if r.IsVPX() {
 		s.HandleFunc(internal.NamespacesPath, h.namespaces)
-		s.HandleFunc(internal.NamespacesPath+"/", h.namespaces)
+		s.HandleFunc(internal.NamespacesPath+"/{namespace}", h.namespace)
+		s.HandleFunc(internal.NamespacesPath+"/{namespace}/registervm", h.registerNamespaceVM)
 		s.HandleFunc(internal.NamespaceClusterPath, h.clusters)
 		s.HandleFunc(internal.NamespaceClusterPath+"/", h.clustersID)
 		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility, h.listCompatibleDistributedSwitches)
@@ -320,75 +321,23 @@ func (h *Handler) getServiceVersion(w http.ResponseWriter, r *http.Request) {
 var namespacesMap = make(map[string]*namespace.NamespacesInstanceInfo)
 
 func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
-	subpath := r.URL.Path[len(internal.NamespacesPath):]
-	subpath = strings.TrimPrefix(subpath, "/")
-	// TODO: move to 1.22's https://go.dev/blog/routing-enhancements
-	route := strings.Split(subpath, "/")
-	subpath = route[0]
-	action := ""
-	if len(route) > 1 {
-		action = route[1]
-	}
-
 	switch r.Method {
 	case http.MethodGet:
-		if len(subpath) > 0 {
-			if result, contains := namespacesMap[subpath]; contains {
-				vapi.StatusOK(w, result)
-			} else {
-				vapi.ApiErrorNotFound(w)
-			}
-			return
-		} else {
-			result := make([]namespace.NamespacesInstanceSummary, 0, len(namespacesMap))
+		result := make([]namespace.NamespacesInstanceSummary, 0, len(namespacesMap))
 
-			for k, v := range namespacesMap {
-				entry := namespace.NamespacesInstanceSummary{
-					ClusterId:    v.ClusterId,
-					Namespace:    k,
-					ConfigStatus: v.ConfigStatus,
-					Description:  v.Description,
-					Stats:        v.Stats,
-				}
-				result = append(result, entry)
+		for k, v := range namespacesMap {
+			entry := namespace.NamespacesInstanceSummary{
+				ClusterId:    v.ClusterId,
+				Namespace:    k,
+				ConfigStatus: v.ConfigStatus,
+				Description:  v.Description,
+				Stats:        v.Stats,
 			}
-
-			vapi.StatusOK(w, result)
-		}
-	case http.MethodPatch:
-		if len(subpath) > 0 {
-			if entry, contains := namespacesMap[subpath]; contains {
-				var spec namespace.NamespacesInstanceUpdateSpec
-				if vapi.Decode(r, w, &spec) {
-					entry.VmServiceSpec = spec.VmServiceSpec
-					vapi.StatusOK(w)
-				}
-			}
+			result = append(result, entry)
 		}
 
-		vapi.ApiErrorNotFound(w)
+		vapi.StatusOK(w, result)
 	case http.MethodPost:
-		if action == "registervm" {
-			var spec namespace.RegisterVMSpec
-			if !vapi.Decode(r, w, &spec) {
-				return
-			}
-
-			ref := types.ManagedObjectReference{Type: "VirtualMachine", Value: spec.VM}
-			task := types.CreateTask{Obj: ref}
-			key := &mo.Field{Path: "config.extraConfig", Key: "vmservice.virtualmachine.resource.yaml"}
-
-			vapi.StatusOK(w, vapi.RunTask(*h.URL, task, func(ctx context.Context, c *vim25.Client) error {
-				var vm mo.VirtualMachine
-				_ = property.DefaultCollector(c).RetrieveOne(ctx, task.Obj, []string{key.String()}, &vm)
-				if vm.Config == nil || len(vm.Config.ExtraConfig) == 0 {
-					return fmt.Errorf("%s %s not found", task.Obj, key)
-				}
-				return nil
-			}))
-			return
-		}
-
 		var spec namespace.NamespacesInstanceCreateSpec
 		if !vapi.Decode(r, w, &spec) {
 			return
@@ -403,16 +352,63 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 		namespacesMap[spec.Namespace] = &newNamespace
 
 		vapi.StatusOK(w)
-	case http.MethodDelete:
-		if len(subpath) > 0 {
-			if _, contains := namespacesMap[subpath]; contains {
-				delete(namespacesMap, subpath)
-				vapi.StatusOK(w)
-				return
-			}
-		}
-		vapi.ApiErrorNotFound(w)
 	}
+}
+
+func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("namespace")
+
+	switch r.Method {
+	case http.MethodGet:
+		if result, contains := namespacesMap[name]; contains {
+			vapi.StatusOK(w, result)
+		} else {
+			vapi.ApiErrorNotFound(w)
+		}
+	case http.MethodPatch:
+		entry, contains := namespacesMap[name]
+		if !contains {
+			vapi.ApiErrorNotFound(w)
+			return
+		}
+
+		var spec namespace.NamespacesInstanceUpdateSpec
+		if vapi.Decode(r, w, &spec) {
+			entry.VmServiceSpec = spec.VmServiceSpec
+			vapi.StatusOK(w)
+		}
+	case http.MethodDelete:
+		if _, contains := namespacesMap[name]; contains {
+			delete(namespacesMap, name)
+			vapi.StatusOK(w)
+		} else {
+			vapi.ApiErrorNotFound(w)
+		}
+	}
+}
+
+func (h *Handler) registerNamespaceVM(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		return
+	}
+
+	var spec namespace.RegisterVMSpec
+	if !vapi.Decode(r, w, &spec) {
+		return
+	}
+
+	ref := types.ManagedObjectReference{Type: "VirtualMachine", Value: spec.VM}
+	task := types.CreateTask{Obj: ref}
+	key := &mo.Field{Path: "config.extraConfig", Key: "vmservice.virtualmachine.resource.yaml"}
+
+	vapi.StatusOK(w, vapi.RunTask(*h.URL, task, func(ctx context.Context, c *vim25.Client) error {
+		var vm mo.VirtualMachine
+		_ = property.DefaultCollector(c).RetrieveOne(ctx, task.Obj, []string{key.String()}, &vm)
+		if vm.Config == nil || len(vm.Config.ExtraConfig) == 0 {
+			return fmt.Errorf("%s %s not found", task.Obj, key)
+		}
+		return nil
+	}))
 }
 
 var vmClassesMap = make(map[string]*namespace.VirtualMachineClassInfo)
