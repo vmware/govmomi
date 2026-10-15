@@ -1,6 +1,6 @@
 module github.com/vmware/govmomi/vcsim
 
-go 1.25.0
+go 1.26.0
 
 replace github.com/vmware/govmomi => ../
 
@@ -10,6 +10,6 @@ require (
 )
 
 require (
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
