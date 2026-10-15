@@ -23,6 +23,38 @@ load test_helper
   assert_success "$perm"
 }
 
+@test "permissions.check" {
+  vcsim_env
+
+  run govc permissions.check /DC0
+  assert_failure
+
+  run govc permissions.check -priv System.Read
+  assert_failure
+
+  run govc permissions.check -priv System.Read,System.View /DC0
+  assert_success
+  assert_line "/DC0 System.Read Yes"
+  assert_line "/DC0 System.View Yes"
+
+  run govc permissions.check -json -priv System.Read /DC0 /DC0/vm
+  assert_success
+  [ "$(jq -r '.entityPrivilege | length' <<<"$output")" -eq 2 ]
+  [ "$(jq -r '.entityPrivilege[0].privAvailability[0].isGranted' <<<"$output")" = "true" ]
+
+  run govc permissions.check -principal root -priv System.Read /DC0
+  assert_success
+  assert_line "/DC0 System.Read Yes"
+
+  ref=$(govc find -i / -type d -name DC0)
+  run govc permissions.check -i -priv System.Read "$ref"
+  assert_success
+  assert_line "$ref System.Read Yes"
+
+  run govc permissions.check -priv System.Read /enoent
+  assert_failure
+}
+
 @test "role.ls" {
   vcsim_env
 
