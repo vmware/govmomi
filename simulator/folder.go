@@ -244,9 +244,10 @@ func (f *Folder) CreateStoragePod(ctx *Context, c *types.CreateStoragePod) soap.
 
 		pod.Name = c.Name
 		pod.ChildType = []string{"Datastore"}
-		pod.Summary = new(types.StoragePodSummary)
+		pod.Summary = &types.StoragePodSummary{Name: c.Name}
 		pod.PodStorageDrsEntry = new(types.PodStorageDrsEntry)
 		pod.PodStorageDrsEntry.StorageDrsConfig.PodConfig.Enabled = true
+		pod.PodStorageDrsEntry.StorageDrsConfig.PodConfig.DefaultVmBehavior = string(types.StorageDrsPodConfigInfoBehaviorManual)
 
 		folderPutChild(ctx, &f.Folder, pod)
 
