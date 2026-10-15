@@ -434,6 +434,8 @@ but appear via `govc $cmd -h`:
  - [vm.target.info](#vmtargetinfo)
  - [vm.unregister](#vmunregister)
  - [vm.upgrade](#vmupgrade)
+ - [vm.vapp.info](#vmvappinfo)
+ - [vm.vapp.set](#vmvappset)
  - [vm.vnc](#vmvnc)
  - [volume.extend](#volumeextend)
  - [volume.ls](#volumels)
@@ -7751,6 +7753,42 @@ Examples:
 
 Options:
   -version=0             Target vm hardware version, by default -- latest available
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.vapp.info
+
+```
+Usage: govc vm.vapp.info [OPTIONS]
+
+List VM vApp properties (OVF properties).
+
+Examples:
+  govc vm.vapp.info -vm $vm
+  govc vm.vapp.info -vm $vm -json | jq .
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.vapp.set
+
+```
+Usage: govc vm.vapp.set [OPTIONS]
+
+Set VM vApp property (OVF property) values.
+
+The properties must already exist on the VM, typically defined by the OVF/OVA
+template the VM was deployed or cloned from. Use 'vm.vapp.info' to list the
+available property ids.
+
+Examples:
+  govc vm.vapp.info -vm $vm
+  govc vm.vapp.set -vm $vm -property guestinfo.hostname=my-vm
+  govc vm.vapp.set -vm $vm -property guestinfo.hostname=my-vm -property guestinfo.ip=10.0.0.5
+
+Options:
+  -property=[]           vApp property. <id>=<value>
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
