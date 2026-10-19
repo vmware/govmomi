@@ -90,6 +90,9 @@ snapshot:
 checksum:
   name_template: "checksums.txt"
 
+release:
+  make_latest: '{{ envOrDefault "IS_LATEST" "true" }}'
+
 changelog:
   sort: asc
   filters:
