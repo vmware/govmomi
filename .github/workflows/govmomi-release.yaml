@@ -93,9 +93,9 @@ jobs:
 
           # check whether the new tag is also the latest
           if [[ $LATEST == $TAG ]]; then
-            echo "islatest=true >> $GITHUB_OUTPUT"
+            echo islatest=true >> $GITHUB_OUTPUT
           else
-            echo "islatest=false >> $GITHUB_OUTPUT"
+            echo islatest=false >> $GITHUB_OUTPUT
           fi
       - name: Push to Release Branch
         if: ${{ !inputs.dryrun }}
