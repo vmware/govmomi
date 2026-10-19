@@ -88,8 +88,8 @@ jobs:
           # create new tag
           git tag -a ${TAG} -m "Release ${TAG}"
 
-          # find latest tag sorted by semver ref
-          LATEST=$(git tag --sort=v:refname | tail -1)
+          # find latest tag sorted by semver ref, ignore pre-releases (e.g. v0.57.0-alpha.0)
+          LATEST=$(git tag --sort=v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | tail -1)
 
           # check whether the new tag is also the latest
           if [[ $LATEST == $TAG ]]; then
