@@ -167,8 +167,13 @@ func guestFamily(id string) string {
 func (b *EnvironmentBrowser) QueryConfigOptionEx(req *types.QueryConfigOptionEx) soap.HasFault {
 	body := new(methods.QueryConfigOptionExBody)
 
-	opt := b.QueryConfigOptionResponse.Returnval
-	if opt == nil {
+	var opt *types.VirtualMachineConfigOption
+	if stored := b.QueryConfigOptionResponse.Returnval; stored != nil {
+		// Shallow copy, as GuestOSDescriptor is set below and must not modify the stored option,
+		// which is also returned as-is by QueryConfigOption.
+		cp := *stored
+		opt = &cp
+	} else {
 		opt = &types.VirtualMachineConfigOption{
 			Version:       esx.HardwareVersion,
 			DefaultDevice: esx.VirtualDevice,
