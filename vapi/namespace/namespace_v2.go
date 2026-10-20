@@ -35,6 +35,20 @@ type NamespaceInstanceSummaryV2 struct {
 	SelfServiceNamespace bool                          `json:"self_service_namespace"`
 }
 
+// NamespaceInstanceMessage
+// https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20Message/
+type NamespaceInstanceMessage struct {
+	Severity string                          `json:"severity"`
+	Details  NamespaceInstanceMessageDetails `json:"details"`
+}
+
+// NamespaceInstanceMessageDetails
+type NamespaceInstanceMessageDetails struct {
+	ID             string `json:"id"`
+	DefaultMessage string `json:"default_message"`
+	Localized      string `json:"localized"`
+}
+
 // NamespaceInstanceInfoV2
 // https://developer.broadcom.com/xapis/vsphere-automation-api/latest/data-structures/Vcenter%20Namespaces%20Instances%20InfoV2/
 // Since 8.0.0.1
@@ -51,6 +65,7 @@ type NamespaceInstanceInfoV2 struct {
 	Edges                []NamespaceEdgeSpec           `json:"edges,omitempty"`
 	Zones                []ZoneInfo                    `json:"zones,omitempty"`
 	AccessList           []Access                      `json:"access_list"`
+	Messages             []NamespaceInstanceMessage    `json:"messages"`
 }
 
 // ZoneInfo
