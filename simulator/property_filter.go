@@ -80,9 +80,13 @@ func (f *PropertyFilter) update(ctx *Context) {
 	})
 }
 
-// matches returns true if the change matches one of the filter Spec.PropSet
-func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference, change *types.PropertyChange) bool {
+// matches returns the PropertyChanges the filter reports for change: one for
+// each PathSet entry that change matches. A change to a parent property, as
+// PropertyDiff reports "guest" for a change to guest.net, matches every
+// requested path under it, and each is reported. It returns nil if none match.
+func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference, change types.PropertyChange) []types.PropertyChange {
 	var kind reflect.Type
+	var out []types.PropertyChange
 
 	for _, p := range f.Spec.PropSet {
 		if p.Type != ref.Type {
@@ -101,12 +105,15 @@ func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference,
 		}
 
 		if isTrue(p.All) {
-			return true
+			return []types.PropertyChange{change}
 		}
 
 		for _, name := range p.PathSet {
+			c := change
+
 			if name == change.Name {
-				return true
+				out = append(out, c)
+				continue
 			}
 
 			var field mo.Field
@@ -115,9 +122,10 @@ func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference,
 				item := field.Item
 				field.Item = ""
 				if field.String() == change.Name {
-					change.Name = name
-					change.Val, _ = fieldValue(reflect.ValueOf(change.Val), item)
-					return true
+					c.Name = name
+					c.Val, _ = fieldValue(reflect.ValueOf(c.Val), item)
+					out = append(out, c)
+					continue
 				}
 			}
 
@@ -125,37 +133,35 @@ func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference,
 				continue // case below does not apply to property index
 			}
 
-			// strings.HasPrefix("runtime.powerState", "runtime") == parent field matches
-			if strings.HasPrefix(change.Name, name) {
+			// strings.HasPrefix("runtime.powerState", "runtime") == parent field matches.
+			// strings.HasPrefix("guest.hostName", "guest.") == the change is to a
+			// parent of the field, as PropertyDiff reports, which may change it.
+			if strings.HasPrefix(change.Name, name) || strings.HasPrefix(name, change.Name+".") {
 				if obj := ctx.Map.Get(ref); obj != nil { // object may have since been deleted
-					change.Name = name
-					change.Val, _ = fieldValue(reflect.ValueOf(obj), name)
+					c.Name = name
+					c.Val, _ = fieldValue(reflect.ValueOf(obj), name)
 				}
-
-				return true
+				out = append(out, c)
 			}
 		}
 	}
 
-	return false
+	return out
 }
 
 // apply the PropertyFilter.Spec to the given ObjectUpdate
 func (f *PropertyFilter) apply(ctx *Context, change types.ObjectUpdate) types.ObjectUpdate {
-	parents := make(map[string]bool)
+	seen := make(map[string]bool)
 	set := change.ChangeSet
 	change.ChangeSet = nil
 
-	for i, p := range set {
-		if f.matches(ctx, change.Obj, &p) {
-			if p.Name != set[i].Name {
-				// update matches a parent field from the spec.
-				if parents[p.Name] {
-					continue // only return 1 instance of the parent
-				}
-				parents[p.Name] = true
+	for _, p := range set {
+		for _, c := range f.matches(ctx, change.Obj, p) {
+			if seen[c.Name] {
+				continue // only report 1 instance of each path
 			}
-			change.ChangeSet = append(change.ChangeSet, p)
+			seen[c.Name] = true
+			change.ChangeSet = append(change.ChangeSet, c)
 		}
 	}
 
