@@ -118,6 +118,7 @@ import (
 	_ "github.com/vmware/govmomi/cli/vm/rdm"
 	_ "github.com/vmware/govmomi/cli/vm/snapshot"
 	_ "github.com/vmware/govmomi/cli/vm/target"
+	_ "github.com/vmware/govmomi/cli/vm/vapp"
 	_ "github.com/vmware/govmomi/cli/volume"
 	_ "github.com/vmware/govmomi/cli/volume/snapshot"
 	_ "github.com/vmware/govmomi/cli/vsan"
