@@ -5,12 +5,21 @@
 package simulator
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/base64"
+	"encoding/xml"
+	"errors"
 	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/vmware/govmomi/simulator"
@@ -24,111 +33,366 @@ func init() {
 	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
 		if r.IsVPX() {
 			path, handler := New(s.Listen, r.OptionManager().Setting)
+			if handler == nil {
+				return
+			}
 			s.Handle(path, handler)
 			s.Handle(sts.SystemPath, handler)
+			h := handler.(*Handler)
+			r.SessionManager().ValidToken = h.validToken
+			s.HandleFunc(tesPath, h.tokenExchange)
+			s.Handle(oidcPath+"/", http.HandlerFunc(h.openIDConnect))
 		}
 	})
 }
 
+// Handler is the STS simulator. It issues SAML tokens signed by its own key, and validates them.
+// It also implements the Token Exchange Service, which exchanges those tokens for JWTs signed by the same key,
+// and the OpenID Connect discovery and JWKS endpoints that JWT verifiers use.
+// Neither requests nor responses are logged, as they carry credentials.
+type Handler struct {
+	// URL is the scheme and host of the SSO server, as clients reach it.
+	URL url.URL
+	// Domain is the SSO domain, for example "vsphere.local".
+	Domain string
+
+	mu     sync.Mutex
+	key    *rsa.PrivateKey
+	cert   *x509.Certificate
+	minted []string
+
+	invalidGrant int
+}
+
 // New creates an STS simulator and configures the simulator endpoint in the given settings.
 // The path returned is that of the settings "config.vpxd.sso.sts.uri" property.
+// The http.Handler returned is a *Handler.
 func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 	for i := range settings {
 		setting := settings[i].GetOptionValue()
 		if setting.Key == "config.vpxd.sso.sts.uri" {
 			endpoint, _ := url.Parse(setting.Value.(string))
-			return endpoint.Path, new(handler)
+			h := &Handler{
+				URL:    url.URL{Scheme: u.Scheme, Host: u.Host},
+				Domain: path.Base(endpoint.Path),
+			}
+			return endpoint.Path, h
 		}
 	}
 	return "", nil
 }
 
-type handler struct{}
+// Lookup returns the STS simulator registered with s, or nil if there is none.
+func Lookup(s *simulator.Service) *Handler {
+	h, _ := s.ServeMux.Handler(&http.Request{URL: &url.URL{Path: sts.SystemPath}})
+	sim, _ := h.(*Handler)
+	return sim
+}
+
+// Minted returns every credential the simulator has issued, in the form it was issued.
+// Tests use them as canaries: none of them should appear in a log.
+func (s *Handler) Minted() []string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return append([]string(nil), s.minted...)
+}
+
+func (s *Handler) mint(credential string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.minted = append(s.minted, credential)
+}
+
+// signer returns the key and certificate the simulator signs tokens with, generating them on first use.
+func (s *Handler) signer() (*rsa.PrivateKey, *x509.Certificate, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.key != nil {
+		return s.key, s.cert, nil
+	}
+
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, nil, err
+	}
+	now := time.Now()
+	tmpl := x509.Certificate{
+		SerialNumber: big.NewInt(now.UnixNano()),
+		Subject:      pkix.Name{CommonName: "ssoserverSign"},
+		NotBefore:    now.Add(-time.Hour),
+		NotAfter:     now.AddDate(10, 0, 0),
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+	}
+	der, err := x509.CreateCertificate(rand.Reader, &tmpl, &tmpl, &key.PublicKey, key)
+	if err != nil {
+		return nil, nil, err
+	}
+	cert, err := x509.ParseCertificate(der)
+	if err != nil {
+		return nil, nil, err
+	}
+	s.key, s.cert = key, cert
+	return key, cert, nil
+}
+
+// verify validates a SAML assertion issued by the simulator.
+func (s *Handler) verify(assertion string) (*token, error) {
+	s.mu.Lock()
+	key := s.key
+	s.mu.Unlock()
+	if key == nil {
+		return nil, errInvalidToken // no token has been issued
+	}
+	return verify(assertion, &key.PublicKey, time.Now())
+}
+
+// validToken implements simulator.SessionManager.ValidToken.
+func (s *Handler) validToken(assertion string) (*simulator.TokenIdentity, error) {
+	t, err := s.verify(assertion)
+	if err != nil {
+		return nil, err
+	}
+	return &simulator.TokenIdentity{Subject: t.Subject, Certificate: t.Certificate}, nil
+}
+
+// request is the part of a WS-Trust request that the simulator uses.
+type request struct {
+	Header struct {
+		Security struct {
+			BinarySecurityToken string `xml:"BinarySecurityToken"`
+			Username            string `xml:"UsernameToken>Username"`
+			Content             string `xml:",innerxml"`
+		} `xml:"Security"`
+	} `xml:"Header"`
+	Body struct {
+		RST struct {
+			Created     string `xml:"Lifetime>Created"`
+			Expires     string `xml:"Lifetime>Expires"`
+			KeyType     string `xml:"KeyType"`
+			ActAs       *inner `xml:"ActAs"`
+			RenewTarget *inner `xml:"RenewTarget"`
+		} `xml:"RequestSecurityToken"`
+	} `xml:"Body"`
+}
+
+type inner struct {
+	Content string `xml:",innerxml"`
+}
+
+// rawElement returns the first element named local in data, as the bytes that encode it, or "" if there is none.
+func rawElement(data, local string) string {
+	dec := xml.NewDecoder(strings.NewReader(data))
+	for {
+		start := dec.InputOffset()
+		tok, err := dec.Token()
+		if err != nil {
+			return ""
+		}
+		if e, ok := tok.(xml.StartElement); ok && e.Name.Local == local {
+			if err := dec.Skip(); err != nil {
+				return ""
+			}
+			return data[start:dec.InputOffset()]
+		}
+	}
+}
+
+// fault is a WS-Trust fault, returned to the client as a SOAP fault.
+type fault struct {
+	code, message string
+}
+
+func (f *fault) Error() string {
+	return f.message
+}
+
+var (
+	errAuthentication = &fault{"wst:FailedAuthentication", "Authentication failed"}
+	errRequest        = &fault{"wst:InvalidRequest", "Invalid request"}
+)
+
+// defaultGroups are those of the default Administrator user.
+var defaultGroups = []string{
+	"Users", "Administrators", "CAAdmins", "ComponentManager.Administrators",
+	"SystemConfiguration.BashShellAdministrators", "SystemConfiguration.Administrators",
+	"LicenseService.Administrators", "ActAsUsers", "Everyone",
+}
+
+// principal returns the identity a request authenticates, and the holder-of-key certificate, if any, it asks to
+// confirm the token with. A token presented to renew, to act as, or to authenticate the request must be one the
+// simulator issued. Passwords are not checked.
+func (s *Handler) principal(req *request) (*token, error) {
+	security := &req.Header.Security
+	rst := &req.Body.RST
+
+	var cert *x509.Certificate
+	if security.BinarySecurityToken != "" {
+		der, err := base64.StdEncoding.DecodeString(strings.TrimSpace(security.BinarySecurityToken))
+		if err != nil {
+			return nil, errRequest
+		}
+		if cert, err = x509.ParseCertificate(der); err != nil {
+			return nil, errRequest
+		}
+	}
+
+	var header *token // a token that authenticates the request, for a token holder without a certificate
+	if assertion := rawElement(security.Content, "Assertion"); assertion != "" {
+		t, err := s.verify(assertion)
+		if err != nil {
+			return nil, errAuthentication
+		}
+		header = t
+		if cert == nil {
+			cert = t.Certificate
+		}
+	}
+
+	var t *token
+	switch {
+	case rst.RenewTarget != nil:
+		renew, err := s.verify(rawElement(rst.RenewTarget.Content, "Assertion"))
+		if err != nil {
+			return nil, errAuthentication
+		}
+		return renew, nil // renewal keeps the token's identity and confirmation
+	case rst.ActAs != nil:
+		actas, err := s.verify(rawElement(rst.ActAs.Content, "Assertion"))
+		if err != nil {
+			return nil, errAuthentication
+		}
+		t = &token{Subject: actas.Subject, Groups: actas.Groups, Solution: actas.Solution}
+	case security.Username != "":
+		t = &token{Subject: security.Username}
+	case security.BinarySecurityToken != "":
+		// A solution user authenticates by certificate: its name is the certificate's CN.
+		name := cert.Subject.CommonName
+		if name == "" {
+			return nil, errAuthentication
+		}
+		t = &token{Subject: name, Solution: true}
+	case header != nil:
+		t = &token{Subject: header.Subject, Groups: header.Groups, Solution: header.Solution}
+	default:
+		return nil, errRequest
+	}
+
+	if !strings.Contains(t.Subject, "@") {
+		t.Subject += "@" + s.Domain
+	}
+	if t.Groups == nil {
+		groups := []string{"Users", "Everyone"}
+		switch {
+		case strings.EqualFold(t.Subject, "Administrator@"+s.Domain):
+			groups = defaultGroups
+		case t.Solution:
+			groups = []string{"Users", "SolutionUsers", "Everyone"}
+		}
+		for _, g := range groups {
+			t.Groups = append(t.Groups, s.Domain+`\`+g)
+		}
+	}
+	if rst.KeyType != "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer" {
+		t.Certificate = cert
+	}
+
+	return t, nil
+}
+
+// issue returns a signed token for the principal req authenticates, with the lifetime it requests.
+func (s *Handler) issue(req *request) (string, *internal.Lifetime, error) {
+	t, err := s.principal(req)
+	if err != nil {
+		return "", nil, err
+	}
+
+	lifetime := 5 * time.Minute
+	created, cerr := time.Parse(internal.Time, req.Body.RST.Created)
+	expires, eerr := time.Parse(internal.Time, req.Body.RST.Expires)
+	if cerr == nil && eerr == nil && expires.After(created) {
+		lifetime = expires.Sub(created)
+	}
+	now := time.Now().UTC()
+	t.NotBefore, t.NotOnOrAfter = now, now.Add(lifetime)
+
+	key, cert, err := s.signer()
+	if err != nil {
+		return "", nil, err
+	}
+	issuer := s.URL.JoinPath("websso", "SAML2", "Metadata", s.Domain).String()
+	assertion, err := t.sign(issuer, key, cert)
+	if err != nil {
+		return "", nil, err
+	}
+	s.mint(assertion)
+
+	return assertion, &internal.Lifetime{
+		Created: t.NotBefore.Format(internal.Time),
+		Expires: t.NotOnOrAfter.Format(internal.Time),
+	}, nil
+}
 
 // ServeHTTP handles STS requests.
-func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	action := r.Header.Get("SOAPAction")
 	action = strings.TrimSuffix(action, `"`) // PowerCLI sts client quotes the header value
 
 	env := soap.Envelope{}
-	now := time.Now()
-	lifetime := &internal.Lifetime{
-		Created: now.Format(internal.Time),
-		Expires: now.Add(5 * time.Minute).Format(internal.Time),
-	}
-
-	switch path.Base(action) {
-	case "Issue":
-		body := internal.RequestSecurityTokenBody{
-			Res: &internal.RequestSecurityTokenResponseCollection{
-				RequestSecurityTokenResponse: internal.RequestSecurityTokenResponse{
-					RequestedSecurityToken: internal.RequestedSecurityToken{
-						Assertion: token,
-					},
-					Lifetime: lifetime,
-				},
-			},
-		}
-		env.Body = body
-	case "Renew":
-		body := internal.RenewSecurityTokenBody{
-			Res: &internal.RequestSecurityTokenResponse{
-				RequestedSecurityToken: internal.RequestedSecurityToken{
-					Assertion: token,
-				},
-				Lifetime: lifetime,
-			},
-		}
-		env.Body = body
-	default:
+	kind := path.Base(action)
+	if kind != "Issue" && kind != "Renew" {
 		log.Printf("sts: unsupported action=%s", action)
 		w.WriteHeader(http.StatusNotFound)
 		return
+	}
+
+	var req request
+	if err := xml.NewDecoder(r.Body).Decode(&req); err != nil {
+		s.fault(w, errRequest)
+		return
+	}
+
+	assertion, lifetime, err := s.issue(&req)
+	if err != nil {
+		s.fault(w, err)
+		return
+	}
+
+	res := internal.RequestSecurityTokenResponse{
+		RequestedSecurityToken: internal.RequestedSecurityToken{
+			Assertion: assertion,
+		},
+		Lifetime: lifetime,
+	}
+
+	switch kind {
+	case "Issue":
+		env.Body = internal.RequestSecurityTokenBody{
+			Res: &internal.RequestSecurityTokenResponseCollection{
+				RequestSecurityTokenResponse: res,
+			},
+		}
+	case "Renew":
+		env.Body = internal.RenewSecurityTokenBody{
+			Res: &res,
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, internal.Marshal(env))
 }
 
-// Currently simulator.SessionManager.LoginByToken() only checks for a non-empty Assertion.Subject.NameID field,
-// so the token below is returned by Issue and Renew requests for now.
-var token = `<saml2:Assertion xmlns:saml2="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="_1881a9ba-4a76-4baa-839b-36e2cba10743" IssueInstant="2018-03-04T00:27:56.409Z" Version="2.0"><saml2:Issuer Format="urn:oasis:names:tc:SAML:2.0:nameid-format:entity">https://office1-sfo2-dhcp221.eng.vmware.com/websso/SAML2/Metadata/vsphere.local</saml2:Issuer><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference URI="#_1881a9ba-4a76-4baa-839b-36e2cba10743"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"><ec:InclusiveNamespaces xmlns:ec="http://www.w3.org/2001/10/xml-exc-c14n#" PrefixList="xs xsi"/></ds:Transform></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>l/0AzCGiPB69oTstUdrCkihBIDtwb83A93zAe10tG3k=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue>EKHf14V0CHctwqXRlhYSYNyID5lNJLimbw57eUBm/QlAMLY7GJ1wth44oeQPSj3eMpJaXKHEYYtn
-fqMngciTrq4ZP2SS7KizxuBjcHChWGmcp+t0zn7+fTbp5sL8HfF3AfOwcyZxwj8n2S7E6Eee7zeC
-cjZpKKZ1QIEwASwpuMCs7vU9IuXsUguHAaN55Jpx3N5u7PlSo/NZE0TJZ+zNWP8m9H5shPDY272D
-Vnp3MGfoD+Dj6T4H8OVF6bMp6czbHsEHTthwPh+pBTzR8ppkyxPKWLkC7OWiOtZBKqLSMTchQyqn
-GNJdl72FBXHS8WXGtJjbwL+MKf+WujhqwdRbXw==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509Certificate>MIIDxTCCAq2gAwIBAgIJAMYXe1r3pfByMA0GCSqGSIb3DQEBCwUAMIGqMQswCQYDVQQDDAJDQTEX
-MBUGCgmSJomT8ixkARkWB3ZzcGhlcmUxFTATBgoJkiaJk/IsZAEZFgVsb2NhbDELMAkGA1UEBhMC
-VVMxEzARBgNVBAgMCkNhbGlmb3JuaWExLDAqBgNVBAoMI29mZmljZTEtc2ZvMi1kaGNwMjIxLmVu
-Zy52bXdhcmUuY29tMRswGQYDVQQLDBJWTXdhcmUgRW5naW5lZXJpbmcwHhcNMTgwMTExMjE1MjQ3
-WhcNMjgwMTA2MjIwMjMxWjAYMRYwFAYDVQQDDA1zc29zZXJ2ZXJTaWduMIIBIjANBgkqhkiG9w0B
-AQEFAAOCAQ8AMIIBCgKCAQEAohfKdXEpiCB+EewJJKk98he/KeAK/1bZ2MjnLspwt3Nvv2uh2xoa
-1asP/TMAhxcztPxhqEZmi0W+nihF/yffY/AhQrGx9XynaOMUNarCNGVI2qBovi8gohT2pXlbKxgZ
-b8VZkVl41WYkDBfQrzoP0XU/sFeOoNIHcFQX/82NFAYtN/4aBZ9gDqhyPihv2RSNG4MnvxxgxtZI
-FPb3eyDt8poKOMjt8zG2JkJRQYiEOCLo/sKJEKXLZeWiqYsbk391/vIk2vaX3L3pgu8yYx/dLfxv
-X/mRYIOcVzpXWQCEPdCejQBwrmVeRaepW5cMhOVlMAAw+mEXYVVTaIi1pfN53wIDAQABo38wfTAL
-BgNVHQ8EBAMCBeAwLgYDVR0RBCcwJYIjb2ZmaWNlMS1zZm8yLWRoY3AyMjEuZW5nLnZtd2FyZS5j
-b20wHQYDVR0OBBYEFAtGcFg9jVO3aBjgd2K0iBFTAPNSMB8GA1UdIwQYMBaAFLpyqy2v1I7a3URK
-ohtSLAtqve5qMA0GCSqGSIb3DQEBCwUAA4IBAQB91dZHRFunBs+YvuOYFRlwJTZOPXzlSYurxC7h
-VeYv6LUGZnuTkp0KfVMsfHyaeDslM8+5F9Iug1jxmEmpeyoaY12zQmxQB6P8lN4jj1Aazj8qmDH6
-ClaSY4Pp0lOSp9ROVlnLi6sRsRphOg+4MS4UeXGgSFlMN1BWJmXcwCazbii8l/EzGx2QhlVjWMAz
-lPFQlWQ4FvV5vUCf8iE+UTin+6oJSXmFzip1NOBOGiIbClmpergZUchNiqTYTrpqblD/Qex5Bv9e
-+xAwuw8e0Lm0XICOcFmKvpotLKKiqMMsRqPoeTqnoSyKqvCGRo2hUs4Y4O6SqEd80+E5lbXImrSt</ds:X509Certificate><ds:X509Certificate>MIIEPzCCAyegAwIBAgIJANS+QleTVJNbMA0GCSqGSIb3DQEBCwUAMIGqMQswCQYDVQQDDAJDQTEX
-MBUGCgmSJomT8ixkARkWB3ZzcGhlcmUxFTATBgoJkiaJk/IsZAEZFgVsb2NhbDELMAkGA1UEBhMC
-VVMxEzARBgNVBAgMCkNhbGlmb3JuaWExLDAqBgNVBAoMI29mZmljZTEtc2ZvMi1kaGNwMjIxLmVu
-Zy52bXdhcmUuY29tMRswGQYDVQQLDBJWTXdhcmUgRW5naW5lZXJpbmcwHhcNMTgwMTA4MjIwMjMx
-WhcNMjgwMTA2MjIwMjMxWjCBqjELMAkGA1UEAwwCQ0ExFzAVBgoJkiaJk/IsZAEZFgd2c3BoZXJl
-MRUwEwYKCZImiZPyLGQBGRYFbG9jYWwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlh
-MSwwKgYDVQQKDCNvZmZpY2UxLXNmbzItZGhjcDIyMS5lbmcudm13YXJlLmNvbTEbMBkGA1UECwwS
-Vk13YXJlIEVuZ2luZWVyaW5nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxcN7rsoK
-CIapsEOYejPK38Qk7CUSPFcOmT7iF15UFlZDogHe1G/ZkYvcP0IvLvpemRiYuRpVGVuUZ9XOgeW6
-J5xpSuNRXMHSMDTUwLM9t/4NMAQxgWVlJjFmPVBIZiWaQgdCzEbCDcv/XaZeb6uJYlbmLKvopmwy
-oDfncGXRUuQIZFsVIUhUgOtbbp9UmvXyjo9ukWdVcTkKlKK7NZGaVa4JYy7q4cc6g5eRmD9qp16o
-vx8DageNAasTP6arnb5CyoGI4KPqJjaI7V4Z1KiOUs+Zj+VtC3XdpVthNtiJ+vgXccO8e7zYfP0y
-d1PCQ/GEZAlRabus5Iplu4/xC23NywIDAQABo2YwZDAdBgNVHQ4EFgQUunKrLa/UjtrdREqiG1Is
-C2q97mowHwYDVR0RBBgwFoEOZW1haWxAYWNtZS5jb22HBH8AAAEwDgYDVR0PAQH/BAQDAgEGMBIG
-A1UdEwEB/wQIMAYBAf8CAQAwDQYJKoZIhvcNAQELBQADggEBAC8bMIhFtlXnCF2fUixTXJ5HZFNY
-vbxa1eFjLFYuBsGBqhPEHkHkdKwgpfo1sd4t0L7JaGS9wsH6zyRUQs97subV5YUI6rvAPOBGDQTm
-RmCeqz3ODZq6JwZEnTTqZjvUVckmt/L/QaRUHAW27MU+SuN8rP0Nghf/gkOabsaWfyT2ADquko4e
-b7seYIlR5mJs+pxVBBsBB2nzxuaV5EjkgestxBqpGkxMnKEDhG6+VjqVxsZoEiNzdBNU7eM67Jc2
-2KU85jHKAao9LfMbwbHOA//1RStXXElyzPQvecq17ATvpw8AxCRu2KeKRwp3Pm2RiquDQFx8aiCe
-2Re4gkrEemA=</ds:X509Certificate></ds:X509Data></ds:KeyInfo></ds:Signature><saml2:Subject><saml2:NameID Format="http://schemas.xmlsoap.org/claims/UPN">Administrator@VSPHERE.LOCAL</saml2:NameID><saml2:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer"><saml2:SubjectConfirmationData NotOnOrAfter="2018-03-04T00:27:01.401Z"/></saml2:SubjectConfirmation></saml2:Subject><saml2:Conditions NotBefore="2018-03-04T00:22:01.401Z" NotOnOrAfter="2018-03-04T00:27:01.401Z"><saml2:ProxyRestriction Count="10"/></saml2:Conditions><saml2:AuthnStatement AuthnInstant="2018-03-04T00:27:56.402Z"><saml2:AuthnContext><saml2:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml2:AuthnContextClassRef></saml2:AuthnContext></saml2:AuthnStatement><saml2:AttributeStatement><saml2:Attribute FriendlyName="Groups" Name="http://rsa.com/schemas/attr-names/2009/01/GroupIdentity" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">vsphere.local\Users</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\CAAdmins</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\ComponentManager.Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\SystemConfiguration.BashShellAdministrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\SystemConfiguration.Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\LicenseService.Administrators</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\ActAsUsers</saml2:AttributeValue><saml2:AttributeValue xsi:type="xs:string">vsphere.local\Everyone</saml2:AttributeValue></saml2:Attribute><saml2:Attribute FriendlyName="givenName" Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">Administrator</saml2:AttributeValue></saml2:Attribute><saml2:Attribute FriendlyName="surname" Name="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">vsphere.local</saml2:AttributeValue></saml2:Attribute><saml2:Attribute FriendlyName="Subject Type" Name="http://vmware.com/schemas/attr-names/2011/07/isSolution" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri"><saml2:AttributeValue xsi:type="xs:string">false</saml2:AttributeValue></saml2:Attribute></saml2:AttributeStatement></saml2:Assertion>`
+// fault responds with a SOAP fault for err. The fault never includes the request.
+func (s *Handler) fault(w http.ResponseWriter, err error) {
+	var f *fault
+	if !errors.As(err, &f) {
+		f = &fault{"wst:RequestFailed", "The request failed"}
+	}
+	env := soap.Envelope{
+		Body: internal.RequestSecurityTokenBody{
+			Fault_: &soap.Fault{Code: f.code, String: f.message},
+		},
+	}
+	w.WriteHeader(http.StatusInternalServerError)
+	fmt.Fprint(w, internal.Marshal(env))
+}
