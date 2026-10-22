@@ -19,6 +19,8 @@ func TestHostFirewallSystem(t *testing.T) {
 	m.Datastore = 0
 	m.Machine = 0
 
+	t.Cleanup(m.Remove)
+
 	err := m.Create()
 	if err != nil {
 		t.Fatal(err)
