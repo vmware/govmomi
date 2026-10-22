@@ -29,6 +29,9 @@ func newEnvironmentBrowser(
 
 	env := new(EnvironmentBrowser)
 	env.initDescriptorReturnVal(ctx, hostRefs...)
+	browser := &HostDatastoreBrowser{}
+	ref := ctx.Map.Put(browser).Reference()
+	env.DatastoreBrowser = &ref
 	ctx.Map.Put(env)
 	return &env.Self
 }
@@ -133,19 +136,36 @@ func (b *EnvironmentBrowser) hosts(ctx *Context) []types.ManagedObjectReference 
 	return nil
 }
 
+func (b *EnvironmentBrowser) configOption() *types.VirtualMachineConfigOption {
+	if opt := b.QueryConfigOptionResponse.Returnval; opt != nil {
+		// Guest filtering must not modify the recorded response.
+		clone := *opt
+		return &clone
+	}
+	opt := &types.VirtualMachineConfigOption{
+		Version:       esx.HardwareVersion,
+		DefaultDevice: esx.VirtualDevice,
+	}
+	opt.HardwareOptions.VirtualDeviceOption = []types.BaseVirtualDeviceOption{
+		&types.VirtualLsiLogicControllerOption{
+			VirtualSCSIControllerOption: types.VirtualSCSIControllerOption{
+				VirtualControllerOption: types.VirtualControllerOption{
+					VirtualDeviceOption: types.VirtualDeviceOption{Type: "VirtualLsiLogicController"},
+				},
+				Sharing: []types.VirtualSCSISharing{types.VirtualSCSISharingNoSharing},
+			},
+		},
+	}
+	opt.HardwareOptions.ResourceConfigOption.CpuAllocationOption.SharesOption.DefaultLevel = types.SharesLevelNormal
+	opt.HardwareOptions.ResourceConfigOption.MemoryAllocationOption.SharesOption.DefaultLevel = types.SharesLevelNormal
+	return opt
+}
+
 func (b *EnvironmentBrowser) QueryConfigOption(req *types.QueryConfigOption) soap.HasFault {
 	body := new(methods.QueryConfigOptionBody)
 
-	opt := b.QueryConfigOptionResponse.Returnval
-	if opt == nil {
-		opt = &types.VirtualMachineConfigOption{
-			Version:       esx.HardwareVersion,
-			DefaultDevice: esx.VirtualDevice,
-		}
-	}
-
 	body.Res = &types.QueryConfigOptionResponse{
-		Returnval: opt,
+		Returnval: b.configOption(),
 	}
 
 	return body
@@ -167,13 +187,7 @@ func guestFamily(id string) string {
 func (b *EnvironmentBrowser) QueryConfigOptionEx(req *types.QueryConfigOptionEx) soap.HasFault {
 	body := new(methods.QueryConfigOptionExBody)
 
-	opt := b.QueryConfigOptionResponse.Returnval
-	if opt == nil {
-		opt = &types.VirtualMachineConfigOption{
-			Version:       esx.HardwareVersion,
-			DefaultDevice: esx.VirtualDevice,
-		}
-	}
+	opt := b.configOption()
 
 	if req.Spec != nil {
 		// From the SDK QueryConfigOptionEx doc:
@@ -251,6 +265,11 @@ func (b *EnvironmentBrowser) QueryConfigTarget(ctx *Context, req *types.QueryCon
 		target.NumCpus += int32(host.Summary.Hardware.NumCpuPkgs)
 		target.NumCpuCores += int32(host.Summary.Hardware.NumCpuCores)
 		target.NumNumaNodes++
+		// A VM must fit on one host, even when querying a cluster.
+		memMB := int32(host.Summary.Hardware.MemorySize / (1024 * 1024))
+		if memMB > target.MaxMemMBOptimalPerf {
+			target.MaxMemMBOptimalPerf = memMB
+		}
 
 		for _, ref := range host.Datastore {
 			if seen[ref] {
