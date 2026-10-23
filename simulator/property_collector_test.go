@@ -969,6 +969,81 @@ func TestPropertyCollectorInvalidProperty(t *testing.T) {
 	}
 }
 
+func TestPropertyCollectorConcurrentViewTraversal(t *testing.T) {
+	for _, inPlace := range []bool{false, true} {
+		t.Run(fmt.Sprintf("inPlace=%t", inPlace), func(t *testing.T) {
+			ctx := NewContext()
+			writer := *ctx // Separate requests must not share lock ownership.
+			var vms []types.ManagedObjectReference
+			for _, name := range []string{"vm-1", "vm-2"} {
+				vm := new(mo.VirtualMachine)
+				vm.Name = name
+				vms = append(vms, ctx.Map.Put(vm).Reference())
+			}
+			cv := new(ContainerView)
+			cv.View = append(cv.View, vms[0])
+			ctx.Session.Put(cv)
+			lv := new(ListView)
+			lv.View = append(lv.View, cv.Reference())
+			ctx.Session.Put(lv)
+
+			req := &types.RetrievePropertiesEx{
+				SpecSet: []types.PropertyFilterSpec{{
+					ObjectSet: []types.ObjectSpec{{
+						Obj: lv.Reference(), Skip: types.NewBool(true),
+						SelectSet: []types.BaseSelectionSpec{&types.TraversalSpec{
+							Type: "ListView", Path: "view", Skip: types.NewBool(true),
+							SelectSet: []types.BaseSelectionSpec{&types.TraversalSpec{
+								Type: "ContainerView", Path: "view",
+							}},
+						}},
+					}},
+					PropSet: []types.PropertySpec{{Type: "VirtualMachine", PathSet: []string{"name"}}},
+				}},
+			}
+
+			stop, done := make(chan struct{}), make(chan struct{})
+			go func() {
+				defer close(done)
+				for i := 0; ; i++ {
+					select {
+					case <-stop:
+						return
+					default:
+					}
+					writer.WithLock(cv, func() {
+						ref := vms[i%len(vms)]
+						if inPlace {
+							// Removing references can reuse the view's backing array.
+							cv.View[0] = ref
+							return
+						}
+						// Moving a VM updates the view through ContainerView.PutObject.
+						writer.Update(cv, []types.PropertyChange{{Name: "view", Val: []types.ManagedObjectReference{ref}}})
+					})
+				}
+			}()
+			defer func() {
+				close(stop)
+				<-done
+			}()
+
+			for i := 0; i < 1000; i++ {
+				res, fault := collect(ctx, req)
+				if fault != nil {
+					t.Fatal(fault)
+				}
+				if len(res.Objects) != 1 || len(res.Objects[0].PropSet) != 1 {
+					t.Fatalf("expected one VM and its name, got %+v", res.Objects)
+				}
+				if name := res.Objects[0].PropSet[0].Val; name != "vm-1" && name != "vm-2" {
+					t.Fatalf("unexpected VM name: %v", name)
+				}
+			}
+		})
+	}
+}
+
 func TestPropertyCollectorRecursiveSelectSet(t *testing.T) {
 	ctx := context.Background()
 
