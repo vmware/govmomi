@@ -644,9 +644,10 @@ func (c *container) remove(ctx *Context) error {
 	var rmverr error
 	if len(volumesToReap) > 0 {
 		run := []string{"volume", "rm", "-f"}
-		run = append(run, strings.Split(string(volumesToReap), "\n")...)
+		run = append(run, strings.Fields(string(volumesToReap))...)
 		cmd = exec.Command("docker", run...)
-		out, rmverr := cmd.Output()
+		var out []byte
+		out, rmverr = cmd.Output()
 		if rmverr != nil {
 			log.Printf("%s %s: %s, %s", c.name, cmd.Args, rmverr, out)
 		}
@@ -661,7 +662,7 @@ func (c *container) remove(ctx *Context) error {
 	var rmnerr error
 	if len(networksToReap) > 0 {
 		run := []string{"network", "rm", "-f"}
-		run = append(run, strings.Split(string(volumesToReap), "\n")...)
+		run = append(run, strings.Fields(string(networksToReap))...)
 		cmd = exec.Command("docker", run...)
 		rmnerr = cmd.Run()
 		if rmnerr != nil {
