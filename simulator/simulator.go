@@ -180,6 +180,7 @@ func tracef(format string, v ...any) {
 
 func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	handler := ctx.Map.Get(method.This)
+	registeredHandler := handler
 	session := ctx.Session
 	ctx.Caller = &method.This
 
@@ -266,9 +267,21 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		args = append(args, reflect.ValueOf(ctx))
 	}
 	args = append(args, reflect.ValueOf(method.Body))
+	var removed soap.HasFault
 	ctx.Map.WithLock(ctx, handler, func() {
+		// A VM may have been destroyed while this request waited for its lock.
+		// Recheck only its registry handler; custom and session handlers retain
+		// their existing dispatch behavior.
+		if _, ok := handler.(*VirtualMachine); ok && handler == registeredHandler && ctx.Map.Get(method.This) != handler {
+			fault := &types.ManagedObjectNotFound{Obj: method.This}
+			removed = &serverFaultBody{Reason: Fault("managed object not found", fault)}
+			return
+		}
 		res = m.Call(args)
 	})
+	if removed != nil {
+		return removed
+	}
 
 	return res[0].Interface().(soap.HasFault)
 }
