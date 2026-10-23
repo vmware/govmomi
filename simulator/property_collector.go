@@ -468,7 +468,7 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 	rr.collected[ref] = true
 }
 
-func (rr *retrieveResult) selectSet(ctx *Context, obj reflect.Value, s []types.BaseSelectionSpec, refs *[]types.ManagedObjectReference) types.BaseMethodFault {
+func (rr *retrieveResult) selectSet(ctx *Context, obj types.ManagedObjectReference, s []types.BaseSelectionSpec, refs *[]types.ManagedObjectReference) types.BaseMethodFault {
 	for _, ss := range s {
 		ts, ok := ss.(*types.TraversalSpec)
 		if ok {
@@ -487,18 +487,24 @@ func (rr *retrieveResult) selectSet(ctx *Context, obj reflect.Value, s []types.B
 			}
 		}
 
-		f, _ := fieldValue(obj, ts.Path)
+		// Snapshot references under this object's lock, including the backing
+		// array. Release it before traversing children to avoid nesting locks in
+		// inventory order, which can conflict with concurrent inventory updates.
+		var children []types.ManagedObjectReference
+		ctx.WithLock(obj, func() {
+			if rval, ok := getObject(ctx, obj); ok {
+				f, _ := fieldValue(rval, ts.Path)
+				children = append(children, fieldRefs(f)...)
+			}
+		})
 
-		for _, ref := range fieldRefs(f) {
+		for _, ref := range children {
 			if isFalse(ts.Skip) {
 				*refs = append(*refs, ref)
 			}
 
-			rval, ok := getObject(ctx, ref)
-			if ok {
-				if err := rr.selectSet(ctx, rval, ts.SelectSet, refs); err != nil {
-					return err
-				}
+			if err := rr.selectSet(ctx, ref, ts.SelectSet, refs); err != nil {
+				return err
 			}
 		}
 	}
@@ -520,7 +526,7 @@ func collect(ctx *Context, r *types.RetrievePropertiesEx) (*types.RetrieveResult
 	for _, spec := range r.SpecSet {
 		for _, o := range spec.ObjectSet {
 			unlock := ctx.Map.AcquireLock(ctx, o.Obj)
-			rval, ok := getObject(ctx, o.Obj)
+			_, ok := getObject(ctx, o.Obj)
 			if !ok {
 				unlock()
 				if isFalse(spec.ReportMissingObjectsInResults) {
@@ -533,9 +539,8 @@ func collect(ctx *Context, r *types.RetrievePropertiesEx) (*types.RetrieveResult
 				rr.collect(ctx, o.Obj)
 			}
 
-			err := rr.selectSet(ctx, rval, o.SelectSet, &refs)
 			unlock()
-			if err != nil {
+			if err := rr.selectSet(ctx, o.Obj, o.SelectSet, &refs); err != nil {
 				return nil, err
 			}
 		}
