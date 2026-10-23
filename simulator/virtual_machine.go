@@ -2832,12 +2832,32 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 }
 
 func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
-	dc := ctx.Map.getEntityDatacenter(vm)
-
 	task := CreateTask(vm, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if ctx.Map.Get(vm.Self) != vm {
+			return nil, &types.ManagedObjectNotFound{Obj: vm.Self}
+		}
+		dc := ctx.Map.getEntityDatacenter(vm)
 		if dc == nil {
 			return nil, &types.ManagedObjectNotFound{Obj: vm.Self} // If our Parent was destroyed, so were we.
 			// TODO: should this also trigger container removal?
+		}
+
+		if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
+			return nil, &types.InvalidPowerState{
+				RequestedState: types.VirtualMachinePowerStatePoweredOff,
+				ExistingState:  vm.Runtime.PowerState,
+			}
+		}
+
+		// Keep the VM registered and its files intact until backing cleanup
+		// succeeds, so a failed removal can be retried through the same MoRef.
+		err := vm.svm.remove(ctx)
+		if err != nil {
+			return nil, &types.RuntimeFault{
+				MethodFault: types.MethodFault{
+					FaultCause: &types.LocalizedMethodFault{
+						Fault:            &types.SystemErrorFault{Reason: err.Error()},
+						LocalizedMessage: err.Error()}}}
 		}
 
 		r := vm.UnregisterVM(ctx, &types.UnregisterVM{
@@ -2861,15 +2881,6 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 			Name:       vm.Config.Files.LogDirectory,
 			Datacenter: &dc.Self,
 		})
-
-		err := vm.svm.remove(ctx)
-		if err != nil {
-			return nil, &types.RuntimeFault{
-				MethodFault: types.MethodFault{
-					FaultCause: &types.LocalizedMethodFault{
-						Fault:            &types.SystemErrorFault{Reason: err.Error()},
-						LocalizedMessage: err.Error()}}}
-		}
 
 		return nil, nil
 	})
