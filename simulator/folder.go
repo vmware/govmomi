@@ -658,7 +658,7 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 			DVSConfigInfo: types.DVSConfigInfo{
 				Uuid:                                dvs.Uuid,
 				Name:                                spec.Name,
-				ConfigVersion:                       spec.ConfigVersion,
+				ConfigVersion:                       "0",
 				NumStandalonePorts:                  spec.NumStandalonePorts,
 				MaxPorts:                            spec.MaxPorts,
 				UplinkPortPolicy:                    spec.UplinkPortPolicy,
