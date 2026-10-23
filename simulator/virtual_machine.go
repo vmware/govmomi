@@ -1344,7 +1344,7 @@ func (vm *VirtualMachine) createFile(ctx *Context, spec string, name string, reg
 	ds := vm.useDatastore(ctx, p.Datastore)
 
 	nhost := len(ds.Host)
-	if internal.IsDatastoreVSAN(ds.Datastore) && nhost < 3 {
+	if internal.IsDatastoreVSAN(ds.Summary.Type) && nhost < 3 {
 		fault := new(types.CannotCreateFile)
 		fault.FaultMessage = []types.LocalizableMessage{
 			{

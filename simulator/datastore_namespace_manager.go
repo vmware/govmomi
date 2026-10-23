@@ -51,7 +51,7 @@ func (m *DatastoreNamespaceManager) ConvertNamespacePathToUuidPath(ctx *Context,
 		return body
 	}
 
-	if !internal.IsDatastoreVSAN(ds.Datastore) {
+	if !internal.IsDatastoreVSAN(ds.Summary.Type) {
 		body.Fault_ = Fault("", &types.InvalidDatastore{Datastore: &ds.Self})
 		return body
 	}
@@ -72,7 +72,7 @@ func (m *DatastoreNamespaceManager) CreateDirectory(ctx *Context, req *types.Cre
 		return body
 	}
 
-	if !internal.IsDatastoreVSAN(ds.Datastore) {
+	if !internal.IsDatastoreVSAN(ds.Summary.Type) {
 		body.Fault_ = Fault("", &types.CannotCreateFile{
 			FileFault: types.FileFault{
 				File: "Datastore not supported for directory creation by DatastoreNamespaceManager",
@@ -140,7 +140,7 @@ func (m *DatastoreNamespaceManager) DeleteDirectory(ctx *Context, req *types.Del
 		return body
 	}
 
-	if !internal.IsDatastoreVSAN(ds.Datastore) {
+	if !internal.IsDatastoreVSAN(ds.Summary.Type) {
 		body.Fault_ = Fault("", &types.FileFault{
 			File: "Datastore not supported for directory deletion by DatastoreNamespaceManager",
 		})
