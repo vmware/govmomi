@@ -46,7 +46,7 @@ func newStore() *store {
 
 // -------- clusters and supervisors --------
 
-func (s *store) clusterSummaries() []namespace.ClusterSummary {
+func (s *store) listClusters() []namespace.ClusterSummary {
 	clusters := make([]namespace.ClusterSummary, 0, len(s.clusters))
 	for _, cluster := range s.clusters {
 		clusters = append(clusters, cluster)
@@ -72,12 +72,12 @@ func (s *store) disableCluster(id string) bool {
 	return true
 }
 
-func (s *store) supervisor(id string) (supervisor, bool) {
+func (s *store) getSupervisor(id string) (supervisor, bool) {
 	sup, exists := s.supervisors[id]
 	return sup, exists
 }
 
-func (s *store) supervisorSummaries() []namespace.SupervisorsSummaryResultItem {
+func (s *store) listSupervisors() []namespace.SupervisorsSummaryResultItem {
 	items := make([]namespace.SupervisorsSummaryResultItem, 0, len(s.supervisors))
 	for id, sup := range s.supervisors {
 		items = append(items, namespace.SupervisorsSummaryResultItem{
@@ -94,7 +94,7 @@ func (s *store) supervisorSummaries() []namespace.SupervisorsSummaryResultItem {
 }
 
 func (s *store) newSupervisor(id string) supervisor {
-	name := s.clusterName(id)
+	name := s.lookupClusterName(id)
 
 	return supervisor{
 		info: namespace.SupervisorSummaryInfo{
@@ -114,11 +114,11 @@ func (s *store) newSupervisor(id string) supervisor {
 			Zone:     name,
 			Clusters: []string{id},
 		}},
-		networks: s.portgroupNetworks(),
+		networks: s.collectPortgroupNetworks(),
 	}
 }
 
-func (s *store) clusterName(id string) string {
+func (s *store) lookupClusterName(id string) string {
 	for _, entity := range s.registry.All("ClusterComputeResource") {
 		if entity.Entity().Self.Value == id {
 			return entity.Entity().Name
@@ -127,8 +127,8 @@ func (s *store) clusterName(id string) string {
 	return id
 }
 
-// portgroupNetworks maps inventory DVPGs to workload networks, minus the per-switch uplink.
-func (s *store) portgroupNetworks() []namespace.NetworkInfo {
+// collectPortgroupNetworks maps inventory DVPGs to workload networks, minus the per-switch uplink.
+func (s *store) collectPortgroupNetworks() []namespace.NetworkInfo {
 	entities := s.registry.All("DistributedVirtualPortgroup")
 
 	slices.SortFunc(entities, func(a, b mo.Entity) int {
@@ -158,7 +158,7 @@ func (s *store) portgroupNetworks() []namespace.NetworkInfo {
 
 // -------- supervisor services --------
 
-func (s *store) serviceSummaries() []namespace.SupervisorServiceSummary {
+func (s *store) listServices() []namespace.SupervisorServiceSummary {
 	result := make([]namespace.SupervisorServiceSummary, 0, len(s.services))
 	for id, info := range s.services {
 		result = append(result, namespace.SupervisorServiceSummary{
@@ -170,7 +170,7 @@ func (s *store) serviceSummaries() []namespace.SupervisorServiceSummary {
 	return result
 }
 
-func (s *store) service(id string) (namespace.SupervisorServiceInfo, bool) {
+func (s *store) getService(id string) (namespace.SupervisorServiceInfo, bool) {
 	info, exists := s.services[id]
 	return info, exists
 }
@@ -205,7 +205,7 @@ func (s *store) hasServiceVersions(id string) bool {
 	return exists
 }
 
-func (s *store) serviceVersionSummaries(id string) []namespace.SupervisorServiceVersionSummary {
+func (s *store) listServiceVersions(id string) []namespace.SupervisorServiceVersionSummary {
 	versions := s.serviceVersions[id]
 
 	result := make([]namespace.SupervisorServiceVersionSummary, 0, len(versions))
@@ -218,7 +218,7 @@ func (s *store) serviceVersionSummaries(id string) []namespace.SupervisorService
 	return result
 }
 
-func (s *store) serviceVersion(id, version string) (namespace.SupervisorServiceVersionInfo, bool) {
+func (s *store) getServiceVersion(id, version string) (namespace.SupervisorServiceVersionInfo, bool) {
 	info, exists := s.serviceVersions[id][version]
 	return info, exists
 }
@@ -254,12 +254,12 @@ func createServiceVersionInfo(pkg carvelPackage, content string) namespace.Super
 
 // -------- namespaces --------
 
-func (s *store) namespace(name string) (namespace.NamespaceInstanceInfoV2, bool) {
+func (s *store) getNamespace(name string) (namespace.NamespaceInstanceInfoV2, bool) {
 	info, exists := s.namespaces[name]
 	return info, exists
 }
 
-func (s *store) namespaceSummaries() []namespace.NamespacesInstanceSummary {
+func (s *store) listNamespaces() []namespace.NamespacesInstanceSummary {
 	result := make([]namespace.NamespacesInstanceSummary, 0, len(s.namespaces))
 	for name, info := range s.namespaces {
 		result = append(result, namespace.NamespacesInstanceSummary{
@@ -274,7 +274,7 @@ func (s *store) namespaceSummaries() []namespace.NamespacesInstanceSummary {
 	return result
 }
 
-func (s *store) namespaceSummariesV2() []namespace.NamespaceInstanceSummaryV2 {
+func (s *store) listNamespacesV2() []namespace.NamespaceInstanceSummaryV2 {
 	result := make([]namespace.NamespaceInstanceSummaryV2, 0, len(s.namespaces))
 	for name, info := range s.namespaces {
 		result = append(result, namespace.NamespaceInstanceSummaryV2{
@@ -363,7 +363,7 @@ func createNamespaceInfo(spec namespace.NamespaceInstanceCreateSpecV2) namespace
 	if spec.NetworkSpec != nil {
 		info.NetworkSpec = createNetworkConfigInfo(*spec.NetworkSpec)
 	} else if spec.Networks == nil {
-		info.NetworkSpec = autoCreatedVpcNetworkConfigInfo(spec.Namespace)
+		info.NetworkSpec = createAutoVpcNetworkConfigInfo(spec.Namespace)
 	}
 	if spec.Networks != nil {
 		addNetworks(&info, *spec.Networks)
@@ -372,8 +372,8 @@ func createNamespaceInfo(spec namespace.NamespaceInstanceCreateSpecV2) namespace
 	return info
 }
 
-// namespacesInstanceInfo projects the v2 record onto the v1 API shape.
-func namespacesInstanceInfo(info namespace.NamespaceInstanceInfoV2) namespace.NamespacesInstanceInfo {
+// convertToNamespacesInstanceInfo projects the v2 record onto the v1 API shape.
+func convertToNamespacesInstanceInfo(info namespace.NamespaceInstanceInfoV2) namespace.NamespacesInstanceInfo {
 	return namespace.NamespacesInstanceInfo{
 		ClusterId:            info.Supervisor,
 		ConfigStatus:         string(info.ConfigStatus),
@@ -385,8 +385,8 @@ func namespacesInstanceInfo(info namespace.NamespaceInstanceInfoV2) namespace.Na
 	}
 }
 
-// autoCreatedVpcNetworkConfigInfo mirrors NSX provisioning a VPC when a namespace requests no network.
-func autoCreatedVpcNetworkConfigInfo(name string) *namespace.NetworkConfigInfo {
+// createAutoVpcNetworkConfigInfo mirrors NSX provisioning a VPC when a namespace requests no network.
+func createAutoVpcNetworkConfigInfo(name string) *namespace.NetworkConfigInfo {
 	return &namespace.NetworkConfigInfo{
 		NetworkProvider: "NSX_VPC",
 		VpcNetwork: &namespace.VpcNetworkInfo{
@@ -508,7 +508,7 @@ func convertToInstanceStats(stats namespace.Stats) namespace.NamespacesInstanceS
 
 // -------- virtual machine classes --------
 
-func (s *store) vmClassList() []namespace.VirtualMachineClassInfo {
+func (s *store) listVmClasses() []namespace.VirtualMachineClassInfo {
 	result := make([]namespace.VirtualMachineClassInfo, 0, len(s.vmClasses))
 	for _, v := range s.vmClasses {
 		result = append(result, v)
@@ -516,7 +516,7 @@ func (s *store) vmClassList() []namespace.VirtualMachineClassInfo {
 	return result
 }
 
-func (s *store) vmClass(id string) (namespace.VirtualMachineClassInfo, bool) {
+func (s *store) getVmClass(id string) (namespace.VirtualMachineClassInfo, bool) {
 	info, exists := s.vmClasses[id]
 	return info, exists
 }

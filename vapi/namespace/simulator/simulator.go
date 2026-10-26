@@ -67,8 +67,8 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 		s.HandleFunc(internal.NamespaceClusterPath+"/{id}", h.cluster)
 		s.HandleFunc(internal.NamespaceClusterPath+"/{id}/support-bundle", h.clustersSupportBundle)
 		s.HandleFunc(internal.NamespaceClusterPath+"/{id}/networks", h.clusterNetworks)
-		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility, h.listCompatibleDistributedSwitches)
-		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility, h.listCompatibleEdgeClusters)
+		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility, h.compatibleDistributedSwitches)
+		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility, h.compatibleEdgeClusters)
 
 		s.HandleFunc(internal.SupervisorsSummariesPath, h.supervisorSummaries)
 		s.HandleFunc(internal.SupervisorsPath+"/{id}/summary", h.supervisorSummary)
@@ -87,7 +87,7 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, h.store.clusterSummaries())
+		vapi.StatusOK(w, h.store.listClusters())
 	}
 }
 
@@ -116,13 +116,13 @@ func (h *Handler) supervisorSummaries(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		vapi.StatusOK(w, namespace.SupervisorsSummaryResult{
-			Items: h.store.supervisorSummaries(),
+			Items: h.store.listSupervisors(),
 		})
 	}
 }
 
 func (h *Handler) supervisorSummary(w http.ResponseWriter, r *http.Request) {
-	s, exists := h.store.supervisor(r.PathValue("id"))
+	s, exists := h.store.getSupervisor(r.PathValue("id"))
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -135,7 +135,7 @@ func (h *Handler) supervisorSummary(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) supervisorTopology(w http.ResponseWriter, r *http.Request) {
-	s, exists := h.store.supervisor(r.PathValue("id"))
+	s, exists := h.store.getSupervisor(r.PathValue("id"))
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -148,7 +148,7 @@ func (h *Handler) supervisorTopology(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) clusterNetworks(w http.ResponseWriter, r *http.Request) {
-	s, exists := h.store.supervisor(r.PathValue("id"))
+	s, exists := h.store.getSupervisor(r.PathValue("id"))
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -199,7 +199,7 @@ func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) 
 	_ = tw.Close()
 }
 
-func (h *Handler) listCompatibleDistributedSwitches(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) compatibleDistributedSwitches(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
@@ -214,7 +214,7 @@ func (h *Handler) listCompatibleDistributedSwitches(w http.ResponseWriter, r *ht
 	}
 }
 
-func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) compatibleEdgeClusters(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
@@ -238,7 +238,7 @@ func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Requ
 func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, h.store.serviceSummaries())
+		vapi.StatusOK(w, h.store.listServices())
 	case http.MethodPost:
 		var spec namespace.SupervisorService
 		if !vapi.Decode(r, w, &spec) {
@@ -255,7 +255,7 @@ func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
-		if _, exists := h.store.service(pkg.id); exists {
+		if _, exists := h.store.getService(pkg.id); exists {
 			vapi.ApiErrorAlreadyExists(w)
 			return
 		}
@@ -268,7 +268,7 @@ func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) service(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	info, exists := h.store.service(id)
+	info, exists := h.store.getService(id)
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -278,7 +278,7 @@ func (h *Handler) service(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		vapi.StatusOK(w, info)
 	case http.MethodPatch:
-		state, ok := serviceStateFromAction(r.URL.Query().Get("action"))
+		state, ok := resolveServiceState(r.URL.Query().Get("action"))
 		if !ok {
 			vapi.ApiErrorInvalidArgument(w)
 			return
@@ -305,7 +305,7 @@ func (h *Handler) serviceVersions(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, h.store.serviceVersionSummaries(id))
+		vapi.StatusOK(w, h.store.listServiceVersions(id))
 	case http.MethodPost:
 		var spec namespace.SupervisorServiceVersion
 		if !vapi.Decode(r, w, &spec) {
@@ -321,7 +321,7 @@ func (h *Handler) serviceVersions(w http.ResponseWriter, r *http.Request) {
 			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
-		if _, exists := h.store.serviceVersion(id, pkg.version); exists {
+		if _, exists := h.store.getServiceVersion(id, pkg.version); exists {
 			vapi.ApiErrorAlreadyExists(w)
 			return
 		}
@@ -335,7 +335,7 @@ func (h *Handler) serviceVersion(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	version := r.PathValue("version")
 
-	info, exists := h.store.serviceVersion(id, version)
+	info, exists := h.store.getServiceVersion(id, version)
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -345,7 +345,7 @@ func (h *Handler) serviceVersion(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		vapi.StatusOK(w, info)
 	case http.MethodPatch:
-		state, ok := serviceStateFromAction(r.URL.Query().Get("action"))
+		state, ok := resolveServiceState(r.URL.Query().Get("action"))
 		if !ok {
 			vapi.ApiErrorInvalidArgument(w)
 			return
@@ -367,7 +367,7 @@ const (
 	deactivatedState = "DEACTIVATED"
 )
 
-func serviceStateFromAction(action string) (string, bool) {
+func resolveServiceState(action string) (string, bool) {
 	switch action {
 	case "activate":
 		return activatedState, true
@@ -434,7 +434,7 @@ func parseCarvelPackage(content string) (carvelPackage, error) {
 func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, h.store.namespaceSummaries())
+		vapi.StatusOK(w, h.store.listNamespaces())
 	case http.MethodPost:
 		var spec namespace.NamespacesInstanceCreateSpec
 		if !vapi.Decode(r, w, &spec) {
@@ -449,7 +449,7 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("namespace")
 
-	info, exists := h.store.namespace(name)
+	info, exists := h.store.getNamespace(name)
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -457,7 +457,7 @@ func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, namespacesInstanceInfo(info))
+		vapi.StatusOK(w, convertToNamespacesInstanceInfo(info))
 	case http.MethodPatch:
 		var spec namespace.NamespacesInstanceUpdateSpec
 		if !vapi.Decode(r, w, &spec) {
@@ -475,7 +475,7 @@ func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) namespacesV2(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, h.store.namespaceSummariesV2())
+		vapi.StatusOK(w, h.store.listNamespacesV2())
 	case http.MethodPost:
 		var spec namespace.NamespaceInstanceCreateSpecV2
 		if !vapi.Decode(r, w, &spec) {
@@ -488,7 +488,7 @@ func (h *Handler) namespacesV2(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) namespaceV2(w http.ResponseWriter, r *http.Request) {
-	info, exists := h.store.namespace(r.PathValue("namespace"))
+	info, exists := h.store.getNamespace(r.PathValue("namespace"))
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -536,7 +536,7 @@ func (h *Handler) registerNamespaceVM(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, h.store.vmClassList())
+		vapi.StatusOK(w, h.store.listVmClasses())
 	case http.MethodPost:
 		var spec namespace.VirtualMachineClassCreateSpec
 		if !vapi.Decode(r, w, &spec) {
@@ -553,14 +553,14 @@ func (h *Handler) vmClass(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		result, exists := h.store.vmClass(id)
+		result, exists := h.store.getVmClass(id)
 		if !exists {
 			vapi.ApiErrorNotFound(w)
 			return
 		}
 		vapi.StatusOK(w, result)
 	case http.MethodPatch:
-		if _, exists := h.store.vmClass(id); !exists {
+		if _, exists := h.store.getVmClass(id); !exists {
 			vapi.ApiErrorNotFound(w)
 			return
 		}
@@ -573,7 +573,7 @@ func (h *Handler) vmClass(w http.ResponseWriter, r *http.Request) {
 		h.store.updateVmClass(id, spec)
 		vapi.StatusOK(w)
 	case http.MethodDelete:
-		if _, exists := h.store.vmClass(id); !exists {
+		if _, exists := h.store.getVmClass(id); !exists {
 			vapi.ApiErrorNotFound(w)
 			return
 		}
