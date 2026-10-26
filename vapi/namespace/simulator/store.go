@@ -20,11 +20,11 @@ import (
 type store struct {
 	registry        *simulator.Registry
 	clusters        map[string]namespace.ClusterSummary
-	supervisors     map[string]*supervisor
-	namespaces      map[string]*namespace.NamespaceInstanceInfoV2
-	vmClasses       map[string]*namespace.VirtualMachineClassInfo
-	services        map[string]*namespace.SupervisorServiceInfo
-	serviceVersions map[string]map[string]*namespace.SupervisorServiceVersionInfo
+	supervisors     map[string]supervisor
+	namespaces      map[string]namespace.NamespaceInstanceInfoV2
+	vmClasses       map[string]namespace.VirtualMachineClassInfo
+	services        map[string]namespace.SupervisorServiceInfo
+	serviceVersions map[string]map[string]namespace.SupervisorServiceVersionInfo
 }
 
 type supervisor struct {
@@ -36,11 +36,11 @@ type supervisor struct {
 func newStore() *store {
 	return &store{
 		clusters:        make(map[string]namespace.ClusterSummary),
-		supervisors:     make(map[string]*supervisor),
-		namespaces:      make(map[string]*namespace.NamespaceInstanceInfoV2),
-		vmClasses:       make(map[string]*namespace.VirtualMachineClassInfo),
-		services:        make(map[string]*namespace.SupervisorServiceInfo),
-		serviceVersions: make(map[string]map[string]*namespace.SupervisorServiceVersionInfo),
+		supervisors:     make(map[string]supervisor),
+		namespaces:      make(map[string]namespace.NamespaceInstanceInfoV2),
+		vmClasses:       make(map[string]namespace.VirtualMachineClassInfo),
+		services:        make(map[string]namespace.SupervisorServiceInfo),
+		serviceVersions: make(map[string]map[string]namespace.SupervisorServiceVersionInfo),
 	}
 }
 
@@ -72,7 +72,7 @@ func (s *store) disableCluster(id string) bool {
 	return true
 }
 
-func (s *store) supervisor(id string) (*supervisor, bool) {
+func (s *store) supervisor(id string) (supervisor, bool) {
 	sup, exists := s.supervisors[id]
 	return sup, exists
 }
@@ -93,10 +93,10 @@ func (s *store) supervisorSummaries() []namespace.SupervisorsSummaryResultItem {
 	return items
 }
 
-func (s *store) newSupervisor(id string) *supervisor {
+func (s *store) newSupervisor(id string) supervisor {
 	name := s.clusterName(id)
 
-	return &supervisor{
+	return supervisor{
 		info: namespace.SupervisorSummaryInfo{
 			Name:             name,
 			ConfigStatus:     namespace.RunningConfigStatus,
@@ -170,26 +170,29 @@ func (s *store) serviceSummaries() []namespace.SupervisorServiceSummary {
 	return result
 }
 
-func (s *store) service(id string) (*namespace.SupervisorServiceInfo, bool) {
+func (s *store) service(id string) (namespace.SupervisorServiceInfo, bool) {
 	info, exists := s.services[id]
 	return info, exists
 }
 
 func (s *store) addService(pkg carvelPackage, content string) {
-	s.services[pkg.id] = &namespace.SupervisorServiceInfo{
+	s.services[pkg.id] = namespace.SupervisorServiceInfo{
 		Name:        pkg.displayName,
 		State:       activatedState,
 		Description: pkg.description,
 	}
-	s.serviceVersions[pkg.id] = map[string]*namespace.SupervisorServiceVersionInfo{
+	s.serviceVersions[pkg.id] = map[string]namespace.SupervisorServiceVersionInfo{
 		pkg.version: createServiceVersionInfo(pkg, content),
 	}
 }
 
 func (s *store) setServiceState(id, state string) {
-	if info, exists := s.services[id]; exists {
-		info.State = state
+	info, exists := s.services[id]
+	if !exists {
+		return
 	}
+	info.State = state
+	s.services[id] = info
 }
 
 func (s *store) removeService(id string) {
@@ -215,7 +218,7 @@ func (s *store) serviceVersionSummaries(id string) []namespace.SupervisorService
 	return result
 }
 
-func (s *store) serviceVersion(id, version string) (*namespace.SupervisorServiceVersionInfo, bool) {
+func (s *store) serviceVersion(id, version string) (namespace.SupervisorServiceVersionInfo, bool) {
 	info, exists := s.serviceVersions[id][version]
 	return info, exists
 }
@@ -225,17 +228,20 @@ func (s *store) addServiceVersion(id string, pkg carvelPackage, content string) 
 }
 
 func (s *store) setServiceVersionState(id, version, state string) {
-	if info, exists := s.serviceVersions[id][version]; exists {
-		info.State = state
+	info, exists := s.serviceVersions[id][version]
+	if !exists {
+		return
 	}
+	info.State = state
+	s.serviceVersions[id][version] = info
 }
 
 func (s *store) removeServiceVersion(id, version string) {
 	delete(s.serviceVersions[id], version)
 }
 
-func createServiceVersionInfo(pkg carvelPackage, content string) *namespace.SupervisorServiceVersionInfo {
-	return &namespace.SupervisorServiceVersionInfo{
+func createServiceVersionInfo(pkg carvelPackage, content string) namespace.SupervisorServiceVersionInfo {
+	return namespace.SupervisorServiceVersionInfo{
 		SupervisorServiceInfo: namespace.SupervisorServiceInfo{
 			Name:        pkg.displayName,
 			State:       activatedState,
@@ -248,7 +254,7 @@ func createServiceVersionInfo(pkg carvelPackage, content string) *namespace.Supe
 
 // -------- namespaces --------
 
-func (s *store) namespace(name string) (*namespace.NamespaceInstanceInfoV2, bool) {
+func (s *store) namespace(name string) (namespace.NamespaceInstanceInfoV2, bool) {
 	info, exists := s.namespaces[name]
 	return info, exists
 }
@@ -284,7 +290,7 @@ func (s *store) namespaceSummariesV2() []namespace.NamespaceInstanceSummaryV2 {
 }
 
 func (s *store) addNamespace(spec namespace.NamespacesInstanceCreateSpec) {
-	s.namespaces[spec.Namespace] = &namespace.NamespaceInstanceInfoV2{
+	s.namespaces[spec.Namespace] = namespace.NamespaceInstanceInfoV2{
 		Supervisor:    spec.Cluster,
 		ConfigStatus:  namespace.NamespaceInstanceConfigStatusRunning,
 		VmServiceSpec: spec.VmServiceSpec,
@@ -314,16 +320,18 @@ func (s *store) updateNamespace(name string, spec namespace.NamespacesInstanceUp
 		info.AccessList = *spec.AccessList
 	}
 	if spec.NetworkSpec != nil {
-		updateNetworkConfig(info, *spec.NetworkSpec)
+		updateNetworkConfig(&info, *spec.NetworkSpec)
 	}
+
+	s.namespaces[name] = info
 }
 
 func (s *store) removeNamespace(name string) {
 	delete(s.namespaces, name)
 }
 
-func createNamespaceInfo(spec namespace.NamespaceInstanceCreateSpecV2) *namespace.NamespaceInstanceInfoV2 {
-	info := &namespace.NamespaceInstanceInfoV2{
+func createNamespaceInfo(spec namespace.NamespaceInstanceCreateSpecV2) namespace.NamespaceInstanceInfoV2 {
+	info := namespace.NamespaceInstanceInfoV2{
 		Supervisor:   spec.Supervisor,
 		ConfigStatus: namespace.NamespaceInstanceConfigStatusRunning,
 	}
@@ -358,14 +366,14 @@ func createNamespaceInfo(spec namespace.NamespaceInstanceCreateSpecV2) *namespac
 		info.NetworkSpec = autoCreatedVpcNetworkConfigInfo(spec.Namespace)
 	}
 	if spec.Networks != nil {
-		addNetworks(info, *spec.Networks)
+		addNetworks(&info, *spec.Networks)
 	}
 
 	return info
 }
 
 // namespacesInstanceInfo projects the v2 record onto the v1 API shape.
-func namespacesInstanceInfo(info *namespace.NamespaceInstanceInfoV2) namespace.NamespacesInstanceInfo {
+func namespacesInstanceInfo(info namespace.NamespaceInstanceInfoV2) namespace.NamespacesInstanceInfo {
 	return namespace.NamespacesInstanceInfo{
 		ClusterId:            info.Supervisor,
 		ConfigStatus:         string(info.ConfigStatus),
@@ -500,21 +508,21 @@ func convertToInstanceStats(stats namespace.Stats) namespace.NamespacesInstanceS
 
 // -------- virtual machine classes --------
 
-func (s *store) vmClassList() []*namespace.VirtualMachineClassInfo {
-	result := make([]*namespace.VirtualMachineClassInfo, 0, len(s.vmClasses))
+func (s *store) vmClassList() []namespace.VirtualMachineClassInfo {
+	result := make([]namespace.VirtualMachineClassInfo, 0, len(s.vmClasses))
 	for _, v := range s.vmClasses {
 		result = append(result, v)
 	}
 	return result
 }
 
-func (s *store) vmClass(id string) (*namespace.VirtualMachineClassInfo, bool) {
+func (s *store) vmClass(id string) (namespace.VirtualMachineClassInfo, bool) {
 	info, exists := s.vmClasses[id]
 	return info, exists
 }
 
 func (s *store) addVmClass(spec namespace.VirtualMachineClassCreateSpec) {
-	s.vmClasses[spec.Id] = &namespace.VirtualMachineClassInfo{
+	s.vmClasses[spec.Id] = namespace.VirtualMachineClassInfo{
 		Id:                spec.Id,
 		CpuCount:          spec.CpuCount,
 		MemoryMb:          spec.MemoryMb,
@@ -537,6 +545,8 @@ func (s *store) updateVmClass(id string, spec namespace.VirtualMachineClassUpdat
 	entry.MemoryReservation = spec.MemoryReservation
 	entry.Devices = spec.Devices
 	entry.ConfigSpec = spec.ConfigSpec
+
+	s.vmClasses[id] = entry
 }
 
 func (s *store) removeVmClass(id string) {
