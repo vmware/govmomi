@@ -16,7 +16,6 @@ import (
 	"net/http"
 	"net/url"
 	"path"
-	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,37 +38,26 @@ func init() {
 	})
 }
 
-// Handler implements the Namespace Management Modules API simulator
+// Handler implements the Namespace Management Modules API simulator. Handler
+// methods own HTTP concerns only; all state lives behind store in store.go.
 type Handler struct {
 	URL   *url.URL
 	store *store
 }
 
-type store struct {
-	clusters        map[string]namespace.ClusterSummary
-	namespaces      map[string]*namespace.NamespaceInstanceInfoV2
-	vmClasses       map[string]*namespace.VirtualMachineClassInfo
-	services        map[string]*namespace.SupervisorServiceInfo
-	serviceVersions map[string]map[string]*namespace.SupervisorServiceVersionInfo
-}
-
 // New creates a Handler instance
 func New(u *url.URL) *Handler {
 	return &Handler{
-		URL: u,
-		store: &store{
-			clusters:        make(map[string]namespace.ClusterSummary),
-			namespaces:      make(map[string]*namespace.NamespaceInstanceInfoV2),
-			vmClasses:       make(map[string]*namespace.VirtualMachineClassInfo),
-			services:        make(map[string]*namespace.SupervisorServiceInfo),
-			serviceVersions: make(map[string]map[string]*namespace.SupervisorServiceVersionInfo),
-		},
+		URL:   u,
+		store: newStore(),
 	}
 }
 
 // Register Namespace Management API paths with the vapi simulator's http.ServeMux
 func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	if r.IsVPX() {
+		h.store.registry = r
+
 		s.HandleFunc(internal.NamespacesPath, h.namespaces)
 		s.HandleFunc(internal.NamespacesPath+"/{namespace}", h.namespace)
 		s.HandleFunc(internal.NamespacesPath+"/{namespace}/{action}", h.namespaceAction)
@@ -78,8 +66,13 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 		s.HandleFunc(internal.NamespaceClusterPath, h.clusters)
 		s.HandleFunc(internal.NamespaceClusterPath+"/{id}", h.cluster)
 		s.HandleFunc(internal.NamespaceClusterPath+"/{id}/support-bundle", h.clustersSupportBundle)
+		s.HandleFunc(internal.NamespaceClusterPath+"/{id}/networks", h.clusterNetworks)
 		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility, h.listCompatibleDistributedSwitches)
 		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility, h.listCompatibleEdgeClusters)
+
+		s.HandleFunc(internal.SupervisorsSummariesPath, h.supervisorSummaries)
+		s.HandleFunc(internal.SupervisorsPath+"/{id}/summary", h.supervisorSummary)
+		s.HandleFunc(internal.SupervisorsPath+"/{id}/topology", h.supervisorTopology)
 
 		s.HandleFunc(internal.SupervisorServicesPath, h.services)
 		s.HandleFunc(internal.SupervisorServicesPath+"/{id}", h.service)
@@ -94,11 +87,7 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		clusters := make([]namespace.ClusterSummary, 0, len(h.store.clusters))
-		for _, cluster := range h.store.clusters {
-			clusters = append(clusters, cluster)
-		}
-		vapi.StatusOK(w, clusters)
+		vapi.StatusOK(w, h.store.clusterSummaries())
 	}
 }
 
@@ -109,22 +98,65 @@ func (h *Handler) cluster(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		switch r.URL.Query().Get("action") {
 		case "enable":
-			h.store.clusters[id] = namespace.ClusterSummary{
-				ID:               id,
-				ConfigStatus:     &namespace.RunningConfigStatus,
-				KubernetesStatus: &namespace.ReadyKubernetesStatus,
-			}
+			h.store.enableCluster(id)
 			vapi.StatusOK(w)
 		case "disable":
-			if _, exists := h.store.clusters[id]; !exists {
+			if !h.store.disableCluster(id) {
 				vapi.ApiErrorNotFound(w)
 				return
 			}
-			delete(h.store.clusters, id)
 			vapi.StatusOK(w)
 		default:
 			vapi.ApiErrorInvalidArgument(w)
 		}
+	}
+}
+
+func (h *Handler) supervisorSummaries(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, namespace.SupervisorsSummaryResult{
+			Items: h.store.supervisorSummaries(),
+		})
+	}
+}
+
+func (h *Handler) supervisorSummary(w http.ResponseWriter, r *http.Request) {
+	s, exists := h.store.supervisor(r.PathValue("id"))
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, s.info)
+	}
+}
+
+func (h *Handler) supervisorTopology(w http.ResponseWriter, r *http.Request) {
+	s, exists := h.store.supervisor(r.PathValue("id"))
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, s.topology)
+	}
+}
+
+func (h *Handler) clusterNetworks(w http.ResponseWriter, r *http.Request) {
+	s, exists := h.store.supervisor(r.PathValue("id"))
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, s.networks)
 	}
 }
 
@@ -206,15 +238,7 @@ func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Requ
 func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		result := make([]namespace.SupervisorServiceSummary, 0, len(h.store.services))
-		for id, info := range h.store.services {
-			result = append(result, namespace.SupervisorServiceSummary{
-				ID:    id,
-				Name:  info.Name,
-				State: info.State,
-			})
-		}
-		vapi.StatusOK(w, result)
+		vapi.StatusOK(w, h.store.serviceSummaries())
 	case http.MethodPost:
 		var spec namespace.SupervisorService
 		if !vapi.Decode(r, w, &spec) {
@@ -231,20 +255,12 @@ func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
-		if _, exists := h.store.services[pkg.id]; exists {
+		if _, exists := h.store.service(pkg.id); exists {
 			vapi.ApiErrorAlreadyExists(w)
 			return
 		}
 
-		h.store.services[pkg.id] = &namespace.SupervisorServiceInfo{
-			Name:        pkg.displayName,
-			State:       activatedState,
-			Description: pkg.description,
-		}
-		h.store.serviceVersions[pkg.id] = map[string]*namespace.SupervisorServiceVersionInfo{
-			pkg.version: createServiceVersionInfo(pkg, content),
-		}
-
+		h.store.addService(pkg, content)
 		vapi.StatusOK(w)
 	}
 }
@@ -252,7 +268,7 @@ func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) service(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	info, exists := h.store.services[id]
+	info, exists := h.store.service(id)
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -262,17 +278,19 @@ func (h *Handler) service(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		vapi.StatusOK(w, info)
 	case http.MethodPatch:
-		if !updateServiceState(w, r, &info.State) {
+		state, ok := serviceStateFromAction(r.URL.Query().Get("action"))
+		if !ok {
+			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
+		h.store.setServiceState(id, state)
 		vapi.StatusOK(w)
 	case http.MethodDelete:
 		if info.State != deactivatedState {
 			vapi.ApiErrorNotAllowedInCurrentState(w)
 			return
 		}
-		delete(h.store.services, id)
-		delete(h.store.serviceVersions, id)
+		h.store.removeService(id)
 		vapi.StatusOK(w)
 	}
 }
@@ -280,22 +298,14 @@ func (h *Handler) service(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) serviceVersions(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 
-	versions, exists := h.store.serviceVersions[id]
-	if !exists {
+	if !h.store.hasServiceVersions(id) {
 		vapi.ApiErrorNotFound(w)
 		return
 	}
 
 	switch r.Method {
 	case http.MethodGet:
-		result := make([]namespace.SupervisorServiceVersionSummary, 0, len(versions))
-		for version, info := range versions {
-			result = append(result, namespace.SupervisorServiceVersionSummary{
-				SupervisorServiceInfo: info.SupervisorServiceInfo,
-				Version:               version,
-			})
-		}
-		vapi.StatusOK(w, result)
+		vapi.StatusOK(w, h.store.serviceVersionSummaries(id))
 	case http.MethodPost:
 		var spec namespace.SupervisorServiceVersion
 		if !vapi.Decode(r, w, &spec) {
@@ -311,21 +321,21 @@ func (h *Handler) serviceVersions(w http.ResponseWriter, r *http.Request) {
 			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
-		if _, exists := versions[pkg.version]; exists {
+		if _, exists := h.store.serviceVersion(id, pkg.version); exists {
 			vapi.ApiErrorAlreadyExists(w)
 			return
 		}
 
-		versions[pkg.version] = createServiceVersionInfo(pkg, spec.CarvelService.Content)
+		h.store.addServiceVersion(id, pkg, spec.CarvelService.Content)
 		vapi.StatusOK(w)
 	}
 }
 
 func (h *Handler) serviceVersion(w http.ResponseWriter, r *http.Request) {
-	versions := h.store.serviceVersions[r.PathValue("id")]
+	id := r.PathValue("id")
 	version := r.PathValue("version")
 
-	info, exists := versions[version]
+	info, exists := h.store.serviceVersion(id, version)
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -335,16 +345,19 @@ func (h *Handler) serviceVersion(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		vapi.StatusOK(w, info)
 	case http.MethodPatch:
-		if !updateServiceState(w, r, &info.State) {
+		state, ok := serviceStateFromAction(r.URL.Query().Get("action"))
+		if !ok {
+			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
+		h.store.setServiceVersionState(id, version, state)
 		vapi.StatusOK(w)
 	case http.MethodDelete:
 		if info.State != deactivatedState {
 			vapi.ApiErrorNotAllowedInCurrentState(w)
 			return
 		}
-		delete(versions, version)
+		h.store.removeServiceVersion(id, version)
 		vapi.StatusOK(w)
 	}
 }
@@ -354,17 +367,15 @@ const (
 	deactivatedState = "DEACTIVATED"
 )
 
-func updateServiceState(w http.ResponseWriter, r *http.Request, state *string) bool {
-	switch r.URL.Query().Get("action") {
+func serviceStateFromAction(action string) (string, bool) {
+	switch action {
 	case "activate":
-		*state = activatedState
+		return activatedState, true
 	case "deactivate":
-		*state = deactivatedState
+		return deactivatedState, true
 	default:
-		vapi.ApiErrorInvalidArgument(w)
-		return false
+		return "", false
 	}
-	return true
 }
 
 type carvelPackage struct {
@@ -420,48 +431,17 @@ func parseCarvelPackage(content string) (carvelPackage, error) {
 	return pkg, nil
 }
 
-func createServiceVersionInfo(pkg carvelPackage, content string) *namespace.SupervisorServiceVersionInfo {
-	return &namespace.SupervisorServiceVersionInfo{
-		SupervisorServiceInfo: namespace.SupervisorServiceInfo{
-			Name:        pkg.displayName,
-			State:       activatedState,
-			Description: pkg.description,
-		},
-		Content:     content,
-		ContentType: "CARVEL_APPS_YAML",
-	}
-}
-
 func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		result := make([]namespace.NamespacesInstanceSummary, 0, len(h.store.namespaces))
-
-		for name, info := range h.store.namespaces {
-			result = append(result, namespace.NamespacesInstanceSummary{
-				ClusterId:            info.Supervisor,
-				Namespace:            name,
-				ConfigStatus:         string(info.ConfigStatus),
-				Description:          info.Description,
-				Stats:                convertToInstanceStats(info.Stats),
-				SelfServiceNamespace: info.SelfServiceNamespace,
-			})
-		}
-
-		vapi.StatusOK(w, result)
+		vapi.StatusOK(w, h.store.namespaceSummaries())
 	case http.MethodPost:
 		var spec namespace.NamespacesInstanceCreateSpec
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}
 
-		h.store.namespaces[spec.Namespace] = &namespace.NamespaceInstanceInfoV2{
-			Supervisor:    spec.Cluster,
-			ConfigStatus:  namespace.NamespaceInstanceConfigStatusRunning,
-			VmServiceSpec: spec.VmServiceSpec,
-			StorageSpecs:  spec.StorageSpecs,
-		}
-
+		h.store.addNamespace(spec)
 		vapi.StatusOK(w)
 	}
 }
@@ -469,7 +449,7 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("namespace")
 
-	info, exists := h.store.namespaces[name]
+	info, exists := h.store.namespace(name)
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -477,25 +457,17 @@ func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		vapi.StatusOK(w, namespace.NamespacesInstanceInfo{
-			ClusterId:            info.Supervisor,
-			ConfigStatus:         string(info.ConfigStatus),
-			Description:          info.Description,
-			Stats:                convertToInstanceStats(info.Stats),
-			SelfServiceNamespace: info.SelfServiceNamespace,
-			VmServiceSpec:        info.VmServiceSpec,
-			StorageSpecs:         info.StorageSpecs,
-		})
+		vapi.StatusOK(w, namespacesInstanceInfo(info))
 	case http.MethodPatch:
 		var spec namespace.NamespacesInstanceUpdateSpec
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}
 
-		updateNamespace(info, spec)
+		h.store.updateNamespace(name, spec)
 		vapi.StatusOK(w)
 	case http.MethodDelete:
-		delete(h.store.namespaces, name)
+		h.store.removeNamespace(name)
 		vapi.StatusOK(w)
 	}
 }
@@ -503,33 +475,20 @@ func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) namespacesV2(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		result := make([]namespace.NamespaceInstanceSummaryV2, 0, len(h.store.namespaces))
-
-		for name, info := range h.store.namespaces {
-			result = append(result, namespace.NamespaceInstanceSummaryV2{
-				Supervisor:           info.Supervisor,
-				Namespace:            name,
-				Description:          info.Description,
-				ConfigStatus:         info.ConfigStatus,
-				Stats:                info.Stats,
-				SelfServiceNamespace: info.SelfServiceNamespace,
-			})
-		}
-
-		vapi.StatusOK(w, result)
+		vapi.StatusOK(w, h.store.namespaceSummariesV2())
 	case http.MethodPost:
 		var spec namespace.NamespaceInstanceCreateSpecV2
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}
 
-		h.store.namespaces[spec.Namespace] = createNamespaceInfo(spec)
+		h.store.addNamespaceV2(spec)
 		vapi.StatusOK(w)
 	}
 }
 
 func (h *Handler) namespaceV2(w http.ResponseWriter, r *http.Request) {
-	info, exists := h.store.namespaces[r.PathValue("namespace")]
+	info, exists := h.store.namespace(r.PathValue("namespace"))
 	if !exists {
 		vapi.ApiErrorNotFound(w)
 		return
@@ -538,173 +497,6 @@ func (h *Handler) namespaceV2(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		vapi.StatusOK(w, info)
-	}
-}
-
-func createNamespaceInfo(spec namespace.NamespaceInstanceCreateSpecV2) *namespace.NamespaceInstanceInfoV2 {
-	info := &namespace.NamespaceInstanceInfoV2{
-		Supervisor:   spec.Supervisor,
-		ConfigStatus: namespace.NamespaceInstanceConfigStatusRunning,
-	}
-
-	if spec.Description != nil {
-		info.Description = *spec.Description
-	}
-	if spec.SelfServiceNamespace != nil {
-		info.SelfServiceNamespace = *spec.SelfServiceNamespace
-	}
-	if spec.StorageSpecs != nil {
-		info.StorageSpecs = *spec.StorageSpecs
-	}
-	if spec.VmServiceSpec != nil {
-		info.VmServiceSpec = *spec.VmServiceSpec
-	}
-	if spec.ContentLibraries != nil {
-		info.ContentLibraries = *spec.ContentLibraries
-	}
-	if spec.Edges != nil {
-		info.Edges = *spec.Edges
-	}
-	if spec.AccessList != nil {
-		info.AccessList = *spec.AccessList
-	}
-	if spec.Zones != nil {
-		info.Zones = createZoneInfos(*spec.Zones)
-	}
-	if spec.NetworkSpec != nil {
-		info.NetworkSpec = createNetworkConfigInfo(*spec.NetworkSpec)
-	}
-	if spec.Networks != nil {
-		addNetworks(info, *spec.Networks)
-	}
-
-	return info
-}
-
-func updateNamespace(info *namespace.NamespaceInstanceInfoV2, spec namespace.NamespacesInstanceUpdateSpec) {
-	info.VmServiceSpec = spec.VmServiceSpec
-
-	if spec.StorageSpecs != nil {
-		info.StorageSpecs = spec.StorageSpecs
-	}
-	if spec.Zones != nil {
-		info.Zones = createZoneInfos(*spec.Zones)
-	}
-	if spec.AccessList != nil {
-		info.AccessList = *spec.AccessList
-	}
-	if spec.NetworkSpec != nil {
-		updateNetworkConfig(info, *spec.NetworkSpec)
-	}
-}
-
-func createNetworkConfigInfo(spec namespace.NetworkConfigCreateSpec) *namespace.NetworkConfigInfo {
-	info := &namespace.NetworkConfigInfo{NetworkProvider: spec.NetworkProvider}
-
-	if vpc := spec.VpcNetwork; vpc != nil {
-		info.VpcNetwork = &namespace.VpcNetworkInfo{}
-		if vpc.VpcConfig != nil {
-			info.VpcNetwork.VpcConfig = *vpc.VpcConfig
-		}
-		if vpc.Vpc != nil {
-			info.VpcNetwork.Vpc = *vpc.Vpc
-		}
-		if vpc.SharedSubnets != nil {
-			info.VpcNetwork.SharedSubnets = *vpc.SharedSubnets
-		}
-		if vpc.DefaultSubnetSize != nil {
-			info.VpcNetwork.DefaultSubnetSize = *vpc.DefaultSubnetSize
-		}
-	}
-
-	if vsphere := spec.VsphereNetwork; vsphere != nil {
-		info.VsphereNetwork = &namespace.VsphereNetworkConfigInfo{}
-		if vsphere.DefaultWorkloadNetwork != nil {
-			info.VsphereNetwork.DefaultWorkloadNetwork = *vsphere.DefaultWorkloadNetwork
-		}
-	}
-
-	return info
-}
-
-func updateNetworkConfig(info *namespace.NamespaceInstanceInfoV2, spec namespace.NetworkConfigUpdateSpec) {
-	if info.NetworkSpec == nil {
-		info.NetworkSpec = &namespace.NetworkConfigInfo{}
-	}
-	if spec.NetworkProvider != "" {
-		info.NetworkSpec.NetworkProvider = spec.NetworkProvider
-	}
-
-	if vpc := spec.VpcConfig; vpc != nil {
-		if info.NetworkSpec.VpcNetwork == nil {
-			info.NetworkSpec.VpcNetwork = &namespace.VpcNetworkInfo{}
-		}
-		if vpc.DefaultSubnetSize != nil {
-			info.NetworkSpec.VpcNetwork.DefaultSubnetSize = *vpc.DefaultSubnetSize
-		}
-		if vpc.PrivateCidrs != nil {
-			info.NetworkSpec.VpcNetwork.VpcConfig.PrivateCidrs = vpc.PrivateCidrs
-		}
-		if vpc.SharedSubnets != nil {
-			info.NetworkSpec.VpcNetwork.SharedSubnets = *vpc.SharedSubnets
-		}
-	}
-
-	if update := spec.VsphereNetworkConfig; update != nil {
-		removeNetworks(info, update.NetworksToRemove)
-		addNetworks(info, update.NetworksToAdd)
-	}
-}
-
-func removeNetworks(info *namespace.NamespaceInstanceInfoV2, networks []string) {
-	if info.NetworkSpec == nil || info.NetworkSpec.VsphereNetwork == nil {
-		return
-	}
-
-	vsphere := info.NetworkSpec.VsphereNetwork
-	vsphere.Networks = slices.DeleteFunc(vsphere.Networks, func(network namespace.NamespaceNetworkInfo) bool {
-		return slices.Contains(networks, network.Network)
-	})
-}
-
-func addNetworks(info *namespace.NamespaceInstanceInfoV2, networks []string) {
-	if len(networks) == 0 {
-		return
-	}
-	if info.NetworkSpec == nil {
-		info.NetworkSpec = &namespace.NetworkConfigInfo{}
-	}
-	if info.NetworkSpec.VsphereNetwork == nil {
-		info.NetworkSpec.VsphereNetwork = &namespace.VsphereNetworkConfigInfo{}
-	}
-
-	vsphere := info.NetworkSpec.VsphereNetwork
-	for _, name := range networks {
-		attached := slices.ContainsFunc(vsphere.Networks, func(network namespace.NamespaceNetworkInfo) bool {
-			return network.Network == name
-		})
-		if !attached {
-			vsphere.Networks = append(vsphere.Networks, namespace.NamespaceNetworkInfo{
-				Network:      name,
-				ConfigStatus: namespace.NetworkConfigStatusActive,
-			})
-		}
-	}
-}
-
-func createZoneInfos(specs []namespace.ZoneSpec) []namespace.ZoneInfo {
-	zones := make([]namespace.ZoneInfo, len(specs))
-	for i, spec := range specs {
-		zones[i] = namespace.ZoneInfo{Zone: spec.Name}
-	}
-	return zones
-}
-
-func convertToInstanceStats(stats namespace.Stats) namespace.NamespacesInstanceStats {
-	return namespace.NamespacesInstanceStats{
-		CpuUsed:     int64(stats.CPUUsed),
-		MemoryUsed:  int64(stats.MemoryUsed),
-		StorageUsed: int64(stats.StorageUsed),
 	}
 }
 
@@ -744,31 +536,14 @@ func (h *Handler) registerNamespaceVM(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		result := make([]*namespace.VirtualMachineClassInfo, 0, len(h.store.vmClasses))
-
-		for _, v := range h.store.vmClasses {
-			result = append(result, v)
-		}
-
-		vapi.StatusOK(w, result)
+		vapi.StatusOK(w, h.store.vmClassList())
 	case http.MethodPost:
 		var spec namespace.VirtualMachineClassCreateSpec
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}
 
-		newClass := namespace.VirtualMachineClassInfo{
-			Id:                spec.Id,
-			CpuCount:          spec.CpuCount,
-			MemoryMb:          spec.MemoryMb,
-			MemoryReservation: spec.MemoryReservation,
-			CpuReservation:    spec.CpuReservation,
-			Devices:           spec.Devices,
-			ConfigSpec:        spec.ConfigSpec,
-		}
-
-		h.store.vmClasses[spec.Id] = &newClass
-
+		h.store.addVmClass(spec)
 		vapi.StatusOK(w)
 	}
 }
@@ -778,14 +553,14 @@ func (h *Handler) vmClass(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		if result, contains := h.store.vmClasses[id]; contains {
-			vapi.StatusOK(w, result)
-		} else {
+		result, exists := h.store.vmClass(id)
+		if !exists {
 			vapi.ApiErrorNotFound(w)
+			return
 		}
+		vapi.StatusOK(w, result)
 	case http.MethodPatch:
-		entry, contains := h.store.vmClasses[id]
-		if !contains {
+		if _, exists := h.store.vmClass(id); !exists {
 			vapi.ApiErrorNotFound(w)
 			return
 		}
@@ -795,20 +570,14 @@ func (h *Handler) vmClass(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		entry.CpuCount = spec.CpuCount
-		entry.MemoryMb = spec.MemoryMb
-		entry.CpuReservation = spec.CpuReservation
-		entry.MemoryReservation = spec.MemoryReservation
-		entry.Devices = spec.Devices
-		entry.ConfigSpec = spec.ConfigSpec
-
+		h.store.updateVmClass(id, spec)
 		vapi.StatusOK(w)
 	case http.MethodDelete:
-		if _, contains := h.store.vmClasses[id]; contains {
-			delete(h.store.vmClasses, id)
-			vapi.StatusOK(w)
-		} else {
+		if _, exists := h.store.vmClass(id); !exists {
 			vapi.ApiErrorNotFound(w)
+			return
 		}
+		h.store.removeVmClass(id)
+		vapi.StatusOK(w)
 	}
 }
