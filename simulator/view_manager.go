@@ -166,7 +166,21 @@ func walk(root mo.Reference, f func(child types.ManagedObjectReference)) {
 }
 
 func (v *ContainerView) add(ctx *Context, root mo.Reference, seen map[types.ManagedObjectReference]bool) {
-	walk(root, func(child types.ManagedObjectReference) {
+	if root == nil {
+		return
+	}
+
+	// Copy each container's children while holding its inventory lock. The
+	// copy must include the backing array, which removal can modify in place.
+	// Release the lock before recursing or updating any view.
+	var children []types.ManagedObjectReference
+	ctx.WithLock(root, func() {
+		walk(root, func(child types.ManagedObjectReference) {
+			children = append(children, child)
+		})
+	})
+
+	for _, child := range children {
 		if v.include(child) {
 			if !seen[child] {
 				seen[child] = true
@@ -177,7 +191,7 @@ func (v *ContainerView) add(ctx *Context, root mo.Reference, seen map[types.Mana
 		if v.Recursive {
 			v.add(ctx, ctx.Map.Get(child), seen)
 		}
-	})
+	}
 }
 
 func (v *ContainerView) find(ctx *Context, root mo.Reference, ref types.ManagedObjectReference, found *bool) bool {
