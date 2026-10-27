@@ -372,8 +372,11 @@ func (m *SessionManager) expiredSession(id string, now time.Time, timeout time.D
 	return expired
 }
 
-// SessionIdleWatch starts a goroutine that calls func expired() at timeout intervals.
+// SessionIdleWatch starts a goroutine that periodically calls func expired().
 // The goroutine exits if the func returns true.
+// Checks run at a fraction of the timeout so that an idle session is removed
+// shortly after it exceeds the timeout. Checking only once per timeout
+// interval could leave a session alive for up to 2x the timeout.
 func SessionIdleWatch(ctx *Context, id string, expired func(string, time.Time, time.Duration) bool) {
 	opt := ctx.Map.OptionManager().find("config.vmacore.soap.sessionTimeout")
 	if opt == nil {
@@ -385,8 +388,10 @@ func SessionIdleWatch(ctx *Context, id string, expired func(string, time.Time, t
 		panic(err)
 	}
 
+	interval := max(timeout/10, time.Millisecond)
+
 	go func() {
-		for t := time.NewTimer(timeout); ; {
+		for t := time.NewTimer(interval); ; {
 			select {
 			case <-ctx.Done():
 				return
@@ -394,7 +399,7 @@ func SessionIdleWatch(ctx *Context, id string, expired func(string, time.Time, t
 				if expired(id, now, timeout) {
 					return
 				}
-				t.Reset(timeout)
+				t.Reset(interval)
 			}
 		}
 	}()
