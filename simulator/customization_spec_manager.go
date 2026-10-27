@@ -7,6 +7,7 @@ package simulator
 import (
 	"encoding/pem"
 	"fmt"
+	"slices"
 	"sync/atomic"
 	"time"
 
@@ -238,7 +239,7 @@ type CustomizationSpecManager struct {
 }
 
 func (m *CustomizationSpecManager) init(r *Registry) {
-	m.items = DefaultCustomizationSpec
+	m.items = slices.Clone(DefaultCustomizationSpec)
 
 	// Real VC is different DN, X509v3 extensions, etc.
 	// This is still useful for testing []byte of DER encoded cert over SOAP
@@ -326,6 +327,22 @@ func (m *CustomizationSpecManager) OverwriteCustomizationSpec(ctx *Context, req 
 		if item.Info.Name == req.Item.Info.Name {
 			m.items[i] = req.Item
 			body.Res = new(types.OverwriteCustomizationSpecResponse)
+			return body
+		}
+	}
+
+	body.Fault_ = Fault("", new(types.NotFound))
+
+	return body
+}
+
+func (m *CustomizationSpecManager) DeleteCustomizationSpec(ctx *Context, req *types.DeleteCustomizationSpec) soap.HasFault {
+	body := new(methods.DeleteCustomizationSpecBody)
+
+	for i, item := range m.items {
+		if item.Info.Name == req.Name {
+			m.items = slices.Delete(m.items, i, i+1)
+			body.Res = new(types.DeleteCustomizationSpecResponse)
 			return body
 		}
 	}
