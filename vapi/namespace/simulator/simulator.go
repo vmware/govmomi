@@ -255,12 +255,10 @@ func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
-		if _, exists := h.store.getService(pkg.id); exists {
+		if !h.store.addService(pkg, content) {
 			vapi.ApiErrorAlreadyExists(w)
 			return
 		}
-
-		h.store.addService(pkg, content)
 		vapi.StatusOK(w)
 	}
 }
@@ -321,12 +319,10 @@ func (h *Handler) serviceVersions(w http.ResponseWriter, r *http.Request) {
 			vapi.ApiErrorInvalidArgument(w)
 			return
 		}
-		if _, exists := h.store.getServiceVersion(id, pkg.version); exists {
+		if !h.store.addServiceVersion(id, pkg, spec.CarvelService.Content) {
 			vapi.ApiErrorAlreadyExists(w)
 			return
 		}
-
-		h.store.addServiceVersion(id, pkg, spec.CarvelService.Content)
 		vapi.StatusOK(w)
 	}
 }
@@ -441,7 +437,10 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.store.addNamespace(spec)
+		if !h.store.addNamespace(spec) {
+			vapi.ApiErrorAlreadyExists(w)
+			return
+		}
 		vapi.StatusOK(w)
 	}
 }
@@ -482,7 +481,10 @@ func (h *Handler) namespacesV2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.store.addNamespaceV2(spec)
+		if !h.store.addNamespaceV2(spec) {
+			vapi.ApiErrorAlreadyExists(w)
+			return
+		}
 		vapi.StatusOK(w)
 	}
 }
@@ -543,7 +545,10 @@ func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.store.addVmClass(spec)
+		if !h.store.addVmClass(spec) {
+			vapi.ApiErrorAlreadyExists(w)
+			return
+		}
 		vapi.StatusOK(w)
 	}
 }

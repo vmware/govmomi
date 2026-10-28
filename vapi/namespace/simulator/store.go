@@ -8,6 +8,7 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"sync"
 
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vapi/namespace"
@@ -18,6 +19,7 @@ import (
 // that state is a method here; the HTTP handlers in simulator.go own only
 // request decoding and response status.
 type store struct {
+	mu              sync.Mutex
 	registry        *simulator.Registry
 	clusters        map[string]namespace.ClusterSummary
 	supervisors     map[string]supervisor
@@ -47,6 +49,9 @@ func newStore() *store {
 // -------- clusters and supervisors --------
 
 func (s *store) listClusters() []namespace.ClusterSummary {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	clusters := make([]namespace.ClusterSummary, 0, len(s.clusters))
 	for _, cluster := range s.clusters {
 		clusters = append(clusters, cluster)
@@ -55,6 +60,9 @@ func (s *store) listClusters() []namespace.ClusterSummary {
 }
 
 func (s *store) enableCluster(id string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	s.clusters[id] = namespace.ClusterSummary{
 		ID:               id,
 		ConfigStatus:     &namespace.RunningConfigStatus,
@@ -64,6 +72,9 @@ func (s *store) enableCluster(id string) {
 }
 
 func (s *store) disableCluster(id string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	if _, exists := s.clusters[id]; !exists {
 		return false
 	}
@@ -73,11 +84,17 @@ func (s *store) disableCluster(id string) bool {
 }
 
 func (s *store) getSupervisor(id string) (supervisor, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	sup, exists := s.supervisors[id]
 	return sup, exists
 }
 
 func (s *store) listSupervisors() []namespace.SupervisorsSummaryResultItem {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	items := make([]namespace.SupervisorsSummaryResultItem, 0, len(s.supervisors))
 	for id, sup := range s.supervisors {
 		items = append(items, namespace.SupervisorsSummaryResultItem{
@@ -159,6 +176,9 @@ func (s *store) collectPortgroupNetworks() []namespace.NetworkInfo {
 // -------- supervisor services --------
 
 func (s *store) listServices() []namespace.SupervisorServiceSummary {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	result := make([]namespace.SupervisorServiceSummary, 0, len(s.services))
 	for id, info := range s.services {
 		result = append(result, namespace.SupervisorServiceSummary{
@@ -171,11 +191,20 @@ func (s *store) listServices() []namespace.SupervisorServiceSummary {
 }
 
 func (s *store) getService(id string) (namespace.SupervisorServiceInfo, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	info, exists := s.services[id]
 	return info, exists
 }
 
-func (s *store) addService(pkg carvelPackage, content string) {
+func (s *store) addService(pkg carvelPackage, content string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, exists := s.services[pkg.id]; exists {
+		return false
+	}
 	s.services[pkg.id] = namespace.SupervisorServiceInfo{
 		Name:        pkg.displayName,
 		State:       activatedState,
@@ -184,9 +213,13 @@ func (s *store) addService(pkg carvelPackage, content string) {
 	s.serviceVersions[pkg.id] = map[string]namespace.SupervisorServiceVersionInfo{
 		pkg.version: createServiceVersionInfo(pkg, content),
 	}
+	return true
 }
 
 func (s *store) setServiceState(id, state string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	info, exists := s.services[id]
 	if !exists {
 		return
@@ -196,16 +229,25 @@ func (s *store) setServiceState(id, state string) {
 }
 
 func (s *store) removeService(id string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	delete(s.services, id)
 	delete(s.serviceVersions, id)
 }
 
 func (s *store) hasServiceVersions(id string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	_, exists := s.serviceVersions[id]
 	return exists
 }
 
 func (s *store) listServiceVersions(id string) []namespace.SupervisorServiceVersionSummary {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	versions := s.serviceVersions[id]
 
 	result := make([]namespace.SupervisorServiceVersionSummary, 0, len(versions))
@@ -219,15 +261,32 @@ func (s *store) listServiceVersions(id string) []namespace.SupervisorServiceVers
 }
 
 func (s *store) getServiceVersion(id, version string) (namespace.SupervisorServiceVersionInfo, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	info, exists := s.serviceVersions[id][version]
 	return info, exists
 }
 
-func (s *store) addServiceVersion(id string, pkg carvelPackage, content string) {
-	s.serviceVersions[id][pkg.version] = createServiceVersionInfo(pkg, content)
+func (s *store) addServiceVersion(id string, pkg carvelPackage, content string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	versions, exists := s.serviceVersions[id]
+	if !exists {
+		return false
+	}
+	if _, exists := versions[pkg.version]; exists {
+		return false
+	}
+	versions[pkg.version] = createServiceVersionInfo(pkg, content)
+	return true
 }
 
 func (s *store) setServiceVersionState(id, version, state string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	info, exists := s.serviceVersions[id][version]
 	if !exists {
 		return
@@ -237,6 +296,9 @@ func (s *store) setServiceVersionState(id, version, state string) {
 }
 
 func (s *store) removeServiceVersion(id, version string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	delete(s.serviceVersions[id], version)
 }
 
@@ -255,11 +317,17 @@ func createServiceVersionInfo(pkg carvelPackage, content string) namespace.Super
 // -------- namespaces --------
 
 func (s *store) getNamespace(name string) (namespace.NamespaceInstanceInfoV2, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	info, exists := s.namespaces[name]
 	return info, exists
 }
 
 func (s *store) listNamespaces() []namespace.NamespacesInstanceSummary {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	result := make([]namespace.NamespacesInstanceSummary, 0, len(s.namespaces))
 	for name, info := range s.namespaces {
 		result = append(result, namespace.NamespacesInstanceSummary{
@@ -275,6 +343,9 @@ func (s *store) listNamespaces() []namespace.NamespacesInstanceSummary {
 }
 
 func (s *store) listNamespacesV2() []namespace.NamespaceInstanceSummaryV2 {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	result := make([]namespace.NamespaceInstanceSummaryV2, 0, len(s.namespaces))
 	for name, info := range s.namespaces {
 		result = append(result, namespace.NamespaceInstanceSummaryV2{
@@ -289,26 +360,45 @@ func (s *store) listNamespacesV2() []namespace.NamespaceInstanceSummaryV2 {
 	return result
 }
 
-func (s *store) addNamespace(spec namespace.NamespacesInstanceCreateSpec) {
+func (s *store) addNamespace(spec namespace.NamespacesInstanceCreateSpec) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, exists := s.namespaces[spec.Namespace]; exists {
+		return false
+	}
 	s.namespaces[spec.Namespace] = namespace.NamespaceInstanceInfoV2{
 		Supervisor:    spec.Cluster,
 		ConfigStatus:  namespace.NamespaceInstanceConfigStatusRunning,
 		VmServiceSpec: spec.VmServiceSpec,
 		StorageSpecs:  spec.StorageSpecs,
 	}
+	return true
 }
 
-func (s *store) addNamespaceV2(spec namespace.NamespaceInstanceCreateSpecV2) {
+func (s *store) addNamespaceV2(spec namespace.NamespaceInstanceCreateSpecV2) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, exists := s.namespaces[spec.Namespace]; exists {
+		return false
+	}
 	s.namespaces[spec.Namespace] = createNamespaceInfo(spec)
+	return true
 }
 
 func (s *store) updateNamespace(name string, spec namespace.NamespacesInstanceUpdateSpec) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	info, exists := s.namespaces[name]
 	if !exists {
 		return
 	}
 
-	info.VmServiceSpec = spec.VmServiceSpec
+	if spec.VmServiceSpec.ContentLibraries != nil || spec.VmServiceSpec.VmClasses != nil {
+		info.VmServiceSpec = spec.VmServiceSpec
+	}
 
 	if spec.StorageSpecs != nil {
 		info.StorageSpecs = spec.StorageSpecs
@@ -327,6 +417,9 @@ func (s *store) updateNamespace(name string, spec namespace.NamespacesInstanceUp
 }
 
 func (s *store) removeNamespace(name string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	delete(s.namespaces, name)
 }
 
@@ -509,6 +602,9 @@ func convertToInstanceStats(stats namespace.Stats) namespace.NamespacesInstanceS
 // -------- virtual machine classes --------
 
 func (s *store) listVmClasses() []namespace.VirtualMachineClassInfo {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	result := make([]namespace.VirtualMachineClassInfo, 0, len(s.vmClasses))
 	for _, v := range s.vmClasses {
 		result = append(result, v)
@@ -517,11 +613,20 @@ func (s *store) listVmClasses() []namespace.VirtualMachineClassInfo {
 }
 
 func (s *store) getVmClass(id string) (namespace.VirtualMachineClassInfo, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	info, exists := s.vmClasses[id]
 	return info, exists
 }
 
-func (s *store) addVmClass(spec namespace.VirtualMachineClassCreateSpec) {
+func (s *store) addVmClass(spec namespace.VirtualMachineClassCreateSpec) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if _, exists := s.vmClasses[spec.Id]; exists {
+		return false
+	}
 	s.vmClasses[spec.Id] = namespace.VirtualMachineClassInfo{
 		Id:                spec.Id,
 		CpuCount:          spec.CpuCount,
@@ -531,9 +636,13 @@ func (s *store) addVmClass(spec namespace.VirtualMachineClassCreateSpec) {
 		Devices:           spec.Devices,
 		ConfigSpec:        spec.ConfigSpec,
 	}
+	return true
 }
 
 func (s *store) updateVmClass(id string, spec namespace.VirtualMachineClassUpdateSpec) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	entry, exists := s.vmClasses[id]
 	if !exists {
 		return
@@ -550,5 +659,8 @@ func (s *store) updateVmClass(id string, spec namespace.VirtualMachineClassUpdat
 }
 
 func (s *store) removeVmClass(id string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	delete(s.vmClasses, id)
 }
