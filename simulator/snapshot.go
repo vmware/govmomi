@@ -163,6 +163,44 @@ func (v *VirtualMachineSnapshot) RevertToSnapshotTask(ctx *Context, req *types.R
 	}
 }
 
+func (v *VirtualMachineSnapshot) RenameSnapshot(ctx *Context, req *types.RenameSnapshot) soap.HasFault {
+	body := &methods.RenameSnapshotBody{}
+
+	if req.Name == "" && req.Description == "" {
+		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "name"})
+		return body
+	}
+
+	vm, ok := ctx.Map.Get(v.Vm).(*VirtualMachine)
+	if !ok {
+		body.Fault_ = Fault("", &types.ManagedObjectNotFound{Obj: req.This})
+		return body
+	}
+
+	ctx.WithLock(vm, func() {
+		var ss *types.VirtualMachineSnapshotTree
+		if vm.Snapshot != nil {
+			ss = findSnapshotInTree(vm.Snapshot.RootSnapshotList, req.This)
+		}
+		if ss == nil {
+			body.Fault_ = Fault("", &types.ManagedObjectNotFound{Obj: req.This})
+			return
+		}
+		if req.Name != "" {
+			ss.Name = req.Name
+		}
+		if req.Description != "" {
+			ss.Description = req.Description
+		}
+		ctx.Update(vm, []types.PropertyChange{
+			{Name: "snapshot.rootSnapshotList", Val: vm.Snapshot.RootSnapshotList},
+		})
+		body.Res = new(types.RenameSnapshotResponse)
+	})
+
+	return body
+}
+
 func (v *VirtualMachineSnapshot) ExportSnapshot(ctx *Context, req *types.ExportSnapshot) soap.HasFault {
 
 	vm := ctx.Map.Get(v.Vm).(*VirtualMachine)
