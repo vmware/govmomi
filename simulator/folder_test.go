@@ -14,6 +14,7 @@ import (
 	"github.com/vmware/govmomi/fault"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25"
@@ -512,6 +513,58 @@ func TestFolderMoveInto(t *testing.T) {
 	err = task.Wait(ctx)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestFolderCreateStoragePodSummary(t *testing.T) {
+	ctx := context.Background()
+	model := VPX()
+
+	defer model.Remove()
+	err := model.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := model.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dc, err := find.NewFinder(c.Client).DefaultDatacenter(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	folders, err := dc.Folders(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ref, err := folders.DatastoreFolder.CreateStoragePod(ctx, "summary-pod")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var pod mo.StoragePod
+	err = property.DefaultCollector(c.Client).RetrieveOne(ctx, ref.Reference(), nil, &pod)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if pod.Name != "summary-pod" {
+		t.Errorf("name=%q", pod.Name)
+	}
+	if pod.Summary == nil || pod.Summary.Name != pod.Name {
+		t.Errorf("summary=%+v, expected name %q", pod.Summary, pod.Name)
+	}
+
+	cfg := pod.PodStorageDrsEntry.StorageDrsConfig.PodConfig
+	if cfg.DefaultVmBehavior != string(types.StorageDrsPodConfigInfoBehaviorManual) {
+		t.Errorf("defaultVmBehavior=%q", cfg.DefaultVmBehavior)
 	}
 }
 
