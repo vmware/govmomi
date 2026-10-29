@@ -6,23 +6,24 @@ package simulator
 
 import (
 	"archive/tar"
+	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
-	"path"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"gopkg.in/yaml.v3"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vapi/namespace"
 	vapi "github.com/vmware/govmomi/vapi/simulator"
-	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -36,80 +37,138 @@ func init() {
 	})
 }
 
-// Handler implements the Namespace Management Modules API simulator
+// Handler implements the Namespace Management Modules API simulator. Handler
+// methods own HTTP concerns only; all state lives behind store in store.go.
 type Handler struct {
-	URL *url.URL
+	URL   *url.URL
+	store *store
 }
 
 // New creates a Handler instance
 func New(u *url.URL) *Handler {
 	return &Handler{
-		URL: u,
+		URL:   u,
+		store: newStore(),
 	}
 }
 
 // Register Namespace Management API paths with the vapi simulator's http.ServeMux
 func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	if r.IsVPX() {
-		s.HandleFunc(internal.NamespacesPath, h.namespaces)
-		s.HandleFunc(internal.NamespacesPath+"/", h.namespaces)
-		s.HandleFunc(internal.NamespaceClusterPath, h.clusters)
-		s.HandleFunc(internal.NamespaceClusterPath+"/", h.clustersID)
-		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility, h.listCompatibleDistributedSwitches)
-		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility, h.listCompatibleEdgeClusters)
+		h.store.registry = r
 
-		s.HandleFunc(internal.SupervisorServicesPath, h.listServices)
-		s.HandleFunc(internal.SupervisorServicesPath+"/", h.getService)
-		s.HandleFunc(internal.SupervisorServicesPath+"/{id}"+internal.SupervisorServicesVersionsPath, h.versionsForService)
-		s.HandleFunc(internal.SupervisorServicesPath+"/{id}"+internal.SupervisorServicesVersionsPath+"/{version}", h.getServiceVersion)
+		s.HandleFunc(internal.NamespacesPath, h.namespaces)
+		s.HandleFunc(internal.NamespacesPath+"/{namespace}", h.namespace)
+		s.HandleFunc(internal.NamespacesPath+"/{namespace}/{action}", h.namespaceAction)
+		s.HandleFunc(internal.NamespacesPathV2, h.namespacesV2)
+		s.HandleFunc(internal.NamespacesPathV2+"/{namespace}", h.namespaceV2)
+		s.HandleFunc(internal.NamespaceClusterPath, h.clusters)
+		s.HandleFunc(internal.NamespaceClusterPath+"/{id}", h.cluster)
+		s.HandleFunc(internal.NamespaceClusterPath+"/{id}/support-bundle", h.clustersSupportBundle)
+		s.HandleFunc(internal.NamespaceClusterPath+"/{id}/networks", h.clusterNetworks)
+		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility, h.compatibleDistributedSwitches)
+		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility, h.compatibleEdgeClusters)
+
+		s.HandleFunc(internal.SupervisorsSummariesPath, h.supervisorSummaries)
+		s.HandleFunc(internal.SupervisorsPath+"/{id}/summary", h.supervisorSummary)
+		s.HandleFunc(internal.SupervisorsPath+"/{id}/topology", h.supervisorTopology)
+
+		s.HandleFunc(internal.SupervisorServicesPath, h.services)
+		s.HandleFunc(internal.SupervisorServicesPath+"/{id}", h.service)
+		s.HandleFunc(internal.SupervisorServicesPath+"/{id}"+internal.SupervisorServicesVersionsPath, h.serviceVersions)
+		s.HandleFunc(internal.SupervisorServicesPath+"/{id}"+internal.SupervisorServicesVersionsPath+"/{version}", h.serviceVersion)
 
 		s.HandleFunc(internal.VmClassesPath, h.vmClasses)
-		s.HandleFunc(internal.VmClassesPath+"/", h.vmClasses)
+		s.HandleFunc(internal.VmClassesPath+"/{vmClass}", h.vmClass)
 	}
-}
-
-// enabledClusters returns refs for cluster names with a "WCP-" prefix.
-// Using the name as a simple hack until we add support for enabling via the API.
-func enabledClusters(c *govmomi.Client) ([]types.ManagedObjectReference, error) {
-	ctx := context.Background()
-	kind := []string{"ClusterComputeResource"}
-
-	m := view.NewManager(c.Client)
-	v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, kind, true)
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = v.Destroy(ctx) }()
-
-	return v.Find(ctx, kind, property.Match{"name": "WCP-*"})
 }
 
 func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
-	c, err := govmomi.NewClient(context.Background(), h.URL, true)
-	if err != nil {
-		panic(err)
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, h.store.listClusters())
+	}
+}
+
+func (h *Handler) cluster(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	switch r.Method {
+	case http.MethodPost:
+		switch r.URL.Query().Get("action") {
+		case "enable":
+			if !h.store.enableCluster(id) {
+				vapi.ApiErrorNotFound(w)
+				return
+			}
+			vapi.StatusOK(w)
+		case "disable":
+			if !h.store.disableCluster(id) {
+				vapi.ApiErrorNotFound(w)
+				return
+			}
+			vapi.StatusOK(w)
+		default:
+			vapi.ApiErrorInvalidArgument(w)
+		}
+	}
+}
+
+func (h *Handler) supervisorSummaries(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, namespace.SupervisorsSummaryResult{
+			Items: h.store.listSupervisors(),
+		})
+	}
+}
+
+func (h *Handler) supervisorSummary(w http.ResponseWriter, r *http.Request) {
+	s, exists := h.store.getSupervisor(r.PathValue("id"))
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
 	}
 
 	switch r.Method {
 	case http.MethodGet:
-		refs, err := enabledClusters(c)
-		if err != nil {
-			panic(err)
-		}
+		vapi.StatusOK(w, s.info)
+	}
+}
 
-		clusters := make([]namespace.ClusterSummary, len(refs))
-		for i, ref := range refs {
-			clusters[i] = namespace.ClusterSummary{
-				ID:               ref.Value,
-				ConfigStatus:     &namespace.RunningConfigStatus,
-				KubernetesStatus: &namespace.ReadyKubernetesStatus,
-			}
-		}
-		vapi.StatusOK(w, clusters)
+func (h *Handler) supervisorTopology(w http.ResponseWriter, r *http.Request) {
+	s, exists := h.store.getSupervisor(r.PathValue("id"))
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, s.topology)
+	}
+}
+
+func (h *Handler) clusterNetworks(w http.ResponseWriter, r *http.Request) {
+	s, exists := h.store.getSupervisor(r.PathValue("id"))
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, s.networks)
 	}
 }
 
 func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if _, exists := h.store.getSupervisor(id); !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
 	var token internal.SupportBundleToken
 	_ = json.NewDecoder(r.Body).Decode(&token)
 	_ = r.Body.Close()
@@ -130,7 +189,6 @@ func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Get support bundle
-	id := path.Base(path.Dir(r.URL.Path))
 	name := fmt.Sprintf("wcp-support-bundle-%s-%s--00-00.tar", id, time.Now().Format("2006Jan02"))
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
@@ -148,22 +206,7 @@ func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) 
 	_ = tw.Close()
 }
 
-func (h *Handler) clustersID(w http.ResponseWriter, r *http.Request) {
-	id := path.Base(r.URL.Path)
-	route := map[string]func(http.ResponseWriter, *http.Request){
-		"support-bundle": h.clustersSupportBundle,
-	}[id]
-
-	if route != nil {
-		route(w, r)
-		return
-	}
-
-	// TODO:
-	// https://vmware.github.io/vsphere-automation-sdk-rest/vsphere/index.html#SVC_com.vmware.vcenter.namespace_management.clusters
-}
-
-func (h *Handler) listCompatibleDistributedSwitches(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) compatibleDistributedSwitches(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
@@ -178,7 +221,7 @@ func (h *Handler) listCompatibleDistributedSwitches(w http.ResponseWriter, r *ht
 	}
 }
 
-func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) compatibleEdgeClusters(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
@@ -199,294 +242,356 @@ func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-// Some fake services, service 1 has 2 versions, service 2 has 1 version
-// Summary for services
-var supervisorServicesMap = map[string]namespace.SupervisorServiceSummary{
-	"service1": {
-		ID:    "service1",
-		Name:  "mock-service-1",
-		State: "ACTIVATED",
-	},
-	"service2": {
-		ID:    "service2",
-		Name:  "mock-service-2",
-		State: "DEACTIVATED",
-	},
-}
-
-// Summary for service versions
-var supervisorServiceVersionsMap = map[string][]namespace.SupervisorServiceVersionSummary{
-	"service1": {
-		{
-			SupervisorServiceInfo: namespace.SupervisorServiceInfo{
-				Name:        "mock-service-1 v1 display name",
-				State:       "ACTIVATED",
-				Description: "This is service 1 version 1.0.0",
-			},
-			Version: "1.0.0",
-		},
-		{
-			SupervisorServiceInfo: namespace.SupervisorServiceInfo{
-				Name:        "mock-service-1 v2 display name",
-				State:       "DEACTIVATED",
-				Description: "This is service 1 version 2.0.0",
-			},
-			Version: "2.0.0",
-		}},
-	"service2": {
-		{
-			SupervisorServiceInfo: namespace.SupervisorServiceInfo{
-				Name:        "mock-service-2 v1 display name",
-				State:       "ACTIVATED",
-				Description: "This is service 2 version 1.1.0",
-			},
-			Version: "1.1.0",
-		},
-	},
-}
-
-func (h *Handler) listServices(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) services(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		supervisorServices := make([]namespace.SupervisorServiceSummary, len(supervisorServicesMap))
-		i := 0
-		for _, service := range supervisorServicesMap {
-			supervisorServices[i] = service
-			i++
+		vapi.StatusOK(w, h.store.listServices())
+	case http.MethodPost:
+		var spec namespace.SupervisorService
+		if !vapi.Decode(r, w, &spec) {
+			return
 		}
-		vapi.StatusOK(w, supervisorServices)
+		if spec.CarvelService == nil {
+			vapi.ApiErrorUnsupported(w)
+			return
+		}
+
+		content := spec.CarvelService.VersionSpec.Content
+		pkg, err := parseCarvelPackage(content)
+		if err != nil {
+			vapi.ApiErrorInvalidArgument(w)
+			return
+		}
+		if !h.store.addService(pkg, content) {
+			vapi.ApiErrorAlreadyExists(w)
+			return
+		}
+		vapi.StatusOK(w)
 	}
 }
 
-func (h *Handler) getService(w http.ResponseWriter, r *http.Request) {
-	id := path.Base(r.URL.Path)
-	switch r.Method {
-	case http.MethodGet:
-		if result, contains := supervisorServicesMap[id]; contains {
-			vapi.StatusOK(w, result)
-		} else {
-			vapi.ApiErrorNotFound(w)
-		}
-		return
-	}
-}
-
-// versionsForService returns the list of versions for a particular service
-func (h *Handler) versionsForService(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("In versionsForService: %v\n", r.URL.Path)
+func (h *Handler) service(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
+
+	info, exists := h.store.getService(id)
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
 	switch r.Method {
 	case http.MethodGet:
-		if result, contains := supervisorServiceVersionsMap[id]; contains {
-			vapi.StatusOK(w, result)
-		} else {
-			vapi.ApiErrorNotFound(w)
+		vapi.StatusOK(w, info)
+	case http.MethodPatch:
+		state, ok := resolveServiceState(r.URL.Query().Get("action"))
+		if !ok {
+			vapi.ApiErrorInvalidArgument(w)
+			return
 		}
-		return
+		h.store.setServiceState(id, state)
+		vapi.StatusOK(w)
+	case http.MethodDelete:
+		if info.State != deactivatedState {
+			vapi.ApiErrorNotAllowedInCurrentState(w)
+			return
+		}
+		h.store.removeService(id)
+		vapi.StatusOK(w)
 	}
 }
 
-// getServiceVersion returns info on a particular service version
-func (h *Handler) getServiceVersion(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) serviceVersions(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+
+	if !h.store.hasServiceVersions(id) {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, h.store.listServiceVersions(id))
+	case http.MethodPost:
+		var spec namespace.SupervisorServiceVersion
+		if !vapi.Decode(r, w, &spec) {
+			return
+		}
+		if spec.CarvelService == nil {
+			vapi.ApiErrorUnsupported(w)
+			return
+		}
+
+		pkg, err := parseCarvelPackage(spec.CarvelService.Content)
+		if err != nil || pkg.id != id {
+			vapi.ApiErrorInvalidArgument(w)
+			return
+		}
+		if !h.store.addServiceVersion(id, pkg, spec.CarvelService.Content) {
+			vapi.ApiErrorAlreadyExists(w)
+			return
+		}
+		vapi.StatusOK(w)
+	}
+}
+
+func (h *Handler) serviceVersion(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	version := r.PathValue("version")
 
+	info, exists := h.store.getServiceVersion(id, version)
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
 	switch r.Method {
 	case http.MethodGet:
-		if versions, contains := supervisorServiceVersionsMap[id]; contains {
-			for _, v := range versions {
-				if v.Version == version {
-					info := namespace.SupervisorServiceVersionInfo{
-						SupervisorServiceInfo: namespace.SupervisorServiceInfo{
-							Description: v.Description,
-							State:       v.State,
-							Name:        v.Name,
-						},
-						ContentType: "CARVEL_APPS_YAML", // return Carvel by default
-						Content:     "abc",              // in reality this is base 64 encoded of content
-					}
-					vapi.StatusOK(w, info)
-					return
-				}
-			}
-			vapi.ApiErrorNotFound(w)
-		} else {
-			vapi.ApiErrorNotFound(w)
+		vapi.StatusOK(w, info)
+	case http.MethodPatch:
+		state, ok := resolveServiceState(r.URL.Query().Get("action"))
+		if !ok {
+			vapi.ApiErrorInvalidArgument(w)
+			return
 		}
-		return
+		h.store.setServiceVersionState(id, version, state)
+		vapi.StatusOK(w)
+	case http.MethodDelete:
+		if info.State != deactivatedState {
+			vapi.ApiErrorNotAllowedInCurrentState(w)
+			return
+		}
+		h.store.removeServiceVersion(id, version)
+		vapi.StatusOK(w)
 	}
 }
 
-var namespacesMap = make(map[string]*namespace.NamespacesInstanceInfo)
+const (
+	activatedState   = "ACTIVATED"
+	deactivatedState = "DEACTIVATED"
+)
 
-func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
-	subpath := r.URL.Path[len(internal.NamespacesPath):]
-	subpath = strings.TrimPrefix(subpath, "/")
-	// TODO: move to 1.22's https://go.dev/blog/routing-enhancements
-	route := strings.Split(subpath, "/")
-	subpath = route[0]
-	action := ""
-	if len(route) > 1 {
-		action = route[1]
+func resolveServiceState(action string) (string, bool) {
+	switch action {
+	case "activate":
+		return activatedState, true
+	case "deactivate":
+		return deactivatedState, true
+	default:
+		return "", false
+	}
+}
+
+type carvelPackage struct {
+	id          string
+	displayName string
+	description string
+	version     string
+}
+
+type carvelResource struct {
+	Kind     string `yaml:"kind"`
+	Metadata struct {
+		Name string `yaml:"name"`
+	} `yaml:"metadata"`
+	Spec struct {
+		DisplayName      string `yaml:"displayName"`
+		ShortDescription string `yaml:"shortDescription"`
+		Version          string `yaml:"version"`
+	} `yaml:"spec"`
+}
+
+func parseCarvelPackage(content string) (carvelPackage, error) {
+	manifest, err := base64.StdEncoding.DecodeString(content)
+	if err != nil {
+		return carvelPackage{}, err
 	}
 
+	var pkg carvelPackage
+	decoder := yaml.NewDecoder(bytes.NewReader(manifest))
+	for {
+		var resource carvelResource
+		err := decoder.Decode(&resource)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			return carvelPackage{}, err
+		}
+
+		switch resource.Kind {
+		case "PackageMetadata":
+			pkg.id = resource.Metadata.Name
+			pkg.displayName = resource.Spec.DisplayName
+			pkg.description = resource.Spec.ShortDescription
+		case "Package":
+			pkg.version = resource.Spec.Version
+		}
+	}
+
+	if pkg.id == "" || pkg.version == "" {
+		return carvelPackage{}, errors.New("manifest must declare a PackageMetadata and a Package")
+	}
+	return pkg, nil
+}
+
+func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		if len(subpath) > 0 {
-			if result, contains := namespacesMap[subpath]; contains {
-				vapi.StatusOK(w, result)
-			} else {
-				vapi.ApiErrorNotFound(w)
-			}
-			return
-		} else {
-			result := make([]namespace.NamespacesInstanceSummary, 0, len(namespacesMap))
-
-			for k, v := range namespacesMap {
-				entry := namespace.NamespacesInstanceSummary{
-					ClusterId:    v.ClusterId,
-					Namespace:    k,
-					ConfigStatus: v.ConfigStatus,
-					Description:  v.Description,
-					Stats:        v.Stats,
-				}
-				result = append(result, entry)
-			}
-
-			vapi.StatusOK(w, result)
-		}
-	case http.MethodPatch:
-		if len(subpath) > 0 {
-			if entry, contains := namespacesMap[subpath]; contains {
-				var spec namespace.NamespacesInstanceUpdateSpec
-				if vapi.Decode(r, w, &spec) {
-					entry.VmServiceSpec = spec.VmServiceSpec
-					vapi.StatusOK(w)
-				}
-			}
-		}
-
-		vapi.ApiErrorNotFound(w)
+		vapi.StatusOK(w, h.store.listNamespaces())
 	case http.MethodPost:
-		if action == "registervm" {
-			var spec namespace.RegisterVMSpec
-			if !vapi.Decode(r, w, &spec) {
-				return
-			}
-
-			ref := types.ManagedObjectReference{Type: "VirtualMachine", Value: spec.VM}
-			task := types.CreateTask{Obj: ref}
-			key := &mo.Field{Path: "config.extraConfig", Key: "vmservice.virtualmachine.resource.yaml"}
-
-			vapi.StatusOK(w, vapi.RunTask(*h.URL, task, func(ctx context.Context, c *vim25.Client) error {
-				var vm mo.VirtualMachine
-				_ = property.DefaultCollector(c).RetrieveOne(ctx, task.Obj, []string{key.String()}, &vm)
-				if vm.Config == nil || len(vm.Config.ExtraConfig) == 0 {
-					return fmt.Errorf("%s %s not found", task.Obj, key)
-				}
-				return nil
-			}))
-			return
-		}
-
 		var spec namespace.NamespacesInstanceCreateSpec
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}
 
-		newNamespace := namespace.NamespacesInstanceInfo{
-			ClusterId:     spec.Cluster,
-			ConfigStatus:  namespace.RunningConfigStatus.String(),
-			VmServiceSpec: spec.VmServiceSpec,
+		respond(w, h.store.addNamespace(spec))
+	}
+}
+
+func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("namespace")
+
+	info, exists := h.store.getNamespace(name)
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, convertToNamespacesInstanceInfo(info))
+	case http.MethodPatch:
+		var spec namespace.NamespacesInstanceUpdateSpec
+		if !vapi.Decode(r, w, &spec) {
+			return
 		}
 
-		namespacesMap[spec.Namespace] = &newNamespace
-
-		vapi.StatusOK(w)
+		respond(w, h.store.updateNamespace(name, spec))
 	case http.MethodDelete:
-		if len(subpath) > 0 {
-			if _, contains := namespacesMap[subpath]; contains {
-				delete(namespacesMap, subpath)
-				vapi.StatusOK(w)
-				return
-			}
+		h.store.removeNamespace(name)
+		vapi.StatusOK(w)
+	}
+}
+
+func (h *Handler) namespacesV2(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, h.store.listNamespacesV2())
+	case http.MethodPost:
+		var spec namespace.NamespaceInstanceCreateSpecV2
+		if !vapi.Decode(r, w, &spec) {
+			return
 		}
+
+		respond(w, h.store.addNamespaceV2(spec))
+	}
+}
+
+func (h *Handler) namespaceV2(w http.ResponseWriter, r *http.Request) {
+	info, exists := h.store.getNamespace(r.PathValue("namespace"))
+	if !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, info)
+	}
+}
+
+func respond(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, errAlreadyExists):
+		vapi.ApiErrorAlreadyExists(w)
+	case errors.Is(err, errNotFound):
+		vapi.ApiErrorNotFound(w)
+	default:
+		vapi.StatusOK(w)
+	}
+}
+
+func (h *Handler) namespaceAction(w http.ResponseWriter, r *http.Request) {
+	switch r.PathValue("action") {
+	case "registervm":
+		h.registerNamespaceVM(w, r)
+	default:
 		vapi.ApiErrorNotFound(w)
 	}
 }
 
-var vmClassesMap = make(map[string]*namespace.VirtualMachineClassInfo)
+func (h *Handler) registerNamespaceVM(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		return
+	}
+
+	var spec namespace.RegisterVMSpec
+	if !vapi.Decode(r, w, &spec) {
+		return
+	}
+
+	ref := types.ManagedObjectReference{Type: "VirtualMachine", Value: spec.VM}
+	task := types.CreateTask{Obj: ref}
+	key := &mo.Field{Path: "config.extraConfig", Key: "vmservice.virtualmachine.resource.yaml"}
+
+	vapi.StatusOK(w, vapi.RunTask(*h.URL, task, func(ctx context.Context, c *vim25.Client) error {
+		var vm mo.VirtualMachine
+		_ = property.DefaultCollector(c).RetrieveOne(ctx, task.Obj, []string{key.String()}, &vm)
+		if vm.Config == nil || len(vm.Config.ExtraConfig) == 0 {
+			return fmt.Errorf("%s %s not found", task.Obj, key)
+		}
+		return nil
+	}))
+}
 
 func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
-	subpath := r.URL.Path[len(internal.VmClassesPath):]
-	subpath = strings.Replace(subpath, "/", "", -1)
-
 	switch r.Method {
 	case http.MethodGet:
-		if len(subpath) > 0 {
-			if result, contains := vmClassesMap[subpath]; contains {
-				vapi.StatusOK(w, result)
-			} else {
-				vapi.ApiErrorNotFound(w)
-			}
-			return
-		} else {
-			result := make([]*namespace.VirtualMachineClassInfo, 0, len(vmClassesMap))
-
-			for _, v := range vmClassesMap {
-				result = append(result, v)
-			}
-
-			vapi.StatusOK(w, result)
-		}
-	case http.MethodPatch:
-		if len(subpath) > 0 {
-			if entry, contains := vmClassesMap[subpath]; contains {
-				var spec namespace.VirtualMachineClassUpdateSpec
-				if !vapi.Decode(r, w, &spec) {
-					return
-				}
-
-				entry.CpuCount = spec.CpuCount
-				entry.MemoryMb = spec.MemoryMb
-				entry.CpuReservation = spec.CpuReservation
-				entry.MemoryReservation = spec.MemoryReservation
-				entry.Devices = spec.Devices
-				entry.ConfigSpec = spec.ConfigSpec
-
-				vapi.StatusOK(w)
-				return
-			}
-		}
-
-		vapi.ApiErrorNotFound(w)
+		vapi.StatusOK(w, h.store.listVmClasses())
 	case http.MethodPost:
 		var spec namespace.VirtualMachineClassCreateSpec
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}
 
-		newClass := namespace.VirtualMachineClassInfo{
-			Id:                spec.Id,
-			CpuCount:          spec.CpuCount,
-			MemoryMb:          spec.MemoryMb,
-			MemoryReservation: spec.MemoryReservation,
-			CpuReservation:    spec.CpuReservation,
-			Devices:           spec.Devices,
-			ConfigSpec:        spec.ConfigSpec,
+		if !h.store.addVmClass(spec) {
+			vapi.ApiErrorAlreadyExists(w)
+			return
+		}
+		vapi.StatusOK(w)
+	}
+}
+
+func (h *Handler) vmClass(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("vmClass")
+
+	switch r.Method {
+	case http.MethodGet:
+		result, exists := h.store.getVmClass(id)
+		if !exists {
+			vapi.ApiErrorNotFound(w)
+			return
+		}
+		vapi.StatusOK(w, result)
+	case http.MethodPatch:
+		if _, exists := h.store.getVmClass(id); !exists {
+			vapi.ApiErrorNotFound(w)
+			return
 		}
 
-		vmClassesMap[spec.Id] = &newClass
+		var spec namespace.VirtualMachineClassUpdateSpec
+		if !vapi.Decode(r, w, &spec) {
+			return
+		}
 
+		h.store.updateVmClass(id, spec)
 		vapi.StatusOK(w)
 	case http.MethodDelete:
-		if len(subpath) > 0 {
-			if _, contains := vmClassesMap[subpath]; contains {
-				delete(vmClassesMap, subpath)
-				vapi.StatusOK(w)
-				return
-			}
+		if _, exists := h.store.getVmClass(id); !exists {
+			vapi.ApiErrorNotFound(w)
+			return
 		}
-		vapi.ApiErrorNotFound(w)
+		h.store.removeVmClass(id)
+		vapi.StatusOK(w)
 	}
 }
