@@ -5,6 +5,7 @@
 package simulator
 
 import (
+	"errors"
 	"path"
 	"slices"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vapi/namespace"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // store holds the simulated Namespace Management state. Every read and write of
@@ -28,6 +30,11 @@ type store struct {
 	services        map[string]namespace.SupervisorServiceInfo
 	serviceVersions map[string]map[string]namespace.SupervisorServiceVersionInfo
 }
+
+var (
+	errAlreadyExists = errors.New("already exists")
+	errNotFound      = errors.New("not found")
+)
 
 type supervisor struct {
 	info     namespace.SupervisorSummaryInfo
@@ -59,16 +66,22 @@ func (s *store) listClusters() []namespace.ClusterSummary {
 	return clusters
 }
 
-func (s *store) enableCluster(id string) {
+func (s *store) enableCluster(id string) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	cluster, exists := s.lookupCluster(id)
+	if !exists {
+		return false
+	}
 
 	s.clusters[id] = namespace.ClusterSummary{
 		ID:               id,
 		ConfigStatus:     &namespace.RunningConfigStatus,
 		KubernetesStatus: &namespace.ReadyKubernetesStatus,
 	}
-	s.supervisors[id] = s.newSupervisor(id)
+	s.supervisors[id] = s.newSupervisor(id, cluster.Name)
+	return true
 }
 
 func (s *store) disableCluster(id string) bool {
@@ -110,9 +123,7 @@ func (s *store) listSupervisors() []namespace.SupervisorsSummaryResultItem {
 	return items
 }
 
-func (s *store) newSupervisor(id string) supervisor {
-	name := s.lookupClusterName(id)
-
+func (s *store) newSupervisor(id, name string) supervisor {
 	return supervisor{
 		info: namespace.SupervisorSummaryInfo{
 			Name:             name,
@@ -135,13 +146,13 @@ func (s *store) newSupervisor(id string) supervisor {
 	}
 }
 
-func (s *store) lookupClusterName(id string) string {
-	for _, entity := range s.registry.All("ClusterComputeResource") {
-		if entity.Entity().Self.Value == id {
-			return entity.Entity().Name
-		}
+func (s *store) lookupCluster(id string) (*mo.ClusterComputeResource, bool) {
+	ref := types.ManagedObjectReference{Type: "ClusterComputeResource", Value: id}
+	cluster, exists := s.registry.Get(ref).(*simulator.ClusterComputeResource)
+	if !exists {
+		return nil, false
 	}
-	return id
+	return &cluster.ClusterComputeResource, true
 }
 
 // collectPortgroupNetworks maps inventory DVPGs to workload networks, minus the per-switch uplink.
@@ -360,12 +371,18 @@ func (s *store) listNamespacesV2() []namespace.NamespaceInstanceSummaryV2 {
 	return result
 }
 
-func (s *store) addNamespace(spec namespace.NamespacesInstanceCreateSpec) bool {
+func (s *store) addNamespace(spec namespace.NamespacesInstanceCreateSpec) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if _, exists := s.namespaces[spec.Namespace]; exists {
-		return false
+		return errAlreadyExists
+	}
+	if _, exists := s.supervisors[spec.Cluster]; !exists {
+		return errNotFound
+	}
+	if !s.hasVmClasses(referencedVmClasses(&spec.VmServiceSpec, nil)) {
+		return errNotFound
 	}
 	s.namespaces[spec.Namespace] = namespace.NamespaceInstanceInfoV2{
 		Supervisor:    spec.Cluster,
@@ -373,27 +390,36 @@ func (s *store) addNamespace(spec namespace.NamespacesInstanceCreateSpec) bool {
 		VmServiceSpec: spec.VmServiceSpec,
 		StorageSpecs:  spec.StorageSpecs,
 	}
-	return true
+	return nil
 }
 
-func (s *store) addNamespaceV2(spec namespace.NamespaceInstanceCreateSpecV2) bool {
+func (s *store) addNamespaceV2(spec namespace.NamespaceInstanceCreateSpecV2) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	if _, exists := s.namespaces[spec.Namespace]; exists {
-		return false
+		return errAlreadyExists
+	}
+	if _, exists := s.supervisors[spec.Supervisor]; !exists {
+		return errNotFound
+	}
+	if !s.hasVmClasses(referencedVmClasses(spec.VmServiceSpec, spec.Zones)) {
+		return errNotFound
 	}
 	s.namespaces[spec.Namespace] = createNamespaceInfo(spec)
-	return true
+	return nil
 }
 
-func (s *store) updateNamespace(name string, spec namespace.NamespacesInstanceUpdateSpec) {
+func (s *store) updateNamespace(name string, spec namespace.NamespacesInstanceUpdateSpec) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	info, exists := s.namespaces[name]
 	if !exists {
-		return
+		return errNotFound
+	}
+	if !s.hasVmClasses(referencedVmClasses(&spec.VmServiceSpec, spec.Zones)) {
+		return errNotFound
 	}
 
 	if spec.VmServiceSpec.ContentLibraries != nil || spec.VmServiceSpec.VmClasses != nil {
@@ -414,6 +440,7 @@ func (s *store) updateNamespace(name string, spec namespace.NamespacesInstanceUp
 	}
 
 	s.namespaces[name] = info
+	return nil
 }
 
 func (s *store) removeNamespace(name string) {
@@ -421,6 +448,33 @@ func (s *store) removeNamespace(name string) {
 	defer s.mu.Unlock()
 
 	delete(s.namespaces, name)
+}
+
+func (s *store) hasVmClasses(ids []string) bool {
+	for _, id := range ids {
+		if _, exists := s.vmClasses[id]; !exists {
+			return false
+		}
+	}
+	return true
+}
+
+func referencedVmClasses(vmService *namespace.VmServiceSpec, zones *[]namespace.ZoneSpec) []string {
+	var ids []string
+	if vmService != nil {
+		ids = append(ids, vmService.VmClasses...)
+	}
+	if zones != nil {
+		for _, zone := range *zones {
+			if zone.VmReservations == nil {
+				continue
+			}
+			for _, reservation := range *zone.VmReservations {
+				ids = append(ids, reservation.ReservedVmClass)
+			}
+		}
+	}
+	return ids
 }
 
 func createNamespaceInfo(spec namespace.NamespaceInstanceCreateSpecV2) namespace.NamespaceInstanceInfoV2 {

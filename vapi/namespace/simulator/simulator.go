@@ -15,7 +15,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"path"
 	"time"
 
 	"github.com/google/uuid"
@@ -98,7 +97,10 @@ func (h *Handler) cluster(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		switch r.URL.Query().Get("action") {
 		case "enable":
-			h.store.enableCluster(id)
+			if !h.store.enableCluster(id) {
+				vapi.ApiErrorNotFound(w)
+				return
+			}
 			vapi.StatusOK(w)
 		case "disable":
 			if !h.store.disableCluster(id) {
@@ -161,6 +163,12 @@ func (h *Handler) clusterNetworks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if _, exists := h.store.getSupervisor(id); !exists {
+		vapi.ApiErrorNotFound(w)
+		return
+	}
+
 	var token internal.SupportBundleToken
 	_ = json.NewDecoder(r.Body).Decode(&token)
 	_ = r.Body.Close()
@@ -181,7 +189,6 @@ func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Get support bundle
-	id := path.Base(path.Dir(r.URL.Path))
 	name := fmt.Sprintf("wcp-support-bundle-%s-%s--00-00.tar", id, time.Now().Format("2006Jan02"))
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
@@ -437,11 +444,7 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if !h.store.addNamespace(spec) {
-			vapi.ApiErrorAlreadyExists(w)
-			return
-		}
-		vapi.StatusOK(w)
+		respond(w, h.store.addNamespace(spec))
 	}
 }
 
@@ -463,8 +466,7 @@ func (h *Handler) namespace(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.store.updateNamespace(name, spec)
-		vapi.StatusOK(w)
+		respond(w, h.store.updateNamespace(name, spec))
 	case http.MethodDelete:
 		h.store.removeNamespace(name)
 		vapi.StatusOK(w)
@@ -481,11 +483,7 @@ func (h *Handler) namespacesV2(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if !h.store.addNamespaceV2(spec) {
-			vapi.ApiErrorAlreadyExists(w)
-			return
-		}
-		vapi.StatusOK(w)
+		respond(w, h.store.addNamespaceV2(spec))
 	}
 }
 
@@ -499,6 +497,17 @@ func (h *Handler) namespaceV2(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		vapi.StatusOK(w, info)
+	}
+}
+
+func respond(w http.ResponseWriter, err error) {
+	switch {
+	case errors.Is(err, errAlreadyExists):
+		vapi.ApiErrorAlreadyExists(w)
+	case errors.Is(err, errNotFound):
+		vapi.ApiErrorNotFound(w)
+	default:
+		vapi.StatusOK(w)
 	}
 }
 

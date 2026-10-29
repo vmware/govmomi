@@ -136,6 +136,7 @@ enable_supervisor_cluster() {
 
 @test "namespace.logs" {
   vcsim_env
+  enable_supervisor_cluster DC0_C0
 
   id=$(govc find -i -maxdepth 0 host/DC0_C0 | awk -F: '{print $2}')
 
@@ -222,6 +223,7 @@ enable_supervisor_cluster() {
 
 @test "namespace.create" {
     vcsim_env
+    enable_supervisor_cluster DC0_C0
 
     run govc namespace.create -cluster DC0_C0 test-namespace-1
     assert_success
@@ -249,8 +251,12 @@ enable_supervisor_cluster() {
 
 @test "namespace.update" {
     vcsim_env
+    enable_supervisor_cluster DC0_C0
 
     govc namespace.create -cluster DC0_C0 test-namespace-1
+    govc namespace.vmclass.create -cpus=2 -memory=2048 class1
+    govc namespace.vmclass.create -cpus=2 -memory=2048 class3
+    govc namespace.vmclass.create -cpus=2 -memory=2048 class4
 
     run govc namespace.update -library=lib1 -library=lib2 -vmclass=class1 test-namespace-1
     assert_success
@@ -294,6 +300,7 @@ enable_supervisor_cluster() {
 
 @test "namespace.info" {
     vcsim_env
+    enable_supervisor_cluster DC0_C0
 
     govc namespace.create -cluster DC0_C0 test-namespace-1
 
@@ -311,6 +318,7 @@ enable_supervisor_cluster() {
 
 @test "namespace.ls" {
     vcsim_env
+    enable_supervisor_cluster DC0_C0
 
     run govc namespace.ls
     assert_success ""
@@ -338,6 +346,7 @@ enable_supervisor_cluster() {
 
 @test "namespace.rm" {
     vcsim_env
+    enable_supervisor_cluster DC0_C0
 
     run govc namespace.rm non-existing-namespace
     assert_failure
@@ -457,6 +466,7 @@ enable_supervisor_cluster() {
 
 @test "namespace.registervm" {
   vcsim_env
+  enable_supervisor_cluster DC0_C0
 
   vm=DC0_C0_RP0_VM0
 
