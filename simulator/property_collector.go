@@ -10,6 +10,7 @@ import (
 	"log"
 	"path"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -563,7 +564,10 @@ func (pc *PropertyCollector) CreateFilter(ctx *Context, c *types.CreateFilter) s
 	filter.PartialUpdates = c.PartialUpdates
 	filter.Spec = c.Spec
 
-	pc.Filter = append(pc.Filter, ctx.Session.Put(filter).Reference())
+	ref := ctx.Session.Put(filter).Reference()
+	pc.mu.Lock()
+	pc.Filter = append(pc.Filter, ref)
+	pc.mu.Unlock()
 
 	body.Res = &types.CreateFilterResponse{
 		Returnval: filter.Self,
@@ -591,7 +595,7 @@ func (pc *PropertyCollector) DestroyPropertyCollector(ctx *Context, c *types.Des
 
 	body := &methods.DestroyPropertyCollectorBody{}
 
-	for _, ref := range pc.Filter {
+	for _, ref := range pc.filters() {
 		// Same as DestroyPropertyFilter
 		ctx.Map.RemoveHandler(ctx.Session.Get(ref).(*PropertyFilter))
 		ctx.Session.Remove(ctx, ref)
@@ -798,8 +802,17 @@ func (pc *PropertyCollector) RemoveObject(_ *Context, ref types.ManagedObjectRef
 	})
 }
 
+// filters returns a copy of pc.Filter, safe to iterate while another request
+// creates or destroys a filter. PropertyCollector opts out of registry locking
+// (nopLocker), so pc.Filter is guarded by pc.mu instead.
+func (pc *PropertyCollector) filters() []types.ManagedObjectReference {
+	pc.mu.Lock()
+	defer pc.mu.Unlock()
+	return slices.Clone(pc.Filter)
+}
+
 func (pc *PropertyCollector) apply(ctx *Context, update *types.UpdateSet) types.BaseMethodFault {
-	for _, ref := range pc.Filter {
+	for _, ref := range pc.filters() {
 		filter, ok := ctx.Session.Get(ref).(*PropertyFilter)
 		if !ok {
 			continue
@@ -967,10 +980,14 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 				continue
 			}
 
-			tracef("%s: applying %d updates to %d filters", pc.Self, len(updates), len(pc.Filter))
+			filters := pc.filters()
+			tracef("%s: applying %d updates to %d filters", pc.Self, len(updates), len(filters))
 
-			for _, f := range pc.Filter {
-				filter := ctx.Session.Get(f).(*PropertyFilter)
+			for _, f := range filters {
+				filter, ok := ctx.Session.Get(f).(*PropertyFilter)
+				if !ok {
+					continue // destroyed by a concurrent DestroyPropertyFilter
+				}
 				filter.update(ctx)
 				fu := types.PropertyFilterUpdate{Filter: f}
 

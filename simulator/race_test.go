@@ -19,6 +19,7 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -355,5 +356,100 @@ func TestRaceVmRelocate(t *testing.T) {
 		if n := failed.Load(); n != 0 {
 			t.Errorf("%d relocate calls failed", n)
 		}
+	})
+}
+
+// TestRaceDestroyPropertyFilter covers WaitForUpdatesEx iterating
+// PropertyCollector.Filter while concurrent requests on the same collector
+// create and destroy filters.
+func TestRaceDestroyPropertyFilter(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		pc, err := property.DefaultCollector(c).Create(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		filter := func() types.CreateFilter {
+			return types.CreateFilter{
+				Spec: types.PropertyFilterSpec{
+					ObjectSet: []types.ObjectSpec{{Obj: vm.Reference()}},
+					PropSet: []types.PropertySpec{{
+						Type:    "VirtualMachine",
+						PathSet: []string{"name"},
+					}},
+				},
+			}
+		}
+
+		if _, err = pc.CreateFilter(ctx, filter()); err != nil {
+			t.Fatal(err)
+		}
+
+		var wg sync.WaitGroup
+		done := make(chan struct{})
+
+		// Generate updates so the WaitForUpdatesEx loop walks pc.Filter.
+		wg.Go(func() {
+			for i := 0; ; i++ {
+				select {
+				case <-done:
+					return
+				default:
+				}
+				task, err := vm.Rename(ctx, fmt.Sprintf("race-%d", i))
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				_ = task.Wait(ctx)
+			}
+		})
+
+		// Create and destroy filters on the same collector.
+		wg.Go(func() {
+			for {
+				select {
+				case <-done:
+					return
+				default:
+				}
+				req := filter()
+				req.This = pc.Reference()
+				res, err := methods.CreateFilter(ctx, c, &req)
+				if err != nil {
+					t.Error(err)
+					return
+				}
+				_, err = methods.DestroyPropertyFilter(ctx, c, &types.DestroyPropertyFilter{This: res.Returnval})
+				if err != nil {
+					t.Error(err)
+					return
+				}
+			}
+		})
+
+		wait := int32(1)
+		req := types.WaitForUpdatesEx{
+			This:    pc.Reference(),
+			Options: &types.WaitOptions{MaxWaitSeconds: &wait},
+		}
+		for range 50 {
+			res, err := methods.WaitForUpdatesEx(ctx, c, &req)
+			if err != nil {
+				t.Error(err)
+				break
+			}
+			if set := res.Returnval; set != nil {
+				req.Version = set.Version
+			}
+		}
+
+		close(done)
+		wg.Wait()
 	})
 }

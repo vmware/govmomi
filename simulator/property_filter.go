@@ -51,9 +51,9 @@ func (_ *PropertyFilter) RemoveObject(_ *Context, _ types.ManagedObjectReference
 func (f *PropertyFilter) DestroyPropertyFilter(ctx *Context, c *types.DestroyPropertyFilter) soap.HasFault {
 	body := &methods.DestroyPropertyFilterBody{}
 
-	ctx.WithLock(f.pc, func() {
-		RemoveReference(&f.pc.Filter, c.This)
-	})
+	f.pc.mu.Lock()
+	RemoveReference(&f.pc.Filter, c.This)
+	f.pc.mu.Unlock()
 
 	ctx.Map.RemoveHandler(f)
 	ctx.Session.Remove(ctx, c.This)
