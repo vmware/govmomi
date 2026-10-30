@@ -10,6 +10,7 @@ import (
 	"log"
 	"path"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -558,7 +559,7 @@ func (pc *PropertyCollector) CreateFilter(ctx *Context, c *types.CreateFilter) s
 	filter.PartialUpdates = c.PartialUpdates
 	filter.Spec = c.Spec
 
-	pc.Filter = append(pc.Filter, ctx.Session.Put(filter).Reference())
+	pc.addFilter(ctx.Session.Put(filter).Reference())
 
 	body.Res = &types.CreateFilterResponse{
 		Returnval: filter.Self,
@@ -586,7 +587,7 @@ func (pc *PropertyCollector) DestroyPropertyCollector(ctx *Context, c *types.Des
 
 	body := &methods.DestroyPropertyCollectorBody{}
 
-	for _, ref := range pc.Filter {
+	for _, ref := range pc.filters() {
 		// Same as DestroyPropertyFilter
 		ctx.Map.RemoveHandler(ctx.Session.Get(ref).(*PropertyFilter))
 		ctx.Session.Remove(ctx, ref)
@@ -793,8 +794,31 @@ func (pc *PropertyCollector) RemoveObject(_ *Context, ref types.ManagedObjectRef
 	})
 }
 
+// addFilter, removeFilter and filters guard pc.Filter with pc.mu.
+// PropertyCollector opts out of the dispatcher's object lock (nopLocker), so
+// ctx.WithLock(pc, ...) does not serialize access: WaitForUpdatesEx would
+// otherwise read the slice while CreateFilter or DestroyPropertyFilter writes it.
+func (pc *PropertyCollector) addFilter(ref types.ManagedObjectReference) {
+	pc.mu.Lock()
+	defer pc.mu.Unlock()
+	pc.Filter = append(pc.Filter, ref)
+}
+
+func (pc *PropertyCollector) removeFilter(ref types.ManagedObjectReference) {
+	pc.mu.Lock()
+	defer pc.mu.Unlock()
+	RemoveReference(&pc.Filter, ref)
+}
+
+// filters returns a snapshot of pc.Filter that is safe to iterate unlocked.
+func (pc *PropertyCollector) filters() []types.ManagedObjectReference {
+	pc.mu.Lock()
+	defer pc.mu.Unlock()
+	return slices.Clone(pc.Filter)
+}
+
 func (pc *PropertyCollector) apply(ctx *Context, update *types.UpdateSet) types.BaseMethodFault {
-	for _, ref := range pc.Filter {
+	for _, ref := range pc.filters() {
 		filter, ok := ctx.Session.Get(ref).(*PropertyFilter)
 		if !ok {
 			continue
@@ -962,9 +986,10 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 				continue
 			}
 
-			tracef("%s: applying %d updates to %d filters", pc.Self, len(updates), len(pc.Filter))
+			filters := pc.filters()
+			tracef("%s: applying %d updates to %d filters", pc.Self, len(updates), len(filters))
 
-			for _, f := range pc.Filter {
+			for _, f := range filters {
 				filter := ctx.Session.Get(f).(*PropertyFilter)
 				filter.update(ctx)
 				fu := types.PropertyFilterUpdate{Filter: f}

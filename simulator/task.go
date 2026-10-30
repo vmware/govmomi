@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/vmware/govmomi/vim25"
@@ -29,8 +30,18 @@ var TaskDelay = DelayConfig{}
 type Task struct {
 	mo.Task
 
+	// infoMu guards Info, which Registry.Update writes while collectors and
+	// other goroutines read it without holding the task lock.
+	infoMu  sync.RWMutex
 	ctx     *Context
 	Execute func(*Task) (types.AnyType, types.BaseMethodFault)
+}
+
+// info returns a snapshot of the task's Info.
+func (t *Task) info() types.TaskInfo {
+	t.infoMu.RLock()
+	defer t.infoMu.RUnlock()
+	return t.Info
 }
 
 func NewTask(runner TaskRunner) *Task {
