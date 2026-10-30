@@ -138,7 +138,7 @@ func (s *searchDatastore) queryMatch(file os.FileInfo) bool {
 }
 
 func friendlyName(ctx *Context, root bool, ds *Datastore, p string) string {
-	if !root || p == "" || !internal.IsDatastoreVSAN(ds.Datastore) {
+	if !root || p == "" || !internal.IsDatastoreVSAN(ds.Summary.Type) {
 		return ""
 	}
 

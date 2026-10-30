@@ -1344,7 +1344,7 @@ func (vm *VirtualMachine) createFile(ctx *Context, spec string, name string, reg
 	ds := vm.useDatastore(ctx, p.Datastore)
 
 	nhost := len(ds.Host)
-	if internal.IsDatastoreVSAN(ds.Datastore) && nhost < 3 {
+	if internal.IsDatastoreVSAN(ds.Summary.Type) && nhost < 3 {
 		fault := new(types.CannotCreateFile)
 		fault.FaultMessage = []types.LocalizableMessage{
 			{
@@ -1484,12 +1484,7 @@ func (vm *VirtualMachine) create(ctx *Context, spec *types.VirtualMachineConfigS
 			vm.Config.ExtraConfig,
 			&types.OptionValue{Key: ContainerBackingOptionKey, Value: e.OCIImage},
 		)
-		for k, v := range e.ExtraConfig {
-			vm.Config.ExtraConfig = append(
-				vm.Config.ExtraConfig,
-				&types.OptionValue{Key: k, Value: v},
-			)
-		}
+		vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, e.extraConfigFor(vm.Config.Name)...)
 	}
 
 	return vm.applyExtraConfig(ctx, spec)
@@ -1763,6 +1758,10 @@ func (vm *VirtualMachine) configureDevice(
 		})
 
 		c := x.GetVirtualEthernetCard()
+		if old, ok := oldDevice.(types.BaseVirtualEthernetCard); ok && c.MacAddress == "" {
+			// An edit that leaves the MAC out keeps the vNIC's MAC.
+			c.MacAddress = old.GetVirtualEthernetCard().MacAddress
+		}
 		if c.MacAddress == "" {
 			if c.UnitNumber == nil {
 				devices.AssignController(device, controller)

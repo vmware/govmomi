@@ -933,3 +933,23 @@ func TestDVSDefaultProductInfo(t *testing.T) {
 		}
 	})
 }
+
+// TestDVSReconfigureKeepsConfigType checks that adding hosts to a DVS (the default
+// model does so) leaves config a VMwareDVSConfigInfo, rather than replacing it with
+// its embedded DVSConfigInfo and dropping the VMware-specific fields.
+func TestDVSReconfigureKeepsConfigType(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		var dvs mo.VmwareDistributedVirtualSwitch
+		ref := Map(ctx).Any("VmwareDistributedVirtualSwitch").Reference()
+		if err := property.DefaultCollector(c).RetrieveOne(ctx, ref, []string{"config"}, &dvs); err != nil {
+			t.Fatal(err)
+		}
+		config, ok := dvs.Config.(*types.VMwareDVSConfigInfo)
+		if !ok {
+			t.Fatalf("config type = %T, want *types.VMwareDVSConfigInfo", dvs.Config)
+		}
+		if len(config.Host) == 0 {
+			t.Error("config.host is empty, want the hosts the model added")
+		}
+	})
+}
