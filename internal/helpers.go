@@ -51,8 +51,10 @@ var vsanFS = []string{
 	string(types.HostFileSystemVolumeFileSystemTypeVVOL),
 }
 
-func IsDatastoreVSAN(ds mo.Datastore) bool {
-	return slices.Contains(vsanFS, ds.Summary.Type)
+// IsDatastoreVSAN reports whether fsType, a Datastore summary type, is a vSAN file system. It takes the type rather
+// than the Datastore so callers do not copy a Datastore that is concurrently updated.
+func IsDatastoreVSAN(fsType string) bool {
+	return slices.Contains(vsanFS, fsType)
 }
 
 func HostSystemManagementIPs(config []types.VirtualNicManagerNetConfig) []net.IP {
