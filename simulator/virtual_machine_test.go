@@ -5628,3 +5628,83 @@ func TestVirtualMachineRuntimeEnumFields(t *testing.T) {
 		t.Fatal("no VirtualMachine objects found in the model")
 	}
 }
+
+func TestVmSwapPlacement(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+		dc, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		finder.SetDatacenter(dc)
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		pool, err := finder.ResourcePool(ctx, "DC0_H0/Resources")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		create := func(name, swapPlacement string) *object.VirtualMachine {
+			spec := types.VirtualMachineConfigSpec{
+				Name:          name,
+				GuestId:       string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+				SwapPlacement: swapPlacement,
+				Files: &types.VirtualMachineFileInfo{
+					VmPathName: "[LocalDS_0]",
+				},
+			}
+			task, err := folders.VmFolder.CreateVM(ctx, spec, pool, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			info, err := task.WaitForResult(ctx, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return object.NewVirtualMachine(c, info.Result.(types.ManagedObjectReference))
+		}
+
+		properties := func(vm *object.VirtualMachine) mo.VirtualMachine {
+			var mvm mo.VirtualMachine
+			err := vm.Properties(ctx, vm.Reference(), []string{"capability", "config"}, &mvm)
+			if err != nil {
+				t.Fatal(err)
+			}
+			return mvm
+		}
+
+		inherit := string(types.VirtualMachineConfigInfoSwapPlacementTypeInherit)
+		hostLocal := string(types.VirtualMachineConfigInfoSwapPlacementTypeHostLocal)
+		vmDirectory := string(types.VirtualMachineConfigInfoSwapPlacementTypeVmDirectory)
+
+		vm := create(t.Name()+"-default", "")
+		mvm := properties(vm)
+		if !mvm.Capability.SwapPlacementSupported {
+			t.Error("expected swapPlacementSupported")
+		}
+		if mvm.Config.SwapPlacement != inherit {
+			t.Errorf("expected %q, got %q", inherit, mvm.Config.SwapPlacement)
+		}
+
+		mvm = properties(create(t.Name()+"-hostLocal", hostLocal))
+		if mvm.Config.SwapPlacement != hostLocal {
+			t.Errorf("expected %q, got %q", hostLocal, mvm.Config.SwapPlacement)
+		}
+
+		task, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{SwapPlacement: vmDirectory})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = task.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+
+		mvm = properties(vm)
+		if mvm.Config.SwapPlacement != vmDirectory {
+			t.Errorf("expected %q, got %q", vmDirectory, mvm.Config.SwapPlacement)
+		}
+	})
+}
