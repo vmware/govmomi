@@ -154,16 +154,21 @@ load test_helper
 
   # Remove username/password
   host=$(govc env GOVC_URL)
-  # Token template, vcsim just checks Assertion.Subject.NameID
+  # Token template, not issued by the STS simulator
   token="<Assertion><Subject><NameID>%s</NameID></Subject></Assertion>"
 
   # shellcheck disable=2059
-  run govc session.login -l -token "$(printf $token "")"
-  assert_failure # empty NameID is a InvalidLogin fault
+  run govc session.login -l -token "$(printf $token root@localos)"
+  assert_failure # vcsim only accepts tokens issued by its STS simulator
 
   # shellcheck disable=2059
-  run govc session.login -l -token "$(printf $token root@localos)"
-  assert_success # non-empty NameID is enough to login
+  run govc session.login -r -token "$(printf $token root@localos)"
+  assert_failure
+
+  token="$(govc session.login -issue)"
+
+  run govc session.login -l -token "$token"
+  assert_success
 
   run govc role.ls -u "$user@$host" # url w/o pass
   assert_success # authenticated via persisted SOAP session
@@ -171,7 +176,7 @@ load test_helper
   run govc tags.ls -u "$user@$host" # url w/o pass
   assert_failure # no persisted REST session yet
 
-  run govc session.login -r -token "$(printf $token root@localos)"
+  run govc session.login -r -token "$token"
   assert_success
 
   run govc tags.ls -u "$user@$host" # url w/o pass

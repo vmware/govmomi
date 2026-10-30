@@ -46,10 +46,9 @@ func ExampleClient_LoginByToken() {
 			return err
 		}
 
-		// Note: vcsim does not currently parse the token NameID for rest as it does for soap
 		fmt.Println(session.User)
 
 		return nil
 	})
-	// Output: TODO
+	// Output: Administrator@VSPHERE.LOCAL
 }
