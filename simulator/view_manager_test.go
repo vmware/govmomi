@@ -16,6 +16,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -185,6 +186,71 @@ func TestViewManager_CreateContainerView(t *testing.T) {
 	})
 	if err != nil {
 		t.Errorf("Failed to run simulation: %s", err.Error())
+	}
+}
+
+func TestContainerViewConcurrentFolderUpdates(t *testing.T) {
+	ctx := NewContext()
+	writer := *ctx // Concurrent requests must have separate lock ownership.
+	dc := new(mo.Datacenter)
+	ctx.Map.Put(dc)
+	root, folder := new(mo.Folder), new(mo.Folder)
+	ctx.Map.PutEntity(dc, root)
+	folderPutChild(ctx, root, folder)
+	stable := new(mo.VirtualMachine)
+	folderPutChild(ctx, root, stable)
+	vms := []*mo.VirtualMachine{new(mo.VirtualMachine), new(mo.VirtualMachine)}
+	for _, vm := range vms {
+		folderPutChild(ctx, folder, vm)
+	}
+
+	manager := new(ViewManager)
+	manager.init(ctx.Map)
+	req := &types.CreateContainerView{
+		Container: root.Reference(),
+		Type:      []string{"VirtualMachine"},
+		Recursive: true,
+	}
+
+	stop, done := make(chan struct{}), make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; ; i++ {
+			select {
+			case <-stop:
+				return
+			default:
+			}
+			vm := vms[i%len(vms)]
+			// Rotate the first child to the end. Removal overwrites the
+			// backing array; insertion also updates existing view handlers.
+			folderRemoveReference(&writer, folder, vm.Reference())
+			folderPutChild(&writer, folder, vm)
+		}
+	}()
+	defer func() {
+		close(stop)
+		<-done
+	}()
+
+	for i := 0; i < 1000; i++ {
+		body := manager.CreateContainerView(ctx, req).(*methods.CreateContainerViewBody)
+		if body.Fault() != nil {
+			t.Fatal(body.Fault())
+		}
+		v := ctx.Session.Get(body.Res.Returnval).(*ContainerView)
+		ctx.WithLock(v, func() {
+			if FindReference(v.View, stable.Reference()) == nil {
+				t.Error("view is missing the stable VM")
+			}
+			for _, ref := range v.View {
+				if ref != stable.Reference() && ref != vms[0].Reference() && ref != vms[1].Reference() {
+					t.Errorf("unexpected view member: %v", ref)
+				}
+			}
+			// SOAP dispatch also holds the view lock during DestroyView.
+			v.DestroyView(ctx, &types.DestroyView{This: body.Res.Returnval})
+		})
 	}
 }
 
