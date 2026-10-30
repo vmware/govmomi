@@ -99,7 +99,7 @@ func (s *VmwareDistributedVirtualSwitch) addDVPortgroups(ctx *Context, specs []t
 			PortNameFormat:               spec.PortNameFormat,
 			Scope:                        spec.Scope,
 			VendorSpecificConfig:         spec.VendorSpecificConfig,
-			ConfigVersion:                spec.ConfigVersion,
+			ConfigVersion:                "0",
 			AutoExpand:                   spec.AutoExpand,
 			VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
 			LogicalSwitchUuid:            spec.LogicalSwitchUuid,
@@ -299,11 +299,21 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 
 		config := s.Config.GetDVSConfigInfo()
 		config.Host = configHosts
+		if spec.SwitchIpAddress != "" {
+			config.SwitchIpAddress = spec.SwitchIpAddress
+		}
+		if vmwareSpec, ok := req.Spec.(*types.VMwareDVSConfigSpec); ok {
+			if vmwareConfig, ok := s.Config.(*types.VMwareDVSConfigInfo); ok && vmwareSpec.IpfixConfig != nil {
+				vmwareConfig.IpfixConfig = vmwareSpec.IpfixConfig
+			}
+		}
+		version, _ := strconv.Atoi(config.ConfigVersion)
+		config.ConfigVersion = strconv.Itoa(version + 1)
 
 		ctx.Update(s, []types.PropertyChange{
 			{Name: "summary.hostMember", Val: members},
 			{Name: "summary.numHosts", Val: int32(len(members))},
-			{Name: "config", Val: config},
+			{Name: "config", Val: s.Config},
 		})
 
 		// Invalidate FetchDVPorts cache: host membership changes affect uplink ports
@@ -311,7 +321,7 @@ func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *t
 
 		ctx.postEvent(&types.DvsReconfiguredEvent{
 			DvsEvent:   s.event(ctx),
-			ConfigSpec: spec,
+			ConfigSpec: req.Spec,
 		})
 
 		return nil, nil
