@@ -405,6 +405,45 @@ load test_helper
   assert_success
 }
 
+@test "vm.create -cluster -ds" {
+  vcsim_env -ds 3
+
+  cluster=$(govc ls -t ClusterComputeResource host | head -1)
+  vm=$(new_id)
+
+  # -ds must be honored with cluster placement, for every datastore
+  for ds in $(govc ls -t Datastore datastore); do
+    name=$(basename "$ds")
+    for i in 1 2 3; do
+      run govc vm.create -cluster "$cluster" -ds "$name" -disk 10M -on=false "$vm-$name-$i"
+      assert_success
+
+      run govc object.collect -s "vm/$vm-$name-$i" config.files.vmPathName
+      assert_success
+      assert_matches "\\[$name\\]"
+
+      # the disk is created alongside the VM files
+      run govc datastore.ls -ds "$name" "$vm-$name-$i"
+      assert_success
+      assert_matches "$vm-$name-$i.vmdk"
+    done
+  done
+
+  # unknown datastore is an error, rather than silently ignored
+  run govc vm.create -cluster "$cluster" -ds enoent -on=false "$vm"
+  assert_failure
+
+  # clone honors -ds with -cluster as well
+  src="$vm-$(basename "$(govc ls -t Datastore datastore | head -1)")-1"
+  target=$(basename "$(govc ls -t Datastore datastore | tail -1)")
+  for i in 1 2 3; do
+    run govc vm.clone -vm "$src" -cluster "$cluster" -ds "$target" -on=false "$vm-clone-$i"
+    assert_success
+    run govc object.collect -s "vm/$vm-clone-$i" config.files.vmPathName
+    assert_matches "\\[$target\\]"
+  done
+}
+
 @test "vm.create -datastore-cluster" {
   vcsim_env -pod 1 -ds 3
 

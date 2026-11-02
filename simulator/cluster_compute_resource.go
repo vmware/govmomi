@@ -481,8 +481,8 @@ func (c *ClusterComputeResource) PlaceVm(ctx *Context, req *types.PlaceVm) soap.
 	switch types.PlacementSpecPlacementType(req.PlacementSpec.PlacementType) {
 	case types.PlacementSpecPlacementTypeClone, types.PlacementSpecPlacementTypeCreate:
 		spec := &types.VirtualMachineRelocateSpec{
-			Datastore: &datastores[rand.Intn(len(c.Datastore))],
-			Host:      &hosts[rand.Intn(len(c.Host))],
+			Datastore: &datastores[rand.Intn(len(datastores))],
+			Host:      &hosts[rand.Intn(len(hosts))],
 			Pool:      c.ResourcePool,
 		}
 		res.Action = append(res.Action, &types.PlacementAction{

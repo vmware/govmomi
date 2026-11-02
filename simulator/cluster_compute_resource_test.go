@@ -354,3 +354,55 @@ func TestPlaceVmRelocate(t *testing.T) {
 		}
 	})
 }
+
+// TestPlaceVmCreateDatastores verifies PlaceVm honors PlacementSpec.Datastores
+// and Hosts for create and clone placement.
+func TestPlaceVmCreateDatastores(t *testing.T) {
+	model := VPX()
+	model.Datastore = 3 // more datastores than hosts, so a wrong index would pick/panic
+	model.ClusterHost = 2
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		cluster := Map(ctx).Any("ClusterComputeResource").(*ClusterComputeResource)
+		obj := object.NewClusterComputeResource(c, cluster.Reference())
+
+		require.Greater(t, len(cluster.Datastore), 1)
+		hosts := cluster.Host
+
+		for _, ptype := range []types.PlacementSpecPlacementType{
+			types.PlacementSpecPlacementTypeCreate,
+			types.PlacementSpecPlacementTypeClone,
+		} {
+			// Every datastore in the cluster must be selectable when requested, repeated to defeat randomness.
+			for _, ds := range cluster.Datastore {
+				for i := 0; i < 10; i++ {
+					res, err := obj.PlaceVm(ctx, types.PlacementSpec{
+						PlacementType: string(ptype),
+						Datastores:    []types.ManagedObjectReference{ds},
+						Hosts:         hosts[:1],
+					})
+					require.NoError(t, err)
+					require.NotEmpty(t, res.Recommendations)
+
+					rspec := res.Recommendations[0].Action[0].(*types.PlacementAction).RelocateSpec
+					require.NotNil(t, rspec.Datastore)
+					require.Equal(t, ds, *rspec.Datastore)
+					require.Equal(t, hosts[0], *rspec.Host)
+				}
+			}
+
+			// Without constraints any cluster datastore is valid.
+			res, err := obj.PlaceVm(ctx, types.PlacementSpec{PlacementType: string(ptype)})
+			require.NoError(t, err)
+			rspec := res.Recommendations[0].Action[0].(*types.PlacementAction).RelocateSpec
+			require.Contains(t, cluster.Datastore, *rspec.Datastore)
+		}
+
+		// A single-element Datastores list must not index past its length.
+		_, err := obj.PlaceVm(ctx, types.PlacementSpec{
+			PlacementType: string(types.PlacementSpecPlacementTypeCreate),
+			Datastores:    cluster.Datastore[len(cluster.Datastore)-1:],
+		})
+		require.NoError(t, err)
+	}, model)
+}

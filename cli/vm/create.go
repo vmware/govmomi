@@ -237,7 +237,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
-	} else if cmd.Cluster == nil {
+	} else if cmd.Cluster == nil || cmd.DatastoreFlag.IsSet() {
 		cmd.Datastore, err = cmd.DatastoreFlag.Datastore()
 		if err != nil {
 			return err
@@ -438,12 +438,15 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if cmd.Datastore != nil {
+	} else if cmd.Cluster == nil && cmd.Datastore != nil {
 		datastore = cmd.Datastore
 	} else if cmd.Cluster != nil {
 		pspec := types.PlacementSpec{
 			PlacementType: string(types.PlacementSpecPlacementTypeCreate),
 			ConfigSpec:    spec,
+		}
+		if cmd.Datastore != nil {
+			pspec.Datastores = []types.ManagedObjectReference{cmd.Datastore.Reference()}
 		}
 		result, err := cmd.Cluster.PlaceVm(ctx, pspec)
 		if err != nil {
@@ -463,6 +466,8 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 			datastore = object.NewDatastore(cmd.Client, *rspec.Datastore)
 			datastore.InventoryPath, _ = datastore.ObjectName(ctx)
 			cmd.Datastore = datastore
+		} else if cmd.Datastore != nil {
+			datastore = cmd.Datastore
 		}
 		if rspec.Host != nil {
 			cmd.HostSystem = object.NewHostSystem(cmd.Client, *rspec.Host)
