@@ -426,6 +426,12 @@ upload_file() {
 
   run govc datastore.cluster.info
   assert_success
+  assert_matches "Name: *DC0_POD0"
+  assert_matches "SDRS Mode: *manual"
+
+  run govc datastore.cluster.info -json
+  assert_success
+  assert_equal DC0_POD0 "$(jq -r '.clusters[0].summary.name' <<<"$output")"
 
   run govc folder.create -pod $pod
   assert_failure # duplicate name
