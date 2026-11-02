@@ -3022,6 +3022,107 @@ func TestVmSnapshotEx(t *testing.T) {
 	}, esx)
 }
 
+func TestVmSnapshotRename(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
+
+		for _, name := range []string{"root", "child"} {
+			task, err := vm.CreateSnapshot(ctx, name, name+"-desc", false, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err = task.Wait(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		ref, err := vm.FindSnapshot(ctx, "child")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		snapshot := func() types.VirtualMachineSnapshotTree {
+			var o mo.VirtualMachine
+			if err := vm.Properties(ctx, vm.Reference(), []string{"snapshot"}, &o); err != nil {
+				t.Fatal(err)
+			}
+			return *findSnapshotInTree(o.Snapshot.RootSnapshotList, *ref)
+		}
+
+		rename := func(name, desc string) error {
+			_, err := methods.RenameSnapshot(ctx, c, &types.RenameSnapshot{This: *ref, Name: name, Description: desc})
+			return err
+		}
+
+		if err = rename("", ""); !fault.Is(err, &types.InvalidArgument{}) {
+			t.Fatalf("expected InvalidArgument, got: %v", err)
+		}
+
+		if err = rename("renamed", ""); err != nil {
+			t.Fatal(err)
+		}
+		if s := snapshot(); s.Name != "renamed" || s.Description != "child-desc" {
+			t.Errorf("unexpected name=%q description=%q", s.Name, s.Description)
+		}
+		if _, err = vm.FindSnapshot(ctx, "child"); err == nil {
+			t.Error("old name should not be found")
+		}
+		if _, err = vm.FindSnapshot(ctx, "root/renamed"); err != nil {
+			t.Error(err)
+		}
+
+		if err = rename("", "new-desc"); err != nil {
+			t.Fatal(err)
+		}
+		if s := snapshot(); s.Name != "renamed" || s.Description != "new-desc" {
+			t.Errorf("unexpected name=%q description=%q", s.Name, s.Description)
+		}
+
+		// The first callback delivers the current state; rename both fields then,
+		// and expect WaitForUpdates to deliver the change.
+		wctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+		err = property.Wait(wctx, property.DefaultCollector(c), vm.Reference(), []string{"snapshot"}, func(pc []types.PropertyChange) bool {
+			info := pc[0].Val.(types.VirtualMachineSnapshotInfo)
+			if s := findSnapshotInTree(info.RootSnapshotList, *ref); s.Name == "final" && s.Description == "final-desc" {
+				return true
+			}
+			if err := rename("final", "final-desc"); err != nil {
+				t.Fatal(err)
+			}
+			return false
+		})
+		if err != nil {
+			t.Fatalf("rename not observed via WaitForUpdates: %v", err)
+		}
+
+		// vcsim leaves a snapshot registered after its parent or its VM is removed;
+		// renaming it must return a fault instead of crashing.
+		task, err := vm.RemoveSnapshot(ctx, "root", true, nil)
+		if err == nil {
+			err = task.Wait(ctx)
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = rename("x", ""); !fault.Is(err, &types.ManagedObjectNotFound{}) {
+			t.Fatalf("expected ManagedObjectNotFound after parent removal, got: %v", err)
+		}
+
+		for _, op := range []func(context.Context) (*object.Task, error){vm.PowerOff, vm.Destroy} {
+			if task, err = op(ctx); err == nil {
+				err = task.Wait(ctx)
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err = rename("x", ""); !fault.Is(err, &types.ManagedObjectNotFound{}) {
+			t.Fatalf("expected ManagedObjectNotFound after VM destroy, got: %v", err)
+		}
+	})
+}
+
 func TestVmMarkAsTemplate(t *testing.T) {
 	ctx := context.Background()
 
