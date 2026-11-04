@@ -41,6 +41,7 @@ end
 
 File.open(File.join(ARGV.first, "types/types.go"), "w") do |io|
   io.print WSDL.header("types")
+  Rules.imports.each { |i| io.print "import \"#{i}\"\n" }
   if target != "vim"
     io.print <<EOF
 import (
@@ -83,5 +84,7 @@ EOF
     sort_by { |x| x.name }.
     each { |e| e.dump(io) }
 end
+
+Rules.verify!
 
 exit(0)

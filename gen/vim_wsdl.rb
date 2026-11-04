@@ -4,6 +4,7 @@
 
 require "nokogiri"
 require "test/unit"
+require "yaml"
 
 # SINCE_API_FORMAT is used to capture the minimum API version for which some API
 # symbol is valid.
@@ -30,6 +31,228 @@ end
 
 def valid_ns?(t)
   $namespaces.include?(t)
+end
+
+# Rules holds the generator rules in overrides.yaml, keyed by Go package. They
+# are applied on top of the WSDL output, to keep declarations that the inputs
+# would otherwise change or drop. A rule that no longer changes the output is
+# an error, so that the data file does not go stale.
+module Rules
+  PATH = File.expand_path("../overrides.yaml", __FILE__)
+
+  # The Go packages that gen.sh generates, keyed by $target.
+  PACKAGES = %w[vim25 pbm vslm sms eam]
+
+  # The rule sections and the YAML type of each.
+  SECTIONS = {
+    "fields" => Hash,
+    "optionality" => Hash,
+    "extra_fields" => Array,
+    "extra_enum_values" => Array,
+  }
+
+  def self.all
+    @all ||= begin
+      rules = File.exist?(PATH) ? (YAML.load_file(PATH) || {}) : {}
+      validate!(rules)
+      rules
+    end
+  end
+
+  # validate! rejects package and section names that no generator run would
+  # read, so that a misspelled key fails instead of being ignored.
+  def self.validate!(rules)
+    raise "#{PATH}: expected a map of Go packages" unless rules.is_a?(Hash)
+    rules.each do |pkg, sections|
+      unless PACKAGES.include?(pkg)
+        raise "#{PATH}: unknown package #{pkg.inspect}; expected one of #{PACKAGES.join(", ")}"
+      end
+      next if sections.nil?
+      raise "#{PATH}: #{pkg}: expected a map of rule sections" unless sections.is_a?(Hash)
+      sections.each do |name, value|
+        kind = SECTIONS[name]
+        if kind.nil?
+          raise "#{PATH}: #{pkg}: unknown section #{name.inspect}; expected one of #{SECTIONS.keys.join(", ")}"
+        end
+        unless value.nil? || value.is_a?(kind)
+          raise "#{PATH}: #{pkg}.#{name}: expected a #{kind == Hash ? "map" : "list"}"
+        end
+      end
+    end
+  end
+
+  def self.section(name)
+    pkg = all[$target] || {}
+    pkg[name] || SECTIONS.fetch(name).new
+  end
+
+  def self.used
+    @used ||= {}
+  end
+
+  def self.use(kind, key)
+    used[[$target, kind, key]] = true
+  end
+
+  # field returns the rule for the field "Struct.Field", or nil.
+  def self.field(struct_name, field_name)
+    key = "#{struct_name}.#{field_name}"
+    rule = section("fields")[key]
+    use("fields", key) if rule
+    rule
+  end
+
+  # unlisted collects the fields whose optionality vi-json and the WSDL
+  # disagree on and that have no optionality rule.
+  def self.unlisted
+    @unlisted ||= []
+  end
+
+  # optionality returns whether the field "Struct.Field" is required: true or
+  # false when an optionality rule overrides the WSDL, nil when the WSDL
+  # decides. wsdl_optional is the WSDL's minOccurs="0"; vijson_required is
+  # the vi-json required list, nil when vi-json does not describe the field.
+  #
+  # Every field that vi-json and the WSDL disagree on needs a rule:
+  # "required" or "optional" overrides the WSDL, "wsdl" keeps it. This way a
+  # new disagreement fails generation instead of silently changing the Go
+  # type or the omitempty of the field.
+  def self.optionality(struct_name, field_name, wsdl_optional, vijson_required)
+    key = "#{struct_name}.#{field_name}"
+    disagree = !vijson_required.nil? && vijson_required == wsdl_optional
+    rule = section("optionality")[key]
+    if rule.nil?
+      unlisted << "#{key}: #{vijson_required ? "required" : "optional"}" if disagree
+      return nil
+    end
+    use("optionality", key)
+    case rule
+    when "required", "optional"
+      required = rule == "required"
+      if required != wsdl_optional
+        raise "#{key}: the WSDL already makes the field #{rule}; remove its optionality rule"
+      end
+      required
+    when "wsdl"
+      raise "#{key}: vi-json and the WSDL agree; remove its optionality rule" unless disagree
+      nil
+    else
+      raise "#{key}: unknown optionality #{rule.inspect}; expected required, optional or wsdl"
+    end
+  end
+
+  # extra_fields returns the extra fields of a struct that follow the field
+  # named after. after is nil for the fields that precede all WSDL fields.
+  def self.extra_fields(struct_name, after)
+    section("extra_fields").
+      select { |r| r["struct"] == struct_name && r["after"] == after }.
+      each { |r| use("extra_fields", "#{r["struct"]}.#{r["after"]}") }
+  end
+
+  # imports returns the packages that extra field declarations refer to.
+  def self.imports
+    section("extra_fields").map { |r| r["import"] }.compact.uniq.sort
+  end
+
+  def self.extra_enum_values(enum_name)
+    section("extra_enum_values").
+      select { |r| r["enum"] == enum_name }.
+      each { |r| use("extra_enum_values", "#{r["enum"]}.#{r["value"]}") }
+  end
+
+  def self.verify!
+    unless unlisted.empty?
+      raise "#{PATH}: #{$target} fields whose optionality vi-json and the WSDL disagree on, without an " \
+            "optionality rule (vi-json value shown; use it, or \"wsdl\" to keep the WSDL):\n  " +
+            unlisted.sort.join("\n  ")
+    end
+    unused = []
+    %w[fields optionality].each do |kind|
+      section(kind).each_key { |k| unused << "#{kind}: #{k}" unless used[[$target, kind, k]] }
+    end
+    section("extra_fields").each do |r|
+      k = "#{r["struct"]}.#{r["after"]}"
+      unused << "extra_fields: #{k}" unless used[[$target, "extra_fields", k]]
+    end
+    section("extra_enum_values").each do |r|
+      k = "#{r["enum"]}.#{r["value"]}"
+      unused << "extra_enum_values: #{k}" unless used[[$target, "extra_enum_values", k]]
+    end
+    unless unused.empty?
+      raise "#{PATH}: #{$target} rules that matched nothing:\n  " + unused.join("\n  ")
+    end
+  end
+end
+
+# dump_extra_fields prints the extra fields of a struct that follow the field
+# named after. wsdl_fields are the Go names of the fields from the WSDL.
+def dump_extra_fields(io, struct_name, after, wsdl_fields)
+  rules = Rules.extra_fields(struct_name, after)
+  return if rules.empty?
+  related = hierarchy_fields(struct_name)
+  rules.each do |r|
+    decl = r["decl"]
+    name = decl.each_line.map(&:strip).find { |l| !l.empty? && !l.start_with?("//") }.to_s.split(/\s+/).first
+    raise "#{struct_name}: extra field without a declaration" if name.nil?
+    if wsdl_fields.include?(name)
+      raise "#{struct_name}.#{name} is now generated from the WSDL; remove its extra_fields rule"
+    end
+    # A field of the same name in an ancestor or a descendant would compile,
+    # because the embedding struct shadows it, but encode ambiguously.
+    if other = related[name]
+      raise "#{struct_name}.#{name} is now generated from the WSDL in #{other}; remove its extra_fields rule"
+    end
+    io.print decl
+    io.print "\n" unless decl.end_with?("\n")
+  end
+end
+
+# hierarchy_fields maps the Go names of the WSDL fields of the ancestors and
+# descendants of the struct name to the struct that declares them.
+def hierarchy_fields(struct_name)
+  name, type = Peek.types.find { |n, _| ucfirst(n) == struct_name }
+  return {} if type.nil?
+
+  related = []
+  t = type
+  while t && t.parent && !related.include?(t.parent)
+    related << t.parent
+    t = Peek.types[t.parent]
+  end
+  queue = type.children.dup
+  until queue.empty?
+    c = queue.shift
+    next if related.include?(c) || c == name
+    related << c
+    queue.concat(Peek.types[c] ? Peek.types[c].children : [])
+  end
+
+  fields = {}
+  related.each do |n|
+    klass = Peek.types[n] && Peek.types[n].klass
+    next unless klass
+    klass.field_names.each { |f| fields[f] ||= ucfirst(n) }
+  end
+  fields
+end
+
+# vijson_required_props returns, for each property that the vi-json schema of
+# the struct name describes, including inherited properties, whether it is
+# required. It returns an empty hash if there is no such schema.
+def vijson_required_props(vijson, name, seen = {})
+  schema = vijson && name && vijson[name]
+  return {} unless schema.is_a?(Hash) && !seen[name]
+  seen[name] = true
+  props = {}
+  ([schema] + (schema["allOf"] || [])).each do |part|
+    if part["$ref"]
+      props.merge!(vijson_required_props(vijson, part["$ref"].split("/").last, seen))
+    else
+      required = part["required"] || []
+      (part["properties"] || {}).each_key { |k| props[k] = required.include?(k) }
+    end
+  end
+  props
 end
 
 def ucfirst(v)
@@ -185,6 +408,12 @@ class Simple
   attr_accessor :name, :type
   attr_reader :vijson, :vijson_props
 
+  # field_names returns the Go names of the fields that the node's own
+  # sequence declares.
+  def field_names
+    @node.xpath(".//xsd:sequence/xsd:element").map { |n| Element.new(n, nil).var_name }
+  end
+
   def initialize(node, vijson)
     @node = node
     @vijson = vijson
@@ -270,9 +499,6 @@ class Simple
       t = $1
       case t
       when "string"
-        if ["IpPoolName"].include?(var_name)
-          self.need_omitempty = false
-        end
       when "int"
         if pointer_type?
           prefix += "*"
@@ -351,8 +577,18 @@ class Simple
     test_attr("maxOccurs", "unbounded")
   end
 
-  def optional?
+  # required_rule is set by Sequence#dump from an optionality rule: true or
+  # false when the rule overrides the WSDL, nil when the WSDL decides.
+  attr_accessor :required_rule
+
+  def wsdl_optional?
     test_attr("minOccurs", "0")
+  end
+
+  # optional? follows the WSDL unless an optionality rule overrides it.
+  def optional?
+    return !required_rule unless required_rule.nil?
+    wsdl_optional?
   end
 
   def need_omitempty=(v)
@@ -445,11 +681,11 @@ class Element < Simple
     end
   end
 
-  def dump_field(io, json_tag="", vijson_props=nil)
+  def dump_field(io, json_tag="", vijson_props=nil, struct_name=nil)
+    goType = var_type
     xmlTag = name
     xmlTag += ",omitempty" if need_omitempty?
     xmlTag += ",typeattr" if need_typeattr?
-    tag = "%s %s `xml:\"%s\"" % [var_name, var_type, xmlTag]
 
     jsonTag = ""
     if json_tag != ""
@@ -461,7 +697,19 @@ class Element < Simple
       jsonTag = name
       jsonTag += ",omitempty" if json_omitempty?
     end
-    tag += " json:\"%s\"" % [jsonTag]
+
+    # A fields rule replaces the Go field type and the xml/json struct tags.
+    # The vim struct tag below still comes from the inputs.
+    rule = struct_name ? Rules.field(struct_name, var_name) : nil
+    if rule
+      want = [rule.fetch("type"), rule.fetch("xml"), rule.fetch("json")]
+      if want == [goType, xmlTag, jsonTag]
+        raise "#{struct_name}.#{var_name}: the WSDL output equals its fields rule; remove the rule"
+      end
+      goType, xmlTag, jsonTag = want
+    end
+
+    tag = "%s %s `xml:\"%s\" json:\"%s\"" % [var_name, goType, xmlTag, jsonTag]
 
     # Print the field's comments as well as determining whether or not the field
     # has a comment with a line that matches the following regex with a
@@ -584,6 +832,14 @@ class SimpleType < Simple
       EnumValue.new(self, n["value"], comments)
     end
 
+    # extra_enum_values rules append values that the inputs do not contain.
+    Rules.extra_enum_values(ucfirstName).each do |r|
+      if enums.any? { |e| e.var_value == r["value"] }
+        raise "#{ucfirstName}: #{r["value"]} is now generated from the WSDL; remove its extra_enum_values rule"
+      end
+      enums << EnumValue.new(self, r["value"], r["comment"])
+    end
+
     io.print "const (\n"
     enums.each { |e| e.dump(io) }
     io.print ")\n\n"
@@ -683,8 +939,12 @@ class ComplexType < Simple
       base
     end
 
+    attr_accessor :struct_name
+
     def dump(io)
-      Sequence.new(@node, @vijson).dump(io, base)
+      s = Sequence.new(@node, @vijson)
+      s.struct_name = struct_name
+      s.dump(io, base)
     end
 
     def dump_interface(io, name)
@@ -697,7 +957,7 @@ class ComplexType < Simple
   end
 
   class Sequence < Simple
-    attr_accessor :array_of
+    attr_accessor :array_of, :struct_name
 
     def initialize(node, vijson, array_of=false)
       super(node, vijson)
@@ -716,7 +976,10 @@ class ComplexType < Simple
     end
 
     def dump(io, base = nil)
-      return unless elements = sequence
+      unless elements = sequence
+        dump_extra_fields(io, struct_name, nil, []) if struct_name
+        return
+      end
       if base != nil
         kind = vim_type(base)
 
@@ -727,8 +990,15 @@ class ComplexType < Simple
         io.print "#{pkg}#{kind}\n\n"
       end
 
+      wsdl_fields = elements.map(&:var_name)
+      dump_extra_fields(io, struct_name, nil, wsdl_fields) if struct_name
+      required = vijson_required_props(@vijson, struct_name)
       elements.each do |e|
-        e.dump_field(io, json_tag=self.array_of ? "_value" : "", vijson_props=@vijson_props)
+        e.required_rule = Rules.optionality(struct_name, e.var_name, e.wsdl_optional?, required[e.name])
+      end
+      elements.each do |e|
+        e.dump_field(io, json_tag=self.array_of ? "_value" : "", vijson_props=@vijson_props, struct_name)
+        dump_extra_fields(io, struct_name, e.var_name, wsdl_fields) if struct_name
       end
     end
 
@@ -815,7 +1085,13 @@ class ComplexType < Simple
       end
     end
     io.print "type %s struct {\n" % ucfirstName
-    klass.dump(io) if klass
+    if klass.respond_to?(:struct_name=)
+      klass.struct_name = ucfirstName
+      klass.dump(io)
+    else
+      klass.dump(io) if klass
+      dump_extra_fields(io, ucfirstName, nil, [])
+    end
     io.print "}\n\n"
   end
 
