@@ -647,6 +647,8 @@ const (
 	PbmOperationCREATE = PbmOperation("CREATE")
 	// Indicates register operation of an entity.
 	PbmOperationREGISTER = PbmOperation("REGISTER")
+	// Indicate unregister operation of an entity.
+	PbmOperationUNREGISTER = PbmOperation("UNREGISTER")
 	// Indicates reconfigure operation of an entity.
 	PbmOperationRECONFIGURE = PbmOperation("RECONFIGURE")
 	// Indicates migrate operation of an entity.
@@ -659,6 +661,7 @@ func (e PbmOperation) Values() []PbmOperation {
 	return []PbmOperation{
 		PbmOperationCREATE,
 		PbmOperationREGISTER,
+		PbmOperationUNREGISTER,
 		PbmOperationRECONFIGURE,
 		PbmOperationMIGRATE,
 		PbmOperationCLONE,
@@ -794,6 +797,9 @@ const (
 	PbmSystemCreatedProfileTypeVmcManagementProfile = PbmSystemCreatedProfileType("VmcManagementProfile")
 	// Indicates the system pre-created non-editable VSANMAX default profile.
 	PbmSystemCreatedProfileTypeVsanMaxDefaultProfile = PbmSystemCreatedProfileType("VsanMaxDefaultProfile")
+	// Indicates the new system pre-created non-editable vSAN ESA default
+	// profile.
+	PbmSystemCreatedProfileTypeVsanEsaAutoManagedRaidProfile = PbmSystemCreatedProfileType("VsanEsaAutoManagedRaidProfile")
 )
 
 func (e PbmSystemCreatedProfileType) Values() []PbmSystemCreatedProfileType {
@@ -803,6 +809,7 @@ func (e PbmSystemCreatedProfileType) Values() []PbmSystemCreatedProfileType {
 		PbmSystemCreatedProfileTypePmemDefaultProfile,
 		PbmSystemCreatedProfileTypeVmcManagementProfile,
 		PbmSystemCreatedProfileTypeVsanMaxDefaultProfile,
+		PbmSystemCreatedProfileTypeVsanEsaAutoManagedRaidProfile,
 	}
 }
 

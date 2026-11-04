@@ -3718,13 +3718,16 @@ func init() {
 // Specification necessary to transition a solution from an existing legacy
 // agency.
 //
+// Supported only for solutions with
+// `SolutionsHostBoundSolutionConfig`.
+//
 // This structure may be used only with operations rendered under `/eam`.
 type SolutionsTransitionSpec struct {
 	types.DynamicData
 
 	// Solution to transition from an old legacy agency.
 	Solution string `xml:"solution" json:"solution"`
-	// Old legacy agency ID to transition from.
+	// Old legacy host bound agency ID to transition from.
 	AgencyId string `xml:"agencyId" json:"agencyId"`
 }
 
