@@ -50,6 +50,9 @@ image-build: ## Build the image for generating types
 
 ABS_PATH_PARENT_DIR := $(abspath $(dir $(shell pwd)))
 
+# Allocate a TTY only when there is one, so the target also runs from scripts.
+TTY_FLAG := $(shell [ -t 0 ] && echo -t)
+
 #
 # Please note the use of the .Gemfile.lock.tmp file below. This is to prevent
 # the container from modifying the local copy of the Gemfile.lock that would
@@ -60,7 +63,8 @@ ABS_PATH_PARENT_DIR := $(abspath $(dir $(shell pwd)))
 generate-types: image-build
 generate-types: ## Generate the types
 	@cp -f Gemfile.lock .Gemfile.lock.tmp
-	$(CRI_BIN) run -it --rm \
+	$(CRI_BIN) run -i $(TTY_FLAG) --rm \
+	  -e VIM_VERSION \
 	  -v $(ABS_PATH_PARENT_DIR):/govmomi \
 	  -v $(ABS_PATH_PARENT_DIR)/gen/.Gemfile.lock.tmp:/govmomi/gen/Gemfile.lock \
 	  $(IMAGE) \
