@@ -34,7 +34,23 @@ load test_helper
   assert_success
   [ ${#lines[@]} -ge 1 ]
 
+  # non-existent path is an error, see issue #3874
   run govc ls enoent
+  assert_failure
+  assert_matches "not found"
+
+  run govc ls /DC0/host/enoent
+  assert_failure
+
+  # glob with no match is not an error
+  run govc ls 'enoent*'
+  assert_success
+  [ ${#lines[@]} -eq 0 ]
+
+  # empty folder is not an error
+  run govc folder.create /DC0/vm/empty
+  assert_success
+  run govc ls /DC0/vm/empty
   assert_success
   [ ${#lines[@]} -eq 0 ]
 }
