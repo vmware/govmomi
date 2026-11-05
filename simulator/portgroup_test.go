@@ -6,6 +6,7 @@ package simulator
 
 import (
 	"context"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -13,8 +14,92 @@ import (
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+func TestPortgroupIPFIX(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		dvsRef := Map(ctx).Any("VmwareDistributedVirtualSwitch").Reference()
+		dvs := object.NewDistributedVirtualSwitch(c, dvsRef)
+		dtask, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{{
+			Name:        "ipfix-pg",
+			NumPorts:    8,
+			Description: "retain portgroup settings",
+			Type:        string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
+			AutoExpand:  types.NewBool(true),
+			DefaultPortConfig: &types.VMwareDVSPortSetting{
+				Vlan: &types.VmwareDistributedVirtualSwitchVlanIdSpec{VlanId: 123},
+				UplinkTeamingPolicy: &types.VmwareUplinkPortTeamingPolicy{
+					Policy: &types.StringPolicy{Value: "loadbalance_srcid"},
+				},
+				SecurityPolicy: &types.DVSSecurityPolicy{AllowPromiscuous: &types.BoolPolicy{Value: types.NewBool(false)}},
+			},
+		}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := dtask.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+		vswitch := Map(ctx).Get(dvsRef).(*VmwareDistributedVirtualSwitch)
+		ref := Map(ctx).FindByName("ipfix-pg", vswitch.Portgroup).Reference()
+		pg := object.NewDistributedVirtualPortgroup(c, ref)
+		readConfig := func() types.DVPortgroupConfigInfo {
+			t.Helper()
+			var obj mo.DistributedVirtualPortgroup
+			if err := pg.Properties(ctx, ref, []string{"config"}, &obj); err != nil {
+				t.Fatal(err)
+			}
+			return obj.Config
+		}
+		initial := readConfig()
+		if initial.ConfigVersion == "" {
+			t.Fatal("portgroup configVersion is empty")
+		}
+		for _, enabled := range []bool{true, false} {
+			before := readConfig()
+			policy := &types.BoolPolicy{Value: types.NewBool(enabled)}
+			dtask, err := pg.Reconfigure(ctx, types.DVPortgroupConfigSpec{
+				ConfigVersion:     before.ConfigVersion,
+				DefaultPortConfig: &types.VMwareDVSPortSetting{IpfixEnabled: policy},
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := dtask.Wait(ctx); err != nil {
+				t.Fatal(err)
+			}
+			after := readConfig()
+			if after.ConfigVersion == before.ConfigVersion {
+				t.Fatal("portgroup configVersion did not change")
+			}
+			expected := initial
+			expected.ConfigVersion = after.ConfigVersion
+			setting := *initial.DefaultPortConfig.(*types.VMwareDVSPortSetting)
+			setting.IpfixEnabled = policy
+			expected.DefaultPortConfig = &setting
+			if !reflect.DeepEqual(after, expected) {
+				t.Fatalf("enabled=%t: portgroup config = %+v, want %+v; setting=%+v",
+					enabled, after, expected, after.DefaultPortConfig)
+			}
+			ports, err := dvs.FetchDVPorts(ctx, &types.DistributedVirtualSwitchPortCriteria{
+				PortgroupKey: []string{ref.Value}, Inside: types.NewBool(true),
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(ports) != int(initial.NumPorts) {
+				t.Fatalf("got %d ports, want %d", len(ports), initial.NumPorts)
+			}
+			for _, port := range ports {
+				if !reflect.DeepEqual(port.Config.Setting, &setting) {
+					t.Fatalf("port %s settings = %+v, want %+v", port.Key, port.Config.Setting, &setting)
+				}
+			}
+		}
+	})
+}
 
 func TestReconfigurePortgroup(t *testing.T) {
 	m := VPX()

@@ -5,6 +5,8 @@
 package simulator
 
 import (
+	"strconv"
+
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -40,19 +42,35 @@ func (s *DistributedVirtualPortgroup) RenameTask(ctx *Context, req *types.Rename
 
 func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(ctx *Context, req *types.ReconfigureDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "reconfigureDvPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		s.Config.DefaultPortConfig = req.Spec.DefaultPortConfig
-		s.Config.NumPorts = req.Spec.NumPorts
-		s.Config.AutoExpand = req.Spec.AutoExpand
-		s.Config.Type = req.Spec.Type
-		s.Config.Description = req.Spec.Description
-		s.Config.DynamicData = req.Spec.DynamicData
-		s.Config.Name = req.Spec.Name
-		s.Config.Policy = req.Spec.Policy
-		s.Config.PortNameFormat = req.Spec.PortNameFormat
-		s.Config.VmVnicNetworkResourcePoolKey = req.Spec.VmVnicNetworkResourcePoolKey
-		s.Config.LogicalSwitchUuid = req.Spec.LogicalSwitchUuid
-		s.Config.SubnetId = req.Spec.SubnetId
-		s.Config.BackingType = req.Spec.BackingType
+		config := s.Config
+		spec := &req.Spec
+		copyNonEmptyValue(&config.NumPorts, &spec.NumPorts)
+		copyNonEmptyValue(&config.AutoExpand, &spec.AutoExpand)
+		copyNonEmptyValue(&config.Type, &spec.Type)
+		copyNonEmptyValue(&config.Description, &spec.Description)
+		copyNonEmptyValue(&config.Name, &spec.Name)
+		copyNonEmptyValue(&config.Policy, &spec.Policy)
+		copyNonEmptyValue(&config.PortNameFormat, &spec.PortNameFormat)
+		copyNonEmptyValue(&config.VmVnicNetworkResourcePoolKey, &spec.VmVnicNetworkResourcePoolKey)
+		copyNonEmptyValue(&config.LogicalSwitchUuid, &spec.LogicalSwitchUuid)
+		copyNonEmptyValue(&config.SubnetId, &spec.SubnetId)
+		copyNonEmptyValue(&config.BackingType, &spec.BackingType)
+		if spec.DefaultPortConfig != nil {
+			config.DefaultPortConfig = spec.DefaultPortConfig
+			current, currentOK := s.Config.DefaultPortConfig.(*types.VMwareDVSPortSetting)
+			setting, settingOK := spec.DefaultPortConfig.(*types.VMwareDVSPortSetting)
+			if currentOK && settingOK {
+				// Port settings are partial updates: an IPFIX-only spec must retain VLAN,
+				// security and teaming policies. Decode into a copy to retain omitted fields.
+				var merged types.VMwareDVSPortSetting
+				deepCopy(current, &merged)
+				deepCopy(setting, &merged)
+				config.DefaultPortConfig = &merged
+			}
+		}
+		version, _ := strconv.Atoi(config.ConfigVersion)
+		config.ConfigVersion = strconv.Itoa(version + 1)
+		ctx.Update(s, []types.PropertyChange{{Name: "config", Val: config}})
 		// Invalidate FetchDVPorts cache: DVPG reconfiguration may change port structure
 		if dvs, ok := ctx.Map.Get(*s.Config.DistributedVirtualSwitch).(*VmwareDistributedVirtualSwitch); ok {
 			dvs.FetchDVPortsResponse.Returnval = nil

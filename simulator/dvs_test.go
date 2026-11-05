@@ -168,6 +168,70 @@ func TestDVS(t *testing.T) {
 	}
 }
 
+func TestDVSIPFIX(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		dvs := object.NewDistributedVirtualSwitch(c, Map(ctx).Any("VmwareDistributedVirtualSwitch").Reference())
+		readConfig := func() *types.VMwareDVSConfigInfo {
+			t.Helper()
+			var obj mo.VmwareDistributedVirtualSwitch
+			if err := dvs.Properties(ctx, dvs.Reference(), []string{"config", "configStatus", "portgroup"}, &obj); err != nil {
+				t.Fatal(err)
+			}
+			config, ok := obj.Config.(*types.VMwareDVSConfigInfo)
+			if !ok {
+				t.Fatalf("config type = %T, want *types.VMwareDVSConfigInfo", obj.Config)
+			}
+			if obj.ConfigStatus != types.ManagedEntityStatusGreen || len(obj.Portgroup) == 0 {
+				t.Fatalf("unexpected VDS inventory: status=%s, portgroups=%v", obj.ConfigStatus, obj.Portgroup)
+			}
+			return config
+		}
+		reconfigure := func(spec types.BaseDVSConfigSpec) {
+			t.Helper()
+			dtask, err := dvs.Reconfigure(ctx, spec)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := dtask.Wait(ctx); err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		reconfigure(&types.DVSConfigSpec{SwitchIpAddress: "192.0.2.20"})
+		initial := readConfig()
+		for _, enabled := range []bool{true, false} {
+			before := readConfig()
+			ipfix := &types.VMwareIpfixConfig{ActiveFlowTimeout: 60, IdleFlowTimeout: 15}
+			if enabled {
+				ipfix.CollectorIpAddress = "192.0.2.10"
+				ipfix.CollectorPort = 2055
+			}
+			spec := &types.VMwareDVSConfigSpec{
+				DVSConfigSpec: types.DVSConfigSpec{ConfigVersion: before.ConfigVersion},
+				IpfixConfig:   ipfix,
+			}
+			reconfigure(spec)
+			after := readConfig()
+			if !reflect.DeepEqual(after.IpfixConfig, ipfix) {
+				t.Fatalf("enabled=%t: IPFIX config = %+v, want %+v", enabled, after.IpfixConfig, ipfix)
+			}
+			if after.ConfigVersion == before.ConfigVersion {
+				t.Fatal("VDS configVersion did not change")
+			}
+			// An unrelated host/config update must retain the VMware config and IPFIX settings.
+			reconfigure(&types.DVSConfigSpec{ConfigVersion: after.ConfigVersion})
+			after = readConfig()
+			expected := *initial
+			expected.ConfigVersion = after.ConfigVersion
+			expected.IpfixConfig = ipfix
+			if !reflect.DeepEqual(after, &expected) {
+				t.Fatalf("enabled=%t: unrelated VDS configuration changed: got %+v, want %+v",
+					enabled, after, &expected)
+			}
+		}
+	})
+}
+
 func TestFetchDVPortsCriteria(t *testing.T) {
 	m := VPX()
 
