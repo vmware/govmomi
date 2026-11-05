@@ -103,6 +103,17 @@ load test_helper
   run govc host.info
   assert_success
   grep -q -v Maintenance <<<"$output"
+
+  for mode in evacuateAllData ensureObjectAccessibility noAction; do
+    run govc host.maintenance.enter -vsan-mode "$mode" "$GOVC_HOST"
+    assert_success
+
+    run govc host.maintenance.exit "$GOVC_HOST"
+    assert_success
+  done
+
+  run govc host.maintenance.enter -vsan-mode bogus "$GOVC_HOST"
+  assert_failure
 }
 
 @test "host.vnic.info" {
