@@ -2172,6 +2172,74 @@ func TestReconfigVm(t *testing.T) {
 	}
 }
 
+func TestReconfigVmVirtualNuma(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vm := object.NewVirtualMachine(c, Map(ctx).Any("VirtualMachine").Reference())
+
+		numaInfo := func() *types.VirtualMachineVirtualNumaInfo {
+			var vmMo mo.VirtualMachine
+			if err := vm.Properties(ctx, vm.Reference(), []string{"config"}, &vmMo); err != nil {
+				t.Fatal(err)
+			}
+			return vmMo.Config.NumaInfo
+		}
+
+		assert.Nil(t, numaInfo())
+
+		tests := []struct {
+			name     string
+			spec     types.VirtualMachineVirtualNuma
+			expected types.VirtualMachineVirtualNumaInfo
+		}{
+			{
+				name: "set cores per numa node",
+				spec: types.VirtualMachineVirtualNuma{
+					CoresPerNumaNode: types.NewInt32(2),
+				},
+				expected: types.VirtualMachineVirtualNumaInfo{
+					CoresPerNumaNode:     types.NewInt32(2),
+					AutoCoresPerNumaNode: types.NewBool(false),
+				},
+			},
+			{
+				name: "unset cores per numa node is unchanged",
+				spec: types.VirtualMachineVirtualNuma{
+					ExposeVnumaOnCpuHotadd: types.NewBool(true),
+				},
+				expected: types.VirtualMachineVirtualNumaInfo{
+					CoresPerNumaNode:        types.NewInt32(2),
+					AutoCoresPerNumaNode:    types.NewBool(false),
+					VnumaOnCpuHotaddExposed: types.NewBool(true),
+				},
+			},
+			{
+				name: "zero cores per numa node reverts to auto",
+				spec: types.VirtualMachineVirtualNuma{
+					CoresPerNumaNode: types.NewInt32(0),
+				},
+				expected: types.VirtualMachineVirtualNumaInfo{
+					AutoCoresPerNumaNode:    types.NewBool(true),
+					VnumaOnCpuHotaddExposed: types.NewBool(true),
+				},
+			},
+		}
+
+		for _, test := range tests {
+			tsk, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+				VirtualNuma: &test.spec,
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := tsk.Wait(ctx); err != nil {
+				t.Fatalf("%s: %s", test.name, err)
+			}
+
+			assert.Equal(t, &test.expected, numaInfo(), test.name)
+		}
+	})
+}
+
 func TestCreateVmWithDevices(t *testing.T) {
 	ctx := context.Background()
 

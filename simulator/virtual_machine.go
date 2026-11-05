@@ -444,11 +444,42 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
 	}
 
+	if spec.VirtualNuma != nil {
+		vm.applyVirtualNuma(spec.VirtualNuma)
+	}
+
 	if spec.GuestId != "" {
 		vm.Guest.GuestFamily = guestFamily(spec.GuestId)
 	}
 
 	vm.Config.Modified = time.Now()
+}
+
+// applyVirtualNuma reflects the VirtualNuma spec in Config.NumaInfo. A zero
+// CoresPerNumaNode clears any manual override and reverts to automatic sizing,
+// while unset fields leave the current NumaInfo values as they are.
+func (vm *VirtualMachine) applyVirtualNuma(spec *types.VirtualMachineVirtualNuma) {
+	if vm.Config.NumaInfo == nil {
+		vm.Config.NumaInfo = &types.VirtualMachineVirtualNumaInfo{
+			AutoCoresPerNumaNode: types.NewBool(true),
+		}
+	}
+
+	info := vm.Config.NumaInfo
+
+	if cores := spec.CoresPerNumaNode; cores != nil {
+		if *cores == 0 {
+			info.CoresPerNumaNode = nil
+			info.AutoCoresPerNumaNode = types.NewBool(true)
+		} else {
+			info.CoresPerNumaNode = types.NewInt32(*cores)
+			info.AutoCoresPerNumaNode = types.NewBool(false)
+		}
+	}
+
+	if spec.ExposeVnumaOnCpuHotadd != nil {
+		info.VnumaOnCpuHotaddExposed = types.NewBool(*spec.ExposeVnumaOnCpuHotadd)
+	}
 }
 
 // vAppUpdateKey resolves the key of the vApp property or product an update spec
