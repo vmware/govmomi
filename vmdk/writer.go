@@ -95,6 +95,11 @@ type StreamOptimizedWriter struct {
 	Capacity       int64
 	GrainTables    []uint64 // stores individual grain table locations
 	GrainDirectory []uint64 // stores grain table locations
+
+	// CID and DDB, when set before the first Write, are written into the embedded descriptor. The
+	// rendered descriptor must fit in one sector, which is all vmdk.Seek reads; Write fails otherwise.
+	CID DiskContentID
+	DDB map[string]string
 }
 
 // NewStreamOptimizedWriter creates a new StreamOptimizedWriter for writing VMDK files.
@@ -273,22 +278,29 @@ func calculateGrainTableLocations(capacity int64) []uint64 {
 
 // writeMetadata writes the SparseExtentHeaderOnDisk, Descriptor, and reserves space for Grain Directory and Grain Tables.
 func (w *StreamOptimizedWriter) writeMetadata() error {
-	// Write SparseExtentHeaderOnDisk
-	err := binary.Write(w.file, binary.LittleEndian, &w.header)
-	if err != nil {
-		return fmt.Errorf("failed to write SparseMetaDataMarkerOnDisk: %v", err)
-	}
-
-	// Write the descriptor
+	// Render the descriptor before writing anything, so a refused descriptor leaves no partial header.
+	// The header is written only after the size check passes.
 	extent := Extent{
 		Size: w.Capacity / SectorSize,
 		Type: "SPARSE",
 	}
 	descriptor := NewDescriptor(extent)
+	descriptor.CID = w.CID
+	for k, v := range w.DDB {
+		descriptor.DDB[k] = v
+	}
 	buf := &bytes.Buffer{}
-	err = descriptor.Write(buf)
+	err := descriptor.Write(buf)
 	if err != nil {
 		return fmt.Errorf("failed to write descriptor: %v", err)
+	}
+	if buf.Len() > SectorSize {
+		return fmt.Errorf("vmdk: descriptor is %d bytes, more than the %d that vmdk.Seek reads", buf.Len(), SectorSize)
+	}
+	// Write SparseExtentHeaderOnDisk
+	err = binary.Write(w.file, binary.LittleEndian, &w.header)
+	if err != nil {
+		return fmt.Errorf("failed to write SparseMetaDataMarkerOnDisk: %v", err)
 	}
 	n, err := w.file.Write(buf.Bytes())
 	if err != nil {
