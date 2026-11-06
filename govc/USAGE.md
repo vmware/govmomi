@@ -3452,10 +3452,20 @@ Put HOST in maintenance mode.
 While this task is running and when the host is in maintenance mode,
 no VMs can be powered on and no provisioning operations can be performed on the host.
 
+The -vsan-mode flag controls vSAN data migration for hosts in a vSAN cluster.
+The values match the vSphere Client options:
+  evacuateAllData:           Full data migration
+  ensureObjectAccessibility: Ensure accessibility (default when unset)
+  noAction:                  No data migration
+
+Examples:
+  govc host.maintenance.enter -vsan-mode evacuateAllData host.example.com
+
 Options:
   -evacuate=false        Evacuate powered off VMs
   -host=                 Host system [GOVC_HOST]
   -timeout=0             Timeout
+  -vsan-mode=            vSAN data migration mode: noAction, ensureObjectAccessibility, evacuateAllData
 ```
 
 ## host.maintenance.exit
