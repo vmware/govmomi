@@ -73,7 +73,7 @@ func (m *TaskManager) PutObject(ctx *Context, obj mo.Reference) {
 	for _, hc := range m.history.collectors {
 		c := hc.(*TaskHistoryCollector)
 		ctx.WithLock(c, func() {
-			if c.taskMatches(ctx, &task.Info) {
+			if info := task.info(); c.taskMatches(ctx, &info) {
 				pushHistory(c.page, task)
 				ctx.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
@@ -279,7 +279,7 @@ func (c *TaskHistoryCollector) taskMatches(ctx *Context, task *types.TaskInfo) b
 
 func (c *TaskHistoryCollector) hasTask(_ *Context, task *types.TaskInfo) bool {
 	for e := c.page.Front(); e != nil; e = e.Next() {
-		if e.Value.(*Task).Info.Key == task.Key {
+		if e.Value.(*Task).info().Key == task.Key {
 			return true
 		}
 	}
@@ -294,7 +294,7 @@ func (m *TaskManager) fillPage(ctx *Context, c *TaskHistoryCollector) {
 	for e := m.history.page.Front(); e != nil; e = e.Next() {
 		task := e.Value.(*Task)
 
-		if c.taskMatches(ctx, &task.Info) {
+		if info := task.info(); c.taskMatches(ctx, &info) {
 			pushHistory(c.page, task)
 		}
 	}
@@ -333,7 +333,7 @@ func (c *TaskHistoryCollector) ReadNextTasks(ctx *Context, req *types.ReadNextTa
 	body.Res = new(types.ReadNextTasksResponse)
 
 	c.next(req.MaxCount, func(e *list.Element) {
-		body.Res.Returnval = append(body.Res.Returnval, e.Value.(*Task).Info)
+		body.Res.Returnval = append(body.Res.Returnval, e.Value.(*Task).info())
 	})
 
 	return body
@@ -348,7 +348,7 @@ func (c *TaskHistoryCollector) ReadPreviousTasks(ctx *Context, req *types.ReadPr
 	body.Res = new(types.ReadPreviousTasksResponse)
 
 	c.prev(req.MaxCount, func(e *list.Element) {
-		body.Res.Returnval = append(body.Res.Returnval, e.Value.(*Task).Info)
+		body.Res.Returnval = append(body.Res.Returnval, e.Value.(*Task).info())
 	})
 
 	return body
@@ -362,7 +362,7 @@ func (c *TaskHistoryCollector) GetLatestPage() []types.TaskInfo {
 		if e == nil {
 			break
 		}
-		latestPage = append(latestPage, e.Value.(*Task).Info)
+		latestPage = append(latestPage, e.Value.(*Task).info())
 		e = e.Prev()
 	}
 
