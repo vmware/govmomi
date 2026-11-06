@@ -7,6 +7,7 @@ package simulator
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -25,6 +26,7 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 type SessionManager struct {
@@ -35,7 +37,20 @@ type SessionManager struct {
 	TLS             func() *tls.Config
 	ValidLogin      func(*types.Login) bool
 
+	// ValidToken, when set, validates a SAML token presented to LoginByToken or to a vAPI session login,
+	// returning the identity the token asserts. The sts simulator sets it to validate the tokens it issues.
+	// When nil, a token is not validated and the session user is the token's Subject NameID.
+	ValidToken func(token string) (*TokenIdentity, error)
+
 	sessions map[string]Session
+}
+
+// TokenIdentity is the identity asserted by a SAML token validated by SessionManager.ValidToken.
+type TokenIdentity struct {
+	// Subject is the token's Subject NameID.
+	Subject string
+	// Certificate is the holder-of-key certificate that confirms the token, nil for a bearer token.
+	Certificate *x509.Certificate
 }
 
 func (m *SessionManager) init(*Registry) {
@@ -171,8 +186,20 @@ func (s *SessionManager) LoginByToken(ctx *Context, req *types.LoginByToken) soa
 			ID string `xml:"Assertion>Subject>NameID"`
 		}
 
-		if s, ok := ctx.Header.Security.(*Element); ok {
-			_ = s.Decode(&subject)
+		security, ok := ctx.Header.Security.(*Element)
+		if ok {
+			_ = security.Decode(&subject)
+		}
+
+		if s.ValidToken != nil {
+			subject.ID = ""
+			if ok {
+				if token := rawElement(security.inner.Content, "Assertion"); token != "" {
+					if id, err := s.ValidToken(token); err == nil {
+						subject.ID = id.Subject
+					}
+				}
+			}
 		}
 
 		if subject.ID == "" {
@@ -579,4 +606,23 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 	}
 
 	return s.Map.Get(ref)
+}
+
+// rawElement returns the first element named local in data, as the bytes that encode it, or "" if there is none.
+// A signed element, such as a SAML Assertion, must be validated in the form it was sent.
+func rawElement(data, local string) string {
+	dec := xml.NewDecoder(strings.NewReader(data))
+	for {
+		start := dec.InputOffset()
+		tok, err := dec.Token()
+		if err != nil {
+			return ""
+		}
+		if e, ok := tok.(xml.StartElement); ok && e.Name.Local == local {
+			if err := dec.Skip(); err != nil {
+				return ""
+			}
+			return data[start:dec.InputOffset()]
+		}
+	}
 }
