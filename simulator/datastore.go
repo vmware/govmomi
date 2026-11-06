@@ -111,7 +111,7 @@ func (ds *Datastore) model(m *Model) error {
 // VirtualDiskManager, etc. methods that have a Datastore path param.
 // Note that VirtualDevice file backing paths must use the vSAN uuid.
 func (ds *Datastore) resolve(ctx *Context, p string, remove ...bool) string {
-	if p == "" || !internal.IsDatastoreVSAN(ds.Datastore) {
+	if p == "" || !internal.IsDatastoreVSAN(ds.Summary.Type) {
 		return path.Join(ds.Path(), p)
 	}
 
