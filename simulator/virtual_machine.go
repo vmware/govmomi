@@ -136,6 +136,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
 		Version:           esx.HardwareVersion,
 		Firmware:          string(types.GuestOsDescriptorFirmwareTypeBios),
+		SwapPlacement:     string(types.VirtualMachineConfigInfoSwapPlacementTypeInherit),
 		VAppConfig:        spec.VAppConfig,
 		Files: &types.VirtualMachineFileInfo{
 			SnapshotDirectory: dsPath,
@@ -166,6 +167,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	vm.Summary.Runtime = vm.Runtime
 
 	vm.Capability.ChangeTrackingSupported = changeTrackingSupported(spec)
+	vm.Capability.SwapPlacementSupported = true
 
 	vm.Summary.QuickStats.GuestHeartbeatStatus = types.ManagedEntityStatusGray
 	vm.Summary.OverallStatus = types.ManagedEntityStatusGreen
@@ -348,6 +350,7 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		{spec.Files.LogDirectory, &vm.Config.Files.LogDirectory},
 		{spec.FtEncryptionMode, &vm.Config.FtEncryptionMode},
 		{spec.MigrateEncryption, &vm.Config.MigrateEncryption},
+		{spec.SwapPlacement, &vm.Config.SwapPlacement},
 	}
 
 	for _, f := range apply {
