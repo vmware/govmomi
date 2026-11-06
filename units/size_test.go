@@ -129,3 +129,23 @@ func TestByteSizeSet(t *testing.T) {
 		}
 	}
 }
+
+func TestByteSizeSetOutOfRange(t *testing.T) {
+	for _, in := range []string{"8E", "16E", "8192P", "9223372036854775807K"} {
+		v := ByteSize(42)
+		if err := v.Set(in); err == nil {
+			t.Errorf("expected error for %q, got %d", in, int64(v))
+		}
+		if v != 42 {
+			t.Errorf("value changed on error for %q: %d", in, int64(v))
+		}
+	}
+
+	var v ByteSize
+	if err := v.Set("7E"); err != nil {
+		t.Errorf("Error: %s [7E]", err)
+	}
+	if v != 7*EB {
+		t.Errorf("Out: expect '%v' actual '%v'", 7*EB, v)
+	}
+}
