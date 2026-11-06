@@ -28,6 +28,8 @@ func TestResourcePool(t *testing.T) {
 		RootFolder:     esx.RootFolder,
 	}
 
+	t.Cleanup(m.Remove)
+
 	err := m.Create()
 	if err != nil {
 		t.Fatal(err)
@@ -157,6 +159,8 @@ func TestCreateVAppESX(t *testing.T) {
 	m := ESX()
 	m.Datastore = 0
 	m.Machine = 0
+
+	t.Cleanup(m.Remove)
 
 	err := m.Create()
 	if err != nil {

@@ -20,6 +20,8 @@ func TestOptionManagerESX(t *testing.T) {
 	model.Datastore = 0
 	model.Machine = 0
 
+	t.Cleanup(model.Remove)
+
 	err := model.Create()
 	if err != nil {
 		t.Fatal(err)
@@ -64,6 +66,8 @@ func TestOptionManagerVPX(t *testing.T) {
 	model := VPX()
 	model.Datastore = 0
 	model.Machine = 0
+
+	t.Cleanup(model.Remove)
 
 	err := model.Create()
 	if err != nil {
