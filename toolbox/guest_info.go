@@ -39,7 +39,7 @@ type DNSConfigInfo struct {
 	HostName   *string `xdr:"optional"`
 	DomainName *string `xdr:"optional"`
 	Servers    []TypedIPAddress
-	Search     *string `xdr:"optional"`
+	Search     []string
 }
 
 type WinsConfigInfo struct {
@@ -185,5 +185,7 @@ func GuestInfoNicInfoRequest() ([]byte, error) {
 		return nil, err
 	}
 
-	return GuestInfoCommand(9 /*INFO_IPADDRESS_V3*/, r), nil
+	// INFO_IPADDRESS_V2 carrying a NicInfoV3, the second of vmtoolsd's
+	// NicInfoMethod fallbacks (guestInfoServer.c NIC_INFO_V3_WITH_INFO_IPADDRESS_V2).
+	return GuestInfoCommand(9 /*INFO_IPADDRESS_V2*/, r), nil
 }
