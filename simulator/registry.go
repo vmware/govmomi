@@ -154,7 +154,7 @@ func (r *Registry) newReference(item mo.Reference) types.ManagedObjectReference 
 
 func (r *Registry) AlignCounter() error {
 	maxN := int64(0)
-	for ref, _ := range r.objects {
+	for ref := range r.objects {
 		prefix := valuePrefix(ref.Type)
 		suffix := strings.TrimPrefix(ref.Value, prefix)
 		n, err := strconv.ParseInt(suffix, 10, 64)

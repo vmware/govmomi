@@ -48,9 +48,9 @@ func commandError(operation string, args []string, err error) error {
 	}
 	var cmdErr error
 	if stderr != "" {
-		cmdErr = fmt.Errorf("%s %v failed: %s: %s", operation, args, err, stderr)
+		cmdErr = fmt.Errorf("%s %v failed: %w: %s", operation, args, err, stderr)
 	} else {
-		cmdErr = fmt.Errorf("%s %v failed: %s", operation, args, err)
+		cmdErr = fmt.Errorf("%s %v failed: %w", operation, args, err)
 	}
 	log.Print(cmdErr)
 	return cmdErr
@@ -101,8 +101,16 @@ type containerDetails struct {
 	}
 }
 
-type unknownContainer error
-type uninitializedContainer error
+// uninitializedContainer is the error for an operation on a container that
+// has not been created, or no longer exists.
+type uninitializedContainer struct{ error }
+
+// isUninitializedContainer reports whether err is, or wraps, an
+// uninitializedContainer.
+func isUninitializedContainer(err error) bool {
+	var u uninitializedContainer
+	return errors.As(err, &u)
+}
 
 var sanitizeNameRx = regexp.MustCompile(`[\(\)\s]`)
 
@@ -244,6 +252,7 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 
 	tw := tar.NewWriter(stdin)
 
+	var tarErr error
 	for _, file := range files {
 		header := file.header
 
@@ -259,7 +268,9 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 			header.Mode = 0444
 		}
 
-		tarErr := tw.WriteHeader(header)
+		if tarErr == nil {
+			tarErr = tw.WriteHeader(header)
+		}
 		if tarErr == nil {
 			_, tarErr = tw.Write(file.content)
 		}
@@ -268,8 +279,8 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 	err = nil
 	twErr := tw.Close()
 	stdinErr := stdin.Close()
-	if twErr != nil || stdinErr != nil {
-		err = fmt.Errorf("tw: {%s}, stdin: {%s}", twErr, stdinErr)
+	if tarErr != nil || twErr != nil || stdinErr != nil {
+		err = fmt.Errorf("tar: {%s}, tw: {%s}, stdin: {%s}", tarErr, twErr, stdinErr)
 	}
 
 	if waitErr := cmd.Wait(); waitErr != nil {
@@ -445,7 +456,7 @@ func (c *container) inspect() (out []byte, detail containerDetails, err error) {
 	c.Unlock()
 
 	if id == "" {
-		err = uninitializedContainer(errors.New("inspect of uninitialized container"))
+		err = uninitializedContainer{errors.New("inspect of uninitialized container")}
 		return
 	}
 
@@ -455,7 +466,7 @@ func (c *container) inspect() (out []byte, detail containerDetails, err error) {
 	out, err = cmd.Output()
 	if eErr, ok := err.(*exec.ExitError); ok {
 		if strings.Contains(string(eErr.Stderr), "No such object") {
-			err = uninitializedContainer(errors.New("inspect of uninitialized container"))
+			err = uninitializedContainer{errors.New("inspect of uninitialized container")}
 		}
 	}
 
@@ -493,7 +504,7 @@ func (c *container) start(ctx *Context) error {
 	c.Unlock()
 
 	if id == "" {
-		return uninitializedContainer(errors.New("start of uninitialized container"))
+		return uninitializedContainer{errors.New("start of uninitialized container")}
 	}
 
 	start := "start"
@@ -536,7 +547,7 @@ func (c *container) pause(ctx *Context) error {
 	c.Unlock()
 
 	if id == "" {
-		return uninitializedContainer(errors.New("pause of uninitialized container"))
+		return uninitializedContainer{errors.New("pause of uninitialized container")}
 	}
 
 	cmd := exec.Command("docker", "pause", c.id)
@@ -555,7 +566,7 @@ func (c *container) restart(ctx *Context) error {
 	c.Unlock()
 
 	if id == "" {
-		return uninitializedContainer(errors.New("restart of uninitialized container"))
+		return uninitializedContainer{errors.New("restart of uninitialized container")}
 	}
 
 	cmd := exec.Command("docker", "restart", c.id)
@@ -574,7 +585,7 @@ func (c *container) stop(ctx *Context) error {
 	c.Unlock()
 
 	if id == "" {
-		return uninitializedContainer(errors.New("stop of uninitialized container"))
+		return uninitializedContainer{errors.New("stop of uninitialized container")}
 	}
 
 	cmd := exec.Command("docker", "stop", c.id)
@@ -599,7 +610,7 @@ func (c *container) exec(ctx *Context, args []string) (string, error) {
 	c.Unlock()
 
 	if id == "" {
-		return "", uninitializedContainer(errors.New("exec into uninitialized container"))
+		return "", uninitializedContainer{errors.New("exec into uninitialized container")}
 	}
 
 	args = append([]string{"exec", c.id}, args...)
@@ -709,7 +720,7 @@ func (c *container) watchContainer(ctx *Context, updateFn func(*Context, []byte,
 	defer c.Unlock()
 
 	if c.id == "" {
-		return uninitializedContainer(errors.New("Attempt to watch uninitialized container"))
+		return uninitializedContainer{errors.New("Attempt to watch uninitialized container")}
 	}
 
 	eventWatch.watch(c)
@@ -730,7 +741,7 @@ func (c *container) watchContainer(ctx *Context, updateFn func(*Context, []byte,
 			out, details, err := c.inspect()
 			var rmErr error
 			var removing bool
-			if _, ok := err.(uninitializedContainer); ok {
+			if isUninitializedContainer(err) {
 				removing = true
 				rmErr = c.remove(ctx)
 			}
