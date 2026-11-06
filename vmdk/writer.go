@@ -134,8 +134,14 @@ func NewStreamOptimizedWriter(filename string, capacity int64) (*StreamOptimized
 }
 
 // getGrains calculates the number of grains needed for the given capacity.
+// The result is rounded up so a final partial grain is covered by a grain
+// table entry instead of being silently dropped.
 func getGrains(capacity int64) uint64 {
-	return uint64(capacity) / (GrainSize * SectorSize)
+	grainSize := int64(GrainSize * SectorSize)
+	if capacity <= 0 {
+		return 0
+	}
+	return uint64((capacity-1)/grainSize + 1)
 }
 
 // getGrainTables calculates the number of Grain Tables needed for the given capacity.
@@ -170,30 +176,27 @@ func (w *StreamOptimizedWriter) Write(data io.Reader) error {
 	zlibWriter := zlib.NewWriter(&compressedBuf)
 
 	grainIndex := 0
-	for {
+	for grainIndex < len(w.GrainTables) {
 		// Read a grain of raw data
 		// Write the compressed data to the header
 		// Track locations in GrainTables and GrainDirectory
 		rawGrain := make([]byte, GrainSize*SectorSize)
-		n, err := io.ReadFull(data, rawGrain)
-		if err == io.EOF || err == io.ErrUnexpectedEOF {
+		_, err := io.ReadFull(data, rawGrain)
+		if err == io.EOF {
 			break
 		}
-		if err != nil {
+		if err != nil && err != io.ErrUnexpectedEOF {
 			return fmt.Errorf("failed to read grain data: %v", err)
 		}
-		if n < len(rawGrain) {
-			rawGrain = rawGrain[:n]
-		}
+		// A short read (io.ErrUnexpectedEOF) is a partial final grain: the
+		// buffer is allocated zeroed, so the bytes past the input are
+		// already zero padding within the declared capacity.
 
 		// Check if the grain is all zeroes
 		if isZeroed(rawGrain) {
 			// Mark grain as unallocated in GrainTables
 			w.GrainTables[grainIndex] = 0
 			grainIndex++
-			if grainIndex >= len(w.GrainTables) {
-				break
-			}
 			continue
 		}
 
@@ -207,11 +210,21 @@ func (w *StreamOptimizedWriter) Write(data io.Reader) error {
 		}
 		zlibWriter.Close()
 		compressedData := compressedBuf.Bytes()
-		// Update GrainTables and GrainDirectory
+
+		// Grain records must start on a sector boundary: pad the gap left
+		// by the previous variable-sized record with zeroes.
 		nextOffset, err := w.file.Seek(0, io.SeekCurrent)
 		if err != nil {
 			w.Abort()
 			return fmt.Errorf("failed to get current file offset: %v", err)
+		}
+		if aligned := alignToSector(nextOffset); aligned > nextOffset {
+			padding := make([]byte, aligned-nextOffset)
+			if _, err := w.file.Write(padding); err != nil {
+				w.Abort()
+				return fmt.Errorf("failed to write grain alignment padding: %v", err)
+			}
+			nextOffset = aligned
 		}
 
 		// Write SparseGrainLBAHeaderOnDisk
@@ -235,8 +248,13 @@ func (w *StreamOptimizedWriter) Write(data io.Reader) error {
 		}
 
 		grainIndex++
-		if grainIndex >= len(w.GrainTables) {
-			break
+	}
+	if grainIndex >= len(w.GrainTables) {
+		// Every grain within the declared capacity has been written.
+		// Trailing input would be silently truncated, so reject it.
+		var probe [1]byte
+		if _, err := io.ReadFull(data, probe[:]); err == nil {
+			return fmt.Errorf("input exceeds disk capacity of %d bytes", w.Capacity)
 		}
 	}
 	return nil
@@ -314,22 +332,42 @@ func (w *StreamOptimizedWriter) writeMetadata() error {
 	return nil
 }
 
+// alignToSector returns the next sector boundary at or after offset.
+func alignToSector(offset int64) int64 {
+	return (offset + int64(SectorSize) - 1) / int64(SectorSize) * int64(SectorSize)
+}
+
 // Close finalizes the VMDK file by writing Grain Tables, Grain Directory, and Metadata Marker.
 // And marking the End of Stream.
 // Corresponds to StreamOptimizedClose() in open-vmdk/vmdk/sparse.c
 func (w *StreamOptimizedWriter) Close() error {
+	// The end-of-stream marker must start on a sector boundary, just like
+	// the grain records written by Write.
+	offset, err := w.file.Seek(0, io.SeekCurrent)
+	if err != nil {
+		return fmt.Errorf("failed to get current file offset: %v", err)
+	}
+	if aligned := alignToSector(offset); aligned > offset {
+		padding := make([]byte, aligned-offset)
+		if _, err := w.file.Write(padding); err != nil {
+			return fmt.Errorf("failed to write end-of-stream alignment padding: %v", err)
+		}
+	}
+
 	// Write Metadata Marker
 	metadataMarker := SparseMetaDataMarkerOnDisk{
 		NumSectors: 0,
 		Size:       0,
 		SectorType: GrainMarkerEndOfStream,
 	}
-	err := binary.Write(w.file, binary.LittleEndian, &metadataMarker)
+	err = binary.Write(w.file, binary.LittleEndian, &metadataMarker)
 	if err != nil {
 		return fmt.Errorf("failed to write SparseMetaDataMarkerOnDisk: %v", err)
 	}
 
-	// Write Grain Tables to the reserved space we created in writeMetadata
+	// Write the Grain Directory to the reserved space we created in
+	// writeMetadata. Entries are uint32 sector offsets, matching the 4
+	// bytes per entry reserved by the layout calculations.
 	// seek back to where the Grain Directory starts
 	_, err = w.file.Seek(int64(w.header.GDOffset*SectorSize), io.SeekStart)
 	if err != nil {
@@ -337,16 +375,29 @@ func (w *StreamOptimizedWriter) Close() error {
 	}
 	// Write Grain Directory
 	for _, grainDirOffset := range w.GrainDirectory {
-		err := binary.Write(w.file, binary.LittleEndian, grainDirOffset)
+		err := binary.Write(w.file, binary.LittleEndian, uint32(grainDirOffset))
 		if err != nil {
 			return fmt.Errorf("failed to write Grain Directory: %v", err)
 		}
 	}
-	// Write Grain Tables
-	for _, grainTableOffset := range w.GrainTables {
-		err := binary.Write(w.file, binary.LittleEndian, grainTableOffset)
-		if err != nil {
-			return fmt.Errorf("failed to write Grain Table: %v", err)
+	// Write each Grain Table at its reserved location. GrainDirectory
+	// holds the sector offset of every table; each table occupies
+	// NumGTEsPerGT uint32 entries within its reserved sectors, the
+	// remainder stays zero filled from writeMetadata.
+	for i, grainTableOffset := range w.GrainDirectory {
+		if _, err := w.file.Seek(int64(grainTableOffset*SectorSize), io.SeekStart); err != nil {
+			return fmt.Errorf("failed to seek to Grain Table %d: %v", i, err)
+		}
+		start := i * int(w.header.NumGTEsPerGT)
+		end := start + int(w.header.NumGTEsPerGT)
+		if end > len(w.GrainTables) {
+			end = len(w.GrainTables)
+		}
+		for _, grainTableEntry := range w.GrainTables[start:end] {
+			err := binary.Write(w.file, binary.LittleEndian, uint32(grainTableEntry))
+			if err != nil {
+				return fmt.Errorf("failed to write Grain Table %d: %v", i, err)
+			}
 		}
 	}
 
