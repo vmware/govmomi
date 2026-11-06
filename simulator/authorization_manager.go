@@ -5,6 +5,7 @@
 package simulator
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/vmware/govmomi/object"
@@ -31,6 +32,14 @@ func (m *AuthorizationManager) init(r *Registry) {
 	}
 
 	m.permissions = make(map[types.ManagedObjectReference][]types.Permission)
+
+	// Custom role ids are positive and unique, the built-in roles use negative ids.
+	m.nextID = 1
+	for _, role := range m.RoleList {
+		if role.RoleId >= m.nextID {
+			m.nextID = role.RoleId + 1
+		}
+	}
 
 	l := object.AuthorizationRoleList(m.RoleList)
 	m.system = l.ByName("ReadOnly").Privilege
@@ -110,8 +119,27 @@ func (m *AuthorizationManager) RemoveEntityPermission(req *types.RemoveEntityPer
 	}
 }
 
+// SetEntityPermissions adds each permission to the entity, or updates the
+// permission already present for the same principal and group.
 func (m *AuthorizationManager) SetEntityPermissions(req *types.SetEntityPermissions) soap.HasFault {
-	m.permissions[req.Entity] = req.Permission
+	entity := req.Entity
+	p := m.permissions[entity]
+
+	for _, v := range req.Permission {
+		v.Entity = &entity
+
+		i := slices.IndexFunc(p, func(e types.Permission) bool {
+			return e.Principal == v.Principal && e.Group == v.Group
+		})
+
+		if i < 0 {
+			p = append(p, v)
+		} else {
+			p[i] = v
+		}
+	}
+
+	m.permissions[entity] = p
 
 	return &methods.SetEntityPermissionsBody{
 		Res: &types.SetEntityPermissionsResponse{},
@@ -231,20 +259,23 @@ func (m *AuthorizationManager) AddAuthorizationRole(req *types.AddAuthorizationR
 		return body
 	}
 
+	id := m.nextID
+	m.nextID++
+
 	m.RoleList = append(m.RoleList, types.AuthorizationRole{
 		Info: &types.Description{
 			Label:   req.Name,
 			Summary: req.Name,
 		},
-		RoleId:    m.nextID,
+		RoleId:    id,
 		Privilege: ids,
 		Name:      req.Name,
 		System:    false,
 	})
 
-	m.nextID++
-
-	body.Res = &types.AddAuthorizationRoleResponse{}
+	body.Res = &types.AddAuthorizationRoleResponse{
+		Returnval: id,
+	}
 
 	return body
 }
