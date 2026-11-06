@@ -221,6 +221,8 @@ func (e errorOutput) Write(w io.Writer) error {
 
 	switch err := e.error.(type) {
 	case task.Error:
+		// FaultMessage entries are printed individually below
+		reason = err.LocalizedMessage
 		faults = err.LocalizedMethodFault.Fault.GetMethodFault().FaultMessage
 		if err.Description != nil {
 			reason = fmt.Sprintf("%s (%s)", reason, err.Description.Message)
