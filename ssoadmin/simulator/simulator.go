@@ -496,6 +496,7 @@ func (s *PrincipalManagementService) ResetLocalPersonUserPassword(ctx *simulator
 	}
 
 	p.password = req.NewPassword
+	s.dir[id] = p
 
 	return body
 }
