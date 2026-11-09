@@ -83,26 +83,38 @@ func WrapSoapFault(f *Fault) error {
 	return soapFaultError{f}
 }
 
+// IsSoapFault returns true if err is, or wraps, a SOAP fault.
 func IsSoapFault(err error) bool {
-	_, ok := err.(soapFaultError)
-	return ok
+	var s soapFaultError
+	return errors.As(err, &s)
 }
 
+// ToSoapFault returns the SOAP fault in err's chain, or nil if there is none.
 func ToSoapFault(err error) *Fault {
-	return err.(soapFaultError).fault
+	var s soapFaultError
+	if errors.As(err, &s) {
+		return s.fault
+	}
+	return nil
 }
 
 func WrapVimFault(v types.BaseMethodFault) error {
 	return vimFaultError{v}
 }
 
+// IsVimFault returns true if err is, or wraps, a vim fault.
 func IsVimFault(err error) bool {
-	_, ok := err.(vimFaultError)
-	return ok
+	var v vimFaultError
+	return errors.As(err, &v)
 }
 
+// ToVimFault returns the vim fault in err's chain, or nil if there is none.
 func ToVimFault(err error) types.BaseMethodFault {
-	return err.(vimFaultError).fault
+	var v vimFaultError
+	if errors.As(err, &v) {
+		return v.fault
+	}
+	return nil
 }
 
 func IsCertificateUntrusted(err error) bool {
