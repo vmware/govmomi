@@ -29,6 +29,9 @@ var (
 	eventWatch eventWatcher
 )
 
+// shellQuote quotes one generated option word without evaluating its contents.
+func shellQuote(s string) string { return "'" + strings.ReplaceAll(s, "'", `'\''`) + "'" }
+
 const (
 	deleteWithContainer = "lifecycle=container"
 	createdByVcsim      = "createdBy=vcsim"
@@ -40,18 +43,29 @@ func init() {
 	}
 }
 
-// commandError logs and returns an error from a command execution failure, including stderr if available.
-func commandError(operation string, args []string, err error) error {
-	stderr := ""
-	if xerr, ok := err.(*exec.ExitError); ok {
-		stderr = strings.TrimSpace(string(xerr.Stderr))
+// commandError keeps operation and failure classification without exposing
+// command arguments, runtime output, or error strings that may contain data.
+func commandError(operation string, err error) error {
+	var safe error
+	var exited *exec.ExitError
+	switch {
+	case errors.Is(err, context.Canceled):
+		safe = context.Canceled
+	case errors.Is(err, context.DeadlineExceeded):
+		safe = context.DeadlineExceeded
+	case errors.As(err, &exited):
+		// Preserve the exit status for callers without retaining captured stderr.
+		safe = &exec.ExitError{ProcessState: exited.ProcessState}
+	case errors.Is(err, exec.ErrNotFound):
+		safe = exec.ErrNotFound
+	case errors.Is(err, os.ErrPermission):
+		safe = os.ErrPermission
+	case errors.Is(err, os.ErrNotExist):
+		safe = os.ErrNotExist
+	default:
+		safe = errors.New("command execution error")
 	}
-	var cmdErr error
-	if stderr != "" {
-		cmdErr = fmt.Errorf("%s %v failed: %s: %s", operation, args, err, stderr)
-	} else {
-		cmdErr = fmt.Errorf("%s %v failed: %s", operation, args, err)
-	}
+	cmdErr := fmt.Errorf("%s failed: %w", operation, safe)
 	log.Print(cmdErr)
 	return cmdErr
 }
@@ -220,7 +234,7 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 		cmd := exec.Command("docker", run...)
 		out, err := cmd.Output()
 		if err != nil {
-			return "", commandError("volume create", cmd.Args, err)
+			return "", commandError("volume create", err)
 		}
 		uid = strings.TrimSpace(string(out))
 
@@ -239,7 +253,7 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 	}
 
 	if err = cmd.Start(); err != nil {
-		return uid, commandError("volume population start", cmd.Args, err)
+		return uid, commandError("volume population start", err)
 	}
 
 	tw := tar.NewWriter(stdin)
@@ -273,7 +287,7 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (uid str
 	}
 
 	if waitErr := cmd.Wait(); waitErr != nil {
-		return uid, commandError("volume population", cmd.Args, waitErr)
+		return uid, commandError("volume population", waitErr)
 	}
 
 	return uid, err
@@ -410,20 +424,27 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 	run = append(run, dockerVol...)
 	run = append(run, dockerPort...)
 	run = append(run, dockerEnv...)
-	run = append(run, image)
-	run = append(run, args...)
-
-	// this combines all the run options into a single string that's passed to /bin/bash -c as the single argument to force bash parsing.
-	// TODO: make this configurable behaviour so users also have the option of not escaping everything for bash
-	cmd := exec.Command(shell, "-c", strings.Join(run, " "))
+	suffix := append([]string{image}, args...)
+	cmd := containerCreateCommand(run, suffix)
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, commandError("container create", cmd.Args, err)
+		return nil, commandError("container create", err)
 	}
 
 	c.id = strings.TrimSpace(string(out))
 
 	return &c, nil
+}
+
+// containerCreateCommand keeps generated options literal while retaining the
+// documented raw shell syntax of the image and command suffix.
+func containerCreateCommand(run, suffix []string) *exec.Cmd {
+	words := make([]string, 0, len(run)+len(suffix))
+	for _, word := range run {
+		words = append(words, shellQuote(word))
+	}
+	words = append(words, suffix...)
+	return exec.Command(shell, "-c", strings.Join(words, " "))
 }
 
 // createVolume takes the specified files and writes them into a volume named for the container.
