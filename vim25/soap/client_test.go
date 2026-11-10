@@ -7,11 +7,16 @@ package soap
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"os"
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/vmware/govmomi/vim25/progress"
 )
 
 type mockRT struct{}
@@ -242,4 +247,42 @@ func TestSessionCookie(t *testing.T) {
 	if val == nil {
 		t.Fatal("no session cookie")
 	}
+}
+
+// A server that replies before reading the body must not cause a panic in the
+// transport's writer goroutine.
+func TestUploadEarlyErrorResponse(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer ts.Close()
+
+	u, _ := url.Parse(ts.URL)
+	c := NewClient(u, true)
+
+	for i := 0; i < 50; i++ {
+		body := io.LimitReader(zeroReader{}, 32<<20)
+		param := DefaultUpload
+		param.ContentLength = 32 << 20
+		param.Progress = discardSinker{}
+		if err := c.Upload(context.Background(), body, u, &param); err == nil {
+			t.Fatal("expected error")
+		}
+	}
+	time.Sleep(100 * time.Millisecond) // let the writer goroutine run
+}
+
+type zeroReader struct{}
+
+func (zeroReader) Read(b []byte) (int, error) { clear(b); return len(b), nil }
+
+type discardSinker struct{}
+
+func (discardSinker) Sink() chan<- progress.Report {
+	ch := make(chan progress.Report)
+	go func() {
+		for range ch {
+		}
+	}()
+	return ch
 }

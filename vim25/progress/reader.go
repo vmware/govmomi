@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -69,6 +70,13 @@ type reader struct {
 	size int64
 	bps  uint64
 
+	// mu guards pos and done, and serializes sends on ch with Done closing it.
+	// The http transport may still call Read from its writer goroutine after
+	// Do has returned (for example on an early error response), so Read must
+	// not send on ch once Done has closed it.
+	mu   sync.Mutex
+	done bool
+
 	ch  chan<- Report
 	ctx context.Context
 }
@@ -91,9 +99,13 @@ func NewReader(ctx context.Context, s Sinker, r io.Reader, size int64) *reader {
 // underlying channel.
 func (r *reader) Read(b []byte) (int, error) {
 	n, err := r.r.Read(b)
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	r.pos += int64(n)
 
-	if err != nil && err != io.EOF {
+	if r.done || (err != nil && err != io.EOF) {
 		return n, err
 	}
 
@@ -115,6 +127,14 @@ func (r *reader) Read(b []byte) (int, error) {
 // Done marks the progress reader as done, optionally including an error in the
 // progress report. After sending it, the underlying channel is closed.
 func (r *reader) Done(err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.done {
+		return
+	}
+	r.done = true
+
 	q := readerReport{
 		t:    time.Now(),
 		pos:  r.pos,
