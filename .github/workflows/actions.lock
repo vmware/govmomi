@@ -14,7 +14,7 @@ workflows:
         - 'actions/upload-artifact@v7.0.2'
         - 'goreleaser/goreleaser-action@v7.3.0'
     '.github/workflows/govmomi-check-wip.yaml':
-        - 'embano1/wip@v1.0.0'
+        - 'embano1/wip@v2'
     '.github/workflows/govmomi-go-lint.yaml':
         - 'actions/checkout@v6.0.1'
         - 'actions/setup-go@v7.0.0'
@@ -82,9 +82,9 @@ dependencies:
         commit: 'sha1-89ae32b08ed1a541efecbab17912962a5e38981c'
         owner_id: 7513068
         repo_id: 113918130
-    'embano1/wip@v1.0.0':
-        ref: 'v1.0.0'
-        commit: 'sha1-d10268b325aea84ff49ff3f0983c0ebc14976caf'
+    'embano1/wip@v2':
+        ref: 'v2'
+        commit: 'sha1-c25450f77ed02c20d00b76ee3b33ff43838739a2'
         owner_id: 15986659
         repo_id: 363937512
     'github/codeql-action@c4fb451437765abf5018c6fbf22cce1a7da1e5cc':
