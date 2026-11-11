@@ -36,7 +36,7 @@ jobs:
       - name: Docker Login
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Checkout Repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 0 # for CHANGELOG
           ref: ${{ github.ref }} # branch provided on dispatch
@@ -63,7 +63,7 @@ jobs:
           # set tag environment variable
           echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
       - name: Setup Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        uses: actions/setup-go@v7.0.0
         with:
           go-version: '1.26'
           # prefer the newest 1.26.x over the (possibly older) runner image cache
@@ -120,7 +120,7 @@ jobs:
           # generate CHANGELOG for this Github release tag only
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' ${TAG}
       - name: Archive CHANGELOG
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         continue-on-error: true
         with:
           name: CHANGELOG
@@ -129,7 +129,7 @@ jobs:
           retention-days: 14
       - name: Simulate Release without Pushing Artifacts
         if: ${{ inputs.dryrun }}
-        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        uses: goreleaser/goreleaser-action@v7.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -137,7 +137,7 @@ jobs:
           args: release --snapshot --clean --release-notes RELEASE_CHANGELOG.md
       - name: Create Release
         if: ${{ !inputs.dryrun }}
-        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # v7.3.0
+        uses: goreleaser/goreleaser-action@v7.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GOVMOMI_RELEASE }}
           IS_LATEST: ${{ steps.tag.outputs.islatest }}
@@ -155,7 +155,7 @@ jobs:
     if: ${{ !inputs.dryrun && needs.release.outputs.latesttag == 'true' }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@v6.0.1
         with:
           fetch-depth: 0 # for CHANGELOG
           ref: main
@@ -169,7 +169,7 @@ jobs:
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' -t .chglog/CHANGELOG.tpl.md
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@15733dbdfeedb4f7fdb73d13c6f5ac83b710fab8 # v8.1.2
+        uses: peter-evans/create-pull-request@v8.1.2
         with:
           commit-message: "Update CHANGELOG for ${{ inputs.tag }}"
           delete-branch: true
