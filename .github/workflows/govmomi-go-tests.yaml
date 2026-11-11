@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Check Repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v7.0.1
 
       - name: Setup Go ${{ matrix.go-version }}
         uses: actions/setup-go@v7.0.0

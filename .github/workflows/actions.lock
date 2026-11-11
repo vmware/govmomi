@@ -4,32 +4,32 @@
 version: 'v0.0.3'
 workflows:
     '.github/workflows/codeql-analysis.yml':
-        - 'actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac'
+        - 'actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a'
         - 'actions/setup-go@v7.0.0'
         - 'github/codeql-action@c4fb451437765abf5018c6fbf22cce1a7da1e5cc'
     '.github/workflows/govmomi-build.yaml':
         - 'actions/cache@v6.1.0'
-        - 'actions/checkout@v6.0.1'
+        - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'goreleaser/goreleaser-action@v7.3.0'
     '.github/workflows/govmomi-check-wip.yaml':
         - 'embano1/wip@v2'
     '.github/workflows/govmomi-go-lint.yaml':
-        - 'actions/checkout@v6.0.1'
+        - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
     '.github/workflows/govmomi-go-tests.yaml':
         - 'actions/cache@v6.1.0'
-        - 'actions/checkout@v6.0.1'
+        - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
     '.github/workflows/govmomi-govc-tests.yaml':
         - 'actions/cache@v6.1.0'
-        - 'actions/checkout@v6.0.1'
+        - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
     '.github/workflows/govmomi-lock.yml':
         - 'dessant/lock-threads@v6.0.2'
     '.github/workflows/govmomi-release.yaml':
-        - 'actions/checkout@v6.0.1'
+        - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'goreleaser/goreleaser-action@v7.3.0'
@@ -37,7 +37,7 @@ workflows:
     '.github/workflows/govmomi-stale.yaml':
         - 'actions/stale@v11.0.0'
     '.github/workflows/issue-greeting.yaml':
-        - 'actions/checkout@v6.0.1'
+        - 'actions/checkout@v7.0.1'
         - 'chuhlomin/render-template@v1.12'
         - 'peter-evans/create-or-update-comment@v5.0.0'
     '.github/workflows/verify-docker-login.yaml': []
@@ -47,14 +47,14 @@ dependencies:
         commit: 'sha1-55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         owner_id: 44036562
         repo_id: 215566462
-    'actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac':
+    'actions/checkout@f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a':
         ref: 'main'
-        commit: 'sha1-3df4ab11eba7bda6032a0b82a6bb43b11571feac'
+        commit: 'sha1-f548e57e544e1ff5a4c46bf1e1b8685f8e4a348a'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/checkout@v6.0.1':
-        ref: 'v6.0.1'
-        commit: 'sha1-8e8c483db84b4bee98b60c0593521ed34d9990e8'
+    'actions/checkout@v7.0.1':
+        ref: 'v7.0.1'
+        commit: 'sha1-3d3c42e5aac5ba805825da76410c181273ba90b1'
         owner_id: 44036562
         repo_id: 197814629
     'actions/setup-go@v7.0.0':
