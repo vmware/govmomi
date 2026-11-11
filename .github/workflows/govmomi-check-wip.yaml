@@ -12,4 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check Pull Request Title
-        uses: embano1/wip@v1.0.0
+        uses: embano1/wip@v2
