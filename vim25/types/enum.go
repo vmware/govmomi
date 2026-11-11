@@ -340,6 +340,82 @@ func init() {
 	t["ArrayUpdateOperation"] = reflect.TypeOf((*ArrayUpdateOperation)(nil)).Elem()
 }
 
+// Possible authentication schemes.
+type AuthenticationRequiredAuthenticationScheme string
+
+const (
+	// Authentication scheme which transmits credentials as
+	// user-id/password pairs, encoded using Base64.
+	//
+	// See RFC 7617 for details.
+	AuthenticationRequiredAuthenticationSchemeBasic = AuthenticationRequiredAuthenticationScheme("Basic")
+	// Authentication scheme which transmits opaque access token string.
+	//
+	// See RFC 6750 for details.
+	AuthenticationRequiredAuthenticationSchemeBearer = AuthenticationRequiredAuthenticationScheme("Bearer")
+)
+
+func (e AuthenticationRequiredAuthenticationScheme) Values() []AuthenticationRequiredAuthenticationScheme {
+	return []AuthenticationRequiredAuthenticationScheme{
+		AuthenticationRequiredAuthenticationSchemeBasic,
+		AuthenticationRequiredAuthenticationSchemeBearer,
+	}
+}
+
+func (e AuthenticationRequiredAuthenticationScheme) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["AuthenticationRequiredAuthenticationScheme"] = reflect.TypeOf((*AuthenticationRequiredAuthenticationScheme)(nil)).Elem()
+}
+
+// Possible reasons why an access request is declined.
+type AuthenticationRequiredErrorType string
+
+const (
+	// The request is missing a required parameter, includes an unsupported
+	// parameter or parameter value, repeats the same parameter, uses more
+	// than one method for including an access token, or is otherwise
+	// malformed.
+	AuthenticationRequiredErrorTypeInvalid_request = AuthenticationRequiredErrorType("invalid_request")
+	// The access token is invalid, expired, revoked or is invalid for
+	// other reasons.
+	//
+	// The client may request a new access token and
+	// retry the request.
+	AuthenticationRequiredErrorTypeInvalid_token = AuthenticationRequiredErrorType("invalid_token")
+	// The request requires higher privileges than provided by the access
+	// token.
+	AuthenticationRequiredErrorTypeInsufficient_scope = AuthenticationRequiredErrorType("insufficient_scope")
+	// vCenter requires registration of the full user claims to enable the
+	// provided access token use in vCenter.
+	//
+	// The client application should
+	// obtain the full claims token from the authorization server on the
+	// "ovl" field specified URI and register the full claims token with
+	// vCenter. After registration, the client application should retry
+	// the request.
+	AuthenticationRequiredErrorTypeRegistration_required = AuthenticationRequiredErrorType("registration_required")
+)
+
+func (e AuthenticationRequiredErrorType) Values() []AuthenticationRequiredErrorType {
+	return []AuthenticationRequiredErrorType{
+		AuthenticationRequiredErrorTypeInvalid_request,
+		AuthenticationRequiredErrorTypeInvalid_token,
+		AuthenticationRequiredErrorTypeInsufficient_scope,
+		AuthenticationRequiredErrorTypeRegistration_required,
+	}
+}
+
+func (e AuthenticationRequiredErrorType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["AuthenticationRequiredErrorType"] = reflect.TypeOf((*AuthenticationRequiredErrorType)(nil)).Elem()
+}
+
 type AutoStartAction string
 
 const (
@@ -605,6 +681,21 @@ func init() {
 
 // The types of tests which can requested by any of the methods in either
 // `VirtualMachineCompatibilityChecker` or `VirtualMachineProvisioningChecker`.
+//
+// Only `extensionTests` evaluates extension-registered compatibility
+// constraints, even if a constraint conceptually belongs to another test type. For
+// example, a constraint whose `VirtualMachineExtensionCompatibilityConstraintType_enum`
+// is `POOL` is not evaluated as part of `resourcePoolTests`; it is only
+// evaluated when `extensionTests` is included.
+//
+// `extensionTests`, in turn, is not scoped to a single domain: requesting it
+// evaluates every constraint registered on the virtual machine, regardless of
+// `VirtualMachineExtensionCompatibilityConstraintType_enum`. So there is no way
+// to request "the complete, resource-pool-only picture" for a virtual machine with
+// both a `POOL` constraint and, say, a `DEVICE` constraint: requesting
+// only `resourcePoolTests` omits the `POOL` constraint, while adding
+// `extensionTests` to also cover it pulls in the unrelated `DEVICE`
+// constraint as well. The same applies to any other test type.
 type CheckTestType string
 
 const (
@@ -637,6 +728,10 @@ const (
 	// destination host or cluster can see the networks that the virtual
 	// machine's virtual nic devices are going to be connected.
 	CheckTestTypeNetworkTests = CheckTestType("networkTests")
+	// Tests that evaluate extension-registered compatibility constraints
+	// (see `VirtualMachineExtensionCompatibilityConstraint`) on virtual
+	// machines managed by an extension.
+	CheckTestTypeExtensionTests = CheckTestType("extensionTests")
 )
 
 func (e CheckTestType) Values() []CheckTestType {
@@ -646,6 +741,7 @@ func (e CheckTestType) Values() []CheckTestType {
 		CheckTestTypeResourcePoolTests,
 		CheckTestTypeDatastoreTests,
 		CheckTestTypeNetworkTests,
+		CheckTestTypeExtensionTests,
 	}
 }
 
@@ -655,6 +751,9 @@ func (e CheckTestType) Strings() []string {
 
 func init() {
 	t["CheckTestType"] = reflect.TypeOf((*CheckTestType)(nil)).Elem()
+	minAPIVersionForEnumValue["CheckTestType"] = map[string]string{
+		"extensionTests": "9.1.2.0",
+	}
 }
 
 // HCIWorkflowState identifies the state of the cluster from the perspective of HCI
@@ -2530,6 +2629,8 @@ const (
 	DistributedVirtualSwitchHostInfrastructureTrafficClassNvmetcp = DistributedVirtualSwitchHostInfrastructureTrafficClass("nvmetcp")
 	// vSphere Provisioning Traffic
 	DistributedVirtualSwitchHostInfrastructureTrafficClassProvisioning = DistributedVirtualSwitchHostInfrastructureTrafficClass("provisioning")
+	// vSAN iSCSI Traffic
+	DistributedVirtualSwitchHostInfrastructureTrafficClassVSANiSCSI = DistributedVirtualSwitchHostInfrastructureTrafficClass("vSANiSCSI")
 )
 
 func (e DistributedVirtualSwitchHostInfrastructureTrafficClass) Values() []DistributedVirtualSwitchHostInfrastructureTrafficClass {
@@ -2546,6 +2647,7 @@ func (e DistributedVirtualSwitchHostInfrastructureTrafficClass) Values() []Distr
 		DistributedVirtualSwitchHostInfrastructureTrafficClassBackupNfc,
 		DistributedVirtualSwitchHostInfrastructureTrafficClassNvmetcp,
 		DistributedVirtualSwitchHostInfrastructureTrafficClassProvisioning,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassVSANiSCSI,
 	}
 }
 
@@ -2559,6 +2661,7 @@ func init() {
 		"backupNfc":    "7.0.1.0",
 		"nvmetcp":      "7.0.3.0",
 		"provisioning": "9.0.0.0",
+		"vSANiSCSI":    "9.1.0.0",
 	}
 }
 
@@ -2603,9 +2706,12 @@ func init() {
 type DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus string
 
 const (
-	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusSUCCEEDED   = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("SUCCEEDED")
+	// Performance NIC offload is successfully enabled.
+	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusSUCCEEDED = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("SUCCEEDED")
+	// Performance NIC offload is in the process of being enabled.
 	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusIN_PROGRESS = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("IN_PROGRESS")
-	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusFAILED      = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("FAILED")
+	// The attempt to enable Performance NIC Offload has failed.
+	DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatusFAILED = DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus("FAILED")
 )
 
 func (e DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus) Values() []DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus {
@@ -2622,6 +2728,7 @@ func (e DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus) Strings
 
 func init() {
 	t["DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualSwitchHostMemberHostPerfNicOffloadStateStatus"] = "9.1.0.0"
 }
 
 // Describe the runtime state of the uplink.
@@ -3883,6 +3990,37 @@ func init() {
 	minAPIVersionForType["HostBIOSInfoFirmwareType"] = "8.0.2.0"
 }
 
+// Indicates the type of DRTM launch that occurred on the platform.
+//
+// TPM attestation may be used to definitively determine the DRTM
+type HostCapabilityDRTMTypes string
+
+const (
+	// No DRTM launch occurred.
+	HostCapabilityDRTMTypesNone = HostCapabilityDRTMTypes("none")
+	// Intel TXT DRTM launch occurred.
+	HostCapabilityDRTMTypesIntelTxt = HostCapabilityDRTMTypes("intelTxt")
+	// AMD SKINIT DRTM launch occurred.
+	HostCapabilityDRTMTypesAmdSkinit = HostCapabilityDRTMTypes("amdSkinit")
+)
+
+func (e HostCapabilityDRTMTypes) Values() []HostCapabilityDRTMTypes {
+	return []HostCapabilityDRTMTypes{
+		HostCapabilityDRTMTypesNone,
+		HostCapabilityDRTMTypesIntelTxt,
+		HostCapabilityDRTMTypesAmdSkinit,
+	}
+}
+
+func (e HostCapabilityDRTMTypes) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["HostCapabilityDRTMTypes"] = reflect.TypeOf((*HostCapabilityDRTMTypes)(nil)).Elem()
+	minAPIVersionForType["HostCapabilityDRTMTypes"] = "9.1.0.0"
+}
+
 // Deprecated as of vSphere API 7.0, use
 // `VmFaultToleranceConfigIssueReasonForIssue_enum`.
 //
@@ -4081,6 +4219,34 @@ func (e HostCertificateManagerCertificateKind) Strings() []string {
 func init() {
 	t["HostCertificateManagerCertificateKind"] = reflect.TypeOf((*HostCertificateManagerCertificateKind)(nil)).Elem()
 	minAPIVersionForType["HostCertificateManagerCertificateKind"] = "8.0.1.0"
+}
+
+type HostCertificateManagerCryptoAlgorithm string
+
+const (
+	// RSA private key size: 2048 bits
+	HostCertificateManagerCryptoAlgorithmRSA_2048 = HostCertificateManagerCryptoAlgorithm("RSA_2048")
+	// RSA private key size: 3072 bits
+	HostCertificateManagerCryptoAlgorithmRSA_3072 = HostCertificateManagerCryptoAlgorithm("RSA_3072")
+	// RSA private key size: 4096 bits
+	HostCertificateManagerCryptoAlgorithmRSA_4096 = HostCertificateManagerCryptoAlgorithm("RSA_4096")
+)
+
+func (e HostCertificateManagerCryptoAlgorithm) Values() []HostCertificateManagerCryptoAlgorithm {
+	return []HostCertificateManagerCryptoAlgorithm{
+		HostCertificateManagerCryptoAlgorithmRSA_2048,
+		HostCertificateManagerCryptoAlgorithmRSA_3072,
+		HostCertificateManagerCryptoAlgorithmRSA_4096,
+	}
+}
+
+func (e HostCertificateManagerCryptoAlgorithm) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["HostCertificateManagerCryptoAlgorithm"] = reflect.TypeOf((*HostCertificateManagerCryptoAlgorithm)(nil)).Elem()
+	minAPIVersionForType["HostCertificateManagerCryptoAlgorithm"] = "9.1.0.0"
 }
 
 // This is a global mode on a configuration specification indicating
@@ -5569,6 +5735,28 @@ func init() {
 	t["HostMaintenanceSpecPurpose"] = reflect.TypeOf((*HostMaintenanceSpecPurpose)(nil)).Elem()
 }
 
+type HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity string
+
+const (
+	HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverityWarning = HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity("warning")
+	HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverityError   = HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity("error")
+)
+
+func (e HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity) Values() []HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity {
+	return []HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity{
+		HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverityWarning,
+		HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverityError,
+	}
+}
+
+func (e HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity"] = reflect.TypeOf((*HostMemberRuntimeInfoNsxNetworkMigrationAvailabilityInfoMigrationSeverity)(nil)).Elem()
+}
+
 // Enumeration of flags pertaining to a memory tier.
 //
 // Here are some examples of what the flags will look like for various memory
@@ -5925,6 +6113,8 @@ const (
 	HostNetStackInstanceSystemStackKeyMirror = HostNetStackInstanceSystemStackKey("mirror")
 	// Stack key used for ops applications
 	HostNetStackInstanceSystemStackKeyOps = HostNetStackInstanceSystemStackKey("ops")
+	// Stack key used for vnetworking
+	HostNetStackInstanceSystemStackKeyVnetworking = HostNetStackInstanceSystemStackKey("vnetworking")
 )
 
 func (e HostNetStackInstanceSystemStackKey) Values() []HostNetStackInstanceSystemStackKey {
@@ -5934,6 +6124,7 @@ func (e HostNetStackInstanceSystemStackKey) Values() []HostNetStackInstanceSyste
 		HostNetStackInstanceSystemStackKeyVSphereProvisioning,
 		HostNetStackInstanceSystemStackKeyMirror,
 		HostNetStackInstanceSystemStackKeyOps,
+		HostNetStackInstanceSystemStackKeyVnetworking,
 	}
 }
 
@@ -5944,8 +6135,9 @@ func (e HostNetStackInstanceSystemStackKey) Strings() []string {
 func init() {
 	t["HostNetStackInstanceSystemStackKey"] = reflect.TypeOf((*HostNetStackInstanceSystemStackKey)(nil)).Elem()
 	minAPIVersionForEnumValue["HostNetStackInstanceSystemStackKey"] = map[string]string{
-		"mirror": "8.0.0.1",
-		"ops":    "8.0.0.1",
+		"mirror":      "8.0.0.1",
+		"ops":         "8.0.0.1",
+		"vnetworking": "9.1.0.0",
 	}
 }
 
@@ -6388,6 +6580,49 @@ func (e HostPatchManagerReason) Strings() []string {
 
 func init() {
 	t["HostPatchManagerReason"] = reflect.TypeOf((*HostPatchManagerReason)(nil)).Elem()
+}
+
+type HostPciPassthruInfoDirectPathDeviceMode string
+
+const (
+	// Device is not available for use by virtual machines.
+	HostPciPassthruInfoDirectPathDeviceModeNone = HostPciPassthruInfoDirectPathDeviceMode("none")
+	// Device is configured for host use, and is not available to virtual machines.
+	HostPciPassthruInfoDirectPathDeviceModeHost = HostPciPassthruInfoDirectPathDeviceMode("host")
+	// Device is available for virtual machines as a DirectPath device.
+	HostPciPassthruInfoDirectPathDeviceModeDirectPath = HostPciPassthruInfoDirectPathDeviceMode("directPath")
+	// Device is available for virtual machines as an Enhanced DirectPath device.
+	HostPciPassthruInfoDirectPathDeviceModeEnhancedDirectPath = HostPciPassthruInfoDirectPathDeviceMode("enhancedDirectPath")
+	// Device is available for virtual machines in Nvidia vGPU same size mode.
+	HostPciPassthruInfoDirectPathDeviceModeVGpuSameSize = HostPciPassthruInfoDirectPathDeviceMode("vGpuSameSize")
+	// Device is available for virtual machines in Nvidia vGPU mixed size mode.
+	HostPciPassthruInfoDirectPathDeviceModeVGpuMixedSize = HostPciPassthruInfoDirectPathDeviceMode("vGpuMixedSize")
+	// System selects the mode.
+	//
+	// After configuration, the device will be in one
+	// of the other valid modes for a DirectPath device.
+	HostPciPassthruInfoDirectPathDeviceModeSystemSelect = HostPciPassthruInfoDirectPathDeviceMode("systemSelect")
+)
+
+func (e HostPciPassthruInfoDirectPathDeviceMode) Values() []HostPciPassthruInfoDirectPathDeviceMode {
+	return []HostPciPassthruInfoDirectPathDeviceMode{
+		HostPciPassthruInfoDirectPathDeviceModeNone,
+		HostPciPassthruInfoDirectPathDeviceModeHost,
+		HostPciPassthruInfoDirectPathDeviceModeDirectPath,
+		HostPciPassthruInfoDirectPathDeviceModeEnhancedDirectPath,
+		HostPciPassthruInfoDirectPathDeviceModeVGpuSameSize,
+		HostPciPassthruInfoDirectPathDeviceModeVGpuMixedSize,
+		HostPciPassthruInfoDirectPathDeviceModeSystemSelect,
+	}
+}
+
+func (e HostPciPassthruInfoDirectPathDeviceMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["HostPciPassthruInfoDirectPathDeviceMode"] = reflect.TypeOf((*HostPciPassthruInfoDirectPathDeviceMode)(nil)).Elem()
+	minAPIVersionForType["HostPciPassthruInfoDirectPathDeviceMode"] = "9.1.0.0"
 }
 
 type HostPowerOperationType string
@@ -6924,6 +7159,8 @@ const (
 	HostSevInfoSevStateUninitialized = HostSevInfoSevState("uninitialized")
 	HostSevInfoSevStateInitialized   = HostSevInfoSevState("initialized")
 	HostSevInfoSevStateWorking       = HostSevInfoSevState("working")
+	// `**Since:**` vSphere API Release 9.1.0.0
+	HostSevInfoSevStateDisabledBios = HostSevInfoSevState("disabledBios")
 )
 
 func (e HostSevInfoSevState) Values() []HostSevInfoSevState {
@@ -6931,6 +7168,7 @@ func (e HostSevInfoSevState) Values() []HostSevInfoSevState {
 		HostSevInfoSevStateUninitialized,
 		HostSevInfoSevStateInitialized,
 		HostSevInfoSevStateWorking,
+		HostSevInfoSevStateDisabledBios,
 	}
 }
 
@@ -6941,6 +7179,9 @@ func (e HostSevInfoSevState) Strings() []string {
 func init() {
 	t["HostSevInfoSevState"] = reflect.TypeOf((*HostSevInfoSevState)(nil)).Elem()
 	minAPIVersionForType["HostSevInfoSevState"] = "7.0.1.0"
+	minAPIVersionForEnumValue["HostSevInfoSevState"] = map[string]string{
+		"disabledBios": "9.1.0.0",
+	}
 }
 
 // Flexible Launch Enclave (FLC) modes.
@@ -7328,6 +7569,8 @@ const (
 	HostTdxInfoTdxStateInitialized  = HostTdxInfoTdxState("initialized")
 	HostTdxInfoTdxStateConfigured   = HostTdxInfoTdxState("configured")
 	HostTdxInfoTdxStateReady        = HostTdxInfoTdxState("ready")
+	// `**Since:**` vSphere API Release 9.1.0.0
+	HostTdxInfoTdxStateDisabledBios = HostTdxInfoTdxState("disabledBios")
 )
 
 func (e HostTdxInfoTdxState) Values() []HostTdxInfoTdxState {
@@ -7336,6 +7579,7 @@ func (e HostTdxInfoTdxState) Values() []HostTdxInfoTdxState {
 		HostTdxInfoTdxStateInitialized,
 		HostTdxInfoTdxStateConfigured,
 		HostTdxInfoTdxStateReady,
+		HostTdxInfoTdxStateDisabledBios,
 	}
 }
 
@@ -7346,6 +7590,9 @@ func (e HostTdxInfoTdxState) Strings() []string {
 func init() {
 	t["HostTdxInfoTdxState"] = reflect.TypeOf((*HostTdxInfoTdxState)(nil)).Elem()
 	minAPIVersionForType["HostTdxInfoTdxState"] = "9.0.0.0"
+	minAPIVersionForEnumValue["HostTdxInfoTdxState"] = map[string]string{
+		"disabledBios": "9.1.0.0",
+	}
 }
 
 // Status constants of TPM attestation.
@@ -7519,6 +7766,8 @@ const (
 	HostVirtualNicManagerNicTypeNvmeRdma = HostVirtualNicManagerNicType("nvmeRdma")
 	// The VirtualNic is used for external vSAN traffic.
 	HostVirtualNicManagerNicTypeVsanExternal = HostVirtualNicManagerNicType("vsanExternal")
+	// The VirtualNic is used for Tunnel Endpoint(TEP) of overlay network.
+	HostVirtualNicManagerNicTypeVnetworking = HostVirtualNicManagerNicType("vnetworking")
 )
 
 func (e HostVirtualNicManagerNicType) Values() []HostVirtualNicManagerNicType {
@@ -7536,6 +7785,7 @@ func (e HostVirtualNicManagerNicType) Values() []HostVirtualNicManagerNicType {
 		HostVirtualNicManagerNicTypeNvmeTcp,
 		HostVirtualNicManagerNicTypeNvmeRdma,
 		HostVirtualNicManagerNicTypeVsanExternal,
+		HostVirtualNicManagerNicTypeVnetworking,
 	}
 }
 
@@ -7549,6 +7799,7 @@ func init() {
 		"nvmeTcp":      "7.0.3.0",
 		"nvmeRdma":     "7.0.3.0",
 		"vsanExternal": "9.0.0.0",
+		"vnetworking":  "9.1.0.0",
 	}
 }
 
@@ -7640,6 +7891,7 @@ func init() {
 type HttpNfcLeaseManifestEntryChecksumType string
 
 const (
+	// Deprecated as of VCF 9.2, use `sha256` instead.
 	HttpNfcLeaseManifestEntryChecksumTypeSha1   = HttpNfcLeaseManifestEntryChecksumType("sha1")
 	HttpNfcLeaseManifestEntryChecksumTypeSha256 = HttpNfcLeaseManifestEntryChecksumType("sha256")
 )
@@ -8502,6 +8754,7 @@ const (
 	ManagedObjectTypeTask                                    = ManagedObjectType("Task")
 	ManagedObjectTypeTaskHistoryCollector                    = ManagedObjectType("TaskHistoryCollector")
 	ManagedObjectTypeTaskManager                             = ManagedObjectType("TaskManager")
+	ManagedObjectTypeTransitGateway                          = ManagedObjectType("TransitGateway")
 	ManagedObjectTypeUserDirectory                           = ManagedObjectType("UserDirectory")
 	ManagedObjectTypeVirtualApp                              = ManagedObjectType("VirtualApp")
 	ManagedObjectTypeVirtualDiskManager                      = ManagedObjectType("VirtualDiskManager")
@@ -8645,6 +8898,7 @@ func (e ManagedObjectType) Values() []ManagedObjectType {
 		ManagedObjectTypeTask,
 		ManagedObjectTypeTaskHistoryCollector,
 		ManagedObjectTypeTaskManager,
+		ManagedObjectTypeTransitGateway,
 		ManagedObjectTypeUserDirectory,
 		ManagedObjectTypeVirtualApp,
 		ManagedObjectTypeVirtualDiskManager,
@@ -10747,8 +11001,24 @@ func init() {
 type SearchIndexPredicateArrayOperator string
 
 const (
+	// When specified, the value on the right hand side
+	// (`SearchIndexPredicate.comparableValue`) is compared
+	// against each element in the array with the provided operator
+	// `SearchIndexPredicateComparisonOperator_enum`.
+	//
+	// The resource will be matched if the `SearchIndexPredicateComparisonOperator_enum`
+	// returns true for ALL elements in the array, otherwise it will
+	// be filtered out.
 	SearchIndexPredicateArrayOperatorAllElements = SearchIndexPredicateArrayOperator("AllElements")
-	SearchIndexPredicateArrayOperatorAnyElement  = SearchIndexPredicateArrayOperator("AnyElement")
+	// When specified, the value on the right hand side
+	// (`SearchIndexPredicate.comparableValue`) is compared
+	// against each element in the array with the provided operator
+	// `SearchIndexPredicateComparisonOperator_enum`.
+	//
+	// The resource will be matched if the `SearchIndexPredicateComparisonOperator_enum`
+	// returns true for ANY element in the array, otherwise it will
+	// be filtered out.
+	SearchIndexPredicateArrayOperatorAnyElement = SearchIndexPredicateArrayOperator("AnyElement")
 )
 
 func (e SearchIndexPredicateArrayOperator) Values() []SearchIndexPredicateArrayOperator {
@@ -10769,16 +11039,79 @@ func init() {
 type SearchIndexPredicateComparisonOperator string
 
 const (
-	SearchIndexPredicateComparisonOperatorEqual          = SearchIndexPredicateComparisonOperator("Equal")
-	SearchIndexPredicateComparisonOperatorNotEqual       = SearchIndexPredicateComparisonOperator("NotEqual")
-	SearchIndexPredicateComparisonOperatorGreater        = SearchIndexPredicateComparisonOperator("Greater")
+	// Equality operator.
+	SearchIndexPredicateComparisonOperatorEqual = SearchIndexPredicateComparisonOperator("Equal")
+	// Inequality operator.
+	SearchIndexPredicateComparisonOperatorNotEqual = SearchIndexPredicateComparisonOperator("NotEqual")
+	// Greater than operator.
+	//
+	// Applicable to numerical properties only, e.g. `long`,
+	// `double`. Cannot apply to `String` or `boolean`.
+	SearchIndexPredicateComparisonOperatorGreater = SearchIndexPredicateComparisonOperator("Greater")
+	// Greater than or equal to operator.
+	//
+	// Applicable to numerical properties only, e.g. `long`,
+	// `double`. Cannot apply to `String` or `boolean`.
 	SearchIndexPredicateComparisonOperatorGreaterOrEqual = SearchIndexPredicateComparisonOperator("GreaterOrEqual")
-	SearchIndexPredicateComparisonOperatorLess           = SearchIndexPredicateComparisonOperator("Less")
-	SearchIndexPredicateComparisonOperatorLessOrEqual    = SearchIndexPredicateComparisonOperator("LessOrEqual")
-	SearchIndexPredicateComparisonOperatorIn             = SearchIndexPredicateComparisonOperator("In")
-	SearchIndexPredicateComparisonOperatorNotIn          = SearchIndexPredicateComparisonOperator("NotIn")
-	SearchIndexPredicateComparisonOperatorLike           = SearchIndexPredicateComparisonOperator("Like")
-	SearchIndexPredicateComparisonOperatorNotLike        = SearchIndexPredicateComparisonOperator("NotLike")
+	// Less than operator.
+	//
+	// Applicable to numerical properties only, e.g. `long`,
+	// `double`. Cannot apply to `String` or `boolean`.
+	SearchIndexPredicateComparisonOperatorLess = SearchIndexPredicateComparisonOperator("Less")
+	// Less than or equal to operator.
+	//
+	// Applicable to numerical properties only, e.g. `long`,
+	// `double`. Cannot apply to `String` or `boolean`.
+	SearchIndexPredicateComparisonOperatorLessOrEqual = SearchIndexPredicateComparisonOperator("LessOrEqual")
+	// Checks for equality with at least one of a list of values.
+	//
+	// Must be used either with `SearchIndexPredicate.comparableList` or
+	// with `Predicate#comparableQueryIndex`. In the second
+	// case the query result set is used as _comparableList_.
+	SearchIndexPredicateComparisonOperatorIn = SearchIndexPredicateComparisonOperator("In")
+	// Checks for inequality with all values in a list.
+	//
+	// If the property is
+	// equal to any of the values in the list, evaluates to `false`.
+	// Otherwise, evaluates to `true` and the property is matched.
+	//
+	// Must be used either with `SearchIndexPredicate.comparableList` or
+	// with `Predicate#comparableQueryIndex`. In the second
+	// case the query result set is used as _comparableList_.
+	SearchIndexPredicateComparisonOperatorNotIn = SearchIndexPredicateComparisonOperator("NotIn")
+	// Pattern matching operator applicable to `String` properties.
+	//
+	// The `*` character is used to define wildcard, i.e. substitute
+	// for zero or more missing letters) before or after a given sequence
+	// of characters. If used at the end, it is interpreted as _search
+	// for all properties whose value starts with the given characters_.
+	// If used at the beginning, it is interpreted as _search for all
+	// properties whose value ends with the given characters_.
+	//
+	// For instance, if the input pattern is _\*vm_ it will match
+	// property with value _linux-vm_, but not _vm-linux_.
+	// If the input pattern is _vm\*_ it will match
+	// property with value _vm-linux_, but not _linux-vm_.
+	//
+	// The wildcard character cannot be used in between other characters,
+	// i.e. in the middle of a pattern. It can be use more than once in a
+	// single pattern only in case it surrounds the pattern, i.e. both in
+	// the beginning and at the end of the pattern to perform substring
+	// (infix) search.
+	//
+	// For instance, if the input pattern is _\`vm\`_ it will match
+	// property with value _linux-vm-1_, _linux-vm_,
+	// _old-vm-linux_, _vm-linux_ and _vm_.
+	//
+	// The backslash character `\` is used for escaping. Hence,
+	// wildcard is escaped with the sequence _\\\*_ and the escape
+	// character itself with the sequence _\\\\_.
+	SearchIndexPredicateComparisonOperatorLike = SearchIndexPredicateComparisonOperator("Like")
+	// Opposite of `Like`.
+	//
+	// The resource will be matched if the
+	// property does NOT contain the provided pattern.
+	SearchIndexPredicateComparisonOperatorNotLike = SearchIndexPredicateComparisonOperator("NotLike")
 )
 
 func (e SearchIndexPredicateComparisonOperator) Values() []SearchIndexPredicateComparisonOperator {
@@ -12546,6 +12879,31 @@ func init() {
 	t["VirtualDiskDeltaDiskFormatVariant"] = reflect.TypeOf((*VirtualDiskDeltaDiskFormatVariant)(nil)).Elem()
 }
 
+type VirtualDiskDiskChainBrokenIssue string
+
+const (
+	// Indicates the disk chain has no issue
+	VirtualDiskDiskChainBrokenIssueNoIssue = VirtualDiskDiskChainBrokenIssue("noIssue")
+	// Indicates the disk chain is broken due to cid mismatch
+	VirtualDiskDiskChainBrokenIssueCidMismatch = VirtualDiskDiskChainBrokenIssue("cidMismatch")
+)
+
+func (e VirtualDiskDiskChainBrokenIssue) Values() []VirtualDiskDiskChainBrokenIssue {
+	return []VirtualDiskDiskChainBrokenIssue{
+		VirtualDiskDiskChainBrokenIssueNoIssue,
+		VirtualDiskDiskChainBrokenIssueCidMismatch,
+	}
+}
+
+func (e VirtualDiskDiskChainBrokenIssue) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VirtualDiskDiskChainBrokenIssue"] = reflect.TypeOf((*VirtualDiskDiskChainBrokenIssue)(nil)).Elem()
+	minAPIVersionForType["VirtualDiskDiskChainBrokenIssue"] = "9.1.0.0"
+}
+
 // The list of known disk modes.
 //
 // The list of supported disk modes varies by the backing type. The "persistent"
@@ -12989,6 +13347,11 @@ const (
 	//
 	// The virtual machine clone
 	// will not have access to the original virtual machine's TPM secrets.
+	//
+	// If the virtual TPM operates in read-only mode
+	// (`vim.vm.device.VirtualTPM#readOnly`), the clone virtual machine
+	// will be configured with a regularly operating (non read-only) virtual
+	// TPM.
 	VirtualMachineCloneSpecTpmProvisionPolicyReplace = VirtualMachineCloneSpecTpmProvisionPolicy("replace")
 )
 
@@ -13164,7 +13527,7 @@ const (
 	// Take a client-specified set of WWNs (specified in "wwn" property) and
 	// assign them to the virtual machine.
 	//
-	// If the new WWN quntity are more
+	// If the new WWN quantity are more
 	// than existing then we will append them to the existing list of WWNs.
 	VirtualMachineConfigSpecNpivWwnOpSet = VirtualMachineConfigSpecNpivWwnOp("set")
 	// Remove the currently assigned WWNs from the virtual machine.
@@ -13392,6 +13755,66 @@ func (e VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPa
 
 func init() {
 	t["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm"] = reflect.TypeOf((*VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm)(nil)).Elem()
+}
+
+type VirtualMachineExtensionCompatibilityConstraintKind string
+
+const (
+	// The constrained property must not change from the virtual machine's
+	// current value.
+	VirtualMachineExtensionCompatibilityConstraintKindINVARIANT = VirtualMachineExtensionCompatibilityConstraintKind("INVARIANT")
+)
+
+func (e VirtualMachineExtensionCompatibilityConstraintKind) Values() []VirtualMachineExtensionCompatibilityConstraintKind {
+	return []VirtualMachineExtensionCompatibilityConstraintKind{
+		VirtualMachineExtensionCompatibilityConstraintKindINVARIANT,
+	}
+}
+
+func (e VirtualMachineExtensionCompatibilityConstraintKind) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VirtualMachineExtensionCompatibilityConstraintKind"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintKind)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineExtensionCompatibilityConstraintKind"] = "9.1.2.0"
+}
+
+type VirtualMachineExtensionCompatibilityConstraintType string
+
+const (
+	// The virtual machine's vCenter service (cross-vCenter move).
+	VirtualMachineExtensionCompatibilityConstraintTypeSERVICE = VirtualMachineExtensionCompatibilityConstraintType("SERVICE")
+	// The virtual machine's folder.
+	VirtualMachineExtensionCompatibilityConstraintTypeFOLDER = VirtualMachineExtensionCompatibilityConstraintType("FOLDER")
+	// The virtual machine's resource pool.
+	VirtualMachineExtensionCompatibilityConstraintTypePOOL = VirtualMachineExtensionCompatibilityConstraintType("POOL")
+	// The virtual machine-level storage policy.
+	VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY = VirtualMachineExtensionCompatibilityConstraintType("VM_STORAGE_POLICY")
+	// Per-disk storage policies.
+	VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY = VirtualMachineExtensionCompatibilityConstraintType("DISK_STORAGE_POLICY")
+	// Virtual device configuration (for example, device backings).
+	VirtualMachineExtensionCompatibilityConstraintTypeDEVICE = VirtualMachineExtensionCompatibilityConstraintType("DEVICE")
+)
+
+func (e VirtualMachineExtensionCompatibilityConstraintType) Values() []VirtualMachineExtensionCompatibilityConstraintType {
+	return []VirtualMachineExtensionCompatibilityConstraintType{
+		VirtualMachineExtensionCompatibilityConstraintTypeSERVICE,
+		VirtualMachineExtensionCompatibilityConstraintTypeFOLDER,
+		VirtualMachineExtensionCompatibilityConstraintTypePOOL,
+		VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY,
+		VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY,
+		VirtualMachineExtensionCompatibilityConstraintTypeDEVICE,
+	}
+}
+
+func (e VirtualMachineExtensionCompatibilityConstraintType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VirtualMachineExtensionCompatibilityConstraintType"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineExtensionCompatibilityConstraintType"] = "9.1.2.0"
 }
 
 // The FaultToleranceState type defines a simple set of states for a
@@ -13704,6 +14127,31 @@ func (e VirtualMachineForkConfigInfoChildType) Strings() []string {
 
 func init() {
 	t["VirtualMachineForkConfigInfoChildType"] = reflect.TypeOf((*VirtualMachineForkConfigInfoChildType)(nil)).Elem()
+}
+
+type VirtualMachineGuestArchitecture string
+
+const (
+	// x86 architecture.
+	VirtualMachineGuestArchitectureX86 = VirtualMachineGuestArchitecture("x86")
+	// ARM architecture.
+	VirtualMachineGuestArchitectureArm = VirtualMachineGuestArchitecture("arm")
+)
+
+func (e VirtualMachineGuestArchitecture) Values() []VirtualMachineGuestArchitecture {
+	return []VirtualMachineGuestArchitecture{
+		VirtualMachineGuestArchitectureX86,
+		VirtualMachineGuestArchitectureArm,
+	}
+}
+
+func (e VirtualMachineGuestArchitecture) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VirtualMachineGuestArchitecture"] = reflect.TypeOf((*VirtualMachineGuestArchitecture)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineGuestArchitecture"] = "9.1.0.0"
 }
 
 // Guest operating system family constants.
@@ -16156,12 +16604,17 @@ const (
 	// "PreferredDuringPlacement" part of this strictness value.
 	//
 	// (2) This VmPlacementPolicy will be enforced for that operation as well
-	// as beyond that when that VM is in execution. This essentially means
-	// that this VmPlacementPolicy will be effectively converted into a
-	// vSphere compute-policy and that compute-policy will be enforced on a
-	// "preferred" basis whenever that VM needs to be placed thereafter.
+	// as beyond that when that VM is in execution. For example, when the VM
+	// needs to be relocated for putting its host into maintenance mode, then
+	// this VmPlacementPolicy will be enforced on a best-effort basis.
+	// Similarly, when the VM needs to be restarted as part of vSphere HA
+	// failover, then this VmPlacementPolicy will be enforced on a best-effort
+	// basis.
 	// This is denoted by the "PreferredDuringExecution" part of this
-	// strictness value.
+	// strictness value. Note that if a VM needs to be relocated by DRS for
+	// load-balancing, then any VmPlacementPolicy is considered as "Required"
+	// and DRS load-balancing is not included in the "PreferredDuringExecution"
+	// part of this strictness value.
 	VmPlacementPolicyVmPlacementPolicyStrictnessPreferredDuringPlacementPreferredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("PreferredDuringPlacementPreferredDuringExecution")
 	// A VmPlacementPolicy with this strictness is enforced on a strict
 	// basis while placing the VM for the operation where this policy has
@@ -16188,12 +16641,17 @@ const (
 	// "RequiredDuringPlacement" part of this strictness value.
 	//
 	// (2) This VmPlacementPolicy will be enforced for that operation as well
-	// as beyond that when that VM is in execution. This essentially means
-	// that this VmPlacementPolicy will be effectively converted into a
-	// vSphere compute-policy and that compute-policy will be enforced on a
-	// "preferred" basis whenever that VM needs to be placed thereafter.
+	// as beyond that when that VM is in execution. For example, when the VM
+	// needs to be relocated for putting its host into maintenance mode, then
+	// this VmPlacementPolicy will be enforced on a best-effort basis.
+	// Similarly, when the VM needs to be restarted as part of vSphere HA
+	// failover, then this VmPlacementPolicy will be enforced on a best-effort
+	// basis.
 	// This is denoted by the "PreferredDuringExecution" part of this
-	// strictness value.
+	// strictness value. Note that if a VM needs to be relocated by DRS for
+	// load-balancing, then any VmPlacementPolicy is considered as "Required"
+	// and DRS load-balancing is not included in the "PreferredDuringExecution"
+	// part of this strictness value.
 	VmPlacementPolicyVmPlacementPolicyStrictnessRequiredDuringPlacementPreferredDuringExecution = VmPlacementPolicyVmPlacementPolicyStrictness("RequiredDuringPlacementPreferredDuringExecution")
 
 	// A VmPlacementPolicy with this strictness is strictly enforced both
@@ -16573,6 +17031,35 @@ func (e VsanUpgradeSystemUpgradeHistoryDiskGroupOpType) Strings() []string {
 
 func init() {
 	t["VsanUpgradeSystemUpgradeHistoryDiskGroupOpType"] = reflect.TypeOf((*VsanUpgradeSystemUpgradeHistoryDiskGroupOpType)(nil)).Elem()
+}
+
+// Virtual storage object metadata operation constants.
+type VslmVsoPostRelocateChangeMetadataOperation string
+
+const (
+	// Update metadata of linked clone if specified.
+	VslmVsoPostRelocateChangeMetadataOperationUPDATE = VslmVsoPostRelocateChangeMetadataOperation("UPDATE")
+	// Reset metadata of linked clone to default
+	// value if specified.
+	VslmVsoPostRelocateChangeMetadataOperationRESET = VslmVsoPostRelocateChangeMetadataOperation("RESET")
+	// If no metadata change is required to be performed.
+	VslmVsoPostRelocateChangeMetadataOperationNO_OP = VslmVsoPostRelocateChangeMetadataOperation("NO_OP")
+)
+
+func (e VslmVsoPostRelocateChangeMetadataOperation) Values() []VslmVsoPostRelocateChangeMetadataOperation {
+	return []VslmVsoPostRelocateChangeMetadataOperation{
+		VslmVsoPostRelocateChangeMetadataOperationUPDATE,
+		VslmVsoPostRelocateChangeMetadataOperationRESET,
+		VslmVsoPostRelocateChangeMetadataOperationNO_OP,
+	}
+}
+
+func (e VslmVsoPostRelocateChangeMetadataOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	t["VslmVsoPostRelocateChangeMetadataOperation"] = reflect.TypeOf((*VslmVsoPostRelocateChangeMetadataOperation)(nil)).Elem()
 }
 
 type WeekOfMonth string
