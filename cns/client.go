@@ -321,6 +321,45 @@ func (c *Client) SyncVolume(ctx context.Context, syncSpecs []cnstypes.CnsSyncVol
 	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
 
+// UnregisterVolumeEx calls the CNS CnsUnregisterVolumeEx API (phase 1 of two-phase unregister).
+// The returned task result contains CnsUnregisterVolumeResult with BackingDiskPath and DiskUUID
+// that the caller must persist before invoking AcknowledgeUnregister.
+func (c *Client) UnregisterVolumeEx(ctx context.Context, spec []cnstypes.CnsUnregisterVolumeSpec) (*object.Task, error) {
+	req := cnstypes.CnsUnregisterVolumeEx{
+		This:           CnsVolumeManagerInstance,
+		UnregisterSpec: spec,
+	}
+	res, err := methods.CnsUnregisterVolumeEx(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
+
+// AcknowledgeUnregister calls the CNS CnsAcknowledgeUnregister API (phase 2 of two-phase unregister).
+// It deletes the PENDING_UNREGISTER record from the CNS database. The call is idempotent.
+func (c *Client) AcknowledgeUnregister(ctx context.Context, volumeIds []cnstypes.CnsVolumeId) error {
+	req := cnstypes.CnsAcknowledgeUnregister{
+		This:      CnsVolumeManagerInstance,
+		VolumeIds: volumeIds,
+	}
+	_, err := methods.CnsAcknowledgeUnregister(ctx, c, &req)
+	return err
+}
+
+// QueryPendingUnregisters calls the CNS CnsQueryPendingUnregisters API.
+// It returns all outstanding PENDING_UNREGISTER records, used for crash recovery on restart.
+func (c *Client) QueryPendingUnregisters(ctx context.Context) ([]cnstypes.CnsUnregisterVolumeResult, error) {
+	req := cnstypes.CnsQueryPendingUnregisters{
+		This: CnsVolumeManagerInstance,
+	}
+	res, err := methods.CnsQueryPendingUnregisters(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Returnval, nil
+}
+
 // UnregisterVolume calls the CNS UnregisterVolume API
 func (c *Client) UnregisterVolume(ctx context.Context, spec []cnstypes.CnsUnregisterVolumeSpec) (*object.Task, error) {
 	req := cnstypes.CnsUnregisterVolume{

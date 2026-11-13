@@ -435,3 +435,63 @@ func CnsClearVolumeControlFlags(ctx context.Context, r soap.RoundTripper, req *t
 
 	return resBody.Res, nil
 }
+
+type CnsUnregisterVolumeExBody struct {
+	Req    *types.CnsUnregisterVolumeEx         `xml:"urn:vsan CnsUnregisterVolumeEx,omitempty"`
+	Res    *types.CnsUnregisterVolumeExResponse `xml:"urn:vsan CnsUnregisterVolumeExResponse,omitempty"`
+	Fault_ *soap.Fault                          `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsUnregisterVolumeExBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsUnregisterVolumeEx(ctx context.Context, r soap.RoundTripper, req *types.CnsUnregisterVolumeEx) (*types.CnsUnregisterVolumeExResponse, error) {
+	var reqBody, resBody CnsUnregisterVolumeExBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type CnsAcknowledgeUnregisterBody struct {
+	Req    *types.CnsAcknowledgeUnregister         `xml:"urn:vsan CnsAcknowledgeUnregister,omitempty"`
+	Res    *types.CnsAcknowledgeUnregisterResponse `xml:"urn:vsan CnsAcknowledgeUnregisterResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsAcknowledgeUnregisterBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsAcknowledgeUnregister(ctx context.Context, r soap.RoundTripper, req *types.CnsAcknowledgeUnregister) (*types.CnsAcknowledgeUnregisterResponse, error) {
+	var reqBody, resBody CnsAcknowledgeUnregisterBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type CnsQueryPendingUnregistersBody struct {
+	Req    *types.CnsQueryPendingUnregisters         `xml:"urn:vsan CnsQueryPendingUnregisters,omitempty"`
+	Res    *types.CnsQueryPendingUnregistersResponse `xml:"urn:vsan CnsQueryPendingUnregistersResponse,omitempty"`
+	Fault_ *soap.Fault                               `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsQueryPendingUnregistersBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsQueryPendingUnregisters(ctx context.Context, r soap.RoundTripper, req *types.CnsQueryPendingUnregisters) (*types.CnsQueryPendingUnregistersResponse, error) {
+	var reqBody, resBody CnsQueryPendingUnregistersBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
