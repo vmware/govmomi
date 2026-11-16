@@ -665,6 +665,14 @@ func init() {
 	types.Add("CnsVolumeAlreadyExistsFault", reflect.TypeOf((*CnsVolumeAlreadyExistsFault)(nil)).Elem())
 }
 
+type CnsLinkedCloneNotSupportedFault struct {
+	CnsFault
+}
+
+func init() {
+	types.Add("CnsLinkedCloneNotSupportedFault", reflect.TypeOf((*CnsLinkedCloneNotSupportedFault)(nil)).Elem())
+}
+
 type CnsAlreadyRegisteredFault struct {
 	CnsFault `xml:"fault,typeattr"`
 
