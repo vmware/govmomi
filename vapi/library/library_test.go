@@ -82,6 +82,97 @@ func TestManagerCreateLibrary(t *testing.T) {
 	})
 }
 
+func TestManagerCreateLibraryStoragePolicy(t *testing.T) {
+	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
+		c := rest.NewClient(vc)
+
+		if err := c.Login(ctx, simulator.DefaultLogin); err != nil {
+			t.Fatal(err)
+		}
+
+		ds, err := find.NewFinder(vc).DefaultDatastore(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		m := library.NewManager(c)
+
+		policy := library.StoragePolicy{
+			Policy:         "aa6d5a82-1c88-45da-85d3-3d74b91a5bad",
+			UsedDatastores: []string{ds.Reference().Value},
+		}
+		id, err := m.CreateLibrary(ctx, library.Library{
+			Name: "policy-backed",
+			Type: "LOCAL",
+			Storage: []library.StorageBacking{{
+				Type:          "STORAGEPOLICY",
+				StoragePolicy: &policy,
+			}},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		l, err := m.GetLibraryByID(ctx, id)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(l.Storage) != 1 {
+			t.Fatalf("expected 1 storage backing, got %d", len(l.Storage))
+		}
+		b := l.Storage[0]
+		if b.Type != "STORAGEPOLICY" {
+			t.Fatalf("expected library storage type STORAGEPOLICY, got %s", b.Type)
+		}
+		if b.DatastoreID != "" {
+			t.Fatalf("expected no datastore ID, got %s", b.DatastoreID)
+		}
+		if b.StoragePolicy == nil {
+			t.Fatal("expected storage policy to be set")
+		}
+		if b.StoragePolicy.Policy != policy.Policy {
+			t.Fatalf("expected policy %s, got %s", policy.Policy, b.StoragePolicy.Policy)
+		}
+		if len(b.StoragePolicy.UsedDatastores) != 1 || b.StoragePolicy.UsedDatastores[0] != ds.Reference().Value {
+			t.Fatalf("expected used datastores %v, got %v", policy.UsedDatastores, b.StoragePolicy.UsedDatastores)
+		}
+
+		// Without used datastores, the server chooses a compliant datastore.
+		id, err = m.CreateLibrary(ctx, library.Library{
+			Name: "policy-backed-chosen",
+			Type: "LOCAL",
+			Storage: []library.StorageBacking{{
+				Type:          "STORAGEPOLICY",
+				StoragePolicy: &library.StoragePolicy{Policy: policy.Policy},
+			}},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		l, err = m.GetLibraryByID(ctx, id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if p := l.Storage[0].StoragePolicy; p == nil || len(p.UsedDatastores) != 1 {
+			t.Fatalf("expected a chosen datastore, got %+v", p)
+		}
+
+		// A datastore backed library must not report a storage policy.
+		var raw map[string]any
+		data, err := json.Marshal(library.StorageBacking{Type: "DATASTORE", DatastoreID: "datastore-1"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = json.Unmarshal(data, &raw); err != nil {
+			t.Fatal(err)
+		}
+		if _, ok := raw["storage_policy"]; ok {
+			t.Fatalf("datastore backing should not marshal storage_policy: %s", data)
+		}
+	})
+}
+
 func TestManagerLibraryUsage(t *testing.T) {
 	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
 		c := rest.NewClient(vc)

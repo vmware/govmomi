@@ -16,11 +16,26 @@ import (
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
+// StoragePolicy defines a storage location, based on a storage policy, where
+// content in a library will be stored. It is used when the StorageBacking type
+// is STORAGEPOLICY.
+type StoragePolicy struct {
+	// Policy is the identifier of the storage policy defining the storage
+	// requirements.
+	Policy string `json:"policy,omitempty"`
+	// UsedDatastores lists the identifiers of the datastores, compliant with
+	// Policy, that are used to store the content in the library.
+	UsedDatastores []string `json:"used_datastores,omitempty"`
+}
+
 // StorageBacking defines a storage location where content in a library will be stored.
 type StorageBacking struct {
 	DatastoreID string `json:"datastore_id,omitempty"`
-	Type        string `json:"type,omitempty"`
-	StorageURI  string `json:"storage_uri,omitempty"`
+	// Type is one of DATASTORE, STORAGEPOLICY or OTHER.
+	Type       string `json:"type,omitempty"`
+	StorageURI string `json:"storage_uri,omitempty"`
+	// StoragePolicy is set when Type is STORAGEPOLICY.
+	StoragePolicy *StoragePolicy `json:"storage_policy,omitempty"`
 }
 
 // Library  provides methods to create, read, update, delete, and enumerate libraries.
