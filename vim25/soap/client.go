@@ -517,6 +517,7 @@ func (c *Client) UseServiceVersion(kind ...string) error {
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("http.Get(%s): %s", u.Path, res.Status)
@@ -530,9 +531,7 @@ func (c *Client) UseServiceVersion(kind ...string) error {
 		&c.Version,
 	}
 
-	err = xml.NewDecoder(res.Body).Decode(&v)
-	_ = res.Body.Close()
-	if err != nil {
+	if err = xml.NewDecoder(res.Body).Decode(&v); err != nil {
 		return fmt.Errorf("xml.Decode(%s): %s", u.Path, err)
 	}
 
