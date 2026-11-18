@@ -125,8 +125,10 @@ func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference,
 				continue // case below does not apply to property index
 			}
 
-			// strings.HasPrefix("runtime.powerState", "runtime") == parent field matches
-			if strings.HasPrefix(change.Name, name) {
+			// strings.HasPrefix("runtime.powerState", "runtime") == parent field matches.
+			// strings.HasPrefix("guest.hostName", "guest.") == the change is to a
+			// parent of the field, as PropertyDiff reports, which may change it.
+			if strings.HasPrefix(change.Name, name) || strings.HasPrefix(name, change.Name+".") {
 				if obj := ctx.Map.Get(ref); obj != nil { // object may have since been deleted
 					change.Name = name
 					change.Val, _ = fieldValue(reflect.ValueOf(obj), name)
