@@ -32,6 +32,14 @@ func (m *AuthorizationManager) init(r *Registry) {
 
 	m.permissions = make(map[types.ManagedObjectReference][]types.Permission)
 
+	// Custom role ids are positive and unique, the built-in roles use negative ids.
+	m.nextID = 1
+	for _, role := range m.RoleList {
+		if role.RoleId >= m.nextID {
+			m.nextID = role.RoleId + 1
+		}
+	}
+
 	l := object.AuthorizationRoleList(m.RoleList)
 	m.system = l.ByName("ReadOnly").Privilege
 	admin := l.ByName("Admin")
@@ -231,20 +239,23 @@ func (m *AuthorizationManager) AddAuthorizationRole(req *types.AddAuthorizationR
 		return body
 	}
 
+	id := m.nextID
+	m.nextID++
+
 	m.RoleList = append(m.RoleList, types.AuthorizationRole{
 		Info: &types.Description{
 			Label:   req.Name,
 			Summary: req.Name,
 		},
-		RoleId:    m.nextID,
+		RoleId:    id,
 		Privilege: ids,
 		Name:      req.Name,
 		System:    false,
 	})
 
-	m.nextID++
-
-	body.Res = &types.AddAuthorizationRoleResponse{}
+	body.Res = &types.AddAuthorizationRoleResponse{
+		Returnval: id,
+	}
 
 	return body
 }

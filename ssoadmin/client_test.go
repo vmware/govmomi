@@ -7,12 +7,14 @@ package ssoadmin_test
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	lsim "github.com/vmware/govmomi/lookup/simulator"
+	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/ssoadmin"
 	_ "github.com/vmware/govmomi/ssoadmin/simulator"
@@ -81,4 +83,35 @@ func verifyClient(t *testing.T, ctx context.Context, c *ssoadmin.Client) {
 	user, err := c.FindUser(ctx, "testuser")
 	require.NoError(t, err)
 	require.Equal(t, &types.AdminUser{Id: types.PrincipalId{Name: "testuser", Domain: "vsphere.local"}, Kind: "person"}, user)
+}
+
+func TestResetPersonPassword(t *testing.T) {
+	model := simulator.VPX()
+	require.NoError(t, model.Create())
+	// Without explicit credentials vcsim accepts any login, and the
+	// ssoadmin directory is not consulted.
+	model.Service.Listen = &url.URL{User: url.UserPassword("admin", "admin-password")}
+
+	simulator.Test(func(ctx context.Context, client *vim25.Client) {
+		c, err := ssoadmin.NewClient(ctx, client)
+		require.NoError(t, err)
+
+		details := types.AdminPersonDetails{FirstName: "test", LastName: "user"}
+		err = c.CreatePersonUser(ctx, "testuser", details, "old-password")
+		require.NoError(t, err)
+
+		err = c.ResetPersonPassword(ctx, "testuser", "new-password")
+		require.NoError(t, err)
+
+		m := session.NewManager(client)
+		require.NoError(t, m.Logout(ctx))
+
+		user := "testuser@vsphere.local"
+
+		err = m.Login(ctx, url.UserPassword(user, "old-password"))
+		require.Error(t, err, "login with the old password")
+
+		err = m.Login(ctx, url.UserPassword(user, "new-password"))
+		require.NoError(t, err, "login with the new password")
+	}, model)
 }
