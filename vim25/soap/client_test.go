@@ -7,10 +7,12 @@ package soap
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -241,5 +243,81 @@ func TestSessionCookie(t *testing.T) {
 	val := c.SessionCookie()
 	if val == nil {
 		t.Fatal("no session cookie")
+	}
+}
+
+type closeTrackingBody struct {
+	io.Reader
+	closed bool
+}
+
+func (b *closeTrackingBody) Close() error {
+	b.closed = true
+	return nil
+}
+
+type serviceVersionsRT struct {
+	status int
+	body   string
+	res    *closeTrackingBody
+}
+
+func (rt *serviceVersionsRT) RoundTrip(req *http.Request) (*http.Response, error) {
+	rt.res = &closeTrackingBody{Reader: strings.NewReader(rt.body)}
+	return &http.Response{
+		StatusCode: rt.status,
+		Status:     fmt.Sprintf("%d %s", rt.status, http.StatusText(rt.status)),
+		Header:     make(http.Header),
+		Body:       rt.res,
+		Request:    req,
+	}, nil
+}
+
+func TestUseServiceVersionClosesBody(t *testing.T) {
+	const versions = `<namespaces version="1.0"><namespace>` +
+		`<name>urn:vim25</name><version>9.0.0.0</version></namespace></namespaces>`
+
+	tests := []struct {
+		name    string
+		status  int
+		body    string
+		wantErr string
+	}{
+		{name: "ok", status: http.StatusOK, body: versions},
+		{name: "unavailable", status: http.StatusServiceUnavailable, body: "Service Unavailable",
+			wantErr: "503 Service Unavailable"},
+		{name: "malformed", status: http.StatusOK, body: "<namespaces><namespace>", wantErr: "xml.Decode"},
+	}
+
+	u, err := url.Parse("https://vcenter.local/sdk")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := NewClient(u, true)
+			rt := &serviceVersionsRT{status: test.status, body: test.body}
+			c.Client.Transport = rt
+
+			err := c.UseServiceVersion()
+			if test.wantErr == "" {
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if c.Namespace != "urn:vim25" || c.Version != "9.0.0.0" {
+					t.Errorf("got namespace %q version %q", c.Namespace, c.Version)
+				}
+			} else if err == nil || !strings.Contains(err.Error(), test.wantErr) {
+				t.Fatalf("expected error containing %q, got %v", test.wantErr, err)
+			}
+
+			if rt.res == nil {
+				t.Fatal("no request was sent")
+			}
+			if !rt.res.closed {
+				t.Error("response body was not closed")
+			}
+		})
 	}
 }
