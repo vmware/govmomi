@@ -5,32 +5,32 @@ version: 'v0.0.3'
 workflows:
     '.github/workflows/codeql-analysis.yml':
         - 'actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'github/codeql-action@c4fb451437765abf5018c6fbf22cce1a7da1e5cc'
     '.github/workflows/govmomi-build.yaml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v6.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'goreleaser/goreleaser-action@v7.3.0'
     '.github/workflows/govmomi-check-wip.yaml':
         - 'embano1/wip@v2'
     '.github/workflows/govmomi-go-lint.yaml':
         - 'actions/checkout@v6.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
     '.github/workflows/govmomi-go-tests.yaml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v6.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
     '.github/workflows/govmomi-govc-tests.yaml':
         - 'actions/cache@v6.1.0'
         - 'actions/checkout@v6.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
     '.github/workflows/govmomi-lock.yml':
         - 'dessant/lock-threads@v6.0.2'
     '.github/workflows/govmomi-release.yaml':
         - 'actions/checkout@v6.0.1'
-        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-go@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'goreleaser/goreleaser-action@v7.3.0'
         - 'peter-evans/create-pull-request@v8.1.3'
@@ -57,9 +57,9 @@ dependencies:
         commit: 'sha1-8e8c483db84b4bee98b60c0593521ed34d9990e8'
         owner_id: 44036562
         repo_id: 197814629
-    'actions/setup-go@v7.0.0':
-        ref: 'v7.0.0'
-        commit: 'sha1-b7ad1dad31e06c5925ef5d2fc7ad053ef454303e'
+    'actions/setup-go@v7.1.0':
+        ref: 'v7.1.0'
+        commit: 'sha1-d8cbb8045d7f43706b9177cceb36c1f91a6644d5'
         owner_id: 44036562
         repo_id: 192624594
     'actions/stale@v11.0.0':
