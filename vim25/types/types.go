@@ -39003,6 +39003,10 @@ type HostHostBusAdapter struct {
 	// `HostStorageProtocol_enum`.
 	// When unset, a default value of "scsi" is assumed.
 	StorageProtocol string `xml:"storageProtocol,omitempty" json:"storageProtocol,omitempty"`
+	// The version of the host bus adapter operating system driver.
+	DriverVersion string `xml:"driverVersion,omitempty" json:"driverVersion,omitempty" vim:"9.1.0.0"`
+	// The version of the firmware running in the host bus adapter.
+	FirmwareVersion string `xml:"firmwareVersion,omitempty" json:"firmwareVersion,omitempty" vim:"9.1.0.0"`
 }
 
 func init() {
