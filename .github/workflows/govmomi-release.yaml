@@ -63,7 +63,7 @@ jobs:
           # set tag environment variable
           echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
       - name: Setup Go
-        uses: actions/setup-go@v7.0.0
+        uses: actions/setup-go@v7.1.0
         with:
           go-version: '1.26'
           # prefer the newest 1.26.x over the (possibly older) runner image cache
