@@ -38,7 +38,7 @@ workflows:
         - 'actions/stale@v11.0.0'
     '.github/workflows/issue-greeting.yaml':
         - 'actions/checkout@v6.0.1'
-        - 'chuhlomin/render-template@v1.12'
+        - 'chuhlomin/render-template@v1.13'
         - 'peter-evans/create-or-update-comment@v5.0.0'
     '.github/workflows/verify-docker-login.yaml': []
 dependencies:
@@ -72,9 +72,9 @@ dependencies:
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
-    'chuhlomin/render-template@v1.12':
-        ref: 'v1.12'
-        commit: 'sha1-a7c644e341797d050d1cb24332d83791b9a46dae'
+    'chuhlomin/render-template@v1.13':
+        ref: 'v1.13'
+        commit: 'sha1-c7bbd9cfdcdfe6ad595c5185286862c6f22567b4'
         owner_id: 3620471
         repo_id: 338697051
     'dessant/lock-threads@v6.0.2':
