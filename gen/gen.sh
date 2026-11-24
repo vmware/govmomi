@@ -62,7 +62,7 @@ ensure_rb_vmodl
 #
 # The VIM API version used by the vim25 client.
 #
-VIM_VERSION="${VIM_VERSION:-9.1.0.0}"
+VIM_VERSION="${VIM_VERSION:-9.1.2.0}"
 
 #
 # Update the vim25 client's VIM version.
@@ -71,7 +71,7 @@ update_vim_version "${VIM_VERSION}"
 
 
 #
-# All types derive from vSphere 9.1.0.0, main..
+# All types derive from vSphere 9.1.2.0 (see README.md).
 #
 export COPYRIGHT_DATE_RANGE="2014-2025"
 
@@ -82,14 +82,13 @@ export COPYRIGHT_DATE_RANGE="2014-2025"
 #
 export FORCE_BASE_INTERFACE_FOR_TYPES="AgencyConfigInfo"
 
-# ./sdk/ contains the contents of wsdl.zip from main.
+# ./sdk/ contains the public files of wsdl.zip.
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v3.0.0
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 generate "../sms" "sms"
 
-# ./sdk/ contains the files eam-messagetypes.xsd and eam-types.xsd from
-# eam-wsdl.zip, from main.
+# ./sdk/ also contains the files eam-messagetypes.xsd and eam-types.xsd.
 #
 # Please note the EAM files are also available at the following, public URL --
 # http://bit.ly/eam-sdk, therefore the WSDL resource for EAM are in fact

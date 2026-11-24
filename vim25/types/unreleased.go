@@ -356,118 +356,54 @@ func init() {
 	t["InsufficientResourcesQuotaFault"] = reflect.TypeOf((*InsufficientResourcesQuotaFault)(nil)).Elem()
 }
 
-// VirtualMachineExtensionCompatibilityConstraintType enumerates the set of
-// constraintType values defined in this release. The value is carried as an
-// open string on the wire; these are the named constants.
-type VirtualMachineExtensionCompatibilityConstraintType string
-
-const (
-	// VirtualMachineExtensionCompatibilityConstraintTypeSERVICE is the virtual machine's vCenter service (cross-vCenter move).
-	VirtualMachineExtensionCompatibilityConstraintTypeSERVICE = VirtualMachineExtensionCompatibilityConstraintType("SERVICE")
-	// VirtualMachineExtensionCompatibilityConstraintTypeFOLDER is the virtual machine's folder.
-	VirtualMachineExtensionCompatibilityConstraintTypeFOLDER = VirtualMachineExtensionCompatibilityConstraintType("FOLDER")
-	// VirtualMachineExtensionCompatibilityConstraintTypePOOL is the virtual machine's resource pool.
-	VirtualMachineExtensionCompatibilityConstraintTypePOOL = VirtualMachineExtensionCompatibilityConstraintType("POOL")
-	// VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY is the virtual machine-level storage policy.
-	VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY = VirtualMachineExtensionCompatibilityConstraintType("VM_STORAGE_POLICY")
-	// VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY is per-disk storage policies.
-	VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY = VirtualMachineExtensionCompatibilityConstraintType("DISK_STORAGE_POLICY")
-	// VirtualMachineExtensionCompatibilityConstraintTypeDEVICE is virtual device configuration (for example, device backings).
-	VirtualMachineExtensionCompatibilityConstraintTypeDEVICE = VirtualMachineExtensionCompatibilityConstraintType("DEVICE")
-)
-
-func (e VirtualMachineExtensionCompatibilityConstraintType) Values() []VirtualMachineExtensionCompatibilityConstraintType {
-	return []VirtualMachineExtensionCompatibilityConstraintType{
-		VirtualMachineExtensionCompatibilityConstraintTypeSERVICE,
-		VirtualMachineExtensionCompatibilityConstraintTypeFOLDER,
-		VirtualMachineExtensionCompatibilityConstraintTypePOOL,
-		VirtualMachineExtensionCompatibilityConstraintTypeVM_STORAGE_POLICY,
-		VirtualMachineExtensionCompatibilityConstraintTypeDISK_STORAGE_POLICY,
-		VirtualMachineExtensionCompatibilityConstraintTypeDEVICE,
-	}
-}
-
-func (e VirtualMachineExtensionCompatibilityConstraintType) Strings() []string {
-	return EnumValuesAsStrings(e.Values())
+// A boxed array of `ReplicationGroupId`. To be used in `Any` placeholders.
+type ArrayOfReplicationGroupId struct {
+	ReplicationGroupId []ReplicationGroupId `xml:"ReplicationGroupId,omitempty" json:"_value"`
 }
 
 func init() {
-	t["VirtualMachineExtensionCompatibilityConstraintType"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintType)(nil)).Elem()
+	t["ArrayOfReplicationGroupId"] = reflect.TypeOf((*ArrayOfReplicationGroupId)(nil)).Elem()
 }
 
-// VirtualMachineExtensionCompatibilityConstraintKind enumerates the set of
-// constraintKind values defined in this release. The value is carried as an
-// open string on the wire; these are the named constants.
-type VirtualMachineExtensionCompatibilityConstraintKind string
-
-const (
-	// VirtualMachineExtensionCompatibilityConstraintKindINVARIANT asserts the constrained property must not change from the virtual machine's current value.
-	VirtualMachineExtensionCompatibilityConstraintKindINVARIANT = VirtualMachineExtensionCompatibilityConstraintKind("INVARIANT")
-)
-
-func (e VirtualMachineExtensionCompatibilityConstraintKind) Values() []VirtualMachineExtensionCompatibilityConstraintKind {
-	return []VirtualMachineExtensionCompatibilityConstraintKind{
-		VirtualMachineExtensionCompatibilityConstraintKindINVARIANT,
-	}
-}
-
-func (e VirtualMachineExtensionCompatibilityConstraintKind) Strings() []string {
-	return EnumValuesAsStrings(e.Values())
-}
-
-func init() {
-	t["VirtualMachineExtensionCompatibilityConstraintKind"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintKind)(nil)).Elem()
-}
-
-type ArrayOfVirtualMachineExtensionCompatibilityConstraint struct {
-	VirtualMachineExtensionCompatibilityConstraint []VirtualMachineExtensionCompatibilityConstraint `xml:"VirtualMachineExtensionCompatibilityConstraint,omitempty" json:"_value"`
-}
-
-func init() {
-	t["ArrayOfVirtualMachineExtensionCompatibilityConstraint"] = reflect.TypeOf((*ArrayOfVirtualMachineExtensionCompatibilityConstraint)(nil)).Elem()
-}
-
-// VirtualMachineExtensionCompatibilityConstraint is a compatibility constraint
-// declared by a managing extension on a virtual machine it manages. A
-// constraint has two orthogonal dimensions: ConstraintType identifies what
-// property is constrained and ConstraintKind identifies how it is evaluated.
-// Within a single VM a constraint's identity is the (ConstraintType,
-// ConstraintKind) pair; ConstraintName is descriptive only.
-type VirtualMachineExtensionCompatibilityConstraint struct {
+// Specifies information about the usage of a Virtual Machine Resource profile
+// in a resource pool.
+//
+// The unit for usage is in terms of number of instances of a given VM resource
+// profile.
+type ResourcePoolVmResourceProfileUsage struct {
 	DynamicData
 
-	// ConstraintName is an optional descriptive label for the constraint,
-	// chosen by the managing extension (for example, "pool-invariant"). It is
-	// not required to be unique and is not used to evaluate or identify the
-	// constraint.
-	ConstraintName string `xml:"constraintName,omitempty" json:"constraintName,omitempty"`
-	// ConstraintType is the property that this constraint protects. The values
-	// defined today are enumerated by
-	// VirtualMachineExtensionCompatibilityConstraintType. An unrecognized value
-	// causes the create or reconfigure operation that registers the constraint
-	// to fail.
-	ConstraintType string `xml:"constraintType" json:"constraintType"`
-	// ConstraintKind is how the constraint is evaluated. The only kind defined
-	// today is
-	// VirtualMachineExtensionCompatibilityConstraintKindINVARIANT. This field is
-	// required and must be set explicitly.
-	ConstraintKind string `xml:"constraintKind" json:"constraintKind"`
+	// Specifies the identifier of the VM resource profile whose usage information
+	// is encapsulated by this VmResourceProfileUsage.
+	Id string `xml:"id" json:"id"`
+	// Specifies how many instances of this VM resource profile are reserved
+	// in this resource pool.
+	//
+	// Note that this indicates the configured reservation
+	// for this resource pool and it does not indicate currently available
+	// reservation.
+	ReservedForPool int64 `xml:"reservedForPool" json:"reservedForPool"`
+	// Specifies how many reserved instances of this VM resource profile in
+	// this resource pool are being used by virtual machines that are direct
+	// descendants of this resource pool.
+	ReservationUsedForVms int64 `xml:"reservationUsedForVms" json:"reservationUsedForVms"`
+	// Specifies how many reserved instances of this VM resource profile in
+	// this resource pool have been allocated to any of its child resource
+	// pools.
+	ReservationUsedForChildPools int64 `xml:"reservationUsedForChildPools" json:"reservationUsedForChildPools"`
 }
 
 func init() {
-	t["VirtualMachineExtensionCompatibilityConstraint"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraint)(nil)).Elem()
+	t["ResourcePoolVmResourceProfileUsage"] = reflect.TypeOf((*ResourcePoolVmResourceProfileUsage)(nil)).Elem()
+	minAPIVersionForType["ResourcePoolVmResourceProfileUsage"] = "9.1.0.0"
 }
 
-// VirtualMachineExtensionCompatibilityConstraintSet represents the set of
-// VirtualMachineExtensionCompatibilityConstraint objects declared on a virtual
-// machine. An empty Constraint array means no constraints are declared.
-type VirtualMachineExtensionCompatibilityConstraintSet struct {
-	DynamicData
-
-	// Constraint is the extension compatibility constraints in this set.
-	Constraint []VirtualMachineExtensionCompatibilityConstraint `xml:"constraint,omitempty" json:"constraint,omitempty"`
+// A boxed array of `ResourcePoolVmResourceProfileUsage`. To be used in `Any` placeholders.
+type ArrayOfResourcePoolVmResourceProfileUsage struct {
+	ResourcePoolVmResourceProfileUsage []ResourcePoolVmResourceProfileUsage `xml:"ResourcePoolVmResourceProfileUsage,omitempty" json:"_value"`
 }
 
 func init() {
-	t["VirtualMachineExtensionCompatibilityConstraintSet"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintSet)(nil)).Elem()
+	t["ArrayOfResourcePoolVmResourceProfileUsage"] = reflect.TypeOf((*ArrayOfResourcePoolVmResourceProfileUsage)(nil)).Elem()
+	minAPIVersionForType["ArrayOfResourcePoolVmResourceProfileUsage"] = "9.1.0.0"
 }

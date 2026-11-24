@@ -17,7 +17,7 @@ target = ARGV[1]
 # Load the vijson yaml to fetch vijson schemas.
 vijson_path = File.join(File.expand_path("../sdk", __FILE__), target+".yaml")
 vijson = nil
-if File.exists?(vijson_path)
+if File.exist?(vijson_path)
   vijson = YAML::load(File.open(vijson_path))["components"]["schemas"]
 end
 
@@ -41,6 +41,7 @@ end
 
 File.open(File.join(ARGV.first, "types/types.go"), "w") do |io|
   io.print WSDL.header("types")
+  Rules.imports.each { |i| io.print "import \"#{i}\"\n" }
   if target != "vim"
     io.print <<EOF
 import (
@@ -83,5 +84,7 @@ EOF
     sort_by { |x| x.name }.
     each { |e| e.dump(io) }
 end
+
+Rules.verify!
 
 exit(0)

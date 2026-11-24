@@ -167,7 +167,11 @@ func (m ObjectManager) Delete(ctx context.Context, ds mo.Reference, id string) (
 		return object.NewTask(m.c, res.Returnval), nil
 	}
 
-	res, err := methods.HostDeleteVStorageObject_Task(ctx, m.c, (*types.HostDeleteVStorageObject_Task)(&req))
+	res, err := methods.HostDeleteVStorageObject_Task(ctx, m.c, &types.HostDeleteVStorageObject_Task{
+		This:      req.This,
+		Datastore: req.Datastore,
+		Id:        req.Id,
+	})
 	if err != nil {
 		return nil, err
 	}

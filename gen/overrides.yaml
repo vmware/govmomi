@@ -1,0 +1,197 @@
+# © Broadcom. All Rights Reserved.
+# The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: Apache-2.0
+
+# Generator rules, applied on top of the WSDL output and keyed by Go package.
+# Generation fails if a rule no longer changes the output; see README.md.
+vim25:
+  # Go field types and xml/json struct tags as shipped in v0.56.2.
+  fields:
+    VirtualDeviceFileBackingInfo.BackingObjectId:
+      {type: "*string", xml: "backingObjectId,omitempty", json: "backingObjectId,omitempty"}
+    VirtualHardware.NumCoresPerSocket:
+      {type: "*int32", xml: "numCoresPerSocket,omitempty", json: "numCoresPerSocket,omitempty"}
+    VirtualMachineConfigSpec.NumCoresPerSocket:
+      {type: "*int32", xml: "numCoresPerSocket,omitempty", json: "numCoresPerSocket,omitempty"}
+    VmToVmGroupsAntiAffinity.SelfTag: {type: "TagId", xml: "selfTag,omitempty", json: "selfTag,omitempty"}
+
+  # Field optionality where vi-json and the WSDL disagree: "required" or
+  # "optional" overrides the WSDL, "wsdl" keeps it.
+  optionality:
+    AlarmDescription.DatastoreConnectionState: required
+    AlarmDescription.HostSystemPowerState: required
+    AlarmDescription.VirtualMachineGuestHeartbeatStatus: required
+    ConfigTarget.SmcPresent: required
+    CpuIncompatible1ECX.Aes: required
+    CpuIncompatible1ECX.Pclmulqdq: required
+    DVSConfigInfo.NetworkResourceManagementEnabled: required
+    DatastoreCapability.NativeSnapshotSupported: required
+    DatastoreCapability.StorageIORMSupported: required
+    DatastoreInfo.MaxMemoryFileSize: required
+    EVCMode.Track: required
+    FileQueryFlags.FileOwner: required
+    GuestOsDescriptor.DiskUuidEnabled: required
+    GuestOsDescriptor.Ich7mRecommended: required
+    GuestOsDescriptor.NumSupportedCoresPerSocket: required
+    GuestOsDescriptor.NumSupportedFloppyDevices: required
+    GuestOsDescriptor.NumSupportedPhysicalSockets: required
+    GuestOsDescriptor.Recommended3D: required
+    GuestOsDescriptor.RecommendedCdromController: required
+    GuestOsDescriptor.RecommendedFirmware: required
+    GuestOsDescriptor.SmcRecommended: required
+    GuestOsDescriptor.SmcRequired: required
+    GuestOsDescriptor.SupportLevel: required
+    GuestOsDescriptor.SupportedFirmware: required
+    GuestOsDescriptor.SupportedForCreate: required
+    GuestOsDescriptor.Supports3D: required
+    GuestOsDescriptor.SupportsCpuHotAdd: required
+    GuestOsDescriptor.SupportsCpuHotRemove: required
+    GuestOsDescriptor.SupportsHotPlugPCI: required
+    GuestOsDescriptor.SupportsMemoryHotAdd: required
+    GuestOsDescriptor.SupportsPvscsiControllerForBoot: required
+    GuestOsDescriptor.SupportsVMI: required
+    GuestOsDescriptor.UsbRecommended: required
+    GuestOsDescriptor.VRAMSizeInKB: required
+    HostCapability.Accel3dSupported: required
+    HostCapability.CloneFromSnapshotSupported: required
+    HostCapability.DeltaDiskBackingsSupported: required
+    HostCapability.EightPlusHostVmfsSharedAccessSupported: required
+    HostCapability.FeatureCapabilitiesSupported: required
+    HostCapability.FtSupported: required
+    HostCapability.HbrNicSelectionSupported: required
+    HostCapability.InterVMCommunicationThroughVMCISupported: required
+    HostCapability.LatencySensitivitySupported: required
+    HostCapability.NestedHVSupported: required
+    HostCapability.PerVMNetworkTrafficShapingSupported: required
+    HostCapability.ProvisioningNicSelectionSupported: required
+    HostCapability.RecordReplaySupported: required
+    HostCapability.SmpFtSupported: required
+    HostCapability.SnapshotRelayoutSupported: required
+    HostCapability.StorageIORMSupported: required
+    HostCapability.StorageVMotionSupported: required
+    HostCapability.TpmSupported: required
+    HostCapability.VPMCSupported: required
+    HostCapability.VStorageCapable: required
+    HostCapability.VirtualExecUsageSupported: required
+    HostCapability.VmfsDatastoreMountCapable: required
+    HostCapability.VmotionWithStorageVMotionSupported: required
+    HostCapability.VrNfcNicSelectionSupported: required
+    HostConfigSummary.FaultToleranceEnabled: required
+    HostDatastoreSystemCapabilities.VmfsExtentExpansionSupported: required
+    HostHardwareInfo.SmcPresent: required
+    HostNetCapabilities.IpV6Supported: required
+    HostSnmpSystemAgentLimits.Capability: required
+    HostSslThumbprintInfo.OwnerTag: required
+    NetworkSummary.IpPoolName: required
+    NotEnoughResourcesToStartVmEvent.Reason: required
+    RuleViolation.Rule: required
+    ScheduledTaskInfo.TaskObject: required
+    StorageIORMConfigOption.ReservationEnabledOption: required
+    StorageIORMConfigOption.StatsCollectionEnabledOption: required
+    StorageIORMInfo.CongestionThresholdMode: required
+    StorageIORMInfo.ReservationEnabled: required
+    StorageIORMInfo.StatsCollectionEnabled: required
+    UserSession.CallCount: required
+    UserSession.ExtensionSession: required
+    UserSession.IpAddress: required
+    UserSession.UserAgent: required
+    VirtualDeviceOption.HotRemoveSupported: required
+    VirtualDiskFlatVer2BackingOption.DeltaDiskFormat: required
+    VirtualDiskFlatVer2BackingOption.DeltaDiskFormatsSupported: required
+    VirtualDiskFlatVer2BackingOption.EagerlyScrub: required
+    VirtualDiskFlatVer2BackingOption.ThinProvisioned: required
+    VirtualDiskOption.IoAllocationOption: required
+    VirtualHardwareOption.NumCoresPerSocket: required
+    VirtualHardwareOption.NumUSBXHCIControllers: required
+    VirtualHardwareOption.ResourceConfigOption: required
+    VirtualMachineCapability.BootRetryOptionsSupported: required
+    VirtualMachineCapability.ChangeTrackingSupported: required
+    VirtualMachineCapability.FeatureRequirementSupported: required
+    VirtualMachineCapability.GuestAutoLockSupported: required
+    VirtualMachineCapability.HostBasedReplicationSupported: required
+    VirtualMachineCapability.MemoryReservationLockSupported: required
+    VirtualMachineCapability.MultipleCoresPerSocketSupported: required
+    VirtualMachineCapability.NestedHVSupported: required
+    VirtualMachineCapability.PoweredOnMonitorTypeChangeSupported: required
+    VirtualMachineCapability.RecordReplaySupported: required
+    VirtualMachineCapability.SeSparseDiskSupported: required
+    VirtualMachineCapability.SettingDisplayTopologySupported: required
+    VirtualMachineCapability.VPMCSupported: required
+    VirtualMachineCapability.VmNpivWwnDisableSupported: required
+    VirtualMachineCapability.VmNpivWwnUpdateSupported: required
+    VirtualMachineConfigOptionDescriptor.CreateSupported: required
+    VirtualMachineConfigOptionDescriptor.DefaultConfigOption: required
+    VirtualMachineConfigOptionDescriptor.RunSupported: required
+    VirtualMachineConfigOptionDescriptor.UpgradeSupported: required
+    VirtualMachineFileLayoutExSnapshotLayout.MemoryKey: required
+    VirtualMachineRuntimeInfo.ConsolidationNeeded: required
+    VirtualMachineRuntimeInfo.FaultToleranceState: required
+    VirtualMachineRuntimeInfo.OnlineStandby: required
+    VirtualMachineRuntimeInfo.RecordReplayState: required
+    VirtualMachineSnapshotTree.Id: required
+    VirtualPCIControllerOption.NumPCIPassthroughDevices: required
+    VirtualPCIControllerOption.NumParaVirtualSCSIControllers: required
+    VirtualPCIControllerOption.NumSATAControllers: required
+    VirtualPCIControllerOption.NumSasSCSIControllers: required
+    VirtualPCIControllerOption.NumVmciDevices: required
+    VirtualPCIControllerOption.NumVmxnet3EthernetCards: required
+    VirtualUSBControllerOption.SupportedSpeeds: required
+    VmfsDatastoreInfo.MaxPhysicalRDMFileSize: required
+    VmfsDatastoreInfo.MaxVirtualRDMFileSize: required
+
+  # Struct fields that the inputs do not contain.
+  extra_fields:
+    - struct: ResourcePoolRuntimeInfo
+      after: Cpu
+      decl: |
+        // Runtime resource usage for VM resource profiles.
+        //
+        // For a given
+        // VM resource profile, values are in number of instances for
+        // that profile.
+        // If unset, there is no information available for the usage of
+        // VM resource profiles in this resource pool.
+        VmRp []ResourcePoolVmResourceProfileUsage `xml:"vmRp,omitempty" json:"vmRp,omitempty" vim:"9.1.0.0"`
+    # vcsim encodes the response element name from this field.
+    - struct: SetCustomValueResponse
+      import: github.com/vmware/govmomi/vim25/xml
+      decl: |
+        XMLName xml.Name `xml:"setCustomValueResponse"`
+
+  # Enum values that the inputs do not contain.
+  extra_enum_values:
+    - enum: VmPlacementPolicyVmPlacementPolicyStrictness
+      value: RequiredDuringPlacementRequiredDuringExecution
+      comment: |
+        
+        // A VmPlacementPolicy with this strictness is strictly enforced both
+        // during the initial placement operation and when the VM is in
+        // execution.
+        //
+        // Below is a detailed explanation:
+        // If an operation requires specifying a VM's `VirtualMachineConfigSpec` or
+        // `VirtualMachineRelocateSpec` and there is a VmPlacementPolicy specified in
+        // that `VirtualMachineConfigSpec.vmPlacementPolicies` or
+        // `VirtualMachineRelocateSpec.vmPlacementPolicies` with this
+        // VmPlacementPolicyStrictness, then it means the following:
+        //
+        // (1) This VmPlacementPolicy will be considered as "required" while
+        // computing the placement for that operation. This means that if a VM
+        // with this VmPlacementPolicy cannot be successfully placed on any host
+        // due to this policy, then the policy will still be honored and no
+        // placement recommendation will be generated for that operation. The
+        // policy must be satisfied to find a successful placement target for
+        // the VM for that operation. This is denoted by the
+        // "RequiredDuringPlacement" part of this strictness value.
+        //
+        // (2) This VmPlacementPolicy will be strictly enforced when that VM is in
+        // execution. For example, when the VM needs to be relocated for putting
+        // its host into maintenance mode, then this VmPlacementPolicy will be
+        // enforced strictly and will not be violated. Similarly, when the VM needs
+        // to be restarted as part of vSphere HA failover, then this
+        // VmPlacementPolicy will be enforced strictly and will not be violated.
+        // This is denoted by the "RequiredDuringExecution" part of this strictness
+        // value. Note that if a VM needs to be relocated by DRS for load-balancing,
+        // then any VmPlacementPolicy is considered as "Required" and DRS
+        // load-balancing is not included in the "RequiredDuringExecution" part of
+        // this strictness value.
