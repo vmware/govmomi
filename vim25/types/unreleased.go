@@ -471,3 +471,32 @@ type VirtualMachineExtensionCompatibilityConstraintSet struct {
 func init() {
 	t["VirtualMachineExtensionCompatibilityConstraintSet"] = reflect.TypeOf((*VirtualMachineExtensionCompatibilityConstraintSet)(nil)).Elem()
 }
+
+// A boxed array of `VirtualMachineComputePolicyInfo`. To be used in `Any` placeholders.
+type ArrayOfVirtualMachineComputePolicyInfo struct {
+	VirtualMachineComputePolicyInfo []VirtualMachineComputePolicyInfo `xml:"VirtualMachineComputePolicyInfo,omitempty" json:"_value"`
+}
+
+func init() {
+	t["ArrayOfVirtualMachineComputePolicyInfo"] = reflect.TypeOf((*ArrayOfVirtualMachineComputePolicyInfo)(nil)).Elem()
+	minAPIVersionForType["ArrayOfVirtualMachineComputePolicyInfo"] = "9.1.0.0"
+}
+
+// An external compute policy associated with a virtual machine and the
+// most recently recorded compliance status of the virtual machine against
+// the policy.
+type VirtualMachineComputePolicyInfo struct {
+	DynamicData
+
+	// Identifier of the compute policy.
+	PolicyId string `xml:"policyId" json:"policyId" vim:"9.1.0.0"`
+	// The most recently recorded compliance status.
+	//
+	// For possible values, see `ComputePolicyStatus.ComplianceStatus`.
+	ComplianceStatus string `xml:"complianceStatus" json:"complianceStatus" vim:"9.1.0.0"`
+}
+
+func init() {
+	t["VirtualMachineComputePolicyInfo"] = reflect.TypeOf((*VirtualMachineComputePolicyInfo)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineComputePolicyInfo"] = "9.1.0.0"
+}

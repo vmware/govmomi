@@ -1748,23 +1748,24 @@ func init() {
 type VirtualMachine struct {
 	ManagedEntity
 
-	Capability           types.VirtualMachineCapability    `json:"capability"`
-	Config               *types.VirtualMachineConfigInfo   `json:"config"`
-	Layout               *types.VirtualMachineFileLayout   `json:"layout"`
-	LayoutEx             *types.VirtualMachineFileLayoutEx `json:"layoutEx"`
-	Storage              *types.VirtualMachineStorageInfo  `json:"storage"`
-	EnvironmentBrowser   types.ManagedObjectReference      `json:"environmentBrowser"`
-	ResourcePool         *types.ManagedObjectReference     `json:"resourcePool"`
-	ParentVApp           *types.ManagedObjectReference     `json:"parentVApp"`
-	ResourceConfig       *types.ResourceConfigSpec         `json:"resourceConfig"`
-	Runtime              types.VirtualMachineRuntimeInfo   `json:"runtime"`
-	Guest                *types.GuestInfo                  `json:"guest"`
-	Summary              types.VirtualMachineSummary       `json:"summary"`
-	Datastore            []types.ManagedObjectReference    `json:"datastore"`
-	Network              []types.ManagedObjectReference    `json:"network"`
-	Snapshot             *types.VirtualMachineSnapshotInfo `json:"snapshot"`
-	RootSnapshot         []types.ManagedObjectReference    `json:"rootSnapshot"`
-	GuestHeartbeatStatus types.ManagedEntityStatus         `json:"guestHeartbeatStatus"`
+	Capability           types.VirtualMachineCapability          `json:"capability"`
+	Config               *types.VirtualMachineConfigInfo         `json:"config"`
+	Layout               *types.VirtualMachineFileLayout         `json:"layout"`
+	LayoutEx             *types.VirtualMachineFileLayoutEx       `json:"layoutEx"`
+	Storage              *types.VirtualMachineStorageInfo        `json:"storage"`
+	EnvironmentBrowser   types.ManagedObjectReference            `json:"environmentBrowser"`
+	ResourcePool         *types.ManagedObjectReference           `json:"resourcePool"`
+	ParentVApp           *types.ManagedObjectReference           `json:"parentVApp"`
+	ResourceConfig       *types.ResourceConfigSpec               `json:"resourceConfig"`
+	Runtime              types.VirtualMachineRuntimeInfo         `json:"runtime"`
+	Guest                *types.GuestInfo                        `json:"guest"`
+	Summary              types.VirtualMachineSummary             `json:"summary"`
+	Datastore            []types.ManagedObjectReference          `json:"datastore"`
+	Network              []types.ManagedObjectReference          `json:"network"`
+	Snapshot             *types.VirtualMachineSnapshotInfo       `json:"snapshot"`
+	RootSnapshot         []types.ManagedObjectReference          `json:"rootSnapshot"`
+	GuestHeartbeatStatus types.ManagedEntityStatus               `json:"guestHeartbeatStatus"`
+	ComputePolicies      []types.VirtualMachineComputePolicyInfo `json:"computePolicies"`
 }
 
 func (m *VirtualMachine) Entity() *ManagedEntity {
