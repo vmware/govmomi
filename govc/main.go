@@ -91,6 +91,7 @@ import (
 	_ "github.com/vmware/govmomi/cli/sso/service"
 	_ "github.com/vmware/govmomi/cli/sso/user"
 	_ "github.com/vmware/govmomi/cli/storage/policy"
+	_ "github.com/vmware/govmomi/cli/tagging"
 	_ "github.com/vmware/govmomi/cli/tags"
 	_ "github.com/vmware/govmomi/cli/tags/association"
 	_ "github.com/vmware/govmomi/cli/tags/category"

@@ -131,6 +131,8 @@ func (c *Manager) GetCategory(ctx context.Context, id string) (*Category, error)
 }
 
 // ListCategories returns all category IDs in the system.
+//
+// Deprecated: use tagging.Manager.ListCategories from github.com/vmware/govmomi/vapi/tagging (vSphere 9.0+).
 func (c *Manager) ListCategories(ctx context.Context) ([]string, error) {
 	url := c.Resource(internal.CategoryPath)
 	var res []string
@@ -141,6 +143,8 @@ func (c *Manager) ListCategories(ctx context.Context) ([]string, error) {
 }
 
 // GetCategories fetches a list of category information in the system.
+//
+// Deprecated: use tagging.Manager.ListCategories from github.com/vmware/govmomi/vapi/tagging (vSphere 9.0+).
 func (c *Manager) GetCategories(ctx context.Context) ([]Category, error) {
 	ids, err := c.ListCategories(ctx)
 	if err != nil {

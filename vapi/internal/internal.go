@@ -16,6 +16,8 @@ const (
 	TagPath                        = "/com/vmware/cis/tagging/tag"
 	AssociationPath                = "/com/vmware/cis/tagging/tag-association"
 	APILibraryPath                 = "/api/content/library"
+	APITagPath                     = "/api/vcenter/tagging/tags"
+	APICategoryPath                = "/api/vcenter/tagging/categories"
 	LibraryPath                    = "/com/vmware/content/library"
 	LibraryItemFileData            = "/com/vmware/cis/data"
 	LibraryItemPath                = "/com/vmware/content/library/item"

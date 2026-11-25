@@ -356,6 +356,8 @@ but appear via `govc $cmd -h`:
  - [storage.policy.info](#storagepolicyinfo)
  - [storage.policy.ls](#storagepolicyls)
  - [storage.policy.rm](#storagepolicyrm)
+ - [tagging.category.ls](#taggingcategoryls)
+ - [tagging.tag.ls](#taggingtagls)
  - [tags.attach](#tagsattach)
  - [tags.attached.ls](#tagsattachedls)
  - [tags.category.create](#tagscategorycreate)
@@ -6202,6 +6204,40 @@ Examples:
   govc storage.policy.rm af7935ab-466d-4b0e-af3c-4ec6bce2112f
 
 Options:
+```
+
+## tagging.category.ls
+
+```
+Usage: govc tagging.category.ls [OPTIONS] [-n NAME]...
+
+List categories using the vSphere 9.0+ /api/vcenter/tagging/categories API.
+
+Examples:
+  govc tagging.category.ls
+  govc tagging.category.ls -n my-category
+  govc tagging.category.ls -json | jq .
+
+Options:
+  -n=                    Only list items with this name (can be specified multiple times)
+```
+
+## tagging.tag.ls
+
+```
+Usage: govc tagging.tag.ls [OPTIONS] [-n NAME]...
+
+List tags using the vSphere 9.0+ /api/vcenter/tagging/tags API.
+
+Examples:
+  govc tagging.tag.ls
+  govc tagging.tag.ls -n my-tag -n other-tag
+  govc tagging.tag.ls -c k8s-zone
+  govc tagging.tag.ls -json | jq .
+
+Options:
+  -c=                    Category name
+  -n=                    Only list items with this name (can be specified multiple times)
 ```
 
 ## tags.attach

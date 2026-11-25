@@ -176,6 +176,8 @@ func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 		{internal.DebugEcho, s.debugEcho},
 		// /api/ patterns.
 		{vapi.Path, s.jsonRPC},
+		{internal.APITagPath, s.apiTags},
+		{internal.APICategoryPath, s.apiCategories},
 		{internal.SecurityPoliciesPath, s.librarySecurityPolicies},
 		{internal.TrustedCertificatesPath, s.libraryTrustedCertificates},
 		{internal.TrustedCertificatesPath + "/", s.libraryTrustedCertificatesID},
