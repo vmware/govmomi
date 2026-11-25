@@ -158,6 +158,8 @@ func (c *Manager) GetTagForCategory(ctx context.Context, id, category string) (*
 }
 
 // ListTags returns all tag IDs in the system.
+//
+// Deprecated: use tagging.Manager.ListTags from github.com/vmware/govmomi/vapi/tagging (vSphere 9.0+).
 func (c *Manager) ListTags(ctx context.Context) ([]string, error) {
 	url := c.Resource(internal.TagPath)
 	var res []string
@@ -168,6 +170,8 @@ func (c *Manager) ListTags(ctx context.Context) ([]string, error) {
 }
 
 // GetTags fetches an array of tag information in the system.
+//
+// Deprecated: use tagging.Manager.ListTags from github.com/vmware/govmomi/vapi/tagging (vSphere 9.0+).
 func (c *Manager) GetTags(ctx context.Context) ([]Tag, error) {
 	ids, err := c.ListTags(ctx)
 	if err != nil {
@@ -188,6 +192,9 @@ func (c *Manager) GetTags(ctx context.Context) ([]Tag, error) {
 }
 
 // The id parameter can be a Category ID or Category Name.
+//
+// Deprecated: use tagging.Manager.ListTagsForCategory from github.com/vmware/govmomi/vapi/tagging (vSphere 9.0+),
+// which takes a Category Name.
 func (c *Manager) ListTagsForCategory(ctx context.Context, id string) ([]string, error) {
 	if isName(id) {
 		cat, err := c.GetCategory(ctx, id)
@@ -209,6 +216,9 @@ func (c *Manager) ListTagsForCategory(ctx context.Context, id string) ([]string,
 }
 
 // The id parameter can be a Category ID or Category Name.
+//
+// Deprecated: use tagging.Manager.ListTagsForCategory from github.com/vmware/govmomi/vapi/tagging (vSphere 9.0+),
+// which takes a Category Name.
 func (c *Manager) GetTagsForCategory(ctx context.Context, id string) ([]Tag, error) {
 	ids, err := c.ListTagsForCategory(ctx, id)
 	if err != nil {
