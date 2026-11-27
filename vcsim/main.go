@@ -35,6 +35,7 @@ import (
 	_ "github.com/vmware/govmomi/ssoadmin/simulator"
 	_ "github.com/vmware/govmomi/sts/simulator"
 	_ "github.com/vmware/govmomi/vapi/appliance/simulator"
+	_ "github.com/vmware/govmomi/vapi/cis/authz/simulator"
 	_ "github.com/vmware/govmomi/vapi/cis/tasks/simulator"
 	_ "github.com/vmware/govmomi/vapi/cluster/simulator"
 	_ "github.com/vmware/govmomi/vapi/crypto/simulator"
