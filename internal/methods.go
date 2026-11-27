@@ -134,3 +134,43 @@ func QueryVirtualDiskInfoTask(ctx context.Context, r soap.RoundTripper, req *Que
 
 	return resBody.InternalRes, nil
 }
+
+type CreateNamespaceFolderBody struct {
+	Req    *CreateNamespaceFolderRequest  `xml:"urn:vim25 CreateNamespaceFolder,omitempty"`
+	Res    *CreateNamespaceFolderResponse `xml:"urn:vim25 CreateNamespaceFolderResponse,omitempty"`
+	Fault_ *soap.Fault                    `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CreateNamespaceFolderBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CreateNamespaceFolder(ctx context.Context, r soap.RoundTripper, req *CreateNamespaceFolderRequest) (*CreateNamespaceFolderResponse, error) {
+	var reqBody, resBody CreateNamespaceFolderBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type CreateExternallyManagedFolderBody struct {
+	Req    *CreateExternallyManagedFolderRequest  `xml:"urn:vim25 CreateExternallyManagedFolder,omitempty"`
+	Res    *CreateExternallyManagedFolderResponse `xml:"urn:vim25 CreateExternallyManagedFolderResponse,omitempty"`
+	Fault_ *soap.Fault                            `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CreateExternallyManagedFolderBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CreateExternallyManagedFolder(ctx context.Context, r soap.RoundTripper, req *CreateExternallyManagedFolderRequest) (*CreateExternallyManagedFolderResponse, error) {
+	var reqBody, resBody CreateExternallyManagedFolderBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
