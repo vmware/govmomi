@@ -69,6 +69,7 @@ func TestModelESX(t *testing.T) {
 
 	compareModel(t, m)
 
+	m.Remove()
 	err = m.Create()
 	if err == nil {
 		t.Error("expected error")

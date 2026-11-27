@@ -32,6 +32,8 @@ func TestDatacenterCreateFolders(t *testing.T) {
 	}
 
 	for _, model := range models {
+		t.Cleanup(model.Remove)
+
 		_ = model.Create()
 
 		dc := model.Map().Any("Datacenter").(*Datacenter)
