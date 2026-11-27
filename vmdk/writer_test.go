@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -296,4 +297,56 @@ func TestIsZeroed(t *testing.T) {
 			assert.Equal(t, tt.want, result)
 		})
 	}
+}
+
+func TestStreamOptimizedWriterDescriptorIDs(t *testing.T) {
+	const idA = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1"
+	path := filepath.Join(t.TempDir(), "ids.vmdk")
+	w, err := NewStreamOptimizedWriter(path, 1024*1024)
+	require.NoError(t, err)
+	w.CID = 0x89abcdef
+	w.DDB = map[string]string{"longContentID": idA}
+
+	require.NoError(t, w.Write(io.LimitReader(rand.Reader, 1024*1024)))
+	require.NoError(t, w.Close())
+
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	defer f.Close()
+	info, err := Seek(f)
+	require.NoError(t, err)
+	assert.Equal(t, DiskContentID(0x89abcdef), info.Descriptor.CID)
+	assert.Equal(t, idA, info.Descriptor.DDB["longContentID"])
+}
+
+func TestStreamOptimizedWriterDescriptorTooLarge(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "large.vmdk")
+	w, err := NewStreamOptimizedWriter(path, 1024*1024)
+	require.NoError(t, err)
+	w.DDB = map[string]string{"longContentID": strings.Repeat("x", 600)}
+
+	err = w.Write(io.LimitReader(rand.Reader, 1024*1024))
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "vmdk.Seek")
+	require.NoError(t, w.file.Close())
+
+	fi, err := os.Stat(path)
+	require.NoError(t, err)
+	assert.Equal(t, int64(0), fi.Size())
+}
+
+func TestStreamOptimizedWriterDescriptorDefault(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "default.vmdk")
+	w, err := NewStreamOptimizedWriter(path, 1024*1024)
+	require.NoError(t, err)
+	require.NoError(t, w.Write(io.LimitReader(rand.Reader, 1024*1024)))
+	require.NoError(t, w.Close())
+
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	defer f.Close()
+	info, err := Seek(f)
+	require.NoError(t, err)
+	assert.Equal(t, DiskContentID(0), info.Descriptor.CID)
+	assert.Empty(t, info.Descriptor.DDB)
 }
