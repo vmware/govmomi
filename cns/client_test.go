@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/dougm/pretty"
 	"github.com/google/uuid"
@@ -1999,6 +2000,442 @@ func TestUnregisterVolume(t *testing.T) {
 	t.Logf("Volume unregistered successfully: %s", volumeId)
 }
 
+// TestUnregisterVolumeExFlow exercises the two-phase unregister protocol:
+//  1. Create 10 block volumes.
+//  2. UnregisterVolumeEx (phase 1) — called once per volume; the CNS server
+//     only processes unregisterSpec[0] so each call carries exactly one spec.
+//     For each volume BackingDiskPath and DiskUUID are logged. DiskUUID is also
+//     cross-checked against VirtualDiskManager.QueryVirtualDiskUuid; the two
+//     should match once the product bug is fixed (currently DiskUUID is sourced
+//     from backingObjectId which is empty on VMFS).
+//  3. QueryPendingUnregisters — verify all 10 volumes appear as pending.
+//  4. AcknowledgeUnregister (phase 2) — single batch call for all 10.
+//  5. QueryPendingUnregisters again — verify none of our 10 remain.
+//  6. AcknowledgeUnregister again — verify idempotency.
+//  7. Re-register each volume as a static CNS volume using the original FCD ID
+//     (BackingDiskId) and disk path (BackingDiskPath) returned in step 2.
+//  8. Delete each re-registered volume.
+//     Cleanup (via t.Cleanup) handles best-effort deletion if the test fails early.
+//
+// Note: DiskUUID in CnsUnregisterVolumeResult is currently populated from the
+// FCD backingObjectId (a vSAN/vVol-only field) rather than the VMDK UUID, so it
+// is empty on VMFS datastores. This is a product bug to be fixed separately.
+//
+// Requires vSphere 9.2.0 or later.
+func TestUnregisterVolumeExFlow(t *testing.T) {
+	ctx := context.Background()
+
+	url := os.Getenv("CNS_VC_URL")
+	datacenter := os.Getenv("CNS_DATACENTER")
+	datastore := os.Getenv("CNS_DATASTORE")
+	if url == "" || datacenter == "" || datastore == "" {
+		t.Skip("CNS_VC_URL, CNS_DATACENTER, and CNS_DATASTORE must be set")
+	}
+
+	u, err := soap.ParseURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c, err := govmomi.NewClient(ctx, u, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !isvSphereVersion92orAbove(ctx, c.ServiceContent.About) {
+		t.Skip("TestUnregisterVolumeExFlow requires vSphere 9.2.0 or above")
+	}
+
+	cnsClient, err := NewClient(ctx, c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	finder := find.NewFinder(cnsClient.vim25Client, false)
+	dc, err := finder.Datacenter(ctx, datacenter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc)
+	ds, err := finder.Datastore(ctx, datastore)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var dsList []vim25types.ManagedObjectReference
+	dsList = append(dsList, ds.Reference())
+
+	containerCluster := cnstypes.CnsContainerCluster{
+		ClusterType:         string(cnstypes.CnsClusterTypeKubernetes),
+		ClusterId:           "demo-cluster-id",
+		VSphereUser:         "Administrator@vsphere.local",
+		ClusterFlavor:       string(cnstypes.CnsClusterFlavorVanilla),
+		ClusterDistribution: "OpenShift",
+	}
+
+	const numVolumes = 10
+
+	// volumeIds holds the CNS volume IDs as created (also the underlying FCD IDs).
+	volumeIds := make([]cnstypes.CnsVolumeId, 0, numVolumes)
+	// backingDiskPaths stores the BackingDiskPath returned by UnregisterVolumeEx
+	// for each volume, keyed by index. Used for re-registration in step 4.
+	backingDiskPaths := make([]string, numVolumes)
+	// volumeNames stores the PVC name per volume so re-registration can reuse it.
+	volumeNames := make([]string, numVolumes)
+
+	// reregisteredIds accumulates the volume IDs returned by Step 7
+	// (re-registration). Declared here so the cleanup closure can reference it
+	// even though it is populated later in the test body.
+	var reregisteredIds []cnstypes.CnsVolumeId
+
+	// cleanupVolume is a helper used by both the t.Cleanup block and the test
+	// body to delete a single CNS volume, treating NotFound as success (the
+	// volume is already gone, which is the desired state).
+	cleanupVolume := func(cctx context.Context, vid cnstypes.CnsVolumeId) {
+		delTask, err := cnsClient.DeleteVolume(cctx, []cnstypes.CnsVolumeId{vid}, true)
+		if err != nil {
+			t.Logf("cleanup DeleteVolume(%s): %v", vid.Id, err)
+			return
+		}
+		taskInfo, err := GetTaskInfo(cctx, delTask)
+		if err != nil {
+			t.Logf("cleanup GetTaskInfo DeleteVolume(%s): %v", vid.Id, err)
+			return
+		}
+		taskResult, err := GetTaskResult(cctx, taskInfo)
+		if err != nil {
+			t.Logf("cleanup GetTaskResult DeleteVolume(%s): %v", vid.Id, err)
+			return
+		}
+		if taskResult != nil {
+			if op := taskResult.GetCnsVolumeOperationResult(); op != nil && op.Fault != nil {
+				if _, ok := op.Fault.Fault.(*cnstypes.CnsVolumeNotFoundFault); ok {
+					t.Logf("cleanup DeleteVolume(%s): already gone (NotFound), skipping", vid.Id)
+					return
+				}
+				t.Logf("cleanup DeleteVolume(%s) fault: %+v", vid.Id, op.Fault)
+			}
+		}
+	}
+
+	// Best-effort cleanup: delete any volumes that still exist (e.g. if the
+	// test fails mid-way). Covers both the original volumeIds and any
+	// reregisteredIds accumulated in Step 7.
+	t.Cleanup(func() {
+		cctx := context.Background()
+		// Collect all IDs to clean; de-duplicate in case FCD_TRANSACTION_SUPPORT
+		// returns the same ID for a re-registered volume.
+		seen := make(map[string]bool)
+		for _, vid := range append(reregisteredIds, volumeIds...) {
+			if seen[vid.Id] {
+				continue
+			}
+			seen[vid.Id] = true
+			cleanupVolume(cctx, vid)
+		}
+	})
+
+	// Step 1: Create 10 block volumes, each 1024 MB.
+	for i := 0; i < numVolumes; i++ {
+		volName := "pvc-" + uuid.New().String()
+		spec := cnstypes.CnsVolumeCreateSpec{
+			Name:       volName,
+			VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+			Datastores: dsList,
+			Metadata: cnstypes.CnsVolumeMetadata{
+				ContainerCluster: containerCluster,
+			},
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: 1024,
+				},
+			},
+		}
+		createTask, err := cnsClient.CreateVolume(ctx, []cnstypes.CnsVolumeCreateSpec{spec})
+		if err != nil {
+			t.Fatalf("CreateVolume[%d] failed: %v", i, err)
+		}
+		createTaskInfo, err := GetTaskInfo(ctx, createTask)
+		if err != nil {
+			t.Fatalf("GetTaskInfo CreateVolume[%d] failed: %v", i, err)
+		}
+		createTaskResult, err := GetTaskResult(ctx, createTaskInfo)
+		if err != nil {
+			t.Fatalf("GetTaskResult CreateVolume[%d] failed: %v", i, err)
+		}
+		if createTaskResult == nil {
+			t.Fatalf("CreateVolume[%d]: empty task result", i)
+		}
+		opRes := createTaskResult.GetCnsVolumeOperationResult()
+		if opRes.Fault != nil {
+			t.Fatalf("CreateVolume[%d] fault: %+v", i, opRes.Fault)
+		}
+		volumeIds = append(volumeIds, opRes.VolumeId)
+		volumeNames[i] = volName
+		t.Logf("Created volume[%d]: %s name=%s", i, opRes.VolumeId.Id, volName)
+	}
+
+	// Step 2: UnregisterVolumeEx (phase 1) — one call per volume.
+	// The CNS server implementation only processes unregisterSpec[0], so each
+	// invocation carries exactly one spec.
+	// The BackingDiskPath and DiskUUID from each result are saved for use in
+	// step 4 (re-registration) and for cross-checking with VirtualDiskManager.
+	vdm := object.NewVirtualDiskManager(cnsClient.vim25Client)
+	for i, vid := range volumeIds {
+		unregSpec := []cnstypes.CnsUnregisterVolumeSpec{
+			{
+				VolumeId:         vid,
+				TargetVolumeType: string(cnstypes.CnsUnregisterTargetVolumeTypeFCD),
+			},
+		}
+		unregTask, err := cnsClient.UnregisterVolumeEx(ctx, unregSpec)
+		if err != nil {
+			t.Fatalf("UnregisterVolumeEx[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		unregTaskInfo, err := GetTaskInfo(ctx, unregTask)
+		if err != nil {
+			t.Fatalf("GetTaskInfo UnregisterVolumeEx[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		unregTaskResult, err := GetTaskResult(ctx, unregTaskInfo)
+		if err != nil {
+			t.Fatalf("GetTaskResult UnregisterVolumeEx[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		if unregTaskResult == nil {
+			t.Fatalf("UnregisterVolumeEx[%d] volume=%s: empty task result", i, vid.Id)
+		}
+		opRes := unregTaskResult.GetCnsVolumeOperationResult()
+		if opRes.Fault != nil {
+			t.Fatalf("UnregisterVolumeEx[%d] volume=%s fault: %+v", i, vid.Id, opRes.Fault)
+		}
+		unregResult := unregTaskResult.(*cnstypes.CnsUnregisterVolumeResult)
+		if unregResult.BackingDiskPath == "" {
+			t.Fatalf("UnregisterVolumeEx[%d] volume=%s: BackingDiskPath is empty", i, vid.Id)
+		}
+		backingDiskPaths[i] = unregResult.BackingDiskPath
+		t.Logf("UnregisterVolumeEx[%d] volume=%s backingDiskPath=%q diskUUID=%q",
+			i, vid.Id, unregResult.BackingDiskPath, unregResult.DiskUUID)
+
+		// Cross-check: VirtualDiskManager.QueryVirtualDiskUuid retrieves the VMDK
+		// UUID (VirtualDisk.Backing.Uuid) via the backing disk path. This should
+		// match unregResult.DiskUUID once the product bug is fixed (currently
+		// DiskUUID is sourced from backingObjectId which is empty on VMFS).
+		vdmUUID, err := vdm.QueryVirtualDiskUuid(ctx, unregResult.BackingDiskPath, dc)
+		if err != nil {
+			t.Logf("UnregisterVolumeEx[%d] volume=%s: VirtualDiskManager.QueryVirtualDiskUuid(%q) error: %v",
+				i, vid.Id, unregResult.BackingDiskPath, err)
+		} else {
+			// VirtualDiskManager returns the UUID in a space/dash-separated hex
+			// format (e.g. "60 00 C2 90 8f 8e 84 5b-99 15 b1 8f 16 b3 de 1f").
+			// Normalize it to the standard 8-4-4-4-12 UUID format that CNS uses
+			// (e.g. "6000C290-8f8e-845b-9915-b18f16b3de1f") before comparing.
+			normalized := normalizeVdmUUID(vdmUUID)
+			t.Logf("UnregisterVolumeEx[%d] volume=%s: diskUUID(CNS)=%q diskUUID(VDM)=%q diskUUID(VDM-normalized)=%q match=%v",
+				i, vid.Id, unregResult.DiskUUID, vdmUUID, normalized,
+				strings.EqualFold(unregResult.DiskUUID, normalized))
+		}
+	}
+
+	// Step 3: QueryPendingUnregisters — all 10 volumes must appear.
+	pending, err := cnsClient.QueryPendingUnregisters(ctx)
+	if err != nil {
+		t.Fatalf("QueryPendingUnregisters failed: %v", err)
+	}
+	pendingByID := make(map[string]bool, len(pending))
+	for _, p := range pending {
+		pendingByID[p.VolumeId.Id] = true
+	}
+	for _, vid := range volumeIds {
+		if !pendingByID[vid.Id] {
+			t.Errorf("QueryPendingUnregisters: volume %s not found in pending list", vid.Id)
+		}
+	}
+	t.Logf("QueryPendingUnregisters: found %d pending record(s) (our volumes=%d)", len(pending), numVolumes)
+
+	// Step 4: AcknowledgeUnregister (phase 2) — single batch call for all 10.
+	if err := cnsClient.AcknowledgeUnregister(ctx, volumeIds); err != nil {
+		t.Fatalf("AcknowledgeUnregister failed: %v", err)
+	}
+	t.Logf("AcknowledgeUnregister succeeded for %d volume(s)", numVolumes)
+
+	// Step 5: QueryPendingUnregisters — none of our 10 volumes may remain pending.
+	pending, err = cnsClient.QueryPendingUnregisters(ctx)
+	if err != nil {
+		t.Fatalf("QueryPendingUnregisters after ack failed: %v", err)
+	}
+	stillPendingByID := make(map[string]bool, len(pending))
+	for _, p := range pending {
+		stillPendingByID[p.VolumeId.Id] = true
+	}
+	for _, vid := range volumeIds {
+		if stillPendingByID[vid.Id] {
+			t.Errorf("volume %s still pending after AcknowledgeUnregister", vid.Id)
+		}
+	}
+	t.Logf("QueryPendingUnregisters after ack: none of our %d volumes remain pending (total pending=%d)",
+		numVolumes, len(pending))
+
+	// Step 6: AcknowledgeUnregister again — must be idempotent.
+	if err := cnsClient.AcknowledgeUnregister(ctx, volumeIds); err != nil {
+		t.Fatalf("AcknowledgeUnregister (idempotency check) failed: %v", err)
+	}
+	t.Logf("AcknowledgeUnregister idempotency check passed")
+
+	// Step 7: Re-register each volume as a static CNS volume using the VMDK URL
+	// path (BackingDiskUrlPath) returned by UnregisterVolumeEx in step 2.
+	//
+	// After UnregisterVolumeEx the FCD entry is gone from the catalog, so we
+	// cannot use BackingDiskId (that path calls VerifyBackingFcdAction which
+	// requires the FCD to still be registered). Instead we use BackingDiskUrlPath
+	// which triggers the RegisterVMDKWithUrlAction path — it re-registers the
+	// VMDK file as a fresh FCD.
+	//
+	// To preserve the original FCD ID we set VolumeId on the top-level spec.
+	// When FCD_TRANSACTION_SUPPORT is enabled (9.2+) CNS passes this ID to
+	// FcdSvc()->RegisterDisk, so the re-registered FCD retains the same ID.
+	//
+	// BackingDiskUrlPath requires the HTTP folder URL format
+	// (https://host/folder/path?dcPath=...&dsName=...) that the authorization
+	// layer's FolderUrlToDatastorePath can parse. We convert the datastore path
+	// format ([dsName] relPath) returned by UnregisterVolumeEx using
+	// Datastore.NewURL.
+	reregisteredIds = make([]cnstypes.CnsVolumeId, 0, numVolumes)
+	for i, vid := range volumeIds {
+		var dsPath object.DatastorePath
+		if !dsPath.FromString(backingDiskPaths[i]) {
+			t.Fatalf("re-register[%d]: failed to parse datastore path %q", i, backingDiskPaths[i])
+		}
+		diskFolderURL := ds.NewURL(dsPath.Path).String()
+
+		vidCopy := vid
+		reregSpec := cnstypes.CnsVolumeCreateSpec{
+			Name:       volumeNames[i],
+			VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+			VolumeId:   &vidCopy, // request the same FCD ID via FCD_TRANSACTION_SUPPORT
+			Metadata: cnstypes.CnsVolumeMetadata{
+				ContainerCluster: containerCluster,
+				EntityMetadata: []cnstypes.BaseCnsEntityMetadata{
+					&cnstypes.CnsKubernetesEntityMetadata{
+						CnsEntityMetadata: cnstypes.CnsEntityMetadata{
+							EntityName: volumeNames[i],
+						},
+						EntityType: string(cnstypes.CnsKubernetesEntityTypePV),
+					},
+				},
+			},
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: 1024,
+				},
+				BackingDiskUrlPath: diskFolderURL,
+			},
+		}
+		reregTask, err := cnsClient.CreateVolume(ctx, []cnstypes.CnsVolumeCreateSpec{reregSpec})
+		if err != nil {
+			t.Fatalf("re-register CreateVolume[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		reregTaskInfo, err := GetTaskInfo(ctx, reregTask)
+		if err != nil {
+			t.Fatalf("GetTaskInfo re-register[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		reregTaskResult, err := GetTaskResult(ctx, reregTaskInfo)
+		if err != nil {
+			t.Fatalf("GetTaskResult re-register[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		if reregTaskResult == nil {
+			t.Fatalf("re-register[%d] volume=%s: empty task result", i, vid.Id)
+		}
+		reregOpRes := reregTaskResult.GetCnsVolumeOperationResult()
+		if reregOpRes.Fault != nil {
+			t.Fatalf("re-register[%d] volume=%s fault: %+v", i, vid.Id, reregOpRes.Fault)
+		}
+		sameID := reregOpRes.VolumeId.Id == vid.Id
+		t.Logf("Re-registered volume[%d]: requested=%s got=%s sameID=%v",
+			i, vid.Id, reregOpRes.VolumeId.Id, sameID)
+		reregisteredIds = append(reregisteredIds, reregOpRes.VolumeId)
+	}
+
+	// Step 7b: Wait for all re-registered volumes to become visible as CNS
+	// volumes via QueryVolume before attempting deletion.
+	//
+	// After CreateVolume returns the FCD is registered and the volume is in the
+	// CNS VolumeInfoCache, but the isCnsVolume flag is set asynchronously by
+	// the metadata-update sub-task. DeleteVolume calls IsCnsVolume() which
+	// checks that flag, so we poll until all volumes are reported by
+	// QueryVolume (which only returns volumes with isCnsVolume=true).
+	{
+		const (
+			pollInterval = 2 * time.Second
+			pollTimeout  = 60 * time.Second
+		)
+		reregIDSet := make(map[string]bool, len(reregisteredIds))
+		for _, vid := range reregisteredIds {
+			reregIDSet[vid.Id] = true
+		}
+		deadline := time.Now().Add(pollTimeout)
+		for {
+			queryFilter := cnstypes.CnsQueryFilter{
+				VolumeIds: reregisteredIds,
+			}
+			qr, err := cnsClient.QueryVolume(ctx, &queryFilter)
+			if err != nil {
+				t.Fatalf("QueryVolume (post re-register poll) failed: %v", err)
+			}
+			foundSet := make(map[string]bool, len(qr.Volumes))
+			for _, v := range qr.Volumes {
+				foundSet[v.VolumeId.Id] = true
+			}
+			allFound := true
+			for id := range reregIDSet {
+				if !foundSet[id] {
+					allFound = false
+					break
+				}
+			}
+			if allFound {
+				t.Logf("QueryVolume confirmed all %d re-registered volumes are visible as CNS volumes", len(reregisteredIds))
+				break
+			}
+			if time.Now().After(deadline) {
+				t.Fatalf("timed out after %s waiting for re-registered volumes to become visible in QueryVolume (found %d/%d)",
+					pollTimeout, len(foundSet), len(reregisteredIds))
+			}
+			t.Logf("QueryVolume: %d/%d re-registered volumes visible, retrying in %s...",
+				len(foundSet), len(reregisteredIds), pollInterval)
+			time.Sleep(pollInterval)
+		}
+	}
+
+	// Step 8: Delete each re-registered volume (using the ID returned by
+	// CreateVolume, which should match the original when FCD_TRANSACTION_SUPPORT
+	// is active). NotFound is treated as success: if the volume is already gone
+	// (e.g. a prior partial run already cleaned it up) that is the desired state.
+	for i, vid := range reregisteredIds {
+		deleteTask, err := cnsClient.DeleteVolume(ctx, []cnstypes.CnsVolumeId{vid}, true)
+		if err != nil {
+			t.Fatalf("DeleteVolume[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		deleteTaskInfo, err := GetTaskInfo(ctx, deleteTask)
+		if err != nil {
+			t.Fatalf("GetTaskInfo DeleteVolume[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		deleteTaskResult, err := GetTaskResult(ctx, deleteTaskInfo)
+		if err != nil {
+			t.Fatalf("GetTaskResult DeleteVolume[%d] volume=%s failed: %v", i, vid.Id, err)
+		}
+		if deleteTaskResult == nil {
+			t.Fatalf("DeleteVolume[%d] volume=%s: empty task result", i, vid.Id)
+		}
+		deleteOpRes := deleteTaskResult.GetCnsVolumeOperationResult()
+		if deleteOpRes.Fault != nil {
+			if _, ok := deleteOpRes.Fault.Fault.(*cnstypes.CnsVolumeNotFoundFault); ok {
+				t.Logf("DeleteVolume[%d] volume=%s: already gone (NotFound), treating as success", i, vid.Id)
+				continue
+			}
+			t.Fatalf("DeleteVolume[%d] volume=%s fault: %+v", i, vid.Id, deleteOpRes.Fault)
+		}
+		t.Logf("Deleted re-registered volume[%d]: %s", i, vid.Id)
+	}
+}
+
 // TestBlockVolumeCBT exercises CnsSetVolumeControlFlags, CnsClearVolumeControlFlags,
 // QueryVolume changedBlockTracking (CnsVolumeCBTStatus), and snapshot changedBlockTrackingId.
 // Requires vSphere 9.2.0 or later.
@@ -2589,4 +3026,20 @@ func isvSphereVersion92orAbove(ctx context.Context, aboutInfo vim25types.AboutIn
 		}
 	}
 	return false
+}
+
+// normalizeVdmUUID converts the space/dash-separated hex format returned by
+// VirtualDiskManager.QueryVirtualDiskUuid into the standard 8-4-4-4-12 UUID
+// format used by CNS (e.g. "6000C290-8f8e-845b-9915-b18f16b3de1f").
+//
+// VDM format:  "60 00 C2 90 8f 8e 84 5b-99 15 b1 8f 16 b3 de 1f"
+// UUID format: "6000C290-8f8e-845b-9915-b18f16b3de1f"
+func normalizeVdmUUID(vdmUUID string) string {
+	// Strip all spaces and dashes to get 32 raw hex digits.
+	raw := strings.ReplaceAll(vdmUUID, " ", "")
+	raw = strings.ReplaceAll(raw, "-", "")
+	if len(raw) != 32 {
+		return vdmUUID
+	}
+	return raw[0:8] + "-" + raw[8:12] + "-" + raw[12:16] + "-" + raw[16:20] + "-" + raw[20:32]
 }
