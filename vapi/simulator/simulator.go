@@ -1073,6 +1073,16 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 			spec.Library.CreationTime = types.NewTime(time.Now())
 			spec.Library.LastModifiedTime = types.NewTime(time.Now())
 			spec.Library.UnsetSecurityPolicyID = spec.Library.SecurityPolicyID == ""
+			if b := spec.Library.Storage[0]; b.Type == "STORAGEPOLICY" {
+				if b.StoragePolicy == nil {
+					b.StoragePolicy = &library.StoragePolicy{}
+					spec.Library.Storage[0] = b
+				}
+				if len(b.StoragePolicy.UsedDatastores) == 0 {
+					// vCenter chooses a datastore compliant with the policy; vcsim uses the first one.
+					b.StoragePolicy.UsedDatastores = []string{s.Map.AllReference("Datastore")[0].Reference().Value}
+				}
+			}
 			dir := s.libraryPath(&spec.Library, "")
 			if err := os.Mkdir(dir, 0750); err != nil {
 				s.error(w, err)
@@ -1495,7 +1505,7 @@ func (s *handler) publish(w http.ResponseWriter, r *http.Request, sids []interna
 			return true // already cloned
 		}
 
-		ds := &vcenter.DiskStorage{Datastore: l.Library.Storage[0].DatastoreID}
+		ds := &vcenter.DiskStorage{Datastore: libraryDatastoreID(l.Library)}
 		ref, err := s.cloneVM(vmtx.Template.Value, vmtx.Name, sub.Placement, ds)
 		if err != nil {
 			s.error(w, err)
@@ -2141,7 +2151,7 @@ func (s *handler) libraryItemStorageByID(id string) ([]library.Storage, bool) {
 	// so a "ds://" scheme isn't collapsed by path.Join's slash cleaning.
 	dsref := types.ManagedObjectReference{
 		Type:  "Datastore",
-		Value: lib.Storage[0].DatastoreID,
+		Value: libraryDatastoreID(lib.Library),
 	}
 	ds := s.Map.Get(dsref).(*simulator.Datastore)
 
@@ -2691,11 +2701,22 @@ func (s *handler) updateFileInfo(id string) *update {
 	return nil
 }
 
+// libraryDatastoreID returns the Datastore that backs the Library. A Library with a
+// STORAGEPOLICY storage backing has no datastore_id, its Datastore is the first of
+// the storage policy's used_datastores.
+func libraryDatastoreID(l *library.Library) string {
+	b := l.Storage[0]
+	if b.StoragePolicy != nil && len(b.StoragePolicy.UsedDatastores) != 0 {
+		return b.StoragePolicy.UsedDatastores[0]
+	}
+	return b.DatastoreID
+}
+
 // libraryPath returns the local Datastore fs path for a Library or Item if id is specified.
 func (s *handler) libraryPath(l *library.Library, id string) string {
 	dsref := types.ManagedObjectReference{
 		Type:  "Datastore",
-		Value: l.Storage[0].DatastoreID,
+		Value: libraryDatastoreID(l),
 	}
 	ds := s.Map.Get(dsref).(*simulator.Datastore)
 
@@ -3297,7 +3318,7 @@ func (s *handler) libraryItemCreateTemplate(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	ds := &vcenter.DiskStorage{Datastore: l.Library.Storage[0].DatastoreID}
+	ds := &vcenter.DiskStorage{Datastore: libraryDatastoreID(l.Library)}
 	ref, err := s.cloneVM(spec.SourceVM, spec.Name, spec.Placement, ds)
 	if err != nil {
 		BadRequest(w, err.Error())
