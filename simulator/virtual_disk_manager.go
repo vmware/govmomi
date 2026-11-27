@@ -261,81 +261,11 @@ func (m *VirtualDiskManager) MoveVirtualDiskTask(ctx *Context, req *types.MoveVi
 
 func (m *VirtualDiskManager) CopyVirtualDiskTask(ctx *Context, req *types.CopyVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "copyVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
-
-		fm := ctx.Map.FileManager()
-
 		dest := vdmNames(req.DestName)
 
 		for i, name := range vdmNames(req.SourceName) {
-
-			if fault := fm.copyDatastoreFile(ctx, &types.CopyDatastoreFile_Task{
-				SourceName:            name,
-				SourceDatacenter:      req.SourceDatacenter,
-				DestinationName:       dest[i],
-				DestinationDatacenter: req.DestDatacenter,
-				Force:                 req.Force,
-			}); fault != nil {
+			if fault := m.copyDisk(ctx, req, name, dest[i]); fault != nil {
 				return nil, fault
-			}
-
-			if req.DestSpec != nil {
-				desc, descPath, fault := fm.DiskDescriptor(ctx, req.DestDatacenter, dest[i])
-				if fault != nil {
-					return nil, fault
-				}
-				if s, ok := req.DestSpec.(*types.FileBackedVirtualDiskSpec); ok {
-
-					var (
-						keyID      string
-						providerID string
-					)
-					switch c := s.Crypto.(type) {
-					case *types.CryptoSpecEncrypt:
-						keyID = c.CryptoKeyId.KeyId
-						if c.CryptoKeyId.ProviderId != nil {
-							providerID = c.CryptoKeyId.ProviderId.Id
-						}
-					case *types.CryptoSpecDeepRecrypt:
-						keyID = c.NewKeyId.KeyId
-						if c.NewKeyId.ProviderId != nil {
-							providerID = c.NewKeyId.ProviderId.Id
-						}
-					case *types.CryptoSpecShallowRecrypt:
-						keyID = c.NewKeyId.KeyId
-						if c.NewKeyId.ProviderId != nil {
-							providerID = c.NewKeyId.ProviderId.Id
-						}
-					}
-
-					if providerID != "" || keyID != "" {
-						desc.EncryptionKeys = &crypto.KeyLocator{
-							Type: crypto.KeyLocatorTypeList,
-							List: []*crypto.KeyLocator{
-								{
-									Type: crypto.KeyLocatorTypePair,
-									Pair: &crypto.KeyLocatorPair{
-										CryptoMAC:  "HMAC-SHA-256",
-										LockedData: []byte("Cg=="),
-										Locker: &crypto.KeyLocator{
-											Type: crypto.KeyLocatorTypeFQID,
-											Indirect: &crypto.KeyLocatorIndirect{
-												Type: crypto.KeyLocatorTypeFQID,
-												FQID: crypto.KeyLocatorFQIDParams{
-													KeyServerID: providerID,
-													KeyID:       keyID,
-												},
-											},
-										},
-									},
-								},
-							},
-						}
-					}
-				}
-
-				if fault := fm.SaveDiskDescriptor(ctx, desc, descPath); fault != nil {
-					return nil, fault
-				}
 			}
 		}
 
@@ -347,6 +277,92 @@ func (m *VirtualDiskManager) CopyVirtualDiskTask(ctx *Context, req *types.CopyVi
 			Returnval: task.Run(ctx),
 		},
 	}
+}
+
+// copyDisk copies the disk name to dest and, when DestSpec is set, rewrites dest's
+// descriptor. dest's copy lock is held across both steps, so a racing copy cannot
+// rewrite the descriptor while this one reads it.
+func (m *VirtualDiskManager) copyDisk(ctx *Context, req *types.CopyVirtualDisk_Task, name, dest string) types.BaseMethodFault {
+	fm := ctx.Map.FileManager()
+
+	src, fault := fm.resolve(ctx, req.SourceDatacenter, name)
+	if fault != nil {
+		return fault
+	}
+	dst, fault := fm.resolve(ctx, req.DestDatacenter, dest)
+	if fault != nil {
+		return fault
+	}
+
+	defer fm.lockDst(dst)()
+
+	if fault := fm.copyFile(src, dst, isTrue(req.Force)); fault != nil {
+		return fault
+	}
+
+	if req.DestSpec == nil {
+		return nil
+	}
+
+	desc, descPath, fault := fm.DiskDescriptor(ctx, req.DestDatacenter, dest)
+	if fault != nil {
+		return fault
+	}
+
+	if s, ok := req.DestSpec.(*types.FileBackedVirtualDiskSpec); ok {
+		var (
+			keyID      string
+			providerID string
+		)
+		switch c := s.Crypto.(type) {
+		case *types.CryptoSpecEncrypt:
+			keyID = c.CryptoKeyId.KeyId
+			if c.CryptoKeyId.ProviderId != nil {
+				providerID = c.CryptoKeyId.ProviderId.Id
+			}
+		case *types.CryptoSpecDeepRecrypt:
+			keyID = c.NewKeyId.KeyId
+			if c.NewKeyId.ProviderId != nil {
+				providerID = c.NewKeyId.ProviderId.Id
+			}
+		case *types.CryptoSpecShallowRecrypt:
+			keyID = c.NewKeyId.KeyId
+			if c.NewKeyId.ProviderId != nil {
+				providerID = c.NewKeyId.ProviderId.Id
+			}
+		}
+
+		if providerID != "" || keyID != "" {
+			desc.EncryptionKeys = &crypto.KeyLocator{
+				Type: crypto.KeyLocatorTypeList,
+				List: []*crypto.KeyLocator{
+					{
+						Type: crypto.KeyLocatorTypePair,
+						Pair: &crypto.KeyLocatorPair{
+							CryptoMAC:  "HMAC-SHA-256",
+							LockedData: []byte("Cg=="),
+							Locker: &crypto.KeyLocator{
+								Type: crypto.KeyLocatorTypeFQID,
+								Indirect: &crypto.KeyLocatorIndirect{
+									Type: crypto.KeyLocatorTypeFQID,
+									FQID: crypto.KeyLocatorFQIDParams{
+										KeyServerID: providerID,
+										KeyID:       keyID,
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+		}
+	}
+
+	if fault := fm.SaveDiskDescriptor(ctx, desc, descPath); fault != nil {
+		return fault
+	}
+
+	return nil
 }
 
 func virtualDiskUUID(dc *types.ManagedObjectReference, file string) string {

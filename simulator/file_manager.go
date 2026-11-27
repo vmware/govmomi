@@ -5,9 +5,11 @@
 package simulator
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -19,6 +21,29 @@ import (
 
 type FileManager struct {
 	mo.FileManager
+
+	// dstMu guards dstLocks. A copy holds the lock for its destination, so a copy
+	// racing with another to the same path sees the finished file, not a partial one.
+	dstMu    sync.Mutex
+	dstLocks map[string]*sync.Mutex
+}
+
+// lockDst acquires the copy lock for the resolved destination path dst and returns
+// the func that releases it.
+func (f *FileManager) lockDst(dst string) func() {
+	f.dstMu.Lock()
+	if f.dstLocks == nil {
+		f.dstLocks = make(map[string]*sync.Mutex)
+	}
+	l, ok := f.dstLocks[dst]
+	if !ok {
+		l = new(sync.Mutex)
+		f.dstLocks[dst] = l
+	}
+	f.dstMu.Unlock()
+
+	l.Lock()
+	return l.Unlock
 }
 
 func (f *FileManager) findDatastore(ctx *Context, ref mo.Reference, name string) (*Datastore, types.BaseMethodFault) {
@@ -238,9 +263,22 @@ func (f *FileManager) copyDatastoreFile(ctx *Context, req *types.CopyDatastoreFi
 		return fault
 	}
 
-	if !isTrue(req.Force) {
-		_, err := os.Stat(dst)
-		if err == nil {
+	defer f.lockDst(dst)()
+
+	return f.copyFile(src, dst, isTrue(req.Force))
+}
+
+// copyFile copies the file at src to dst. The caller must hold dst's copy lock.
+// Without force, an existing dst is accepted only if it already holds the same bytes
+// as src. Unlike vCenter, which rejects any copy onto an existing file, this lets
+// concurrent identical copies from vm-operator all succeed. A different existing file
+// still fails with FileAlreadyExists.
+func (f *FileManager) copyFile(src, dst string, force bool) types.BaseMethodFault {
+	if !force {
+		if _, err := os.Stat(dst); err == nil {
+			if same, _ := sameFileContent(src, dst); same {
+				return nil
+			}
 			return f.fault(dst, nil, new(types.FileAlreadyExists))
 		}
 	}
@@ -262,6 +300,20 @@ func (f *FileManager) copyDatastoreFile(ctx *Context, req *types.CopyDatastoreFi
 	}
 
 	return nil
+}
+
+// sameFileContent reports whether the files at a and b hold the same bytes. Any read
+// error is returned, and callers treat it as a difference.
+func sameFileContent(a, b string) (bool, error) {
+	x, err := os.ReadFile(filepath.Clean(a))
+	if err != nil {
+		return false, err
+	}
+	y, err := os.ReadFile(filepath.Clean(b))
+	if err != nil {
+		return false, err
+	}
+	return bytes.Equal(x, y), nil
 }
 
 func (f *FileManager) CopyDatastoreFileTask(ctx *Context, req *types.CopyDatastoreFile_Task) soap.HasFault {
