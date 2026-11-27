@@ -7,6 +7,7 @@ package units
 import (
 	"errors"
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 )
@@ -73,25 +74,31 @@ func (b *ByteSize) Set(s string) error {
 	if err != nil {
 		return err
 	}
-	*b = ByteSize(i)
+	var multiplier int64 = 1
 
 	switch m[2] {
 	case "B", "b", "":
 	case "K", "k":
-		*b *= ByteSize(KB)
+		multiplier = KB
 	case "M", "m":
-		*b *= ByteSize(MB)
+		multiplier = MB
 	case "G", "g":
-		*b *= ByteSize(GB)
+		multiplier = GB
 	case "T", "t":
-		*b *= ByteSize(TB)
+		multiplier = TB
 	case "P", "p":
-		*b *= ByteSize(PB)
+		multiplier = PB
 	case "E", "e":
-		*b *= ByteSize(EB)
+		multiplier = EB
 	default:
 		return errors.New("invalid byte suffix")
 	}
+
+	if i > math.MaxInt64/multiplier {
+		return errors.New("byte value out of range")
+	}
+
+	*b = ByteSize(i * multiplier)
 
 	return nil
 }
