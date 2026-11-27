@@ -1,6 +1,6 @@
 module github.com/vmware/govmomi
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/a8m/tree v0.0.0-20240104212747-2c8764a5f17e
@@ -11,7 +11,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	github.com/vmware/vmw-guestinfo v0.0.0-20220317130741-510905f0efa3
 	github.com/xlab/treeprint v1.2.0
-	golang.org/x/text v0.41.0
+	golang.org/x/text v0.42.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
