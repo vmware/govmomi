@@ -118,6 +118,17 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
+		if len(es) == 0 && !strings.ContainsAny(arg, "*?[") {
+			// An empty result is valid for an empty container, but not for a path that does not exist.
+			self, err := finder.ManagedObjectList(ctx, arg)
+			if err != nil {
+				return err
+			}
+			if len(self) == 0 {
+				return fmt.Errorf("path '%s' not found", arg)
+			}
+		}
+
 		for _, e := range es {
 			if cmd.typeMatch(e.Object.Reference()) {
 				lr.Elements = append(lr.Elements, e)
