@@ -174,6 +174,12 @@ func (dss *HostDatastoreSystem) CreateNasDatastore(ctx *Context, c *types.Create
 	ds := &Datastore{}
 	ds.Name = path.Base(c.Spec.LocalPath)
 
+	// Without remoteHostNames, report remoteHost, as an NFS v3 volume does.
+	remoteHostNames := c.Spec.RemoteHostNames
+	if len(remoteHostNames) == 0 {
+		remoteHostNames = []string{c.Spec.RemoteHost}
+	}
+
 	ds.Info = &types.NasDatastoreInfo{
 		DatastoreInfo: types.DatastoreInfo{
 			Url: c.Spec.LocalPath,
@@ -183,8 +189,9 @@ func (dss *HostDatastoreSystem) CreateNasDatastore(ctx *Context, c *types.Create
 				Name: c.Spec.LocalPath,
 				Type: c.Spec.Type,
 			},
-			RemoteHost: c.Spec.RemoteHost,
-			RemotePath: c.Spec.RemotePath,
+			RemoteHost:      c.Spec.RemoteHost,
+			RemotePath:      c.Spec.RemotePath,
+			RemoteHostNames: remoteHostNames,
 		},
 	}
 
