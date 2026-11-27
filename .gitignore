@@ -11,3 +11,11 @@ dist/
 # Ignore editor temp files
 *~
 .vscode/
+.cursor/
+
+# Test binaries
+*.test
+
+# vmci simulation artifacts (built on-demand by simulator tests via go build)
+/vmci-guest
+/simulator/bin/
